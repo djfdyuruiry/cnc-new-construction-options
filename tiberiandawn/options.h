@@ -144,6 +144,7 @@ public:
     KeyNumType KeyTeam8;
     KeyNumType KeyTeam9;
     KeyNumType KeyTeam10;
+    KeyNumType KeyDeploy;
 
 protected:
     void Adjust_Palette(void* oldpal,

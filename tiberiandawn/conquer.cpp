@@ -588,6 +588,19 @@ void Keyboard_Process(KeyNumType& input)
         }
     }
 
+    if (key != 0 && (key == Options.KeyDeploy)) {
+        if (CurrentObject.Count()) {
+            for (index = 0; index < CurrentObject.Count(); index++) {
+                ObjectClass const* tech = CurrentObject[index];
+
+                if (tech != NULL && tech->Can_Player_Move()) {
+                    OutList.Add(EventClass(EventClass::DEPLOY, tech->As_Target()));
+                }
+            }
+        }
+        input = KN_NONE;
+    }
+
     /*
     **	Center the map about the construction yard or construction vehicle
     **	if one is present.

@@ -131,6 +131,7 @@ OptionsClass::OptionsClass(void)
     , KeyTeam8(KN_8)
     , KeyTeam9(KN_9)
     , KeyTeam10(KN_0)
+    , KeyDeploy(KN_D)
 {
     GameSpeed = TIMER_SECOND / TICKS_PER_SECOND;
     ScrollRate = TIMER_SECOND / TICKS_PER_SECOND;
