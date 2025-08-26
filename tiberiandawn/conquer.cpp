@@ -433,6 +433,7 @@ void Keyboard_Process(KeyNumType& input)
 
     if (Debug_Flag) {
         switch (input) {
+        // Give the player 10K credits
         case (int)KN_M | (int)KN_SHIFT_BIT:
         case (int)KN_M | (int)KN_ALT_BIT:
         case (int)KN_M | (int)KN_CTRL_BIT:
@@ -453,11 +454,14 @@ void Keyboard_Process(KeyNumType& input)
 #endif
 
 #ifdef CHEAT_KEYS
+    // Win
     if (Debug_Playtest && input == (KN_W | KN_ALT_BIT)) {
         PlayerPtr->Blockage = false;
         PlayerPtr->Flag_To_Win();
     }
 
+    // Reveal shroud
+    // BUG: Doesn't work
     if ((Debug_Flag || Debug_Playtest) && plain == KN_F4) {
         if (GameToPlay == GAME_NORMAL) {
             Debug_Unshroud = (Debug_Unshroud == false);
@@ -465,6 +469,7 @@ void Keyboard_Process(KeyNumType& input)
         }
     }
 
+    // Show special dialog
     if (Debug_Flag && input == KN_SLASH) {
         if (GameToPlay != GAME_NORMAL) {
             SpecialDialog = SDLG_SPECIAL;
@@ -801,6 +806,7 @@ void Keyboard_Process(KeyNumType& input)
     }
 
 #ifdef CHEAT_KEYS
+    // Proxy other debug options to Debug_Key
     if (Debug_Flag && input && (input & KN_RLSE_BIT) == 0) {
         Debug_Key(input);
     }
