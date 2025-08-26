@@ -74,6 +74,7 @@ void Debug_Key(unsigned input)
 
         switch (input) {
 
+        // BUG: Crashes the game
         case KN_L:
             extern int NetMonoMode, NewMonoMode;
             if (NetMonoMode)
@@ -121,6 +122,7 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // TODO: Figure out what the hell this does?
         case KN_P:
             Keyboard->Clear();
             while (!Keyboard->Check()) {
@@ -130,6 +132,7 @@ void Debug_Key(unsigned input)
             Keyboard->Clear();
             break;
 
+        // Spawn an orca
         case KN_O: {
             AircraftClass* air = new AircraftClass(AIRCRAFT_ORCA, PlayerPtr->Class->House);
             if (air) {
@@ -138,9 +141,13 @@ void Debug_Key(unsigned input)
             }
         } break;
 
+        // Insta builds
         case (int)KN_B | (int)KN_ALT_BIT: {
             Debug_Instant_Build ^= 1;
         } break;
+
+        // Spawn an Apache aircraft
+        // BUG: The standard select construction yard shortcut overrides this
         case KN_B: {
             AircraftClass* air = new AircraftClass(AIRCRAFT_HELICOPTER, PlayerPtr->Class->House);
             if (air) {
@@ -149,6 +156,8 @@ void Debug_Key(unsigned input)
             }
         } break;
 
+        // Spawn a chinook
+        // BUG: The standard repair shortcut overrides this
         case KN_T: {
             AircraftClass* air = new AircraftClass(AIRCRAFT_TRANSPORT, PlayerPtr->Class->House);
             if (air) {
@@ -157,16 +166,22 @@ void Debug_Key(unsigned input)
             }
         } break;
 
+        // Damage objects under cursor
         case KN_GRAVE:
             new AnimClass(ANIM_ART_EXP1, Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y()));
             Explosion_Damage(Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y()), 250, NULL, WARHEAD_HE);
             break;
 
+        // Run GDI ending sequence
+        // BUG: doesn't quit mission (returns to scenario after FMVs, with corrupted map graphics)
+        // TODO: Shows that it is possible to play a FMV during a scenario (might be a useful new trigger to play a FMV)
         case KN_Z:
             //				new AnimClass(ANIM_LZ_SMOKE, Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y()));
             GDI_Ending();
             break;
 
+        // Allow building any standard object
+        // BUG: persists after exiting current scenario
         case KN_C:
             Debug_Cheat = (Debug_Cheat == false);
             PlayerPtr->IsRecalcNeeded = true;
@@ -186,6 +201,8 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // Toggle between making the map maximum size and original size
+        // TODO: Could be a useful new trigger effect to reveal more of the map (like in TS or RA2)
         case (int)KN_Z | (int)KN_ALT_BIT:
             if (map_x == -1) {
                 map_x = Map.MapCellX;
@@ -224,6 +241,7 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // BUG: Crashes the game
         case KN_M:
             if (Debug_Flag) {
                 if (MonoClass::Is_Enabled()) {
@@ -234,18 +252,22 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // Win
         case (int)KN_W | (int)KN_ALT_BIT:
             PlayerPtr->Flag_To_Win();
             break;
 
+        // Lose
         case (int)KN_L | (int)KN_ALT_BIT:
             PlayerPtr->Flag_To_Lose();
             break;
 
+        // BUG: Crashes the game
         case KN_F:
             Debug_Find_Path ^= 1;
             break;
 
+        // Remove currently select object
         case KN_DELETE:
             if (CurrentObject.Count()) {
                 Map.Recalc();
@@ -254,12 +276,14 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // TODO: Figure this out ???
         case KN_D:
             if (Teams.Count() != 0 && Teams.Ptr(0) != nullptr) {
                 delete Teams.Ptr(0);
             }
             break;
 
+        // Damage the currently selected object
         case (int)KN_DELETE | (int)KN_SHIFT_BIT:
             if (CurrentObject.Count()) {
                 Map.Recalc();
@@ -268,6 +292,7 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // BUG: Doesn't allow placing the copied object
         case KN_INSERT:
             if (CurrentObject.Count()) {
                 Map.PendingObject = &CurrentObject[0]->Class_Of();
@@ -537,6 +562,7 @@ void Debug_Key(unsigned input)
         /*
         **	Reveal entire map to player.
         */
+        // BUG: Doesn't reveal map
         case KN_F4:
             if (GameToPlay == GAME_NORMAL) {
                 Debug_Unshroud = (Debug_Unshroud == false);
@@ -548,6 +574,8 @@ void Debug_Key(unsigned input)
         **	Shows sight and fire range in the form of circles emanating from the currently
         **	selected unit. The white circle is for sight range, the red circle is for
         **	fire range.
+        **
+        **  BUG: Only works sometimes and is very brief (hard to see)
         */
         case KN_F7:
             if (CurrentObject.Count() && CurrentObject[0]->Is_Techno()) {
@@ -577,6 +605,7 @@ void Debug_Key(unsigned input)
             }
             break;
 
+        // BUG: Doesn't reveal map
         case ((int)KN_F4 | (int)KN_CTRL_BIT):
             Debug_Unshroud = (Debug_Unshroud == false);
             Map.Flag_To_Redraw(true);
