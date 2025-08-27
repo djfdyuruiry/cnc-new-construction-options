@@ -3,38 +3,45 @@
     {
       "name": "HideTempleFromGdi",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "Don't allow captured NOD con yards to build a NOD Temple"
     },
     {
       "name": "HideObeliskFromGdi",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "Don't allow captured NOD con yards to build an Obelisk"
     },
     {
       "name": "HideApcFromNod",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "HideRocketLauncherFromNod",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "HideHelipadFromNod",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "HideAdvancedCommCenterFromNod",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "Don't allow captured GDI con yards to build an Adv. Comm Center"
     },
     {
       "name": "OnlyGdiCanUseIonCannon",
       "type": "bool",
       "default": true,
-      "implemented": false
+      "implemented": false,
+      "comment": "(**NOTE: Not Implemented Yet**) Only allow GDI constructed Adv. Comm Centers to grant the Ion Cannon superpower"
     }
   ]
 }

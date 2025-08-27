@@ -3,17 +3,20 @@
     {
       "name": "HarvesterPips",
       "type": "int",
-      "default": 7
+      "default": 7,
+      "comment": "Total number of pips to show when a harvester is selected by the player. The number of filled pips is dynamically determined based on the above `MaxHarvesterCapacity` rule and the amount the tiberium onboard."
     },
     {
       "name": "CreditsPerTiberiumScoop",
       "type": "int",
-      "default": 25
+      "default": 25,
+      "comment": "The value of one scoop of tiberium collected by a Harvester. Number of scoops is controlled by the `MaxHarvesterCapacity` rule, these two rules combined are multiplied together to calculate the value of a full harvester."
     },
     {
       "name": "MaxHarvesterCapacity",
       "type": "int",
-      "default": 28
+      "default": 28,
+      "comment": "How much tiberium a harvester can hold, this is measured in the number of scoops a harvester makes. Value of a scoop is controlled by the `MaxHarvesterCapacity` rule, these two rules combined are multiplied together to calculate the value of a full harvester."
     }
   ]
 }

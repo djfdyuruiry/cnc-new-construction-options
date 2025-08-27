@@ -3,37 +3,44 @@
     {
       "name": "SetBuildLevelTo1InGdiScenario2",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "When player is in GDI level 2 set the build level to 1"
     },
     {
       "name": "RenameTechCenterToPrisionInNodScenario3",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "When playing level 3 rename Tech Centers to `Prison`"
     },
     {
       "name": "HideBazookaFromGdiUntilScenario8",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "HideRocketLauncherFromGdiUntilScenario9",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "HideSandbagFromGdiUntilScenario9",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "AllowNodToBuildAdvancedPowerInScenario12",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     },
     {
       "name": "RequireTechCentreForStealthTankInNodScenario11",
       "type": "bool",
-      "default": true
+      "default": true,
+      "comment": "-"
     }
   ]
 }
