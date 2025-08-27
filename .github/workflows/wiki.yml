@@ -38,6 +38,9 @@ jobs:
 
           python scripts/99.generate-tiberian-dawn-rules-doc.py
 
+          # ensure normally ignored generated files get pushed to wiki
+          rm wiki/.gitignore
+
       - uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           strategy: init
