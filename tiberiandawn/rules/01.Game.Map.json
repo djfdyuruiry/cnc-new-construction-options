@@ -1,4 +1,6 @@
 {
+  "section": "Game.Map",
+  "comment": "Building placement rules and tiberium behaviour.",
   "rules": [
     {
       "name": "MaxBuildDistance",

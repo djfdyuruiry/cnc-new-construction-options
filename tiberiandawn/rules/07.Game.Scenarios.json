@@ -1,4 +1,6 @@
 {
+  "section": "Game.Scenarios",
+  "comment": "Change game rules for specific single player scenarios, mainly used to modify the player tech tree.",
   "rules": [
     {
       "name": "SetBuildLevelTo1InGdiScenario2",
@@ -7,7 +9,7 @@
       "comment": "When player is in GDI level 2 set the build level to 1"
     },
     {
-      "name": "RenameTechCenterToPrisionInNodScenario3",
+      "name": "RenameTechCenterToPrisonInNodScenario3",
       "type": "bool",
       "default": true,
       "comment": "When playing level 3 rename Tech Centers to `Prison`"

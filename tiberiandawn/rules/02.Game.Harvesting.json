@@ -1,4 +1,6 @@
 {
+  "section": "Game.Harvesting",
+  "comment": "Harvester unit and harvesting behaviour.",
   "rules": [
     {
       "name": "HarvesterPips",

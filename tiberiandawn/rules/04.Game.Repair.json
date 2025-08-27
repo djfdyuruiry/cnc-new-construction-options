@@ -1,4 +1,6 @@
 {
+  "section": "Game.Repair",
+  "comment": "Repair behaviour (Units and Aircraft).",
   "rules": [
     {
       "name": "UnitRepairFactor",

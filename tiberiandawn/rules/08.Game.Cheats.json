@@ -1,4 +1,6 @@
 {
+  "section": "Game.Cheats",
+  "comment": "Rules that break the game in some way, often to the advantage of the player.",
   "rules": [
     {
       "name": "AllowBuildingAllForCurrentHouse",

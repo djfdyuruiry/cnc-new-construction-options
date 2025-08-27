@@ -1,4 +1,6 @@
 {
+  "section": "Game.Factories",
+  "comment": "Factory behaviour (barracks, weapons factory etc.).",
   "rules": [
     {
       "name": "ProductionStepsPerTick",

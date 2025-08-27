@@ -51,8 +51,8 @@ function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_
   set(IS_IMPLEMENTED ${IS_IMPLEMENTED} PARENT_SCOPE)
 endfunction()
 
-function (ExtractSectionNameFromFileName _RELATIVE_RULE_FILE _SECTION_NAME _SECTION_NAME_UPPER)
-  string(REGEX REPLACE "^[0-9]+[.](.+)[.]json$" "\\1" SECTION_NAME "${_RELATIVE_RULE_FILE}")
+function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPPER)
+  string(JSON SECTION_NAME GET ${_RULES_JSON} section)
 
   message(STATUS "Rule section: ${SECTION_NAME}")
 
@@ -93,7 +93,11 @@ function(Main)
 
   foreach(RULE_FILE ${RULES_FILES})
     ParseRuleFilePath("${RULE_FILE}" RELATIVE_RULE_FILE)
-    ExtractSectionNameFromFileName("${RELATIVE_RULE_FILE}" SECTION_NAME SECTION_NAME_UPPER)
+
+    # load rule definitions from JSON file
+    file(READ ${RULE_FILE} RULES_JSON)
+
+    ExtractSectionNameFromJson("${RULES_JSON}" SECTION_NAME SECTION_NAME_UPPER)
 
     message(STATUS "Generating code for rule section: [${SECTION_NAME}]")
   
@@ -121,8 +125,6 @@ function(Main)
                                  "        c")
     string(APPEND RULE_EXPORT_CODE "${SECTION_LEAD_IN}")
 
-    # load rule definitions from JSON file
-    file(READ ${RULE_FILE} RULES_JSON)
 
     string(JSON RULE_COUNT LENGTH ${RULES_JSON} rules)
     MATH(EXPR RULE_COUNT "${RULE_COUNT}-1")

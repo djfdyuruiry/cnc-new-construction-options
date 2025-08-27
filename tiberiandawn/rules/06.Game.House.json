@@ -1,4 +1,6 @@
 {
+  "section": "Game.House",
+  "comment": "House (GDI/NOD) specific behaviour, mainly used to hide units/super powers from certain sides.",
   "rules": [
     {
       "name": "HideTempleFromGdi",
