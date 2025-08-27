@@ -31,7 +31,7 @@ jobs:
       - name: Render Wiki Templates
         run: |
           python -m venv .venv
-          .venv/bin/activate
+          . .venv/bin/activate
 
           python -m ensurepip
           pip install jinja2
