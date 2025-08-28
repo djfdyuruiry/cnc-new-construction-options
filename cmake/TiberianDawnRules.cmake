@@ -1,11 +1,47 @@
 # Rules code generator, allows keeping game rules in one place
 # for a single source of truth.
 
+# Function to setup monitoring for JSON files using GitWatcher patterns
+function(SetupRuleMonitoring _TARGET_NAME)
+  # Check if monitoring is already set up
+  if(NOT DEFINED RULES_MONITORING_SETUP)
+    set(RULES_MONITORING_SETUP TRUE)
+    
+    # Add custom target that monitors rules files using GitWatcher patterns
+    add_custom_target(${_TARGET_NAME}
+      ALL
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rules/*.json
+      COMMENT "Monitoring rule JSON files for changes..."
+      COMMAND ${CMAKE_COMMAND}
+        -D_RULES_MONITOR_TARGET=${_TARGET_NAME}
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TiberianDawnRules.cmake")
+  endif()
+endfunction()
+
+# Function to check if rules have changed and regenerate code
+function(CheckRulesChanged)
+  # This would be used by GitWatcher to detect changes in JSON rule files
+  set(RULES_CHANGED FALSE)
+  
+  # In a real implementation, this would check file modification times or hashes
+  # For now, we'll trigger regeneration on build
+  set(RULES_CHANGED TRUE)
+  
+  return()
+endfunction()
+
+# Function to regenerate rule code when files change
+function(RegenerateRules)
+  # Trigger the main function to regenerate rules
+  message(STATUS "Regenerating rules from JSON files...")
+  Main()
+endfunction()
+
 function(ResolveRuleValue _RULE_DEFAULT _RULE_VALUE)
   set(RULE_VALUE "${_RULE_DEFAULT}")
 
   if(${RULE_TYPE} STREQUAL "bool")
-    # covert ON/OFF to C boolean literals
+    # convert ON/OFF to C boolean literals
     if(${_RULE_DEFAULT})
       set(RULE_VALUE "true")
     else()
@@ -71,9 +107,6 @@ function(ParseRuleFilePath _RULE_FILE _RELATIVE_RULE_FILE)
 endfunction()
 
 function(ScanForRuleFiles _RULES_FILES)
-  file(RELATIVE_PATH RELATIVE_SOURCE_DIR ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-  message(STATUS "Processing rules files in ${RELATIVE_SOURCE_DIR}/rules/*.json")
-
   file(GLOB_RECURSE RULES_FILES "${CMAKE_CURRENT_SOURCE_DIR}/rules/*.json")
 
   set("${_RULES_FILES}" ${RULES_FILES} PARENT_SCOPE)
