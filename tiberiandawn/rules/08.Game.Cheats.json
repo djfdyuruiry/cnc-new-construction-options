@@ -5,27 +5,32 @@
     {
       "name": "AllowBuildingAllForCurrentHouse",
       "type": "bool",
-      "default": false
+      "default": false,
+      "comment": "Allow building everything for your side, but you still need to build prerequisites for stuff (Repair Bay -> Mammoth Tank for example)"
     },
     {
       "name": "UnitsAreIndestructible",
       "type": "bool",
-      "default": false
+      "default": false,
+      "comment": "Weapons do no damage to anything. (No win/lose scenario)"
     },
     {
       "name": "InfantryAutoScatters",
       "type": "bool",
-      "default": false
+      "default": false,
+      "comment": "Infantry auto scatters when under attack."
     },
     {
       "name": "GiveAttackersAnAdvantage",
       "type": "bool",
-      "default": false
+      "default": false,
+      "comment": "By default, defending units take less damage than attacking ones - setting this to true disables that behaviour."
     },
     {
       "name": "SpeedySuperweapons",
       "type": "bool",
-      "default": false
+      "default": false,
+      "comment": "Superweapons recharge almost instantly. (includes superweapons owned by AI players)"
     }
   ]
 }
