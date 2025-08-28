@@ -626,6 +626,7 @@ bool Init_Game(int, char*[])
     **	Dump a default copy of rules.ini.
     */
     if (!rulesIniFile.Is_Available()) {
+        Rule.Process(RuleINI); // ensure defaults loaded in Rule instance before export
         Rule.Export(RuleINI);
         CDFileClass ini_export("RULES.INI");
         RuleINI.Save(ini_export, false);

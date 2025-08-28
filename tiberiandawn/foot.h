@@ -290,6 +290,8 @@ public:
 
 private:
     int Passable_Cell(CELL cell, FacingType face, int threat, MoveType threshhold);
+    CELL Find_Passable_Position_Near(const CELL target, const int maxRadius, const MoveType threshhold, const int threat);
+    int Find_Path_AStar(PathType* const resultPath, const CELL source, CELL dest, const int maxLen, const MoveType threshhold, const int threat);
     PathType* Find_Path(CELL dest, FacingType* final_moves, int maxlen, MoveType threshhold);
     void Debug_Draw_Map(const char* txt, CELL start, CELL dest, bool pause);
     void Debug_Draw_Path(PathType* path);

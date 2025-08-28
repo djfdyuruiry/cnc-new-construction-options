@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-set -eEuo pipefail
+set -eExuo pipefail
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -7,6 +7,9 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/lib/functions.sh"
 
 function main() {
+  local preset="${1:-}"
+  local build_type="${2:-}"
+
   if [ -z "${TD_DATA_PATH:-}" ]; then
     load_env_file_if_present
   fi
@@ -14,8 +17,27 @@ function main() {
   assert_variable_exists "TD_DATA_PATH" \
     "Set the env var TD_DATA_PATH to a directory that contains Tiberian Dawn game data and try again"
 
-  "${script_path}/1.build.sh" "td" "$@"
-  "${script_path}/2.deploy.sh" "nco-tiberian-dawn-debug" "vanillatd" "${TD_DATA_PATH}/vanillatd-dev"
+  if [[ "${preset}" =~ ^nco.* ]]; then
+    # custom cmake preset passed, remove it before forwarding args to game
+    shift
+  fi
+
+  if [ -z "${preset}" ]; then
+    preset="nco-tiberian-dawn-debug"
+  fi
+
+  if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
+    # custom build preset passed, remove it before forwarding args to game
+    shift
+  elif [[ "${preset}" =~ ^nco.* ]]; then
+    build_type="RelWithDebInfo"
+  else
+    # not a build type, don't pass to the build script
+    build_type=""
+  fi
+
+  "${script_path}/1.build.sh" "${preset}" "${build_type}"
+  "${script_path}/2.deploy.sh" "${preset}" "vanillatd" "${TD_DATA_PATH}/vanillatd-dev"
 
   pushd_silent "${TD_DATA_PATH}"
 
@@ -24,7 +46,7 @@ function main() {
 
   local exit_code=0
 
-  ./vanillatd-dev -CHEAT "$@" || {
+  NCO_LOG_LEVEL="debug" ./vanillatd-dev -CHEAT "$@" || {
     exit_code="$?"
     stop_logging
     log_error "Game finished with non-zero exit code: ${exit_code}"

@@ -103,6 +103,15 @@
             }
         },
         {
+            "name": "nco-tiberian-dawn",
+            "inherits": "nco",
+            "displayName": "NCO build (TD)",
+            "cacheVariables": {
+                "BUILD_VANILLARA": "OFF",
+                "MAP_EDITORRA": "OFF"
+            }
+        },
+        {
             "name": "nco-red-alert",
             "inherits": "nco",
             "displayName": "NCO build (RA)",
@@ -112,13 +121,25 @@
             }
         },
         {
-            "name": "nco-tiberian-dawn",
-            "inherits": "nco",
-            "displayName": "NCO build (TD)",
+            "name": "nco-tiberian-dawn-remaster",
+            "inherits": "nco-remaster",
+            "displayName": "NCO Remaster build (TD)",
             "cacheVariables": {
-                "BUILD_VANILLARA": "OFF",
-                "MAP_EDITORRA": "OFF"
+                "BUILD_REMASTERRA": "OFF"
             }
+        },
+        {
+            "name": "nco-red-alert-remaster",
+            "inherits": "nco-remaster",
+            "displayName": "NCO Remaster build (RA)",
+            "cacheVariables": {
+                "BUILD_REMASTERTD": "OFF"
+            }
+        },
+        {
+            "name": "nco-debug",
+            "inherits": "nco",
+            "displayName": "NCO debug build"
         },
         {
             "name": "nco-red-alert-debug",
@@ -134,22 +155,6 @@
             "name": "nco-remaster",
             "inherits": "remaster",
             "displayName": "NCO Remaster build"
-        },
-        {
-            "name": "nco-red-alert-remaster",
-            "inherits": "nco-remaster",
-            "displayName": "NCO Remaster build (RA)",
-            "cacheVariables": {
-                "BUILD_REMASTERTD": "OFF"
-            }
-        },
-        {
-            "name": "nco-tiberian-dawn-remaster",
-            "inherits": "nco-remaster",
-            "displayName": "NCO Remaster build (TD)",
-            "cacheVariables": {
-                "BUILD_REMASTERRA": "OFF"
-            }
         }
     ],
     "buildPresets": [
@@ -194,6 +199,13 @@
             "displayName": "NCO Build",
             "description": "NCO Build",
             "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "nco-debug",
+            "configurePreset": "nco-debug",
+            "displayName": "NCO Debug Build",
+            "description": "NCO Debug Build",
+            "configuration": "Debug"
         },
         {
             "name": "nco-red-alert",
@@ -369,32 +381,6 @@
             ]
         },
         {
-            "name": "nco-red-alert-debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-red-alert-debug"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-red-alert-debug"
-                }
-            ]
-        },
-        {
-            "name": "nco-tiberian-dawn-debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-tiberian-dawn-debug"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-tiberian-dawn-debug"
-                }
-            ]
-        },
-        {
             "name": "nco-remaster",
             "steps": [
                 {
@@ -430,6 +416,45 @@
                 {
                     "type": "build",
                     "name": "nco-tiberian-dawn-remaster"
+                }
+            ]
+        },
+        {
+            "name": "nco-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "nco-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "nco-debug"
+                }
+            ]
+        },
+        {
+            "name": "nco-tiberian-dawn-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "nco-tiberian-dawn-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "nco-tiberian-dawn-debug"
+                }
+            ]
+        },
+        {
+            "name": "nco-red-alert-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "nco-red-alert-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "nco-red-alert-debug"
                 }
             ]
         }

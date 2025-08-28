@@ -4419,6 +4419,33 @@ static const int _map_width_shift_bits = 7;
 static const int _map_width_shift_bits = 6;
 #endif
 
+static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool preventBuildingInShroud, bool allowBuildingBesideWalls, int remainingDistance)
+{
+	if (remainingDistance < 1)
+	{
+		return;
+	}
+
+	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
+		CELL adjcell = Adjacent_Cell(cell, facing);
+
+		//Out of bounds check
+		if (adjcell < 0 || adjcell >= MAP_CELL_TOTAL) {
+			continue;
+		}
+
+		if (!allowBuildingBesideWalls && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
+			return;
+		}
+
+		if (!preventBuildingInShroud || Map.In_Radar(adjcell)) {
+			placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
+		}
+
+		Scan_For_Valid_Placement(adjcell, placement_distance, preventBuildingInShroud, allowBuildingBesideWalls, remainingDistance - 1);
+	}
+}
+
 void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_type, unsigned char* placement_distance)
 {
     int map_cell_x = Map.MapCellX;
@@ -4444,6 +4471,10 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
+	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
@@ -4451,13 +4482,11 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
             BuildingClass* base = (BuildingClass*)Map[cell].Cell_Find_Object(RTTI_BUILDING);
             if ((base && base->House->Class->House == PlayerPtr->Class->House)
                 || (Map[cell].Owner == PlayerPtr->Class->House)) {
-                placement_distance[cell] = 0U;
-                for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-                    CELL adjcell = Adjacent_Cell(cell, facing);
-                    if (Map.In_Radar(adjcell)) {
-                        placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
-                    }
-                }
+				placement_distance[cell] = 0U;
+
+				auto maxPlacement = maxPlacementDistance;
+
+				Scan_For_Valid_Placement(cell, placement_distance, preventBuildingInShroud, allowBuildingBesideWalls, maxPlacement);
             }
         }
     }

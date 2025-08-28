@@ -38,12 +38,20 @@
 #include "macros.h"
 #include "straw.h"
 #include <stdlib.h>
-#include <stdint.h>
+#include <cstdint>
 
 extern uint16_t primeTable[3511];
 
-#define digit               uint32_t
-#define signeddigit         int32_t
+/**
+ * To be compatible with C++20 <bit>, these types are required
+ * to be declared in the following way:
+ *
+ *   - Include `<cstdint>` instead of `<stdint.h>`
+ *   - Use `typedef ...` instead of a `#define digit ...` macro
+ **/
+typedef std::uint32_t digit;
+typedef std::int32_t signeddigit;
+
 #define LOG_UNITSIZE        5
 #define UNITSIZE            32
 #define UPPER_MOST_BIT      0x80000000L

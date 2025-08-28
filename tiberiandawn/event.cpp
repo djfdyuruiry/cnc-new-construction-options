@@ -740,6 +740,19 @@ void EventClass::Execute(void)
         }
         break;
 
+    case DEPLOY:
+        techno = As_Techno(Data.Target.Whom);
+        if (techno && techno->IsActive && !techno->IsInLimbo && !techno->IsTethered) {
+            auto techno_type = techno->Techno_Type_Class();
+
+            if (techno_type->IsTransporter) {
+                techno->Mission = MISSION_UNLOAD;
+            } else {
+                techno->Mission = MISSION_HUNT;
+            }
+        }
+        break;
+
     /*
     **	Default: do nothing.
     */

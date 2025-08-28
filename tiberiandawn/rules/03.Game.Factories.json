@@ -1,0 +1,24 @@
+{
+  "section": "Game.Factories",
+  "comment": "Factory behaviour (barracks, weapons factory etc.).",
+  "rules": [
+    {
+      "name": "ProductionStepsPerTick",
+      "type": "int",
+      "default": 1,
+      "comment": "The amount of building progress that is made on each game tick. There are 15 ticks in second, so this value multiplied by 15 is the amount of progress that will be made in one second."
+    },
+    {
+      "name": "FactoryCountStepMultiplier",
+      "type": "float",
+      "default": 1.0,
+      "comment": "The multipler to apply for each factory present, so if you have two Barracks and set this to `1.0`"
+    },
+    {
+      "name": "TotalProductionSteps",
+      "type": "int",
+      "default": 108,
+      "comment": "The amount of steps required to build a thing, this divided by `ProductionStepsPerTick` is the time in game ticks required. For example: if `ProductionStepsPerTick` was 2 and `TotalProductionSteps` was 30 - it would take 15 game ticks (or 1 second)."
+    }
+  ]
+}

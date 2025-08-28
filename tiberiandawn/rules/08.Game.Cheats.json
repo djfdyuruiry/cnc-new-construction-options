@@ -1,0 +1,31 @@
+{
+  "section": "Game.Cheats",
+  "comment": "Rules that break the game in some way, often to the advantage of the player.",
+  "rules": [
+    {
+      "name": "AllowBuildingAllForCurrentHouse",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "name": "UnitsAreIndestructible",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "name": "InfantryAutoScatters",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "name": "GiveAttackersAnAdvantage",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "name": "SpeedySuperweapons",
+      "type": "bool",
+      "default": false
+    }
+  ]
+}

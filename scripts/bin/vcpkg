@@ -12,7 +12,7 @@ function main() {
 
   pushd_silent "${repo_path}"
 
-  if [ ! -d "${vcpkg_path}" ]; then
+  if [ ! -x "${vcpkg_path}/bootstrap-vcpkg.sh" ]; then
     git submodule update --init --recursive
   fi
 

@@ -1175,6 +1175,11 @@ public:
     char FireLaunch;
     char ProneLaunch;
 
+    
+    // TODO: Implement NCO logic and new fields
+    //bool IsImmuneToTiberium;
+    //bool HasC4Charges;
+
     /*
     **	This is the explicit unit class constructor.
     */

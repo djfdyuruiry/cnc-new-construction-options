@@ -81,7 +81,7 @@ bool Find_File_Data_Posix::FindNextWithFilter()
 
         auto result = fnmatch(FileFilter, DirEntry->d_name, FNM_PATHNAME | FNM_CASEFOLD);
 
-        DBG_TRACE("fnmatch('%s', '%s', FNM_PATHNAME | FNM_CASEFOLD) == %d", FileFilter, DirEntry->d_name, result);
+        CNC_LOGGER_TRACE("fnmatch('{}', '{}', FNM_PATHNAME | FNM_CASEFOLD) == {}", FileFilter, DirEntry->d_name, result);
 
         if (result == 0) {
             strcpy(FullName, DirName);
@@ -98,7 +98,7 @@ bool Find_File_Data_Posix::FindFirst(const char* fname)
     FullName[0] = '\0';
     DirName[0] = '\0';
 
-    DBG_TRACE("Find_File_Data_Posix::FindFirst('%s')", fname);
+    CNC_LOGGER_TRACE("Find_File_Data_Posix::FindFirst('{}')", fname);
 
     // split directory and file from the path
     char* fdir = strrchr((char*)fname, '/');

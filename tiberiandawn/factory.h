@@ -42,6 +42,8 @@ class FactoryClass : private StageClass
     friend class DLLExportClass; // ST - 1/29/2019 11:04AM
 
 public:
+    static int STEP_COUNT; // Number of steps to break production down into.
+
     FactoryClass(void);
     FactoryClass(NoInitClass const& x)
         : StageClass(x){};
@@ -112,11 +114,6 @@ public:
     unsigned IsActive : 1;
 
 protected:
-    enum StepCountEnum
-    {
-        STEP_COUNT = 108 // Number of steps to break production down into.
-    };
-
     int Cost_Per_Tick(void);
 
 private:

@@ -86,27 +86,51 @@ function build_and_test() {
 }
 
 function main() {
-  local target="${1:-all}"
+  local target="${1:-debug}"
+  local build_type="${2:-}"
 
-  # Shift the first argument to use as target, but keep it for cmake call later
+  # remove arguments, so we can forward other arguments to cmake call later
   shift
+
+  if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
+    shift
+  fi
 
   export CC="clang"
   export CXX="clang++"
   export VC_CXX_FLAGS="-w;-Wwrite-strings;-Werror=write-strings"
 
-  local cmake_preset="nco"
+  local cmake_preset
 
   case "${target}" in
+    # aliases for humans
     ra)
       cmake_preset="nco-red-alert-debug"
+      build_type="Debug"
       ;;
     td)
       cmake_preset="nco-tiberian-dawn-debug"
+      build_type="Debug"
+      ;;
+    debug)
+      cmake_preset="nco-debug"
+      build_type="Debug"
+      ;;
+    release)
+      cmake_preset="nco"
+      build_type="RelWithDebInfo"
+      ;;
+    # direct cmake access for scripts
+    *)
+      cmake_preset="${target}"
+
+      if [ -z "${build_type}" ]; then
+        error_and_exit "When passing a literal cmake preset, you must also provide a build type - e.x. '$0 nco RelWithDebInfo'"
+      fi
       ;;
   esac
 
-  local build_output_path="${build_directory}/${cmake_preset}/Debug"
+  local build_output_path="${build_directory}/${cmake_preset}/${build_type}"
 
   build_and_test "${cmake_preset}" "${build_output_path}" "$@"
   log_binary_output "${build_output_path}"

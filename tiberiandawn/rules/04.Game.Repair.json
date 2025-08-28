@@ -1,0 +1,30 @@
+{
+  "section": "Game.Repair",
+  "comment": "Repair behaviour (Units and Aircraft).",
+  "rules": [
+    {
+      "name": "UnitRepairFactor",
+      "type": "float",
+      "default": 1.02,
+      "comment": "Used along with strength step value to calculate the cost of a single repair step. (Cost / (MaxStrength / UnitRepairStrengthStep)) * UnitRepairFactor"
+    },
+    {
+      "name": "UnitRepairStrengthStep",
+      "type": "int",
+      "default": 4,
+      "comment": "The amount of strength to give a unit on each repair step."
+    },
+    {
+      "name": "AircraftRepairFactor",
+      "type": "float",
+      "default": 1.02,
+      "comment": "Used along with strength step value to calculate the cost of a single repair step. (Cost / (MaxStrength / AircraftRepairStrengthStep)) * AircraftRepairFactor"
+    },
+    {
+      "name": "AircraftRepairStrengthStep",
+      "type": "int",
+      "default": 2,
+      "comment": "The amount of strength to give a aircraft on each repair step."
+    }
+  ]
+}

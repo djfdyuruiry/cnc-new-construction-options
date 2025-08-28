@@ -53,6 +53,8 @@
 
 #include "function.h"
 
+int FactoryClass::STEP_COUNT = 108;
+
 /***********************************************************************************************
  * FactoryClass::Validate -- validates factory pointer													  *
  *                                                                                             *
@@ -224,7 +226,7 @@ void FactoryClass::AI(void)
 {
     Validate();
     if (!IsSuspended && (Object != NULL || SpecialItem)) {
-        int stages = 1;
+        auto stages = Get_Int_Rule(GAME_FACTORIES_SECTION, PRODUCTION_STEPS_PER_TICK_RULE);
 
         /*
         **	Determine the acceleration factor for factory production.
@@ -233,24 +235,28 @@ void FactoryClass::AI(void)
         **	factory types doesn't affect individual factories.
         */
         if (Object && House->IsHuman) {
-            switch (Object->What_Am_I()) {
-            case RTTI_AIRCRAFT:
-                stages = House->AircraftFactories;
-                break;
+			auto factory_count_multiplier = Get_Float_Rule(GAME_FACTORIES_SECTION, FACTORY_COUNT_STEP_MULTIPLIER_RULE);
+			auto modified_stages = stages;
 
-            case RTTI_INFANTRY:
-                stages = House->InfantryFactories;
-                break;
+			switch (Object->What_Am_I()) {
+				case RTTI_AIRCRAFT:
+					modified_stages = nearbyint(House->AircraftFactories * factory_count_multiplier);
+					break;
 
-            case RTTI_UNIT:
-                stages = House->UnitFactories;
-                break;
+				case RTTI_INFANTRY:
+					modified_stages = nearbyint(House->InfantryFactories * factory_count_multiplier);
+					break;
 
-            case RTTI_BUILDING:
-                stages = House->BuildingFactories;
-                break;
-            }
-            stages = MAX(stages, 1);
+				case RTTI_UNIT:
+					modified_stages = nearbyint(House->UnitFactories * factory_count_multiplier);
+					break;
+
+				case RTTI_BUILDING:
+					modified_stages = nearbyint(House->BuildingFactories * factory_count_multiplier);
+					break;
+			}
+
+			stages = MAX(modified_stages, stages);
         }
 
         for (int index = 0; index < stages; index++) {

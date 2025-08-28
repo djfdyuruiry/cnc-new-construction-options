@@ -1759,7 +1759,17 @@ void UnitTypeClass::Dimensions(int& width, int& height) const
  *=============================================================================================*/
 int UnitTypeClass::Repair_Cost(void) const
 {
-    return (Fixed_To_Cardinal(Cost / (MaxStrength / REPAIR_STEP), REPAIR_PERCENT));
+	auto repair_factor = Get_Float_Rule(GAME_REPAIR_SECTION, UNIT_REPAIR_FACTOR_RULE);
+	auto repair_percent = nearbyint(repair_factor * 100);
+
+    auto repair_step = Get_Int_Rule(GAME_REPAIR_SECTION, UNIT_REPAIR_STRENGTH_STEP_RULE);
+
+	return(
+		Fixed_To_Cardinal(
+			Cost / (MaxStrength / repair_step),
+			repair_percent
+		)
+	);
 }
 
 /***********************************************************************************************
@@ -1801,7 +1811,9 @@ int UnitTypeClass::Repair_Step(void) const
 int UnitTypeClass::Max_Pips(void) const
 {
     if (Type == UNIT_HARVESTER) {
-        return (FULL_LOAD_CREDITS / 100);
+        auto pips = Get_Int_Rule(GAME_HARVESTING_SECTION, HARVESTER_PIPS_RULE);
+
+        return pips;
     }
 
     if (IsTransporter) {

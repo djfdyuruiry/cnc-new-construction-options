@@ -17,12 +17,21 @@ function main() {
 
   target="$(eval "echo ${target}")"
 
-  find "${build_path}/${cmake_preset}/Debug" \
+  local build_type="Debug"
+
+  if [ "${cmake_preset}" == "nco" ]; then
+    build_type="RelWithDebInfo"
+  fi
+
+  find "${build_path}/${cmake_preset}/${build_type}" \
     -maxdepth 1 \
     -type f \
     -executable \
     -iname "${source}" \
     -print0 | xargs -0 -I {} cp -fv "{}" "${target}"
+
+  rm -fv "$(dirname "${target}")/"*.log
+
 }
 
 main "$@"

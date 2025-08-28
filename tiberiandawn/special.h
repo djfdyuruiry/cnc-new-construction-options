@@ -160,6 +160,9 @@ public:
 
     /*
     **	If the monochrome debugging output is enabled, then this flag will be true.
+    **
+    ** BUG: MonoClass is effectively useless because it relies on underlying DOS code
+    **      that was removed during C&C Gold dev. Never enable this
     */
     unsigned IsMonoEnabled : 1;
 

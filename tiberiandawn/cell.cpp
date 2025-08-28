@@ -1931,7 +1931,7 @@ int CellClass::Tiberium_Adjust(bool pregame)
             }
 
             OverlayData = _adj[count];
-            return ((OverlayData + 1) * UnitTypeClass::TIBERIUM_STEP);
+            return((OverlayData+1) * Get_Int_Rule(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE));
         }
     }
     return (0);

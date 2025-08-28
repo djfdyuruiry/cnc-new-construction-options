@@ -63,5 +63,5 @@ body:
     id: logs
     attributes:
       label: Relevant log output
-      description: Please copy and paste any relevant logs
+      description: Please copy and paste any relevant logs - ENSURE NO PERSONAL INFO IS INCLUDED IN LOGS
       render: shell

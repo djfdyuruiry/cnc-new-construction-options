@@ -434,26 +434,26 @@ void BuildingClass::Debug_Dump(MonoClass* mono) const
 {
     Validate();
     mono->Set_Cursor(0, 0);
-    mono->Print("ÚName:ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂMission:ÄÄÄÂTarCom:ÂÄÄÄÄÄÄÄÂRadio:ÂCoord:ÄÄÂÄÄÄÄÄÄÄÄÂSt:Ä¿\n"
-                "³                   ³           ³       ³       ³      ³        ³        ³    ³\n"
-                "ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂNÂYÂHealth:ÄÂÄÄÄÁÄÂTurret:ÂÄÄÄÄÄÁÂÄBuilding:ÄÄÂCargo:ÄÄÄÄÁÄÄÄÄ´\n"
-                "³Active........³ ³ ³        ³     ³       ³      ³            ³               ³\n"
-                "³Limbo.........³ ³ ÃÄÄÄÄÄÄÄÄÁÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´\n"
-                "³Owned.........³ ³ ³Last Message:                                             ³\n"
-                "³Discovered....³ ³ ÃTimer:ÂArm:ÂÄÄÄÄÄÄÂTiberium:ÂFlash:ÂStage:ÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\n"
-                "³Selected......³ ³ ³      ³    ³      ³         ³      ³      ³                \n"
-                "³Teathered.....³ ³ ÃÄÄÄÄÄÄÁÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÙ                \n"
-                "³Locked on Map.³ ³ ³                                                           \n"
-                "³Is A Loaner...³ ³ ³                                                           \n"
-                "³              ³ ³ ³                                                           \n"
-                "³              ³ ³ ³                                                           \n"
-                "³              ³ ³ ³                                                           \n"
-                "³Repairing.....³ ³ ³                                                           \n"
-                "³              ³ ³ ³                                                           \n"
-                "³              ³ ³ ³                                                           \n"
-                "³Recoiling.....³ ³ ³                                                           \n"
-                "³To Display....³ ³ ³                                                           \n"
-                "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÁÄÙ                                                           \n");
+    mono->Print("ï¿½Name:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Mission:ï¿½ï¿½ï¿½ï¿½TarCom:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Radio:ï¿½Coord:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½St:Ä¿\n"
+                "ï¿½                   ï¿½           ï¿½       ï¿½       ï¿½      ï¿½        ï¿½        ï¿½    ï¿½\n"
+                "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½Yï¿½Health:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Turret:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Building:ï¿½ï¿½ï¿½Cargo:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´\n"
+                "ï¿½Active........ï¿½ ï¿½ ï¿½        ï¿½     ï¿½       ï¿½      ï¿½            ï¿½               ï¿½\n"
+                "ï¿½Limbo.........ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´\n"
+                "ï¿½Owned.........ï¿½ ï¿½ ï¿½Last Message:                                             ï¿½\n"
+                "ï¿½Discovered....ï¿½ ï¿½ ï¿½Timer:ï¿½Arm:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Tiberium:ï¿½Flash:ï¿½Stage:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n"
+                "ï¿½Selected......ï¿½ ï¿½ ï¿½      ï¿½    ï¿½      ï¿½         ï¿½      ï¿½      ï¿½                \n"
+                "ï¿½Teathered.....ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½                \n"
+                "ï¿½Locked on Map.ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½Is A Loaner...ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½              ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½              ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½              ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½Repairing.....ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½              ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½              ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½Recoiling.....ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½To Display....ï¿½ ï¿½ ï¿½                                                           \n"
+                "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½                                                           \n");
     mono->Set_Cursor(1, 1);
     mono->Printf("%s:%s", House->Class->IniName, Class->IniName);
     mono->Set_Cursor(35, 3);
@@ -1979,8 +1979,12 @@ void BuildingClass::Drop_Debris(TARGET source)
     cell = Coord_Cell(Coord);
     offset = Occupy_List();
     int odds = 2;
-    if (Target_Legal(WhomToRepay))
+    if (Target_Legal(WhomToRepay)) {
         odds -= 1;
+
+        IsSurvivorless = !Get_Bool_Rule(GAME_MISC_SECTION, DESTROYED_BUILDINGS_HAVE_SURVIVORS_RULE);
+    }
+
     if (IsCaptured)
         odds += 6;
     while (*offset != REFRESH_EOL) {
@@ -5470,6 +5474,46 @@ bool BuildingClass::Can_Player_Move(void) const
     return (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
+static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBuildingBesideWalls, int remainingDistance)
+{
+	if (remainingDistance < 1) {
+		return false;
+	}
+
+	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
+		CELL newcell = Adjacent_Cell(cell, facing);
+
+		if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
+			continue;
+		}
+
+		/*
+		**	The special cell ownership flag allows building adjacent
+		**	to friendly walls and bibs even though there is no official
+		**	building located there.
+		*/
+		if (Map[newcell].Owner == house->Class->House) {
+			if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
+				return true;
+			}
+		}
+
+		BuildingClass* base = Map[newcell].Cell_Building();
+
+		// TODO: could add a `build off allies base` rule by checking if 
+		//       house is friendly to current players house
+		if (base && base->House->Class->House == house->Class->House) {
+			return true;
+		}
+
+		if (Scan_For_Proximity_Check(newcell, house, allowBuildingBesideWalls, remainingDistance - 1)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /***********************************************************************************************
  * BuildingClass::Passes_Proximity_Check -- Determines if building placement is near friendly sq*
  *                                                                                             *
@@ -5499,36 +5543,37 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
         return (true);
     }
 
-    /*
-    **	Scan through all cells that the building foundation would cover. If any adjacent
-    **	cells to these are of friendly persuasion, then consider the proximity check to
-    **	have been a success.
-    */
-    short const* ptr = Occupy_List(true);
-    while (*ptr != REFRESH_EOL) {
-        CELL cell = homecell + *ptr++;
+	/*
+	**	Scan through all cells that the building foundation would cover. If any adjacent
+	**	cells to these are of friendly persuasion, then consider the proximity check to
+	**	have been a success.
+	*/
+	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
-        if (!Map.In_Radar(cell))
-            return (false);
+	auto ptr = Occupy_List(true);
 
-        for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-            CELL newcell = Adjacent_Cell(cell, facing);
+	while (*ptr != REFRESH_EOL) {
+		CELL cell = homecell + *ptr++;
 
-            BuildingClass* base = Map[newcell].Cell_Building();
+		if (preventBuildingInShroud && !Map.In_Radar(cell)) {
+			return false;
+		}
+	}
 
-            /*
-            **	The special cell ownership flag allows building adjacent
-            **	to friendly walls and bibs even though there is no official
-            **	building located there.
-            */
-            if (Map[newcell].Owner == House->Class->House) {
-                return (true);
-            }
+	ptr = Occupy_List(true);
 
-            if (base && base->House->Class->House == House->Class->House) {
-                return (true);
-            }
-        }
-    }
-    return (false);
+	while (*ptr != REFRESH_EOL) {
+		CELL cell = homecell + *ptr++;
+
+		auto maxDistance = maxPlacementDistance;
+		auto proximityDetected = Scan_For_Proximity_Check(cell, House, allowBuildingBesideWalls, maxDistance);
+
+		if (proximityDetected) {
+			return true;
+		}
+	}
+
+	return(false);
 }

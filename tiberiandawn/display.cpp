@@ -829,6 +829,51 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const* object)
 }
 
 #ifdef USE_RA_AI
+bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool preventBuildingInShroud, bool allowBuildingBesideWalls, int remainingDistance) const
+{
+	if (remainingDistance < 1) {
+		return false;
+	}
+
+	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
+		CELL newcell = Adjacent_Cell(cell, facing);
+
+		if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
+			continue;
+		}
+
+		if (preventBuildingInShroud && !In_Radar(cell))
+		{
+			return false;
+		}
+
+		/*
+		**	The special cell ownership flag allows building adjacent
+		**	to friendly walls and bibs even though there is no official
+		**	building located there.
+		*/
+		if ((*this)[newcell].Owner == house) {
+			if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference((*this)[newcell].Overlay).IsWall) {
+				return true;
+			}
+		}
+
+		TechnoClass* base = (*this)[newcell].Cell_Techno();
+
+		// TODO: could add a `build off allies base` rule by checking if 
+		//       house is friendly to current players house
+		if (base && base->What_Am_I() == RTTI_BUILDING && base->House->Class->House == house) {
+			return true;
+		}
+
+		if (Scan_For_Proximity(newcell, house, preventBuildingInShroud, allowBuildingBesideWalls, remainingDistance - 1)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /*
 ** Additional version of Passes_Proximity_Check, inspired by RA implementation. Needed for RA AI. ST - 7/24/2019 5:42PM
 */
@@ -862,56 +907,53 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const* object)
  *   06/07/1994 JLB : Handles concrete check.                                                  *
  *   10/11/1994 BWG : Added IsProximate check for ore refineries                               *
  *=============================================================================================*/
-bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const* object,
-                                          HousesType house,
-                                          short const* list,
-                                          CELL trycell) const
+bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, HousesType house, short const * list, CELL trycell) const
 {
-    short const* ptr;
+	short const *ptr;
 
-    /*
-    ** In editor mode, the proximity check always passes.
-    */
-    if (Debug_Map) {
-        return (true);
-    }
+	/*
+	** In editor mode, the proximity check always passes.
+	*/
+	if (Debug_Map) {
+		return(true);
+	}
 
-    if (!object || object->What_Am_I() != RTTI_BUILDINGTYPE) {
-        return (true);
-    }
+	if (!object || object->What_Am_I() != RTTI_BUILDINGTYPE) {
+		return(true);
+	}
 
-    /*
-    **	Scan through all cells that the building foundation would cover. If any adjacent
-    **	cells to these are of friendly persuasion, then consider the proximity check to
-    **	have been a success.
-    */
-    ptr = list;
-    while (*ptr != REFRESH_EOL) {
-        CELL cell = trycell + *ptr++;
+	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
-        for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-            CELL newcell = Adjacent_Cell(cell, facing);
+	/*
+	**	Scan through all cells that the building foundation would cover. If any adjacent
+	**	cells to these are of friendly persuasion, then consider the proximity check to
+	**	have been a success.
+	*/
+	ptr = list;
+	while (*ptr != REFRESH_EOL) {
+		CELL cell = trycell + *ptr++;
 
-            if (!In_Radar(cell))
-                return (false);
+        // BUG: Doesn't prevent building in shroud
+		if (preventBuildingInShroud && !Map.In_Radar(cell)) {
+			return false;
+		}
+	}
 
-            TechnoClass* base = (*this)[newcell].Cell_Techno();
+	ptr = list;
+	while (*ptr != REFRESH_EOL) {
+		CELL cell = trycell + *ptr++;
 
-            /*
-            **	The special cell ownership flag allows building adjacent
-            **	to friendly walls and bibs even though there is no official
-            **	building located there.
-            */
-            if ((*this)[newcell].Owner == house) {
-                return (true);
-            }
+		auto maximumDistance = maxPlacementDistance;
+		auto proximityDetected = Scan_For_Proximity(cell, house, preventBuildingInShroud, allowBuildingBesideWalls, maximumDistance);
 
-            if (base && base->What_Am_I() == RTTI_BUILDING && base->House->Class->House == house) {
-                return (true);
-            }
-        }
-    }
-    return (false);
+		if (proximityDetected)
+		{
+			return true;
+		}
+	}
+	return(false);
 }
 
 #endif // USE_RA_AI

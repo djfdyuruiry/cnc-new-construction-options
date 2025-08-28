@@ -152,7 +152,9 @@ void DriveClass::Force_Track(int track, COORDINATE coord)
 int DriveClass::Tiberium_Load(void) const
 {
     if (*this == UNIT_HARVESTER) {
-        return (Cardinal_To_Fixed(UnitTypeClass::STEP_COUNT, Tiberium));
+        auto capacity = Get_Int_Rule(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
+
+        return (Cardinal_To_Fixed(capacity, Tiberium));
     }
     return (0x0000);
 }
@@ -1639,25 +1641,29 @@ int DriveClass::Offload_Tiberium_Bail(void)
 {
     if (Tiberium) {
         Tiberium--;
+
+        auto capacity = Get_Int_Rule(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
+        auto credits = capacity * Get_Int_Rule(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE); 
+        
         if (House->IsHuman) {
-            return (UnitTypeClass::FULL_LOAD_CREDITS / UnitTypeClass::STEP_COUNT); // 25 in debugger
+            return (credits / capacity); // 25 in debugger
         }
 
         // MBL 05.14.2020: AI harvested credits fix for multiplayer, since they are miscalculated, and it's noticed
         //
-        // return(UnitTypeClass::FULL_LOAD_CREDITS+(UnitTypeClass::FULL_LOAD_CREDITS/3)/UnitTypeClass::STEP_COUNT); 708
+        // return(credits+(credits/3)/capacity); 708
         // in debugger
         //
         if (GameToPlay == GAME_NORMAL) // Non-multiplayer game, keep the original calculation; 708 in debugger
         {
-            return (UnitTypeClass::FULL_LOAD_CREDITS
-                    + (UnitTypeClass::FULL_LOAD_CREDITS / 3)
-                          / UnitTypeClass::STEP_COUNT); // Original (708), wrong calcualation but preserving to not
+            return (credits
+                    + (credits / 3)
+                          / capacity); // Original (708), wrong calcualation but preserving to not
                                                         // break missions
         } else // Multiplayer game, apply the 1/3 bonus credits correction, so not be as extreme; 33 in debugger
         {
-            return ((UnitTypeClass::FULL_LOAD_CREDITS + (UnitTypeClass::FULL_LOAD_CREDITS / 3))
-                    / UnitTypeClass::STEP_COUNT); // Corrected calculation
+            return ((credits + (credits / 3))
+                    / capacity); // Corrected calculation
         }
     }
     return (0);

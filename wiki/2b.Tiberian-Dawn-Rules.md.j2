@@ -1,0 +1,17 @@
+`rules.ini` is a simple text file that controls how different units, buildings and infantry behave in-game. This was included by default by Westwood in Red Alert onward. Below is a explaination of the sections in this file and different values that can be set.
+
+The `rules.ini` file is created for you when you first run the game, and can be found where you installed `vanillatd` and the required game files.
+{% for section in sections %}
+## [{{ section.section }}]
+
+{{ section.comment }}
+
+| Rule | Comment |
+|--------|-------------|
+{% for rule in section.rules %}| `{{ rule.name }}` | {{ rule.comment }} |
+{% endfor %}
+```ini
+[{{ section.section }}]
+{% for rule in section.rules %}{{ rule.name }}={{ rule.default }}
+{% endfor %}```
+{% endfor %}

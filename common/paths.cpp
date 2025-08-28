@@ -42,8 +42,8 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
     Data_Path();
     User_Path();
 
-    DBG_INFO("Searching the following paths for path config data:\n  argv: '%s'\n  binary: '%s'\n  default data: "
-             "'%s'\n  default user: '%s'",
+    DBG_INFO("Searching the following paths for path config data: < argv: '%s' | binary: '%s' | default data: "
+             "'%s' | default user: '%s' >",
              argv_path.c_str(),
              ProgramPath.c_str(),
              DataPath.c_str(),

@@ -39,6 +39,8 @@
 #include "filetemp.h"
 #endif
 
+#include "logger.h"
+
 /*=========================================================================*/
 /* File IO system defines and enumerations											*/
 /*=========================================================================*/
@@ -240,6 +242,9 @@ public:
     virtual bool FindFirst(const char* fname) = 0;
     virtual bool FindNext() = 0;
     virtual void Close() = 0;
+
+protected:
+    static const CncLogger Logger;
 };
 
 extern bool Find_First(const char* fname, unsigned int mode, Find_File_Data** ffblk);

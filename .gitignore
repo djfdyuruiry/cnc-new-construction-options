@@ -3,3 +3,4 @@
 /.cache
 .env
 .vcpkg
+*.log

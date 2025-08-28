@@ -1432,11 +1432,18 @@ void MapClass::Logic(void)
         TiberiumScan = 0;
         IsForwardScan = (IsForwardScan == false);
 
+        // BUG: When these values are too high, causes game loop to lag (needs more efficent algorithm, not looping)
+        auto growthFactorMultipler = Get_Float_Rule(GAME_MAP_SECTION, TIBERIUM_GROWTH_RATE_RULE);
+		auto spreadFactorMultipler = Get_Float_Rule(GAME_MAP_SECTION, TIBERIUM_SPREAD_RATE_RULE);
+
+		int growthFactor = nearbyint(tries * growthFactorMultipler);
+		int spreadFactor = nearbyint(tries * spreadFactorMultipler);
+
         /*
         **	Growth logic.
         */
         if (TiberiumGrowthCount) {
-            for (int i = 0; i < tries; i++) {
+            for (int i = 0; i < growthFactor; i++) {
                 int pick = Random_Pick(0, TiberiumGrowthCount - 1);
                 CELL cell = TiberiumGrowth[pick];
                 CellClass* newcell = &(*this)[cell];
@@ -1456,7 +1463,7 @@ void MapClass::Logic(void)
         **	Spread logic.
         */
         if (TiberiumSpreadCount) {
-            for (int i = 0; i < tries; i++) {
+            for (int i = 0; i < spreadFactor; i++) {
                 int pick = Random_Pick(0, TiberiumSpreadCount - 1);
                 CELL cell = TiberiumSpread[pick];
 

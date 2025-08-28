@@ -34,6 +34,9 @@
  *   RulesClass::RulesClass -- Default constructor for rules class object.                     *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "common/logger.h"
+#include "common/rulesections.h"
+
 #include "function.h"
 #include "ccini.h"
 
@@ -259,6 +262,9 @@ bool RulesClass::Process(CCINIClass& ini)
     AI(ini);
     IQ(ini);
     Difficulty(ini);
+    Process_Sections(ini);
+
+    Apply_Static_And_Global_Values();
 
     return (true);
 }
@@ -282,6 +288,7 @@ bool RulesClass::Export(CCINIClass& ini)
     Export_AI(ini);
     Export_IQ(ini);
     Export_Difficulty(ini);
+    Export_Sections(ini);
 
     return (true);
 }

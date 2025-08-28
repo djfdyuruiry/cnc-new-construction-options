@@ -3,6 +3,8 @@ set(GIT_PRE_CONFIGURE_FILE "gitinfo.cpp.in")
 set(GIT_POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/gitinfo.cpp")
 include(GitWatcher)
 
+find_package(spdlog CONFIG REQUIRED)
+
 set(COMMON_SRC
     ${GIT_POST_CONFIGURE_FILE}
     _diptabl.cpp
@@ -56,6 +58,7 @@ set(COMMON_SRC
     linear.cpp
     link.cpp
     load.cpp
+    logger.cpp
     memrev.cpp
     misc.cpp
     mixfile.cpp
@@ -167,11 +170,16 @@ endif()
 file(GLOB_RECURSE COMMON_HEADERS "*.h")
 
 add_library(common STATIC ${COMMON_SRC} ${COMMON_HEADERS})
+
+target_link_libraries(common PUBLIC spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 target_link_libraries(common PUBLIC ${COMMON_LIBS})
+
 target_include_directories(common PUBLIC .)
+
 target_compile_definitions(common PRIVATE FIXIT_FAST_LOAD $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING>)
 target_compile_options(common PUBLIC ${VC_CXX_FLAGS})
 target_compile_features(common PUBLIC cxx_std_11)
+
 # Make build check state of git to check for uncommitted changes.
 add_dependencies(common check_git)
 

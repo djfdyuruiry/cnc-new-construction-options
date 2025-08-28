@@ -27,10 +27,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Render Wiki Templates
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+
+          python -m ensurepip
+          pip install jinja2
+
+          python scripts/99.generate-tiberian-dawn-rules-doc.py
+
+          # ensure normally ignored generated files get pushed to wiki
+          rm -fv wiki/.gitignore
+
       - uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           strategy: init
           preprocess: true
           ignore: |
             .obsidian
+            *.j2
           dry-run: ${{ github.ref != 'refs/heads/main' }}

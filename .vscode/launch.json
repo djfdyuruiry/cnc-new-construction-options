@@ -11,7 +11,13 @@
         "-CHEAT"
       ],
       "cwd": "${env:HOME}/Games/cnc-tiberian-dawn",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "environment": [
+        {
+          "name": "NCO_LOG_LEVEL",
+          "value": "debug,Find_File_Data=off"
+        }
+      ]
     },
     {
       "name": "Debug RA",
@@ -20,7 +26,13 @@
       "preLaunchTask": "Build & Deploy RA",
       "program": "${env:HOME}/Games/cnc-red-alert/vanillara-dev",
       "cwd": "${env:HOME}/Games/cnc-red-alert",
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "environment": [
+        {
+          "name": "NCO_LOG_LEVEL",
+          "value": "debug,Find_File_Data=off"
+        }
+      ]
     }
   ]
 }

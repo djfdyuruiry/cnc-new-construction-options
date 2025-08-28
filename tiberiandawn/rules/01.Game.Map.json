@@ -1,0 +1,66 @@
+{
+  "section": "Game.Map",
+  "comment": "Building placement rules and tiberium behaviour.",
+  "rules": [
+    {
+      "name": "MaxBuildDistance",
+      "type": "int",
+      "default": 1,
+      "comment": "This controls how far away from an existing structure a player can place a building. _Note: values higher than 6 may cause performance problems._"
+    },
+    {
+      "name": "PreventBuildingInShroud",
+      "type": "bool",
+      "default": true,
+      "comment": "(**NOTE: Broken**) Prevent a player from placing a building inside the shroud/fog of war."
+    },
+    {
+      "name": "AllowBuildingBesideWalls",
+      "type": "bool",
+      "default": true,
+      "comment": "Allow building structures off player walls. (Known issue with this - if turned off the game shows White instead of Red tiles when you try to place beside walls, but it does work - it won't let you place the building)"
+    },
+    {
+      "name": "TiberiumGrows",
+      "type": "bool",
+      "default": true,
+      "comment": "Tiberium cells will grow on the map."
+    },
+    {
+      "name": "TiberiumSpreads",
+      "type": "bool",
+      "default": true,
+      "comment": "Tiberium will spread to nearby cells."
+    },
+    {
+      "name": "SlowTiberiumGrowthAndSpread",
+      "type": "bool",
+      "default": false,
+      "comment": "Slows down tiberium spread and growth (half the default rate)"
+    },
+    {
+      "name": "TiberiumGrowthRate",
+      "type": "float",
+      "default": 1.0,
+      "comment": "Controls the rate of tiberium growth, note enabling `SlowTiberiumGrowthAndSpread` will half the set rate. _Note: excessive values may cause performance problems._"
+    },
+    {
+      "name": "TiberiumSpreadRate",
+      "type": "float",
+      "default": 1.0,
+      "comment": "Controls the rate of tiberium spread, note enabling `SlowTiberiumGrowthAndSpread` will half the set rate. _Note: excessive values may cause performance problems._"
+    },
+    {
+      "name": "TiberiumInfantryDamage",
+      "type": "int",
+      "default": 2,
+      "comment": "The amount of damage infantry takes by walking across a cell of tiberium, if infantry type has the `ImmuneToTiberium ` flag is set to `yes` then this is ignored for that type."
+    },
+    {
+      "name": "TiberiumBlossomTreeDamage",
+      "type": "int",
+      "default": 5,
+      "comment": "The amount of damage nearby units/infantry etc. take by when a blossom tree shoots tiberium in the air."
+    }
+  ]
+}

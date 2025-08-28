@@ -60,6 +60,8 @@ public:
     unsigned IsContentScan : 1;
 };
 
+class RuleSections;
+
 class RulesClass
 {
 public:
@@ -69,10 +71,13 @@ public:
     bool AI(CCINIClass& ini);
     bool IQ(CCINIClass& ini);
     bool Difficulty(CCINIClass& ini);
+    bool Process_Sections(CCINIClass& ini);
+
     bool Export(CCINIClass& file);
     bool Export_AI(CCINIClass& ini);
     bool Export_IQ(CCINIClass& ini);
     bool Export_Difficulty(CCINIClass& ini);
+    bool Export_Sections(CCINIClass& ini);
 
     /*
     **	This specifies the average number of minutes between each computer attack.
@@ -282,6 +287,21 @@ public:
     **	difficulty class object for each difficulty level.
     */
     DifficultyClass Diff[DIFF_COUNT];
+
+    // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
+    RuleSections Sections;
+
+private:
+    void Apply_Special_Properties();
+    void Apply_Static_And_Global_Values();
 };
+
+#define Get_Rule_Value(section, rule, value_type) Rule.Sections[section].Get<value_type>(rule)
+
+#define Get_Int_Rule(section, rule) Get_Rule_Value(section, rule, int)
+
+#define Get_Bool_Rule(section, rule) Get_Rule_Value(section, rule, bool)
+
+#define Get_Float_Rule(section, rule) Get_Rule_Value(section, rule, float)
 
 #endif

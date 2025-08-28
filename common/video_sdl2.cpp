@@ -742,7 +742,8 @@ public:
         SDL_FreeSurface(surface);
 
         if (texture) {
-            SDL_DestroyTexture(texture);
+            // BUG: This crashes the process if game was not fully initialised when destructor called
+            // SDL_DestroyTexture(texture);
         }
 
         if (windowSurface) {

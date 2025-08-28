@@ -4,6 +4,18 @@
     "CXX": "clang++",
     "VC_CXX_FLAGS": "-w;-Wwrite-strings;-Werror=write-strings"
   },
+  "cmake.options.statusBarVisibility": "hidden",
+  "cmake.options.advanced": { 
+    "buildTarget": {
+      "statusBarVisibility": "visible"
+    },
+    "configurePreset": { 
+      "statusBarVisibility": "visible"
+    }, 
+    "workflowPreset": {
+      "statusBarVisibility": "visible"
+    }
+  },
   "githubPullRequests.remotes": [
     "origin"
   ],
@@ -99,6 +111,9 @@
     "valarray": "cpp",
     "variant": "cpp",
     "*.def": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "cerrno": "cpp",
+    "climits": "cpp",
+    "*.in": "cpp"
   }
 }
