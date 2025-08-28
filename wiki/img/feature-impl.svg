@@ -1,0 +1,7 @@
+<svg width="105" height="20" xmlns="http://www.w3.org/2000/svg">
+  <!-- Green background -->
+  <rect width="105" height="20" fill="#218b38ff" rx="8" ry="8"/>
+  
+  <!-- Bold white text -->
+  <text x="52" y="14" font-family="Arial, sans-serif" font-weight="bold" font-size="14" fill="white" text-anchor="middle">Implemented</text>
+</svg>
