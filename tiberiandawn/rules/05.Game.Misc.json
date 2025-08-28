@@ -55,7 +55,7 @@
       "type": "bool",
       "default": true,
       "implemented": false,
-      "comment": "(**NOTE: Not Implemented Yet**) Remove the nuclear superpower after 1 shot"
+      "comment": "Remove the nuclear superpower after 1 shot"
     },
     {
       "name": "HelipadsAndAircraftBoughtSeperately",

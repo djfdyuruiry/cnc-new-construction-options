@@ -43,7 +43,14 @@
       "type": "bool",
       "default": true,
       "implemented": false,
-      "comment": "(**NOTE: Not Implemented Yet**) Only allow GDI constructed Adv. Comm Centers to grant the Ion Cannon superpower"
+      "comment": "Only allow GDI constructed Adv. Comm Center to grant the Ion Cannon superpower"
+    },
+    {
+      "name": "OnlyNodCanUseNuke",
+      "type": "bool",
+      "default": true,
+      "implemented": false,
+      "comment": "Only allow Nod constructed Temple of Nod to grant the Nuke superpower"
     }
   ]
 }
