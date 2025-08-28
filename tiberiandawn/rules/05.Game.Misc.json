@@ -54,7 +54,6 @@
       "name": "OnlyAllowUsingOneNukePerScenario",
       "type": "bool",
       "default": true,
-      "implemented": false,
       "comment": "Remove the nuclear superpower after 1 shot"
     },
     {
