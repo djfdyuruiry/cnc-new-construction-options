@@ -2,39 +2,22 @@
 # for a single source of truth.
 
 # Function to setup monitoring for JSON files using GitWatcher patterns
-function(SetupRuleMonitoring _TARGET_NAME)
-  # Check if monitoring is already set up
-  if(NOT DEFINED RULES_MONITORING_SETUP)
-    set(RULES_MONITORING_SETUP TRUE)
-    
-    # Add custom target that monitors rules files using GitWatcher patterns
-    add_custom_target(${_TARGET_NAME}
+function(SetupRuleMonitoring)
+  add_custom_target(td_rules
       ALL
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rules/*.json
-      COMMENT "Monitoring rule JSON files for changes..."
-      COMMAND ${CMAKE_COMMAND}
-        -D_RULES_MONITOR_TARGET=${_TARGET_NAME}
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TiberianDawnRules.cmake")
-  endif()
-endfunction()
-
-# Function to check if rules have changed and regenerate code
-function(CheckRulesChanged)
-  # This would be used by GitWatcher to detect changes in JSON rule files
-  set(RULES_CHANGED FALSE)
-  
-  # In a real implementation, this would check file modification times or hashes
-  # For now, we'll trigger regeneration on build
-  set(RULES_CHANGED TRUE)
-  
-  return()
-endfunction()
-
-# Function to regenerate rule code when files change
-function(RegenerateRules)
-  # Trigger the main function to regenerate rules
-  message(STATUS "Regenerating rules from JSON files...")
-  Main()
+      BYPRODUCTS
+          ${RULES_NCO_PATH}
+          ${RULE_KEYS_PATH}
+          ${RULES_STATE_FILE}
+      COMMENT "[TiberianDawnRules] Monitoring rule JSON files for changes..."
+      COMMAND
+          ${CMAKE_COMMAND}
+          -D_BUILD_TIME_TD_RULES=TRUE
+          -DRULES_STATE_FILE=${RULES_STATE_FILE}
+          -DRULES_PATH=${RULES_PATH}
+          -DRULES_NCO_PATH=${RULES_NCO_PATH}
+          -DRULE_KEYS_PATH=${RULE_KEYS_PATH}
+          -P "${CMAKE_CURRENT_LIST_FILE}")
 endfunction()
 
 function(ResolveRuleValue _RULE_DEFAULT _RULE_VALUE)
@@ -90,7 +73,7 @@ endfunction()
 function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPPER)
   string(JSON SECTION_NAME GET ${_RULES_JSON} section)
 
-  message(STATUS "Rule section: ${SECTION_NAME}")
+  message(STATUS "[TiberianDawnRules] Rule section: ${SECTION_NAME}")
 
   string(TOUPPER ${SECTION_NAME} SECTION_NAME_UPPER)
 
@@ -99,21 +82,69 @@ function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPP
 endfunction()
 
 function(ParseRuleFilePath _RULE_FILE _RELATIVE_RULE_FILE)
-  file(RELATIVE_PATH RELATIVE_RULE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/rules "${_RULE_FILE}")
+  file(RELATIVE_PATH RELATIVE_RULE_FILE "${RULES_PATH}" "${_RULE_FILE}")
 
-  message(STATUS "Processing rules file: ${RELATIVE_RULE_FILE}")
+  message(STATUS "[TiberianDawnRules] Processing rules file: ${RELATIVE_RULE_FILE}")
 
   set("${_RELATIVE_RULE_FILE}" ${RELATIVE_RULE_FILE} PARENT_SCOPE)
 endfunction()
 
-function(ScanForRuleFiles _RULES_FILES)
-  file(GLOB_RECURSE RULES_FILES "${CMAKE_CURRENT_SOURCE_DIR}/rules/*.json")
+function(WatchRuleFileForChanges _RULE_FILE)
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY CMAKE_CONFIGURE_DEPENDS ${_RULE_FILE}
+  )
+endfunction()
+
+function(ScanForRuleFiles _RULES_STATE_FILE _RULES_FILES _RULES_HASH _RULES_HAVE_CHANGED)
+  file(GLOB_RECURSE RULES_FILES "${RULES_PATH}/*.json")
+
+  set(RULES_HASH "")
+
+  foreach(RULE_FILE ${RULES_FILES})
+    file(SHA256 "${RULE_FILE}" FILE_HASH)  
+    string(SHA256 RULES_HASH "${RULES_HASH}${FILE_HASH}")
+  endforeach()
+
+  set(RULES_HAVE_CHANGED true)
+
+  if(EXISTS "${_RULES_STATE_FILE}")
+    file(READ "${_RULES_STATE_FILE}" OLD_RULES_HASH)
+    if(OLD_RULES_HASH STREQUAL "${RULES_HASH}")
+        set(RULES_HAVE_CHANGED false)
+    endif()
+  endif()
 
   set("${_RULES_FILES}" ${RULES_FILES} PARENT_SCOPE)
+  set("${_RULES_HASH}" ${RULES_HASH} PARENT_SCOPE)
+  set("${_RULES_HAVE_CHANGED}" ${RULES_HAVE_CHANGED} PARENT_SCOPE)
 endfunction()
 
 function(Main)
-  message(STATUS "=== TiberianDawnRules.cmake start ===")
+  if(NOT DEFINED "RULES_STATE_FILE")
+    set(RULES_STATE_FILE "${CMAKE_BINARY_DIR}/td-rules-hash")
+  endif()
+
+  message(STATUS "[TiberianDawnRules] Detecting changes in Rules...")
+  ScanForRuleFiles("${RULES_STATE_FILE}" RULES_FILES RULES_HASH RULES_HAVE_CHANGED)
+
+  if(EXISTS "${RULES_STATE_FILE}")
+    file(READ "${RULES_STATE_FILE}" OLD_RULES_HASH)
+    if(OLD_RULES_HASH STREQUAL "${RULES_HASH}")
+        message(STATUS "[TiberianDawnRules] No Rule changes detected")
+
+        if(NOT _BUILD_TIME_TD_RULES)
+          message(STATUS "[TiberianDawnRules] Setting up Rules monitoring")
+
+          SetupRuleMonitoring()
+        endif()
+
+        return()
+    endif()
+  endif()
+
+  message(STATUS "[TiberianDawnRules] Generating Rules code...")
 
   set(RULE_JSON_SOURCES_COMMENTS, "")
   set(RULE_KEYS_DEFINES "")
@@ -121,10 +152,9 @@ function(Main)
   set(RULE_PROCESS_CODE "")
   set(RULE_EXPORT_CODE "")
 
-  # find JSON files
-  ScanForRuleFiles(RULES_FILES)
-
   foreach(RULE_FILE ${RULES_FILES})
+    WatchRuleFileForChanges("${RULE_FILE}")
+
     ParseRuleFilePath("${RULE_FILE}" RELATIVE_RULE_FILE)
 
     # load rule definitions from JSON file
@@ -132,7 +162,7 @@ function(Main)
 
     ExtractSectionNameFromJson("${RULES_JSON}" SECTION_NAME SECTION_NAME_UPPER)
 
-    message(STATUS "Generating code for rule section: [${SECTION_NAME}]")
+    message(STATUS "[TiberianDawnRules] Generating code for rule section: [${SECTION_NAME}]")
   
     # rulekeys.h comment header
     string(APPEND RULE_JSON_SOURCES_COMMENTS " *   - rules/${RELATIVE_RULE_FILE}\n")
@@ -199,19 +229,23 @@ function(Main)
       endif()
 
       # rulekeys.h rule defines
-      message(STATUS "Generating code for rule: [${SECTION_NAME}] => ${RULE_NAME}")
+      message(STATUS "[TiberianDawnRules] Generating code for rule: [${SECTION_NAME}] => ${RULE_NAME}")
       string(APPEND RULE_KEYS_DEFINES "\n#define ${RULE_DEFINE} \"${RULE_NAME}\"")
     endforeach()
   endforeach()
 
   # render templates
-  set(RULES_NCO_PATH ${CMAKE_CURRENT_SOURCE_DIR}/rules-nco.cpp)
-  set(RULE_KEYS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/rulekeys.h)
-
   configure_file(${RULES_NCO_PATH}.in ${RULES_NCO_PATH} @ONLY)
   configure_file(${RULE_KEYS_PATH}.in ${RULE_KEYS_PATH} @ONLY)
 
-  message(STATUS "=== TiberianDawnRules.cmake end ===")
+  message(STATUS "[TiberianDawnRules] Saving Rules state")
+  file(WRITE "${RULES_STATE_FILE}" "${RULES_HASH}")
+
+  if(NOT _BUILD_TIME_TD_RULES)
+    message(STATUS "[TiberianDawnRules] Setting up Rules monitoring")
+
+    SetupRuleMonitoring()
+  endif()
 endfunction()
 
 Main()

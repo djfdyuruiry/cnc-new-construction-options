@@ -1,3 +1,7 @@
+set(RULES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules")
+set(RULES_NCO_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules-nco.cpp")
+set(RULE_KEYS_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rulekeys.h")
+
 include(TiberianDawnRules)
 
 set(TIBDAWN_SRC
