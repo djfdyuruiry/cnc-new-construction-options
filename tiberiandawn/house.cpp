@@ -1396,7 +1396,9 @@ void HouseClass::AI(void)
         */
         if ((GameToPlay == GAME_NORMAL || Rule.AllowSuperWeapons) && (ActiveBScan & STRUCTF_TEMPLE) && Has_Nuke_Device()
             && IsHuman) {
-            NukeStrike.Enable((GameToPlay == GAME_NORMAL), this == PlayerPtr);
+            auto one_nuke_per_scenario = Get_Bool_Rule(GAME_MISC_SECTION, ONLY_ALLOW_USING_ONE_NUKE_PER_SCENARIO_RULE);
+
+            NukeStrike.Enable((GameToPlay == GAME_NORMAL && one_nuke_per_scenario), this == PlayerPtr);
 
             /*
             **	Flag the sidebar to be redrawn if necessary.
