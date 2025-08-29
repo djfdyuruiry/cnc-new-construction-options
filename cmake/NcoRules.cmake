@@ -83,11 +83,11 @@ endfunction()
 function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_DEFAULT)
   string(JSON RULE_OBJECT_JSON GET "${_RULES_JSON}" rules "${_RULE_INDEX}")
 
-  string(JSON RULE_NAME GET ${RULE_OBJECT_JSON} name)
-  string(JSON RULE_TYPE GET ${RULE_OBJECT_JSON} type)
-  string(JSON RULE_DEFAULT GET ${RULE_OBJECT_JSON} default)
+  string(JSON RULE_NAME GET "${RULE_OBJECT_JSON}" name)
+  string(JSON RULE_TYPE GET "${RULE_OBJECT_JSON}" type)
+  string(JSON RULE_DEFAULT GET "${RULE_OBJECT_JSON}" default)
 
-  string(JSON IS_IMPLEMENTED ERROR_VARIABLE JSON_ERROR GET ${RULE_OBJECT_JSON} implemented)
+  string(JSON IS_IMPLEMENTED ERROR_VARIABLE JSON_ERROR GET "${RULE_OBJECT_JSON}" implemented)
 
   if(NOT ${IS_IMPLEMENTED} STREQUAL "OFF")
     # default implemented flag to true
@@ -101,7 +101,7 @@ function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_
 endfunction()
 
 function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPPER)
-  string(JSON SECTION_NAME GET ${_RULES_JSON} section)
+  string(JSON SECTION_NAME GET "${_RULES_JSON}" section)
 
   message(STATUS "[NcoRules] Rule section: ${SECTION_NAME}")
 
@@ -259,7 +259,7 @@ function(Main)
     string(APPEND RULE_EXPORT_CODE "${SECTION_LEAD_IN}")
 
 
-    string(JSON RULE_COUNT LENGTH ${RULES_JSON} rules)
+    string(JSON RULE_COUNT LENGTH "${RULES_JSON}" rules)
     MATH(EXPR RULE_COUNT "${RULE_COUNT}-1")
 
     foreach(RULE_INDEX RANGE ${RULE_COUNT})
