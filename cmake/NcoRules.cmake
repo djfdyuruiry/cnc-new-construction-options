@@ -1,24 +1,45 @@
-# Rules code generator, allows keeping game rules in one place
+##
+# Rules code generator, allows keeping game rule metadata in one place
 # for a single source of truth.
+#
+# Params (mandatory):
+#
+#   * RULES_PATH - Path to a directory that contains .json files describing a rules.ini section
+#   * RULES_KEYS_TEMPLATE_PATH - Template for generated .h file that defines consts for names of sections and rules
+#   * RULES_KEYS_PATH - Output path for rendered ${RULES_KEYS_TEMPLATE_PATH} template
+#   * RULES_NCO_TEMPLATE_PATH - Template for generated .cpp file that loads and exports rules
+#   * RULES_NCO_PATH - Output path for rendered ${RULES_NCO_TEMPLATE_PATH} template
+#
+# This script reads all JSON files in ${RULES_PATH}, one JSON file per rules.ini section. The rules in each file
+# are used to generate const strings, load from INI code and export to INI code using common/rulesections.h types.
+#
+# Generates four seperate blocks of C++ code and provides them as variables to the above templates:
+#
+#   * RULE_JSON_SOURCES_COMMENTS - Multiline comment lines containing a list of JSON files used to generated rules
+#   * RULE_KEYS_DEFINES - Define macros which provide const strings for section and rule names
+#   * RULE_PROCESS_CODE - Calls the index operator on a Sections variable/class member for each section
+#                         and invokes 'With<IniRuleContext>' with a 'Load' call inside the lambda for each rule
+#                         (Sections expected to be of type RuleSections, see: common/rulesections.h)
+#   * RULE_EXPORT_CODE - Calls the index operator on a Sections variable/class member for each section
+#                        and invokes 'With<IniRuleContext>' with a 'Save' call inside the lambda for each rule
+#                        (Sections expected to be of type RuleSections, see: common/rulesections.h)
+#
+# All JSON files are watched for changes, automatically regenerating code before build and on configure. Adding/deleting
+# JSON files is also detected automatically. The template files passed in as params are also watched.
+#
+##
+macro(CHECK_REQUIRED_VARIABLE var_name)
+    if(NOT DEFINED ${var_name})
+        message(FATAL_ERROR "[NcoRules] The \"${var_name}\" variable must be defined.")
+    endif()
+    PATH_TO_ABSOLUTE(${var_name})
+endmacro()
 
-# Function to setup monitoring for JSON files using GitWatcher patterns
-function(SetupRuleMonitoring)
-  add_custom_target(td_rules
-      ALL
-      BYPRODUCTS
-          ${RULES_NCO_PATH}
-          ${RULE_KEYS_PATH}
-          ${RULES_STATE_FILE}
-      COMMENT "[TiberianDawnRules] Monitoring rule JSON files for changes..."
-      COMMAND
-          ${CMAKE_COMMAND}
-          -D_BUILD_TIME_TD_RULES=TRUE
-          -DRULES_STATE_FILE=${RULES_STATE_FILE}
-          -DRULES_PATH=${RULES_PATH}
-          -DRULES_NCO_PATH=${RULES_NCO_PATH}
-          -DRULE_KEYS_PATH=${RULE_KEYS_PATH}
-          -P "${CMAKE_CURRENT_LIST_FILE}")
-endfunction()
+CHECK_REQUIRED_VARIABLE(RULES_PATH)
+CHECK_REQUIRED_VARIABLE(RULES_NCO_TEMPLATE_PATH)
+CHECK_REQUIRED_VARIABLE(RULES_NCO_PATH)
+CHECK_REQUIRED_VARIABLE(RULE_KEYS_TEMPLATE_PATH)
+CHECK_REQUIRED_VARIABLE(RULE_KEYS_PATH)
 
 function(ResolveRuleValue _RULE_DEFAULT _RULE_VALUE)
   set(RULE_VALUE "${_RULE_DEFAULT}")
@@ -73,7 +94,7 @@ endfunction()
 function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPPER)
   string(JSON SECTION_NAME GET ${_RULES_JSON} section)
 
-  message(STATUS "[TiberianDawnRules] Rule section: ${SECTION_NAME}")
+  message(STATUS "[NcoRules] Rule section: ${SECTION_NAME}")
 
   string(TOUPPER ${SECTION_NAME} SECTION_NAME_UPPER)
 
@@ -84,41 +105,90 @@ endfunction()
 function(ParseRuleFilePath _RULE_FILE _RELATIVE_RULE_FILE)
   file(RELATIVE_PATH RELATIVE_RULE_FILE "${RULES_PATH}" "${_RULE_FILE}")
 
-  message(STATUS "[TiberianDawnRules] Processing rules file: ${RELATIVE_RULE_FILE}")
+  message(STATUS "[NcoRules] Processing rules file: ${RELATIVE_RULE_FILE}")
 
   set("${_RELATIVE_RULE_FILE}" ${RELATIVE_RULE_FILE} PARENT_SCOPE)
 endfunction()
 
-function(WatchRuleFileForChanges _RULE_FILE)
-  set_property(
-    DIRECTORY
-    APPEND
-    PROPERTY CMAKE_CONFIGURE_DEPENDS ${_RULE_FILE}
+function(SetupRuleCheckBeforeBuild)
+  if(_BUILD_TIME_TD_RULES)
+    # This prevents attempting to define this check when this file is called by
+    # the custom target we define below (think of it like a recursion check).
+    return()
+  endif()
+
+  message(STATUS "[NcoRules] Setting up pre-build Rules check")
+
+  # Custom target ensures any rule files made after configure and before build
+  # are detected and this cmake file is re-ran to regen code. Current variable
+  # context is inherited.
+  add_custom_target(
+    td_rules
+    ALL
+    BYPRODUCTS
+      ${RULES_NCO_PATH}
+      ${RULE_KEYS_PATH}
+      ${RULES_STATE_FILE}
+    COMMENT "[NcoRules] Checking rule JSON files for changes..."
+    COMMAND
+      ${CMAKE_COMMAND}
+      -D_BUILD_TIME_TD_RULES=TRUE
+      -DRULES_STATE_FILE=${RULES_STATE_FILE}
+      -DRULES_PATH=${RULES_PATH}
+      -DRULES_NCO_PATH=${RULES_NCO_PATH}
+      -DRULE_KEYS_PATH=${RULE_KEYS_PATH}
+      -P "${CMAKE_CURRENT_LIST_FILE}"
   )
 endfunction()
 
-function(ScanForRuleFiles _RULES_STATE_FILE _RULES_FILES _RULES_HASH _RULES_HAVE_CHANGED)
+function(WatchFileForChanges _FILE)
+  # ensures the fule is seen as a depencency of the configure phase
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY CMAKE_CONFIGURE_DEPENDS ${_FILE}
+  )
+endfunction()
+
+function(ScanForRuleFiles _RULES_STATE_FILE _RULES_FILES _RULES_HASH _FILES_HAVE_CHANGED)
+  message(STATUS "[NcoRules] Scanning rule files...")
+
   file(GLOB_RECURSE RULES_FILES "${RULES_PATH}/*.json")
 
   set(RULES_HASH "")
 
   foreach(RULE_FILE ${RULES_FILES})
+    # add hash of file contents to overall rules hash
     file(SHA256 "${RULE_FILE}" FILE_HASH)  
     string(SHA256 RULES_HASH "${RULES_HASH}${FILE_HASH}")
+
+    WatchFileForChanges("${RULE_FILE}")
   endforeach()
 
-  set(RULES_HAVE_CHANGED true)
+  # ensure templates are included in hash so code is generated if they change
+  file(SHA256 "${RULES_NCO_TEMPLATE_PATH}" FILE_HASH)  
+  string(SHA256 RULES_HASH "${RULES_HASH}${FILE_HASH}")
+
+  file(SHA256 "${RULE_KEYS_TEMPLATE_PATH}" FILE_HASH)  
+  string(SHA256 RULES_HASH "${RULES_HASH}${FILE_HASH}")
+
+  WatchFileForChanges("${RULES_NCO_TEMPLATE_PATH}")
+  WatchFileForChanges("${RULE_KEYS_TEMPLATE_PATH}")
+
+  # If a previous hash was calculated, and does not match the
+  # hash we just calculated, then flag that files have changed.
+  set(FILES_HAVE_CHANGED true)
 
   if(EXISTS "${_RULES_STATE_FILE}")
     file(READ "${_RULES_STATE_FILE}" OLD_RULES_HASH)
     if(OLD_RULES_HASH STREQUAL "${RULES_HASH}")
-        set(RULES_HAVE_CHANGED false)
+        set(FILES_HAVE_CHANGED false)
     endif()
   endif()
 
   set("${_RULES_FILES}" ${RULES_FILES} PARENT_SCOPE)
   set("${_RULES_HASH}" ${RULES_HASH} PARENT_SCOPE)
-  set("${_RULES_HAVE_CHANGED}" ${RULES_HAVE_CHANGED} PARENT_SCOPE)
+  set("${_FILES_HAVE_CHANGED}" ${FILES_HAVE_CHANGED} PARENT_SCOPE)
 endfunction()
 
 function(Main)
@@ -126,25 +196,16 @@ function(Main)
     set(RULES_STATE_FILE "${CMAKE_BINARY_DIR}/td-rules-hash")
   endif()
 
-  message(STATUS "[TiberianDawnRules] Detecting changes in Rules...")
-  ScanForRuleFiles("${RULES_STATE_FILE}" RULES_FILES RULES_HASH RULES_HAVE_CHANGED)
+  ScanForRuleFiles("${RULES_STATE_FILE}" RULES_FILES RULES_HASH FILES_HAVE_CHANGED)
 
-  if(EXISTS "${RULES_STATE_FILE}")
-    file(READ "${RULES_STATE_FILE}" OLD_RULES_HASH)
-    if(OLD_RULES_HASH STREQUAL "${RULES_HASH}")
-        message(STATUS "[TiberianDawnRules] No Rule changes detected")
+  if(NOT FILES_HAVE_CHANGED)
+    message(STATUS "[NcoRules] No Rule changes detected")
+    SetupRuleCheckBeforeBuild()
 
-        if(NOT _BUILD_TIME_TD_RULES)
-          message(STATUS "[TiberianDawnRules] Setting up Rules monitoring")
-
-          SetupRuleMonitoring()
-        endif()
-
-        return()
-    endif()
+    return()
   endif()
 
-  message(STATUS "[TiberianDawnRules] Generating Rules code...")
+  message(STATUS "[NcoRules] Generating Rules code...")
 
   set(RULE_JSON_SOURCES_COMMENTS, "")
   set(RULE_KEYS_DEFINES "")
@@ -153,8 +214,6 @@ function(Main)
   set(RULE_EXPORT_CODE "")
 
   foreach(RULE_FILE ${RULES_FILES})
-    WatchRuleFileForChanges("${RULE_FILE}")
-
     ParseRuleFilePath("${RULE_FILE}" RELATIVE_RULE_FILE)
 
     # load rule definitions from JSON file
@@ -162,7 +221,7 @@ function(Main)
 
     ExtractSectionNameFromJson("${RULES_JSON}" SECTION_NAME SECTION_NAME_UPPER)
 
-    message(STATUS "[TiberianDawnRules] Generating code for rule section: [${SECTION_NAME}]")
+    message(STATUS "[NcoRules] Generating code for rule section: [${SECTION_NAME}]")
   
     # rulekeys.h comment header
     string(APPEND RULE_JSON_SOURCES_COMMENTS " *   - rules/${RELATIVE_RULE_FILE}\n")
@@ -229,23 +288,20 @@ function(Main)
       endif()
 
       # rulekeys.h rule defines
-      message(STATUS "[TiberianDawnRules] Generating code for rule: [${SECTION_NAME}] => ${RULE_NAME}")
+      message(STATUS "[NcoRules] Generating code for rule: [${SECTION_NAME}] => ${RULE_NAME}")
       string(APPEND RULE_KEYS_DEFINES "\n#define ${RULE_DEFINE} \"${RULE_NAME}\"")
     endforeach()
   endforeach()
 
   # render templates
-  configure_file(${RULES_NCO_PATH}.in ${RULES_NCO_PATH} @ONLY)
-  configure_file(${RULE_KEYS_PATH}.in ${RULE_KEYS_PATH} @ONLY)
+  configure_file(${RULES_NCO_TEMPLATE_PATH} ${RULES_NCO_PATH} @ONLY)
+  configure_file(${RULE_KEYS_TEMPLATE_PATH} ${RULE_KEYS_PATH} @ONLY)
 
-  message(STATUS "[TiberianDawnRules] Saving Rules state")
+  # save rules hash to file, used in ScanForRuleFiles() to detect if changes happen
+  message(STATUS "[NcoRules] Saving Rules state")
   file(WRITE "${RULES_STATE_FILE}" "${RULES_HASH}")
 
-  if(NOT _BUILD_TIME_TD_RULES)
-    message(STATUS "[TiberianDawnRules] Setting up Rules monitoring")
-
-    SetupRuleMonitoring()
-  endif()
+  SetupRuleCheckBeforeBuild()
 endfunction()
 
 Main()

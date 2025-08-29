@@ -1,8 +1,11 @@
+# NcoRules params
 set(RULES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules")
 set(RULES_NCO_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules-nco.cpp")
 set(RULE_KEYS_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rulekeys.h")
+set(RULES_NCO_TEMPLATE_PATH "${RULES_NCO_PATH}.in")
+set(RULE_KEYS_TEMPLATE_PATH "${RULE_KEYS_PATH}.in")
 
-include(TiberianDawnRules)
+include(NcoRules)
 
 set(TIBDAWN_SRC
     aadata.cpp
