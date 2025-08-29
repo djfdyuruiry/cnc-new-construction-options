@@ -7291,7 +7291,7 @@ void HouseClass::Active_Remove(TechnoClass const* techno)
         return;
 
     if (techno->What_Am_I() == RTTI_BUILDING) {
-        int* fptr = Factory_Counter(((BuildingClass*)techno)->Class->ToBuild);
+        int* fptr = Factory_Counter((RTTIType)((BuildingClass*)techno)->Class->ToBuild);
         if (fptr != NULL) {
             *fptr = *fptr - 1;
         }
@@ -7319,7 +7319,7 @@ void HouseClass::Active_Add(TechnoClass const* techno)
         return;
 
     if (techno->What_Am_I() == RTTI_BUILDING) {
-        int* fptr = Factory_Counter(((BuildingClass*)techno)->Class->ToBuild);
+        int* fptr = Factory_Counter((RTTIType)((BuildingClass*)techno)->Class->ToBuild);
         if (fptr != NULL) {
             *fptr = *fptr + 1;
         }

@@ -160,6 +160,8 @@ public:
     */
     TCountDownTimerClass PlacementDelay;
 
+    TARGET RallyPoint;
+
     /*---------------------------------------------------------------------
     **	Constructors, Destructors, and overloaded operators.
     */
@@ -315,6 +317,11 @@ public:
     **	Dee-buggin' support.
     */
     int Validate(void) const;
+
+    bool Can_Have_Rally_Point() const;
+    virtual void Set_Unselected_By_Player(HouseClass * player = NULL) override;
+    TARGET Target_For_Rally_Point() const;
+    bool Rally_Unit(FootClass& unit);
 
 private:
     void Drop_Debris(TARGET source = TARGET_NONE);

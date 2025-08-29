@@ -163,6 +163,45 @@ int BuildingClass::Validate(void) const
 #define Validate()
 #endif
 
+
+ /***********************************************************************************************
+  * BuildingClass::Can_Have_Rally_Point -- Query if a building can have a rally point.          *
+  *                                                                                             *
+  *    This routine simply checks the buildings type against a hard coded list.                 *
+  *    of buildings that may set a rally point for produced units.                              *
+  *                                                                                             *
+  * INPUT:   None                                                                               *
+  *                                                                                             *
+  * OUTPUT:  True if true false if false                                                        *
+  *                                                                                             *
+  * WARNINGS:   none                                                                            *
+  *                                                                                             *
+  * HISTORY:                                                                                    *
+  *   07/06/2020 cfehunter : Created.                                                           *
+  *=============================================================================================*/
+bool BuildingClass::Can_Have_Rally_Point() const
+{
+	if (!this->IsOwnedByPlayer) {
+		return false;
+	}
+
+	auto rallyPointsEnabled = true;
+
+	return rallyPointsEnabled
+		&& Class->IsFactory
+		&& Class->ToBuild != FACTORY_TYPE_BUILDING; // rallying makes no sense for buildings
+}
+
+void BuildingClass::Set_Unselected_By_Player(HouseClass* player)
+{
+	TechnoClass::Set_Unselected_By_Player(player);
+
+	if (RallyPoint && Can_Have_Rally_Point())
+	{
+		Map.Flag_To_Redraw(true);
+	}
+}
+
 /***********************************************************************************************
  * BuildingClass::Receive_Message -- Handle an incoming message to the building.               *
  *                                                                                             *
@@ -403,8 +442,13 @@ RadioMessageType BuildingClass::Receive_Message(RadioClass* from, RadioMessageTy
         }
 
         TechnoClass::Receive_Message(from, message, param);
-        if (*this == STRUCT_WEAP || *this == STRUCT_AIRSTRIP || *this == STRUCT_REPAIR)
+
+        if (Can_Have_Rally_Point() && Target_Legal(RallyPoint)) {
+            Rally_Unit(static_cast<FootClass&>(*from));
+        } else if (*this == STRUCT_WEAP || *this == STRUCT_AIRSTRIP || *this == STRUCT_REPAIR) {
             return (RADIO_RUN_AWAY);
+        }
+
         return (RADIO_ROGER);
     }
 
@@ -686,6 +730,20 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
             CC_Draw_Shape(ObjectTypeClass::SelectShapes, SELECT_WRENCH, x, y, window, SHAPE_CENTER | SHAPE_WIN_REL);
         }
     }
+
+    if (Can_Have_Rally_Point() 
+        && Is_Selected_By_Player()
+        && Is_Owned_By_Player()
+        && RallyPoint
+        && Target_Legal(RallyPoint))
+	{
+		int startX, startY, endX, endY;
+
+		Map.Coord_To_Pixel(Center_Coord(), startX, startY);
+		Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
+
+		CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
+	}
 
     TechnoClass::Draw_It(x, y, window);
 }
@@ -1210,7 +1268,7 @@ void BuildingClass::AI(void)
                 **	production can never complete -- don't bother starting it.
                 */
                 if (House->IsStarted && House->Available_Money() > 10) {
-                    TechnoTypeClass const* techno = House->Suggest_New_Object(Class->ToBuild);
+                    TechnoTypeClass const* techno = House->Suggest_New_Object((RTTIType)Class->ToBuild);
 
                     /*
                     **	If a suitable object type was selected for production, then start
@@ -1764,6 +1822,14 @@ void BuildingClass::Look(bool)
     }
 }
 #endif
+
+TARGET BuildingClass::Target_For_Rally_Point() const
+{
+	return Target_Legal(RallyPoint) ? (
+			Is_Target_Cell(RallyPoint) ? ::As_Target(Map.Nearby_Location(As_Cell(RallyPoint))) : RallyPoint
+		)
+		: ::As_Target(Nearby_Location());
+}
 
 /***********************************************************************************************
  * BuildingClass::new -- Allocates a building object from building pool.                       *
@@ -5374,7 +5440,7 @@ void BuildingClass::Detach_All(bool all)
             TechnoClass* object = factory->Get_Object();
             IsInLimbo = true;
             if (object && !object->Techno_Type_Class()->Who_Can_Build_Me(true, false, House->Class->House)) {
-                House->Abandon_Production(Class->ToBuild);
+                House->Abandon_Production((RTTIType)Class->ToBuild);
             }
             IsInLimbo = false;
         }
@@ -5576,4 +5642,34 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
 	}
 
 	return(false);
+}
+
+/***********************************************************************************************
+ * BuildingClass::Rally_Unit -- Order a unit to the buildings rally point                      *
+ *                                                                                             *
+ *    This routine will attempt to order a unit to move the the buildings rally point.         *
+ *    If the building has a rally point, and the unit should be rallyed.                       *
+ *                                                                                             *
+ * INPUT:   unit - unit to rally                                                               *
+ *                                                                                             *
+ * OUTPUT:  true if successful                                                                 *
+ *                                                                                             *
+ * WARNINGS: none                                                                              *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   14/06/2020 cfehunter : Created.                                                           *
+ *=============================================================================================*/
+bool BuildingClass::Rally_Unit(FootClass& unit)
+{
+    if (unit.What_Am_I() != RTTI_UNIT || !static_cast<const UnitClass&>(unit).Class->IsToHarvest) {
+        const TARGET rally_target = Target_For_Rally_Point();
+
+        //Make sure units dont rally to themselves. Only a problem for repair/reload pads
+        auto move_target = unit.As_Target() != rally_target ? rally_target : ::As_Target(Nearby_Location());
+
+        return Target_Legal(move_target) && 
+            Transmit_Message(RADIO_MOVE_HERE, move_target, &unit) == RADIO_ROGER;
+    }
+
+	return false;
 }

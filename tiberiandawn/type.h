@@ -679,7 +679,7 @@ public:
     **	This flag specifies the type of object this factory building can "produce". For non
     **	factory buildings, this value will be RTTI_NONE.
     */
-    RTTIType ToBuild;
+    FactoryType ToBuild;
 
     /*
     **	For building that produce ground units (infantry and vehicles), there is a default
@@ -794,7 +794,7 @@ public:
                       bool is_buildable,
                       bool is_crew,
                       bool is_sturdy,
-                      RTTIType tobuild,
+                      FactoryType tobuild,
                       DirType sframe,
                       unsigned short strength,
                       int sightrange,

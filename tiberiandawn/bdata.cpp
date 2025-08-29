@@ -186,7 +186,7 @@ static BuildingTypeClass const ClassTemple(STRUCT_TEMPLE,
                                            true,            // Can it be manufactured by the player?
                                            true,            // Does it contain a crew?
                                            false,           // Does building care less if placed on concrete?
-                                           RTTI_NONE,       // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            DIR_N,           // Starting idle frame to match construction.
                                            1000,            // STRNTH:		Full strength of building.
                                            4,               // SIGHTRANGE:	Range of sighting.
@@ -237,7 +237,7 @@ static BuildingTypeClass const ClassEye(STRUCT_EYE,
                                         true,            // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         (DirType)160,    // Starting idle frame to match construction.
                                         500,             // STRNTH:		Full strength of building.
                                         10,              // SIGHTRANGE:	Range of sighting.
@@ -290,7 +290,7 @@ static BuildingTypeClass const
                 true,          // Can it be manufactured by the player?
                 true,          // Does it contain a crew?
                 false,         // Does building care less if placed on concrete?
-                RTTI_UNITTYPE, // The object type produced at this factory.
+                FACTORY_TYPE_UNIT, // The object type produced at this factory.
                 DIR_N,         // Starting idle frame to match construction.
 #ifdef ADVANCED
                 500, // STRNTH:		Full strength of building.
@@ -344,7 +344,7 @@ static BuildingTypeClass const ClassGTower(STRUCT_GTOWER,
                                            true,             // Can it be manufactured by the player?
                                            true,             // Does it contain a crew?
                                            false,            // Does building care less if placed on concrete?
-                                           RTTI_NONE,        // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            DIR_N,            // Starting idle frame to match construction.
                                            200,              // STRNTH:		Full strength of building.
                                            3,                // SIGHTRANGE:	Range of sighting.
@@ -396,7 +396,7 @@ static BuildingTypeClass const ClassATower(STRUCT_ATOWER,
                                            true,             // Can it be manufactured by the player?
                                            true,             // Does it contain a crew?
                                            false,            // Does building care less if placed on concrete?
-                                           RTTI_NONE,        // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            DIR_N,            // Starting idle frame to match construction.
                                            300,              // STRNTH:		Full strength of building.
                                            4,                // SIGHTRANGE:	Range of sighting.
@@ -448,7 +448,7 @@ static BuildingTypeClass const ClassObelisk(STRUCT_OBELISK,
                                             true,            // Can it be manufactured by the player?
                                             true,            // Does it contain a crew?
                                             false,           // Does building care less if placed on concrete?
-                                            RTTI_NONE,       // The object type produced at this factory.
+                                            FACTORY_TYPE_NONE, // The object type produced at this factory.
                                             DIR_N,           // Starting idle frame to match construction.
                                             200,             // STRNTH:		Full strength of building.
                                             5,               // SIGHTRANGE:	Range of sighting.
@@ -499,7 +499,7 @@ static BuildingTypeClass const ClassTurret(STRUCT_TURRET,
                                            true,             // Can it be manufactured by the player?
                                            true,             // Does it contain a crew?
                                            false,            // Does building care less if placed on concrete?
-                                           RTTI_NONE,        // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            (DirType)208,     // Starting idle frame to match construction.
                                            200,              // STRNTH:		Full strength of building.
                                            5,                // SIGHTRANGE:	Range of sighting.
@@ -558,7 +558,7 @@ static BuildingTypeClass const ClassConst(STRUCT_CONST,
                                           false,             // Can it be manufactured by the player?
                                           true,              // Does it contain a crew?
                                           false,             // Does building care less if placed on concrete?
-                                          RTTI_BUILDINGTYPE, // The object type produced at this factory.
+                                          FACTORY_TYPE_BUILDING, // The object type produced at this factory.
                                           DIR_N,             // Starting idle frame to match construction.
                                           400,               // STRNTH:		Full strength of building.
                                           3,                 // SIGHTRANGE:	Range of sighting.
@@ -610,7 +610,7 @@ static BuildingTypeClass const
                   true,            // Can it be manufactured by the player?
                   true,            // Does it contain a crew?
                   false,           // Does building care less if placed on concrete?
-                  RTTI_NONE,       // The object type produced at this factory.
+                  FACTORY_TYPE_NONE, // The object type produced at this factory.
                   DIR_N,           // Starting idle frame to match construction.
                   450,             // STRNTH:		Full strength of building.
                   4,               // SIGHTRANGE:	Range of sighting.
@@ -661,7 +661,7 @@ static BuildingTypeClass const
                  true,             // Can it be manufactured by the player?
                  false,            // Does it contain a crew?
                  false,            // Does building care less if placed on concrete?
-                 RTTI_NONE,        // The object type produced at this factory.
+                 FACTORY_TYPE_NONE, // The object type produced at this factory.
                  DIR_N,            // Starting idle frame to match construction.
                  150,              // STRNTH:		Full strength of building.
                  2,                // SIGHTRANGE:	Range of sighting.
@@ -712,7 +712,7 @@ static BuildingTypeClass const ClassHelipad(STRUCT_HELIPAD,
                                             true,              // Can it be manufactured by the player?
                                             false,             // Does it contain a crew?
                                             false,             // Does building care less if placed on concrete?
-                                            RTTI_AIRCRAFTTYPE, // The object type produced at this factory.
+                                            FACTORY_TYPE_AIRCRAFT, // The object type produced at this factory.
                                             DIR_N,             // Starting idle frame to match construction.
                                             400,               // STRNTH:		Full strength of building.
                                             3,                 // SIGHTRANGE:	Range of sighting.
@@ -763,7 +763,7 @@ static BuildingTypeClass const ClassCommand(STRUCT_RADAR,
                                             true,             // Can it be manufactured by the player?
                                             true,             // Does it contain a crew?
                                             false,            // Does building care less if placed on concrete?
-                                            RTTI_NONE,        // The object type produced at this factory.
+                                            FACTORY_TYPE_NONE, // The object type produced at this factory.
                                             (DirType)160,     // Starting idle frame to match construction.
                                             500,              // STRNTH:		Full strength of building.
                                             10,               // SIGHTRANGE:	Range of sighting.
@@ -814,7 +814,7 @@ static BuildingTypeClass const ClassSAM(STRUCT_SAM,
                                         true,             // Can it be manufactured by the player?
                                         false,            // Does it contain a crew?
                                         false,            // Does building care less if placed on concrete?
-                                        RTTI_NONE,        // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,            // Starting idle frame to match construction.
                                         200,              // STRNTH:		Full strength of building.
                                         3,                // SIGHTRANGE:	Range of sighting.
@@ -865,7 +865,7 @@ static BuildingTypeClass const ClassAirStrip(STRUCT_AIRSTRIP,
                                              true,             // Can it be manufactured by the player?
                                              true,             // Does it contain a crew?
                                              false,            // Does building care less if placed on concrete?
-                                             RTTI_UNITTYPE,    // The object type produced at this factory.
+                                             FACTORY_TYPE_UNIT, // The object type produced at this factory.
                                              DIR_N,            // Starting idle frame to match construction.
                                              500,              // STRNTH:		Full strength of building.
                                              5,                // SIGHTRANGE:	Range of sighting.
@@ -916,7 +916,7 @@ static BuildingTypeClass const ClassPower(STRUCT_POWER,
                                           true,            // Can it be manufactured by the player?
                                           true,            // Does it contain a crew?
                                           false,           // Does building care less if placed on concrete?
-                                          RTTI_NONE,       // The object type produced at this factory.
+                                          FACTORY_TYPE_NONE, // The object type produced at this factory.
                                           DIR_N,           // Starting idle frame to match construction.
                                           200,             // STRNTH:		Full strength of building.
                                           2,               // SIGHTRANGE:	Range of sighting.
@@ -968,7 +968,7 @@ static BuildingTypeClass const
                        true,               // Can it be manufactured by the player?
                        true,               // Does it contain a crew?
                        false,              // Does building care less if placed on concrete?
-                       RTTI_NONE,          // The object type produced at this factory.
+                       FACTORY_TYPE_NONE, // The object type produced at this factory.
                        DIR_N,              // Starting idle frame to match construction.
                        300,                // STRNTH:		Full strength of building.
                        2,                  // SIGHTRANGE:	Range of sighting.
@@ -1018,7 +1018,7 @@ static BuildingTypeClass const ClassHospital(STRUCT_HOSPITAL,
                                              true,             // Can it be manufactured by the player?
                                              true,             // Does it contain a crew?
                                              false,            // Does building care less if placed on concrete?
-                                             RTTI_NONE,        // The object type produced at this factory.
+                                             FACTORY_TYPE_NONE, // The object type produced at this factory.
                                              DIR_N,            // Starting idle frame to match construction.
                                              200,              // STRNTH:		Full strength of building.
                                              2,                // SIGHTRANGE:	Range of sighting.
@@ -1070,7 +1070,7 @@ static BuildingTypeClass const ClassBioLab(STRUCT_BIO_LAB,
                                            true,             // Can it be manufactured by the player?
                                            true,             // Does it contain a crew?
                                            false,            // Does building care less if placed on concrete?
-                                           RTTI_NONE,        // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            DIR_N,            // Starting idle frame to match construction.
                                            300,              // STRNTH:		Full strength of building.
                                            2,                // SIGHTRANGE:	Range of sighting.
@@ -1122,7 +1122,7 @@ static BuildingTypeClass const
                   true,              // Can it be manufactured by the player?
                   true,              // Does it contain a crew?
                   false,             // Does building care less if placed on concrete?
-                  RTTI_INFANTRYTYPE, // The object type produced at this factory.
+                  FACTORY_TYPE_INFANTRY, // The object type produced at this factory.
                   DIR_N,             // Starting idle frame to match construction.
                   400,               // STRNTH:		Full strength of building.
                   3,                 // SIGHTRANGE:	Range of sighting.
@@ -1172,7 +1172,7 @@ static BuildingTypeClass const ClassHand(STRUCT_HAND,
                                          true,              // Can it be manufactured by the player?
                                          true,              // Does it contain a crew?
                                          false,             // Does building care less if placed on concrete?
-                                         RTTI_INFANTRYTYPE, // The object type produced at this factory.
+                                         FACTORY_TYPE_INFANTRY, // The object type produced at this factory.
                                          DIR_N,             // Starting idle frame to match construction.
                                          400,               // STRNTH:		Full strength of building.
                                          3,                 // SIGHTRANGE:	Range of sighting.
@@ -1223,7 +1223,7 @@ static BuildingTypeClass const ClassTanker(STRUCT_TANKER,
                                            false,           // Can it be manufactured by the player?
                                            true,            // Does it contain a crew?
                                            true,            // Does building care less if placed on concrete?
-                                           RTTI_NONE,       // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            DIR_N,           // Starting idle frame to match construction.
                                            100,             // STRNTH:		Full strength of building.
                                            2,               // SIGHTRANGE:	Range of sighting.
@@ -1274,7 +1274,7 @@ static BuildingTypeClass const ClassRepair(STRUCT_REPAIR,
                                            true,            // Can it be manufactured by the player?
                                            true,            // Does it contain a crew?
                                            false,           // Does building care less if placed on concrete?
-                                           RTTI_NONE,       // The object type produced at this factory.
+                                           FACTORY_TYPE_NONE, // The object type produced at this factory.
                                            DIR_N,           // Starting idle frame to match construction.
                                            400,             // STRNTH:		Full strength of building.
                                            3,               // SIGHTRANGE:	Range of sighting.
@@ -1327,7 +1327,7 @@ static BuildingTypeClass const ClassRoad(STRUCT_ROAD,
                                          true,            // Can it be manufactured by the player?
                                          false,           // Does it contain a crew?
                                          true,            // Does building care less if placed on concrete?
-                                         RTTI_NONE,       // The object type produced at this factory.
+                                         FACTORY_TYPE_NONE, // The object type produced at this factory.
                                          DIR_N,           // Starting idle frame to match construction.
                                          1,               // STRNTH:		Full strength of building.
                                          0,               // SIGHTRANGE:	Range of sighting.
@@ -1379,7 +1379,7 @@ static BuildingTypeClass const ClassV01(STRUCT_V01,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1430,7 +1430,7 @@ static BuildingTypeClass const ClassV02(STRUCT_V02,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1481,7 +1481,7 @@ static BuildingTypeClass const ClassV03(STRUCT_V03,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1532,7 +1532,7 @@ static BuildingTypeClass const ClassV04(STRUCT_V04,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1583,7 +1583,7 @@ static BuildingTypeClass const ClassV05(STRUCT_V05,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1634,7 +1634,7 @@ static BuildingTypeClass const ClassV06(STRUCT_V06,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1685,7 +1685,7 @@ static BuildingTypeClass const ClassV07(STRUCT_V07,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1736,7 +1736,7 @@ static BuildingTypeClass const ClassV08(STRUCT_V08,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1787,7 +1787,7 @@ static BuildingTypeClass const ClassV09(STRUCT_V09,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1838,7 +1838,7 @@ static BuildingTypeClass const ClassV10(STRUCT_V10,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1889,7 +1889,7 @@ static BuildingTypeClass const ClassV11(STRUCT_V11,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1940,7 +1940,7 @@ static BuildingTypeClass const ClassV12(STRUCT_V12,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -1991,7 +1991,7 @@ static BuildingTypeClass const ClassV13(STRUCT_V13,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -2042,7 +2042,7 @@ static BuildingTypeClass const ClassV14(STRUCT_V14,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -2093,7 +2093,7 @@ static BuildingTypeClass const ClassV15(STRUCT_V15,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -2144,7 +2144,7 @@ static BuildingTypeClass const ClassV16(STRUCT_V16,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -2195,7 +2195,7 @@ static BuildingTypeClass const ClassV17(STRUCT_V17,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -2246,7 +2246,7 @@ static BuildingTypeClass const ClassV18(STRUCT_V18,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         1,               // SIGHTRANGE:	Range of sighting.
@@ -2297,7 +2297,7 @@ static BuildingTypeClass const ClassV19(STRUCT_PUMP,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2348,7 +2348,7 @@ static BuildingTypeClass const ClassV20(STRUCT_V20,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2399,7 +2399,7 @@ static BuildingTypeClass const ClassV21(STRUCT_V21,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2450,7 +2450,7 @@ static BuildingTypeClass const ClassV22(STRUCT_V22,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2501,7 +2501,7 @@ static BuildingTypeClass const ClassV23(STRUCT_V23,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2552,7 +2552,7 @@ static BuildingTypeClass const ClassV24(STRUCT_V24,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2603,7 +2603,7 @@ static BuildingTypeClass const ClassV25(STRUCT_V25,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2654,7 +2654,7 @@ static BuildingTypeClass const ClassV26(STRUCT_V26,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2705,7 +2705,7 @@ static BuildingTypeClass const ClassV27(STRUCT_V27,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2756,7 +2756,7 @@ static BuildingTypeClass const ClassV28(STRUCT_V28,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2807,7 +2807,7 @@ static BuildingTypeClass const ClassV29(STRUCT_V29,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2858,7 +2858,7 @@ static BuildingTypeClass const ClassV30(STRUCT_V30,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2909,7 +2909,7 @@ static BuildingTypeClass const ClassV31(STRUCT_V31,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -2960,7 +2960,7 @@ static BuildingTypeClass const ClassV32(STRUCT_V32,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -3011,7 +3011,7 @@ static BuildingTypeClass const ClassV33(STRUCT_V33,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -3062,7 +3062,7 @@ static BuildingTypeClass const ClassV34(STRUCT_V34,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -3113,7 +3113,7 @@ static BuildingTypeClass const ClassV35(STRUCT_V35,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -3164,7 +3164,7 @@ static BuildingTypeClass const ClassV36(STRUCT_V36,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         200,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -3214,7 +3214,7 @@ static BuildingTypeClass const ClassV37(STRUCT_V37,
                                         false,           // Can it be manufactured by the player?
                                         true,            // Does it contain a crew?
                                         false,           // Does building care less if placed on concrete?
-                                        RTTI_NONE,       // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,           // Starting idle frame to match construction.
                                         300,             // STRNTH:		Full strength of building.
                                         2,               // SIGHTRANGE:	Range of sighting.
@@ -3264,7 +3264,7 @@ static BuildingTypeClass const ClassMission(STRUCT_MISSION,
                                             false,           // Can it be manufactured by the player?
                                             true,            // Does it contain a crew?
                                             false,           // Does building care less if placed on concrete?
-                                            RTTI_NONE,       // The object type produced at this factory.
+                                            FACTORY_TYPE_NONE, // The object type produced at this factory.
                                             DIR_N,           // Starting idle frame to match construction.
                                             200,             // STRNTH:		Full strength of building.
                                             2,               // SIGHTRANGE:	Range of sighting.
@@ -3317,7 +3317,7 @@ static BuildingTypeClass const Sandbag(STRUCT_SANDBAG_WALL,
                                        true,             // Can it be manufactured by the player?
                                        false,            // Does it contain a crew?
                                        true,             // Does building care less if placed on concrete?
-                                       RTTI_NONE,        // The object type produced at this factory.
+                                       FACTORY_TYPE_NONE, // The object type produced at this factory.
                                        DIR_N,            // Starting idle frame to match construction.
                                        1,                // STRNTH:		Full strength of building.
                                        0,                // SIGHTRANGE:	Range of sighting.
@@ -3368,7 +3368,7 @@ static BuildingTypeClass const Cyclone(STRUCT_CYCLONE_WALL,
                                        true,             // Can it be manufactured by the player?
                                        false,            // Does it contain a crew?
                                        true,             // Does building care less if placed on concrete?
-                                       RTTI_NONE,        // The object type produced at this factory.
+                                       FACTORY_TYPE_NONE, // The object type produced at this factory.
                                        DIR_N,            // Starting idle frame to match construction.
                                        1,                // STRNTH:		Full strength of building.
                                        0,                // SIGHTRANGE:	Range of sighting.
@@ -3419,7 +3419,7 @@ static BuildingTypeClass const Brick(STRUCT_BRICK_WALL,
                                      true,            // Can it be manufactured by the player?
                                      false,           // Does it contain a crew?
                                      true,            // Does building care less if placed on concrete?
-                                     RTTI_NONE,       // The object type produced at this factory.
+                                     FACTORY_TYPE_NONE, // The object type produced at this factory.
                                      DIR_N,           // Starting idle frame to match construction.
                                      1,               // STRNTH:		Full strength of building.
                                      0,               // SIGHTRANGE:	Range of sighting.
@@ -3470,7 +3470,7 @@ static BuildingTypeClass const Barbwire(STRUCT_BARBWIRE_WALL,
                                         true,              // Can it be manufactured by the player?
                                         false,             // Does it contain a crew?
                                         true,              // Does building care less if placed on concrete?
-                                        RTTI_NONE,         // The object type produced at this factory.
+                                        FACTORY_TYPE_NONE, // The object type produced at this factory.
                                         DIR_N,             // Starting idle frame to match construction.
                                         1,                 // STRNTH:		Full strength of building.
                                         0,                 // SIGHTRANGE:	Range of sighting.
@@ -3521,7 +3521,7 @@ static BuildingTypeClass const Wood(STRUCT_WOOD_WALL,
                                     true,            // Can it be manufactured by the player?
                                     false,           // Does it contain a crew?
                                     true,            // Does building care less if placed on concrete?
-                                    RTTI_NONE,       // The object type produced at this factory.
+                                    FACTORY_TYPE_NONE, // The object type produced at this factory.
                                     DIR_N,           // Starting idle frame to match construction.
                                     1,               // STRNTH:		Full strength of building.
                                     0,               // SIGHTRANGE:	Range of sighting.
@@ -3660,7 +3660,7 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                                      bool is_buildable,
                                      bool is_crew,
                                      bool is_sturdy,
-                                     RTTIType tobuild,
+                                     FactoryType tobuild,
                                      DirType sframe,
                                      unsigned short strength,
                                      int sightrange,
