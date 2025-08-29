@@ -1,10 +1,10 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Misc",
-  "comment": "Rules that don't really fit into one category, covers a wide range of behaviour.\n\n- Beta Features (Bibs, 3 point turns)\n- Allow using Skirmish/Multiplayer options in single player\n- Building behaviours",
+  "comment": "Rules that don't really fit into one category, covers a wide range of behavior.\n\n- Beta Features (Bibs, 3 point turns)\n- Allow using Skirmish/Multiplayer options in single player\n- Building behaviors",
   "rules": [
     {
-      "name": "SmartDefence",
+      "name": "SmartDefense",
       "type": "bool",
       "default": false,
       "comment": "Human controlled units retaliate when they come under fire and they will also try to crush infantry if possible."
@@ -37,7 +37,7 @@
       "name": "ShowBibsOnBuildings",
       "type": "bool",
       "default": false,
-      "comment": "Show little dirt bibs on buildings (if turned off, overrides any rules for indiviual buildings)"
+      "comment": "Show little dirt bibs on buildings (if turned off, overrides any rules for individual buildings)"
     },
     {
       "name": "ShowCivilianBuildingNames",
@@ -58,7 +58,7 @@
       "comment": "Remove the nuclear superpower after 1 shot"
     },
     {
-      "name": "HelipadsAndAircraftBoughtSeperately",
+      "name": "HelipadsAndAircraftBoughtSeparately",
       "type": "bool",
       "default": false,
       "comment": "Helipads do not come with a chopper, they are also cheaper."
