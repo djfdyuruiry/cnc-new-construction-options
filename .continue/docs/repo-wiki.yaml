@@ -1,6 +1,0 @@
-name: repo-wiki
-version: 0.0.1
-schema: v1
-docs:
-  - name: New Contruction Options (NCO) Wiki
-    startUrl: https://github.com/djfdyuruiry/cnc-new-construction-options/wiki

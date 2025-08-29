@@ -1,6 +1,0 @@
-name: awesome-cpp
-version: 0.0.1
-schema: v1
-docs:
-  - name: Awesome C++ - A curated list of awesome C++ (or C) frameworks, libraries and resources
-    startUrl: https://raw.githubusercontent.com/fffaraz/awesome-cpp/refs/heads/master/README.md

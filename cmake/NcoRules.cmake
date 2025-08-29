@@ -138,22 +138,22 @@ function(SetupRuleCheckBeforeBuild)
       ${RULES_NCO_PATH}
       ${RULE_KEYS_PATH}
       ${RULES_STATE_FILE}
-    COMMENT "[NcoRules] Checking rule JSON files for changes..."
+    COMMENT "[NcoRules] Checking rule files for changes..."
     COMMAND
       ${CMAKE_COMMAND}
-      -D_BUILD_TIME_TD_RULES=TRUE
-      -DRULES_STATE_FILE=${RULES_STATE_FILE}
       -DRULES_PATH=${RULES_PATH}
       -DRULES_NCO_TEMPLATE_PATH=${RULES_NCO_TEMPLATE_PATH}
       -DRULES_NCO_PATH=${RULES_NCO_PATH}
       -DRULE_KEYS_TEMPLATE_PATH=${RULE_KEYS_TEMPLATE_PATH}
       -DRULE_KEYS_PATH=${RULE_KEYS_PATH}
+      -DRULES_STATE_FILE=${RULES_STATE_FILE}
+      -D_BUILD_TIME_TD_RULES=TRUE
       -P "${CMAKE_CURRENT_LIST_FILE}"
   )
 endfunction()
 
 function(WatchFileForChanges _FILE)
-  # ensures the fule is seen as a depencency of the configure phase
+  # ensures the file is seen as a depencency of the configure phase
   set_property(
     DIRECTORY
     APPEND
