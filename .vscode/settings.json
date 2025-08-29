@@ -115,5 +115,23 @@
     "cerrno": "cpp",
     "climits": "cpp",
     "*.in": "cpp"
-  }
+  },
+  "cSpell.words": [
+    "Avalonia",
+    "CCINI",
+    "CCMAP",
+    "endfor",
+    "mobius",
+    "modders",
+    "MSVC",
+    "Nyergud's",
+    "Nyerguds",
+    "Oddysee",
+    "redalert",
+    "vanillara",
+    "vanillatd",
+    "VCPKG",
+    "Westwood",
+    "xypand"
+  ]
 }
