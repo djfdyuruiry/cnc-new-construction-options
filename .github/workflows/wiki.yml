@@ -8,6 +8,8 @@ on:
     paths: &change-paths
       - .github/workflows/wiki.yml
       - wiki/**
+      - tiberiandawn/rules/**
+      - scripts/99.generate-tiberian-dawn-rules-doc.py
 
   # wiki should only be deployed from main
   push:
@@ -30,13 +32,7 @@ jobs:
 
       - name: Render Wiki Templates
         run: |
-          python -m venv .venv
-          . .venv/bin/activate
-
-          python -m ensurepip
-          pip install jinja2
-
-          python scripts/99.generate-tiberian-dawn-rules-doc.py
+          scripts/generate-td-rules-doc/generate.sh
 
           # ensure normally ignored generated files get pushed to wiki
           rm -fv wiki/.gitignore
