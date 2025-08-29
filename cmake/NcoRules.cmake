@@ -39,10 +39,9 @@
 #
 ##
 macro(CHECK_REQUIRED_VARIABLE var_name)
-    if(NOT DEFINED ${var_name})
-        message(FATAL_ERROR "[NcoRules] The \"${var_name}\" variable must be defined.")
-    endif()
-    PATH_TO_ABSOLUTE(${var_name})
+  if(NOT DEFINED ${var_name})
+    message(FATAL_ERROR "[NcoRules] The \"${var_name}\" variable must be defined.")
+  endif()
 endmacro()
 
 CHECK_REQUIRED_VARIABLE(RULES_PATH)
