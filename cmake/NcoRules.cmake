@@ -258,8 +258,8 @@ function(Main)
                                  "        c")
     string(APPEND RULE_EXPORT_CODE "${SECTION_LEAD_IN}")
 
-
     string(JSON RULE_COUNT LENGTH "${RULES_JSON}" rules)
+
     MATH(EXPR RULE_COUNT "${RULE_COUNT}-1")
 
     foreach(RULE_INDEX RANGE ${RULE_COUNT})
