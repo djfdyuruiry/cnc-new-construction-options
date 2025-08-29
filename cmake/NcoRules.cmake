@@ -13,6 +13,16 @@
 # This script reads all JSON files in ${RULES_PATH}, one JSON file per rules.ini section. The rules in each file
 # are used to generate const strings, load from INI code and export to INI code using common/rulesections.h types.
 #
+# Expected structure of JSON files is defined in the schema file 'nco-rules-json-schema.json', use this in your files
+# to validate them in VSCode etc.:
+#
+#   ```json
+#   {
+#     "$schema": "../../cmake/nco-rules-json-schema.json",
+#     "section": "My Section"
+#   }
+#   ```
+#
 # Generates four seperate blocks of C++ code and provides them as variables to the above templates:
 #
 #   * RULE_JSON_SOURCES_COMMENTS - Multiline comment lines containing a list of JSON files used to generated rules
