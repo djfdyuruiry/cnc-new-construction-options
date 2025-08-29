@@ -25,7 +25,7 @@
       "name": "GiveAttackersAnAdvantage",
       "type": "bool",
       "default": false,
-      "comment": "By default, defending units take less damage than attacking ones - setting this to true disables that behaviour."
+      "comment": "By default, defending units take less damage than attacking ones - setting this to true disables that behavior."
     },
     {
       "name": "SpeedySuperweapons",

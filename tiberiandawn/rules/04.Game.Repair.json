@@ -1,7 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Repair",
-  "comment": "Repair behaviour (Units and Aircraft).",
+  "comment": "Repair behavior (Units and Aircraft).",
   "rules": [
     {
       "name": "UnitRepairFactor",

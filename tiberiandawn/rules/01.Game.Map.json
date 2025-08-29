@@ -1,7 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Map",
-  "comment": "Building placement rules and tiberium behaviour.",
+  "comment": "Building placement rules and tiberium behavior.",
   "rules": [
     {
       "name": "MaxBuildDistance",

@@ -115,5 +115,27 @@
     "cerrno": "cpp",
     "climits": "cpp",
     "*.in": "cpp"
-  }
+  },
+  "cSpell.words": [
+    "Avalonia",
+    "CCINI",
+    "CCMAP",
+    "endfor",
+    "mobius",
+    "modders",
+    "MSVC",
+    "Nyergud's",
+    "Nyerguds",
+    "Oddysee",
+    "redalert",
+    "Redeployable",
+    "Superweapons",
+    "tiberium",
+    "vanillara",
+    "vanillatd",
+    "VCPKG",
+    "Visceroids",
+    "Westwood",
+    "xypand"
+  ]
 }
