@@ -327,6 +327,8 @@ private:
     void Drop_Debris(TARGET source = TARGET_NONE);
     virtual BulletClass* Fire_At(TARGET target, int which);
 
+    void Player_Set_Rally_Point(TARGET target);
+
     /*
     ** Some additional padding in case we need to add data to the class and maintain backwards compatibility for
     *save/load

@@ -185,9 +185,9 @@ bool BuildingClass::Can_Have_Rally_Point() const
 		return false;
 	}
 
-	auto rallyPointsEnabled = true;
+	auto rally_points_enabled = Get_Bool_Rule(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
 
-	return rallyPointsEnabled
+	return rally_points_enabled
 		&& Class->IsFactory
 		&& Class->ToBuild != FACTORY_TYPE_BUILDING; // rallying makes no sense for buildings
 }
@@ -742,6 +742,7 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
 		Map.Coord_To_Pixel(Center_Coord(), startX, startY);
 		Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
 
+        // BUG: Line flickers if it intercepts certain objects
 		CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
 	}
 
@@ -926,6 +927,11 @@ BulletClass* BuildingClass::Fire_At(TARGET target, int which)
     }
 
     return (bullet);
+}
+
+void BuildingClass::Player_Set_Rally_Point(TARGET target)
+{
+    OutList.Add(EventClass(EventClass::SET_RALLY, As_Target(), target));
 }
 
 /***********************************************************************************************
@@ -2148,6 +2154,10 @@ void BuildingClass::Active_Click_With(ActionType action, ObjectClass* object)
     if (action == ACTION_TOGGLE_PRIMARY && Class->IsFactory) {
         OutList.Add(EventClass(EventClass::PRIMARY, As_Target()));
     }
+
+	if (action == ACTION_MOVE && Can_Have_Rally_Point()) {
+		Player_Set_Rally_Point(object->As_Target());
+	}
 }
 
 /***********************************************************************************************
@@ -2169,18 +2179,25 @@ void BuildingClass::Active_Click_With(ActionType action, ObjectClass* object)
  *=============================================================================================*/
 void BuildingClass::Active_Click_With(ActionType action, CELL cell)
 {
-    Validate();
-    if (action == ACTION_ATTACK) {
-        Player_Assign_Mission(MISSION_ATTACK, ::As_Target(cell));
-    }
+	Validate();
+	if (action == ACTION_ATTACK) {
+		Player_Assign_Mission(MISSION_ATTACK, ::As_Target(cell));
+	}
 
-    if (action == ACTION_MOVE && *this == STRUCT_CONST) {
-        OutList.Add(EventClass(EventClass::ARCHIVE, As_Target(), ::As_Target(cell)));
-        OutList.Add(EventClass(EventClass::SELL, As_Target()));
+	if (action != ACTION_MOVE) {
+		return;
+	}
 
-        COORDINATE coord = Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y());
-        OutList.Add(EventClass(ANIM_MOVE_FLASH, PlayerPtr->Class->House, coord, 1 << PlayerPtr->Class->House));
-    }
+	if (*this == STRUCT_CONST) {
+		OutList.Add(EventClass(EventClass::ARCHIVE, As_Target(), ::As_Target(cell)));
+		OutList.Add(EventClass(EventClass::SELL, As_Target()));
+
+		COORDINATE coord = Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y());
+		OutList.Add(EventClass(ANIM_MOVE_FLASH, PlayerPtr->Class->House, coord, 1 << PlayerPtr->Class->House));
+	}
+	else if (Can_Have_Rally_Point()) {
+		Player_Set_Rally_Point(::As_Target(cell));
+	}
 }
 
 /***********************************************************************************************
@@ -2201,12 +2218,17 @@ void BuildingClass::Active_Click_With(ActionType action, CELL cell)
  *=============================================================================================*/
 void BuildingClass::Assign_Target(TARGET target)
 {
-    Validate();
-    if (*this != STRUCT_SAM && !In_Range(target, 0)) {
-        target = TARGET_NONE;
-    }
+	Validate();
+	if (*this != STRUCT_SAM && !In_Range(target, 0)) {
+		target = TARGET_NONE;
+	}
+	
+	if (Can_Have_Rally_Point() && Target_Legal(target)) {
+		RallyPoint = target;
+		return;
+	}
 
-    TechnoClass::Assign_Target(target);
+	TechnoClass::Assign_Target(target);
 }
 
 /***********************************************************************************************
@@ -3249,22 +3271,22 @@ ActionType BuildingClass::What_Action(ObjectClass* object) const
  *=============================================================================================*/
 ActionType BuildingClass::What_Action(CELL cell) const
 {
-    Validate();
-    ActionType action = TechnoClass::What_Action(cell);
+	Validate();
+	ActionType action = TechnoClass::What_Action(cell);
 
-    if (action == ACTION_MOVE && (*this != STRUCT_CONST || !Special.IsMCVDeploy)) {
-        action = ACTION_NONE;
-    }
+	if (action == ACTION_MOVE && !Can_Have_Rally_Point() && (*this != STRUCT_CONST || !Special.IsMCVDeploy)) {
+		action = ACTION_NONE;
+	}
 
-    /*
-    **	Don't allow targeting of SAM sites, even if the CTRL key
-    **	is held down.
-    */
-    if (action == ACTION_ATTACK && *this == STRUCT_SAM) {
-        action = ACTION_NONE;
-    }
+	/*
+	**	Don't allow targeting of SAM sites, even if the CTRL key
+	**	is held down.
+	*/
+	if (action == ACTION_ATTACK && *this == STRUCT_SAM) {
+		action = ACTION_NONE;
+	}
 
-    return (action);
+	return(action);
 }
 
 /***********************************************************************************************
@@ -3902,13 +3924,13 @@ COORDINATE BuildingClass::Sort_Y(void) const
  *=============================================================================================*/
 MoveType BuildingClass::Can_Enter_Cell(CELL cell, FacingType) const
 {
-    Validate();
+	Validate();
 
-    if (*this == STRUCT_CONST && IsDown) {
-        return (Map[cell].Is_Generally_Clear() ? MOVE_OK : MOVE_NO);
-    }
+	if (IsDown && IsLocked && (Can_Have_Rally_Point() || *this == STRUCT_CONST)) {
+		return(Map[cell].Is_Generally_Clear() ? MOVE_OK : MOVE_NO);
+	}
 
-    return (Class->Legal_Placement(cell) ? MOVE_OK : MOVE_NO);
+	return(Class->Legal_Placement(cell) ? MOVE_OK : MOVE_NO);
 }
 
 /***********************************************************************************************
@@ -5537,7 +5559,9 @@ CELL BuildingClass::Find_Exit_Cell(TechnoClass const* techno) const
 bool BuildingClass::Can_Player_Move(void) const
 {
     Validate();
-    return (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
+
+	return Can_Have_Rally_Point()
+		|| (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
 static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBuildingBesideWalls, int remainingDistance)
