@@ -38,14 +38,14 @@ void RulesClass::Apply_Special_Properties() {
     Special.IsTFast = !Get_Bool_Rule(GAME_MAP_SECTION, SLOW_TIBERIUM_GROWTH_AND_SPREAD_RULE);
 
     // misc
-    Special.IsSmartDefense = Get_Bool_Rule(GAME_MISC_SECTION, SMART_DEFENCE_RULE);
+    Special.IsSmartDefense = Get_Bool_Rule(GAME_MISC_SECTION, SMART_DEFENSE_RULE);
     Special.IsTreeTarget = Get_Bool_Rule(GAME_MISC_SECTION, TARGET_TREES_RULE);
     Special.IsMCVDeploy = Get_Bool_Rule(GAME_MISC_SECTION, MCV_REDEPLOYABLE_RULE);
     Special.IsVisceroids = Get_Bool_Rule(GAME_MISC_SECTION, SPAWN_VISCEROIDS_RULE);
     Special.IsThreePoint = Get_Bool_Rule(GAME_MISC_SECTION, VEHICLES_DO_THREE_POINT_TURNS_RULE);
     Special.IsRoad = Get_Bool_Rule(GAME_MISC_SECTION, SHOW_BIBS_ON_BUILDINGS_RULE);
     Special.IsNamed = Get_Bool_Rule(GAME_MISC_SECTION, SHOW_CIVILIAN_BUILDING_NAMES_RULE);
-    Special.IsSeparate = Get_Bool_Rule(GAME_MISC_SECTION, HELIPADS_AND_AIRCRAFT_BOUGHT_SEPERATELY_RULE);
+    Special.IsSeparate = Get_Bool_Rule(GAME_MISC_SECTION, HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE);
 
     // cheats
     Special.IsInert = Get_Bool_Rule(GAME_CHEATS_SECTION, UNITS_ARE_INDESTRUCTIBLE_RULE);
