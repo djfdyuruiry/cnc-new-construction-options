@@ -1,0 +1,13 @@
+{
+  "$schema": "../../cmake/nco-rules-json-schema.json",
+  "section": "Enhancements",
+  "comment": "Toggles for new features and enhancements to the game engine.",
+  "rules": [
+    {
+      "name": "AStarPathFinding",
+      "type": "bool",
+      "default": true,
+      "comment": "Use an A* path finding algorithm to move units around the map; less dumb and more logical than original method used in C&C. Ported from the CFEPatch - see: https://bitbucket.org/cfehunter/cncremastered/src/cfepatch/"
+    }
+  ]
+}
