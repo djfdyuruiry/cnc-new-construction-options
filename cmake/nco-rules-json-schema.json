@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "NCO metadata for game rules",
+  "description": "Metadata for a section of a rules.ini file",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "description": "INI identifier for the section"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Description of the section as markdown"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the rule"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "int",
+              "bool",
+              "float",
+              "fixed"
+            ],
+            "description": "Type of the rule value"
+          },
+          "default": {
+            "description": "Default value for the rule"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Explanation of the rule"
+          },
+          "implemented": {
+            "type": "bool",
+            "description": "Is behaviour for this rule actually implemented yet?"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "default"
+        ]
+      }
+    }
+  },
+  "required": [
+    "section",
+    "comment",
+    "rules"
+  ]
+}

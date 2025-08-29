@@ -1,4 +1,5 @@
 {
+  "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Misc",
   "comment": "Rules that don't really fit into one category, covers a wide range of behaviour.\n\n- Beta Features (Bibs, 3 point turns)\n- Allow using Skirmish/Multiplayer options in single player\n- Building behaviours",
   "rules": [
@@ -54,8 +55,7 @@
       "name": "OnlyAllowUsingOneNukePerScenario",
       "type": "bool",
       "default": true,
-      "implemented": false,
-      "comment": "(**NOTE: Not Implemented Yet**) Remove the nuclear superpower after 1 shot"
+      "comment": "Remove the nuclear superpower after 1 shot"
     },
     {
       "name": "HelipadsAndAircraftBoughtSeperately",

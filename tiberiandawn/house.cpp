@@ -671,19 +671,17 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
         && Class->House == HOUSE_GOOD) {
 		if (((BuildingTypeClass const*)type)->Type == STRUCT_TEMPLE 
             && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_TEMPLE_FROM_GDI_RULE)){
-			return false;
-		} else {
             CNC_LOG_TRACE("GDI scenario detected, hiding Temple of Nod from player");
+			return false;
         }
 
         if (((BuildingTypeClass const*)type)->Type == STRUCT_OBELISK
             && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_OBELISK_FROM_GDI_RULE)) {
-			return false;
-		} else {
             CNC_LOG_TRACE("GDI scenario detected, hiding Obelisk of Light from player");
+			return false;
         }
 
-        return (false);
+        return true;
     }
 
     /*
@@ -1315,6 +1313,7 @@ void HouseClass::AI(void)
         }
 
     } else {
+        auto only_gdi_can_use_ion_cannon = Get_Bool_Rule(GAME_HOUSE_SECTION, ONLY_GDI_CAN_USE_ION_CANNON_RULE);
 
         /*
         **	If there is no ion cannon present, but there is an advanced communcation
@@ -1322,7 +1321,7 @@ void HouseClass::AI(void)
         */
         if ((GameToPlay == GAME_NORMAL || Rule.AllowSuperWeapons)
             && (ActiveBScan & STRUCTF_EYE)
-            && (ActLike == HOUSE_GOOD || GameToPlay != GAME_NORMAL)
+            && ((!only_gdi_can_use_ion_cannon || ActLike == HOUSE_GOOD) || GameToPlay != GAME_NORMAL)
             && (IsHuman || GameToPlay != GAME_NORMAL)) {
 
             IonCannon.Enable(false, this == PlayerPtr, Power_Fraction() < 1);
@@ -1389,14 +1388,21 @@ void HouseClass::AI(void)
         }
 
     } else {
+        auto only_nod_can_use_nuke = Get_Bool_Rule(GAME_HOUSE_SECTION, ONLY_NOD_CAN_USE_NUKE_RULE);
 
         /*
         **	If there is no nuke strike present, but there is a Temple of Nod
         **	available, then make the nuke strike strike available.
         */
-        if ((GameToPlay == GAME_NORMAL || Rule.AllowSuperWeapons) && (ActiveBScan & STRUCTF_TEMPLE) && Has_Nuke_Device()
-            && IsHuman) {
-            NukeStrike.Enable((GameToPlay == GAME_NORMAL), this == PlayerPtr);
+        if ((GameToPlay == GAME_NORMAL || Rule.AllowSuperWeapons)
+            && (ActiveBScan & STRUCTF_TEMPLE)
+            && ((!only_nod_can_use_nuke || ActLike == HOUSE_BAD) || GameToPlay != GAME_NORMAL)
+            && (IsHuman || GameToPlay != GAME_NORMAL)
+            && Has_Nuke_Device()) {
+
+            auto one_nuke_per_scenario = Get_Bool_Rule(GAME_MISC_SECTION, ONLY_ALLOW_USING_ONE_NUKE_PER_SCENARIO_RULE);
+
+            NukeStrike.Enable((GameToPlay == GAME_NORMAL && one_nuke_per_scenario), this == PlayerPtr);
 
             /*
             **	Flag the sidebar to be redrawn if necessary.
