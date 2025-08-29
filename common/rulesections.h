@@ -28,6 +28,7 @@ public:
         return *this;
     }
 
+    // TODO: Validation/value error handling
     template<typename T>
     RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value) {
         T value;
@@ -55,7 +56,7 @@ public:
             auto default_value_str = std::format("{}", default_value);
             value = std::stof(
                 ini.Get_String(SectionName.data(), name.data(), default_value_str)
-            );            
+            );
 
             CNC_LOG_DEBUG("Resolved value: {} | (default={})", value, default_value);
         } else {
