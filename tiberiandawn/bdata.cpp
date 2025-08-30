@@ -4418,10 +4418,15 @@ int BuildingTypeClass::Height(void) const
  *=============================================================================================*/
 int BuildingTypeClass::Repair_Cost(void) const
 {
-    int cost = (Raw_Cost() * REPAIR_STEP) / MaxStrength;
+	auto repair_factor = Get_Float_Rule(GAME_REPAIR_SECTION, BUILDING_REPAIR_FACTOR_RULE);
+	auto repair_percent = nearbyint(repair_factor * 100);
+
+    auto repair_step = Get_Int_Rule(GAME_REPAIR_SECTION, BUILDING_REPAIR_STRENGTH_STEP_RULE);
+
+    int cost = (Raw_Cost() * repair_step) / MaxStrength;
     cost /= 2;
     cost = MAX(cost, 1);
-    cost = Fixed_To_Cardinal(cost, REPAIR_PERCENT);
+    cost = Fixed_To_Cardinal(cost, repair_percent);
     return (MAX(cost, 1));
 }
 
@@ -4442,7 +4447,7 @@ int BuildingTypeClass::Repair_Cost(void) const
  *=============================================================================================*/
 int BuildingTypeClass::Repair_Step(void) const
 {
-    return (REPAIR_STEP);
+    return Get_Int_Rule(GAME_REPAIR_SECTION, BUILDING_REPAIR_STRENGTH_STEP_RULE);
 }
 
 /***********************************************************************************************
