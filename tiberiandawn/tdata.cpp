@@ -75,7 +75,7 @@ static short const _List111101[] = {0, 1, 2, MAP_CELL_W, MAP_CELL_W + 2, REFRESH
 static short const _List11110[] = {0, 1, 2, 3, REFRESH_EOL};
 
 static TerrainTypeClass const Tree1Class(TERRAIN_TREE1,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                          XYP_COORD(11, 41), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -94,7 +94,7 @@ static TerrainTypeClass const Tree1Class(TERRAIN_TREE1,
                                          (short const*)_List1001);
 
 static TerrainTypeClass const Tree2Class(TERRAIN_TREE2,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                          XYP_COORD(11, 44), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -113,7 +113,7 @@ static TerrainTypeClass const Tree2Class(TERRAIN_TREE2,
                                          (short const*)_List1001);
 
 static TerrainTypeClass const Tree3Class(TERRAIN_TREE3,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                          XYP_COORD(12, 45), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -151,7 +151,7 @@ static TerrainTypeClass const Tree4Class(TERRAIN_TREE4,
                                          NULL);
 
 static TerrainTypeClass const Tree5Class(TERRAIN_TREE5,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                          XYP_COORD(15, 41), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -170,7 +170,7 @@ static TerrainTypeClass const Tree5Class(TERRAIN_TREE5,
                                          (short const*)_List1001);
 
 static TerrainTypeClass const Tree6Class(TERRAIN_TREE6,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                          XYP_COORD(16, 37), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -189,7 +189,7 @@ static TerrainTypeClass const Tree6Class(TERRAIN_TREE6,
                                          (short const*)_List1001);
 
 static TerrainTypeClass const Tree7Class(TERRAIN_TREE7,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                          XYP_COORD(15, 41), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -208,7 +208,7 @@ static TerrainTypeClass const Tree7Class(TERRAIN_TREE7,
                                          (short const*)_List1001);
 
 static TerrainTypeClass const Tree8Class(TERRAIN_TREE8,
-                                         THEATERF_WINTER | THEATERF_TEMPERATE | THEATERF_DESERT,
+                                         THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE | THEATERF_DESERT,
                                          XYP_COORD(14, 22), // Center base coordinate offset.
                                          false,             // Spawns Tiberium spontaneously?
                                          true,              // Does it have destruction animation?
@@ -246,7 +246,7 @@ static TerrainTypeClass const Tree9Class(TERRAIN_TREE9,
                                          (short const*)_List01);
 
 static TerrainTypeClass const Tree10Class(TERRAIN_TREE10,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(25, 43), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -265,7 +265,7 @@ static TerrainTypeClass const Tree10Class(TERRAIN_TREE10,
                                           (short const*)_List1100);
 
 static TerrainTypeClass const Tree11Class(TERRAIN_TREE11,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(23, 44), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -284,7 +284,7 @@ static TerrainTypeClass const Tree11Class(TERRAIN_TREE11,
                                           (short const*)_List1100);
 
 static TerrainTypeClass const Tree12Class(TERRAIN_TREE12,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(14, 36), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -303,7 +303,7 @@ static TerrainTypeClass const Tree12Class(TERRAIN_TREE12,
                                           (short const*)_List1001);
 
 static TerrainTypeClass const Tree13Class(TERRAIN_TREE13,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(19, 40), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -322,7 +322,7 @@ static TerrainTypeClass const Tree13Class(TERRAIN_TREE13,
                                           (short const*)_List1101);
 
 static TerrainTypeClass const Tree14Class(TERRAIN_TREE14,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(19, 40), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -341,7 +341,7 @@ static TerrainTypeClass const Tree14Class(TERRAIN_TREE14,
                                           (short const*)_List1100);
 
 static TerrainTypeClass const Tree15Class(TERRAIN_TREE15,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(19, 40), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -360,7 +360,7 @@ static TerrainTypeClass const Tree15Class(TERRAIN_TREE15,
                                           (short const*)_List1100);
 
 static TerrainTypeClass const Tree16Class(TERRAIN_TREE16,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(13, 36), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -379,7 +379,7 @@ static TerrainTypeClass const Tree16Class(TERRAIN_TREE16,
                                           (short const*)_List1001);
 
 static TerrainTypeClass const Tree17Class(TERRAIN_TREE17,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(18, 44), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           true,              // Does it have destruction animation?
@@ -417,7 +417,7 @@ static TerrainTypeClass const Tree18Class(TERRAIN_TREE18,
                                           (short const*)_List111101);
 
 static TerrainTypeClass const Split1Class(TERRAIN_BLOSSOMTREE1,
-                                          THEATERF_TEMPERATE | THEATERF_WINTER,
+                                          THEATERF_TEMPERATE | THEATERF_WINTER | THEATERF_SNOW,
                                           XYP_COORD(18, 44), // Center base coordinate offset.
                                           true,              // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
@@ -436,7 +436,7 @@ static TerrainTypeClass const Split1Class(TERRAIN_BLOSSOMTREE1,
                                           (short const*)_List1101);
 
 static TerrainTypeClass const Split2Class(TERRAIN_BLOSSOMTREE2,
-                                          THEATERF_TEMPERATE | THEATERF_WINTER | THEATERF_DESERT,
+                                          THEATERF_TEMPERATE | THEATERF_WINTER | THEATERF_SNOW | THEATERF_DESERT,
                                           XYP_COORD(18, 44), // Center base coordinate offset.
                                           true,              // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
@@ -455,7 +455,7 @@ static TerrainTypeClass const Split2Class(TERRAIN_BLOSSOMTREE2,
                                           (short const*)_List1101);
 
 static TerrainTypeClass const Clump1Class(TERRAIN_CLUMP1,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(28, 41), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
@@ -474,7 +474,7 @@ static TerrainTypeClass const Clump1Class(TERRAIN_CLUMP1,
                                           (short const*)_List110001);
 
 static TerrainTypeClass const Clump2Class(TERRAIN_CLUMP2,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(38, 41), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
@@ -493,7 +493,7 @@ static TerrainTypeClass const Clump2Class(TERRAIN_CLUMP2,
                                           (short const*)_List101001);
 
 static TerrainTypeClass const Clump3Class(TERRAIN_CLUMP3,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(33, 35), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
@@ -512,7 +512,7 @@ static TerrainTypeClass const Clump3Class(TERRAIN_CLUMP3,
                                           (short const*)_List001);
 
 static TerrainTypeClass const Clump4Class(TERRAIN_CLUMP4,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(44, 49), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
@@ -531,7 +531,7 @@ static TerrainTypeClass const Clump4Class(TERRAIN_CLUMP4,
                                           (short const*)_List111000010110);
 
 static TerrainTypeClass const Clump5Class(TERRAIN_CLUMP5,
-                                          THEATERF_WINTER | THEATERF_TEMPERATE,
+                                          THEATERF_WINTER | THEATERF_SNOW | THEATERF_TEMPERATE,
                                           XYP_COORD(49, 58), // Center base coordinate offset.
                                           false,             // Spawns Tiberium spontaneously?
                                           false,             // Does it have destruction animation?
