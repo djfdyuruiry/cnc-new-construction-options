@@ -4,6 +4,18 @@
   "comment": "Repair behavior (Units and Aircraft).",
   "rules": [
     {
+      "name": "BuildingRepairFactor",
+      "type": "float",
+      "default": 1.02,
+      "comment": "Used along with strength step value to calculate the cost of a single repair step."
+    },
+    {
+      "name": "BuildingRepairStrengthStep",
+      "type": "int",
+      "default": 5,
+      "comment": "The amount of strength to give a building on each repair step."
+    },
+    {
       "name": "UnitRepairFactor",
       "type": "float",
       "default": 1.02,
