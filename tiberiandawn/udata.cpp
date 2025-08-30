@@ -1789,7 +1789,7 @@ int UnitTypeClass::Repair_Cost(void) const
  *=============================================================================================*/
 int UnitTypeClass::Repair_Step(void) const
 {
-    return (REPAIR_STEP);
+    return Get_Int_Rule(GAME_REPAIR_SECTION, UNIT_REPAIR_STRENGTH_STEP_RULE);
 }
 
 /***********************************************************************************************

@@ -650,7 +650,7 @@ int AircraftTypeClass::Repair_Cost(void) const
  *=============================================================================================*/
 int AircraftTypeClass::Repair_Step(void) const
 {
-    return (REPAIR_STEP);
+    return Get_Int_Rule(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_STRENGTH_STEP_RULE);
 }
 
 /***********************************************************************************************
