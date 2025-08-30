@@ -181,25 +181,25 @@ int BuildingClass::Validate(void) const
   *=============================================================================================*/
 bool BuildingClass::Can_Have_Rally_Point() const
 {
-	if (!this->IsOwnedByPlayer) {
-		return false;
-	}
+    if (!this->IsOwnedByPlayer) {
+       return false;
+    }
 
-	auto rally_points_enabled = Get_Bool_Rule(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
+    auto rally_points_enabled = Get_Bool_Rule(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
 
-	return rally_points_enabled
-		&& Class->IsFactory
-		&& Class->ToBuild != FACTORY_TYPE_BUILDING; // rallying makes no sense for buildings
+    return rally_points_enabled
+        && Class->IsFactory
+        && Class->ToBuild != FACTORY_TYPE_BUILDING; // rallying makes no sense for buildings
 }
 
 void BuildingClass::Set_Unselected_By_Player(HouseClass* player)
 {
-	TechnoClass::Set_Unselected_By_Player(player);
+    TechnoClass::Set_Unselected_By_Player(player);
 
-	if (RallyPoint && Can_Have_Rally_Point())
-	{
-		Map.Flag_To_Redraw(true);
-	}
+    if (RallyPoint && Can_Have_Rally_Point())
+    {
+        Map.Flag_To_Redraw(true);
+    }
 }
 
 /***********************************************************************************************
@@ -736,15 +736,15 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
         && Is_Owned_By_Player()
         && RallyPoint
         && Target_Legal(RallyPoint))
-	{
-		int startX, startY, endX, endY;
+    {
+        int startX, startY, endX, endY;
 
-		Map.Coord_To_Pixel(Center_Coord(), startX, startY);
-		Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
+        Map.Coord_To_Pixel(Center_Coord(), startX, startY);
+        Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
 
         // BUG: Line flickers if it intercepts certain objects
-		CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
-	}
+        CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
+    }
 
     TechnoClass::Draw_It(x, y, window);
 }
@@ -1831,10 +1831,10 @@ void BuildingClass::Look(bool)
 
 TARGET BuildingClass::Target_For_Rally_Point() const
 {
-	return Target_Legal(RallyPoint) ? (
-			Is_Target_Cell(RallyPoint) ? ::As_Target(Map.Nearby_Location(As_Cell(RallyPoint))) : RallyPoint
-		)
-		: ::As_Target(Nearby_Location());
+    return Target_Legal(RallyPoint) ? (
+            Is_Target_Cell(RallyPoint) ? ::As_Target(Map.Nearby_Location(As_Cell(RallyPoint))) : RallyPoint
+        )
+        : ::As_Target(Nearby_Location());
 }
 
 /***********************************************************************************************
@@ -2155,9 +2155,9 @@ void BuildingClass::Active_Click_With(ActionType action, ObjectClass* object)
         OutList.Add(EventClass(EventClass::PRIMARY, As_Target()));
     }
 
-	if (action == ACTION_MOVE && Can_Have_Rally_Point()) {
-		Player_Set_Rally_Point(object->As_Target());
-	}
+    if (action == ACTION_MOVE && Can_Have_Rally_Point()) {
+        Player_Set_Rally_Point(object->As_Target());
+    }
 }
 
 /***********************************************************************************************
@@ -2179,25 +2179,25 @@ void BuildingClass::Active_Click_With(ActionType action, ObjectClass* object)
  *=============================================================================================*/
 void BuildingClass::Active_Click_With(ActionType action, CELL cell)
 {
-	Validate();
-	if (action == ACTION_ATTACK) {
-		Player_Assign_Mission(MISSION_ATTACK, ::As_Target(cell));
-	}
+    Validate();
+    if (action == ACTION_ATTACK) {
+        Player_Assign_Mission(MISSION_ATTACK, ::As_Target(cell));
+    }
 
-	if (action != ACTION_MOVE) {
-		return;
-	}
+    if (action != ACTION_MOVE) {
+        return;
+    }
 
-	if (*this == STRUCT_CONST) {
-		OutList.Add(EventClass(EventClass::ARCHIVE, As_Target(), ::As_Target(cell)));
-		OutList.Add(EventClass(EventClass::SELL, As_Target()));
+    if (*this == STRUCT_CONST) {
+        OutList.Add(EventClass(EventClass::ARCHIVE, As_Target(), ::As_Target(cell)));
+        OutList.Add(EventClass(EventClass::SELL, As_Target()));
 
-		COORDINATE coord = Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y());
-		OutList.Add(EventClass(ANIM_MOVE_FLASH, PlayerPtr->Class->House, coord, 1 << PlayerPtr->Class->House));
-	}
-	else if (Can_Have_Rally_Point()) {
-		Player_Set_Rally_Point(::As_Target(cell));
-	}
+        COORDINATE coord = Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y());
+        OutList.Add(EventClass(ANIM_MOVE_FLASH, PlayerPtr->Class->House, coord, 1 << PlayerPtr->Class->House));
+    }
+    else if (Can_Have_Rally_Point()) {
+        Player_Set_Rally_Point(::As_Target(cell));
+    }
 }
 
 /***********************************************************************************************
@@ -2218,17 +2218,17 @@ void BuildingClass::Active_Click_With(ActionType action, CELL cell)
  *=============================================================================================*/
 void BuildingClass::Assign_Target(TARGET target)
 {
-	Validate();
-	if (*this != STRUCT_SAM && !In_Range(target, 0)) {
-		target = TARGET_NONE;
-	}
-	
-	if (Can_Have_Rally_Point() && Target_Legal(target)) {
-		RallyPoint = target;
-		return;
-	}
+    Validate();
+    if (*this != STRUCT_SAM && !In_Range(target, 0)) {
+        target = TARGET_NONE;
+    }
 
-	TechnoClass::Assign_Target(target);
+    if (Can_Have_Rally_Point() && Target_Legal(target)) {
+        RallyPoint = target;
+        return;
+    }
+
+    TechnoClass::Assign_Target(target);
 }
 
 /***********************************************************************************************
@@ -5560,48 +5560,48 @@ bool BuildingClass::Can_Player_Move(void) const
 {
     Validate();
 
-	return Can_Have_Rally_Point()
-		|| (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
+    return Can_Have_Rally_Point()
+        || (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
 static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBuildingBesideWalls, int remainingDistance)
 {
-	if (remainingDistance < 1) {
-		return false;
-	}
+    if (remainingDistance < 1) {
+        return false;
+    }
 
-	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-		CELL newcell = Adjacent_Cell(cell, facing);
+    for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
+        CELL newcell = Adjacent_Cell(cell, facing);
 
-		if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
-			continue;
-		}
+        if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
+            continue;
+        }
 
-		/*
-		**	The special cell ownership flag allows building adjacent
-		**	to friendly walls and bibs even though there is no official
-		**	building located there.
-		*/
-		if (Map[newcell].Owner == house->Class->House) {
-			if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
-				return true;
-			}
-		}
+        /*
+        **	The special cell ownership flag allows building adjacent
+        **	to friendly walls and bibs even though there is no official
+        **	building located there.
+        */
+        if (Map[newcell].Owner == house->Class->House) {
+            if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
+                return true;
+            }
+        }
 
-		BuildingClass* base = Map[newcell].Cell_Building();
+        BuildingClass* base = Map[newcell].Cell_Building();
 
-		// TODO: could add a `build off allies base` rule by checking if 
-		//       house is friendly to current players house
-		if (base && base->House->Class->House == house->Class->House) {
-			return true;
-		}
+        // TODO: could add a `build off allies base` rule by checking if 
+        //       house is friendly to current players house
+        if (base && base->House->Class->House == house->Class->House) {
+            return true;
+        }
 
-		if (Scan_For_Proximity_Check(newcell, house, allowBuildingBesideWalls, remainingDistance - 1)) {
-			return true;
-		}
-	}
+        if (Scan_For_Proximity_Check(newcell, house, allowBuildingBesideWalls, remainingDistance - 1)) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 /***********************************************************************************************
@@ -5633,39 +5633,39 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
         return (true);
     }
 
-	/*
-	**	Scan through all cells that the building foundation would cover. If any adjacent
-	**	cells to these are of friendly persuasion, then consider the proximity check to
-	**	have been a success.
-	*/
-	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    /*
+    **	Scan through all cells that the building foundation would cover. If any adjacent
+    **	cells to these are of friendly persuasion, then consider the proximity check to
+    **	have been a success.
+    */
+    auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+    auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+    auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
-	auto ptr = Occupy_List(true);
+    auto ptr = Occupy_List(true);
 
-	while (*ptr != REFRESH_EOL) {
-		CELL cell = homecell + *ptr++;
+    while (*ptr != REFRESH_EOL) {
+        CELL cell = homecell + *ptr++;
 
-		if (preventBuildingInShroud && !Map.In_Radar(cell)) {
-			return false;
-		}
-	}
+        if (preventBuildingInShroud && !Map.In_Radar(cell)) {
+            return false;
+        }
+    }
 
-	ptr = Occupy_List(true);
+    ptr = Occupy_List(true);
 
-	while (*ptr != REFRESH_EOL) {
-		CELL cell = homecell + *ptr++;
+    while (*ptr != REFRESH_EOL) {
+        CELL cell = homecell + *ptr++;
 
-		auto maxDistance = maxPlacementDistance;
-		auto proximityDetected = Scan_For_Proximity_Check(cell, House, allowBuildingBesideWalls, maxDistance);
+        auto maxDistance = maxPlacementDistance;
+        auto proximityDetected = Scan_For_Proximity_Check(cell, House, allowBuildingBesideWalls, maxDistance);
 
-		if (proximityDetected) {
-			return true;
-		}
-	}
+        if (proximityDetected) {
+            return true;
+        }
+    }
 
-	return(false);
+    return(false);
 }
 
 /***********************************************************************************************
@@ -5695,5 +5695,5 @@ bool BuildingClass::Rally_Unit(FootClass& unit)
             Transmit_Message(RADIO_MOVE_HERE, move_target, &unit) == RADIO_ROGER;
     }
 
-	return false;
+    return false;
 }
