@@ -3271,22 +3271,22 @@ ActionType BuildingClass::What_Action(ObjectClass* object) const
  *=============================================================================================*/
 ActionType BuildingClass::What_Action(CELL cell) const
 {
-	Validate();
-	ActionType action = TechnoClass::What_Action(cell);
+    Validate();
+    ActionType action = TechnoClass::What_Action(cell);
 
-	if (action == ACTION_MOVE && !Can_Have_Rally_Point() && (*this != STRUCT_CONST || !Special.IsMCVDeploy)) {
-		action = ACTION_NONE;
-	}
+    if (action == ACTION_MOVE && !Can_Have_Rally_Point() && (*this != STRUCT_CONST || !Special.IsMCVDeploy)) {
+        action = ACTION_NONE;
+    }
 
-	/*
+    /*
 	**	Don't allow targeting of SAM sites, even if the CTRL key
 	**	is held down.
-	*/
-	if (action == ACTION_ATTACK && *this == STRUCT_SAM) {
-		action = ACTION_NONE;
-	}
+    */
+    if (action == ACTION_ATTACK && *this == STRUCT_SAM) {
+        action = ACTION_NONE;
+    }
 
-	return(action);
+    return(action);
 }
 
 /***********************************************************************************************
@@ -3924,13 +3924,13 @@ COORDINATE BuildingClass::Sort_Y(void) const
  *=============================================================================================*/
 MoveType BuildingClass::Can_Enter_Cell(CELL cell, FacingType) const
 {
-	Validate();
+    Validate();
 
-	if (IsDown && IsLocked && (Can_Have_Rally_Point() || *this == STRUCT_CONST)) {
-		return(Map[cell].Is_Generally_Clear() ? MOVE_OK : MOVE_NO);
-	}
+    if (IsDown && IsLocked && (Can_Have_Rally_Point() || *this == STRUCT_CONST)) {
+        return(Map[cell].Is_Generally_Clear() ? MOVE_OK : MOVE_NO);
+    }
 
-	return(Class->Legal_Placement(cell) ? MOVE_OK : MOVE_NO);
+    return(Class->Legal_Placement(cell) ? MOVE_OK : MOVE_NO);
 }
 
 /***********************************************************************************************
