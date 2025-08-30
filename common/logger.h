@@ -32,8 +32,6 @@ public:
     void Fatal(const std::string_view message) const;
     std::shared_ptr<spdlog::logger> operator()() const;
 private:
-    static CncLogger Instance;
-
     static void Register(const std::string name);
 
     const std::string Name;
