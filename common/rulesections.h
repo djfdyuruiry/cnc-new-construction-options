@@ -1,5 +1,23 @@
 #pragma once
 
+/**
+ * These classes provide an API for dynamically managing rules for a game, without
+ * having to explicitly declare class members for each rule. It uses the built in
+ * INIClass methods for loading and exporting rule values. Setting rule values after
+ * loading is also supported.
+ * 
+ * Class hierarchy:
+ * 
+ *   - RuleSections --[contains many]--> RuleSection
+ *   - IniRuleContext --[wrapper around]--> RuleSection + INIClass
+ *   - RuleSection --[uses]--> IniRuleContext
+ * 
+ * Usage:
+ * 
+ *  It is intended that one RuleSections instance is added as a member of a RulesClass
+ *  class. This way it can be used to load rules to/from INI files using INIClass instances. 
+ */
+
 #include <functional>
 #include <optional>
 #include <memory>

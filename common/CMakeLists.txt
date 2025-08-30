@@ -4,6 +4,7 @@ set(GIT_POST_CONFIGURE_FILE "${CMAKE_CURRENT_BINARY_DIR}/gitinfo.cpp")
 include(GitWatcher)
 
 find_package(spdlog CONFIG REQUIRED)
+find_package(lua REQUIRED)
 
 set(COMMON_SRC
     ${GIT_POST_CONFIGURE_FILE}
@@ -172,9 +173,11 @@ file(GLOB_RECURSE COMMON_HEADERS "*.h")
 add_library(common STATIC ${COMMON_SRC} ${COMMON_HEADERS})
 
 target_link_libraries(common PUBLIC spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+target_link_libraries(common PUBLIC ${LUA_LIBRARIES})
 target_link_libraries(common PUBLIC ${COMMON_LIBS})
 
 target_include_directories(common PUBLIC .)
+target_include_directories(common PUBLIC ${LUA_INCLUDE_DIR})
 
 target_compile_definitions(common PRIVATE FIXIT_FAST_LOAD $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING>)
 target_compile_options(common PUBLIC ${VC_CXX_FLAGS})
