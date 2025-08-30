@@ -163,6 +163,45 @@ int BuildingClass::Validate(void) const
 #define Validate()
 #endif
 
+
+ /***********************************************************************************************
+  * BuildingClass::Can_Have_Rally_Point -- Query if a building can have a rally point.          *
+  *                                                                                             *
+  *    This routine simply checks the buildings type against a hard coded list.                 *
+  *    of buildings that may set a rally point for produced units.                              *
+  *                                                                                             *
+  * INPUT:   None                                                                               *
+  *                                                                                             *
+  * OUTPUT:  True if true false if false                                                        *
+  *                                                                                             *
+  * WARNINGS:   none                                                                            *
+  *                                                                                             *
+  * HISTORY:                                                                                    *
+  *   07/06/2020 cfehunter : Created.                                                           *
+  *=============================================================================================*/
+bool BuildingClass::Can_Have_Rally_Point() const
+{
+    if (!this->IsOwnedByPlayer) {
+       return false;
+    }
+
+    auto rally_points_enabled = Get_Bool_Rule(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
+
+    return rally_points_enabled
+        && Class->IsFactory
+        && Class->ToBuild != FACTORY_TYPE_BUILDING; // rallying makes no sense for buildings
+}
+
+void BuildingClass::Set_Unselected_By_Player(HouseClass* player)
+{
+    TechnoClass::Set_Unselected_By_Player(player);
+
+    if (RallyPoint && Can_Have_Rally_Point())
+    {
+        Map.Flag_To_Redraw(true);
+    }
+}
+
 /***********************************************************************************************
  * BuildingClass::Receive_Message -- Handle an incoming message to the building.               *
  *                                                                                             *
@@ -403,8 +442,13 @@ RadioMessageType BuildingClass::Receive_Message(RadioClass* from, RadioMessageTy
         }
 
         TechnoClass::Receive_Message(from, message, param);
-        if (*this == STRUCT_WEAP || *this == STRUCT_AIRSTRIP || *this == STRUCT_REPAIR)
+
+        if (Can_Have_Rally_Point() && Target_Legal(RallyPoint)) {
+            Rally_Unit(static_cast<FootClass&>(*from));
+        } else if (*this == STRUCT_WEAP || *this == STRUCT_AIRSTRIP || *this == STRUCT_REPAIR) {
             return (RADIO_RUN_AWAY);
+        }
+
         return (RADIO_ROGER);
     }
 
@@ -687,6 +731,21 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
         }
     }
 
+    if (Can_Have_Rally_Point() 
+        && Is_Selected_By_Player()
+        && Is_Owned_By_Player()
+        && RallyPoint
+        && Target_Legal(RallyPoint))
+    {
+        int startX, startY, endX, endY;
+
+        Map.Coord_To_Pixel(Center_Coord(), startX, startY);
+        Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
+
+        // BUG: Line flickers if it intercepts certain objects
+        CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
+    }
+
     TechnoClass::Draw_It(x, y, window);
 }
 
@@ -868,6 +927,11 @@ BulletClass* BuildingClass::Fire_At(TARGET target, int which)
     }
 
     return (bullet);
+}
+
+void BuildingClass::Player_Set_Rally_Point(TARGET target)
+{
+    OutList.Add(EventClass(EventClass::SET_RALLY, As_Target(), target));
 }
 
 /***********************************************************************************************
@@ -1210,7 +1274,7 @@ void BuildingClass::AI(void)
                 **	production can never complete -- don't bother starting it.
                 */
                 if (House->IsStarted && House->Available_Money() > 10) {
-                    TechnoTypeClass const* techno = House->Suggest_New_Object(Class->ToBuild);
+                    TechnoTypeClass const* techno = House->Suggest_New_Object((RTTIType)Class->ToBuild);
 
                     /*
                     **	If a suitable object type was selected for production, then start
@@ -1765,6 +1829,14 @@ void BuildingClass::Look(bool)
 }
 #endif
 
+TARGET BuildingClass::Target_For_Rally_Point() const
+{
+    return Target_Legal(RallyPoint) ? (
+            Is_Target_Cell(RallyPoint) ? ::As_Target(Map.Nearby_Location(As_Cell(RallyPoint))) : RallyPoint
+        )
+        : ::As_Target(Nearby_Location());
+}
+
 /***********************************************************************************************
  * BuildingClass::new -- Allocates a building object from building pool.                       *
  *                                                                                             *
@@ -2082,6 +2154,10 @@ void BuildingClass::Active_Click_With(ActionType action, ObjectClass* object)
     if (action == ACTION_TOGGLE_PRIMARY && Class->IsFactory) {
         OutList.Add(EventClass(EventClass::PRIMARY, As_Target()));
     }
+
+    if (action == ACTION_MOVE && Can_Have_Rally_Point()) {
+        Player_Set_Rally_Point(object->As_Target());
+    }
 }
 
 /***********************************************************************************************
@@ -2108,12 +2184,19 @@ void BuildingClass::Active_Click_With(ActionType action, CELL cell)
         Player_Assign_Mission(MISSION_ATTACK, ::As_Target(cell));
     }
 
-    if (action == ACTION_MOVE && *this == STRUCT_CONST) {
+    if (action != ACTION_MOVE) {
+        return;
+    }
+
+    if (*this == STRUCT_CONST) {
         OutList.Add(EventClass(EventClass::ARCHIVE, As_Target(), ::As_Target(cell)));
         OutList.Add(EventClass(EventClass::SELL, As_Target()));
 
         COORDINATE coord = Map.Pixel_To_Coord(Get_Mouse_X(), Get_Mouse_Y());
         OutList.Add(EventClass(ANIM_MOVE_FLASH, PlayerPtr->Class->House, coord, 1 << PlayerPtr->Class->House));
+    }
+    else if (Can_Have_Rally_Point()) {
+        Player_Set_Rally_Point(::As_Target(cell));
     }
 }
 
@@ -2138,6 +2221,11 @@ void BuildingClass::Assign_Target(TARGET target)
     Validate();
     if (*this != STRUCT_SAM && !In_Range(target, 0)) {
         target = TARGET_NONE;
+    }
+
+    if (Can_Have_Rally_Point() && Target_Legal(target)) {
+        RallyPoint = target;
+        return;
     }
 
     TechnoClass::Assign_Target(target);
@@ -3186,19 +3274,19 @@ ActionType BuildingClass::What_Action(CELL cell) const
     Validate();
     ActionType action = TechnoClass::What_Action(cell);
 
-    if (action == ACTION_MOVE && (*this != STRUCT_CONST || !Special.IsMCVDeploy)) {
+    if (action == ACTION_MOVE && !Can_Have_Rally_Point() && (*this != STRUCT_CONST || !Special.IsMCVDeploy)) {
         action = ACTION_NONE;
     }
 
     /*
-    **	Don't allow targeting of SAM sites, even if the CTRL key
-    **	is held down.
+	**	Don't allow targeting of SAM sites, even if the CTRL key
+	**	is held down.
     */
     if (action == ACTION_ATTACK && *this == STRUCT_SAM) {
         action = ACTION_NONE;
     }
 
-    return (action);
+    return(action);
 }
 
 /***********************************************************************************************
@@ -3838,11 +3926,11 @@ MoveType BuildingClass::Can_Enter_Cell(CELL cell, FacingType) const
 {
     Validate();
 
-    if (*this == STRUCT_CONST && IsDown) {
-        return (Map[cell].Is_Generally_Clear() ? MOVE_OK : MOVE_NO);
+    if (IsDown && IsLocked && (Can_Have_Rally_Point() || *this == STRUCT_CONST)) {
+        return(Map[cell].Is_Generally_Clear() ? MOVE_OK : MOVE_NO);
     }
 
-    return (Class->Legal_Placement(cell) ? MOVE_OK : MOVE_NO);
+    return(Class->Legal_Placement(cell) ? MOVE_OK : MOVE_NO);
 }
 
 /***********************************************************************************************
@@ -5374,7 +5462,7 @@ void BuildingClass::Detach_All(bool all)
             TechnoClass* object = factory->Get_Object();
             IsInLimbo = true;
             if (object && !object->Techno_Type_Class()->Who_Can_Build_Me(true, false, House->Class->House)) {
-                House->Abandon_Production(Class->ToBuild);
+                House->Abandon_Production((RTTIType)Class->ToBuild);
             }
             IsInLimbo = false;
         }
@@ -5471,47 +5559,49 @@ CELL BuildingClass::Find_Exit_Cell(TechnoClass const* techno) const
 bool BuildingClass::Can_Player_Move(void) const
 {
     Validate();
-    return (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
+
+    return Can_Have_Rally_Point()
+        || (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
 static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBuildingBesideWalls, int remainingDistance)
 {
-	if (remainingDistance < 1) {
-		return false;
-	}
+    if (remainingDistance < 1) {
+        return false;
+    }
 
-	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-		CELL newcell = Adjacent_Cell(cell, facing);
+    for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
+        CELL newcell = Adjacent_Cell(cell, facing);
 
-		if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
-			continue;
-		}
+        if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
+            continue;
+        }
 
-		/*
-		**	The special cell ownership flag allows building adjacent
-		**	to friendly walls and bibs even though there is no official
-		**	building located there.
-		*/
-		if (Map[newcell].Owner == house->Class->House) {
-			if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
-				return true;
-			}
-		}
+        /*
+        **	The special cell ownership flag allows building adjacent
+        **	to friendly walls and bibs even though there is no official
+        **	building located there.
+        */
+        if (Map[newcell].Owner == house->Class->House) {
+            if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
+                return true;
+            }
+        }
 
-		BuildingClass* base = Map[newcell].Cell_Building();
+        BuildingClass* base = Map[newcell].Cell_Building();
 
-		// TODO: could add a `build off allies base` rule by checking if 
-		//       house is friendly to current players house
-		if (base && base->House->Class->House == house->Class->House) {
-			return true;
-		}
+        // TODO: could add a `build off allies base` rule by checking if 
+        //       house is friendly to current players house
+        if (base && base->House->Class->House == house->Class->House) {
+            return true;
+        }
 
-		if (Scan_For_Proximity_Check(newcell, house, allowBuildingBesideWalls, remainingDistance - 1)) {
-			return true;
-		}
-	}
+        if (Scan_For_Proximity_Check(newcell, house, allowBuildingBesideWalls, remainingDistance - 1)) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 /***********************************************************************************************
@@ -5543,37 +5633,67 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
         return (true);
     }
 
-	/*
-	**	Scan through all cells that the building foundation would cover. If any adjacent
-	**	cells to these are of friendly persuasion, then consider the proximity check to
-	**	have been a success.
-	*/
-	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    /*
+    **	Scan through all cells that the building foundation would cover. If any adjacent
+    **	cells to these are of friendly persuasion, then consider the proximity check to
+    **	have been a success.
+    */
+    auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+    auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+    auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
-	auto ptr = Occupy_List(true);
+    auto ptr = Occupy_List(true);
 
-	while (*ptr != REFRESH_EOL) {
-		CELL cell = homecell + *ptr++;
+    while (*ptr != REFRESH_EOL) {
+        CELL cell = homecell + *ptr++;
 
-		if (preventBuildingInShroud && !Map.In_Radar(cell)) {
-			return false;
-		}
-	}
+        if (preventBuildingInShroud && !Map.In_Radar(cell)) {
+            return false;
+        }
+    }
 
-	ptr = Occupy_List(true);
+    ptr = Occupy_List(true);
 
-	while (*ptr != REFRESH_EOL) {
-		CELL cell = homecell + *ptr++;
+    while (*ptr != REFRESH_EOL) {
+        CELL cell = homecell + *ptr++;
 
-		auto maxDistance = maxPlacementDistance;
-		auto proximityDetected = Scan_For_Proximity_Check(cell, House, allowBuildingBesideWalls, maxDistance);
+        auto maxDistance = maxPlacementDistance;
+        auto proximityDetected = Scan_For_Proximity_Check(cell, House, allowBuildingBesideWalls, maxDistance);
 
-		if (proximityDetected) {
-			return true;
-		}
-	}
+        if (proximityDetected) {
+            return true;
+        }
+    }
 
-	return(false);
+    return(false);
+}
+
+/***********************************************************************************************
+ * BuildingClass::Rally_Unit -- Order a unit to the buildings rally point                      *
+ *                                                                                             *
+ *    This routine will attempt to order a unit to move the the buildings rally point.         *
+ *    If the building has a rally point, and the unit should be rallyed.                       *
+ *                                                                                             *
+ * INPUT:   unit - unit to rally                                                               *
+ *                                                                                             *
+ * OUTPUT:  true if successful                                                                 *
+ *                                                                                             *
+ * WARNINGS: none                                                                              *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   14/06/2020 cfehunter : Created.                                                           *
+ *=============================================================================================*/
+bool BuildingClass::Rally_Unit(FootClass& unit)
+{
+    if (unit.What_Am_I() != RTTI_UNIT || !static_cast<const UnitClass&>(unit).Class->IsToHarvest) {
+        const TARGET rally_target = Target_For_Rally_Point();
+
+        //Make sure units dont rally to themselves. Only a problem for repair/reload pads
+        auto move_target = unit.As_Target() != rally_target ? rally_target : ::As_Target(Nearby_Location());
+
+        return Target_Legal(move_target) && 
+            Transmit_Message(RADIO_MOVE_HERE, move_target, &unit) == RADIO_ROGER;
+    }
+
+    return false;
 }

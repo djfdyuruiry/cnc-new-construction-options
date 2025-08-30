@@ -8,6 +8,12 @@
       "type": "bool",
       "default": true,
       "comment": "Use an A* path finding algorithm to move units around the map; less dumb and more logical than original method used in C&C. Ported from the CFEPatch - see: https://bitbucket.org/cfehunter/cncremastered/src/cfepatch/"
+    },
+    {
+      "name": "RallyPoints",
+      "type": "bool",
+      "default": true,
+      "comment": "Barracks, Hand of Nod, Weapons Factory etc. support setting rally points for produced units TS/RA2 style. Ported from the CFEPatch - see: https://bitbucket.org/cfehunter/cncremastered/src/cfepatch/"
     }
   ]
 }

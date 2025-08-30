@@ -160,6 +160,8 @@ public:
     */
     TCountDownTimerClass PlacementDelay;
 
+    TARGET RallyPoint;
+
     /*---------------------------------------------------------------------
     **	Constructors, Destructors, and overloaded operators.
     */
@@ -316,9 +318,16 @@ public:
     */
     int Validate(void) const;
 
+    bool Can_Have_Rally_Point() const;
+    virtual void Set_Unselected_By_Player(HouseClass * player = NULL) override;
+    TARGET Target_For_Rally_Point() const;
+    bool Rally_Unit(FootClass& unit);
+
 private:
     void Drop_Debris(TARGET source = TARGET_NONE);
     virtual BulletClass* Fire_At(TARGET target, int which);
+
+    void Player_Set_Rally_Point(TARGET target);
 
     /*
     ** Some additional padding in case we need to add data to the class and maintain backwards compatibility for

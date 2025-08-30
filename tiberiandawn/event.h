@@ -85,6 +85,9 @@ public:
         ARCHIVE,       // Updates archive target on specified object.
         TIMING,        // new timing values for all systems to use
         PROCESS_TIME,  // a system's average processing time, in ticks per frame
+
+        SET_RALLY,     // rally point support
+
         LAST_EVENT,    // one past the last event
     } EventType;
 
