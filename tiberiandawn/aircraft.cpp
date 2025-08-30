@@ -2005,6 +2005,7 @@ void AircraftClass::Debug_Dump(MonoClass* mono) const
 {
     Validate();
     mono->Set_Cursor(0, 0);
+
     mono->Print("�Name:���������������Mission:����TarCom:�NavCom:�Radio:�Coord:���Altitude�St:Ŀ\n"
                 "�                   �           �       �       �      �        �        �    �\n"
                 "����������������N�Y�Health:��Fdir:��Bdir:��Speed:��������������Cargo:��������Ĵ\n"
