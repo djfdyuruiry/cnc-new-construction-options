@@ -108,6 +108,17 @@ public:
     }
 };
 
+class LuaStateDeleter {
+public:
+    void operator()(lua_State *L) const
+    {
+        if (L)
+        {
+            lua_close(L);
+        }
+    }
+};
+
 /**
  * Wrapper around a Lua state.
  * 
@@ -130,7 +141,7 @@ public:
     };
 
     LuaEngine() {
-        Runtime = std::shared_ptr<lua_State>(Build_State(), lua_close);
+        Runtime = std::unique_ptr<lua_State, LuaStateDeleter>(Build_State(), LuaStateDeleter());
     }
 
     void With_State(std::function<void(lua_State*)> actions) {
@@ -241,5 +252,5 @@ private:
         return L;
     };
 
-    std::shared_ptr<lua_State> Runtime;
+    std::unique_ptr<lua_State, LuaStateDeleter> Runtime;
 };
