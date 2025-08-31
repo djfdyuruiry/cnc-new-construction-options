@@ -60,7 +60,6 @@ set(COMMON_SRC
     linear.cpp
     link.cpp
     load.cpp
-    logger.cpp
     memrev.cpp
     misc.cpp
     mixfile.cpp
