@@ -35,6 +35,8 @@
 #ifndef SCENARIO_H
 #define SCENARIO_H
 
+#include "common/lua.h"
+
 /*
 **	This class holds the information about the current game being played. This information is
 **	global to the scenario and is generally of a similar nature to the information that was held
@@ -115,6 +117,8 @@ public:
     **	This records the bookmark view locations the player has recorded.
     */
     CELL Views[4];
+
+    LuaEngine Lua;
 };
 
 #endif

@@ -46,6 +46,7 @@
 
 #include "function.h"
 #include "common/framelimit.h"
+#include "common/lua.h"
 
 extern int PreserveVQAScreen;
 
@@ -102,7 +103,6 @@ ScenarioClass::ScenarioClass(void)
  *=============================================================================================*/
 bool Start_Scenario(char* root, bool briefing)
 {
-
     if (!Read_Scenario(root)) {
         CCDebugString("C&C95 - Failed to read scenario.\n");
         return (false);
@@ -178,6 +178,16 @@ bool Start_Scenario(char* root, bool briefing)
 #endif
         }
     }
+
+    Scen.Lua.Bridge()
+        .beginNamespace("Game")
+            .beginNamespace("scenario")
+                .template addConstant<const char*>(
+                    "name",
+                    Scen.ScenarioName
+                )
+            .endNamespace()
+        .endNamespace ();
 
     /*
     ** Set the options values, since the palette has been initialized by Read_Scenario
@@ -281,6 +291,7 @@ bool Read_Scenario(char* root)
 #endif
         return (false);
     }
+
     ScenarioInit--;
     CCDebugString("C&C95 - Leaving Read_Scenario.\n");
     return (true);
@@ -384,6 +395,9 @@ void Clear_Scenario(void)
     Base.Init();
 
     CurrentObject.Clear_All();
+
+    Scen.Lua.~LuaEngine();
+    Scen.Lua = LuaEngine();
 }
 
 /***********************************************************************************************
@@ -623,6 +637,12 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
+    auto lua_name = Scen.Lua.Try_Read<std::string_view>("Game.scenario.name");
+
+    if (lua_name.has_value()) {
+        CNC_LOG_DEBUG("Game.scenario.name == {}", lua_name.value());
+    }
+
     Map.Set_Default_Mouse(MOUSE_NORMAL);
     Hide_Mouse();
 

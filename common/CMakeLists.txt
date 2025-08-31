@@ -5,6 +5,7 @@ include(GitWatcher)
 
 find_package(spdlog CONFIG REQUIRED)
 find_package(lua REQUIRED)
+find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/LuaBridge.h")
 
 set(COMMON_SRC
     ${GIT_POST_CONFIGURE_FILE}
@@ -60,6 +61,7 @@ set(COMMON_SRC
     link.cpp
     load.cpp
     logger.cpp
+    lua.cpp
     memrev.cpp
     misc.cpp
     mixfile.cpp
@@ -176,8 +178,9 @@ target_link_libraries(common PUBLIC spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 target_link_libraries(common PUBLIC ${LUA_LIBRARIES})
 target_link_libraries(common PUBLIC ${COMMON_LIBS})
 
-target_include_directories(common PUBLIC .)
 target_include_directories(common PUBLIC ${LUA_INCLUDE_DIR})
+target_include_directories(common PUBLIC ${LUABRIDGE_INCLUDE_DIRS})
+target_include_directories(common PUBLIC .)
 
 target_compile_definitions(common PRIVATE FIXIT_FAST_LOAD $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING>)
 target_compile_options(common PUBLIC ${VC_CXX_FLAGS})

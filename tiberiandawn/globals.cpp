@@ -119,10 +119,6 @@ char LoseMovie[_MAX_FNAME + _MAX_EXT];
 char ActionMovie[_MAX_FNAME + _MAX_EXT];
 char MovieThemeName[_MAX_FNAME + _MAX_EXT];
 
-/***************************************************************************
-**	These are the movie names to use for mission briefing, winning, and losing
-**	sequences. They are read from the INI file.
-*/
 ScenarioClass Scen;
 
 /***************************************************************************
