@@ -179,7 +179,7 @@ bool Start_Scenario(char* root, bool briefing)
         }
     }
 
-    Scen.Lua.Bridge()
+    Scen.Lua.value().Bridge()
         .beginNamespace("Game")
             .beginNamespace("scenario")
                 .template addConstant<const char*>(
@@ -396,7 +396,7 @@ void Clear_Scenario(void)
 
     CurrentObject.Clear_All();
 
-    Scen.Lua.~LuaEngine();
+    Scen.Lua.reset();
     Scen.Lua = LuaEngine();
 }
 
@@ -637,7 +637,7 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
-    Scen.Lua.Eval<std::string_view>("Game.scenario.name")
+    Scen.Lua.value().Eval<std::string_view>("Game.scenario.name")
         .If_Value([](auto name) {
             CNC_LOG_DEBUG("Game.scenario.name == {}", name);
         });
