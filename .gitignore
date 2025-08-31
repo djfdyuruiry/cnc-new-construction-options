@@ -4,3 +4,4 @@
 .env
 .vcpkg
 *.log
+perf.data*

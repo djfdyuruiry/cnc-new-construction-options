@@ -10,6 +10,10 @@ function main() {
   local preset="${1:-}"
   local build_type="${2:-}"
 
+  if [ -z "$(command perf)" ]; then
+    error_and_exit "perf command is required to run this script"
+  fi
+
   if [ -z "${RA_DATA_PATH:-}" ]; then
     load_env_file_if_present
   fi
@@ -46,7 +50,8 @@ function main() {
 
   local exit_code=0
 
-  NCO_LOG_LEVEL="debug" ./vanillara-dev "$@" || {
+  # run with debug logging and capture profiling info
+  NCO_LOG_LEVEL="debug" perf record ./vanillara-dev "$@" || {
     exit_code="$?"
     stop_logging
     log_error "Game finished with non-zero exit code: ${exit_code}"
