@@ -45,14 +45,16 @@ public:
 
             lua_pop(L, 1);
         }
-    };
+    }
+
+    LuaResult(int code): Lua_Code(code) {}
 
     /**
      * Provide a custom error message and set a custom error state. 
      */
     LuaResult(std::string error) : Lua_Code(LUA_ERRERR + 1) {
         Error = std::make_optional(error);
-    };
+    }
 
     bool Is_Ok() const {
         return Lua_Code == LUA_OK;
@@ -91,13 +93,12 @@ public:
 
     LuaResultWithValue(const LuaResult& result) : LuaResult(result) {}
 
-    LuaResultWithValue(lua_State* L, int code) : LuaResult(L,code) {}
-
-    LuaResultWithValue(lua_State* L, int code, T lua_value) : LuaResult(L, code) {
+    LuaResultWithValue(T lua_value) : LuaResult(LUA_OK) {
         value = std::make_optional<T>(lua_value);
     }
 
-    LuaResultWithValue(std::string error) : LuaResult(error) {}
+    // L param is to prevent conflicts when T == std::string
+    LuaResultWithValue(lua_State* L, std::string error) : LuaResult(error) {}
 
     const LuaResultWithValue& If_Value(std::function<void(T)> action) const {
         if (value.has_value()) {
@@ -109,51 +110,21 @@ public:
 };
 
 /**
- * Smart pointer helper class to teardown lua_State pointers.
- */
-class LuaStateDeleter {
-public:
-    void operator()(lua_State *L) const
-    {
-        if (L)
-        {
-            lua_close(L);
-        }
-    }
-};
-
-/**
- * Wrapper around a Lua state.
- * 
- * LuaEngine::Global() is the persistent state for the lifetime of
- * the game process.
- * 
- * Instances of LuaEngine should be created for the lifecycle of a
- * given context to ensure clean state when starting a new context
- * (scenario/screen/thread etc.).
+ * Abstract wrapper around a Lua state.
  */
 class LuaEngine {
 public:
     using LuaType = std::variant<std::string_view, double, int>;
 
-    // for storing persistent Lua state globally
-    static const LuaEngine& Global() {
-        static LuaEngine global;
-
-        return global;
-    };
-
-    LuaEngine() {
-        Runtime = std::unique_ptr<lua_State, LuaStateDeleter>(Build_State(), LuaStateDeleter());
-    }
+    virtual ~LuaEngine() = default;
 
     void With_State(std::function<void(lua_State*)> actions) {
-        actions(Runtime.get());
+        actions(Get_State());
     }
 
     template<class T>
     T Get_Value_From_State(std::function<T(lua_State*)> actions) {
-        return actions(Runtime.get());
+        return actions(Get_State());
     }
 
     LuaResult Exec(const std::string& script) {
@@ -166,9 +137,10 @@ public:
                 return LuaResult(L, status);
             }
 
-            status = lua_pcall(L, 0, LUA_MULTRET, 0);
-
-            return LuaResult(L, status);
+            return LuaResult(
+                L,
+                lua_pcall(L, 0, LUA_MULTRET, 0)
+            );
         });
     }
 
@@ -182,12 +154,39 @@ public:
                 return LuaResult(L, status);
             }
 
-            status = lua_pcall(L, 0, LUA_MULTRET, 0);
-
-            return LuaResult(L, status);
+            return LuaResult(
+                L,
+                lua_pcall(L, 0, LUA_MULTRET, 0)
+            );
         });
     };
 
+    template<class T>
+    void Push_Value(T value) {
+        With_State([&value](auto L) {
+            if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
+                lua_pushstring(L, value.data());
+            } else if constexpr (std::is_same_v<T, double>) {
+                lua_pushnumber(L, value);
+            } else if constexpr (std::is_same_v<T, int>) {
+                lua_pushinteger(L, value);
+            } else {
+                CNC_LOGGER_FATAL("Attempted to write unsupported Lua type");
+            }
+        });
+    }
+
+    LuaResultWithValue<std::string> To_String(int stack_index = -1) {
+        return Get_Value_From_State<LuaResultWithValue<std::string>>([&stack_index](auto L) {
+            return LuaResultWithValue<std::string>(
+                lua_tostring(L, stack_index)
+            );
+        });
+    }
+
+    /**
+     * Read a value from the stack, with type checking.
+     */
     template<class T>
     LuaResultWithValue<T> Try_Read(int stack_index = -1) {
         return Get_Value_From_State<LuaResultWithValue<T>>([&stack_index](auto L) {
@@ -196,32 +195,38 @@ public:
             if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double>) {
                 if (type != LUA_TNUMBER) {
                     return LuaResultWithValue<T>(
-                        std::format("Failed to read int/number from stack index {} due to type mismatch, actual type: {}", stack_index, type)
+                        L,
+                        std::format(
+                            "Failed to read int/number from stack index {} due to type mismatch, actual type: {}",
+                            stack_index,
+                            type
+                        )
                     );
                 }
             }
 
             if constexpr (std::is_same_v<T, int>) {
-                return std::make_optional(
+                return LuaResultWithValue<T>(
                     lua_tointeger(L, stack_index)
                 );
             } else if constexpr (std::is_same_v<T, double>) {
-                return std::make_optional(
+                return LuaResultWithValue<T>(
                     lua_tonumber(L, stack_index)
                 );
-            } else if constexpr (std::is_same_v<T, std::string_view>) {
+            } else if constexpr (std::is_same_v<T, std::string>) {
                 if (type != LUA_TSTRING) { 
                     return LuaResultWithValue<T>(
                         L,
-                        LUA_OK,
-                        std::format("Failed to read string from stack index {} due to type mismatch, actual type: {}", stack_index, type)
+                        std::format(
+                            "Failed to read string from stack index {} due to type mismatch, actual type: {}",
+                            stack_index,
+                            type
+                        )
                     );
                 }
 
                 return LuaResultWithValue<T>(
-                    L,
-                    LUA_OK,
-                    std::string_view(lua_tostring(L, stack_index))
+                    std::string(lua_tostring(L, stack_index))
                 );
             }
 
@@ -243,10 +248,55 @@ public:
     }
 
     luabridge::Namespace Bridge() {
-        return luabridge::getGlobalNamespace(Runtime.get());
+        return luabridge::getGlobalNamespace(Get_State());
     }
-private:
+
+protected:
     inline static const CncLogger Logger = CncLogger("LuaEngine");
+
+    virtual lua_State* Get_State() = 0;
+};
+
+/**
+ * Smart pointer helper class to teardown lua_State pointers.
+ */
+class LuaStateDeleter {
+public:
+    void operator()(lua_State *L) const
+    {
+        if (L)
+        {
+            lua_close(L);
+        }
+    }
+};
+
+/**
+ * Instances of this LuaEngine should be created for the lifecycle of a
+ * given context to ensure clean state when starting a new context
+ * (scenario/screen/thread etc.).
+ * 
+ * Aligns with smart pointer unique logic.
+ */
+class UniqueLuaEngine : public LuaEngine {
+public:
+    // for storing persistent Lua state globally
+    static const UniqueLuaEngine& Global() {
+        static UniqueLuaEngine global;
+
+        return global;
+    };
+
+    UniqueLuaEngine() : State(Build_State(), LuaStateDeleter()) {
+    }
+
+protected:
+    virtual lua_State* Get_State() {
+        return State.get();
+    }
+
+private:
+    std::unique_ptr<lua_State, LuaStateDeleter> State;
 
     static lua_State* Build_State() {
         auto L = luaL_newstate();
@@ -254,6 +304,25 @@ private:
 
         return L;
     };
+};
 
-    std::unique_ptr<lua_State, LuaStateDeleter> Runtime;
+/**
+ * Instances of this LuaEngine should be created to wrap around
+ * a state that isn't owned by the current context, e.x. in a
+ * Lua C function.
+ * 
+ * Aligns with smart pointer shared logic.
+ */
+class SharedLuaEngine : public LuaEngine {
+public:
+    SharedLuaEngine(lua_State* L) : State(L) {
+    }
+
+protected:
+    virtual lua_State* Get_State() {
+        return State;
+    }
+
+private:
+    lua_State* State;
 };

@@ -179,16 +179,6 @@ bool Start_Scenario(char* root, bool briefing)
         }
     }
 
-    Scen.Lua.value().Bridge()
-        .beginNamespace("Game")
-            .beginNamespace("scenario")
-                .template addConstant<const char*>(
-                    "name",
-                    Scen.ScenarioName
-                )
-            .endNamespace()
-        .endNamespace ();
-
     /*
     ** Set the options values, since the palette has been initialized by Read_Scenario
     */
@@ -396,8 +386,29 @@ void Clear_Scenario(void)
 
     CurrentObject.Clear_All();
 
-    Scen.Lua.reset();
-    Scen.Lua = LuaEngine();
+    Scen.Lua = UniqueLuaEngine();
+
+    Scen.Lua.Bridge()
+        .beginNamespace("Game")
+            .beginNamespace("scenario")
+                .template addConstant<const char*>(
+                    "name",
+                    Scen.ScenarioName
+                )
+            .endNamespace()
+            .beginNamespace("Logger")
+                .addCFunction("info", [](auto L) {
+                    auto engine = SharedLuaEngine(L);
+
+                    engine.Try_Read<std::string>()
+                        .If_Value([](auto message) {
+                            CNC_LOG_INFO(message);
+                        });
+
+                    return 0;
+                })
+            .endNamespace()
+        .endNamespace();
 }
 
 /***********************************************************************************************
@@ -637,10 +648,9 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
-    Scen.Lua.value().Eval<std::string_view>("Game.scenario.name")
-        .If_Value([](auto name) {
-            CNC_LOG_DEBUG("Game.scenario.name == {}", name);
-        });
+    Scen.Lua.Exec(R"*(
+        Game.Logger.info("Game.scenario.name == " .. Game.scenario.name)
+    )*");
 
     Map.Set_Default_Mouse(MOUSE_NORMAL);
     Hide_Mouse();

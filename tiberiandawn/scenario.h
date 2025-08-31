@@ -118,7 +118,7 @@ public:
     */
     CELL Views[4];
 
-    std::optional<LuaEngine> Lua;
+    UniqueLuaEngine Lua;
 };
 
 #endif
