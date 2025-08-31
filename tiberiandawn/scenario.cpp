@@ -637,7 +637,7 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
-    Scen.Lua.Try_Read<std::string_view>("Game.scenario.name")
+    Scen.Lua.Eval<std::string_view>("Game.scenario.name")
         .If_Value([](auto name) {
             CNC_LOG_DEBUG("Game.scenario.name == {}", name);
         });

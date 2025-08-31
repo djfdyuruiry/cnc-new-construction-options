@@ -11,9 +11,28 @@
 
 #include "logger.h"
 
+/**
+ * C++ API for working with Lua. Uses LuaBridge to provide a
+ * fluent interface for declaring classes, functions and variables.
+ */
+
+/**
+ * Models the result of making a call to the low-level C Lua API.
+ * 
+ * Uses callbacks for fluent consumption: If_Ok and On_Error.
+ */
 class LuaResult {
 public:
+    /**
+     * If @code is not LUA_OK, this constructor has side affects and will
+     * pop the last error off the Lua stack @L.
+     */
     LuaResult(lua_State* L, int code) : Lua_Code(code) {
+        if (code == LUA_ERRERR + 1) {
+            // custom lua error provided
+            return;
+        }
+
         if (code < LUA_OK || code > LUA_ERRERR) {
             // invalid error code passed, assume error
             code = LUA_ERRERR;
@@ -28,7 +47,10 @@ public:
         }
     };
 
-    LuaResult(std::string error) : Lua_Code(LUA_ERRERR) {
+    /**
+     * Provide a custom error message and set a custom error state. 
+     */
+    LuaResult(std::string error) : Lua_Code(LUA_ERRERR + 1) {
         Error = std::make_optional(error);
     };
 
@@ -57,6 +79,11 @@ private:
     std::optional<std::string> Error;
 };
 
+/**
+ * Models the reading a value using the low-level C Lua API.
+ * 
+ * Use LuaResult fluent callbacks plus If_Value to read the value if set.
+ */
 template<class T>
 class LuaResultWithValue : public LuaResult {
 public:
@@ -81,6 +108,16 @@ public:
     }
 };
 
+/**
+ * Wrapper around a Lua state.
+ * 
+ * LuaEngine::Global() is the persistent state for the lifetime of
+ * the game process.
+ * 
+ * Instances of LuaEngine should be created for the lifecycle of a
+ * given context to ensure clean state when starting a new context
+ * (scenario/screen/thread etc.).
+ */
 class LuaEngine {
 public:
     using LuaType = std::variant<std::string_view, double, int>;
@@ -96,18 +133,20 @@ public:
         Runtime = std::shared_ptr<lua_State>(Build_State(), lua_close);
     }
 
-    void With_State(std::function<void(lua_State*)> actions);
-
-    template<class T>
-    T With_State(std::function<void(lua_State*)> actions) {
+    void With_State(std::function<void(lua_State*)> actions) {
         actions(Runtime.get());
     }
 
-    LuaResult Exec(std::string_view script) {
+    template<class T>
+    T Get_Value_From_State(std::function<T(lua_State*)> actions) {
+        return actions(Runtime.get());
+    }
+
+    LuaResult Exec(const std::string& script) {
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
 
-        return With_State<LuaResult>([&script](auto L) {
-            auto status =   (L, script.data());
+        return Get_Value_From_State<LuaResult>([&script](auto L) {
+            auto status = luaL_loadstring(L, script.data());
 
             if (status != LUA_OK) {
                 return LuaResult(L, status);
@@ -122,7 +161,7 @@ public:
     LuaResult Exec_File(std::string_view script_path) {
         CNC_LOGGER_DEBUG("Attempting to execute lua file: {}", script_path);
 
-        return With_State<LuaResult>([&script_path](auto L) {
+        return Get_Value_From_State<LuaResult>([&script_path](auto L) {
             auto status = luaL_loadfile(L, script_path.data());
 
             if (status != LUA_OK) {
@@ -137,7 +176,7 @@ public:
 
     template<class T>
     LuaResultWithValue<T> Try_Read(int stack_index = -1) {
-        return With_State<LuaResultWithValue<T>>([&stack_index](auto L) {
+        return Get_Value_From_State<LuaResultWithValue<T>>([&stack_index](auto L) {
             auto type = lua_type(L, stack_index);
 
             if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double>) {
@@ -177,7 +216,7 @@ public:
     }
 
     template<class T>
-    LuaResultWithValue<T> Try_Read(std::string_view expression) {
+    LuaResultWithValue<T> Eval(const std::string& expression) {
         auto result = Exec(std::format("return {}", expression));
     
         if (!result.Is_Ok()) {
@@ -204,4 +243,3 @@ private:
 
     std::shared_ptr<lua_State> Runtime;
 };
-
