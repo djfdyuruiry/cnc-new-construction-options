@@ -108,6 +108,9 @@ public:
     }
 };
 
+/**
+ * Smart pointer helper class to teardown lua_State pointers.
+ */
 class LuaStateDeleter {
 public:
     void operator()(lua_State *L) const
