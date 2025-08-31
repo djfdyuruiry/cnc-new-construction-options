@@ -61,7 +61,6 @@ set(COMMON_SRC
     link.cpp
     load.cpp
     logger.cpp
-    lua.cpp
     memrev.cpp
     misc.cpp
     mixfile.cpp

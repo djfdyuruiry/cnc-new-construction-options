@@ -46,7 +46,7 @@
 
 #include "function.h"
 #include "common/framelimit.h"
-#include "common/lua.h"
+#include "common/luaengine.h"
 
 extern int PreserveVQAScreen;
 
@@ -637,11 +637,10 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
-    auto lua_name = Scen.Lua.Try_Read<std::string_view>("Game.scenario.name");
-
-    if (lua_name.has_value()) {
-        CNC_LOG_DEBUG("Game.scenario.name == {}", lua_name.value());
-    }
+    Scen.Lua.Try_Read<std::string_view>("Game.scenario.name")
+        .If_Value([](auto name) {
+            CNC_LOG_DEBUG("Game.scenario.name == {}", name);
+        });
 
     Map.Set_Default_Mouse(MOUSE_NORMAL);
     Hide_Mouse();

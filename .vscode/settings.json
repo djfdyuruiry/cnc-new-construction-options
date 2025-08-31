@@ -114,7 +114,10 @@
     "filesystem": "cpp",
     "cerrno": "cpp",
     "climits": "cpp",
-    "*.in": "cpp"
+    "*.in": "cpp",
+    "cassert": "cpp",
+    "cfloat": "cpp",
+    "*.rh": "cpp"
   },
   "cSpell.words": [
     "Avalonia",
