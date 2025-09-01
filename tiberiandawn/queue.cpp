@@ -2790,6 +2790,9 @@ static int Execute_DoList(int,
                 DoList[i].IsExecuted = true; // mark as having been executed
             }
         }
+
+        WWMessageBox().Process("LUA");
+
         return (1);
     }
 
