@@ -124,6 +124,7 @@
     "CCINI",
     "CCMAP",
     "endfor",
+    "luabridge",
     "mobius",
     "modders",
     "MSVC",

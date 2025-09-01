@@ -1,8 +1,10 @@
 #pragma once
 
 #include <functional>
+#include <future>
 #include <memory>
 #include <string>
+#include <thread>
 #include <variant>
 #include <format>
 
@@ -23,6 +25,9 @@
  */
 class LuaResult {
 public:
+    int Lua_Code;
+    std::optional<std::string> Error;
+
     /**
      * If @code is not LUA_OK, this constructor has side affects and will
      * pop the last error off the Lua stack @L.
@@ -60,6 +65,25 @@ public:
         return Lua_Code == LUA_OK;
     }
 
+    const char * Code_As_String() const {
+        switch (Lua_Code) {
+            case LUA_OK:
+                return "OK";
+            case LUA_ERRRUN:
+                return "Runtime";
+            case LUA_ERRSYNTAX:
+                return "Syntax";
+            case LUA_ERRMEM:
+                return "Memory";
+            case LUA_ERRFILE:
+                return "File";
+            case LUA_ERRERR:
+                return "Error Handling Failure";
+            default:
+                return "Unknown";
+        }
+    }
+
     const LuaResult& If_Ok(std::function<void(const LuaResult&)> action) const {
         if (Is_Ok()) {
             action(*this);
@@ -75,10 +99,6 @@ public:
 
         return *this;
     }
-
-private:
-    int Lua_Code;
-    std::optional<std::string> Error;
 };
 
 /**
@@ -89,20 +109,20 @@ private:
 template<class T>
 class LuaResultWithValue : public LuaResult {
 public:
-    std::optional<T> value;
+    std::optional<T> Value_Source;
 
     LuaResultWithValue(const LuaResult& result) : LuaResult(result) {}
 
     LuaResultWithValue(T lua_value) : LuaResult(LUA_OK) {
-        value = std::make_optional<T>(lua_value);
+        Value_Source = std::make_optional<T>(lua_value);
     }
 
     // L param is to prevent conflicts when T == std::string
     LuaResultWithValue(lua_State* L, std::string error) : LuaResult(error) {}
 
     const LuaResultWithValue& If_Value(std::function<void(T)> action) const {
-        if (value.has_value()) {
-            action(value.value());
+        if (Value_Source.has_value()) {
+            action(Value_Source.value());
         }
 
         return *this;
@@ -127,6 +147,13 @@ public:
         return actions(Get_State());
     }
 
+    void Raise_Error(const std::string& message) const {
+        With_State([&](auto L) {
+            Push_Value(message);
+            lua_error(L);
+        });
+    }
+
     LuaResult Exec(const std::string& script) const {
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
 
@@ -134,7 +161,14 @@ public:
             auto status = luaL_loadstring(L, script.data());
 
             if (status != LUA_OK) {
-                return LuaResult(L, status);
+                auto result = LuaResult(L, status);
+
+                CNC_LOGGER_TRACE(
+                    "Error loading lua script due to '{}' error: {}",
+                    result.Code_As_String(),
+                    result.Error.value()
+                );
+                return result;
             }
 
             return LuaResult(
@@ -142,6 +176,19 @@ public:
                 lua_pcall(L, 0, LUA_MULTRET, 0)
             );
         });
+    }
+
+    std::future<LuaResult> Exec_Async(const std::string& script) const {
+        auto promise = std::make_shared<std::promise<LuaResult>>();
+        auto future = promise->get_future();
+
+        std::thread([=]() {
+            promise->set_value(
+                Exec(script)
+            );
+        }).detach();
+
+        return future;
     }
 
     LuaResult Exec_File(std::string_view script_path) const {
@@ -152,6 +199,14 @@ public:
 
             if (status != LUA_OK) {
                 return LuaResult(L, status);
+                auto result = LuaResult(L, status);
+
+                CNC_LOGGER_TRACE(
+                    "Error loading lua file due to '{}' error: {}",
+                    result.Code_As_String(),
+                    result.Error.value()
+                );
+                return result;
             }
 
             return LuaResult(
@@ -161,27 +216,21 @@ public:
         });
     };
 
-    template<class T>
-    void Push_Value(T value) const {
-        With_State([&value](auto L) {
-            if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
-                lua_pushstring(L, value.data());
-            } else if constexpr (std::is_same_v<T, double>) {
-                lua_pushnumber(L, value);
-            } else if constexpr (std::is_same_v<T, int>) {
-                lua_pushinteger(L, value);
-            } else {
-                CNC_LOGGER_FATAL("Attempted to write unsupported Lua type");
-            }
-        });
+    std::future<LuaResult> Exec_File_Async(std::string_view script_path) const {
+        auto promise = std::make_shared<std::promise<LuaResult>>();
+        auto future = promise->get_future();
+
+        std::thread([=]() {
+            promise->set_value(
+                Exec_File(script_path)
+            );
+        }).detach();
+
+        return future;
     }
 
-    LuaResultWithValue<std::string> To_String(int stack_index = -1) const {
-        return Get_Value_From_State<LuaResultWithValue<std::string>>([&stack_index](auto L) {
-            return LuaResultWithValue<std::string>(
-                lua_tostring(L, stack_index)
-            );
-        });
+    int Get_Stack_Count() const {
+        return lua_gettop(Get_State());
     }
 
     /**
@@ -234,6 +283,14 @@ public:
         });
     }
 
+    LuaResultWithValue<std::string> To_String(int stack_index = -1) const {
+        return Get_Value_From_State<LuaResultWithValue<std::string>>([&stack_index](auto L) {
+            return LuaResultWithValue<std::string>(
+                lua_tostring(L, stack_index)
+            );
+        });
+    }
+
     template<class T>
     LuaResultWithValue<T> Eval(const std::string& expression) const {
         auto result = Exec(std::format("return {}", expression));
@@ -247,14 +304,145 @@ public:
         return Try_Read<T>();
     }
 
+    template<class T>
+    std::future<LuaResultWithValue<T>> Eval_Async(const std::string& expression) const {
+        auto promise = std::make_shared<std::promise<LuaResultWithValue<T>>>();
+        auto future = promise->get_future();
+
+        std::thread([=]() {
+            promise->set_value(
+                Eval<T>(expression)
+            );
+        }).detach();
+
+        return future;
+    }
+
+    template<class T>
+    void Push_Value(T value) const {
+        With_State([&value](auto L) {
+            if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
+                lua_pushstring(L, value.data());
+            } else if constexpr (std::is_same_v<T, double>) {
+                lua_pushnumber(L, value);
+            } else if constexpr (std::is_same_v<T, int>) {
+                lua_pushinteger(L, value);
+            } else {
+                CNC_LOGGER_FATAL("Attempted to write unsupported Lua type");
+            }
+        });
+    }
+
     luabridge::Namespace Bridge() const {
         return luabridge::getGlobalNamespace(Get_State());
     }
-
 protected:
     inline static const CncLogger Logger = CncLogger("LuaEngine");
 
     virtual lua_State* Get_State() const = 0;
+};
+
+/**
+ * Wrapper around LuaEngine to validate and read arguments passed to a CFunction.
+ */
+class LuaArguments {
+public:
+    const int Count;
+    const std::string Function_Signature;
+
+    LuaArguments(const LuaEngine& lua, std::string function_signature) : Lua(lua), Count(lua.Get_Stack_Count()), Function_Signature(function_signature) {
+    }
+
+    // Fluent assert stream methods
+
+    LuaArguments& Count_Is(int expected) {
+        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+            // already invalid, short circuit
+            return *this;
+        }
+
+        Stream_Is_Valid = Count == expected;
+        Stream_Argument_Index = 1;
+
+        return *this;
+    }
+
+    template<class T>
+    LuaArguments& Next_Argument_Is() {
+        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+            // already invalid, short circuit
+            return *this;
+        }
+
+        if (Stream_Argument_Index.has_value()) {
+            Stream_Argument_Index = 1;
+        }
+
+        auto result = Lua.Try_Read<T>(Stream_Argument_Index.value());
+
+        Stream_Is_Valid = result.Is_Ok();
+        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+
+        return *this;
+    }
+
+    template<class T>
+    LuaArguments& First_Argument_Is() {
+        Stream_Argument_Index = 1;
+
+        return Next_Argument_Is<T>();
+    }
+
+    bool Assert() {
+        if (!Stream_Is_Valid.has_value()) {
+            // called before Is calls, assume invalid
+            Stream_Is_Valid = false;
+        }
+
+        auto result = Stream_Is_Valid.value();
+
+        if (!result) {
+            Lua.Raise_Error(
+                std::format(
+                    "Incorrect number of arguments, or argument type mis-match. Usage: {}",
+                    Function_Signature
+                )
+            );
+        }
+
+        Stream_Is_Valid.reset();
+        Stream_Argument_Index.reset();
+
+        return result;
+    }
+
+    // Fluent read stream methods
+
+    template<class T>
+    LuaResultWithValue<T> Read_Next() {
+        if (!Read_Stream_Argument_Index.has_value()) {
+            Read_Stream_Argument_Index = 1;
+        }
+
+        auto result = Lua.Try_Read<T>(Read_Stream_Argument_Index.value());
+
+        Read_Stream_Argument_Index = Read_Stream_Argument_Index.value() + 1;
+
+        return result;
+    }
+
+    template<class T>
+    LuaResultWithValue<T> Read_First() {
+        Read_Stream_Argument_Index = 1;
+
+        return Read_Next<T>();
+    }
+private:
+    const LuaEngine& Lua;
+    std::optional<bool> Stream_Is_Valid;
+    std::optional<int> Stream_Argument_Index;
+
+    std::optional<int> Read_Stream_Argument_Index;
 };
 
 /**

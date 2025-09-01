@@ -46,7 +46,8 @@
 
 #include "function.h"
 #include "common/framelimit.h"
-#include "common/luaengine.h"
+#include "common/lua/logging_luaapi.h"
+#include "common/lua/luaengine.h"
 
 extern int PreserveVQAScreen;
 
@@ -388,27 +389,9 @@ void Clear_Scenario(void)
 
     Scen.Lua = UniqueLuaEngine();
 
-    Scen.Lua.Bridge()
-        .beginNamespace("Game")
-            .beginNamespace("scenario")
-                .template addConstant<const char*>(
-                    "name",
-                    Scen.ScenarioName
-                )
-            .endNamespace()
-            .beginNamespace("Logger")
-                .addCFunction("info", [](auto L) {
-                    auto engine = SharedLuaEngine(L);
+    auto logging_api = LoggingLuaApi(Scen.Lua);
 
-                    engine.Try_Read<std::string>()
-                        .If_Value([](auto message) {
-                            CNC_LOG_INFO(message);
-                        });
-
-                    return 0;
-                })
-            .endNamespace()
-        .endNamespace();
+    logging_api.Register();
 }
 
 /***********************************************************************************************
@@ -648,8 +631,14 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
-    Scen.Lua.Exec(R"*(
-        Game.Logger.info("Game.scenario.name == " .. Game.scenario.name)
+    Scen.Lua.Exec_Async(R"*(
+        local success, error = pcall(function()
+          Logger.log("debug", "REEING FROM THE VOID")
+        end)
+
+        if not success then
+            print(error)
+        end
     )*");
 
     Map.Set_Default_Mouse(MOUSE_NORMAL);

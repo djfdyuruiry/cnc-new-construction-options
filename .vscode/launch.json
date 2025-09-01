@@ -15,7 +15,7 @@
       "environment": [
         {
           "name": "NCO_LOG_LEVEL",
-          "value": "debug,Find_File_Data=off"
+          "value": "debug,LuaEngine=trace,Find_File_Data=off"
         }
       ]
     },

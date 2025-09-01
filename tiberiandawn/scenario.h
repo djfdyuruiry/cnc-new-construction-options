@@ -35,7 +35,7 @@
 #ifndef SCENARIO_H
 #define SCENARIO_H
 
-#include "common/luaengine.h"
+#include "common/lua/luaengine.h"
 
 /*
 **	This class holds the information about the current game being played. This information is
