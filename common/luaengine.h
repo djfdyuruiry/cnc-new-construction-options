@@ -118,16 +118,16 @@ public:
 
     virtual ~LuaEngine() = default;
 
-    void With_State(std::function<void(lua_State*)> actions) {
+    void With_State(std::function<void(lua_State*)> actions) const {
         actions(Get_State());
     }
 
     template<class T>
-    T Get_Value_From_State(std::function<T(lua_State*)> actions) {
+    T Get_Value_From_State(std::function<T(lua_State*)> actions) const {
         return actions(Get_State());
     }
 
-    LuaResult Exec(const std::string& script) {
+    LuaResult Exec(const std::string& script) const {
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
 
         return Get_Value_From_State<LuaResult>([&script](auto L) {
@@ -144,7 +144,7 @@ public:
         });
     }
 
-    LuaResult Exec_File(std::string_view script_path) {
+    LuaResult Exec_File(std::string_view script_path) const {
         CNC_LOGGER_DEBUG("Attempting to execute lua file: {}", script_path);
 
         return Get_Value_From_State<LuaResult>([&script_path](auto L) {
@@ -162,7 +162,7 @@ public:
     };
 
     template<class T>
-    void Push_Value(T value) {
+    void Push_Value(T value) const {
         With_State([&value](auto L) {
             if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
                 lua_pushstring(L, value.data());
@@ -176,7 +176,7 @@ public:
         });
     }
 
-    LuaResultWithValue<std::string> To_String(int stack_index = -1) {
+    LuaResultWithValue<std::string> To_String(int stack_index = -1) const {
         return Get_Value_From_State<LuaResultWithValue<std::string>>([&stack_index](auto L) {
             return LuaResultWithValue<std::string>(
                 lua_tostring(L, stack_index)
@@ -188,7 +188,7 @@ public:
      * Read a value from the stack, with type checking.
      */
     template<class T>
-    LuaResultWithValue<T> Try_Read(int stack_index = -1) {
+    LuaResultWithValue<T> Try_Read(int stack_index = -1) const {
         return Get_Value_From_State<LuaResultWithValue<T>>([&stack_index](auto L) {
             auto type = lua_type(L, stack_index);
 
@@ -235,7 +235,7 @@ public:
     }
 
     template<class T>
-    LuaResultWithValue<T> Eval(const std::string& expression) {
+    LuaResultWithValue<T> Eval(const std::string& expression) const {
         auto result = Exec(std::format("return {}", expression));
     
         if (!result.Is_Ok()) {
@@ -247,14 +247,14 @@ public:
         return Try_Read<T>();
     }
 
-    luabridge::Namespace Bridge() {
+    luabridge::Namespace Bridge() const {
         return luabridge::getGlobalNamespace(Get_State());
     }
 
 protected:
     inline static const CncLogger Logger = CncLogger("LuaEngine");
 
-    virtual lua_State* Get_State() = 0;
+    virtual lua_State* Get_State() const = 0;
 };
 
 /**
@@ -291,7 +291,7 @@ public:
     }
 
 protected:
-    virtual lua_State* Get_State() {
+    virtual lua_State* Get_State() const {
         return State.get();
     }
 
@@ -319,7 +319,7 @@ public:
     }
 
 protected:
-    virtual lua_State* Get_State() {
+    virtual lua_State* Get_State() const {
         return State;
     }
 

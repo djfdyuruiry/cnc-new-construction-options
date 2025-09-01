@@ -118,6 +118,9 @@ public:
     */
     CELL Views[4];
 
+    /**
+     * Lua instance lives for the lifecycle of a scenario.
+     */
     UniqueLuaEngine Lua;
 };
 
