@@ -554,6 +554,12 @@ void Debug_Key(unsigned input)
 
 #endif
 
+        case KN_F5:
+            Scen.Lua.Exec_Async(R"*(
+                Messages.showToPlayer("This message came from Lua")
+            )*");
+            break;
+
         case KN_F3:
             Debug_Icon = (Debug_Icon == false);
             Map.Flag_To_Redraw(true);

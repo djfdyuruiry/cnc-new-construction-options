@@ -109,8 +109,6 @@ public:
 template<class T>
 class LuaResultWithValue : public LuaResult {
 public:
-    std::optional<T> Value_Source;
-
     LuaResultWithValue(const LuaResult& result) : LuaResult(result) {}
 
     LuaResultWithValue(T lua_value) : LuaResult(LUA_OK) {
@@ -127,6 +125,25 @@ public:
 
         return *this;
     }
+
+    bool Has_Value() {
+        return Value_Source.has_value();
+    }
+
+    /**
+     * This method is dangerous, and must only be called after
+     * checking Is_Ok and Has_Value both return `true`.
+     */
+    T Unpack() {
+        if (!Value_Source.has_value()) {
+            CNC_LOG_FATAL("Attempted to unpack empty LuaResultWithValue");
+        }
+
+        return Value_Source.value();
+    }
+
+private:
+    std::optional<T> Value_Source;
 };
 
 /**
@@ -137,6 +154,15 @@ public:
     using LuaType = std::variant<std::string_view, double, int>;
 
     virtual ~LuaEngine() = default;
+
+    template<class T>
+    void Register_Api() {
+        auto api = T(*this);
+
+        api.Register();
+    }
+
+    // low level state access
 
     void With_State(std::function<void(lua_State*)> actions) const {
         actions(Get_State());
@@ -153,6 +179,8 @@ public:
             lua_error(L);
         });
     }
+
+    // code execution
 
     LuaResult Exec(const std::string& script) const {
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
@@ -228,6 +256,8 @@ public:
 
         return future;
     }
+
+    // lua stack interaction (read/write values)
 
     int Get_Stack_Count() const {
         return lua_gettop(Get_State());
@@ -333,6 +363,8 @@ public:
         });
     }
 
+    // bridge for API building
+
     luabridge::Namespace Bridge() const {
         return luabridge::getGlobalNamespace(Get_State());
     }
@@ -380,7 +412,7 @@ public:
 
         auto result = Lua.Try_Read<T>(Stream_Argument_Index.value());
 
-        Stream_Is_Valid = result.Is_Ok();
+        Stream_Is_Valid = result.Is_Ok() && result.Has_Value();
         Stream_Argument_Index = Stream_Argument_Index.value() + 1;
 
         return *this;
@@ -443,6 +475,29 @@ private:
     std::optional<int> Stream_Argument_Index;
 
     std::optional<int> Read_Stream_Argument_Index;
+};
+
+/**
+ * Builder that makes registering APIs easier.
+ */
+template<class T>
+class LuaEngineBuilder {
+public:
+    template<class U>
+    LuaEngineBuilder& With_Api() {
+        Lua.template Register_Api<U>();
+
+        return *this;
+    }
+
+    /**
+     * Resolve the end of the builder chain as a concrete implementation.
+     */
+    T Build() {
+        return std::move(Lua);
+    }
+private:
+    T Lua;
 };
 
 /**

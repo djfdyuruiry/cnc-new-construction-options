@@ -4,7 +4,7 @@
 #include <string>
 
 #include "logger.h"
-#include "luaengine.h"
+#include "lua/luaengine.h"
 
 /**
  * Wrapper around LuaEngine to register Lua

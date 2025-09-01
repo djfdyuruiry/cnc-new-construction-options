@@ -45,9 +45,12 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+
 #include "common/framelimit.h"
 #include "common/lua/logging_luaapi.h"
 #include "common/lua/luaengine.h"
+
+#include "lua/messages_luaapi.h"
 
 extern int PreserveVQAScreen;
 
@@ -387,11 +390,10 @@ void Clear_Scenario(void)
 
     CurrentObject.Clear_All();
 
-    Scen.Lua = UniqueLuaEngine();
-
-    auto logging_api = LoggingLuaApi(Scen.Lua);
-
-    logging_api.Register();
+    Scen.Lua = LuaEngineBuilder<UniqueLuaEngine>()
+        .With_Api<LoggingLuaApi>()
+        .With_Api<MessagesLuaApi>()
+        .Build();
 }
 
 /***********************************************************************************************
