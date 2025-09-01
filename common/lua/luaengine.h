@@ -534,7 +534,7 @@ public:
     }
 
 protected:
-    virtual lua_State* Get_State() const {
+    virtual lua_State* Get_State() const override {
         return State.get();
     }
 
@@ -562,7 +562,7 @@ public:
     }
 
 protected:
-    virtual lua_State* Get_State() const {
+    virtual lua_State* Get_State() const override {
         return State;
     }
 

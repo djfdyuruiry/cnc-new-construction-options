@@ -10,7 +10,7 @@ public:
     {
     }
 
-    virtual void Register_Functions() const
+    virtual void Register_Functions() const override
     {
         Get_Namespace()
             .addCFunction("log", [](auto L) {

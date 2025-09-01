@@ -556,7 +556,7 @@ void Debug_Key(unsigned input)
 
         case KN_F5:
             Scen.Lua.Exec_Async(R"*(
-                Messages.showToPlayer("This message came from Lua")
+                Messages.popupOk("This message came from Lua")
             )*");
             break;
 

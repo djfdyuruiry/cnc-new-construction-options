@@ -1,7 +1,10 @@
 #pragma once
 
+#include <memory>
+
 #include "../common/lua/luaapi.h"
 
+#include "td_luaevents.h"
 #include "../externs.h"
 
 class MessagesLuaApi: public LuaApi {
@@ -11,7 +14,7 @@ public:
     {
     }
 
-    virtual void Register_Functions() const {
+    virtual void Register_Functions() const override {
         Get_Namespace()
             .addCFunction("showToPlayer", [](auto L) {
                 auto engine = SharedLuaEngine(L);
@@ -34,6 +37,26 @@ public:
                     0
                 );
                 Map.Flag_To_Redraw(false);
+
+                return 0;
+            })
+            .addCFunction("popupOk", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Messages.popupOk(<string: message>)");
+
+                if (!arguments.Count_Is(1)
+                        .First_Argument_Is<std::string>()
+                        .Assert()) {
+                    return 0;
+                }
+
+                auto message = arguments.Read_First<std::string>().Unpack();
+
+                LuaList.push(
+                    std::move(
+                        std::make_unique<PopupLuaEvent>(message)
+                    )
+                );
 
                 return 0;
             })

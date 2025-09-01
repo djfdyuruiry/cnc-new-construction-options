@@ -36,6 +36,8 @@
 #ifndef EXTERNS_H
 #define EXTERNS_H
 
+#include <queue>
+
 #include "cell.h"
 
 #ifdef SCENARIO_EDITOR
@@ -52,6 +54,7 @@
 #include "jshell.h"
 #include "common/vqaconfig.h"
 #include "common/winstub.h"
+#include "common/lua/luaevent.h"
 #include "ccini.h"
 
 #ifdef REMASTER_BUILD
@@ -179,6 +182,8 @@ extern TFixedIHeapClass<HouseClass> Houses;
 
 extern QueueClass<EventClass, MAX_EVENTS> OutList;
 extern QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
+
+extern std::queue<std::unique_ptr<LuaEvent>> LuaList;
 
 typedef DynamicVectorArrayClass<ObjectClass*, HOUSE_COUNT, HOUSE_FIRST> SelectedObjectsType;
 extern SelectedObjectsType CurrentObject;

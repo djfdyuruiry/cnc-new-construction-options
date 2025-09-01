@@ -4,11 +4,13 @@
 
 #include "../msgbox.h"
 
-class PopupEvent : public LuaEvent {
+class PopupLuaEvent : public LuaEvent {
 public:
-    PopupEvent(const std::string message) : LuaEvent(message) {}
+    PopupLuaEvent(std::string message) : LuaEvent("PopupLuaEvent", message) {}
 
-    virtual void Execute() const {
+    virtual void Execute() const override {
+        LuaEvent::Execute();
+
         auto message = std::get<std::string>(Data);
 
         WWMessageBox().Process(message.data());

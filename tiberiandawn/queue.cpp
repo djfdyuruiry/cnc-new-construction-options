@@ -2738,6 +2738,23 @@ static int Extract_Compressed_Events(void* buf, int bufsize)
 
 #endif // DEMO
 
+/**
+ * Iterate through FIFO lua events, discarding each after processing.
+ */
+static void Process_Lua_Events() {
+    if (LuaList.size() < 1) {
+        CNC_LOG_TRACE("No Lua Events to process");
+        return;
+    }
+
+    CNC_LOG_DEBUG("Processing {} Lua Events", LuaList.size());
+
+    while (!LuaList.empty()) {
+        LuaList.front()->Execute();
+        LuaList.pop();
+    }
+}
+
 /***************************************************************************
  * Execute_DoList -- Executes commands from the DoList                     *
  *                                                                         *
@@ -2791,7 +2808,7 @@ static int Execute_DoList(int,
             }
         }
 
-        WWMessageBox().Process("LUA");
+        Process_Lua_Events();
 
         return (1);
     }
