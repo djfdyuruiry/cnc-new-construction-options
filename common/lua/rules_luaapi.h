@@ -31,7 +31,7 @@ public:
     virtual void Register_Functions() const override
     {
         With_Api_Namespace([](auto& n) {
-            n.addCFunction("lookup", [](auto L) {
+            n.addCFunction("get", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Rules.get(<string: section>, <string: key>)");
 
