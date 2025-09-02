@@ -212,6 +212,10 @@ public:
         return keys;
     }
 
+    bool Has_Section(std::string_view name) {
+        return Sections.find(name) != Sections.end();
+    }
+
     RuleSection& operator[](std::string_view name) {
         auto it = Sections.find(name);
 

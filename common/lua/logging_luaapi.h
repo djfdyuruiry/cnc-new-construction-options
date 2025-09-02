@@ -2,6 +2,9 @@
 
 #include "luaapi.h"
 
+/**
+ * Lua interface for spdlog.
+ */
 class LoggingLuaApi : public LuaApi
 {
 public:

@@ -1,5 +1,19 @@
 #pragma once
 
+/**
+ * C++ API for working with Lua. Uses LuaBridge to provide a
+ * fluent interface for declaring classes, functions and variables.
+ * 
+ * Class hierarchy:
+ * 
+ *   LuaEngine --[uses]--> LuaResult --[uses]--> LuaResultWithValue
+ *   LuaArguments --[uses]--> LuaEngine
+ *   UniqueLuaEngine --[extends]--> LuaEngine
+ *      UniqueLuaEngine --[uses]--> LuaStateDeleter
+ *   LuaEngineBuilder --[builds]--> UniqueLuaEngine
+ *   SharedLuaEngine --[extends]--> LuaEngine
+ */
+
 #include <functional>
 #include <future>
 #include <memory>
@@ -12,11 +26,6 @@
 #include <LuaBridge/LuaBridge.h>
 
 #include "../logger.h"
-
-/**
- * C++ API for working with Lua. Uses LuaBridge to provide a
- * fluent interface for declaring classes, functions and variables.
- */
 
 /**
  * Models the result of making a call to the low-level C Lua API.
@@ -174,7 +183,7 @@ public:
     }
 
     /**
-     * Note: Calling this will terminate execution of the source function/method
+     * Note: Calling this will terminate execution of the source CFunction
      * context, so no need to return after calling this.
      */
     void Raise_Error(const std::string& message) const {
@@ -261,10 +270,39 @@ public:
         return future;
     }
 
-    // lua stack interaction (read/write values)
+    // lua stack interaction (inspect, read and write values)
 
     int Get_Stack_Count() const {
         return lua_gettop(Get_State());
+    }
+
+    template<class T>
+    bool Is_Type(int stack_index = -1) const {
+        return Get_Value_From_State<bool>([&stack_index](auto L) {
+            auto type = lua_type(L, stack_index);
+
+            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
+                return type == LUA_TNUMBER;
+            } else if constexpr (std::is_same_v<T, bool>) {
+                return type == LUA_TBOOLEAN;
+            } else if constexpr (std::is_same_v<T, std::string>) {
+                return type == LUA_TSTRING;
+            }
+
+            return false;
+        });
+    }
+
+    bool Is_Nil(int stack_index = -1) const {
+        return Get_Value_From_State<bool>([&stack_index](auto L) {
+            return lua_type(L, stack_index) == LUA_TNIL;
+        });
+    }
+
+    bool Is_None(int stack_index = -1) const {
+        return Get_Value_From_State<bool>([&stack_index](auto L) {
+            return lua_type(L, stack_index) == LUA_TNONE;
+        });
     }
 
     /**
@@ -275,7 +313,7 @@ public:
         return Get_Value_From_State<LuaResultWithValue<T>>([&stack_index](auto L) {
             auto type = lua_type(L, stack_index);
 
-            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double>) {
+            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
                 if (type != LUA_TNUMBER) {
                     return LuaResultWithValue<T>(
                         L,
@@ -295,6 +333,14 @@ public:
             } else if constexpr (std::is_same_v<T, double>) {
                 return LuaResultWithValue<T>(
                     lua_tonumber(L, stack_index)
+                );
+            } else if constexpr (std::is_same_v<T, float>) {
+                return LuaResultWithValue<T>(
+                    (float)lua_tonumber(L, stack_index)
+                );
+            } else if constexpr (std::is_same_v<T, bool>) {
+                return LuaResultWithValue<T>(
+                    lua_toboolean(L, stack_index)
                 );
             } else if constexpr (std::is_same_v<T, std::string>) {
                 if (type != LUA_TSTRING) { 
@@ -326,6 +372,29 @@ public:
     }
 
     template<class T>
+    void Push_Value(T value) const {
+        With_State([&value](auto L) {
+            if constexpr (std::is_same_v<T, std::string_view>) {
+                lua_pushstring(L, value.data());
+            } else if constexpr (std::is_same_v<T, std::string>) {
+                lua_pushstring(L, value.c_str());
+            } else if constexpr (std::is_same_v<T, double>) {
+                lua_pushnumber(L, value);
+            } else if constexpr (std::is_same_v<T, float>) {
+                lua_pushnumber(L, (double)value);
+            } else if constexpr (std::is_same_v<T, int>) {
+                lua_pushinteger(L, value);
+            } else if constexpr (std::is_same_v<T, bool>) {
+                lua_pushboolean(L, value);
+            } else {
+                CNC_LOGGER_FATAL("Attempted to write unsupported C++ type");
+            }
+        });
+    }
+
+    // Read values using expressions
+
+    template<class T>
     LuaResultWithValue<T> Eval(const std::string& expression) const {
         auto result = Exec(std::format("return {}", expression));
     
@@ -352,25 +421,6 @@ public:
         return future;
     }
 
-    template<class T>
-    void Push_Value(T value) const {
-        With_State([&value](auto L) {
-            if constexpr (std::is_same_v<T, std::string_view>) {
-                lua_pushstring(L, value.data());
-            } else if constexpr (std::is_same_v<T, std::string>) {
-                lua_pushstring(L, value.c_str());
-            } else if constexpr (std::is_same_v<T, double>) {
-                lua_pushnumber(L, value);
-            } else if constexpr (std::is_same_v<T, float>) {
-                lua_pushnumber(L, (double)value);
-            } else if constexpr (std::is_same_v<T, int>) {
-                lua_pushinteger(L, value);
-            } else {
-                CNC_LOGGER_FATAL("Attempted to write unsupported Lua type");
-            }
-        });
-    }
-
     // bridge for API building
 
     luabridge::Namespace Bridge() const {
@@ -384,6 +434,13 @@ protected:
 
 /**
  * Wrapper around LuaEngine to validate and read arguments passed to a CFunction.
+ * 
+ * Fluent interface available for validating arguments:
+ *   Call Count_Is and one or more X_Argument_Is(Not_Y) then finish with Assert
+ * 
+ * Fluent interface available for reading arguments:
+ *   Call Read_First then zero or more Read_Next. Arguments can be peeked with
+ *   First_Read_Is and Next_Read_Is to check upcoming types (useful for multi type args)
  */
 class LuaArguments {
 public:
@@ -420,9 +477,11 @@ public:
             Stream_Argument_Index = 1;
         }
 
-        auto result = Lua.Try_Read<T>(Stream_Argument_Index.value());
+        if (Stream_Argument_Index > Count) {
+            Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
+        }
 
-        Stream_Is_Valid = result.Is_Ok() && result.Has_Value();
+        Stream_Is_Valid = Lua.template Is_Type<T>(Stream_Argument_Index.value());
         Stream_Argument_Index = Stream_Argument_Index.value() + 1;
 
         return *this;
@@ -433,6 +492,58 @@ public:
         Stream_Argument_Index = 1;
 
         return Next_Argument_Is<T>();
+    }
+
+    LuaArguments& Next_Argument_Is_Not_Nil() {
+        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+            // already invalid, short circuit
+            return *this;
+        }
+
+        if (!Stream_Argument_Index.has_value()) {
+            Stream_Argument_Index = 1;
+        }
+
+        if (Stream_Argument_Index > Count) {
+            Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
+        }
+
+        Stream_Is_Valid = !Lua.Is_Nil(Stream_Argument_Index.value());
+        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+
+        return *this;
+    }
+
+    LuaArguments& First_Argument_Is_Not_Nil() {
+        Stream_Argument_Index = 1;
+
+        return Next_Argument_Is_Not_Nil();
+    }
+
+    LuaArguments& Next_Argument_Is_Not_None() {
+        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+            // already invalid, short circuit
+            return *this;
+        }
+
+        if (!Stream_Argument_Index.has_value()) {
+            Stream_Argument_Index = 1;
+        }
+
+        if (Stream_Argument_Index > Count) {
+            Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
+        }
+
+        Stream_Is_Valid = !Lua.Is_None(Stream_Argument_Index.value());
+        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+
+        return *this;
+    }
+
+    LuaArguments& First_Argument_Is_Not_None() {
+        Stream_Argument_Index = 1;
+
+        return Next_Argument_Is_Not_None();
     }
 
     bool Assert() {
@@ -461,9 +572,31 @@ public:
     // Fluent read stream methods
 
     template<class T>
+    bool Next_Read_Is() {
+        if (!Read_Stream_Argument_Index.has_value()) {
+            Read_Stream_Argument_Index = 1;
+        }
+
+        auto result = Lua.template Is_Type<T>(Read_Stream_Argument_Index.value());
+
+        return result;
+    }
+
+    template<class T>
+    LuaResultWithValue<T> First_Read_Is() {
+        Read_Stream_Argument_Index = 1;
+
+        return Next_Is<T>();
+    }
+
+    template<class T>
     LuaResultWithValue<T> Read_Next() {
         if (!Read_Stream_Argument_Index.has_value()) {
             Read_Stream_Argument_Index = 1;
+        }
+
+        if (Read_Stream_Argument_Index > Count) {
+            Lua.Raise_Error("Attempted to read more arguments than were provided.");
         }
 
         auto result = Lua.Try_Read<T>(Read_Stream_Argument_Index.value());
@@ -485,29 +618,6 @@ private:
     std::optional<int> Stream_Argument_Index;
 
     std::optional<int> Read_Stream_Argument_Index;
-};
-
-/**
- * Builder that makes registering APIs easier.
- */
-template<class T>
-class LuaEngineBuilder {
-public:
-    template<class U>
-    LuaEngineBuilder& With_Api() {
-        Lua.template Register_Api<U>();
-
-        return *this;
-    }
-
-    /**
-     * Resolve the end of the builder chain as a concrete implementation.
-     */
-    T Build() {
-        return std::move(Lua);
-    }
-private:
-    T Lua;
 };
 
 /**
@@ -562,7 +672,7 @@ private:
 /**
  * Instances of this LuaEngine should be created to wrap around
  * a state that isn't owned by the current context, e.x. in a
- * Lua C function.
+ * Lua CFunction.
  * 
  * Aligns with smart pointer shared logic.
  */
@@ -578,4 +688,27 @@ protected:
 
 private:
     lua_State* State;
+};
+
+/**
+ * Builder that makes registering APIs easier.
+ */
+template<class T>
+class LuaEngineBuilder {
+public:
+    template<class T, typename... Args>
+    LuaEngineBuilder& With_Api(Args&&... args) {
+        Lua.template Register_Api<U>(std::forward<Args>(args)...);
+
+        return *this;
+    }
+
+    /**
+     * Resolve the end of the builder chain as a concrete implementation.
+     */
+    T Build() {
+        return std::move(Lua);
+    }
+private:
+    T Lua;
 };

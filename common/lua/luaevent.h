@@ -7,6 +7,11 @@
 
 using LuaEventData = std::variant<std::string, int, double>;
 
+/**
+ * Encapsulates a piece of discrete logic that a Lua
+ * thread wants to be executed async. Used to pass
+ * messages to the game engine.
+ */
 class LuaEvent {
 public:
     LuaEvent(const std::string_view type, const LuaEventData data): EventType(type), Data(data) {}
