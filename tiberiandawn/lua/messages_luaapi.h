@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "../common/lua/luaapi.h"
+#include "../common/lua/luaarguments.h"
 
 #include "td_luaevents.h"
 #include "../externs.h"

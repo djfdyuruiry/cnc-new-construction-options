@@ -48,6 +48,17 @@ public:
         return *this;
     }
 
+    std::vector<std::string_view> Rule_Names() const {
+        std::vector<std::string_view> keys;
+        keys.reserve(Rules.size());
+
+        for (const auto& pair : Rules) {
+            keys.emplace_back(pair.first);
+        }
+
+        return keys;
+    }
+
     // TODO: Validation/value error handling
     template<typename T>
     RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value) {

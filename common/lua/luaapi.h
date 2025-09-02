@@ -61,10 +61,10 @@ public:
       return;
     }
 
-    CNC_LOGGER_INFO("Registering scripts using base path: {}", Lua_Directory.string());
+    CNC_LOGGER_INFO("Registering scripts using base path: {}", LuaEngine::Lua_Directory.string());
 
     for (const auto& script : Scripts) {
-      auto full_script_path = Lua_Directory / script;
+      auto full_script_path = LuaEngine::Lua_Directory / "nco" / script;
 
       Lua.Exec_File(full_script_path.string())
         .If_Ok([&](auto& r) {
@@ -85,7 +85,6 @@ public:
   }
 protected:
   inline static const CncLogger Logger = CncLogger("LuaApi");
-  inline static const std::filesystem::path Lua_Directory = std::filesystem::path(Paths.Program_Path()) / "lua" / "nco";
   inline static const std::string_view Root_Namespace = "__CNC_API";
 
   const LuaEngine& Lua;

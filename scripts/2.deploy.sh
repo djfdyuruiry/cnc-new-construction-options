@@ -11,10 +11,10 @@ function deploy_nco_lua() {
   rm -rf "${target_dir}/lua/nco"
   mkdir -p "${target_dir}/lua/nco"
 
-  cp -rf "${common_lua_scripts_path}"/* "${target_dir}/lua/nco"
+  cp -rf "${common_lua_scripts_path}"/* "${target_dir}/lua"
 
   if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
-    cp -rf "${td_lua_scripts_path}"/* "${target_dir}/lua/nco"
+    cp -rf "${td_lua_scripts_path}"/* "${target_dir}/lua"
   fi
 }
 

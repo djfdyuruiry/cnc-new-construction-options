@@ -1,6 +1,7 @@
 #pragma once
 
 #include "luaapi.h"
+#include "luaarguments.h"
 
 /**
  * Lua interface for spdlog.

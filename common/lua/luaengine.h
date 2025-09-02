@@ -14,6 +14,7 @@
  *   SharedLuaEngine --[extends]--> LuaEngine
  */
 
+#include <filesystem>
 #include <functional>
 #include <future>
 #include <memory>
@@ -26,141 +27,14 @@
 #include <LuaBridge/LuaBridge.h>
 
 #include "../logger.h"
-
-/**
- * Models the result of making a call to the low-level C Lua API.
- * 
- * Uses callbacks for fluent consumption: If_Ok and On_Error.
- */
-class LuaResult {
-public:
-    int Lua_Code;
-    std::optional<std::string> Error;
-
-    /**
-     * If @code is not LUA_OK, this constructor has side affects and will
-     * pop the last error off the Lua stack @L.
-     */
-    LuaResult(lua_State* L, int code) : Lua_Code(code) {
-        if (code == LUA_ERRERR + 1) {
-            // custom lua error provided
-            return;
-        }
-
-        if (code < LUA_OK || code > LUA_ERRERR) {
-            // invalid error code passed, assume error
-            code = LUA_ERRERR;
-        }
-
-        if (code != LUA_OK) {
-            Error = std::make_optional(
-                std::string(lua_tostring(L, -1))
-            );
-
-            lua_pop(L, 1);
-        }
-    }
-
-    LuaResult(int code): Lua_Code(code) {}
-
-    /**
-     * Provide a custom error message and set a custom error state. 
-     */
-    LuaResult(std::string error) : Lua_Code(LUA_ERRERR + 1) {
-        Error = std::make_optional(error);
-    }
-
-    bool Is_Ok() const {
-        return Lua_Code == LUA_OK;
-    }
-
-    const char * Code_As_String() const {
-        switch (Lua_Code) {
-            case LUA_OK:
-                return "OK";
-            case LUA_ERRRUN:
-                return "Runtime";
-            case LUA_ERRSYNTAX:
-                return "Syntax";
-            case LUA_ERRMEM:
-                return "Memory";
-            case LUA_ERRFILE:
-                return "File";
-            case LUA_ERRERR:
-                return "Error Handling Failure";
-            default:
-                return "Unknown";
-        }
-    }
-
-    const LuaResult& If_Ok(std::function<void(const LuaResult&)> action) const {
-        if (Is_Ok()) {
-            action(*this);
-        }
-
-        return *this;
-    }
-
-    const LuaResult& On_Error(std::function<void(const LuaResult&)> action) const {
-        if (!Is_Ok()) {
-            action(*this);
-        }
-
-        return *this;
-    }
-};
-
-/**
- * Models the reading a value using the low-level C Lua API.
- * 
- * Use LuaResult fluent callbacks plus If_Value to read the value if set.
- */
-template<class T>
-class LuaResultWithValue : public LuaResult {
-public:
-    LuaResultWithValue(const LuaResult& result) : LuaResult(result) {}
-
-    LuaResultWithValue(T lua_value) : LuaResult(LUA_OK) {
-        Value_Source = std::make_optional<T>(lua_value);
-    }
-
-    // L param is to prevent conflicts when T == std::string
-    LuaResultWithValue(lua_State* L, std::string error) : LuaResult(error) {}
-
-    const LuaResultWithValue& If_Value(std::function<void(T)> action) const {
-        if (Value_Source.has_value()) {
-            action(Value_Source.value());
-        }
-
-        return *this;
-    }
-
-    bool Has_Value() {
-        return Value_Source.has_value();
-    }
-
-    /**
-     * This method is dangerous, and must only be called after
-     * checking Is_Ok and Has_Value both return `true`.
-     */
-    T Unpack() {
-        if (!Value_Source.has_value()) {
-            CNC_LOG_FATAL("Attempted to unpack empty LuaResultWithValue");
-        }
-
-        return Value_Source.value();
-    }
-
-private:
-    std::optional<T> Value_Source;
-};
+#include "luaresult.h"
 
 /**
  * Abstract wrapper around a Lua state.
  */
 class LuaEngine {
 public:
-    using LuaType = std::variant<std::string_view, double, int>;
+    inline static const std::filesystem::path Lua_Directory = std::filesystem::path(Paths.Program_Path()) / "lua";
 
     virtual ~LuaEngine() = default;
 
@@ -224,9 +98,19 @@ public:
         auto future = promise->get_future();
 
         std::thread([=]() {
-            promise->set_value(
-                Exec(script)
-            );
+            auto result = Exec(script);
+
+            // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend
+            //       , user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
+            if (!result.Is_Ok()) {
+                CNC_LOGGER_ERROR(
+                    "Error from background lua script: {} | script: {}",
+                    result.Error.value(),
+                    script
+                );
+            }
+
+            promise->set_value(result);
         }).detach();
 
         return future;
@@ -262,9 +146,20 @@ public:
         auto future = promise->get_future();
 
         std::thread([=]() {
-            promise->set_value(
-                Exec_File(script_path)
-            );
+            auto result = Exec_File(script_path);
+
+            // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend
+            //       , user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
+            if (!result.Is_Ok()) {
+                // TODO: output debug info - maybe have a method in LuaEvent that builds a standard error message for logging or logs directly
+                CNC_LOGGER_ERROR(
+                    "Error from background lua script file: {} | script_path: {}",
+                    result.Error.value(),
+                    script_path
+                );
+            }
+
+            promise->set_value(result);
         }).detach();
 
         return future;
@@ -433,194 +328,6 @@ protected:
 };
 
 /**
- * Wrapper around LuaEngine to validate and read arguments passed to a CFunction.
- * 
- * Fluent interface available for validating arguments:
- *   Call Count_Is and one or more X_Argument_Is(Not_Y) then finish with Assert
- * 
- * Fluent interface available for reading arguments:
- *   Call Read_First then zero or more Read_Next. Arguments can be peeked with
- *   First_Read_Is and Next_Read_Is to check upcoming types (useful for multi type args)
- */
-class LuaArguments {
-public:
-    const int Count;
-    const std::string Function_Signature;
-
-    LuaArguments(const LuaEngine& lua, std::string function_signature) : 
-        Lua(lua),
-        Count(lua.Get_Stack_Count()),
-        Function_Signature(function_signature) {}
-
-    // Fluent assert stream methods
-
-    LuaArguments& Count_Is(int expected) {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
-            // already invalid, short circuit
-            return *this;
-        }
-
-        Stream_Is_Valid = Count == expected;
-        Stream_Argument_Index = 1;
-
-        return *this;
-    }
-
-    template<class T>
-    LuaArguments& Next_Argument_Is() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
-            // already invalid, short circuit
-            return *this;
-        }
-
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
-        }
-
-        if (Stream_Argument_Index > Count) {
-            Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
-        }
-
-        Stream_Is_Valid = Lua.template Is_Type<T>(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
-
-        return *this;
-    }
-
-    template<class T>
-    LuaArguments& First_Argument_Is() {
-        Stream_Argument_Index = 1;
-
-        return Next_Argument_Is<T>();
-    }
-
-    LuaArguments& Next_Argument_Is_Not_Nil() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
-            // already invalid, short circuit
-            return *this;
-        }
-
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
-        }
-
-        if (Stream_Argument_Index > Count) {
-            Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
-        }
-
-        Stream_Is_Valid = !Lua.Is_Nil(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
-
-        return *this;
-    }
-
-    LuaArguments& First_Argument_Is_Not_Nil() {
-        Stream_Argument_Index = 1;
-
-        return Next_Argument_Is_Not_Nil();
-    }
-
-    LuaArguments& Next_Argument_Is_Not_None() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
-            // already invalid, short circuit
-            return *this;
-        }
-
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
-        }
-
-        if (Stream_Argument_Index > Count) {
-            Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
-        }
-
-        Stream_Is_Valid = !Lua.Is_None(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
-
-        return *this;
-    }
-
-    LuaArguments& First_Argument_Is_Not_None() {
-        Stream_Argument_Index = 1;
-
-        return Next_Argument_Is_Not_None();
-    }
-
-    bool Assert() {
-        if (!Stream_Is_Valid.has_value()) {
-            // called before Is calls, assume invalid
-            Stream_Is_Valid = false;
-        }
-
-        auto result = Stream_Is_Valid.value();
-
-        if (!result) {
-            Lua.Raise_Error(
-                std::format(
-                    "Incorrect number of arguments, or argument type mis-match. Usage: {}",
-                    Function_Signature
-                )
-            );
-        }
-
-        Stream_Is_Valid.reset();
-        Stream_Argument_Index.reset();
-
-        return result;
-    }
-
-    // Fluent read stream methods
-
-    template<class T>
-    bool Next_Read_Is() {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
-        }
-
-        auto result = Lua.template Is_Type<T>(Read_Stream_Argument_Index.value());
-
-        return result;
-    }
-
-    template<class T>
-    LuaResultWithValue<T> First_Read_Is() {
-        Read_Stream_Argument_Index = 1;
-
-        return Next_Is<T>();
-    }
-
-    template<class T>
-    LuaResultWithValue<T> Read_Next() {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
-        }
-
-        if (Read_Stream_Argument_Index > Count) {
-            Lua.Raise_Error("Attempted to read more arguments than were provided.");
-        }
-
-        auto result = Lua.Try_Read<T>(Read_Stream_Argument_Index.value());
-
-        Read_Stream_Argument_Index = Read_Stream_Argument_Index.value() + 1;
-
-        return result;
-    }
-
-    template<class T>
-    LuaResultWithValue<T> Read_First() {
-        Read_Stream_Argument_Index = 1;
-
-        return Read_Next<T>();
-    }
-private:
-    const LuaEngine& Lua;
-    std::optional<bool> Stream_Is_Valid;
-    std::optional<int> Stream_Argument_Index;
-
-    std::optional<int> Read_Stream_Argument_Index;
-};
-
-/**
  * Smart pointer helper class to teardown lua_State pointers.
  */
 class LuaStateDeleter {
@@ -651,6 +358,15 @@ public:
     };
 
     UniqueLuaEngine() : State(Build_State(), LuaStateDeleter()) {
+        Exec(
+            std::format(
+                "package.path = package.path .. ';{}/?.lua;{}/?/init.lua'",
+                Lua_Directory.string(),
+                Lua_Directory.string()
+            )
+        ).On_Error([](auto& r) {
+            CNC_LOGGER_CRITICAL("Failed to initialise Lua package paths: {}", r.Error.value());
+        });
     }
 
 protected:
@@ -664,6 +380,8 @@ private:
     static lua_State* Build_State() {
         auto L = luaL_newstate();
         luaL_openlibs(L);
+
+
 
         return L;
     };
@@ -696,7 +414,7 @@ private:
 template<class T>
 class LuaEngineBuilder {
 public:
-    template<class T, typename... Args>
+    template<class U, typename... Args>
     LuaEngineBuilder& With_Api(Args&&... args) {
         Lua.template Register_Api<U>(std::forward<Args>(args)...);
 

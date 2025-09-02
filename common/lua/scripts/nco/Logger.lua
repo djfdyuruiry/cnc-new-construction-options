@@ -17,7 +17,7 @@ _G.Logger._log = function(level, message, ...)
   )
 
   -- See: common/lua/logging_luaapi.h
-  __CNC_API.Logger.log(source_location, level, string.format(message, ...))
+  __CNC_API.Logger.log(source_location, level, string.format(tostring(message), ...))
 end
 
 _G.Logger.level = __CNC_API.Logger.level

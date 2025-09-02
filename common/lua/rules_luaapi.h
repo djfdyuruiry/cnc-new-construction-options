@@ -5,6 +5,8 @@
 #include "../rulesections.h"
 
 #include "luaapi.h"
+#include "luaarguments.h"
+#include "luatablebuilder.h"
 
 /**
  * Describes a static class which has public static member
@@ -23,24 +25,53 @@ template <RuleSectionsProviderConcept R>
 class RulesLuaApi : public LuaApi
 {
 public:
-    RulesLuaApi(const LuaEngine& engine) 
-     : LuaApi(engine, "Rules", {"Rules.lua"}) {}
-
-    virtual void Register_Consts() const override
-    {
-        With_Api_Namespace([](auto& n) {
-            //auto section_names = T::Sections.Section_Names();
-
-            //n.addConstant("sectionNames", section_names);
-        });
-    }
+    RulesLuaApi(const LuaEngine& engine) : LuaApi(engine, "Rules", {"Rules.lua"}) {}
 
     virtual void Register_Functions() const override
     {
+        // TODO: have a function that dumps the lua type for a given rule
         With_Api_Namespace([](auto& n) {
-            n.addCFunction("get", [](auto L) {
+            n.addCFunction("getSectionNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "Rules.get(<string: section>, <string: key>)");
+
+                auto section_names = R::Sections.Section_Names();
+                auto table_builder = LuaTableBuilder(engine);
+
+                for (const auto& name : section_names) {
+                    table_builder.With_Index_Value(name);
+                }
+
+                return 1;
+            }).addCFunction("getRuleNamesForSection", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Rules.getRuleNamesForSection(<string: section>)");
+
+                arguments.Count_Is(1)
+                    .First_Argument_Is<std::string>()
+                    .Assert();
+
+                auto section = arguments.Read_First<std::string>().Unpack();
+
+                if (!R::Sections.Has_Section(section)) {
+                    engine.Raise_Error(
+                        std::format(
+                            "Rule section does not exist: {}",
+                            section
+                        )
+                    );
+                }
+
+                auto rule_names = R::Sections[section].Rule_Names();
+                auto table_builder = LuaTableBuilder(engine);
+
+                for (const auto& name : rule_names) {
+                    table_builder.With_Index_Value(name);
+                }
+
+                return 1;
+            }).addCFunction("getRuleValue", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Rules.getRuleValue(<string: section>, <string: key>)");
 
                 arguments.Count_Is(2)
                     .First_Argument_Is<std::string>()
@@ -73,9 +104,9 @@ public:
                 }
 
                 return 1;
-            }).addCFunction("set", [](auto L) {
+            }).addCFunction("setRuleValue", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "Rules.set(<string: section>, <string: key>, <number|int|bool: value>)");
+                auto arguments = LuaArguments(engine, "Rules.setRuleValue(<string: section>, <string: key>, <number|int|bool: value>)");
 
                 arguments.Count_Is(3)
                     .First_Argument_Is<std::string>()
