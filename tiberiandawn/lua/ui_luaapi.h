@@ -17,11 +17,9 @@ public:
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "UI.popupOk(<string: message>)");
 
-                if (!arguments.Count_Is(1)
-                        .First_Argument_Is<std::string>()
-                        .Assert()) {
-                    return 0;
-                }
+                arguments.Count_Is(1)
+                    .First_Argument_Is<std::string>()
+                    .Assert();
 
                 auto message = arguments.Read_First<std::string>().Unpack();
 

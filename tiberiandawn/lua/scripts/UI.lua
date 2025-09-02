@@ -4,6 +4,11 @@ _G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {
   UI = {}
 }
 
+--[[
+  Show a popup to the player. Supported types: 'OK'
+
+  Supports printf style formatting.
+]]
 _G.TiberianDawn.UI.showPopup = function(popupType, message, ...)
   if type(popupType) ~= "string" then
     popupType = "OK"

@@ -17,11 +17,9 @@ public:
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Messages.showToPlayer(<string: message>)");
 
-                if (!arguments.Count_Is(1)
-                        .First_Argument_Is<std::string>()
-                        .Assert()) {
-                    return 0;
-                }
+                arguments.Count_Is(1)
+                    .First_Argument_Is<std::string>()
+                    .Assert();
 
                 auto message = arguments.Read_First<std::string>().Unpack();
 
@@ -42,11 +40,9 @@ public:
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Messages.popupOk(<string: message>)");
 
-                if (!arguments.Count_Is(1)
-                        .First_Argument_Is<std::string>()
-                        .Assert()) {
-                    return 0;
-                }
+                arguments.Count_Is(1)
+                    .First_Argument_Is<std::string>()
+                    .Assert();
 
                 auto message = arguments.Read_First<std::string>().Unpack();
 

@@ -13,12 +13,12 @@
 template <class T>
 class AtomicQueue {
 public:
-    AtomicQueue(): Queue(std::make_unique<std::queue<T>>()), Mutex() {}
+    AtomicQueue(): Queue(std::make_unique<std::queue<std::unique_ptr<T>>>()), Mutex() {}
 
     /**
      * Use the underlying std::queue with exclusive access.
      */
-    void Access(std::function<void(std::unique_ptr<std::queue<T>>&)> action)
+    void Access(std::function<void(std::unique_ptr<std::queue<std::unique_ptr<T>>>&)> action)
     {
         std::lock_guard<std::mutex> lock(Mutex);
 
@@ -39,6 +39,6 @@ public:
         );
     }
 private:
-    std::unique_ptr<std::queue<T>> Queue;
+    std::unique_ptr<std::queue<std::unique_ptr<T>>> Queue;
     std::mutex Mutex;
 };

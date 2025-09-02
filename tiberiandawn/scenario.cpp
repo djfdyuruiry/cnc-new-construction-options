@@ -48,6 +48,7 @@
 
 #include "common/framelimit.h"
 #include "common/lua/logging_luaapi.h"
+#include "common/lua/rules_luaapi.h"
 #include "common/lua/luaengine.h"
 
 #include "lua/game_luaapi.h"
@@ -394,6 +395,7 @@ void Clear_Scenario(void)
 
     Scen.Lua = LuaEngineBuilder<UniqueLuaEngine>()
         .With_Api<LoggingLuaApi>()
+        .With_Api<RulesLuaApi<RuleSectionsProvider>>()
         .With_Api<MessagesLuaApi>()
         .With_Api<GameLuaApi>()
         .With_Api<UiLuaApi>()
@@ -637,16 +639,6 @@ void Do_Win(void)
  *=============================================================================================*/
 void Do_Lose(void)
 {
-    Scen.Lua.Exec_Async(R"*(
-        local success, error = pcall(function()
-          Logger.log("debug", "REEING FROM THE VOID")
-        end)
-
-        if not success then
-            print(error)
-        end
-    )*");
-
     Map.Set_Default_Mouse(MOUSE_NORMAL);
     Hide_Mouse();
 

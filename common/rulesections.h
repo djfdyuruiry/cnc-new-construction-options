@@ -31,6 +31,8 @@
 #include "ini.h"
 #include "logger.h"
 
+using RuleValueVariant = std::variant<int, bool, float>;
+
 class RuleSection {
 public:
     std::string_view SectionName;
@@ -123,6 +125,16 @@ public:
         CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
     }
 
+    const RuleValueVariant& Get_Variant(std::string_view name) const {
+        auto it = Rules.find(name);
+
+        if (it != Rules.end()) {
+            return it->second;
+        }
+
+        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+    }
+
     template<typename T>
     RuleSection& Set(std::string_view name, T value) {
         CNC_LOGGER_WARN("Updating rule at runtime: [{}] -> {}", SectionName, name);
@@ -140,8 +152,7 @@ public:
 private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
-    using RuleVariant = std::variant<int, bool, float>;
-    std::unordered_map<std::string_view, RuleVariant> Rules;
+    std::unordered_map<std::string_view, RuleValueVariant> Rules;
 };
 
 class IniRuleContext {
@@ -190,6 +201,17 @@ private:
 
 class RuleSections {
 public:
+    std::vector<std::string_view> Section_Names() const {
+        std::vector<std::string_view> keys;
+        keys.reserve(Sections.size());
+
+        for (const auto& pair : Sections) {
+            keys.emplace_back(pair.first);
+        }
+
+        return keys;
+    }
+
     RuleSection& operator[](std::string_view name) {
         auto it = Sections.find(name);
 

@@ -11,7 +11,7 @@
 #include <lua.hpp>
 #include <LuaBridge/LuaBridge.h>
 
-#include "logger.h"
+#include "../logger.h"
 
 /**
  * C++ API for working with Lua. Uses LuaBridge to provide a
@@ -155,9 +155,9 @@ public:
 
     virtual ~LuaEngine() = default;
 
-    template<class T>
-    void Register_Api() {
-        auto api = T(*this);
+    template<class T, typename... Args>
+    void Register_Api(Args&&... args) {
+        auto api = T(*this, std::forward<Args>(args)...);
 
         api.Register();
     }
@@ -361,6 +361,8 @@ public:
                 lua_pushstring(L, value.c_str());
             } else if constexpr (std::is_same_v<T, double>) {
                 lua_pushnumber(L, value);
+            } else if constexpr (std::is_same_v<T, float>) {
+                lua_pushnumber(L, (double)value);
             } else if constexpr (std::is_same_v<T, int>) {
                 lua_pushinteger(L, value);
             } else {

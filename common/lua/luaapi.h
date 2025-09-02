@@ -4,9 +4,10 @@
 #include <functional>
 #include <string>
 
-#include "logger.h"
-#include "lua/luaengine.h"
+#include "../logger.h"
 #include "../paths.h"
+
+#include "luaengine.h"
 
 /**
  * Wrapper around LuaEngine to register Lua

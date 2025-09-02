@@ -387,10 +387,8 @@ QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
 /**
  * Queued Lua events - ensures API calls from Lua that interact with game state happen
  * at the right time, on the correct thread and in order. See: @file{queue.cpp}.
- * 
- * TODO: Make thread safe
  */
-AtomicQueue<std::unique_ptr<LuaEvent>> LuaList;
+AtomicQueue<LuaEvent> LuaList;
 
 /***************************************************************************
 **	These are arrays/lists of trigger pointers for each cell & the houses.

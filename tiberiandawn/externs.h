@@ -160,6 +160,14 @@ extern CCINIClass RuleINI;
 extern RulesClass Rule;
 extern WWKeyboardClass* Keyboard;
 
+/**
+ * Adapter for Lua API to pull in static RulesClass variable.
+ */
+class RuleSectionsProvider {
+public:
+    inline static RuleSections& Sections = Rule.Sections;
+};
+
 /*
 **	Game object allocation and tracking classes.
 */
@@ -182,7 +190,7 @@ extern TFixedIHeapClass<HouseClass> Houses;
 extern QueueClass<EventClass, MAX_EVENTS> OutList;
 extern QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
 
-extern AtomicQueue<std::unique_ptr<LuaEvent>> LuaList;
+extern AtomicQueue<LuaEvent> LuaList;
 
 typedef DynamicVectorArrayClass<ObjectClass*, HOUSE_COUNT, HOUSE_FIRST> SelectedObjectsType;
 extern SelectedObjectsType CurrentObject;

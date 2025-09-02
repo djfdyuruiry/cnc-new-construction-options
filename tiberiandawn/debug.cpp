@@ -559,8 +559,10 @@ void Debug_Key(unsigned input)
                 function onF5()
                   Logger.debug("onF5 Called")
 
+                  local value = __CNC_API.Rules.lookup("Game.Map", "MaxBuildDistance")
+
                   TiberianDawn.Messages.showToPlayer("HELLO THERE")
-                  TiberianDawn.UI.showPopup("OK", "This message came from Lua. 2*10=%d", 2*10)
+                  TiberianDawn.UI.showPopup("OK", "This message came from Lua. Game.Map=>MaxBuildDistance: %d", value)
                   TiberianDawn.Game.playerWin()
                 end
 
