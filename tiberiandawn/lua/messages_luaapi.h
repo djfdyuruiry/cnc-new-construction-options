@@ -9,11 +9,11 @@
 
 class MessagesLuaApi: public LuaApi {
 public:
-    MessagesLuaApi(const LuaEngine& engine) : LuaApi(engine, "Messages") {}
+    MessagesLuaApi(const LuaEngine& engine) : LuaApi(engine, "Messages", { "Messages.lua" }) {}
 
     virtual void Register_Functions() const override {
-        Get_Namespace()
-            .addCFunction("showToPlayer", [](auto L) {
+        With_Api_Namespace([](auto& n) {
+            n.addCFunction("showToPlayer", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Messages.showToPlayer(<string: message>)");
 
@@ -53,7 +53,7 @@ public:
                 LuaList.Push<PopupLuaEvent>(message);
 
                 return 0;
-            })
-        .endNamespace();
+            });
+        });
     }
 };

@@ -9,11 +9,11 @@
 
 class GameLuaApi: public LuaApi {
 public:
-    GameLuaApi(const LuaEngine& engine) : LuaApi(engine, "Game") {}
+    GameLuaApi(const LuaEngine& engine) : LuaApi(engine, "Game", { "Game.lua" }) {}
 
     virtual void Register_Functions() const override {
-        Get_Namespace()
-            .addCFunction("win", [](auto L) {
+        With_Api_Namespace([](auto& n) {
+            n.addCFunction("win", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 
                 if (!PlayerPtr) {
@@ -34,7 +34,7 @@ public:
                 PlayerPtr->Flag_To_Lose();
 
                 return 0;
-            })
-        .endNamespace();
+            });
+        });
     }
 };

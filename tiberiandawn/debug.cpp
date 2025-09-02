@@ -556,9 +556,15 @@ void Debug_Key(unsigned input)
 
         case KN_F5:
             Scen.Lua.Exec_Async(R"*(
-                Logger.log("debug.lua:10 onF5()", "debug", "onF5 Called")
-                Messages.popupOk("This message came from Lua")
-                Game.win()
+                function onF5()
+                  Logger.debug("onF5 Called")
+
+                  TiberianDawn.Messages.showToPlayer("HELLO THERE")
+                  TiberianDawn.UI.showPopup("OK", "This message came from Lua. 2*10=%d", 2*10)
+                  TiberianDawn.Game.playerWin()
+                end
+
+                print(pcall(onF5))
             )*");
             break;
 

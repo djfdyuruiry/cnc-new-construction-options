@@ -12,3 +12,6 @@ scripts_path="${repo_path}/scripts"
 scripts_bin_path="${scripts_path}/bin"
 
 vcpkg_path="${repo_path}/.vcpkg"
+
+common_lua_scripts_path="${repo_path}/common/lua/scripts"
+td_lua_scripts_path="${repo_path}/tiberiandawn/lua/scripts"

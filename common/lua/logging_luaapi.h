@@ -9,13 +9,13 @@ public:
         : LuaApi(
             engine,
             "Logger",
-            std::vector<std::filesystem::path> { "test.lua" }
+            { "Logger.lua" }
         ){}
 
     virtual void Register_Functions() const override
     {
-        Get_Namespace()
-            .addCFunction("log", [](auto L) {
+        With_Api_Namespace([](auto& n) {
+            n.addCFunction("log", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Logger.log(<string: level>, <string: message>)");
 
@@ -35,11 +35,11 @@ public:
 
                 Logger()->log(
                     log_level,
-                    std::format("[{}] {}", location, message)
+                    std::format("Lua [{}] {}", location, message)
                 );
- 
+
                 return 0;
-            })
-        .endNamespace();
+            });
+        });
     }
 };

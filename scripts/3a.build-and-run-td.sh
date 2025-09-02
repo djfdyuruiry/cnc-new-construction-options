@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-set -eExuo pipefail
+set -eEuo pipefail
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -33,6 +33,8 @@ function main() {
   if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
     # custom build preset passed, remove it before forwarding args to game
     shift
+  elif [[ "${preset}" =~ ^nco.+-debug$ ]]; then
+    build_type="Debug"
   elif [[ "${preset}" =~ ^nco.* ]]; then
     build_type="RelWithDebInfo"
   else
@@ -45,20 +47,20 @@ function main() {
 
   pushd_silent "${TD_DATA_PATH}"
 
-  local log_path="${build_path}/vanillatd.log"
-  start_logging "${log_path}"
-
   local exit_code=0
+  local prefix_command=""
+
+  if [ "${PROFILE:-false}" == "true" ]; then
+    prefix_command="perf record"
+  fi
 
   # run with debug logging and capture profiling info
-  NCO_LOG_LEVEL="debug" perf record ./vanillatd-dev -CHEAT "$@" || {
+  NCO_LOG_LEVEL="debug" ${prefix_command} ./vanillatd-dev -CHEAT "$@" || {
     exit_code="$?"
-    stop_logging
     log_error "Game finished with non-zero exit code: ${exit_code}"
   }
 
-  stop_logging
-  log_warning "View full game log: ${log_path}"
+  log_warning "View full game log: $(pwd)/nco.log"
 
   rm "vanillatd-dev"
   popd_silent

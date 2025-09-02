@@ -7,15 +7,27 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/lib/vars.sh"
 . "${script_path}/lib/functions.sh"
 
+function deploy_nco_lua() {
+  rm -rf "${target_dir}/lua/nco"
+  mkdir -p "${target_dir}/lua/nco"
+
+  cp -rf "${common_lua_scripts_path}"/* "${target_dir}/lua/nco"
+
+  if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
+    cp -rf "${td_lua_scripts_path}"/* "${target_dir}/lua/nco"
+  fi
+}
+
 function main() {
   local cmake_preset="${1}"
   local source="${2}"
   local target="${3}"
 
-  log_info "Exanding deploy target path using .env file (if present): ${env_file_path}"
+  log_info "Expanding deploy target path using .env file (if present): ${env_file_path}"
   load_env_file_if_present
 
   target="$(eval "echo ${target}")"
+  target_dir="$(dirname "${target}")"
 
   local build_type="Debug"
 
@@ -30,8 +42,9 @@ function main() {
     -iname "${source}" \
     -print0 | xargs -0 -I {} cp -fv "{}" "${target}"
 
-  rm -fv "$(dirname "${target}")/"*.log
+  deploy_nco_lua
 
+  rm -fv "${target_dir}/"*.log
 }
 
 main "$@"

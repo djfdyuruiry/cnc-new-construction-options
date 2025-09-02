@@ -15,6 +15,9 @@
  *   local var = <Name>.<const>
  *   local result = <Name>.<function>()
  *
+ * Lua scripts can be loaded from disk as well by passing 'scripts'
+ * param the constructor. This are expected to be in "<GAME_PATH>/lua/nco"
+ * , where <GAME_PATH> is the path to the game binary.
  */
 class LuaApi {
 public:
@@ -35,8 +38,18 @@ public:
     Name(name),
     Scripts() {}
 
-  luabridge::Namespace Get_Namespace() const {
-    return Lua.Bridge().beginNamespace(Name.data());
+  luabridge::Namespace Get_Api_Namespace() const {
+    return Lua.Bridge()
+      .beginNamespace(Root_Namespace.data())
+      .beginNamespace(Name.data());
+  }
+
+  void With_Api_Namespace(std::function<void(luabridge::Namespace&)> action) const {
+    auto api_namespace = Get_Api_Namespace();
+
+    action(api_namespace);
+
+    api_namespace.endNamespace().endNamespace();
   }
 
   virtual void Register_Consts() const {};
@@ -71,7 +84,8 @@ public:
   }
 protected:
   inline static const CncLogger Logger = CncLogger("LuaApi");
-  inline static const std::filesystem::path Lua_Directory = std::filesystem::path(Paths.Program_Path()) / "lua";
+  inline static const std::filesystem::path Lua_Directory = std::filesystem::path(Paths.Program_Path()) / "lua" / "nco";
+  inline static const std::string_view Root_Namespace = "__CNC_API";
 
   const LuaEngine& Lua;
   const std::string_view Name;

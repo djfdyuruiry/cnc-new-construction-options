@@ -142,5 +142,8 @@
     "Visceroids",
     "Westwood",
     "xypand"
+  ],
+  "Lua.diagnostics.globals": [
+    "__CNC_API"
   ]
 }
