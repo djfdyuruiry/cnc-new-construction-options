@@ -173,6 +173,10 @@ public:
         return actions(Get_State());
     }
 
+    /**
+     * Note: Calling this will terminate execution of the source function/method
+     * context, so no need to return after calling this.
+     */
     void Raise_Error(const std::string& message) const {
         With_State([&](auto L) {
             Push_Value(message);
@@ -382,8 +386,10 @@ public:
     const int Count;
     const std::string Function_Signature;
 
-    LuaArguments(const LuaEngine& lua, std::string function_signature) : Lua(lua), Count(lua.Get_Stack_Count()), Function_Signature(function_signature) {
-    }
+    LuaArguments(const LuaEngine& lua, std::string function_signature) : 
+        Lua(lua),
+        Count(lua.Get_Stack_Count()),
+        Function_Signature(function_signature) {}
 
     // Fluent assert stream methods
 
@@ -406,7 +412,7 @@ public:
             return *this;
         }
 
-        if (Stream_Argument_Index.has_value()) {
+        if (!Stream_Argument_Index.has_value()) {
             Stream_Argument_Index = 1;
         }
 

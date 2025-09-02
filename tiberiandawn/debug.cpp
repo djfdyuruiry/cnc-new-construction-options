@@ -556,7 +556,9 @@ void Debug_Key(unsigned input)
 
         case KN_F5:
             Scen.Lua.Exec_Async(R"*(
+                Logger.log("debug.lua:10 onF5()", "debug", "onF5 Called")
                 Messages.popupOk("This message came from Lua")
+                Game.win()
             )*");
             break;
 

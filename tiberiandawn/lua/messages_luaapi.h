@@ -9,10 +9,7 @@
 
 class MessagesLuaApi: public LuaApi {
 public:
-    MessagesLuaApi(const LuaEngine& engine)
-        : LuaApi(engine, "Messages")
-    {
-    }
+    MessagesLuaApi(const LuaEngine& engine) : LuaApi(engine, "Messages") {}
 
     virtual void Register_Functions() const override {
         Get_Namespace()
@@ -28,6 +25,7 @@ public:
 
                 auto message = arguments.Read_First<std::string>().Unpack();
 
+                // ripped off from netdlg.cpp
                 Messages.Add_Message(
                     message.data(),
                     CC_GREEN,

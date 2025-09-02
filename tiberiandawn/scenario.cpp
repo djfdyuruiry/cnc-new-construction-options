@@ -50,6 +50,7 @@
 #include "common/lua/logging_luaapi.h"
 #include "common/lua/luaengine.h"
 
+#include "lua/game_luaapi.h"
 #include "lua/messages_luaapi.h"
 
 extern int PreserveVQAScreen;
@@ -393,6 +394,7 @@ void Clear_Scenario(void)
     Scen.Lua = LuaEngineBuilder<UniqueLuaEngine>()
         .With_Api<LoggingLuaApi>()
         .With_Api<MessagesLuaApi>()
+        .With_Api<GameLuaApi>()
         .Build();
 }
 
