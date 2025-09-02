@@ -32,6 +32,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "common/atomicqueue.h"
 #include "common/vqaconfig.h"
 #include "common/lua/luaevent.h"
 
@@ -389,7 +390,7 @@ QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
  * 
  * TODO: Make thread safe
  */
-std::queue<std::unique_ptr<LuaEvent>> LuaList;
+AtomicQueue<std::unique_ptr<LuaEvent>> LuaList;
 
 /***************************************************************************
 **	These are arrays/lists of trigger pointers for each cell & the houses.

@@ -2742,17 +2742,19 @@ static int Extract_Compressed_Events(void* buf, int bufsize)
  * Iterate through FIFO lua events, discarding each after processing.
  */
 static void Process_Lua_Events() {
-    if (LuaList.size() < 1) {
-        CNC_LOG_TRACE("No Lua Events to process");
-        return;
-    }
+    LuaList.Access([&](auto& q) {
+         if (q->size() == 0) {
+            CNC_LOG_TRACE("No Lua Events to process");
+            return;
+        }
 
-    CNC_LOG_DEBUG("Processing {} Lua Events", LuaList.size());
+        CNC_LOG_DEBUG("Processing Lua Events");
 
-    while (!LuaList.empty()) {
-        LuaList.front()->Execute();
-        LuaList.pop();
-    }
+        while (!q->empty()) {
+            q->front()->Execute();
+            q->pop();
+        }
+    });
 }
 
 /***************************************************************************

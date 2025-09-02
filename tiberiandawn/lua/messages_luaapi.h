@@ -52,11 +52,7 @@ public:
 
                 auto message = arguments.Read_First<std::string>().Unpack();
 
-                LuaList.push(
-                    std::move(
-                        std::make_unique<PopupLuaEvent>(message)
-                    )
-                );
+                LuaList.Push<PopupLuaEvent>(message);
 
                 return 0;
             })

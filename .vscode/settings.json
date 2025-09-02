@@ -117,7 +117,8 @@
     "*.in": "cpp",
     "cassert": "cpp",
     "cfloat": "cpp",
-    "*.rh": "cpp"
+    "*.rh": "cpp",
+    "ciso646": "cpp"
   },
   "cSpell.words": [
     "Avalonia",
