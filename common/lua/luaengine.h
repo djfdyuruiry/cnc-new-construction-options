@@ -190,7 +190,7 @@ public:
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
 
         return Get_Value_From_State<LuaResult>([&script](auto L) {
-            auto status = luaL_loadstring(L, script.data());
+            auto status = luaL_loadstring(L, script.c_str());
 
             if (status != LUA_OK) {
                 auto result = LuaResult(L, status);
@@ -355,8 +355,10 @@ public:
     template<class T>
     void Push_Value(T value) const {
         With_State([&value](auto L) {
-            if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
+            if constexpr (std::is_same_v<T, std::string_view>) {
                 lua_pushstring(L, value.data());
+            } else if constexpr (std::is_same_v<T, std::string>) {
+                lua_pushstring(L, value.c_str());
             } else if constexpr (std::is_same_v<T, double>) {
                 lua_pushnumber(L, value);
             } else if constexpr (std::is_same_v<T, int>) {

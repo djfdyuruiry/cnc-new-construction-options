@@ -160,7 +160,7 @@ private:
 
 #define CNC_LOGGER_WARN(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::warn, __VA_ARGS__)
 
-#define CNC_LOGGER_ERROR(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::error, __VA_ARGS__)
+#define CNC_LOGGER_ERROR(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::err, __VA_ARGS__)
 
 #define CNC_LOGGER_CRITICAL(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::critical, __VA_ARGS__)
 

@@ -13,6 +13,6 @@ public:
 
         auto message = std::get<std::string>(Data);
 
-        WWMessageBox().Process(message.data());
+        WWMessageBox().Process(message.c_str());
     }
 };

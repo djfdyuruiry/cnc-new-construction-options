@@ -6,9 +6,11 @@ class LoggingLuaApi : public LuaApi
 {
 public:
     LoggingLuaApi(const LuaEngine& engine)
-        : LuaApi(engine, "Logger")
-    {
-    }
+        : LuaApi(
+            engine,
+            "Logger",
+            std::vector<std::filesystem::path> { "test.lua" }
+        ){}
 
     virtual void Register_Functions() const override
     {
@@ -29,7 +31,7 @@ public:
                 auto level = arguments.Read_Next<std::string>().Unpack();
                 auto message = arguments.Read_Next<std::string>().Unpack();
 
-                auto log_level = spdlog::level::from_str(level.data());
+                auto log_level = spdlog::level::from_str(level.c_str());
 
                 Logger()->log(
                     log_level,
