@@ -1,3 +1,5 @@
+-- See: common/lua/logging_luaapi.h
+-- Requires: common/lua/system_luaapi.h
 _G.Logger = _G.Logger and _G.Logger or {
   level = __CNC_API.Logger.level,
 
@@ -9,15 +11,25 @@ _G.Logger = _G.Logger and _G.Logger or {
   ]]
   _log = function(level, message, ...)
     local caller = debug.getinfo(3)
+    local callerSource = caller.source
+
+    if callerSource:match("^@") then
+      -- source is a file
+      local sourceFilePath = System.Path(callerSource:match("^@(.+)$"))
+
+      if sourceFilePath.isSubPathOf(System.luaPath) then
+        -- remove leading path if it's a file inside the standard Lua directory
+        callerSource = sourceFilePath.asRelativeSubPathOf(System.luaPath)
+      end
+    end
 
     local source_location = string.format(
       "%s:%d %s()",
-      caller.short_src,
+      callerSource,
       caller.currentline,
       caller.name
     )
 
-    -- See: common/lua/logging_luaapi.h
     __CNC_API.Logger.log(source_location, level, string.format(tostring(message), ...))
   end
 }

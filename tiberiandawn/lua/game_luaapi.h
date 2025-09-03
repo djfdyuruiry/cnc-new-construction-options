@@ -10,10 +10,10 @@
 
 class GameLuaApi: public LuaApi {
 public:
-    GameLuaApi(const LuaEngine& engine) : LuaApi(engine, "Game", { "Game.lua" }) {}
+    GameLuaApi() : LuaApi("Game", { "Game.lua" }) {}
 
-    virtual void Register_Functions() const override {
-        With_Api_Namespace([](auto& n) {
+    virtual void Register_Functions(LuaEngine& engine) const override {
+        With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("win", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 

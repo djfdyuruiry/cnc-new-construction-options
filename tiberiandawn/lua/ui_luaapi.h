@@ -12,10 +12,10 @@
 
 class UiLuaApi: public LuaApi {
 public:
-    UiLuaApi(const LuaEngine& engine) : LuaApi(engine, "UI", { "UI.lua" }) {}
+    UiLuaApi() : LuaApi("UI", { "UI.lua" }) {}
 
-    virtual void Register_Functions() const override {
-        With_Api_Namespace([](auto& n) {
+    virtual void Register_Functions(LuaEngine& engine) const override {
+        With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("popupOk", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "UI.popupOk(<string: message>)");

@@ -11,15 +11,10 @@
 class SystemLuaApi : public LuaApi
 {
 public:
-    SystemLuaApi(const LuaEngine& engine)
-        : LuaApi(
-            engine,
-            "System",
-            { "System.lua" }
-        ){}
+    SystemLuaApi() : LuaApi("System", { "System.lua" }){}
 
-    virtual void Register_Consts() const override {
-        With_Api_Namespace([](auto& n) { 
+    virtual void Register_Consts(LuaEngine& engine) const override {
+        With_Api_Namespace(engine, [](auto& n) { 
             n.addConstant("gamePath", Program_Path)
              .addConstant("luaPath", LuaEngine::Lua_Path.string())
              .addConstant("userPath", User_Path)

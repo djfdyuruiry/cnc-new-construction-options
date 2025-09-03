@@ -84,12 +84,64 @@ Path = function(pathStringOrPath, separator, isWindows)
     )
   end
 
-  return
-  setmetatable(
+  local function isSubPathOf(otherPathOrString)
+    local potentialAncestorPath = marshalToPath(otherPathOrString)
+
+    -- If this path has fewer parts than the other path, it can't be a subpath
+    if #parts < #(potentialAncestorPath.parts) then
+      return false
+    end
+
+    -- Compare each part of the other path with the corresponding part of this path
+    for i = 1, #(potentialAncestorPath.parts) do
+      if parts[i] ~= potentialAncestorPath.parts[i] then
+        -- some part of the potential subpath mismatches
+        return false
+      end
+    end
+
+    return true
+  end
+
+  local function asRelativeSubPathOf(otherPathOrString)
+    local otherPath = marshalToPath(otherPathOrString)
+
+    if not isSubPathOf(otherPath) then
+      error(
+        string.format(
+          "Path passed to Path.asRelativeSubPathOf(...), '%s', was not an ancestor of the current path: %s",
+          otherPathOrString,
+          pathString
+        )
+      )
+    end
+
+    local subPathParts = {}
+
+    for i = ((#otherPath.parts) + 1), #parts do
+      table.insert(subPathParts, parts[i])
+    end
+
+    local subPathString = ""
+
+    for i, subPathPart in ipairs(subPathParts) do
+      if i == 1 then
+        subPathString = subPathPart
+      else
+        subPathString = subPathString .. separator .. subPathPart
+      end
+    end
+
+    return Path(subPathString, separator, isWindows)
+  end
+
+  return setmetatable(
     {
       parts = parts,
       join = join,
       isRelative = isRelative,
+      isSubPathOf = isSubPathOf,
+      asRelativeSubPathOf = asRelativeSubPathOf,
       getRoot = getRoot,
       pathString = pathString
     },

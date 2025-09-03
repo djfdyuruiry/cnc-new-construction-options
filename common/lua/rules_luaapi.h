@@ -25,12 +25,12 @@ template <RuleSectionsProviderConcept R>
 class RulesLuaApi : public LuaApi
 {
 public:
-    RulesLuaApi(const LuaEngine& engine) : LuaApi(engine, "Rules", {"Rules.lua"}) {}
+    RulesLuaApi() : LuaApi("Rules", {"Rules.lua"}) {}
 
-    virtual void Register_Functions() const override
+    virtual void Register_Functions(LuaEngine& engine) const override
     {
         // TODO: have a function that dumps the lua type for a given rule
-        With_Api_Namespace([](auto& n) {
+        With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("getSectionNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 

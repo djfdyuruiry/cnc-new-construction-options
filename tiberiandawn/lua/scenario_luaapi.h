@@ -12,27 +12,32 @@
 class ScenarioLuaApi : public LuaApi
 {
 public:
-    ScenarioLuaApi(const LuaEngine& engine, std::string name, std::string type, std::string faction, std::string house)
-        : LuaApi(engine, "Scenario", {"Scenario.lua"})
+    ScenarioLuaApi(
+        std::string scenario_name,
+        std::string scenario_type,
+        std::string scenario_faction,
+        std::string scenario_house
+    ) : LuaApi("Scenario", {"Scenario.lua"})
     {
-        Name = name;
-        Type = type, Faction = faction;
-        House = house;
+        Scenario_Name = scenario_name;
+        Scenario_Type = scenario_type;
+        Scenario_Faction = scenario_faction;
+        Scenario_House = scenario_house;
     }
 
-    virtual void Register_Consts() const override
+    virtual void Register_Consts(LuaEngine& engine) const override
     {
-        With_Api_Namespace([&](auto& n) {
-            n.addConstant("name", Name)
-                .addConstant("type", Type)
-                .addConstant("faction", Faction)
-                .addConstant("house", House);
+        With_Api_Namespace(engine, [&](auto& n) {
+            n.addConstant("name", Scenario_Name)
+                .addConstant("type", Scenario_Type)
+                .addConstant("faction", Scenario_Faction)
+                .addConstant("house", Scenario_House);
         });
     }
 
-    virtual void Register_Functions() const override
+    virtual void Register_Functions(LuaEngine& engine) const override
     {
-        With_Api_Namespace([](auto& n) {
+        With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("getTriggerNames", [](auto L) {
                  auto engine = SharedLuaEngine(L);
 
@@ -73,8 +78,8 @@ public:
     }
 
 private:
-    std::string Name;
-    std::string Type;
-    std::string Faction;
-    std::string House;
+    std::string Scenario_Name;
+    std::string Scenario_Type;
+    std::string Scenario_Faction;
+    std::string Scenario_House;
 };

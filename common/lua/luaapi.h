@@ -24,40 +24,26 @@ class LuaApi {
 public:
   inline static const std::filesystem::path Nco_Directory = "nco";
 
-  LuaApi(
-    const LuaEngine& engine,
-    const std::string_view name,
-    const std::vector<std::filesystem::path> scripts
-  ) :
-    Lua(engine),
-    Name(name),
-    Scripts(scripts) {}
+  const std::string_view Name;
 
-  LuaApi(
-    const LuaEngine& engine,
-    const std::string_view name
-  ) :
-    Lua(engine),
-    Name(name),
-    Scripts() {}
+  LuaApi(const std::string_view name, const std::vector<std::filesystem::path> scripts) : Name(name), Scripts(scripts) {}
+  LuaApi(const std::string_view name) : Name(name), Scripts() {}
 
-  luabridge::Namespace Get_Api_Namespace() const {
-    return Lua.Bridge()
-      .beginNamespace(Root_Namespace.data())
-      .beginNamespace(Name.data());
+  void With_Api_Namespace(LuaEngine& engine, std::function<void(luabridge::Namespace&)> action) const {
+    engine.With_Api_Namespace(Name, action);
   }
 
-  void With_Api_Namespace(std::function<void(luabridge::Namespace&)> action) const {
-    auto api_namespace = Get_Api_Namespace();
+  /**
+   * Ensure the host Lua engine has other APIs
+   * that are a dependency of this API here.
+   */
+  virtual void Register_Dependencies(LuaEngine& Lua) const {}
 
-    action(api_namespace);
+  virtual void Register_Consts(LuaEngine& Lua) const {};
 
-    api_namespace.endNamespace().endNamespace();
-  }
+  virtual void Register_Functions(LuaEngine& Lua) const {};
 
-  virtual void Register_Consts() const {};
-  virtual void Register_Functions() const {};
-  virtual void Register_Scripts() const {
+  virtual void Register_Scripts(LuaEngine& Lua) const {
     if (Scripts.size() < 1) {
       CNC_LOGGER_DEBUG("No scripts registered for this API");
       return;
@@ -83,18 +69,16 @@ public:
     }
   }
 
-  virtual void Register() {
+  virtual void Register(LuaEngine& Lua) {
     CNC_LOGGER_INFO("Registering Lua API: {}", Name);
 
-    Register_Consts();
-    Register_Functions();
-    Register_Scripts();
+    Register_Dependencies(Lua);
+    Register_Consts(Lua);
+    Register_Functions(Lua);
+    Register_Scripts(Lua);
   }
 protected:
   inline static const CncLogger Logger = CncLogger("LuaApi");
-  inline static const std::string_view Root_Namespace = "__CNC_API";
 
-  const LuaEngine& Lua;
-  const std::string_view Name;
   const std::vector<std::filesystem::path> Scripts;
 };

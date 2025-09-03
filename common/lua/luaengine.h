@@ -21,6 +21,7 @@
 #include <string>
 #include <thread>
 #include <variant>
+#include <vector>
 #include <format>
 
 #include <lua.hpp>
@@ -32,20 +33,58 @@
 #include "luaresult.h"
 
 /**
+ * Avoids a circular dependency whilst enforcing
+ * type constraints for LuaApi types.
+ */
+template <typename T, typename U>
+concept LuaApiConcept = requires(T t, U& e) {
+    { t.Register(e) } -> std::same_as<void>;
+    { t.Name } -> std::same_as<const std::basic_string_view<char> &>;
+};
+
+/**
  * Abstract wrapper around a Lua state.
  */
 class LuaEngine {
 public:
     // default path for lua script files - we ensure this is in the Lua 'package.path', see UniqueLuaEngine()
     inline static const std::filesystem::path Lua_Path = std::filesystem::path(Paths.Program_Path()) / "lua";
+    // all APIs will be available from this global Lua table
+    inline static const std::string_view Root_Api_Namespace = "__CNC_API";
 
     virtual ~LuaEngine() = default;
 
-    template<class T, typename... Args>
-    void Register_Api(Args&&... args) {
-        auto api = T(*this, std::forward<Args>(args)...);
+    // API registration
 
-        api.Register();
+    template<class T, typename... Args>
+    requires LuaApiConcept<T, LuaEngine>
+    void Register_Api(Args&&... args) {
+        auto api = T(std::forward<Args>(args)...);
+
+        auto it = std::find(Registered_Apis.begin(), Registered_Apis.end(), api.Name);
+
+        if (it != Registered_Apis.end()) {
+            CNC_LOG_DEBUG("Request to register Api '%s' ignored, it's already registered");
+            return;
+        }
+
+        api.Register(*this);
+
+        Registered_Apis.emplace_back(api.Name);
+    }
+
+    luabridge::Namespace Get_Api_Namespace(std::string_view name) const {
+        return Bridge()
+        .beginNamespace(Root_Api_Namespace.data())
+        .beginNamespace(name.data());
+    }
+
+    void With_Api_Namespace(std::string_view name, std::function<void(luabridge::Namespace&)> action) const {
+        auto api_namespace = Get_Api_Namespace(name);
+
+        action(api_namespace);
+
+        api_namespace.endNamespace().endNamespace();
     }
 
     // low level state access
@@ -366,6 +405,8 @@ public:
 protected:
     inline static const CncLogger Logger = CncLogger("LuaEngine");
 
+    std::vector<std::string_view> Registered_Apis;
+
     virtual lua_State* Get_State() const = 0;
 };
 
@@ -457,6 +498,7 @@ template<class T>
 class LuaEngineBuilder {
 public:
     template<class U, typename... Args>
+    requires LuaApiConcept<U, LuaEngine>
     LuaEngineBuilder& With_Api(Args&&... args) {
         Lua.template Register_Api<U>(std::forward<Args>(args)...);
 

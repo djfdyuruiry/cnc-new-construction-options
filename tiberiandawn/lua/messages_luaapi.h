@@ -11,10 +11,10 @@
 
 class MessagesLuaApi: public LuaApi {
 public:
-    MessagesLuaApi(const LuaEngine& engine) : LuaApi(engine, "Messages", { "Messages.lua" }) {}
+    MessagesLuaApi() : LuaApi("Messages", { "Messages.lua" }) {}
 
-    virtual void Register_Functions() const override {
-        With_Api_Namespace([](auto& n) {
+    virtual void Register_Functions(LuaEngine& engine) const override {
+        With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("showToPlayer", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Messages.showToPlayer(<string: message>)");
