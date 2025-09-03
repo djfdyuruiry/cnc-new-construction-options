@@ -30,7 +30,7 @@ class ScenarioLua final
 public:
      static const LuaEngine& Get_Engine() {
           if (!Engine.has_value()) {
-               CNC_LOG_FATAL("Attempted to access lua engine before it was loaded");
+               CNC_LOGGER_FATAL("Attempted to access lua engine before it was loaded");
           }
 
           return Engine.value();
@@ -42,6 +42,8 @@ public:
       */
      static void On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, ScenarioClass& scenario, HouseClass* player) {
           Call_Back();
+
+          CNC_LOGGER_INFO("Game engine called Lua hook: On_Scenario_Load");
 
           auto scenario_name = std::string(scenario.ScenarioName);
           std::string scenario_type_name = game_type == GAME_NORMAL ? "single-player" : "multiplayer";
@@ -65,7 +67,7 @@ public:
 
           Exec_Scenario_Lua_Scripts(ini, scenario, scenario_name, faction, house_name);
 
-          CNC_LOG_DEBUG("Scenario Lua initialization done");
+          CNC_LOGGER_DEBUG("Scenario Lua initialization done");
 
           Call_Back();
      }
@@ -73,17 +75,21 @@ public:
      ScenarioLua() = delete;
 
 private:
+     static inline const CncLogger Logger = CncLogger("ScenarioLua");
      static inline std::optional<UniqueLuaEngine> Engine;
 
      /**
-      * Run various lua files for the current scenario, these files are attempted:
+      * Run various lua script files for the current scenario, scripts are attempted in the following order:
       * 
-      * - File path in INI '[Basic].LuaScript', defaults to LuaScripts::On_Scenario_Load (can be used as a hook for all scenarios)
-      * - Name of the scenario '<scenario_name>.lua', e.x. 'scg01ea.lua' (in lower case)
-      * - Name of the scenario without variant, e.x. 'scg01.lua' (again, in lower case)
-      * - Name of the player faction '<faction>-scenario.lua', e.x. 'gdi-scenario.lua' (again, in lower case)
-      * - Name of the player house '<house>-scenario.lua', e.x. 'goodguy-scenario.lua' (again, in lower case)
+      *   - File path in @property{LuaScripts::On_Scenario_Load} (can be used as a hook for all scenarios)
+      *   - Name of the player faction '<faction>-scenario.lua', e.x. 'gdi-scenario.lua' (again, in lower case)
+      *   - Name of the player house '<house>-scenario.lua', e.x. 'goodguy-scenario.lua' (again, in lower case)
+      *   - Name of the scenario without variant, e.x. 'scg01.lua' (again, in lower case)
+      *   - Name of the scenario '<scenario_name>.lua', e.x. 'scg01ea.lua' (in lower case)
+      *   - File path in INI '[Basic].LuaScript' (if present, value in INI is converted to lower case)
       *
+      * Note: These are designed to flow from most generic script to the most specific script, so that any
+      *       overrides can be applied appropriately and files down the chain are executed.
       */
      static void Exec_Scenario_Lua_Scripts(
           const CCINIClass& ini,
@@ -92,20 +98,44 @@ private:
           const std::string& faction_name,
           const std::string& house_name
      ) {
-          auto scenario_lua_script_path = ini.Get_String("Basic", "LuaScript", LuaScripts::On_Scenario_Load);
           auto lua_scripts_to_load = std::vector<std::string> {
-               scenario_lua_script_path,
+               LuaScripts::On_Scenario_Load,
                std::format("{}.lua", scenario_name),
                std::format("{}.lua", scenario_name.substr(0, 5)),
                std::format("{}-scenario.lua", faction_name),
                std::format("{}-scenario.lua", house_name)
           };
 
+          auto scenario_lua_script_path = ini.Get_String("Basic", "LuaScript", std::string_view("__NOT_FOUND__"));
+
+          if (scenario_lua_script_path != "__NOT_FOUND__") {
+               // is not blank
+               if (!std::all_of(
+                    scenario_lua_script_path.begin(),
+                    scenario_lua_script_path.end(),
+                    [](unsigned char c){ return std::isspace(c); }
+               )) {
+                    CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", scenario_lua_script_path);
+
+                    // to lower
+                    std::transform(
+                         scenario_lua_script_path.begin(),
+                         scenario_lua_script_path.end(),
+                         scenario_lua_script_path.begin(),
+                         ::tolower
+                    );
+
+                    lua_scripts_to_load.emplace_back(scenario_lua_script_path);
+               }
+          } else {
+               CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");
+          }
+
           for (const auto& script_path : lua_scripts_to_load) {
                Get_Engine()
                     .Exec_File_If_Exists(script_path)
                     .On_Error([&](auto& r) {
-                         CNC_LOG_ERROR(
+                         CNC_LOGGER_ERROR(
                               "Failed to load scenario script '{}' due to an error: {}",
                               script_path,
                               r.Error.value_or("unknown error")
