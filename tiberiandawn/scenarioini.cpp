@@ -49,6 +49,8 @@
 #include "common/irandom.h"
 #include "ccini.h"
 
+#include "lua/scenariolua.h"
+
 /************************************* Prototypes *********************************************/
 static void Assign_Houses(void);
 static void Remove_AI_Players(void);
@@ -641,6 +643,11 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     }
 
     Call_Back();
+
+    /**
+     * Lua rabbit hole
+     */
+    ScenarioLua::On_Scenario_Load(ini, GameToPlay, Scen, PlayerPtr);
 
     /*
     **	Return with flag saying that the scenario file was read.

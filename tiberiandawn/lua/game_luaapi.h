@@ -4,8 +4,9 @@
 
 #include "../common/lua/luaapi.h"
 
-#include "td_luaevents.h"
 #include "../externs.h"
+
+#include "td_luaevents.h"
 
 class GameLuaApi: public LuaApi {
 public:

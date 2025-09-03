@@ -8,8 +8,8 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/lib/functions.sh"
 
 function deploy_nco_lua() {
-  rm -rf "${target_dir}/lua/nco"
-  mkdir -p "${target_dir}/lua/nco"
+  rm -rf "${target_dir}/lua"
+  mkdir -p "${target_dir}/lua"
 
   cp -rf "${common_lua_scripts_path}"/* "${target_dir}/lua"
 

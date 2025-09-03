@@ -8,6 +8,8 @@
 #include "td_luaevents.h"
 #include "../externs.h"
 
+#include "td_luaevents.h"
+
 class UiLuaApi: public LuaApi {
 public:
     UiLuaApi(const LuaEngine& engine) : LuaApi(engine, "UI", { "UI.lua" }) {}

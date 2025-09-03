@@ -16,12 +16,14 @@
  *   local var = <Name>.<const>
  *   local result = <Name>.<function>()
  *
- * Lua scripts can be loaded from disk as well by passing 'scripts'
- * param the constructor. This are expected to be in "<GAME_PATH>/lua/nco"
- * , where <GAME_PATH> is the path to the game binary.
+ * Lua scripts can be loaded from disk by passing a 'scripts' vector
+ * in the constructor. These scripts are expected to be in "<LUA_DIR>/nco"
+ * , where <LUA_DIR> is managed by @class{LuaEngine}.
  */
 class LuaApi {
 public:
+  inline static const std::filesystem::path Nco_Directory = "nco";
+
   LuaApi(
     const LuaEngine& engine,
     const std::string_view name,
@@ -61,17 +63,22 @@ public:
       return;
     }
 
-    CNC_LOGGER_INFO("Registering scripts using base path: {}", LuaEngine::Lua_Directory.string());
+    CNC_LOGGER_INFO("Registering scripts using base path: {}", LuaEngine::Lua_Path.string());
 
     for (const auto& script : Scripts) {
-      auto full_script_path = LuaEngine::Lua_Directory / "nco" / script;
+      auto full_script_path = script;
+
+      if (script.is_relative()) {
+        // assume relative paths are part of the 'nco' library
+        full_script_path = Nco_Directory / script;
+      }
 
       Lua.Exec_File(full_script_path.string())
         .If_Ok([&](auto& r) {
           CNC_LOGGER_INFO("Loaded script OK: {}", script.string());
         })
         .On_Error([&](auto& r) {
-          CNC_LOGGER_ERROR("Failed to load script '{}': {}", script.string(), r.Error.value());
+          CNC_LOGGER_FATAL("Failed to load script '{}': {}", script.string(), r.Error.value());
         });      
     }
   }

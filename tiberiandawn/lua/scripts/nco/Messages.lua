@@ -1,10 +1,6 @@
-_G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {
-  Game = {},
-  Messages = {},
-  UI = {}
-}
+_G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {}
 
-_G.TiberianDawn.Messages.showToPlayer = function(...)
-  -- See: tiberiandawn/lua/game_luaapi.h
-  __CNC_API.Messages.showToPlayer(...);
-end
+-- See: tiberiandawn/lua/messages_luaapi.h
+_G.TiberianDawn.Messages = _G.TiberianDawn.Messages and _G.TiberianDawn.Messages or {
+  showToPlayer = __CNC_API.Messages.showToPlayer
+}

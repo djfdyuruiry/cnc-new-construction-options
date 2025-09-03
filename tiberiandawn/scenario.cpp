@@ -47,13 +47,6 @@
 #include "function.h"
 
 #include "common/framelimit.h"
-#include "common/lua/logging_luaapi.h"
-#include "common/lua/rules_luaapi.h"
-#include "common/lua/luaengine.h"
-
-#include "lua/game_luaapi.h"
-#include "lua/messages_luaapi.h"
-#include "lua/ui_luaapi.h"
 
 extern int PreserveVQAScreen;
 
@@ -392,14 +385,6 @@ void Clear_Scenario(void)
     Base.Init();
 
     CurrentObject.Clear_All();
-
-    Scen.Lua = LuaEngineBuilder<UniqueLuaEngine>()
-        .With_Api<LoggingLuaApi>()
-        .With_Api<RulesLuaApi<RuleSectionsProvider>>()
-        .With_Api<MessagesLuaApi>()
-        .With_Api<GameLuaApi>()
-        .With_Api<UiLuaApi>()
-        .Build();
 }
 
 /***********************************************************************************************

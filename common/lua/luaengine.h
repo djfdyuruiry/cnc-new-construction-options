@@ -27,6 +27,8 @@
 #include <LuaBridge/LuaBridge.h>
 
 #include "../logger.h"
+#include "../paths.h"
+
 #include "luaresult.h"
 
 /**
@@ -34,7 +36,8 @@
  */
 class LuaEngine {
 public:
-    inline static const std::filesystem::path Lua_Directory = std::filesystem::path(Paths.Program_Path()) / "lua";
+    // default path for lua script files - we ensure this is in the Lua 'package.path', see UniqueLuaEngine()
+    inline static const std::filesystem::path Lua_Path = std::filesystem::path(Paths.Program_Path()) / "lua";
 
     virtual ~LuaEngine() = default;
 
@@ -66,6 +69,13 @@ public:
             lua_error(L);
         });
     }
+
+    template<typename... Args>
+    void Raise_Error_Format(const std::string& message, Args&&... args) {
+        Raise_Error(
+            std::format(message, std::forward<Args>(args)...)
+        );
+    };
 
     // code execution
 
@@ -116,19 +126,51 @@ public:
         return future;
     }
 
-    LuaResult Exec_File(std::string_view script_path) const {
-        CNC_LOGGER_DEBUG("Attempting to execute lua file: {}", script_path);
+    LuaResult Exec_File(std::filesystem::path script_path) const {
+        auto full_script_path = script_path;
 
-        return Get_Value_From_State<LuaResult>([&script_path](auto L) {
-            auto status = luaL_loadfile(L, script_path.data());
+        if (script_path.is_relative()){
+            // assume relative paths are part of @var{Lua_Path} file tree
+            full_script_path = Lua_Path / script_path;
+        }
+
+        if (!std::filesystem::is_regular_file(full_script_path)) {
+            return LuaResult(
+                std::format(
+                    "Unable to execute lua file '{}': file was not found at given path",
+                    full_script_path.string()
+                )
+            );
+        }
+
+        return Exec_File_If_Exists(full_script_path);
+    }
+
+    LuaResult Exec_File_If_Exists(std::filesystem::path script_path) const {
+        auto full_script_path = script_path;
+
+        if (script_path.is_relative()){
+            // assume relative paths are part of @var{Lua_Path} file tree
+            full_script_path = Lua_Path / script_path;
+        }
+
+        if (!std::filesystem::is_regular_file(full_script_path)) {
+            CNC_LOGGER_WARN("Skipping lua file execution as it does not exist: {}", full_script_path.string());
+            return LuaResult(LUA_OK);
+        }
+
+        CNC_LOGGER_DEBUG("Attempting to execute lua file: {}", full_script_path.string());
+
+        return Get_Value_From_State<LuaResult>([&full_script_path](auto L) {
+            auto status = luaL_loadfile(L, full_script_path.string().c_str());
 
             if (status != LUA_OK) {
                 return LuaResult(L, status);
                 auto result = LuaResult(L, status);
 
                 CNC_LOGGER_TRACE(
-                    "Error loading lua file due to '{}' error: {}",
-                    result.Code_As_String(),
+                    "Error loading lua file '{}' due to error: {}",
+                    full_script_path.string(),
                     result.Error.value()
                 );
                 return result;
@@ -361,8 +403,8 @@ public:
         Exec(
             std::format(
                 "package.path = package.path .. ';{}/?.lua;{}/?/init.lua'",
-                Lua_Directory.string(),
-                Lua_Directory.string()
+                Lua_Path.string(),
+                Lua_Path.string()
             )
         ).On_Error([](auto& r) {
             CNC_LOGGER_CRITICAL("Failed to initialise Lua package paths: {}", r.Error.value());

@@ -5,8 +5,9 @@
 #include "../common/lua/luaapi.h"
 #include "../common/lua/luaarguments.h"
 
-#include "td_luaevents.h"
 #include "../externs.h"
+
+#include "td_luaevents.h"
 
 class MessagesLuaApi: public LuaApi {
 public:

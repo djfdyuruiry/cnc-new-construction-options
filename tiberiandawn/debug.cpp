@@ -38,6 +38,9 @@
 #include <stdarg.h>
 #include "common/filepcx.h"
 #include "common/rawfile.h"
+
+#include "lua/scenariolua.h"
+
 #ifdef CHEAT_KEYS
 
 extern bool ScreenRecording;
@@ -555,7 +558,7 @@ void Debug_Key(unsigned input)
 #endif
 
         case KN_F5:
-            Scen.Lua.Exec_Async(R"*(
+            ScenarioLua::Get_Engine().Exec_Async(R"*(
                 function onF5()
                   Logger.debug("onF5 Called")
 

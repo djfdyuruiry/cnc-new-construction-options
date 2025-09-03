@@ -117,11 +117,6 @@ public:
     **	This records the bookmark view locations the player has recorded.
     */
     CELL Views[4];
-
-    /**
-     * Lua instance lives for the lifecycle of a scenario.
-     */
-    UniqueLuaEngine Lua;
 };
 
 #endif

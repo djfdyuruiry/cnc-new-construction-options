@@ -1,0 +1,3 @@
+- `nco` directory contains the Tiberian Dawn that is bundled with the game release
+- All top level scripts are for testing when debugging
+- These files are deployed by [scripts/2.deploy.sh](../../../scripts/2.deploy.sh)

@@ -1037,11 +1037,16 @@ int INIClass::Get_String(char const* section, char const* entry, char const* def
     }
 }
 
-std::string INIClass::Get_String(char const* section, char const* entry, std::string const& defvalue) const
+std::string INIClass::Get_String(char const* section, char const* entry, const std::string& defvalue) const
 {
     std::string buffer(MAX_LINE_LENGTH, '\0');
     buffer.resize(Get_String(section, entry, defvalue.c_str(), &buffer[0], static_cast<int>(buffer.capacity())));
     return buffer;
+}
+
+std::string INIClass::Get_String(char const* section, char const* entry, const std::string_view& defvalue) const
+{
+    return Get_String(section, entry, std::string(defvalue));
 }
 
 /***********************************************************************************************
