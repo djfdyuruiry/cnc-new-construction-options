@@ -1,5 +1,19 @@
 local Path
 
+--[[
+  Simple Path class for building and querying file
+  paths for the current operating system.
+
+  Short hand join using '/' operator:
+
+    local a = Path(...)
+    local b = Path(...)
+
+    -- outputs "<a><pathSeparator><b><pathSeparator>sub<pathSeparator>path<pathSeparator>file.txt"
+    --         e.x.  "<a>/<b>/sub/path/file.txt" on *nix
+    --               "<a>\<b>\sub\path\file.txt" on windows 
+    local joined_path = a / b / "sub" / "path" / "file.txt"
+]]
 Path = function(pathStringOrPath, separator, isWindows)
   local windowsDrivePattern = "^[A-Z]:\\"
 
