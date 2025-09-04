@@ -1,6 +1,9 @@
+if type(__CNC_API) == "nil" or (__CNC_API.UI) == "nil" then
+  error("nco.TiberianDawn.UI failed to init, required C++ backend not loaded: -- tiberiandawn/lua/ui_luaapi.h")
+end
+
 _G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {}
 
--- See: tiberiandawn/lua/ui_luaapi.h
 _G.TiberianDawn.UI = _G.TiberianDawn.UI and _G.TiberianDawn.UI or {
   __cpp_source = __CNC_API.UI.__cpp_source,
   __name = __CNC_API.UI.__name,
@@ -26,3 +29,5 @@ _G.TiberianDawn.UI = _G.TiberianDawn.UI and _G.TiberianDawn.UI or {
     end
   end
 }
+
+return _G.TiberianDawn.UI

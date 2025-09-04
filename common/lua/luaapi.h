@@ -99,7 +99,7 @@ public:
 protected:
     inline static const CncLogger Logger = CncLogger("LuaApi");
 
-    const std::vector<std::filesystem::path> Scripts;
+    std::vector<std::filesystem::path> Scripts;
 
     /**
      * Sub-classes should copy/paste this with 'override'

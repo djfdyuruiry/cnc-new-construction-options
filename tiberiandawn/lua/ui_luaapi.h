@@ -8,11 +8,13 @@
 #include "td_luaevents.h"
 #include "../externs.h"
 
+#include "td_luaapi.h"
 #include "td_luaevents.h"
 
-class UiLuaApi: public LuaApi {
+class UiLuaApi: public TiberianDawnLuaApi
+{
 public:
-    UiLuaApi() : LuaApi("UI", { "UI.lua" }) {}
+    UiLuaApi() : TiberianDawnLuaApi("UI", { "UI.lua" }) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {

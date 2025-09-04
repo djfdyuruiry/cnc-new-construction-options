@@ -2,15 +2,15 @@
 
 #include <memory>
 
-#include "../common/lua/luaapi.h"
-
 #include "../externs.h"
 
+#include "td_luaapi.h"
 #include "td_luaevents.h"
 
-class GameLuaApi: public LuaApi {
+class GameLuaApi: public TiberianDawnLuaApi
+{
 public:
-    GameLuaApi() : LuaApi("Game", { "Game.lua" }) {}
+    GameLuaApi() : TiberianDawnLuaApi("Game", { "Game.lua" }) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {

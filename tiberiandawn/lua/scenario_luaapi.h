@@ -9,7 +9,9 @@
 
 #include "../externs.h"
 
-class ScenarioLuaApi : public LuaApi
+#include "td_luaapi.h"
+
+class ScenarioLuaApi: public TiberianDawnLuaApi
 {
 public:
     ScenarioLuaApi(
@@ -17,7 +19,7 @@ public:
         std::string scenario_type,
         std::string scenario_faction,
         std::string scenario_house
-    ) : LuaApi("Scenario", {"Scenario.lua"})
+    ) : TiberianDawnLuaApi("Scenario", {"Scenario.lua"})
     {
         Scenario_Name = scenario_name;
         Scenario_Type = scenario_type;

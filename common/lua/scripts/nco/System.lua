@@ -1,6 +1,9 @@
+if type(__CNC_API) == "nil" or (__CNC_API.System) == "nil" then
+  error("nco.System failed to init, required C++ backend not loaded: common/lua/system_luaapi.h")
+end
+
 local Path = require("nco.lib.Path")
 
--- See: common/lua/system_luaapi.h
 _G.System = _G.System and _G.System or {
   __cpp_source = __CNC_API.System.__cpp_source,
   __name = __CNC_API.System.__name,
@@ -34,3 +37,5 @@ for _, pathField in ipairs({ "gamePath", "luaPath", "userPath"}) do
     _G.System._openFile(_G.System[pathField], ...)
   end
 end
+
+return _G.System

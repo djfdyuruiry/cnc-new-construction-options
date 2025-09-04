@@ -1,5 +1,9 @@
--- See: common/lua/logging_luaapi.h
--- Requires: common/lua/system_luaapi.h
+if type(__CNC_API) == "nil" or (__CNC_API.Logger) == "nil" then
+  error("nco.Logger failed to init, required C++ backend not loaded: common/lua/logging_luaapi.h")
+end
+
+local System = require("nco.System")
+
 _G.Logger = _G.Logger and _G.Logger or {
   __cpp_source = __CNC_API.Logger.__cpp_source,
   __name = __CNC_API.Logger.__name,
@@ -43,3 +47,5 @@ for _, v in pairs({ "trace", "debug", "info", "warning", "error", "critical" }) 
     _G.Logger._log(v, message, ...)
   end
 end
+
+return _G.Logger

@@ -7,11 +7,13 @@
 
 #include "../externs.h"
 
+#include "td_luaapi.h"
 #include "td_luaevents.h"
 
-class MessagesLuaApi: public LuaApi {
+class MessagesLuaApi: public TiberianDawnLuaApi
+{
 public:
-    MessagesLuaApi() : LuaApi("Messages", { "Messages.lua" }) {}
+    MessagesLuaApi() : TiberianDawnLuaApi("Messages", { "Messages.lua" }) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {
