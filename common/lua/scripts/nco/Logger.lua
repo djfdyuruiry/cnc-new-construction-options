@@ -1,6 +1,9 @@
 -- See: common/lua/logging_luaapi.h
 -- Requires: common/lua/system_luaapi.h
 _G.Logger = _G.Logger and _G.Logger or {
+  __cpp_source = __CNC_API.Logger.__cpp_source,
+  __name = __CNC_API.Logger.__name,
+
   level = __CNC_API.Logger.level,
 
   --[[

@@ -2,6 +2,9 @@ _G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {}
 
 -- See: tiberiandawn/lua/ui_luaapi.h
 _G.TiberianDawn.UI = _G.TiberianDawn.UI and _G.TiberianDawn.UI or {
+  __cpp_source = __CNC_API.UI.__cpp_source,
+  __name = __CNC_API.UI.__name,
+
   --[[
     Show a popup to the player. Supported types: 'OK'
 

@@ -23,6 +23,11 @@ public:
         });
     }
 
+protected:
+    virtual const char* Get_Cpp_Source() const override {
+        return __FILE__;
+    }
+
 private:
 #ifdef _WIN32
     static inline bool Is_Windows = true;

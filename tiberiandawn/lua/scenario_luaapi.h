@@ -77,6 +77,11 @@ public:
         });
     }
 
+protected:
+    virtual const char* Get_Cpp_Source() const override {
+        return __FILE__;
+    }
+
 private:
     std::string Scenario_Name;
     std::string Scenario_Type;

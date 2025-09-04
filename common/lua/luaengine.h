@@ -64,7 +64,7 @@ public:
         auto it = std::find(Registered_Apis.begin(), Registered_Apis.end(), api.Name);
 
         if (it != Registered_Apis.end()) {
-            CNC_LOG_DEBUG("Request to register Api '%s' ignored, it's already registered");
+            CNC_LOG_DEBUG("Request to register Api '{}' ignored, it's already registered", api.Name);
             return;
         }
 
@@ -75,8 +75,8 @@ public:
 
     luabridge::Namespace Get_Api_Namespace(std::string_view name) const {
         return Bridge()
-        .beginNamespace(Root_Api_Namespace.data())
-        .beginNamespace(name.data());
+          .beginNamespace(Root_Api_Namespace.data())
+          .beginNamespace(name.data());
     }
 
     void With_Api_Namespace(std::string_view name, std::function<void(luabridge::Namespace&)> action) const {
