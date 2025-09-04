@@ -6,6 +6,15 @@
 
 #include "luaengine.h"
 
+/**
+ * Fluent builder for setting up Lua Tables on the stack.
+ * Supports both index based array tables and key=value tables.
+ * 
+ * Arrays: New_Table() -> With_Index_Value() (repeat With_Index_Value as needed)
+ * Maps:   New_Table() -> With_Key_Value()   (repeat With_Key_Value as needed)
+ * 
+ * Values are pushed onto the stack as methods are called, no need to finalize.
+ */
 class LuaTableBuilder
 {
 public:
