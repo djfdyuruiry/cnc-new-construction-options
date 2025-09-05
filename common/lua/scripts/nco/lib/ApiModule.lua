@@ -1,5 +1,6 @@
 local TypeValidator = require("nco.lib.TypeValidator")
 
+local skipIfNotPresent = TypeValidator.Validators.skipIfNotPresent
 local isType = TypeValidator.Validators.isType
 local isNotBlank = TypeValidator.Validators.isNotBlank
 local isNotEmpty = TypeValidator.Validators.isNotEmpty
@@ -8,15 +9,18 @@ local function ApiModule(moduleSpec)
   TypeValidator.validateCall(
     "ApiModule",
     {
-      { moduleSpec, isType("table") },
-      { moduleSpec.modulePath, isType("table"), isNotEmpty },
-      { moduleSpec.cppApi, isType("string"), isNotBlank },
-      { moduleSpec.cppSource, isType("string"), isNotBlank },
-      { moduleSpec.apiModuleBuilder, isType("function"), isNotBlank }
+      moduleSpec = { moduleSpec, isType("table") },
+      ["moduleSpec.modulePath"] = { moduleSpec.modulePath, isType("table"), isNotEmpty },
+      ["moduleSpec.cppApi"] = { moduleSpec.cppApi, isType("string"), isNotBlank },
+      ["moduleSpec.cppSource"] = { moduleSpec.cppSource, isType("string"), isNotBlank },
+      ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") },
+      ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("table") }
     }
   )
 
-    -- build module path, working down to destination table (_G.x[.y]...)
+  local mockPresent = type(_G.__CNC_API_MOCK) == "table"
+
+  -- build module path, working down to destination table (_G.x[.y]...)
   local moduleDest = _G
   local moduleDestStr = ""
 
@@ -32,7 +36,7 @@ local function ApiModule(moduleSpec)
   end
 
   -- assert cppApi is loaded into Lua state
-  if type(__CNC_API) ~= "table" or type(__CNC_API[moduleSpec.cppApi]) ~= "table" then
+  if not mockPresent and not (type(_G.__CNC_API) == "table" and type(_G.__CNC_API[moduleSpec.cppApi]) == "table") then
     error(
       string.format(
        "%s API failed to init, required C++ backend not loaded: %s",
@@ -42,8 +46,22 @@ local function ApiModule(moduleSpec)
     )
   end
 
-  -- attempt to build module
-  local moduleOrError, status = pcall(moduleSpec.apiModuleBuilder, __CNC_API[moduleSpec.cppApi], moduleSpec)
+  -- attempt to build module (use a mock cppApi via builder, if present)
+  local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.cppApi] or _G.__CNC_API_MOCK(moduleSpec)[moduleSpec.cppApi]
+
+  if mockPresent and type(cppApi) ~="table" then
+    error(
+      string.format(
+       "%s API failed to init, C++ backend mock builder didn't return a table, actual type returned: %s",
+        moduleDestStr,
+        type(cppApi)
+      )
+    )
+  end
+
+  local status, moduleOrError = xpcall(function()
+    return moduleSpec.builder(cppApi, moduleSpec)
+  end, debug.traceback)
 
   if not status then
     error(
