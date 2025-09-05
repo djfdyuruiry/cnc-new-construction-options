@@ -10,7 +10,7 @@
 class GameLuaApi: public TiberianDawnLuaApi
 {
 public:
-    GameLuaApi() : TiberianDawnLuaApi("Game", { "Game.lua" }) {}
+    GameLuaApi() : TiberianDawnLuaApi("Game", true) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {

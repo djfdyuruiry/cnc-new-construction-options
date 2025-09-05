@@ -28,12 +28,16 @@ public:
     inline static const std::filesystem::path Nco_Directory = "nco";
 
     const std::string_view Name;
-
-    LuaApi(const std::string_view name, const std::vector<std::filesystem::path> scripts)
-        : Name(name), Scripts(scripts) {}
+    const bool Has_Native_Module;
 
     LuaApi(const std::string_view name)
-        : Name(name), Scripts() {}
+        : Name(name), Scripts(), Has_Native_Module(false) {}
+
+    LuaApi(const std::string_view name, const bool has_native_module)
+        : Name(name), Scripts(), Has_Native_Module(has_native_module) {}
+
+    LuaApi(const std::string_view name, const bool has_native_module, const std::vector<std::filesystem::path> scripts)
+        : Name(name), Scripts(scripts), Has_Native_Module(has_native_module) {}
 
     void With_Api_Namespace(LuaEngine& engine, std::function<void(luabridge::Namespace&)> action) const
     {
@@ -50,13 +54,35 @@ public:
 
     /**
      * Ensure the host Lua engine has other APIs
-     * that are a dependency of this API here.
+     * that are a dependency of this API.
      */
     virtual void Register_Dependencies(LuaEngine& engine) const {}
 
     virtual void Register_Consts(LuaEngine& engine) const {}
 
     virtual void Register_Functions(LuaEngine& engine) const {}
+
+    virtual void Register_Native_Module(LuaEngine& engine) const
+    {
+        if (!Has_Native_Module) {
+            return;
+        }
+
+        auto require_script = std::format(
+            R"*( require("{}.{}") )*",
+            Get_Parent_Lua_Module_Path(),
+            Name
+        );
+
+        engine.Exec(require_script)
+            .On_Error([&](auto& r) {
+                CNC_LOGGER_FATAL(
+                    "Failed to register native module using script '{}': {}",
+                    require_script,
+                    r.Error.value()
+                );
+            });
+    }
 
     virtual void Register_Scripts(LuaEngine& engine) const
     {
@@ -87,12 +113,15 @@ public:
     {
         CNC_LOGGER_INFO("Registering Lua API: {}", Name);
 
-        Register_Api_Metadata(engine);
-
         Register_Dependencies(engine);
 
+        // c++ code
+        Register_Api_Metadata(engine);
         Register_Consts(engine);
         Register_Functions(engine);
+
+        // lua code
+        Register_Native_Module(engine);
         Register_Scripts(engine);
     }
 
@@ -102,8 +131,18 @@ protected:
     std::vector<std::filesystem::path> Scripts;
 
     /**
+     * Follow the directory mapping Lua does: x/y/z becomes x.y.z
+     */
+    virtual const std::string& Get_Parent_Lua_Module_Path() const
+    {
+        static const auto module = Nco_Directory.string();
+
+        return module;
+    }
+
+    /**
      * Sub-classes should copy/paste this with 'override'
-     * to ensure source file is correct.
+     * to ensure source file metadata is correct.
      */
     virtual const char* Get_Cpp_Source() const
     {

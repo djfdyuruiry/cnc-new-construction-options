@@ -19,7 +19,7 @@ public:
         std::string scenario_type,
         std::string scenario_faction,
         std::string scenario_house
-    ) : TiberianDawnLuaApi("Scenario", {"Scenario.lua"})
+    ) : TiberianDawnLuaApi("Scenario", true)
     {
         Scenario_Name = scenario_name;
         Scenario_Type = scenario_type;

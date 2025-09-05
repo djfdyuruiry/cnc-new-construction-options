@@ -10,7 +10,7 @@
 class LoggingLuaApi : public LuaApi
 {
 public:
-    LoggingLuaApi() : LuaApi("Logger", { "Logger.lua" }) {}
+    LoggingLuaApi() : LuaApi("Logger", true) {}
 
     virtual void Register_Dependencies(LuaEngine& engine) const override {
         engine.Register_Api<SystemLuaApi>();

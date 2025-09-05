@@ -14,7 +14,7 @@
 class UiLuaApi: public TiberianDawnLuaApi
 {
 public:
-    UiLuaApi() : TiberianDawnLuaApi("UI", { "UI.lua" }) {}
+    UiLuaApi() : TiberianDawnLuaApi("UI", true) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {

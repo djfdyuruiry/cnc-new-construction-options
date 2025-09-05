@@ -13,7 +13,7 @@
 class MessagesLuaApi: public TiberianDawnLuaApi
 {
 public:
-    MessagesLuaApi() : TiberianDawnLuaApi("Messages", { "Messages.lua" }) {}
+    MessagesLuaApi() : TiberianDawnLuaApi("Messages", true) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {

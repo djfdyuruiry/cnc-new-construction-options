@@ -25,7 +25,7 @@ template <RuleSectionsProviderConcept R>
 class RulesLuaApi : public LuaApi
 {
 public:
-    RulesLuaApi() : LuaApi("Rules", {"Rules.lua"}) {}
+    RulesLuaApi() : LuaApi("Rules", true) {}
 
     virtual void Register_Functions(LuaEngine& engine) const override
     {

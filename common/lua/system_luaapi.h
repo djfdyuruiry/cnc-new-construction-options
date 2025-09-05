@@ -11,7 +11,7 @@
 class SystemLuaApi : public LuaApi
 {
 public:
-    SystemLuaApi() : LuaApi("System", { "System.lua" }){}
+    SystemLuaApi() : LuaApi("System", true){}
 
     virtual void Register_Consts(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) { 
