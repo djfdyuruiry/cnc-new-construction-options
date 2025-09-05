@@ -1,22 +1,8 @@
-local function RulesSectionRuleProxy(getRule, setRule, ruleName, sectionName)
-  return setmetatable(
-    {
-      name = ruleName,
-      sectionName = sectionName
-    },
-    {
-      __call = function(_, ruleValue)
-        if ruleValue == nil then
-          return getRule(ruleName)
-        end
-
-        return setRule(ruleName, ruleValue)
-      end
-    }
-  )
-end
-
 local function RulesSectionProxy(api, sectionName)
+  local function getRuleType(...)
+    return api.getRuleType(sectionName, ...)
+  end
+
   local function getRule(...)
     return api.getRuleValue(sectionName, ...)
   end
@@ -31,14 +17,20 @@ local function RulesSectionProxy(api, sectionName)
 
   return setmetatable(
     {
-      name = sectionName,
+      __name = sectionName,
+      getRuleNames = getRuleNames,
+      getRuleType = getRuleType,
       getRule = getRule,
       setRule = setRule,
-      getRuleNames = getRuleNames
     },
     {
-      __index = function(_, ruleName)
-        return RulesSectionRuleProxy(getRule, setRule, ruleName, sectionName)
+      -- get value
+      __index = function(_, ...)
+        return getRule(...)
+      end,
+      -- set value
+      __newindex = function(_, ...)
+        return setRule(...)
       end
     }
   )
@@ -50,6 +42,10 @@ local function RulesApiProxy(api)
     {
       __index = function(_, sectionName)
         return RulesSectionProxy(api, sectionName)
+      end,
+      -- make proxy read only
+      __newindex = function()
+        error("Rule API is read only. Did you mean to set a rule and forgot to add the name?")
       end
     }
   )

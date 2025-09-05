@@ -29,7 +29,6 @@ public:
 
     virtual void Register_Functions(LuaEngine& engine) const override
     {
-        // TODO: have a function that dumps the lua type for a given rule
         With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("getSectionNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
@@ -69,6 +68,40 @@ public:
                 }
 
                 return 1;
+            }).addCFunction("getRuleType", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Rules.getRuleType(<string: section>, <string: key>)");
+
+                arguments.Count_Is(2)
+                    .First_Argument_Is<std::string>()
+                    .Next_Argument_Is<std::string>()
+                    .Assert();
+
+                auto section = arguments.Read_First<std::string>().Unpack();
+                auto key = arguments.Read_Next<std::string>().Unpack();
+
+                Assert_Rule_Exists<R>(engine, section, key);
+
+                // unpack variant to call corresponding engine Push_Value template
+                const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
+
+                if (const auto* value = std::get_if<int>(&rule_value_variant)) {
+                    engine.Push_Value(
+                        LuaEngine::Lua_Type_Map[LUA_TNUMBER]
+                    );
+                } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
+                    engine.Push_Value(
+                        LuaEngine::Lua_Type_Map[LUA_TNUMBER]
+                    );
+                }else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
+                    engine.Push_Value(
+                        LuaEngine::Lua_Type_Map[LUA_TBOOLEAN]
+                    );
+                } else {
+                    engine.Raise_Error("Illegal rule value variant detected");
+                }
+
+                return 1;
             }).addCFunction("getRuleValue", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "Rules.getRuleValue(<string: section>, <string: key>)");
@@ -81,14 +114,7 @@ public:
                 auto section = arguments.Read_First<std::string>().Unpack();
                 auto key = arguments.Read_Next<std::string>().Unpack();
 
-                if (!R::Sections.Has_Section(section)) {
-                    engine.Raise_Error(
-                        std::format(
-                            "Rule section does not exist: {}",
-                            section
-                        )
-                    );
-                }
+                Assert_Rule_Exists<R>(engine, section, key);
 
                 // unpack variant to call corresponding engine Push_Value template
                 const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
@@ -117,20 +143,16 @@ public:
                 auto section = arguments.Read_First<std::string>().Unpack();
                 auto key = arguments.Read_Next<std::string>().Unpack();
 
-                if (!R::Sections.Has_Section(section)) {
-                    engine.Raise_Error(
-                        std::format(
-                            "Rule section does not exist: {}", 
-                            section
-                        )
-                    );
-                }
+                Assert_Rule_Exists<R>(engine, section, key);
 
                 // unpack variant to call corresponding section Set template
                 const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
                 auto rule_type_error = true;
+                auto expected_type = LUA_TNONE;
 
                 if (const auto* value = std::get_if<int>(&rule_value_variant)) {
+                    expected_type = LUA_TNUMBER;
+    
                     if (arguments.template Next_Read_Is<int>()) {
                         R::Sections[section].template Set<int>(
                             key,
@@ -139,6 +161,8 @@ public:
                         rule_type_error = false;
                     } 
                 } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
+                    expected_type = LUA_TNUMBER;
+
                     if (arguments.template Next_Read_Is<float>()) {
                         R::Sections[section].template Set<float>(
                             key,
@@ -147,6 +171,8 @@ public:
                         rule_type_error = false;
                     }
                 } else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
+                    expected_type = LUA_TBOOLEAN;
+
                     if (arguments.template Next_Read_Is<bool>()) {
                         R::Sections[section].template Set<bool>(
                             key,
@@ -157,9 +183,13 @@ public:
                 } else {
                     engine.Raise_Error("Illegal rule value variant detected");
                 }
-                
+
                 if (rule_type_error) {
-                    engine.Raise_Error("Incorrect type passed for rule value");
+                    engine.Raise_Error_Format(
+                        "Incorrect type passed for rule value, expected '{}' but got: {}",
+                        LuaEngine::Lua_Type_Map[expected_type].value(),
+                        arguments.Get_Next_Read_Type()
+                    );
                 }
 
                 // return old rule value
@@ -177,6 +207,24 @@ public:
     }
 
 protected:
+    template<RuleSectionsProviderConcept SR>
+    static void Assert_Rule_Exists(const LuaEngine& engine, const std::string& section, const std::string& key) {
+        if (!SR::Sections.Has_Section(section)) {
+            engine.Raise_Error_Format(
+                "Rule section does not exist: {}", 
+                section
+            );
+        }
+
+        if (!SR::Sections[section].Has_Key(key)) {
+            engine.Raise_Error_Format(
+                "Rule key does not exist in section '{}': {}", 
+                section,
+                key
+            );
+        }
+    }
+
     virtual const char* Get_Cpp_Source() const override {
         return __FILE__;
     }

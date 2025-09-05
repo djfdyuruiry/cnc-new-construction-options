@@ -150,6 +150,20 @@ public:
 
     // Fluent read stream methods
 
+    const std::string_view Get_Next_Read_Type() {
+        if (!Read_Stream_Argument_Index.has_value()) {
+            Read_Stream_Argument_Index = 1;
+        }
+
+        return Lua.Get_Lua_Type(Read_Stream_Argument_Index.value());
+    }
+
+    const std::string_view First_Read_Type() {
+        Read_Stream_Argument_Index = 1;
+
+        return Lua.Get_Lua_Type(Read_Stream_Argument_Index.value());
+    }
+
     template<class T>
     bool Next_Read_Is() {
         if (!Read_Stream_Argument_Index.has_value()) {

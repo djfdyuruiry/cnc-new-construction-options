@@ -7,6 +7,7 @@
 #include <lua.hpp>
 
 #include "../logger.h"
+#include "../twowaymap.h"
 
 /**
  * Models the result of making a call to the low-level C Lua API.
@@ -15,6 +16,15 @@
  */
 class LuaResult {
 public:
+    inline static const TwoWayMap<int, std::string_view> Lua_Error_Map {
+        { LUA_OK, "OK" },
+        { LUA_ERRRUN, "Runtime" },
+        { LUA_ERRSYNTAX, "Syntax" },
+        { LUA_ERRMEM, "Memory" },
+        { LUA_ERRFILE, "File" },
+        { LUA_ERRERR, "Error Handling Failure" }
+    };
+
     int Lua_Code;
     std::optional<std::string> Error;
     std::optional<lua_Debug> Debug_Info;
@@ -60,23 +70,8 @@ public:
         return Lua_Code == LUA_OK;
     }
 
-    const char * Code_As_String() const {
-        switch (Lua_Code) {
-            case LUA_OK:
-                return "OK";
-            case LUA_ERRRUN:
-                return "Runtime";
-            case LUA_ERRSYNTAX:
-                return "Syntax";
-            case LUA_ERRMEM:
-                return "Memory";
-            case LUA_ERRFILE:
-                return "File";
-            case LUA_ERRERR:
-                return "Error Handling Failure";
-            default:
-                return "Unknown";
-        }
+    const std::string_view Code_As_String() const {
+        return Lua_Error_Map[Lua_Code].value_or("Unknown");
     }
 
     const LuaResult& If_Ok(std::function<void(const LuaResult&)> action) const {

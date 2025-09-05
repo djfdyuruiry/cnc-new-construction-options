@@ -48,6 +48,10 @@ public:
         return *this;
     }
 
+    bool Has_Key(std::string_view name) {
+        return Rules.find(name) != Rules.end();
+    }
+
     std::vector<std::string_view> Rule_Names() const {
         std::vector<std::string_view> keys;
         keys.reserve(Rules.size());

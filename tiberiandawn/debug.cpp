@@ -562,12 +562,15 @@ void Debug_Key(unsigned input)
                 function onF5()
                   Logger.debug("onF5 Called")
 
-                  local value = Rules["Game.Map"].MaxBuildDistance()
+                  local value = Rules["Game.Map"].MaxBuildDistance
 
-                  TiberianDawn.Messages.showToPlayer("HELLO THERE")
+                  TiberianDawn.Messages.showToPlayer(
+                    "HELLO THERE, Game.Map=>MaxBuildDistance type: %s",
+                    Rules["Game.Map"].getRuleType("MaxBuildDistance")
+                  )
                   TiberianDawn.UI.showPopup("OK", "This message came from Lua. Game.Map=>MaxBuildDistance: %d", value)
 
-                  Rules["Game.Harvesting"].CreditsPerTiberiumScoop(250)
+                  Rules["Game.Harvesting"].CreditsPerTiberiumScoop = 250
 
                   for _, r in ipairs(Rules["Game.Misc"].getRuleNames()) do
                     Logger.info("Section rule: [Game.Misc] => %s", s)

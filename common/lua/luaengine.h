@@ -29,6 +29,7 @@
 
 #include "../logger.h"
 #include "../paths.h"
+#include "../twowaymap.h"
 
 #include "luaresult.h"
 
@@ -51,6 +52,18 @@ public:
     inline static const std::filesystem::path Lua_Path = std::filesystem::path(Paths.Program_Path()) / "lua";
     // all APIs will be available from this global Lua table
     inline static const std::string_view Root_Api_Namespace = "__CNC_API";
+    inline static const TwoWayMap<int, std::string_view> Lua_Type_Map {
+        {LUA_TNONE, "none"},
+        {LUA_TNIL, "nil"},
+        {LUA_TBOOLEAN, "boolean"},
+        {LUA_TLIGHTUSERDATA, "lightuserdata"},
+        {LUA_TNUMBER, "number"},
+        {LUA_TSTRING, "string"},
+        {LUA_TTABLE, "table"},
+        {LUA_TFUNCTION, "function"},
+        {LUA_TUSERDATA, "userdata"},
+        {LUA_TTHREAD, "thread"}
+    };
 
     virtual ~LuaEngine() = default;
 
@@ -110,9 +123,9 @@ public:
     }
 
     template<typename... Args>
-    void Raise_Error_Format(const std::string& message, Args&&... args) {
+    void Raise_Error_Format(const std::string& message, Args&&... args) const {
         Raise_Error(
-            std::format(message, std::forward<Args>(args)...)
+            std::vformat(message, std::make_format_args(args...))
         );
     };
 
@@ -267,6 +280,19 @@ public:
 
             return false;
         });
+    }
+
+    int Get_Lua_Type_Code(int stack_index = -1) const {
+        return Get_Value_From_State<bool>([&stack_index](auto L) {
+            return lua_type(L, stack_index);
+        });
+    }
+
+    const std::string_view Get_Lua_Type(int stack_index = -1) const
+    {
+        auto type_code = Get_Lua_Type_Code(stack_index);
+
+        return Lua_Type_Map[type_code].value();
     }
 
     bool Is_Nil(int stack_index = -1) const {
