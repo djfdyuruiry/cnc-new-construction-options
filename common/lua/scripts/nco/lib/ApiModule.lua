@@ -4,22 +4,23 @@ local isType = TypeValidator.Validators.isType
 local isNotBlank = TypeValidator.Validators.isNotBlank
 local isNotEmpty = TypeValidator.Validators.isNotEmpty
 
-local function ApiModule(modulePath, cppApi, cppSource, apiModuleBuilder)
+local function ApiModule(moduleSpec)
   TypeValidator.validateCall(
     "ApiModule",
     {
-      { modulePath, isType("table"), isNotEmpty },
-      { cppApi, isType("string"), isNotBlank },
-      { cppSource, isType("string"), isNotBlank },
-      { apiModuleBuilder, isType("function"), isNotBlank }
+      { moduleSpec, isType("table") },
+      { moduleSpec.modulePath, isType("table"), isNotEmpty },
+      { moduleSpec.cppApi, isType("string"), isNotBlank },
+      { moduleSpec.cppSource, isType("string"), isNotBlank },
+      { moduleSpec.apiModuleBuilder, isType("function"), isNotBlank }
     }
   )
 
+    -- build module path, working down to destination table (_G.x[.y]...)
   local moduleDest = _G
   local moduleDestStr = ""
 
-  for i, v in ipairs(modulePath) do
-    -- work down to destination table (_G.[0].[1]...)
+  for i, v in ipairs(moduleSpec.modulePath) do
     moduleDest[v] = moduleDest[v] and moduleDest[v] or {}
     moduleDest = moduleDest[v]
 
@@ -30,17 +31,19 @@ local function ApiModule(modulePath, cppApi, cppSource, apiModuleBuilder)
     moduleDestStr = moduleDestStr .. v
   end
 
-  if type(__CNC_API) ~= "table" or type(__CNC_API[cppApi]) ~= "table" then
+  -- assert cppApi is loaded into Lua state
+  if type(__CNC_API) ~= "table" or type(__CNC_API[moduleSpec.cppApi]) ~= "table" then
     error(
       string.format(
        "%s API failed to init, required C++ backend not loaded: %s",
        moduleDestStr,
-       cppSource
+       moduleSpec.cppSource
       )
     )
   end
 
-  local moduleOrError, status = pcall(apiModuleBuilder, __CNC_API[cppApi])
+  -- attempt to build module
+  local moduleOrError, status = pcall(moduleSpec.apiModuleBuilder, __CNC_API[moduleSpec.cppApi], moduleSpec)
 
   if not status then
     error(
@@ -64,12 +67,16 @@ local function ApiModule(modulePath, cppApi, cppSource, apiModuleBuilder)
     )
   end
 
-  module.__cpp_source = cppApi.__cpp_source
-  module.__name = cppApi.__name
+  -- load generic metadata
+  module.__cpp_source = moduleSpec.cppApi.__cpp_source
+  module.__name = moduleSpec.cppApi.__name
 
   moduleDest = setmetatable(
-    module,
+    {},
     {
+      __index = function (t, k)
+        return module[k]
+      end,
       __newindex = function ()
         error("API modules are read only. Did you mean to access an API method or field?")
       end
