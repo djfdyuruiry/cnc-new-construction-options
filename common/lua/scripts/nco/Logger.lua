@@ -1,7 +1,5 @@
 local ApiModule = require("nco.lib.ApiModule")
-local System = {Path=function ()
-  
-end}--require("nco.System")
+local System = require("nco.System")
 
 local function builder(cppApi)
   local logger = {
@@ -48,9 +46,20 @@ local function builder(cppApi)
   return logger
 end
 
-return ApiModule({
+---@type { 
+---  level: string,
+---  _log: fun(level:string, message:string, ...):nil,
+---  trace:fun(message:string, ...):nil,
+---  debug:fun(message:string, ...):nil,
+---  info:fun(message:string, ...):nil,
+---  warning:fun(message:string, ...):nil,
+---  error:fun(message:string, ...):nil,
+---  critical:fun(message:string, ...):nil}
+local Logger = ApiModule({
   modulePath = {"Logger"},
   cppApi = "Logger",
   cppSource = "common/lua/logging_luaapi.h",
-  builderz = builder
+  builder = builder
 })
+
+return Logger

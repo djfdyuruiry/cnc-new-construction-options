@@ -6,17 +6,17 @@ end
 
 local function isType(typeString)
   return function(functionName, argumentName, value)
-    return assert(
-      string.format("%s: argument %s must be of type %s", functionName, argumentName, typeString),
-      type(value) == typeString
+    assert(
+      type(value) == typeString,
+      string.format("%s: argument %s must be of type %s", functionName, argumentName, typeString)
     )
   end
 end
 
 local function isNotNil(functionName, argumentName, value)
   return assert(
-    string.format("%s: argument %s must not be nil", functionName, argumentName),
-    value ~= nil
+    value ~= nil,
+    string.format("%s: argument %s must not be nil", functionName, argumentName)
   )
 end
 
@@ -26,8 +26,8 @@ local function isNotBlank(functionName, argumentName, value)
     local _, count = value:gsub("%S", "")
 
     assert(
-      string.format("%s: argument %s must not be blank", functionName, argumentName),
-      count > 0
+      count > 0,
+      string.format("%s: argument %s must not be blank", functionName, argumentName)
     )
     return
   end
@@ -42,10 +42,16 @@ local function isNotBlank(functionName, argumentName, value)
 end
 
 local function isNotEmpty(functionName, argumentName, value)
-  if type(value) == "table" or type(value) == "string" then
+  if type(value) == "table" then
     assert(
-      string.format("%s: argument %s must not be empty", functionName, argumentName),
-      (#value) > 0
+      next(value) ~= nil,
+      string.format("%s: argument %s must not be empty", functionName, argumentName)
+    )
+    return
+  elseif type(value) == "string" then
+    assert(
+      (#value) > 0,
+      string.format("%s: argument %s must not be empty", functionName, argumentName)
     )
     return
   end
@@ -71,12 +77,10 @@ local function validateCall(functionName, argumentsMap, callingSelf)
     local argValue
     local stopProcessing = false
 
-    print("arg", argumentName)
+    for i = 1, #validators do
+      local validatorOrArgValue = validators[i]
 
-    for i, validatorOrArgValue in ipairs(validators) do
       if i == 1 then
-        print("value", validatorOrArgValue)
-
         argValue = validatorOrArgValue
       elseif not stopProcessing then
         local validator = validatorOrArgValue
@@ -87,11 +91,9 @@ local function validateCall(functionName, argumentsMap, callingSelf)
 
         if validator == skipIfNotPresent then
           validator(argValue, function ()
-            print("stopProcessing", i - 1)
             stopProcessing = true
           end)
         else
-          print("validator", i - 1)
           validator(functionName, argumentName, argValue)
         end
       end

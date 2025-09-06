@@ -13,8 +13,7 @@ local function ApiModule(moduleSpec)
       ["moduleSpec.modulePath"] = { moduleSpec.modulePath, isType("table"), isNotEmpty },
       ["moduleSpec.cppApi"] = { moduleSpec.cppApi, isType("string"), isNotBlank },
       ["moduleSpec.cppSource"] = { moduleSpec.cppSource, isType("string"), isNotBlank },
-      ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") },
-      ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("table") }
+      ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") }
     }
   )
 
