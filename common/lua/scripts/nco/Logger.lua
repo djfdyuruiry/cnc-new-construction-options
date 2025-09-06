@@ -12,7 +12,7 @@ local System = require("nco.System")
       Logger.error("Something bad happened. %s", errorMessage)
     ```
 ]]
----@class Logger 
+---@class Logger : ApiModule
 ---@field level LogLevel
 ---@field log fun(level: LogLevel, message:string, ...)
 ---@field trace fun(message:string, ...)

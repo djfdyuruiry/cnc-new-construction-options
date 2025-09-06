@@ -9,6 +9,8 @@ local isNotEmpty = TypeValidator.Validators.isNotEmpty
 ---@field __name string
 ---@field __cppSource string
 
+---@class ApiModule CppApi
+
 ---@class ApiModuleSpec
 ---@field modulePath string[]
 ---@field cppApi string
@@ -21,6 +23,7 @@ local isNotEmpty = TypeValidator.Validators.isNotEmpty
 --- Returned table is a wrapper around the native Lua module locking
 --- it down to be read only.
 ---@param moduleSpec ApiModuleSpec
+---@return ApiModule
 return function(moduleSpec)
   TypeValidator.validateCall(
     "ApiModule",

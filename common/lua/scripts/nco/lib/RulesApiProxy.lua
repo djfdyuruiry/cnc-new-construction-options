@@ -1,4 +1,4 @@
----@class CppRulesApi
+---@class CppRulesApi : CppApi
 ---@field getSectionNames fun(): string[]
 ---@field getRuleNamesForSection fun(section: string): string[]
 ---@field getRuleType fun(section: string, ruleName: string): type

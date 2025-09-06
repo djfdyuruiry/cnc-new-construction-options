@@ -6,7 +6,7 @@ local Path = require("nco.lib.Path")
 
   See: nco.lib.Path
 ]]
----@class System
+---@class System : ApiModule
 ---@field pathSeparator string
 ---@field isWindows boolean
 ---@field gamePath Path
