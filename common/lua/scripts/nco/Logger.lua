@@ -6,7 +6,7 @@ local function builder(cppApi)
     level = cppApi.level,
 
     --[[
-      Wrapper around LoggerLuaApi that passes current
+      Wrapper around log that passes current
       lua source location and log level/message.
 
       Supports printf style formatting.
@@ -48,13 +48,14 @@ end
 
 ---@type { 
 ---  level: string,
----  _log: fun(level:string, message:string, ...):nil,
----  trace:fun(message:string, ...):nil,
----  debug:fun(message:string, ...):nil,
----  info:fun(message:string, ...):nil,
----  warning:fun(message:string, ...):nil,
----  error:fun(message:string, ...):nil,
----  critical:fun(message:string, ...):nil}
+---  _log: fun(level:string, message:string, ...),
+---  trace: fun(message:string, ...),
+---  debug: fun(message:string, ...),
+---  info: fun(message:string, ...),
+---  warning: fun(message:string, ...),
+---  error: fun(message:string, ...),
+---  critical: fun(message:string, ...)
+--- }
 local Logger = ApiModule({
   modulePath = {"Logger"},
   cppApi = "Logger",

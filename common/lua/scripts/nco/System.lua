@@ -36,6 +36,12 @@ local function builder(cppApi)
   return system
 end
 
+---@type { 
+---  pathSeparator: string,
+---  isWindows: boolean,
+---  _openFile: fun(...),
+--- 
+--- }
 return ApiModule({
   modulePath = {"System"},
   cppApi = "System",
