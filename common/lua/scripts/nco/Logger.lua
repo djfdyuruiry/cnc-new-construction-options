@@ -1,9 +1,20 @@
 local ApiModule = require("nco.lib.ApiModule")
 local System = require("nco.System")
 
+---@alias LogLevel "trace"|"debug"|"info"|"warning"|"error"|"critical"
+
+--[[
+  API that writes to game engine logs.
+
+  - Methods will capture the call stack of the caller automatically
+  - Methods support printf style formatting for ease of use:
+    ```lua
+      Logger.error("Something bad happened. %s", errorMessage)
+    ```
+]]
 ---@class Logger 
----@field level string
----@field _log fun(level:string, message:string, ...)
+---@field level LogLevel
+---@field log fun(level: LogLevel, message:string, ...)
 ---@field trace fun(message:string, ...)
 ---@field debug fun(message:string, ...)
 ---@field info fun(message:string, ...)
@@ -16,13 +27,9 @@ local function builder(cppApi)
   local logger = {
     level = cppApi.level,
 
-    --[[
-      Wrapper around log that passes current
-      lua source location and log level/message.
-
-      Supports printf style formatting.
-    ]]
-    _log = function(level, message, ...)
+    ---@param level LogLevel
+    ---@param message string
+    log = function(level, message, ...)
       local caller = debug.getinfo(3)
       local callerSource = caller.source
 
@@ -47,10 +54,10 @@ local function builder(cppApi)
     end
   }
 
-  -- Make level aliases that call _log 
+  -- Make level aliases that call log (matches spdlog levels) 
   for _, v in pairs({ "trace", "debug", "info", "warning", "error", "critical" }) do
     logger[v] = function(message, ...)
-      logger._log(v, message, ...)
+      logger.log(v, message, ...)
     end
   end
 

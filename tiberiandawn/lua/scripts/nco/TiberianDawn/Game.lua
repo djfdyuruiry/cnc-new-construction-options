@@ -13,3 +13,16 @@ _G.TiberianDawn.Game = _G.TiberianDawn.Game and _G.TiberianDawn.Game or {
 }
 
 return _G.TiberianDawn.Game
+
+--[[
+  API that controls the Tiberian Dawn game engine.
+
+  - Methods will capture the call stack of the caller automatically
+  - Methods support printf style formatting for ease of use:
+    ```lua
+      Logger.error("Something bad happened. %s", errorMessage)
+    ```
+]]
+---@class Game
+---@field win fun()
+---@field lose fun()

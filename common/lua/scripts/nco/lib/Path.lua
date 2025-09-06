@@ -13,6 +13,11 @@
     local joined_path = a / b / "sub" / "path" / "file.txt"
 ]]
 
+local TypeValidator = require("nco.lib.TypeValidator")
+
+local isType = TypeValidator.Validators.isType
+local isNotBlank = TypeValidator.Validators.isNotBlank
+
 local Path
 
 ---@class Path
@@ -28,9 +33,15 @@ local Path
 ---@type function
 ---@param pathStringOrPath Path|string
 ---@param separator string
----@param isWindows string
+---@param isWindows boolean
 ---@returns Path
 Path = function(pathStringOrPath, separator, isWindows)
+  TypeValidator.validateCall("Path", {
+    pathStringOrPath = {pathStringOrPath, isType("string", "table")},
+    separator = {separator, isType("string"), isNotBlank},
+    isWindows = {isWindows, isType("boolean")}
+  })
+
   local windowsDrivePattern = "^[A-Z]:\\"
 
   local pathString = tostring(pathStringOrPath)

@@ -1,18 +1,45 @@
+---@param action function
 local function skipIfNotPresent(value, action)
   if type(value) == "nil" then
     action()
   end
 end
 
-local function isType(typeString)
+---@param ... type
+local function isType(...)
+  local validTypes = {...}
+  local typesString = ""
+
+  for i, typeString in ipairs(validTypes) do
+    if i == 1 then
+      typeString = typeString .. "|"
+    end
+
+    typesString = typesString .. typeString
+  end
+
+  ---@param functionName string
+  ---@param argumentName string
+  ---@param value any
   return function(functionName, argumentName, value)
+    local typeIsValid = false
+
+    for _, typeString in ipairs(validTypes) do
+      if type(value) == typeString then
+        typeIsValid = true
+      end
+    end
+
     assert(
-      type(value) == typeString,
-      string.format("%s: argument %s must be of type %s", functionName, argumentName, typeString)
+      typeIsValid,
+      string.format("%s: argument %s must be of type(s) %s", functionName, argumentName, typesString)
     )
   end
 end
 
+---@param functionName string
+---@param argumentName string
+---@param value any
 local function isNotNil(functionName, argumentName, value)
   return assert(
     value ~= nil,
@@ -20,6 +47,9 @@ local function isNotNil(functionName, argumentName, value)
   )
 end
 
+---@param functionName string
+---@param argumentName string
+---@param value string
 local function isNotBlank(functionName, argumentName, value)
   if type(value) == "string" then
     -- Check if the string contains non-whitespace characters
@@ -41,6 +71,9 @@ local function isNotBlank(functionName, argumentName, value)
   )
 end
 
+---@param functionName string
+---@param argumentName string
+---@param value table|string
 local function isNotEmpty(functionName, argumentName, value)
   if type(value) == "table" then
     assert(
@@ -65,6 +98,9 @@ local function isNotEmpty(functionName, argumentName, value)
   )
 end
 
+---@param functionName string
+---@param argumentsMap { [string]: any[] }
+---@param callingSelf boolean?
 local function validateCall(functionName, argumentsMap, callingSelf)
   if not callingSelf then
     validateCall("validateCall", {

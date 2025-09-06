@@ -1,16 +1,21 @@
 local ApiModule = require("nco.lib.ApiModule")
 local Path = require("nco.lib.Path")
 
----@class System 
+--[[
+  API to work with file paths and provide OS info.
+
+  See: nco.lib.Path
+]]
+---@class System
 ---@field pathSeparator string
 ---@field isWindows boolean
 ---@field gamePath Path
 ---@field luaPath Path
 ---@field userPath Path
----@field openGameFile fun(subPath: Path|string, mode?: openmode):file*,string?
----@field openLuaFile fun(subPath: Path|string, mode?: openmode):file*,string?
----@field openUserFile fun(subPath: Path|string, mode?: openmode):file*,string?
----@field Path fun(path: Path|string):Path
+---@field openGameFile fun(subPath: Path|string, mode?: openmode): file*, string?
+---@field openLuaFile fun(subPath: Path|string, mode?: openmode): file*, string?
+---@field openUserFile fun(subPath: Path|string, mode?: openmode): file*, string?
+---@field Path fun(path: Path|string): Path
 
 ---@return System
 local function builder(cppApi)

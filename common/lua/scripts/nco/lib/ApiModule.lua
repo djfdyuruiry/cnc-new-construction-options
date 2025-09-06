@@ -5,7 +5,23 @@ local isType = TypeValidator.Validators.isType
 local isNotBlank = TypeValidator.Validators.isNotBlank
 local isNotEmpty = TypeValidator.Validators.isNotEmpty
 
-local function ApiModule(moduleSpec)
+---@class CppApi
+---@field __name string
+---@field __cppSource string
+
+---@class ApiModuleSpec
+---@field modulePath string[]
+---@field cppApi string
+---@field cppSource string
+---@field builder fun(cppApi: CppApi, spec: ApiModuleSpec): table
+
+--- Loads an native Lua API module, using a builder pattern and
+--- the option to mock the backend C++ API using CncApiMock.
+--- 
+--- Returned table is a wrapper around the native Lua module locking
+--- it down to be read only.
+---@param moduleSpec ApiModuleSpec
+return function(moduleSpec)
   TypeValidator.validateCall(
     "ApiModule",
     {
@@ -13,7 +29,8 @@ local function ApiModule(moduleSpec)
       ["moduleSpec.modulePath"] = { moduleSpec.modulePath, isType("table"), isNotEmpty },
       ["moduleSpec.cppApi"] = { moduleSpec.cppApi, isType("string"), isNotBlank },
       ["moduleSpec.cppSource"] = { moduleSpec.cppSource, isType("string"), isNotBlank },
-      ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") }
+      ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") },
+      ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("function") }
     }
   )
 
@@ -35,6 +52,7 @@ local function ApiModule(moduleSpec)
   end
 
   -- assert cppApi is loaded into Lua state
+  ---@diagnostic disable-next-line: undefined-field
   if not mockPresent and not (type(_G.__CNC_API) == "table" and type(_G.__CNC_API[moduleSpec.cppApi]) == "table") then
     error(
       string.format(
@@ -46,6 +64,7 @@ local function ApiModule(moduleSpec)
   end
 
   -- attempt to build module (use a mock cppApi via builder, if present)
+  ---@type CppApi
   local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.cppApi] or _G.__CNC_API_MOCK(moduleSpec)[moduleSpec.cppApi]
 
   if mockPresent and type(cppApi) ~="table" then
@@ -85,8 +104,8 @@ local function ApiModule(moduleSpec)
   end
 
   -- load generic metadata
-  module.__cpp_source = moduleSpec.cppApi.__cpp_source
-  module.__name = moduleSpec.cppApi.__name
+  module.__cpp_source = cppApi.__cppSource
+  module.__name = cppApi.__name
 
   moduleDest = setmetatable(
     {},
@@ -102,5 +121,3 @@ local function ApiModule(moduleSpec)
 
   return moduleDest
 end
-
-return ApiModule
