@@ -1,20 +1,64 @@
-if type(__CNC_API) == "nil" or (__CNC_API.Scenario) == "nil" then
-  error("nco.TiberianDawn.Scenario failed to init, required C++ backend not loaded: -- tiberiandawn/lua/scenario_luaapi.h")
-end
+local ApiModule = require("nco.lib.ApiModule")
 
-_G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {}
+---@class ScenarioPlayer
+---@field faction "gdi"|"nod"|"civilian"
+---@field house string
 
-_G.TiberianDawn.Scenario = _G.TiberianDawn.Scenario and _G.TiberianDawn.Scenario or {
-  __cpp_source = __CNC_API.Scenario.__cpp_source,
-  __name = __CNC_API.Scenario.__name,
+---@class ScenarioHouses
+---@field getNames fun(): string[]
 
-  name = __CNC_API.Scenario.name,
-  type = __CNC_API.Scenario.type,
-  faction = __CNC_API.Scenario.faction,
-  house = __CNC_API.Scenario.house,
+---@class ScenarioTriggers
+---@field getNames fun(): string[]
+---@field deleteIfExists fun(triggerName: string): boolean
 
-  getTriggerNames = __CNC_API.Scenario.getTriggerNames,
-  deleteTriggerIfExists = __CNC_API.Scenario.deleteTriggerIfExists
-}
+--[[
+  API that provides controls for the current mission
+  or skirmish match.
 
-return _G.TiberianDawn.Scenario
+  Provides scenario info, player info and trigger control.
+]]
+---@class Scenario : ApiModule
+---@field name string
+---@field type "single-player"|"multiplayer"
+---@field player ScenarioPlayer
+---@field houses ScenarioHouses
+---@field triggers ScenarioTriggers
+
+---@type Game
+local Scenario = ApiModule({
+  modulePath = { "TiberianDawn", "Scenario" },
+  cppApi = "Scenario",
+  cppSource = "tiberiandawn/lua/scenario_luaapi.h",
+  builder = function(cppApi)
+    return {
+      name = cppApi.name,
+      type = cppApi.type,
+
+      player = {
+        faction = cppApi.faction,
+        house = cppApi.house
+      },
+
+      houses = setmetatable(
+        {
+          getNames = cppApi.getHouseNames
+        },
+        {
+          -- TODO: Get house details by name via [] operator
+        }
+      ),
+
+      triggers = setmetatable(
+        {
+          getNames = cppApi.getTriggerNames,
+          deleteIfExists = cppApi.deleteTriggerIfExists
+        },
+        {
+          -- TODO: Get trigger details by name via [] operator
+        }
+      )
+    }
+  end
+})
+
+return Scenario

@@ -17,6 +17,7 @@ local Path = require("nco.lib.Path")
 ---@field openUserFile fun(subPath: Path|string, mode?: openmode): file*, string?
 ---@field Path fun(path: Path|string): Path
 
+---@param cppApi CppApiInstance
 ---@return System
 local function builder(cppApi)
   local system = {

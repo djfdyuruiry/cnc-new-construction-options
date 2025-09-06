@@ -30,8 +30,8 @@ local RulesApiProxy = require("nco.lib.RulesApiProxy")
   See: nco.lib.Path
 ]]
 ---@type RulesApiProxy
-local Rules = ApiModule({
-  modulePath = {"Rules"},
+_G.Rules = _G.Rules and _G.Rules or ApiModule({
+  modulePath = "Rules",
   cppApi = "Rules",
   cppSource = "common/lua/rules_luaapi.h",
   builder = RulesApiProxy

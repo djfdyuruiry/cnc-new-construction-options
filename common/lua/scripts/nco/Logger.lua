@@ -22,6 +22,7 @@ local System = require("nco.System")
 ---@field error fun(message:string, ...)
 ---@field critical fun(message:string, ...)
 
+---@param cppApi CppApiInstance
 ---@return Logger
 local function builder(cppApi)
   local logger = {
@@ -65,11 +66,11 @@ local function builder(cppApi)
 end
 
 ---@type Logger
-local Logger = ApiModule({
+_G.Logger = _G.Logger and _G.Logger or ApiModule({
   modulePath = {"Logger"},
   cppApi = "Logger",
   cppSource = "common/lua/logging_luaapi.h",
   builder = builder
 })
 
-return Logger
+return _G.Logger

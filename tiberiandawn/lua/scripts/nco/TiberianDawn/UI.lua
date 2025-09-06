@@ -1,33 +1,48 @@
-if type(__CNC_API) == "nil" or (__CNC_API.UI) == "nil" then
-  error("nco.TiberianDawn.UI failed to init, required C++ backend not loaded: -- tiberiandawn/lua/ui_luaapi.h")
+local ApiModule = require("nco.lib.ApiModule")
+
+---@alias PopupType "OK"
+
+--[[
+  API that allows controlling the Tiberian Dawn user interface (menus, popups etc.)
+
+  Note: Popup messages pause the game until the user interacts with the dialog
+]]
+---@class UI : ApiModule
+---@field showPopup fun(type: PopupType, message: string, ...)
+---@field showOkPopup fun(message: string, ...)
+
+---@returns UI
+local function builder(cppApi)
+  local ui = {
+    ---@param popupType PopupType
+    ---@param message string
+    showPopup = function(popupType, message, ...)
+      popupType = string.upper(popupType)
+
+      local formatted_message = string.format(message, ...)
+
+      if popupType == "OK" then
+        cppApi.popupOk(formatted_message);
+      else
+        error(string.format("Invalid popup type: {}", popupType))
+      end
+    end
+  }
+
+  ui.showOkPopup = function(message, ...)
+    ui.showPopup("OK", message, ...)
+  end
+
+  return ui
 end
 
-_G.TiberianDawn = _G.TiberianDawn and _G.TiberianDawn or {}
+---@type UI
+local UI = ApiModule({
+  modulePath = { "TiberianDawn", "UI" },
+  cppApi = "UI",
+  cppSource = "tiberiandawn/lua/ui_luaapi.h",
+  builder = builder
+})
 
-_G.TiberianDawn.UI = _G.TiberianDawn.UI and _G.TiberianDawn.UI or {
-  __cpp_source = __CNC_API.UI.__cpp_source,
-  __name = __CNC_API.UI.__name,
+return UI
 
-  --[[
-    Show a popup to the player. Supported types: 'OK'
-
-    Supports printf style formatting.
-  ]]
-  showPopup = function(popupType, message, ...)
-    if type(popupType) ~= "string" then
-      popupType = "OK"
-    end
-
-    popupType = string.upper(popupType)
-
-    local formatted_message = string.format(message, ...)
-
-    if popupType == "OK" then
-      __CNC_API.UI.popupOk(formatted_message);
-    else
-      error(string.format("Invalid popup type: {}", popupType))
-    end
-  end
-}
-
-return _G.TiberianDawn.UI

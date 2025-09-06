@@ -376,7 +376,9 @@ public:
     template<class T>
     void Push_Value(T value) const {
         With_State([&value](auto L) {
-            if constexpr (std::is_same_v<T, std::string_view>) {
+            if constexpr (std::is_same_v<T, const char*>) {
+                lua_pushstring(L, value);
+            } else if constexpr (std::is_same_v<T, std::string_view>) {
                 lua_pushstring(L, value.data());
             } else if constexpr (std::is_same_v<T, std::string>) {
                 lua_pushstring(L, value.c_str());

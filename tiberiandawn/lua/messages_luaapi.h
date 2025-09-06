@@ -8,7 +8,6 @@
 #include "../externs.h"
 
 #include "td_luaapi.h"
-#include "td_luaevents.h"
 
 class MessagesLuaApi: public TiberianDawnLuaApi
 {
@@ -40,20 +39,6 @@ public:
 
                 return 0;
             })
-            .addCFunction("popupOk", [](auto L) {
-                auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "Messages.popupOk(<string: message>)");
-
-                arguments.Count_Is(1)
-                    .First_Argument_Is<std::string>()
-                    .Assert();
-
-                auto message = arguments.Read_First<std::string>().Unpack();
-
-                LuaList.Push<PopupLuaEvent>(message);
-
-                return 0;
-            });
         });
     }
 

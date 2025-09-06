@@ -8,6 +8,8 @@
 #include "../common/lua/luatablebuilder.h"
 
 #include "../externs.h"
+#include "../defines.h"
+#include "../type.h"
 
 #include "td_luaapi.h"
 
@@ -40,20 +42,33 @@ public:
     virtual void Register_Functions(LuaEngine& engine) const override
     {
         With_Api_Namespace(engine, [](auto& n) {
-            n.addCFunction("getTriggerNames", [](auto L) {
-                 auto engine = SharedLuaEngine(L);
+            n.addCFunction("getHouseNames", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                
+                auto house_name_table = LuaTableBuilder(engine);
 
-                 auto trigger_names_table = LuaTableBuilder(engine);
-                 auto i = 0;
+                for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; i++) {
+                    house_name_table.With_Index_Value(
+                        HouseTypeClass::As_Reference(i).IniName
+                    );
+                }
 
-                 while (i < Triggers.Count()) {
-                    auto trigger_name = std::string_view(Triggers.Ptr(i)->Get_Name());
+                return 1;
+              })
+             .addCFunction("getTriggerNames", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+
+                auto trigger_names_table = LuaTableBuilder(engine);
+                auto i = 0;
+
+                while (i < Triggers.Count()) {
+                    auto trigger_name = Triggers.Ptr(i)->Get_Name();
 
                     trigger_names_table.With_Index_Value(trigger_name);
                     i++;
-                 }
+                }
 
-                 return 1;
+                return 1;
              }).addCFunction("deleteTriggerIfExists", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "<bool> Scenario.deleteTriggerIfExists(<string: name>)");
