@@ -1,6 +1,17 @@
 local ApiModule = require("nco.lib.ApiModule")
 local System = require("nco.System")
 
+---@class Logger 
+---@field level string
+---@field _log fun(level:string, message:string, ...)
+---@field trace fun(message:string, ...)
+---@field debug fun(message:string, ...)
+---@field info fun(message:string, ...)
+---@field warning fun(message:string, ...)
+---@field error fun(message:string, ...)
+---@field critical fun(message:string, ...)
+
+---@return Logger
 local function builder(cppApi)
   local logger = {
     level = cppApi.level,
@@ -46,16 +57,7 @@ local function builder(cppApi)
   return logger
 end
 
----@type { 
----  level: string,
----  _log: fun(level:string, message:string, ...),
----  trace: fun(message:string, ...),
----  debug: fun(message:string, ...),
----  info: fun(message:string, ...),
----  warning: fun(message:string, ...),
----  error: fun(message:string, ...),
----  critical: fun(message:string, ...)
---- }
+---@type Logger
 local Logger = ApiModule({
   modulePath = {"Logger"},
   cppApi = "Logger",

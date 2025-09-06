@@ -1,5 +1,3 @@
-local Path
-
 --[[
   Simple Path class for building and querying file
   paths for the current operating system.
@@ -14,12 +12,28 @@ local Path
     --               "<a>\<b>\sub\path\file.txt" on windows 
     local joined_path = a / b / "sub" / "path" / "file.txt"
 ]]
+
+local Path
+
+---@class Path
+---@field parts string[]
+---@field join fun(otherPathOrString: Path|string): Path
+---@field isRelative fun(): boolean
+---@field isSubPathOf fun(otherPathOrString: Path|string): boolean
+---@field asRelativeSubPathOf fun(otherPathOrString: Path|string): Path
+---@field getRoot fun(): Path
+---@field pathString string
+---@operator div(Path|string): Path
+
+---@type function
+---@param pathStringOrPath Path|string
+---@param separator string
+---@param isWindows string
+---@returns Path
 Path = function(pathStringOrPath, separator, isWindows)
   local windowsDrivePattern = "^[A-Z]:\\"
 
-   local pathString = type(pathStringOrPath) == "table"
-    and pathStringOrPath.pathString
-    or pathStringOrPath
+  local pathString = tostring(pathStringOrPath)
 
   local function getParts()
     local result = {}
@@ -160,6 +174,7 @@ Path = function(pathStringOrPath, separator, isWindows)
       pathString = pathString
     },
     {
+      ---@return Path
       __div = function (firstPath, secondPath)
         return firstPath.join(secondPath)
       end,

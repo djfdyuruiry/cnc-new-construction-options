@@ -132,6 +132,7 @@
     "Nyergud's",
     "Nyerguds",
     "Oddysee",
+    "openmode",
     "redalert",
     "Redeployable",
     "Superweapons",
@@ -145,5 +146,6 @@
   ],
   "Lua.diagnostics.globals": [
     "__CNC_API"
-  ]
+  ],
+  "Lua.runtime.version": "Lua 5.4"
 }

@@ -1,11 +1,26 @@
 local ApiModule = require("nco.lib.ApiModule")
 local Path = require("nco.lib.Path")
 
+---@class System 
+---@field pathSeparator string
+---@field isWindows boolean
+---@field gamePath Path
+---@field luaPath Path
+---@field userPath Path
+---@field openGameFile fun(subPath: Path|string, mode?: openmode):file*,string?
+---@field openLuaFile fun(subPath: Path|string, mode?: openmode):file*,string?
+---@field openUserFile fun(subPath: Path|string, mode?: openmode):file*,string?
+---@field Path fun(path: Path|string):Path
+
+---@return System
 local function builder(cppApi)
   local system = {
     pathSeparator = cppApi.pathSeparator,
     isWindows = cppApi.isWindows,
 
+    ---@param rootPath Path|string
+    ---@param subPath string
+    ---@param mode openmode
     _openFile = function(rootPath, subPath, mode)
       local fullPath = Path(rootPath, cppApi.pathSeparator, cppApi.isWindows) / subPath
 
@@ -13,6 +28,8 @@ local function builder(cppApi)
     end,
 
     -- Wrapper around Path class that passes required system params
+    ---@param pathStringOrPath Path|string
+    ---@return Path
     Path = function(pathStringOrPath)
       return Path(pathStringOrPath, cppApi.pathSeparator, cppApi.isWindows)
     end
@@ -36,15 +53,12 @@ local function builder(cppApi)
   return system
 end
 
----@type { 
----  pathSeparator: string,
----  isWindows: boolean,
----  _openFile: fun(...),
---- 
---- }
-return ApiModule({
+---@type System
+local System = ApiModule({
   modulePath = {"System"},
   cppApi = "System",
   cppSource = "common/lua/system_luaapi.h",
   builder = builder
 })
+
+return System
