@@ -12,8 +12,7 @@ local isNotEmpty = TypeValidator.Validators.isNotEmpty
 ---@alias CppApiInstance CppApi | { [string]: any|function }
 
 ---@class ApiModuleSpec
----@field modulePath string
----@field cppApi string
+---@field name string
 ---@field cppSource string
 ---@field builder fun(cppApi: CppApiInstance, spec: ApiModuleSpec): table
 
@@ -32,8 +31,7 @@ return function(moduleSpec)
     "ApiModule",
     {
       moduleSpec = { moduleSpec, isType("table") },
-      ["moduleSpec.modulePath"] = { moduleSpec.modulePath, isType("string"), isNotEmpty },
-      ["moduleSpec.cppApi"] = { moduleSpec.cppApi, isType("string"), isNotBlank },
+      ["moduleSpec.name"] = { moduleSpec.name, isType("string"), isNotEmpty },
       ["moduleSpec.cppSource"] = { moduleSpec.cppSource, isType("string"), isNotBlank },
       ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") },
       ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("function") }
@@ -42,26 +40,13 @@ return function(moduleSpec)
 
   local mockPresent = type(_G.__CNC_API_MOCK) == "table"
 
-  -- build module path, working down to destination table (_G.x[.y]...)
-  local modulePathString = ""
-
-  for i, v in ipairs(moduleSpec.modulePath) do
-    if i ~= 1 then
-      modulePathString = modulePathString .. "."
-    end
-
-    modulePathString = modulePathString .. v
-  end
-
-  moduleSpec.modulePathString = modulePathString
-
   -- assert cppApi is loaded into Lua state
   ---@diagnostic disable-next-line: undefined-field
-  if not mockPresent and not (type(_G.__CNC_API) == "table" and type(_G.__CNC_API[moduleSpec.cppApi]) == "table") then
+  if not mockPresent and not (type(_G.__CNC_API) == "table" and type(_G.__CNC_API[moduleSpec.name]) == "table") then
     error(
       string.format(
        "%s API failed to init, required C++ backend not loaded: %s",
-       modulePathString,
+       moduleSpec.name,
        moduleSpec.cppSource
       )
     )
@@ -69,13 +54,13 @@ return function(moduleSpec)
 
   -- attempt to build module (use a mock cppApi via builder, if present)
   ---@type CppApi
-  local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.cppApi] or _G.__CNC_API_MOCK(moduleSpec)[moduleSpec.cppApi]
+  local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.name] or _G.__CNC_API_MOCK(moduleSpec)[moduleSpec.name]
 
   if mockPresent and type(cppApi) ~="table" then
     error(
       string.format(
        "%s API failed to init, C++ backend mock builder didn't return a table, actual type returned: %s",
-        modulePathString,
+        moduleSpec.name,
         type(cppApi)
       )
     )
@@ -89,7 +74,7 @@ return function(moduleSpec)
     error(
       string.format(
         "Failed to build API module '%s' due to error: %s",
-        modulePathString,
+        moduleSpec.name,
         moduleOrError
       )
     )
@@ -101,7 +86,7 @@ return function(moduleSpec)
     error(
       string.format(
         "Builder for API module '%s' did not return a table, actual type returned: %s",
-        modulePathString,
+        moduleSpec.name,
         type(moduleOrError)
       )
     )

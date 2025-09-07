@@ -1,4 +1,4 @@
-local ApiModule = require("nco.lib.ApiModule")
+local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 --[[
   API for showing in-game messages to the player.
@@ -7,9 +7,8 @@ local ApiModule = require("nco.lib.ApiModule")
 ---@field showToPlayer fun(message: string, ...) Supports string.format style calls
 
 ---@type Messages
-local Messages = ApiModule({
-  modulePath = { "TiberianDawn", "Messages" },
-  cppApi = "Messages",
+_G.Messages = TdApiModule({
+  name = "Messages",
   cppSource = "tiberiandawn/lua/messages_luaapi.h",
   builder = function(cppApi)
     return {
@@ -22,4 +21,4 @@ local Messages = ApiModule({
   end
 })
 
-return Messages
+return _G.Messages

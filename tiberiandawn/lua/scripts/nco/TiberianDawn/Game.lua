@@ -1,4 +1,4 @@
-local ApiModule = require("nco.lib.ApiModule")
+local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 --[[
   API that controls the Tiberian Dawn game engine.
@@ -8,9 +8,8 @@ local ApiModule = require("nco.lib.ApiModule")
 ---@field lose fun()
 
 ---@type Game
-local Game = ApiModule({
-  modulePath = { "TiberianDawn", "Game" },
-  cppApi = "Game",
+_G.Game = TdApiModule({
+  name = "Game",
   cppSource = "tiberiandawn/lua/game_luaapi.h",
   builder = function(cppApi)
     return {
@@ -20,4 +19,4 @@ local Game = ApiModule({
   end
 })
 
-return Game
+return _G.Game

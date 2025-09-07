@@ -38,7 +38,7 @@ public:
                 Map.Flag_To_Redraw(false);
 
                 return 0;
-            })
+            });
         });
     }
 

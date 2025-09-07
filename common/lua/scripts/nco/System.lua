@@ -60,11 +60,10 @@ local function builder(cppApi)
 end
 
 ---@type System
-local System = ApiModule({
-  modulePath = {"System"},
-  cppApi = "System",
+_G.System = ApiModule({
+  name = "System",
   cppSource = "common/lua/system_luaapi.h",
   builder = builder
 })
 
-return System
+return _G.System

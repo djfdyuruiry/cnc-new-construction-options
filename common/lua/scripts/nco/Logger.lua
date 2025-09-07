@@ -40,7 +40,9 @@ local function builder(cppApi)
 
         if sourceFilePath.isSubPathOf(System.luaPath) then
           -- remove leading path if it's a file inside the standard Lua directory
-          callerSource = sourceFilePath.asRelativeSubPathOf(System.luaPath)
+          callerSource = tostring(
+            sourceFilePath.asRelativeSubPathOf(System.luaPath)
+          )
         end
       end
 
@@ -66,9 +68,8 @@ local function builder(cppApi)
 end
 
 ---@type Logger
-_G.Logger = _G.Logger and _G.Logger or ApiModule({
-  modulePath = {"Logger"},
-  cppApi = "Logger",
+_G.Logger = ApiModule({
+  name = "Logger",
   cppSource = "common/lua/logging_luaapi.h",
   builder = builder
 })

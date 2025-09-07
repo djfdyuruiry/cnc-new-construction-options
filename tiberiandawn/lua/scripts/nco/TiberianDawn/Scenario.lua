@@ -1,4 +1,4 @@
-local ApiModule = require("nco.lib.ApiModule")
+local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 ---@class ScenarioPlayer
 ---@field faction "gdi"|"nod"|"civilian"
@@ -24,41 +24,43 @@ local ApiModule = require("nco.lib.ApiModule")
 ---@field houses ScenarioHouses
 ---@field triggers ScenarioTriggers
 
----@type Game
-local Scenario = ApiModule({
-  modulePath = { "TiberianDawn", "Scenario" },
-  cppApi = "Scenario",
-  cppSource = "tiberiandawn/lua/scenario_luaapi.h",
-  builder = function(cppApi)
-    return {
-      name = cppApi.name,
-      type = cppApi.type,
+---@return Scenario
+local function builder(cppApi)
+  return {
+    name = cppApi.name,
+    type = cppApi.type,
 
-      player = {
-        faction = cppApi.faction,
-        house = cppApi.house
+    player = {
+      faction = cppApi.faction,
+      house = cppApi.house
+    },
+
+    houses = setmetatable(
+      {
+        getNames = cppApi.getHouseNames
       },
+      {
+        -- TODO: Get house details by name via [] operator
+      }
+    ),
 
-      houses = setmetatable(
-        {
-          getNames = cppApi.getHouseNames
-        },
-        {
-          -- TODO: Get house details by name via [] operator
-        }
-      ),
+    triggers = setmetatable(
+      {
+        getNames = cppApi.getTriggerNames,
+        deleteIfExists = cppApi.deleteTriggerIfExists
+      },
+      {
+        -- TODO: Get trigger details by name via [] operator
+      }
+    )
+  }
+end
 
-      triggers = setmetatable(
-        {
-          getNames = cppApi.getTriggerNames,
-          deleteIfExists = cppApi.deleteTriggerIfExists
-        },
-        {
-          -- TODO: Get trigger details by name via [] operator
-        }
-      )
-    }
-  end
+---@type Scenario
+_G.Scenario = TdApiModule({
+  name = "Scenario",
+  cppSource = "tiberiandawn/lua/scenario_luaapi.h",
+  builder = builder
 })
 
-return Scenario
+return _G.Scenario

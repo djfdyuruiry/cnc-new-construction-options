@@ -1,4 +1,4 @@
-local ApiModule = require("nco.lib.ApiModule")
+local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 ---@alias PopupType "OK"
 
@@ -37,12 +37,10 @@ local function builder(cppApi)
 end
 
 ---@type UI
-local UI = ApiModule({
-  modulePath = { "TiberianDawn", "UI" },
-  cppApi = "UI",
+_G.UI = TdApiModule({
+  name = "UI",
   cppSource = "tiberiandawn/lua/ui_luaapi.h",
   builder = builder
 })
 
-return UI
-
+return _G.UI
