@@ -92,14 +92,17 @@ return function(moduleSpec)
     )
   end
 
-  -- load generic metadata
-  module.__cpp_source = cppApi.__cppSource
-  module.__name = cppApi.__name
-
   return setmetatable(
     {},
     {
-      __index = function (t, k)
+      __index = function (_, k)
+        -- provide generic metadata
+        if k == "__name" then
+          return cppApi.__name
+        elseif k == "__cppSource" then
+          return cppApi.__cppSource
+        end
+
         return module[k]
       end,
       __newindex = function ()
