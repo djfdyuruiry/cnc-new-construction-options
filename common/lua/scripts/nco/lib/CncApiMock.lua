@@ -1,11 +1,14 @@
 local Path = require("nco.lib.Path")
 
+---@alias CallsTable { [string]: { [string]: boolean[]|any[][] } }
+
 _G.__CNC_API_MOCK = {}
 
+---@type fun(handler: fun(calls: CallsTable, mock: table))
 local mockCncApi
 
 mockCncApi = function(handler)
-  ---@return { [string]: { [string]: boolean[]|any[][] } }
+  ---@return CallsTable
   local function buildCallsTable()
     return {
       Logger = {
@@ -22,7 +25,8 @@ mockCncApi = function(handler)
     }
   end
 
-  local function buildMockTable()
+  ---@param calls CallsTable
+  local function buildMockTable(calls)
     return {
       Logger = setmetatable(
         {},
@@ -72,7 +76,7 @@ mockCncApi = function(handler)
   end
 
   local calls = buildCallsTable()
-  local mock = buildMockTable()
+  local mock = buildMockTable(calls)
   local registeredModules = {}
 
   if type(handler) == "function" then
@@ -93,13 +97,27 @@ mockCncApi = function(handler)
     __registeredModules.
 
     All calls and registered modules can be cleared by calling __reset().
+  
+    Adding additional mocks can be achieved by calling the reset method:
+
+      ```lua
+        __CNC_API_MOCK.__reset(function(calls, mocks)
+          calls.MyModule = {
+            -- ...
+          }
+
+          mocks.MyModule = {
+            -- ...
+          }
+        end)
+      ```
   ]]
   _G.__CNC_API_MOCK = setmetatable(
     {
       __calls = calls,
       ---@type ApiModuleSpec[]
       __registeredModules = registeredModules,
-      ---@type fun(calls: table, mock: table)
+
       __reset = mockCncApi
     },
     {
