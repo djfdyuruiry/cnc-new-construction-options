@@ -74,12 +74,12 @@ _G.__CNC_API_MOCK.__reset = function()
           elseif k == "house" then
             table.insert(calls.Scenario.house, true)
 
-            return "goodguy"
+            return "GoodGuy"
           elseif k == "getHouseNames" then
             return function(...)
               table.insert(calls.Scenario.getHouseNames, {...})
 
-              return {"goodguy", "badguy"}
+              return {"GoodGuy", "BadGuy"}
             end
           elseif k == "getTriggerNames" then
             return function(...)

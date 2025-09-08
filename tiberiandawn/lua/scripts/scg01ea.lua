@@ -1,17 +1,9 @@
+local Utils = require("nco.lib.Utils")
+
 local function main()
   Logger.info("Someone called scg01ea.lua")
 
-  local triggerCsv = ""
-
-  for i, t in ipairs(Scenario.triggers.getNames()) do
-    if i ~= 1 then
-      triggerCsv = triggerCsv .. ","
-    end
-
-    triggerCsv = triggerCsv .. t
-  end
-
-  Logger.debug("Triggers: %s", triggerCsv)
+  Logger.debug("Triggers: %s", Utils.arrayToCsv(Scenario.triggers.getNames()))
   Logger.info("Preventing GDI getting Hum-Vee's")
 
   if not Scenario.triggers.deleteIfExists("RNF4") then

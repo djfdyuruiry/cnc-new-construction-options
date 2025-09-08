@@ -51,7 +51,6 @@ public:
           auto house_name = std::string(player->Class->IniName);
 
           std::transform(scenario_name.begin(), scenario_name.end(), scenario_name.begin(), ::tolower);
-          std::transform(house_name.begin(), house_name.end(), house_name.begin(), ::tolower);
 
           CNC_LOG_INFO("Initializing Lua for scenario: {}", scenario_name);
 
@@ -64,6 +63,9 @@ public:
                .With_Api<UiLuaApi>()
                .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name)
                .Build();
+
+          // ensure house_name is lowercase for filename use
+          std::transform(house_name.begin(), house_name.end(), house_name.begin(), ::tolower);
 
           Exec_Scenario_Lua_Scripts(ini, scenario, scenario_name, faction, house_name);
 
@@ -106,26 +108,19 @@ private:
                std::format("{}-scenario.lua", house_name)
           };
 
-          auto scenario_lua_script_path = ini.Get_String("Basic", "LuaScript", std::string_view("__NOT_FOUND__"));
+          auto ini_script_path = ini.Get_String("Basic", "LuaScript", std::string_view("__NOT_FOUND__"));
 
-          if (scenario_lua_script_path != "__NOT_FOUND__") {
+          if (ini_script_path != "__NOT_FOUND__") {
                // is not blank
                if (!std::all_of(
-                    scenario_lua_script_path.begin(),
-                    scenario_lua_script_path.end(),
-                    [](unsigned char c){ return std::isspace(c); }
+                    ini_script_path.begin(), ini_script_path.end(), [](unsigned char c){ return std::isspace(c); }
                )) {
-                    CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", scenario_lua_script_path);
+                    CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", ini_script_path);
 
                     // to lower
-                    std::transform(
-                         scenario_lua_script_path.begin(),
-                         scenario_lua_script_path.end(),
-                         scenario_lua_script_path.begin(),
-                         ::tolower
-                    );
+                    std::transform(ini_script_path.begin(), ini_script_path.end(), ini_script_path.begin(), ::tolower);
 
-                    lua_scripts_to_load.emplace_back(scenario_lua_script_path);
+                    lua_scripts_to_load.emplace_back(ini_script_path);
                }
           } else {
                CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");
