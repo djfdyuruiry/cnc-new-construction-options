@@ -14,7 +14,7 @@ _G.Messages = TdApiModule({
     return {
       showToPlayer = function(message, ...)
         cppApi.showToPlayer(
-          string.format(message, ...)
+          string.format(tostring(message), ...)
         )
       end
     }

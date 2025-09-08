@@ -87,15 +87,15 @@ public:
 
                 if (const auto* value = std::get_if<int>(&rule_value_variant)) {
                     engine.Push_Value(
-                        LuaEngine::Lua_Type_Map[LUA_TNUMBER]
+                        LuaEngine::Lua_Type_Map[LUA_TNUMBER].value()
                     );
                 } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
                     engine.Push_Value(
-                        LuaEngine::Lua_Type_Map[LUA_TNUMBER]
+                        LuaEngine::Lua_Type_Map[LUA_TNUMBER].value()
                     );
                 }else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
                     engine.Push_Value(
-                        LuaEngine::Lua_Type_Map[LUA_TBOOLEAN]
+                        LuaEngine::Lua_Type_Map[LUA_TBOOLEAN].value()
                     );
                 } else {
                     engine.Raise_Error("Illegal rule value variant detected");

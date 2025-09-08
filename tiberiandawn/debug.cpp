@@ -558,27 +558,7 @@ void Debug_Key(unsigned input)
 #endif
 
         case KN_F5:
-            ScenarioLua::Get_Engine().Exec_Async(R"*(
-                function onF5()
-                  Logger.debug("onF5 Called")
-
-                  local value = Rules["Game.Map"].MaxBuildDistance
-
-                  TiberianDawn.Messages.showToPlayer(
-                    "HELLO THERE, Game.Map=>MaxBuildDistance type: %s",
-                    Rules["Game.Map"].getRuleType("MaxBuildDistance")
-                  )
-                  TiberianDawn.UI.showPopup("OK", "This message came from Lua. Game.Map=>MaxBuildDistance: %d", value)
-
-                  Rules["Game.Harvesting"].CreditsPerTiberiumScoop = 250
-
-                  for _, r in ipairs(Rules["Game.Misc"].getRuleNames()) do
-                    Logger.info("Section rule: [Game.Misc] => %s", s)
-                  end
-                end
-
-                onF5()
-            )*");
+            ScenarioLua::Get_Engine().Exec_File_If_Exists("__debug.lua");
             break;
 
         case KN_F3:

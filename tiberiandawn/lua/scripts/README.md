@@ -1,3 +1,5 @@
 - `nco/TiberianDawn` directory contains the `nco.TiberianDawn` module of the lua library that is bundled with the game release
 - All top level scripts are for testing when debugging
+  - `__debug.lua` is callable by pressing F5 when the `-CHEAT` cli argument is passed to the game
+  - The whole file is reloaded every time, so it can be edited whilst the game is running
 - These files are deployed by [scripts/2.deploy.sh](../../../scripts/2.deploy.sh)

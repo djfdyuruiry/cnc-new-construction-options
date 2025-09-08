@@ -15,8 +15,9 @@
 
 local TypeValidator = require("nco.lib.TypeValidator")
 
-local isType = TypeValidator.Validators.isType
+local isNotEmpty = TypeValidator.Validators.isNotEmpty
 local isNotBlank = TypeValidator.Validators.isNotBlank
+local isType = TypeValidator.Validators.isType
 
 local Path
 
@@ -37,7 +38,7 @@ local Path
 ---@returns Path
 Path = function(pathStringOrPath, separator, isWindows)
   TypeValidator.validateCall("Path", {
-    pathStringOrPath = {pathStringOrPath, isType("string", "table")},
+    pathStringOrPath = {pathStringOrPath, isType("string", "table"), isNotEmpty},
     separator = {separator, isType("string"), isNotBlank},
     isWindows = {isWindows, isType("boolean")}
   })
@@ -100,6 +101,10 @@ Path = function(pathStringOrPath, separator, isWindows)
   end
 
   local function join (otherPathOrString)
+    TypeValidator.validateCall("join", {
+      otherPathOrString = { otherPathOrString, isType("table", "string"), isNotEmpty }
+    })
+
     local otherPath = marshalToPath(otherPathOrString)
 
     if not otherPath.isRelative() then
@@ -124,6 +129,10 @@ Path = function(pathStringOrPath, separator, isWindows)
   end
 
   local function isSubPathOf(otherPathOrString)
+    TypeValidator.validateCall("isSubPathOf", {
+      otherPathOrString = { otherPathOrString, isType("table", "string"), isNotEmpty }
+    })
+
     local potentialAncestorPath = marshalToPath(otherPathOrString)
 
     -- If this path has fewer parts than the other path, it can't be a subpath
@@ -143,6 +152,10 @@ Path = function(pathStringOrPath, separator, isWindows)
   end
 
   local function asRelativeSubPathOf(otherPathOrString)
+    TypeValidator.validateCall("asRelativeSubPathOf", {
+      otherPathOrString = { otherPathOrString, isType("table", "string"), isNotEmpty }
+    })
+
     local otherPath = marshalToPath(otherPathOrString)
 
     if not isSubPathOf(otherPath) then

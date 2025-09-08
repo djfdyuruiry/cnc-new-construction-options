@@ -1,4 +1,9 @@
+local TypeValidator = require("nco.lib.TypeValidator")
+
 local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
+
+local isNotBlank = TypeValidator.Validators.isNotBlank
+local isType = TypeValidator.Validators.isType
 
 ---@alias PopupType "OK"
 
@@ -17,6 +22,11 @@ local function builder(cppApi)
     ---@param popupType PopupType
     ---@param message string
     showPopup = function(popupType, message, ...)
+      TypeValidator.validateCall("showPopup", {
+        popupType = {popupType, isType("string"), isNotBlank},
+        message = {message, isType("string"), isNotBlank}
+      })
+
       popupType = string.upper(popupType)
 
       local formatted_message = string.format(message, ...)

@@ -1,3 +1,10 @@
+--[[
+  Handy Lua utility functions for working with:
+
+    - strings
+    - tables
+]]
+
 local TypeValidator = require("nco.lib.TypeValidator")
 
 local isType = TypeValidator.Validators.isType
@@ -9,6 +16,7 @@ local Utils = {}
 
 ---@param array any[]
 ---@param delimiter string?
+---@return string
 Utils.arrayToCsv = function(array, delimiter)
   TypeValidator.validateCall(
     "arrayToCsv",
@@ -34,8 +42,9 @@ end
 
 --- Simple table to CSV conversion for dictionary
 --- style tables.
----@param tableList table[]
+---@param tableList { [string]: any }[]
 ---@param delimiter string?
+---@return string
 Utils.tableToCsv = function(tableList, delimiter)
   TypeValidator.validateCall(
     "tableToCsv",
@@ -97,6 +106,7 @@ end
 
 ---@param subject string
 ---@param delimiter string
+---@return table
 Utils.splitString = function(subject, delimiter)
   TypeValidator.validateCall(
     "splitString",

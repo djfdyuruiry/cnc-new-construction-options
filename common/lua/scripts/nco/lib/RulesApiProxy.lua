@@ -1,3 +1,9 @@
+local TypeValidator = require("nco.lib.TypeValidator")
+
+local isNotEmpty = TypeValidator.Validators.isNotEmpty
+local isNotBlank = TypeValidator.Validators.isNotBlank
+local isType = TypeValidator.Validators.isType
+
 ---@class CppRulesApi : CppApi
 ---@field getSectionNames fun(): string[]
 ---@field getRuleNamesForSection fun(section: string): string[]
@@ -18,6 +24,11 @@
 ---@param sectionName string
 ---@return RulesSectionProxy
 local function RulesSectionProxy(api, sectionName)
+  TypeValidator.validateCall("RulesSectionProxy", {
+    api = {api, isType("table"), isNotEmpty},
+    separator = {sectionName, isType("string"), isNotBlank}
+  })
+
   local function getRuleType(...)
     return api.getRuleType(sectionName, ...)
   end
