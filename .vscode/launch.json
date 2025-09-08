@@ -33,6 +33,26 @@
           "value": "debug,Find_File_Data=off"
         }
       ]
+    },
+    {
+      "arg": [],
+      "name": "Debug Lua Unit Tests",
+      "program": "${workspaceFolder}/tests/lua/scripts/tests/unit/init.lua",
+      "request": "launch",
+      "stopOnEntry": false,
+      "type": "lua",
+      "luaVersion": "lua54",
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua;${workspaceFolder}/tests/lua/scripts/?.lua;${workspaceFolder}/tests/lua/scripts/?/init.lua"
+    },
+    {
+      "arg": [],
+      "name": "Debug scg01ea.lua",
+      "program": "${workspaceFolder}/tiberiandawn/lua/scripts/scg01ea.lua",
+      "request": "launch",
+      "stopOnEntry": false,
+      "type": "lua",
+      "luaVersion": "lua54",
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua;${workspaceFolder}/tests/lua/scripts/?.lua;${workspaceFolder}/tests/lua/scripts/?/init.lua"
     }
   ]
 }

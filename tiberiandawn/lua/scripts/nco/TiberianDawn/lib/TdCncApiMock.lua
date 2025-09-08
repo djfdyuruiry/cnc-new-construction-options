@@ -1,123 +1,119 @@
 require("nco.lib.CncApiMock")
 
--- common modules __reset handle
-local __reset = _G.__CNC_API_MOCK.__reset
+local function extendCallsTable(calls)
+  calls.Game = {
+    win = {},
+    lose = {}
+  }
 
-_G.__CNC_API_MOCK.__reset = function()
-  -- chain from the original __reset to inherit common mocks
-  __reset(function(calls, mock)
-    calls.Game = {
-      win = {},
-      lose = {}
-    }
+  calls.Messages = {
+    showToPlayer = {}
+  }
 
-    mock.Game = setmetatable(
-      {},
-      {
-        __index = function (_, k)
-          if k == "win" then
-            return function(...)
-              table.insert(calls.Game.win, {...})
-            end
-          elseif k == "lose" then
-            return function(...)
-              table.insert(calls.Game.lose, {...})
-            end
-          end
-        end
-      }
-    )
+  calls.Scenario = {
+    name = {},
+    type = {},
+    faction = {},
+    house = {},
+    getHouseNames = {},
+    getTriggerNames = {},
+    deleteTriggerIfExists = {}
+  }
 
-    calls.Messages = {
-      showToPlayer = {}
-    }
-
-    mock.Messages = setmetatable(
-      {},
-      {
-        __index = function (_, k)
-          if k == "showToPlayer" then
-            return function(...)
-              table.insert(calls.Messages.showToPlayer, {...})
-            end
-          end
-        end
-      }
-    )
-
-    calls.Scenario = {
-      name = {},
-      type = {},
-      faction = {},
-      house = {},
-      getHouseNames = {},
-      getTriggerNames = {},
-      deleteTriggerIfExists = {}
-    }
-
-    mock.Scenario = setmetatable(
-      {},
-      {
-        __index = function(_, k)
-          if k == "name" then
-            table.insert(calls.Scenario.name, true)
-
-            return "scg01ea"
-          elseif k == "type" then
-            table.insert(calls.Scenario.type, true)
-
-            return "single-player"
-          elseif k == "faction" then
-            table.insert(calls.Scenario.faction, true)
-
-            return "gdi"
-          elseif k == "house" then
-            table.insert(calls.Scenario.house, true)
-
-            return "GoodGuy"
-          elseif k == "getHouseNames" then
-            return function(...)
-              table.insert(calls.Scenario.getHouseNames, {...})
-
-              return {"GoodGuy", "BadGuy"}
-            end
-          elseif k == "getTriggerNames" then
-            return function(...)
-              table.insert(calls.Scenario.getTriggerNames, {...})
-
-              return {"TRI1", "TRI2"}
-            end
-          elseif k == "deleteTriggerIfExists" then
-            return function(...)
-              table.insert(calls.Scenario.deleteTriggerIfExists, {...})
-
-              return true
-            end
-          end
-        end
-      }
-    )
-
-    calls.UI = {
-      popupOk = {}
-    }
-
-    mock.UI = setmetatable(
-      {},
-      {
-        __index = function (_, k)
-          if k == "popupOk" then
-            return function(...)
-              table.insert(calls.UI.popupOk, {...})
-            end
-          end
-        end
-      }
-    )
-  end)
+  calls.UI = {
+    popupOk = {}
+  }
 end
 
-_G.__CNC_API_MOCK.__reset()
+local function extendMockTable(getCalls, mock)
+  mock.Game = setmetatable(
+    {},
+    {
+      __index = function (_, k)
+        if k == "win" then
+          return function(...)
+            table.insert(getCalls().Game.win, {...})
+          end
+        elseif k == "lose" then
+          return function(...)
+            table.insert(getCalls().Game.lose, {...})
+          end
+        end
+      end
+    }
+  )
+
+  mock.Messages = setmetatable(
+    {},
+    {
+      __index = function (_, k)
+        if k == "showToPlayer" then
+          return function(...)
+            table.insert(getCalls().Messages.showToPlayer, {...})
+          end
+        end
+      end
+    }
+  )
+
+  mock.Scenario = setmetatable(
+    {},
+    {
+      __index = function(_, k)
+        if k == "name" then
+          table.insert(getCalls().Scenario.name, true)
+
+          return "scg01ea"
+        elseif k == "type" then
+          table.insert(getCalls().Scenario.type, true)
+
+          return "single-player"
+        elseif k == "faction" then
+          table.insert(getCalls().Scenario.faction, true)
+
+          return "gdi"
+        elseif k == "house" then
+          table.insert(getCalls().Scenario.house, true)
+
+          return "GoodGuy"
+        elseif k == "getHouseNames" then
+          return function(...)
+            table.insert(getCalls().Scenario.getHouseNames, {...})
+
+            return {"GoodGuy", "BadGuy"}
+          end
+        elseif k == "getTriggerNames" then
+          return function(...)
+            table.insert(getCalls().Scenario.getTriggerNames, {...})
+
+            return {"TRI1", "TRI2"}
+          end
+        elseif k == "deleteTriggerIfExists" then
+          return function(...)
+            table.insert(getCalls().Scenario.deleteTriggerIfExists, {...})
+
+            return true
+          end
+        end
+      end
+    }
+  )
+
+  mock.UI = setmetatable(
+    {},
+    {
+      __index = function (_, k)
+        if k == "popupOk" then
+          return function(...)
+            table.insert(getCalls().UI.popupOk, {...})
+          end
+        end
+      end
+    }
+  )
+end
+
+_G.__CNC_API_MOCK.__extend(extendCallsTable, extendMockTable)
 
 --[[
   Extension to the nco.lib.CncApiMock that adds mocks for

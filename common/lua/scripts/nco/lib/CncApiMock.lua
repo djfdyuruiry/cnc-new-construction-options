@@ -2,15 +2,22 @@ local Path = require("nco.lib.Path")
 
 ---@alias CallsTable { [string]: { [string]: boolean[]|any[][] } }
 
-_G.__CNC_API_MOCK = {}
+---@class CncApiMock
+---@field __calls CallsTable,
+---@field __registeredModules ApiModuleSpec[]
+---@field __extend fun(callsHandler: (fun(calls: (fun(): CallsTable))), mockHandler: fun(getCalls: (fun(calls: CallsTable)), mock: table))?)
+---@field __reset fun()
 
----@type fun(handler: fun(calls: CallsTable, mock: table))
+---@type fun(handler: fun(calls: (fun(): CallsTable), mock: table)?)
 local mockCncApi
 
-mockCncApi = function(handler)
+---@param callsHandler fun(calls: CallsTable)?
+---@param mockHandler fun(getCalls: (fun(calls: CallsTable)), mock: table)?
+---@returns CncApiMock
+mockCncApi = function(callsHandler, mockHandler)
   ---@return CallsTable
   local function buildCallsTable()
-    return {
+    local calls = {
       Logger = {
         level = {},
         log = {}
@@ -30,21 +37,27 @@ mockCncApi = function(handler)
         isWindows = {}
       }
     }
+
+    if type(callsHandler) == "function" then
+      callsHandler(calls)
+    end
+
+    return calls
   end
 
-  ---@param calls CallsTable
-  local function buildMockTable(calls)
-    return {
+  ---@param getCalls fun(): CallsTable
+  local function buildMockTable(getCalls)
+    local mock = {
       Logger = setmetatable(
         {},
         {
           __index = function (_, field)
             if field == "level" then
-              table.insert(calls.Logger.level, true)
+              table.insert(getCalls().Logger.level, true)
               return "debug"
             elseif field == "log" then
               return function(...)
-                table.insert(calls.Logger.log, {...})
+                table.insert(getCalls().Logger.log, {...})
                 print(...)
               end
             end
@@ -59,27 +72,27 @@ mockCncApi = function(handler)
           __index = function (_, field)
             if field == "getSectionNames" then
               return function(...)
-                table.insert(calls.Rules.getSectionNames, {...})
+                table.insert(getCalls().Rules.getSectionNames, {...})
                 return {"Section1", "Section2"}
               end
             elseif field == "getRuleNamesForSection" then
               return function(...)
-                table.insert(calls.Rules.getRuleNamesForSection, {...})
+                table.insert(getCalls().Rules.getRuleNamesForSection, {...})
                 return {"Rule1", "Rule2"}
               end
             elseif field == "getRuleType" then
               return function(...)
-                table.insert(calls.Rules.getRuleType, {...})
+                table.insert(getCalls().Rules.getRuleType, {...})
                 return "number"
               end
             elseif field == "getRuleValue" then
               return function(...)
-                table.insert(calls.Rules.getRuleValue, {...})
+                table.insert(getCalls().Rules.getRuleValue, {...})
                 return 42
               end
             elseif field == "setRuleValue" then
               return function(...)
-                table.insert(calls.Rules.setRuleValue, {...})
+                table.insert(getCalls().Rules.setRuleValue, {...})
                 return 42
               end
             end
@@ -91,23 +104,23 @@ mockCncApi = function(handler)
         {
           __index = function (_, field)
             if field == "gamePath" then
-              table.insert(calls.System.gamePath, true)
+              table.insert(getCalls().System.gamePath, true)
               return Path("/game", "/", false)
             elseif field == "luaPath" then
-              table.insert(calls.System.luaPath, true)
+              table.insert(getCalls().System.luaPath, true)
               return Path("/game/lua", "/", false)
             elseif field == "userPath" then
-              table.insert(calls.System.userPath, true)
+              table.insert(getCalls().System.userPath, true)
               return Path("/user", "/", false)
             elseif field == "pathSeparator" then
-              table.insert(calls.System.pathSeparator, true)
+              table.insert(getCalls().System.pathSeparator, true)
               return "/"
             elseif field == "isWindows" then
-              table.insert(calls.System.isWindows, true)
+              table.insert(getCalls().System.isWindows, true)
               return false
             elseif field == "Path" then
               return function(...)
-                table.insert(calls.System.Path, {...})
+                table.insert(getCalls().System.Path, {...})
                 return Path(({...})[1], "/", false)
               end
             end
@@ -115,15 +128,23 @@ mockCncApi = function(handler)
         }
       )
     }
+
+    if type(mockHandler) == "function" then
+      mockHandler(getCalls, mock)
+    end
+
+    return mock
   end
 
   local calls = buildCallsTable()
-  local mock = buildMockTable(calls)
-  local registeredModules = {}
 
-  if type(handler) == "function" then
-    handler(calls, mock)
+  local function getCalls()
+    -- reference upvalue
+    return calls
   end
+
+  local mock = buildMockTable(getCalls)
+  local registeredModules = {}
 
   --[[
     Mock implementation of the C++ backend API.
@@ -154,12 +175,16 @@ mockCncApi = function(handler)
         end)
       ```
   ]]
+  ---@type CncApiMock
   _G.__CNC_API_MOCK = setmetatable(
     {
-      __calls = calls,
+      __calls = getCalls,
       ---@type ApiModuleSpec[]
       __registeredModules = registeredModules,
-      __reset = mockCncApi
+      __extend = mockCncApi,
+      __reset = function ()
+        calls = buildCallsTable()
+      end
     },
     {
       ---@param moduleSpec ApiModuleSpec
@@ -170,6 +195,8 @@ mockCncApi = function(handler)
       end
     }
   )
+
+  return _G.__CNC_API_MOCK
 end
 
 mockCncApi()
