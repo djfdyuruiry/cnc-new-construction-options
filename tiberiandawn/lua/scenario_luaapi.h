@@ -69,7 +69,8 @@ public:
                 }
 
                 return 1;
-             }).addCFunction("deleteTriggerIfExists", [](auto L) {
+             })
+             .addCFunction("deleteTriggerIfExists", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "<bool> Scenario.deleteTriggerIfExists(<string: name>)");
 

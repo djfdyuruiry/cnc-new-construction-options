@@ -15,3 +15,4 @@ vcpkg_path="${repo_path}/.vcpkg"
 
 common_lua_scripts_path="${repo_path}/common/lua/scripts"
 td_lua_scripts_path="${repo_path}/tiberiandawn/lua/scripts"
+test_lua_scripts_path="${repo_path}/tests/lua/scripts"

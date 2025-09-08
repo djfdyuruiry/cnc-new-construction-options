@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# shellcheck source-path=SCRIPTDIR
+set -eEuo pipefail
+
+script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+. "${script_path}/../lib/vars.sh"
+. "${script_path}/../lib/functions.sh"
+
+function main() {
+  pushd_silent "${repo_path}"
+
+  if [ -z "$(command -v lua)" ]; then
+    error_and_exit "The Lua binary was not found on this PATH, this is required to run this wrapper"
+  fi
+
+  local lua_path
+  lua_path="$(lua -e "print(package.path)")"
+
+  export LUA_PATH="${lua_path};${common_lua_scripts_path}/?.lua;${common_lua_scripts_path}/?/init.lua;${td_lua_scripts_path}/?.lua;${td_lua_scripts_path}/?/init.lua"
+
+  lua "$@"
+
+  popd_silent
+}
+
+main "$@"

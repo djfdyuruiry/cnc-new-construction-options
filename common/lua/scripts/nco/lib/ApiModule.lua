@@ -34,7 +34,7 @@ return function(moduleSpec)
       ["moduleSpec.name"] = { moduleSpec.name, isType("string"), isNotEmpty },
       ["moduleSpec.cppSource"] = { moduleSpec.cppSource, isType("string"), isNotBlank },
       ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") },
-      ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("function") }
+      ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("table") }
     }
   )
 
@@ -54,7 +54,7 @@ return function(moduleSpec)
 
   -- attempt to build module (use a mock cppApi via builder, if present)
   ---@type CppApi
-  local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.name] or _G.__CNC_API_MOCK(moduleSpec)[moduleSpec.name]
+  local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.name] or _G.__CNC_API_MOCK(moduleSpec)
 
   if mockPresent and type(cppApi) ~="table" then
     error(

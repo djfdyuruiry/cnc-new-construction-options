@@ -44,6 +44,8 @@ mockCncApi = function(handler)
           end
         }
       ),
+      -- TODO: Rules
+      Rules = {},
       System = setmetatable(
         {},
         {
@@ -117,15 +119,14 @@ mockCncApi = function(handler)
       __calls = calls,
       ---@type ApiModuleSpec[]
       __registeredModules = registeredModules,
-
       __reset = mockCncApi
     },
     {
       ---@param moduleSpec ApiModuleSpec
-      __call = function(moduleSpec)
+      __call = function(_, moduleSpec)
         table.insert(registeredModules, moduleSpec)
 
-        return mock
+        return mock[moduleSpec.name]
       end
     }
   )
