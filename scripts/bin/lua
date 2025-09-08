@@ -17,9 +17,14 @@ function main() {
   local lua_path
   lua_path="$(lua -e "print(package.path)")"
 
-  LUA_PATH="${lua_path};${common_lua_scripts_path}/?.lua;${common_lua_scripts_path}/?/init.lua"
-  LUA_PATH="${LUA_PATH};${td_lua_scripts_path}/?.lua;${td_lua_scripts_path}/?/init.lua"
-  export LUA_PATH="${LUA_PATH};${test_lua_scripts_path}/?.lua;${test_lua_scripts_path}/?/init.lua"
+  if [ -n "${EXTRA_LUA_PATH:-}" ]; then
+    lua_path="${lua_path};${EXTRA_LUA_PATH}"
+  fi
+
+  lua_path="${lua_path};${common_lua_scripts_path}/?.lua;${common_lua_scripts_path}/?/init.lua"
+  lua_path="${lua_path};${td_lua_scripts_path}/?.lua;${td_lua_scripts_path}/?/init.lua"
+
+  export LUA_PATH="${lua_path}"
 
   lua "$@"
 

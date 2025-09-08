@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug TD",
+      "name": "TD",
       "type": "cppdbg",
       "request": "launch",
       "preLaunchTask": "Build & Deploy TD",
@@ -20,7 +20,7 @@
       ]
     },
     {
-      "name": "Debug RA",
+      "name": "RA",
       "type": "cppdbg",
       "request": "launch",
       "preLaunchTask": "Build & Deploy RA",
@@ -37,7 +37,7 @@
     // requires 2.0.9 extension version for 'Lua Debug'
     {
       "arg": [],
-      "name": "Debug Lua Unit Tests",
+      "name": "Lua Unit Tests",
       "program": "${workspaceFolder}/tests/lua/scripts/tests/unit/init.lua",
       "request": "launch",
       "stopOnEntry": false,
@@ -47,13 +47,13 @@
     },
     {
       "arg": [],
-      "name": "Debug scg01ea.lua",
+      "name": "scg01ea.lua",
       "program": "${workspaceFolder}/tiberiandawn/lua/scripts/scg01ea.lua",
       "request": "launch",
       "stopOnEntry": false,
       "type": "lua",
       "luaVersion": "lua54",
-      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua;${workspaceFolder}/tests/lua/scripts/?.lua;${workspaceFolder}/tests/lua/scripts/?/init.lua"
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua"
     }
   ]
 }

@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# shellcheck source-path=SCRIPTDIR
 set -eEuo pipefail
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,7 +11,7 @@ function main() {
   local lua_script_file="${1:-}"
 
   if [ -z "${lua_script_file}" ]; then
-    error_and_exit "Usage: ${0} <lua_script_file> - where <lua_script_file> is a file in tiberiandawn/lua/scripts/nco/TiberianDawn"
+    error_and_exit "Usage: ${0} <lua_script_file>"
   fi
 
   "${scripts_bin_path}/lua" \

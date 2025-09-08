@@ -140,13 +140,16 @@ local function runTests()
   print("\nTest Summary:\n")
   print("  Passed: " .. passedTests)
   print("  Failed: " .. failedTests)
-  print("  Total: " .. (passedTests + failedTests))
+  print("  Total: " .. tostring(passedTests + failedTests) .. "\n")
 
-  -- Print names of failed tests with test suite prefix
-  print("\nFailed Tests:\n")
-  for testName, result in pairs(testResults) do
-    if not result.passed then
-      print(testName)
+  if failedTests > 0 then
+    -- Print names of failed tests with test suite prefix
+    print("\nFailed Tests:\n")
+
+    for testName, result in pairs(testResults) do
+      if not result.passed then
+        print(testName)
+      end
     end
   end
 
@@ -161,8 +164,8 @@ end
   beforeAll and beforeEach are only supported in the
   root describe context for now.
 
-  Once all test suites are declared, call runTests to
-  execute all suites. This will call os.exit when finished
+  Once all test suites are declared, call `runTests()` to
+  execute all suites. This will call `os.exit` when finished
   with the exit code matching the number of failed tests.
 
   Example test suite:
