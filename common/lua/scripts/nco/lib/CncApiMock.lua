@@ -15,6 +15,13 @@ mockCncApi = function(handler)
         level = {},
         log = {}
       },
+      Rules = {
+        getSectionNames = {},
+        getRuleNamesForSection = {},
+        getRuleType = {},
+        getRuleValue = {},
+        setRuleValue = {}
+      },
       System = {
         gamePath = {},
         luaPath = {},
@@ -44,8 +51,41 @@ mockCncApi = function(handler)
           end
         }
       ),
-      -- TODO: Rules
-      Rules = {},
+      Rules = setmetatable(
+        {},
+        {
+          -- TODO: hooks to allow test scripts to have a
+          --       mock rules table that gets used by below
+          __index = function (_, field)
+            if field == "getSectionNames" then
+              return function(...)
+                table.insert(calls.Rules.getSectionNames, {...})
+                return {"Section1", "Section2"}
+              end
+            elseif field == "getRuleNamesForSection" then
+              return function(...)
+                table.insert(calls.Rules.getRuleNamesForSection, {...})
+                return {"Rule1", "Rule2"}
+              end
+            elseif field == "getRuleType" then
+              return function(...)
+                table.insert(calls.Rules.getRuleType, {...})
+                return "number"
+              end
+            elseif field == "getRuleValue" then
+              return function(...)
+                table.insert(calls.Rules.getRuleValue, {...})
+                return 42
+              end
+            elseif field == "setRuleValue" then
+              return function(...)
+                table.insert(calls.Rules.setRuleValue, {...})
+                return 42
+              end
+            end
+          end
+        }
+      ),
       System = setmetatable(
         {},
         {
