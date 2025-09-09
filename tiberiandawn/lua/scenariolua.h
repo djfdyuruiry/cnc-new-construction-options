@@ -74,6 +74,51 @@ public:
           Call_Back();
      }
 
+     static bool Exec_Callback_Trigger(std::string_view trigger_name, std::string_view callback) {
+          auto status = false;
+
+          Get_Engine()
+               .Eval<bool>(
+                    // TODO: native Lua Events module
+                    std::format(
+                         R"*(true -- Events.{}("{}"))*",
+                         callback,
+                         trigger_name
+                    )
+               )
+               .If_Value([&](auto lua_status) {
+                    status = lua_status;
+               })
+               .On_Error([&](auto& r) {
+                    CNC_LOGGER_ERROR(
+                         "Failed to exec lua callback on scenario trigger '{}' due to error: {}",
+                         trigger_name,
+                         r.Error.value()
+                    );
+               });
+
+          return status;
+     }
+
+     static bool Exec_Script_Trigger(std::string_view trigger_name, std::string_view script_path) {
+          auto status = false;
+
+          Get_Engine()
+               .Exec_File(script_path)
+               .If_Ok([&](auto& r) {
+                    status = true;
+               })
+               .On_Error([&](auto& r) {
+                    CNC_LOGGER_ERROR(
+                         "Failed to exec lua script on scenario trigger '{}' due to error: {}",
+                         trigger_name,
+                         r.Error.value()
+                    );
+               });
+
+          return status;
+     }
+
      ScenarioLua() = delete;
 
 private:

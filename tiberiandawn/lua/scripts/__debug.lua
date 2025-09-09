@@ -1,5 +1,3 @@
-local Utils = require("nco.lib.Utils")
-
 --[[
   This script is invoked by the debug key listener routine
   in Tiberian Dawn. Press F5 to execute the file; this is
@@ -7,6 +5,8 @@ local Utils = require("nco.lib.Utils")
 
   See: `Debug_Key()` in `tiberiandawn/debug.cpp`
 ]]
+local Utils = require("nco.lib.Utils")
+
 local function onF5()
   Logger.debug("onF5 Called")
 

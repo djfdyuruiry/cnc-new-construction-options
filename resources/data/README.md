@@ -10,7 +10,7 @@
   - Scenario IDs changed to work with the Covert Operations Menu logic
   - GDI Missions are `scg[51-56]ea`
   - NOD Missions are `scb[38-41]ea`
-  - PATSUX misson is now Scenario No. `54`
+  - PATSUX mission is now Scenario No. `54` <!-- TODO: Add PATSUX mission number to RULES or amend scenario INI when aircraft rule overrides implemented -->
   - Note: PATSUX referenced in Source Code `scenario.cpp` to implement Laser ORCAs (for now)
 - `snow.mix`, `snowicnh.mix`, `snowifre.mix` and `snowiger.mix`: The snow theater from Red Alert, converted to work with Tiberian Dawn
   - **Note**: These files are part of Nyergud's C&C 1.06 patch, see [here](http://nyerguds.arsaneus-design.com/cnc95upd/cc95p106/patch106c_r3_en.html#toc_4) for credits of the original authors (specifically `Jafet Kackur` for these files)

@@ -1,3 +1,4 @@
+-- house goodguy scenario 1-east load test script
 local Utils = require("nco.lib.Utils")
 
 local function main()

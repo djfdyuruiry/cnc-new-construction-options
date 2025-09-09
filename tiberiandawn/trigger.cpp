@@ -57,6 +57,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "lua/scenariolua.h"
 
 static void Do_All_To_Hunt(void);
 
@@ -100,7 +101,9 @@ static const char* ActionText[TriggerClass::ACTION_COUNT + 1] = {"None",
                                                                  "Dstry Trig 'ZZZZ'",
                                                                  "Autocreate",
                                                                  "Cap=Win/Des=Lose",
-                                                                 "Allow Win"};
+                                                                 "Allow Win",
+                                                                 "Lua Callback",
+                                                                 "Lua Script"};
 
 void TriggerClass::Load()
 {
@@ -892,6 +895,14 @@ bool TriggerClass::Spring(EventType event, HousesType house, int data)
         Do_All_To_Hunt();
         break;
 
+    case ACTION_LUA_CALLBACK:
+        success = ScenarioLua::Exec_Callback_Trigger(Name, StringData.value());
+        break;
+
+    case ACTION_LUA_SCRIPT:
+        success = ScenarioLua::Exec_Script_Trigger(Name, StringData.value());
+        break;
+
     default:
         break;
     }
@@ -1117,9 +1128,10 @@ void TriggerClass::Fill_In(const char* name, const char* entry)
     }
 
     /*
-    **	5th token: Team.
+    **	5th token: StringData (Possibly a Team name).
     */
-    Team = TeamTypeClass::As_Pointer(strtok(NULL, ","));
+    StringData = std::string(strtok(NULL, ","));
+    Team = TeamTypeClass::As_Pointer(StringData.value().data());
 
     /*
     ** 6th token: IsPersistant.  This token was added later, so we must check

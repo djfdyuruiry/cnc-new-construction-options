@@ -99,9 +99,12 @@ public:
         ACTION_DESTROY_XXXX,   // Destroy trigger XXXX.
         ACTION_DESTROY_YYYY,   // Destroy trigger YYYY.
         ACTION_DESTROY_ZZZZ,   // Destroy trigger ZZZZ.
-        ACTION_AUTOCREATE,     // Computer to autocreat teams.
+        ACTION_AUTOCREATE,     // Computer to autocreate teams.
         ACTION_WINLOSE,        // Win if captured, lose if destroyed.
         ACTION_ALLOWWIN,       // Allows winning if triggered.
+
+        ACTION_LUA_CALLBACK,   // Runs a registered lua callback.
+        ACTION_LUA_SCRIPT,     // Runs a lua script file.
 
         ACTION_COUNT,
         ACTION_FIRST = 0
@@ -266,6 +269,8 @@ public:
     */
     int Data;
     int DataCopy;
+
+    std::optional<std::string> StringData;
 
 private:
     /*
