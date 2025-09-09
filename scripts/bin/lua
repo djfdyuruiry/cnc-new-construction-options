@@ -8,8 +8,6 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/../lib/functions.sh"
 
 function main() {
-  pushd_silent "${repo_path}"
-
   if [ -z "$(command -v lua)" ]; then
     error_and_exit "The Lua binary was not found on this PATH, this is required to run this wrapper"
   fi
@@ -27,8 +25,6 @@ function main() {
   export LUA_PATH="${lua_path}"
 
   lua "$@"
-
-  popd_silent
 }
 
 main "$@"

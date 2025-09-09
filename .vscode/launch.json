@@ -34,26 +34,29 @@
         }
       ]
     },
-    // requires 2.0.9 extension version for 'Lua Debug'
+    // BUG: below launch configs require extension 'Lua Debug' v2.0.9 to work
     {
-      "arg": [],
       "name": "Lua Unit Tests",
-      "program": "${workspaceFolder}/tests/lua/scripts/tests/unit/init.lua",
-      "request": "launch",
-      "stopOnEntry": false,
       "type": "lua",
       "luaVersion": "lua54",
-      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua;${workspaceFolder}/tests/lua/scripts/?.lua;${workspaceFolder}/tests/lua/scripts/?/init.lua"
+      "request": "launch",
+      "stopOnEntry": false,
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua;${workspaceFolder}/tests/lua/scripts/?.lua;${workspaceFolder}/tests/lua/scripts/?/init.lua",
+      "program": "${workspaceFolder}/tests/lua/scripts/tests/unit/init.lua",
+      "arg": []
     },
     {
-      "arg": [],
       "name": "scg01ea.lua",
-      "program": "${workspaceFolder}/tiberiandawn/lua/scripts/scg01ea.lua",
-      "request": "launch",
-      "stopOnEntry": false,
       "type": "lua",
       "luaVersion": "lua54",
-      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua"
+      "request": "launch",
+      "stopOnEntry": false,
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua",
+      "cwd": "${workspaceFolder}/tests/lua/scripts",
+      "program": "test-game-script.lua",
+      "arg": [
+        "tiberiandawn/lua/scripts/scg01ea.lua"
+      ]
     }
   ]
 }
