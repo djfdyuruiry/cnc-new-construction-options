@@ -55,7 +55,7 @@ public:
 
                 return 1;
             })
-            .addCFunction("getHouseCredits", [](auto L) {
+            .addCFunction("getHouseMoney", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseCredits(<string: name>)");
 
@@ -63,13 +63,43 @@ public:
 
                 auto name = arguments.Read_First<std::string>().Unpack();
 
-                for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; i++) {
-                    const auto& house = HouseTypeClass::Pointers.Ptr(i);
+                engine.Push_Value(
+                    Get_House_By_Name(engine, name)->Available_Money()
+                );
 
-                    if (std::string(house.IniName) == name) {
-                        engine.Push_Value(house.Credits)
+                return 1;
+            })
+
+            .addCFunction("modifyHouseCredits", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseCredits(<string: name>)");
+
+                arguments.Count_Is(2)
+                    .First_Argument_Is<std::string>()
+                    .Next_Argument_Is<int>()
+                    .Assert();
+
+                auto name = arguments.Read_First<std::string>().Unpack();
+                auto creditsModifier = arguments.Read_Next<int>().Unpack();
+
+                auto house = Get_House_By_Name(engine, name);
+
+                if (creditsModifier < 0)
+                {
+                    // call wants to take money away from the house
+                    auto creditsToSpend = -creditsModifier;
+
+                    if (House->Available_Money() - creditsToSpend > -1) {
+                        house->Spend_Money(creditsToSpend);
                     }
                 }
+                else if (creditsModifier > 0)
+                {
+                    // call wants to give money to the house
+                    house->Refund_Money(creditsModifier);
+                }
+
+                engine.Push_Value(house->Available_Money());
 
                 return 1;
             })
@@ -120,6 +150,20 @@ protected:
     }
 
 private:
+    static HouseClass* Get_House_By_Name(const LuaEngine& engine, const std::string& name)
+    {
+        auto houseType = HouseTypeClass::From_Name(name.c_str());
+
+        if (houseType == HOUSE_NONE) {
+            engine.Raise_Error_Format(
+                "Failed to parse house name from string: {}",
+                name
+            );
+        }
+
+        return HouseClass::As_Pointer(houseType);
+    }
+
     std::string Scenario_Name;
     std::string Scenario_Type;
     std::string Scenario_Faction;
