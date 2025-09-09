@@ -1,4 +1,4 @@
-require("nco.lib.CncApiMock")
+local CncApiMock = require("nco.lib.CncApiMock")
 
 local function extendCallsTable(calls)
   calls.Game = {
@@ -113,10 +113,10 @@ local function extendMockTable(getCalls, mock)
   )
 end
 
-_G.__CNC_API_MOCK.__extend(extendCallsTable, extendMockTable)
+CncApiMock().__extend(extendCallsTable, extendMockTable)
 
 --[[
   Extension to the nco.lib.CncApiMock that adds mocks for
   Tiberian Dawn specific modules.
 ]]
-return _G.__CNC_API_MOCK
+return CncApiMock

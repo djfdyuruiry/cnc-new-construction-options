@@ -1,23 +1,16 @@
 local TestFramework = require("lib.TestFramework")
 
+local CncApiMock = require("nco.lib.CncApiMock")
+local Logger = require("nco.Logger")
+
 local describe = TestFramework.describe
 local beforeEach = TestFramework.beforeEach
 local beforeAll = TestFramework.beforeAll
 local should = TestFramework.should
 
 describe("Logger", function ()
-  ---@type Logger
-  local Logger
-  ---@type CncApiMock
-  local MockApi
-
-  beforeAll(function ()
-    MockApi = require("nco.lib.CncApiMock")
-    Logger = require("nco.Logger")
-  end)
-
   beforeEach(function ()
-    MockApi.__reset()
+    CncApiMock().__reset()
   end)
 
   describe("log", function()
@@ -25,7 +18,7 @@ describe("Logger", function ()
       Logger.log("debug", "nonsense")
 
       assert(
-        #MockApi.__calls().Logger.log == 1,
+        #CncApiMock().__calls().Logger.log == 1,
         "Should have called Logger.log once"
       )
     end)
@@ -34,7 +27,7 @@ describe("Logger", function ()
       Logger.log("debug", "nonsense %d", 33)
 
       assert(
-        MockApi.__calls().Logger.log[1][3] == "nonsense 33",
+        CncApiMock().__calls().Logger.log[1][3] == "nonsense 33",
         "Should have called Logger.log once"
       )
     end)

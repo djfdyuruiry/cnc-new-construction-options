@@ -133,7 +133,7 @@ end
 local function executeTest(testResults, testSuiteName, testSuite, testName, func)
   print("\n [" .. testSuiteName .. "] > " .. testName .. "\n") -- Print test name
 
-  local success, err = pcall(testSuite.beforeEach)
+  local success, err = xpcall(testSuite.beforeEach, debug.traceback)
 
   if not success then
     print("  ❌ TEST '" .. testName .. "' FAILED, beforeEach error: " .. err)
@@ -145,7 +145,7 @@ local function executeTest(testResults, testSuiteName, testSuite, testName, func
     }
   end
 
-  success, err = pcall(func)
+  success, err = xpcall(func, debug.traceback)
 
   testResults["[" .. testSuiteName .. "] > " ..testName] = {
     testSuite = testSuiteName,
@@ -163,7 +163,7 @@ end
 local function executeTestSuite(testResults, testSuiteName, testSuite)
   print("> [" .. testSuiteName .. "]\n")
 
-  local success, err = pcall(testSuite.beforeAll)
+  local success, err = xpcall(testSuite.beforeAll, debug.traceback)
 
   if not success then
     print("❌ TEST SUITE FAILED, beforeAll error: " .. err)

@@ -25,8 +25,8 @@ local isType = TypeValidator.Validators.isType
 ---@return RulesSectionProxy
 local function RulesSectionProxy(api, sectionName)
   TypeValidator.validateCall("RulesSectionProxy", {
-    api = {api, isType("table"), isNotEmpty},
-    separator = {sectionName, isType("string"), isNotBlank}
+    api = {api, isType("table")},
+    sectionName = {sectionName, isType("string"), isNotBlank}
   })
 
   local function getRuleType(...)
@@ -72,7 +72,13 @@ end
 ---@return RulesApiProxy
 local function RulesApiProxy(api)
   return setmetatable(
-    api,
+    {
+      getSectionNames = api.getSectionNames,
+      getRuleNamesForSection = api.getRuleNamesForSection,
+      getRuleType = api.getRuleType,
+      getRuleValue = api.getRuleValue,
+      setRuleValue = api.setRuleValue
+    },
     {
       __index = function(_, sectionName)
         return RulesSectionProxy(api, sectionName)

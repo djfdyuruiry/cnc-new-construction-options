@@ -90,12 +90,12 @@ mockCncApi = function(callsHandler, mockHandler)
             elseif field == "getRuleValue" then
               return function(...)
                 table.insert(getCalls().Rules.getRuleValue, {...})
-                return 42
+                return 33
               end
             elseif field == "setRuleValue" then
               return function(...)
                 table.insert(getCalls().Rules.setRuleValue, {...})
-                return 42
+                return 44
               end
             end
           end
@@ -203,4 +203,7 @@ end
 
 mockCncApi()
 
-return _G.__CNC_API_MOCK
+---@returns CncApiMock
+return function ()
+  return _G.__CNC_API_MOCK
+end
