@@ -100,6 +100,12 @@ local function extendMockTable(getCalls, mock)
           return function(...)
             table.insert(getCalls().Scenario.modifyHouseMoney, {...})
           end
+        elseif k == "getTriggerNames" then
+          return function(...)
+            table.insert(getCalls().Scenario.getTriggerNames, {...})
+
+            return { "TRI1", "TRI2" }
+          end
         elseif k == "deleteTriggerIfExists" then
           return function(...)
             table.insert(getCalls().Scenario.deleteTriggerIfExists, {...})
