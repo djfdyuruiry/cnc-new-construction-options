@@ -90,7 +90,7 @@ Path = function(pathStringOrPath, separator, isWindows)
 
   local function getRoot()
     if isRelative() then
-      return parts[1]
+      return Path(parts[1], separator, isWindows)
     end
 
     local rootPath = isWindows
@@ -201,6 +201,9 @@ Path = function(pathStringOrPath, separator, isWindows)
       ---@return Path
       __div = function (firstPath, secondPath)
         return firstPath.join(secondPath)
+      end,
+      __eq = function (firstPath, secondPath)
+        return tostring(firstPath) == tostring(secondPath)
       end,
       __tostring = function()
         return pathString

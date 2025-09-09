@@ -3,7 +3,7 @@ local Tests = {
   testSuites = {}
 }
 
----@type nil|{ beforeAll: fun(), beforeEach: fun(), tests: { [string]: fun() }, currentPath: string, depth: number }
+---@type nil|{ beforeAll: fun(), beforeEach: fun(), tests: { [string]: fun() }, currentPathParts: string[], depth: number }
 local currentTestSuite = nil
 
 local function describe(name, func)
@@ -12,28 +12,31 @@ local function describe(name, func)
   if type(currentTestSuite) == "nil" then
     rootCall = true
 
+    -- describe/doTest blocks tracker for 'recursion'
     currentTestSuite = {
       beforeAll = function() end,
       beforeEach = function() end,
       tests = {},
-      currentPathParts = {name},
-      depth = 1
+      currentPathParts = {},
+      depth = 0
     }
   else
-    if currentTestSuite.depth > 1 then
-      currentTestSuite.currentPathParts[currentTestSuite.depth + 1] = " > " .. name
-    else
-      currentTestSuite.currentPathParts[currentTestSuite.depth + 1] = name
-    end
-
+    -- entered a describe block, push it's name
     currentTestSuite.depth = currentTestSuite.depth + 1
+    currentTestSuite.currentPathParts[currentTestSuite.depth] = name
   end
 
+  -- call nested describe block or doTest block
   func()
 
-  currentTestSuite.depth = currentTestSuite.depth - 1
+  if not rootCall and currentTestSuite.depth > 0 then
+    -- left a describe block, pop it's name
+    table.remove(currentTestSuite.currentPathParts, currentTestSuite.depth)
+    currentTestSuite.depth = currentTestSuite.depth - 1
+  end
 
   if rootCall then
+    -- end of describe root call, load tests into suite
     Tests.testSuites[name] = {
       beforeAll = currentTestSuite.beforeAll,
       beforeEach = currentTestSuite.beforeEach,
@@ -49,11 +52,11 @@ local function describe(name, func)
 end
 
 local function when(name, func)
-  return describe(string.format("when %s", name), func)
+  return describe(string.format("{when} %s", name), func)
 end
 
 local function _and(name, func)
-  return describe(string.format("and %s", name), func)
+  return describe(string.format("{and} %s", name), func)
 end
 
 local function beforeAll(func)
@@ -85,25 +88,30 @@ local function doTest(name, func)
 
   local fullTestName = ""
 
-  for i = 1, currentTestSuite.depth - 1 do
-    fullTestName = currentTestSuite.currentPathParts[i]
+  -- build full name from nested block names
+  for i = 1, currentTestSuite.depth do
+    if i > 1 then
+      fullTestName = fullTestName .. " > "
+    end
+
+    fullTestName = fullTestName .. currentTestSuite.currentPathParts[i]
   end
 
-  fullTestName = fullTestName .. name
+  fullTestName = fullTestName .. " > " .. name
 
   currentTestSuite.tests[fullTestName] = func
 end
 
 local function should(name, func)
-  return doTest(string.format(" should %s", name), func)
+  return doTest(string.format("{should} %s", name), func)
 end
 
 local function _then(name, func)
-  return doTest(string.format(" then %s", name), func)
+  return doTest(string.format("{then} %s", name), func)
 end
 
 local function is(name, func)
-  return doTest(string.format(" is %s", name), func)
+  return doTest(string.format("{is} %s", name), func)
 end
 
 local function runTests()
@@ -148,7 +156,7 @@ local function runTests()
       }
 
       if success then
-        print("\n  ✅ TEST '" .. testName .. "' PASSED")
+        print("\n  ✅ TEST PASSED")
       else
         print("\n  ❌ TEST '" .. testName .. "' FAILED: " .. tostring(err))
       end
@@ -223,6 +231,18 @@ end
 
         should("fail", function ()
           assert(false, "I made it happen")
+        end)
+      end)
+
+      when("a when thing", function()
+        _then("my test", function()
+          assert(true, "Never gonna happen")
+        end)
+
+        and("another thing fail", function ()
+          _then("my test", function()
+            assert(false, "Always gonna happen")
+          end)
         end)
       end)
     end)

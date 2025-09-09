@@ -21,7 +21,8 @@ describe("Path", function ()
       _then("result path is correct", function()
         local result = testPath.join("lua")
 
-        assert(result == "/usr/bin/lua")
+        -- test __tostring
+        assert(tostring(result) == "/usr/bin/lua")
       end)
     end)
 
@@ -29,7 +30,8 @@ describe("Path", function ()
       _then("result path is correct", function()
         local result = testPath.join(Path("lua", "/", false))
 
-        assert(result == "/usr/bin/lua")
+        -- test __eq
+        assert(result == Path("/usr/bin/lua", "/", false))
       end)
     end)
   end)
@@ -39,15 +41,17 @@ describe("Path", function ()
       _then("result path is correct", function()
         local result = testPath / "lua"
 
-        assert(result == "/usr/bin/lua")
+        -- test __eq
+        assert(result == Path("/usr/bin/lua", "/", false))
       end)
     end)
 
     when("rhs is Path instance", function()
       _then("result path is correct", function()
-        local result = testPath.join / Path("lua", "/", false)
+        local result = testPath / Path("lua", "/", false)
 
-        assert(result == "/usr/bin/lua")
+        -- test __tostring
+        assert(tostring(result) == "/usr/bin/lua")
       end)
     end)
   end)
@@ -101,6 +105,7 @@ describe("Path", function ()
         local path = Path("/usr/bin/env/local", "/", false)
         local result = path.asRelativeSubPathOf(testPath)
 
+        -- test __tostring
         assert(tostring(result) == "env/local")
       end)
     end)
@@ -111,13 +116,15 @@ describe("Path", function ()
       local relativePath = Path("relative/path", "/", false)
       local result = relativePath.getRoot()
 
-      assert(result == "relative")
+      -- test __tostring
+      assert(tostring(result) == "relative")
     end)
 
     should("get system root path for absolute path", function()
       local result = testPath.getRoot()
 
-      assert(result == "/")
+      -- test __eq
+      assert(result == Path("/", "/", false))
     end)
   end)
 end)
