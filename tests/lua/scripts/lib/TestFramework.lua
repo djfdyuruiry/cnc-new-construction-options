@@ -16,19 +16,22 @@ local function describe(name, func)
       beforeAll = function() end,
       beforeEach = function() end,
       tests = {},
-      currentPath = "",
+      currentPathParts = {name},
       depth = 1
     }
   else
     if currentTestSuite.depth > 1 then
-      currentTestSuite.currentPath = currentTestSuite.currentPath .. " > "
+      currentTestSuite.currentPathParts[currentTestSuite.depth + 1] = " > " .. name
+    else
+      currentTestSuite.currentPathParts[currentTestSuite.depth + 1] = name
     end
 
-    currentTestSuite.currentPath = currentTestSuite.currentPath .. name
     currentTestSuite.depth = currentTestSuite.depth + 1
   end
 
   func()
+
+  currentTestSuite.depth = currentTestSuite.depth - 1
 
   if rootCall then
     Tests.testSuites[name] = {
@@ -43,6 +46,14 @@ local function describe(name, func)
 
     currentTestSuite = nil
   end
+end
+
+local function when(name, func)
+  return describe(string.format("when %s", name), func)
+end
+
+local function _and(name, func)
+  return describe(string.format("and %s", name), func)
 end
 
 local function beforeAll(func)
@@ -67,14 +78,32 @@ local function beforeEach(func)
   currentTestSuite.beforeEach = func
 end
 
-local function should(name, func)
+local function doTest(name, func)
   if type(currentTestSuite) == "nil" then
-    error("should() must be called within a describe block")
+    error("doTest() must be called within a describe block")
   end
 
-  local fullTestName = currentTestSuite.currentPath .. " should " .. name
+  local fullTestName = ""
+
+  for i = 1, currentTestSuite.depth - 1 do
+    fullTestName = currentTestSuite.currentPathParts[i]
+  end
+
+  fullTestName = fullTestName .. name
 
   currentTestSuite.tests[fullTestName] = func
+end
+
+local function should(name, func)
+  return doTest(string.format(" should %s", name), func)
+end
+
+local function _then(name, func)
+  return doTest(string.format(" then %s", name), func)
+end
+
+local function is(name, func)
+  return doTest(string.format(" is %s", name), func)
 end
 
 local function runTests()
@@ -173,10 +202,10 @@ end
   ```lua
     local TestFramework = require("lib.TestFramework")
 
-    local describe = Tests.describe
-    local beforeEach = Tests.beforeEach
-    local beforeAll = Tests.beforeAll
-    local should = Tests.should
+    local describe = TestFramework.describe
+    local beforeEach = TestFramework.beforeEach
+    local beforeAll = TestFramework.beforeAll
+    local should = TestFramework.should
 
     describe("my test suite", function ()
       beforeAll(function ()
@@ -202,17 +231,25 @@ end
 ]]
 ---@class TestFramework
 ---@field describe fun(name: string, func: fun())
+---@field when fun(name: string, func: fun())
+---@field _and fun(name: string, func: fun())
 ---@field beforeAll fun(func: fun())
 ---@field beforeEach fun(func: fun())
 ---@field should fun(name: string, func: fun())
+---@field _then fun(name: string, func: fun())
+---@field is fun(name: string, func: fun())
 ---@field runTests fun()
 
 ---@type TestFramework
 local TestFramework = {
   describe = describe,
+  when = when,
+  _and = _and,
+  _then = _then,
   beforeAll = beforeAll,
   beforeEach = beforeEach,
   should = should,
+  is = is,
   runTests = runTests
 }
 
