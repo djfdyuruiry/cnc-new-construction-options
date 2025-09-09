@@ -25,6 +25,16 @@ local function onF5()
   for _, r in ipairs(Rules["Game.Misc"].getRuleNames()) do
     Logger.info("Section rule: [Game.Misc] => %s", r)
   end
+
+  local goodguy = Scenario.houses.GoodGuy
+
+  local money = goodguy.getMoney()
+
+  Logger.info("GDI money: %s", money)
+
+  -- should resolve to +100 money
+  goodguy.giveMoney(200)
+  goodguy.takeMoney(100)
 end
 
 onF5()

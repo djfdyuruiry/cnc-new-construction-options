@@ -4,6 +4,11 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@field faction "gdi"|"nod"|"civilian"
 ---@field house string
 
+---@class House
+---@field getMoney fun(): number
+---@field giveMoney fun(amount: number)
+---@field takeMoney fun(amount: number)
+
 ---@class ScenarioHouses
 ---@field getNames fun(): string[]
 
@@ -21,7 +26,7 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@field name string
 ---@field type "single-player"|"multiplayer"
 ---@field player ScenarioPlayer
----@field houses ScenarioHouses
+---@field houses ScenarioHouses | { [string]: House }
 ---@field triggers ScenarioTriggers
 
 ---@return Scenario
@@ -40,7 +45,19 @@ local function builder(cppApi)
         getNames = cppApi.getHouseNames
       },
       {
-        -- TODO: Get house details by name via [] operator
+        __index = function (_, houseName)
+          return {
+            getMoney = function ()
+              return cppApi.getHouseMoney(houseName)
+            end,
+            giveMoney = function(amount)
+              cppApi.modifyHouseMoney(houseName, amount)
+            end,
+            takeMoney = function(amount)
+              cppApi.modifyHouseMoney(houseName, -amount)
+            end
+          }
+        end
       }
     ),
 

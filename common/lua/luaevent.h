@@ -1,11 +1,8 @@
 #pragma once
 
 #include <string>
-#include <variant>
 
 #include "../logger.h"
-
-using LuaEventData = std::variant<std::string, int, double>;
 
 /**
  * Encapsulates a piece of discrete logic that a Lua
@@ -14,7 +11,7 @@ using LuaEventData = std::variant<std::string, int, double>;
  */
 class LuaEvent {
 public:
-    LuaEvent(const std::string_view type, const LuaEventData data): EventType(type), Data(data) {}
+    LuaEvent(const std::string_view type): EventType(type) {}
 
     virtual ~LuaEvent() = default;
     virtual void Execute() const {
@@ -25,5 +22,4 @@ protected:
     inline static CncLogger Logger = CncLogger("LuaEvent");
 
     const std::string_view EventType;
-    const LuaEventData Data;
 };

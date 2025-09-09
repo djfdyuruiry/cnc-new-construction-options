@@ -16,6 +16,8 @@ local function extendCallsTable(calls)
     faction = {},
     house = {},
     getHouseNames = {},
+    getHouseMoney = {},
+    modifyHouseMoney = {},
     getTriggerNames = {},
     deleteTriggerIfExists = {}
   }
@@ -82,11 +84,21 @@ local function extendMockTable(getCalls, mock)
 
             return {"GoodGuy", "BadGuy"}
           end
-        elseif k == "getTriggerNames" then
+        elseif k == "getHouseNames" then
           return function(...)
-            table.insert(getCalls().Scenario.getTriggerNames, {...})
+            table.insert(getCalls().Scenario.getHouseNames, {...})
 
-            return {"TRI1", "TRI2"}
+            return {"GoodGuy", "BadGuy"}
+          end
+        elseif k == "getHouseMoney" then
+          return function(...)
+            table.insert(getCalls().Scenario.getHouseMoney, {...})
+
+            return 1000
+          end
+        elseif k == "modifyHouseMoney" then
+          return function(...)
+            table.insert(getCalls().Scenario.modifyHouseMoney, {...})
           end
         elseif k == "deleteTriggerIfExists" then
           return function(...)

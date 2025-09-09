@@ -126,6 +126,7 @@
     "CCMAP",
     "currentline",
     "endfor",
+    "goodguy",
     "luabridge",
     "mobius",
     "modders",
@@ -148,5 +149,5 @@
   "Lua.diagnostics.globals": [
     "__CNC_API"
   ],
-  "Lua.runtime.version": "Lua 5.4",
+  "Lua.runtime.version": "Lua 5.4"
 }

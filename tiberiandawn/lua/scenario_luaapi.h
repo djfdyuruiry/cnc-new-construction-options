@@ -57,22 +57,26 @@ public:
             })
             .addCFunction("getHouseMoney", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseCredits(<string: name>)");
+                auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseMoney(<string: name>)");
 
                 arguments.Count_Is(1).First_Argument_Is<std::string>().Assert();
 
                 auto name = arguments.Read_First<std::string>().Unpack();
 
+                auto house = HouseClass::As_Pointer(
+                    Parse_House_Name(engine, name)
+                );
+
                 engine.Push_Value(
-                    Get_House_By_Name(engine, name)->Available_Money()
+                    house->Available_Money()
                 );
 
                 return 1;
             })
 
-            .addCFunction("modifyHouseCredits", [](auto L) {
+            .addCFunction("modifyHouseMoney", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseCredits(<string: name>)");
+                auto arguments = LuaArguments(engine, "<bool> Scenario.modifyHouseMoney(<string: name>, <number: modifier)");
 
                 arguments.Count_Is(2)
                     .First_Argument_Is<std::string>()
@@ -80,28 +84,13 @@ public:
                     .Assert();
 
                 auto name = arguments.Read_First<std::string>().Unpack();
-                auto creditsModifier = arguments.Read_Next<int>().Unpack();
+                auto moneyModifier = arguments.Read_Next<int>().Unpack();
 
-                auto house = Get_House_By_Name(engine, name);
+                auto house = Parse_House_Name(engine, name);
 
-                if (creditsModifier < 0)
-                {
-                    // call wants to take money away from the house
-                    auto creditsToSpend = -creditsModifier;
+                LuaList.Push<ModifyHouseMoneyLuaEvent>(house, moneyModifier);
 
-                    if (House->Available_Money() - creditsToSpend > -1) {
-                        house->Spend_Money(creditsToSpend);
-                    }
-                }
-                else if (creditsModifier > 0)
-                {
-                    // call wants to give money to the house
-                    house->Refund_Money(creditsModifier);
-                }
-
-                engine.Push_Value(house->Available_Money());
-
-                return 1;
+                return 0;
             })
             .addCFunction("getTriggerNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
@@ -150,7 +139,7 @@ protected:
     }
 
 private:
-    static HouseClass* Get_House_By_Name(const LuaEngine& engine, const std::string& name)
+    static HousesType Parse_House_Name(const LuaEngine& engine, const std::string& name)
     {
         auto houseType = HouseTypeClass::From_Name(name.c_str());
 
@@ -161,7 +150,7 @@ private:
             );
         }
 
-        return HouseClass::As_Pointer(houseType);
+        return houseType;
     }
 
     std::string Scenario_Name;
