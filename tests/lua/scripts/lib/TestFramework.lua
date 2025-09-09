@@ -7,6 +7,14 @@ local Tests = {
 local currentTestSuite = nil
 
 local function describe(name, func)
+  if type(name) ~= "string" then
+    error("describe() requires name parameter to be a string")
+  end
+
+  if type(func) ~= "function" then
+    error("describe() requires func parameter to be a function")
+  end
+
   local rootCall = false
 
   if type(currentTestSuite) == "nil" then
@@ -82,6 +90,14 @@ local function beforeEach(func)
 end
 
 local function doTest(name, func)
+  if type(name) ~= "string" then
+    error("doTest() requires name parameter to be a string")
+  end
+
+  if type(func) ~= "function" then
+    error("doTest() requires func parameter to be a function")
+  end
+
   if type(currentTestSuite) == "nil" then
     error("doTest() must be called within a describe block")
   end
@@ -114,53 +130,61 @@ local function is(name, func)
   return doTest(string.format("{is} %s", name), func)
 end
 
+local function executeTest(testResults, testSuiteName, testSuite, testName, func)
+  print("\n [" .. testSuiteName .. "] > " .. testName .. "\n") -- Print test name
+
+  local success, err = pcall(testSuite.beforeEach)
+
+  if not success then
+    print("  ❌ TEST '" .. testName .. "' FAILED, beforeEach error: " .. err)
+
+    testResults["[" .. testSuiteName .. "] > " .. testName] = {
+      testSuite = testSuiteName,
+      passed = false,
+      error = "beforeEach: " .. err
+    }
+  end
+
+  success, err = pcall(func)
+
+  testResults["[" .. testSuiteName .. "] > " ..testName] = {
+    testSuite = testSuiteName,
+    passed = success and true or false,
+    error = success and nil or err
+  }
+
+  if success then
+    print("\n  ✅ TEST PASSED")
+  else
+    print("\n  ❌ TEST '" .. testName .. "' FAILED: " .. tostring(err))
+  end
+end
+
+local function executeTestSuite(testResults, testSuiteName, testSuite)
+  print("> [" .. testSuiteName .. "]\n")
+
+  local success, err = pcall(testSuite.beforeAll)
+
+  if not success then
+    print("❌ TEST SUITE FAILED, beforeAll error: " .. err)
+
+    testResults["[" .. testSuiteName .. "] ALL"] = {
+      testSuite = testSuiteName,
+      passed = false,
+      error = err
+    }
+  end
+
+  for testName, func in pairs(testSuite.tests) do
+    executeTest(testResults, testSuiteName, testSuite, testName, func)
+  end
+end
+
 local function runTests()
   local testResults = {}
 
   for testSuiteName, testSuite in pairs(Tests.testSuites) do
-    print("> [" .. testSuiteName .. "]\n")
-
-    local success, err = pcall(testSuite.beforeAll)
-
-    if not success then
-      print("❌ TEST SUITE FAILED, beforeAll error: " .. err)
-
-      testResults["[" .. testSuiteName .. "] ALL"] = {
-        testSuite = testSuiteName,
-        passed = false,
-        error = err
-      }
-    end
-
-    for testName, func in pairs(testSuite.tests) do
-      print("\n  > " .. testName .. "\n") -- Print test name
-
-      success, err = pcall(testSuite.beforeEach)
-
-      if not success then
-        print("  ❌ TEST '" .. testName .. "' FAILED, beforeEach error: " .. err)
-
-        testResults["[" .. testSuiteName .. "] > " .. testName] = {
-          testSuite = testSuiteName,
-          passed = false,
-          error = "beforeEach: " .. err
-        }
-      end
-
-      success, err = pcall(func)
-
-      testResults["[" .. testSuiteName .. "] > " ..testName] = {
-        testSuite = testSuiteName,
-        passed = success and true or false,
-        error = success and nil or err
-      }
-
-      if success then
-        print("\n  ✅ TEST PASSED")
-      else
-        print("\n  ❌ TEST '" .. testName .. "' FAILED: " .. tostring(err))
-      end
-    end
+    executeTestSuite(testResults, testSuiteName, testSuite)
   end
 
   local passedTests = 0
