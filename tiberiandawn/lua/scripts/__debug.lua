@@ -14,7 +14,7 @@ local function onF5()
 
   local value = Rules["Game.Map"].MaxBuildDistance
 
-  Messages.showToPlayer(
+  Messages.sendToPlayer(
     "HELLO THERE, Game.Map=>MaxBuildDistance type: %s",
     Rules["Game.Map"].getRuleType("MaxBuildDistance")
   )

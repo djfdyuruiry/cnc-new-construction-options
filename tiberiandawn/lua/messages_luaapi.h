@@ -16,9 +16,9 @@ public:
 
     virtual void Register_Functions(LuaEngine& engine) const override {
         With_Api_Namespace(engine, [](auto& n) {
-            n.addCFunction("showToPlayer", [](auto L) {
+            n.addCFunction("sendToPlayer", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "Messages.showToPlayer(<string: message>)");
+                auto arguments = LuaArguments(engine, "Messages.sendToPlayer(<string: message>)");
 
                 arguments.Count_Is(1)
                     .First_Argument_Is<std::string>()

@@ -7,7 +7,7 @@ local function extendCallsTable(calls)
   }
 
   calls.Messages = {
-    showToPlayer = {}
+    sendToPlayer = {}
   }
 
   calls.Scenario = {
@@ -47,9 +47,9 @@ local function extendMockTable(getCalls, mock)
     {},
     {
       __index = function (_, k)
-        if k == "showToPlayer" then
+        if k == "sendToPlayer" then
           return function(...)
-            table.insert(getCalls().Messages.showToPlayer, {...})
+            table.insert(getCalls().Messages.sendToPlayer, {...})
           end
         end
       end

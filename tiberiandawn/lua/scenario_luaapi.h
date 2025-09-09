@@ -54,8 +54,26 @@ public:
                 }
 
                 return 1;
-              })
-             .addCFunction("getTriggerNames", [](auto L) {
+            })
+            .addCFunction("getHouseCredits", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseCredits(<string: name>)");
+
+                arguments.Count_Is(1).First_Argument_Is<std::string>().Assert();
+
+                auto name = arguments.Read_First<std::string>().Unpack();
+
+                for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; i++) {
+                    const auto& house = HouseTypeClass::Pointers.Ptr(i);
+
+                    if (std::string(house.IniName) == name) {
+                        engine.Push_Value(house.Credits)
+                    }
+                }
+
+                return 1;
+            })
+            .addCFunction("getTriggerNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 
                 auto trigger_names_table = LuaTableBuilder(engine);
@@ -69,7 +87,8 @@ public:
                 }
 
                 return 1;
-             }).addCFunction("deleteTriggerIfExists", [](auto L) {
+            })
+            .addCFunction("deleteTriggerIfExists", [](auto L) {
                 auto engine = SharedLuaEngine(L);
                 auto arguments = LuaArguments(engine, "<bool> Scenario.deleteTriggerIfExists(<string: name>)");
 
@@ -95,7 +114,8 @@ public:
     }
 
 protected:
-    virtual const char* Get_Cpp_Source() const override {
+    virtual const char* Get_Cpp_Source() const override
+    {
         return __FILE__;
     }
 
