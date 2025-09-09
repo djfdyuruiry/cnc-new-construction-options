@@ -11,11 +11,11 @@ local Path = require("nco.lib.Path")
 ---@field __reset fun()
 
 ---@type MockCncApi
+---@returns CncApiMock
 local mockCncApi
 
 ---@param callsHandler fun(calls: CallsTable)?
 ---@param mockHandler fun(getCalls: (fun(calls: CallsTable)), mock: table)?
----@returns CncApiMock
 mockCncApi = function(callsHandler, mockHandler)
   ---@return CallsTable
   local function buildCallsTable()
@@ -151,30 +151,35 @@ mockCncApi = function(callsHandler, mockHandler)
   --[[
     Mock implementation of the C++ backend API.
 
-    To use: Require this module at the start of your test script,
-    ApiModule is configured to check the global table __CNC_API_MOCK and
-    use it if present.
-
-    Records field lookup and function calls (params are captured), use
-    __calls to inspect and assert.
-
-    Modules that get registered via the ApiModule class are recorded in
-    __registeredModules.
-
-    All calls and registered modules can be cleared by calling __reset().
-  
-    Adding additional mocks can be achieved by calling the reset method:
-
+    - To use: Require this module at the start of your test script,
+    ApiModule is configured to inject mocks using the global table
+    __CNC_API_MOCK and, if present.
+    - Note: Always place it as the first require in your script, or mock 
+    injection will fail.
+    - Field lookups and function calls are recorded, use __calls to inspect
+      and assert; params for function calls are captured
+    - Modules that get registered via the ApiModule class are recorded in
+      __registeredModules.
+    - All calls and registered modules can be cleared by calling __reset().
+    - Adding additional mocks can be achieved by calling __extend():
       ```lua
-        __CNC_API_MOCK.__reset(function(calls, mocks)
-          calls.MyModule = {
-            -- ...
-          }
+        local CncApiMock = require("nco.lib.CncApiMock")
 
-          mocks.MyModule = {
-            -- ...
-          }
-        end)
+        -- Always call __extend() before requiring modules that depend on the
+        -- additional C++ APIs you add to the mock, otherwise these will fail
+        -- to load. Any changes here will persist, and can be further extended
+        -- by calling __extend() later.
+        CncApiMock().__extend(
+          function(calls)
+            -- amend the calls table
+          end,
+          function(getCalls, mock)
+            -- amend the mock table, use getCalls() to record calls 
+          end
+        )
+
+        -- reset the mock
+        CncApiMock().__reset()
       ```
   ]]
   ---@type CncApiMock
@@ -201,8 +206,14 @@ mockCncApi = function(callsHandler, mockHandler)
   return _G.__CNC_API_MOCK
 end
 
+-- ensure Mock is initialized before require returns.
+-- nco.lib.ApiModule will detect the global variable if 
+-- this file is required before any API modules.
 mockCncApi()
 
+--- Lazy loading the mock from a function ensures 
+--- any modifications to the global table are not
+--- missed; __extend() and __reset() modify it.
 ---@returns CncApiMock
 return function ()
   return _G.__CNC_API_MOCK
