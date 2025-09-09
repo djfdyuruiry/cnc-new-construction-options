@@ -2,13 +2,15 @@ local Path = require("nco.lib.Path")
 
 ---@alias CallsTable { [string]: { [string]: boolean[]|any[][] } }
 
+---@alias MockCncApi fun(callsHandler: (fun(calls: (fun(): CallsTable)))?, mockHandler: fun(getCalls: (fun(calls: CallsTable)), mock: table))?)
+
 ---@class CncApiMock
 ---@field __calls CallsTable,
 ---@field __registeredModules ApiModuleSpec[]
----@field __extend fun(callsHandler: (fun(calls: (fun(): CallsTable))), mockHandler: fun(getCalls: (fun(calls: CallsTable)), mock: table))?)
+---@field __extend MockCncApi
 ---@field __reset fun()
 
----@type fun(callsHandler: (fun(calls: (fun(): CallsTable))), mockHandler: fun(getCalls: (fun(calls: CallsTable)), mock: table))?)
+---@type MockCncApi
 local mockCncApi
 
 ---@param callsHandler fun(calls: CallsTable)?
