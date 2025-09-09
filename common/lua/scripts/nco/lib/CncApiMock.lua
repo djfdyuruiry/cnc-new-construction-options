@@ -8,7 +8,7 @@ local Path = require("nco.lib.Path")
 ---@field __extend fun(callsHandler: (fun(calls: (fun(): CallsTable))), mockHandler: fun(getCalls: (fun(calls: CallsTable)), mock: table))?)
 ---@field __reset fun()
 
----@type fun(handler: fun(calls: (fun(): CallsTable), mock: table)?)
+---@type fun(callsHandler: (fun(calls: (fun(): CallsTable))), mockHandler: fun(getCalls: (fun(calls: CallsTable)), mock: table))?)
 local mockCncApi
 
 ---@param callsHandler fun(calls: CallsTable)?
