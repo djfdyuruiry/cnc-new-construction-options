@@ -67,7 +67,7 @@ public:
 
     virtual ~LuaEngine() = default;
 
-    #pragma region // API registration
+    #pragma region API
 
     template<class T, typename... Args>
     requires LuaApiConcept<T, LuaEngine>
@@ -102,7 +102,7 @@ public:
 
     #pragma endregion
 
-    #pragma region // low level state access
+    #pragma region State Access
 
     void With_State(std::function<void(lua_State*)> actions) const {
         actions(Get_State());
@@ -133,7 +133,7 @@ public:
 
     #pragma endregion
 
-    #pragma region // code execution
+    #pragma region Code Exec
 
     LuaResult Exec(const std::string& script) const {
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
@@ -287,7 +287,7 @@ public:
 
     #pragma endregion
 
-    #pragma region // lua stack interaction (inspect, read and write values)
+    #pragma region Stack
 
     int Get_Stack_Count() const {
         return lua_gettop(Get_State());
@@ -353,10 +353,63 @@ public:
         });
     }
 
+    LuaResult With_Global(
+        std::string_view name,
+        int expected_lua_type,
+        std::function<LuaResult()> action
+    ) const {
+        auto type = Load_Global(name);
+
+        if (type != expected_lua_type) {
+            Pop();
+            return LuaResult(
+                std::format(
+                    "Global '{}' was of unexpected type '{}', expected '{}'",
+                    name,
+                    Lua_Type_Map[type].value(),
+                    Lua_Type_Map[expected_lua_type].value()
+                )
+            );
+        }
+
+        auto result = action();
+
+        Pop();
+
+        return result;
+    }
+
     int Load_Table_Field(std::string_view name, int stack_index = -1) const {
         return Get_Value_From_State<int>([&](auto L) {
             return lua_getfield(L, stack_index, name.data());
         });
+    }
+
+    LuaResult With_Table_Field(
+        std::string_view parent_expression,
+        std::string_view name,
+        int expected_lua_type,
+        std::function<LuaResult()> action
+    ) const {
+        auto type = Load_Table_Field(name);
+
+        if (type != expected_lua_type) {
+            Pop();
+            return LuaResult(
+                std::format(
+                    "Table field '{}.{}' was of unexpected type '{}', expected '{}'",
+                    parent_expression,
+                    name,
+                    Lua_Type_Map[type].value(),
+                    Lua_Type_Map[expected_lua_type].value()
+                )
+            );
+        }
+
+        auto result = action();
+        Pop();
+
+        return result;
     }
 
     /**
@@ -413,8 +466,45 @@ public:
                 );
             }
 
-            CNC_LOGGER_FATAL("Attempted to read unsupported Lua type");
+            CNC_LOGGER_FATAL("Attempted to read Lua value using unsupported type: {}", typeid(T).name());
         });
+    }
+
+    template<class T>
+    LuaResultWithValue<T> Try_Read_Table_Field(
+        std::string_view parent_expression,
+        std::string_view name
+    ) {
+        auto expected_type = LUA_TNONE;
+        
+        if constexpr (std::is_same_v<T, bool>) {
+            expected_type = LUA_TBOOLEAN;
+        } else if constexpr (std::is_same_v<T, double>) {
+            expected_type = LUA_TNUMBER;
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            expected_type = LUA_TSTRING;
+        } else {
+            CNC_LOGGER_FATAL(
+                "Attempted to read Lua table field using unsupported type '{}': {}.{}",
+                typeid(T).name(),
+                parent_expression,
+                name
+            );
+        }
+
+        LuaResultWithValue<T> value_result = LuaResult(LUA_OK);
+
+        auto table_result = With_Table_Field(parent_expression, name, expected_type, [&]() {
+            value_result = Try_Read<T>();
+
+            return value_result;
+        });
+
+        if (!table_result.Is_Ok()) {
+            return table_result;
+        }
+
+        return value_result;
     }
 
     LuaResultWithValue<std::string> To_String(int stack_index = -1) const {
@@ -459,9 +549,35 @@ public:
         ((Push_Value(args)), ...);
     }
 
+    template<class T>
+    LuaResult Set_Table_Field(
+        std::string_view table_expression,
+        std::string_view name,
+        T value,
+        int table_stack_index = -1
+    ) const {
+        if (!Is_Table(table_stack_index)) {
+            return LuaResult(
+                std::format(
+                    "Unable to set field '{}' as target '{}' is not a table",
+                    name,
+                    table_expression
+                )  
+            );
+        }
+
+        Push_Value(value);
+
+        With_State([&](auto L) {
+            lua_setfield(L, table_stack_index - 1, name.data());
+        });
+
+        return LuaResult(LUA_OK);
+    }
+
     #pragma endregion
 
-    #pragma region // Read values using expressions
+    #pragma region Expressions
 
     template<class T>
     LuaResultWithValue<T> Eval(const std::string& expression) const {
@@ -535,14 +651,25 @@ public:
     };
 
     UniqueLuaEngine() : State(Build_State(), LuaStateDeleter()) {
-        Exec(
-            std::format(
-                "package.path = package.path .. ';{}/?.lua;{}/?/init.lua'",
-                Lua_Path.string(),
-                Lua_Path.string()
-            )
-        ).On_Error([](auto& r) {
-            CNC_LOGGER_CRITICAL(
+        With_Global("package", LUA_TTABLE, [&]() {
+            auto read_result = Try_Read_Table_Field<std::string>("package", "path");
+
+            if (!read_result.Is_Ok() || !read_result.Has_Value()) {
+                return (LuaResult)read_result;
+            }
+
+            return read_result.Map<LuaResult>([&](auto base_package_path) {
+                auto package_path = std::format(
+                    "{};{}/?.lua;{}/?/init.lua",
+                    base_package_path,
+                    Lua_Path.string(),
+                    Lua_Path.string()
+                );
+
+                return Set_Table_Field("package", "path", package_path);
+            });
+        }).On_Error([](auto& r) {
+            CNC_LOGGER_FATAL(
                 "Failed to initialise Lua package paths: {}",
                 r.Error_Message()
             );

@@ -164,6 +164,7 @@ public:
 
         return *this;
     }
+
 private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
@@ -206,6 +207,7 @@ public:
 
         return *this;
     }
+
 private:
     inline static CncLogger Logger = CncLogger("IniRuleContext");
 
@@ -244,6 +246,7 @@ public:
 
         return *Sections[name];
     }
+
 private:
     inline static CncLogger Logger = CncLogger("RuleSections");
 

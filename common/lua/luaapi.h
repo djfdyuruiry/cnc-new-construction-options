@@ -26,6 +26,7 @@ class LuaApi
 {
 public:
     inline static const std::filesystem::path Nco_Directory = "nco";
+    inline static const std::string_view Require_Global = "require";
 
     const std::string_view Name;
     const bool Has_Native_Module;
@@ -68,20 +69,20 @@ public:
             return;
         }
 
-        auto require_script = std::format(
-            R"*( require("{}.{}") )*",
-            Get_Parent_Lua_Module_Path(),
-            Name
-        );
+        auto module_path = std::format("{}.{}", Get_Parent_Lua_Module_Path(), Name);
 
-        engine.Exec(require_script)
-            .On_Error([&](auto& r) {
-                CNC_LOGGER_FATAL(
-                    "Failed to register native module using script '{}': {}",
-                    require_script,
-                    r.Error_Message()
-                );
-            });
+        CNC_LOGGER_DEBUG("Registering native module: {}", module_path);
+
+        engine.With_Global(Require_Global, LUA_TFUNCTION, [&]() {
+            return engine.PCall_With_Args(Require_Global, module_path)
+                .On_Error([&](auto& r) {
+                    CNC_LOGGER_FATAL(
+                        "Failed to register native module '{}': {}",
+                        module_path,
+                        r.Error_Message()
+                    );
+                });
+        });
     }
 
     virtual void Register_Scripts(LuaEngine& engine) const

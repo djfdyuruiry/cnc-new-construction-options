@@ -136,6 +136,15 @@ public:
         return Value_Source.value();
     }
 
+    template<class U>
+    U Map(std::function<U(T)> mapper) {
+        if (!Value_Source.has_value()) {
+            CNC_LOG_FATAL("Attempted to map empty LuaResultWithValue");
+        }
+
+        return mapper(Value_Source.value());
+    }
+
 private:
     std::optional<T> Value_Source;
 };

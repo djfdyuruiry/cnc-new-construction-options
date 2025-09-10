@@ -13,56 +13,26 @@
 class EventLuaApi : public LuaApi
 {
 public:
-    inline static const std::string GlobalTable = "Event";
+    inline static const std::string EventGlobalTable = "Event";
     inline static const std::string HandlersTable = "handlers";
+    inline static const std::string HandlersTablePath = std::format("{}.{}", EventGlobalTable, HandlersTable);
 
     template<typename... Args>
     static LuaResult Execute_Event(
-        const LuaEngine& engine,
+        const LuaEngine& e,
         std::string_view event_name,
         Args&&... args
     ) {
-        auto lookup_status = false;
-        auto lookup_count = 0;
-
-        engine.Load_Global(GlobalTable);
-        lookup_status = engine.Is_Table();
-        lookup_count++;
-
-        if (lookup_status) {
-            engine.Load_Table_Field(HandlersTable);
-            lookup_status = engine.Is_Table();
-            lookup_count++;
-        }
-
-        if (!lookup_status) {
-            engine.Pop(lookup_count);
-
-            return LuaResult(
-                std::format(
-                    "Event API handlers table is missing: {}.{}",
-                    GlobalTable,
-                    HandlersTable
-                )
-            );
-        }
-
-        engine.Load_Table_Field(event_name);
-        lookup_count++;
-
-        auto result = engine.PCall_With_Args(
-            std::format(
-                "{}.{}.{}",
-                GlobalTable,
-                HandlersTable,
-                event_name
-            ),
-            std::forward<Args>(args)...
-        );
-
-        engine.Pop(lookup_count);
-
-        return result;
+        return e.With_Global(EventGlobalTable, LUA_TTABLE, [&]() {
+            return e.With_Table_Field(EventGlobalTable, HandlersTable, LUA_TTABLE, [&]() {
+                return e.With_Table_Field(HandlersTablePath, event_name, LUA_TFUNCTION, [&]() {
+                    return e.PCall_With_Args(
+                        std::format("{}.{}", HandlersTablePath, event_name),
+                        std::forward<Args>(args)...
+                    );
+                });
+            });
+        });
     }
 
     EventLuaApi() : LuaApi("Event", true) {}
