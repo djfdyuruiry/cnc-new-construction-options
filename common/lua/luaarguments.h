@@ -205,6 +205,25 @@ public:
 
         return Read_Next<T>();
     }
+
+    void Assert_String_Parameter_Is_Valid(std::string_view name, std::string value, unsigned int max_chars){
+        if (value.empty() || std::all_of(value.begin(), value.end(), ::isspace)) {
+            Lua.Raise_Error_Format(
+                "Parameter '{}' was blank",
+                name,
+                max_chars
+            );
+        }
+
+        if (value.length() > max_chars) {
+            Lua.Raise_Error_Format(
+                "Parameter '{}' was too long, should be at most {} characters long. Value: {}",
+                name,
+                max_chars,
+                value
+            );
+        }
+    }
 private:
     const LuaEngine& Lua;
     std::optional<bool> Stream_Is_Valid;

@@ -14,14 +14,14 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 ---@class ScenarioTeamTypes
 ---@field getNames fun(): string[]
----@field get fun(team: string)
----@field add fun(team: string, teamDefinition: string)
+---@field get fun(name: string)
+---@field add fun(name: string, definition: string)
 
 ---@class ScenarioTriggers
 ---@field getNames fun(): string[]
----@field get fun(trigger: string)
----@field add fun(triggerName: string, triggerDefinition: string)
----@field deleteIfExists fun(triggerName: string): boolean
+---@field get fun(name: string)
+---@field add fun(name: string, definition: string)
+---@field deleteIfExists fun(name: string): boolean
 
 --[[
   API that provides controls for the current mission

@@ -126,24 +126,8 @@ public:
                 auto name = arguments.Read_First<std::string>().Unpack();
                 auto definition = arguments.Read_Next<std::string>().Unpack();
 
-                // TODO: implement value validators in LuaArguments
-                if (name.length() < 1) {
-                    engine.Raise_Error_Format("Team type name was empty");
-                } else if (name.length() > 8) {
-                    engine.Raise_Error_Format(
-                        "Team type name '{}' too long, should be at most 8 characters long. Name: {}",
-                        name
-                    );
-                }
-
-                if (definition.length() < 1) {
-                    engine.Raise_Error_Format("Team type CSV definition was empty");
-                } else if (definition.length() > 127) {
-                    engine.Raise_Error_Format(
-                        "Team type definition too long, should be at most 127 characters long. Definition: {}",
-                        definition
-                    );
-                }
+                arguments.Assert_String_Parameter_Is_Valid("name", name, 8);
+                arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
                 CNC_LOGGER_DEBUG(
                     "Loading team type '{}' from Lua call, CSV definition: {}",
@@ -205,39 +189,23 @@ public:
                     .First_Argument_Is<std::string>()
                     .Assert();
 
-                auto trigger_name = arguments.Read_First<std::string>().Unpack();
-                auto trigger_definition = arguments.Read_Next<std::string>().Unpack();
+                auto name = arguments.Read_First<std::string>().Unpack();
+                auto definition = arguments.Read_Next<std::string>().Unpack();
 
-                // TODO: implement value validators in LuaArguments
-                if (trigger_name.length() < 1) {
-                    engine.Raise_Error_Format("Trigger name was empty");
-                } else if (trigger_name.length() > 4) {
-                    engine.Raise_Error_Format(
-                        "Trigger name '{}' too long, should be at most 4 characters long. Name: {}",
-                        trigger_name
-                    );
-                }
-
-                if (trigger_name.length() < 1) {
-                    engine.Raise_Error_Format("Trigger CSV definition was empty");
-                } else if (trigger_definition.length() > 127) {
-                    engine.Raise_Error_Format(
-                        "Trigger definition too long, should be at most 127 characters long. Definition: {}",
-                        trigger_definition
-                    );
-                }
+                arguments.Assert_String_Parameter_Is_Valid("name", name, 4);
+                arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
                 CNC_LOGGER_DEBUG(
                     "Loading scenario trigger '{}' from Lua call, CSV definition: {}",
-                    trigger_name,
-                    trigger_definition
+                    name,
+                    definition
                 );
 
                 auto trigger = new TriggerClass();
 
                 trigger->Fill_In(
-                    trigger_name.c_str(),
-                    trigger_definition.c_str()
+                    name.c_str(),
+                    definition.c_str()
                 );
 
                 trigger->Load();
