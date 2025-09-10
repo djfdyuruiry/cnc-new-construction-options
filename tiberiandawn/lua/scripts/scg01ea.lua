@@ -1,25 +1,25 @@
 -- house goodguy scenario 1-east load test script
 local Utils = require("nco.lib.Utils")
 
-local function main()
-  Logger.info("Someone called scg01ea.lua")
+local function addingNewTeam()
+  Scenario.teams.add("LUA1", "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1")
+  Scenario.triggers.add("TMR4", "Time,Reinforce.,8,GoodGuy,LUA1,0")
+end
 
-  -- test trigger lookups
-  Logger.debug("Triggers: %s", Utils.arrayToCsv(Scenario.triggers.getNames()))
-  Logger.debug("WIN trigger: %s", Scenario.triggers.get("WIN"))
-
-  -- test editing existing scenario triggers
-  Logger.info("Preventing GDI getting Hum-Vee's")
-
-  if not Scenario.triggers.deleteIfExists("RNF4") then
-    Logger.warning("Attempted to delete missing trigger: RNF4")
+local function addingNewTrigger()
+  Event.handlers.newTriggerTest = function(triggerName)
+      Logger.debug("10 second trigger execute (%s)", triggerName)
   end
 
-  if not Scenario.triggers.deleteIfExists("RNF6") then
-    Logger.warning("Attempted to delete missing trigger: RNF6")
-  end
+  Scenario.triggers.add("TMR3", "Time,Lua Event,15,GoodGuy,newTriggerTest,0")
+end
 
-  -- test declaring lua trigger defined in scenario ini
+local function teamTypeLookups()
+  Logger.debug("Team Types: %s", Utils.arrayToCsv(Scenario.teams.getNames()))
+  Logger.debug("Team GDIR2: %s", Scenario.teams.get("GDIR2"))
+end
+
+local function timerTriggerSetup()
   Event.handlers.onTimerTrigger = function(triggerName)
     Logger.debug("Handling trigger %s", triggerName)
 
@@ -29,21 +29,34 @@ local function main()
       Logger.debug("10 second trigger execute")
     end
   end
+end
 
-  -- test team type lookups
-  Logger.debug("Team Types: %s", Utils.arrayToCsv(Scenario.teams.getNames()))
-  Logger.debug("Team GDIR2: %s", Scenario.teams.get("GDIR2"))
+local function editingTriggers()
+  Logger.info("Preventing GDI getting Hum-Vee's")
 
-  -- test adding a new trigger
-  Event.handlers.newTriggerTest = function(triggerName)
-      Logger.debug("10 second trigger execute (%s)", triggerName)
+  if not Scenario.triggers.deleteIfExists("RNF4") then
+    Logger.warning("Attempted to delete missing trigger: RNF4")
   end
 
-  Scenario.triggers.add("TMR3", "Time,Lua Event,15,GoodGuy,newTriggerTest,0")
+  if not Scenario.triggers.deleteIfExists("RNF6") then
+    Logger.warning("Attempted to delete missing trigger: RNF6")
+  end
+end
 
-  -- test adding a team
-  Scenario.teams.add("LUA1", "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1")
-  Scenario.triggers.add("TMR4", "Time,Reinforce.,8,GoodGuy,LUA1,0")
+local function triggerLookups()
+  Logger.debug("Triggers: %s", Utils.arrayToCsv(Scenario.triggers.getNames()))
+  Logger.debug("WIN trigger: %s", Scenario.triggers.get("WIN"))
+end
+
+local function main()
+  Logger.info("Someone called scg01ea.lua")
+
+  triggerLookups()
+  editingTriggers()
+  timerTriggerSetup()
+  teamTypeLookups()
+  addingNewTrigger()
+  addingNewTeam()
 end
 
 main()
