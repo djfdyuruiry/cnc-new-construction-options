@@ -22,36 +22,47 @@ public:
         std::string_view event_name,
         Args&&... args
     ) {
-        return engine.Get_Value_From_State<LuaResult>([&](auto L) {
-            lua_getglobal(L, GlobalTable.c_str()); // get event table
-            lua_getfield(L, -1, HandlersTable.c_str()); // get handlers table
-            lua_getfield(L, -1, event_name.data()); // get event handler function
+        auto lookup_status = false;
+        auto lookup_count = 0;
 
-            if (!lua_isfunction(L, -1)) {
-                lua_pop(L, 3);
+        engine.Load_Global(GlobalTable);
+        lookup_status = engine.Is_Table();
+        lookup_count++;
 
-                return LuaResult(
-                    std::format(
-                        "Event handler is either missing or not a function: {}.{}.{}",
-                        GlobalTable,
-                        HandlersTable,
-                        event_name
-                    )
-                );
-            }
+        if (lookup_status) {
+            engine.Load_Table_Field(HandlersTable);
+            lookup_status = engine.Is_Table();
+            lookup_count++;
+        }
 
-            // push args to lua stack
-            engine.Push_Values(std::forward<Args>(args)...);
+        if (!lookup_status) {
+            engine.Pop(lookup_count);
 
-            auto result = LuaResult(
-                L,
-                lua_pcall(L, sizeof...(Args), 1, 0)
+            return LuaResult(
+                std::format(
+                    "Event API handlers table is missing: {}.{}",
+                    GlobalTable,
+                    HandlersTable
+                )
             );
+        }
 
-            lua_pop(L, 3);
+        engine.Load_Table_Field(event_name);
+        lookup_count++;
 
-            return result;
-        });
+        auto result = engine.PCall_With_Args(
+            std::format(
+                "{}.{}.{}",
+                GlobalTable,
+                HandlersTable,
+                event_name
+            ),
+            std::forward<Args>(args)...
+        );
+
+        engine.Pop(lookup_count);
+
+        return result;
     }
 
     EventLuaApi() : LuaApi("Event", true) {}

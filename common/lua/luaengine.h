@@ -67,7 +67,7 @@ public:
 
     virtual ~LuaEngine() = default;
 
-    // API registration
+    #pragma region // API registration
 
     template<class T, typename... Args>
     requires LuaApiConcept<T, LuaEngine>
@@ -100,7 +100,9 @@ public:
         api_namespace.endNamespace().endNamespace();
     }
 
-    // low level state access
+    #pragma endregion
+
+    #pragma region // low level state access
 
     void With_State(std::function<void(lua_State*)> actions) const {
         actions(Get_State());
@@ -129,7 +131,9 @@ public:
         );
     };
 
-    // code execution
+    #pragma endregion
+
+    #pragma region // code execution
 
     LuaResult Exec(const std::string& script) const {
         CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
@@ -259,7 +263,31 @@ public:
         return future;
     }
 
-    // lua stack interaction (inspect, read and write values)
+    // TODO: Make variants of this
+    template<typename... Args>
+    LuaResult PCall_With_Args(std::string_view expression, Args&&... args) const {
+        if (!Is_Function()) {
+            return LuaResult(
+                std::format(
+                    "Unable to call '{}' as it is either undefined or not a function",
+                    expression
+                )
+            );
+        }
+
+        Push_Values(std::forward<Args>(args)...);
+
+        return Get_Value_From_State<LuaResult>([](auto L) {
+            return LuaResult(
+                L,
+                lua_pcall(L, sizeof...(Args), 1, 0)
+            );
+        });
+    }
+
+    #pragma endregion
+
+    #pragma region // lua stack interaction (inspect, read and write values)
 
     int Get_Stack_Count() const {
         return lua_gettop(Get_State());
@@ -267,7 +295,7 @@ public:
 
     template<class T>
     bool Is_Type(int stack_index = -1) const {
-        return Get_Value_From_State<bool>([&stack_index](auto L) {
+        return Get_Value_From_State<bool>([&](auto L) {
             auto type = lua_type(L, stack_index);
 
             if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
@@ -283,7 +311,7 @@ public:
     }
 
     int Get_Lua_Type_Code(int stack_index = -1) const {
-        return Get_Value_From_State<bool>([&stack_index](auto L) {
+        return Get_Value_From_State<bool>([&](auto L) {
             return lua_type(L, stack_index);
         });
     }
@@ -296,14 +324,38 @@ public:
     }
 
     bool Is_Nil(int stack_index = -1) const {
-        return Get_Value_From_State<bool>([&stack_index](auto L) {
+        return Get_Value_From_State<bool>([&](auto L) {
             return lua_type(L, stack_index) == LUA_TNIL;
         });
     }
 
     bool Is_None(int stack_index = -1) const {
-        return Get_Value_From_State<bool>([&stack_index](auto L) {
+        return Get_Value_From_State<bool>([&](auto L) {
             return lua_type(L, stack_index) == LUA_TNONE;
+        });
+    }
+
+    bool Is_Table(int stack_index = -1) const {
+        return Get_Value_From_State<bool>([&](auto L) {
+            return lua_istable(L, stack_index);
+        });
+    }
+
+    bool Is_Function(int stack_index = -1) const {
+        return Get_Value_From_State<bool>([&](auto L) {
+            return lua_isfunction(L, stack_index);
+        });
+    }
+
+    int Load_Global(std::string_view name) const {
+        return Get_Value_From_State<int>([&](auto L) {
+            return lua_getglobal(L, name.data());
+        });
+    }
+
+    int Load_Table_Field(std::string_view name, int stack_index = -1) const {
+        return Get_Value_From_State<int>([&](auto L) {
+            return lua_getfield(L, stack_index, name.data());
         });
     }
 
@@ -312,7 +364,7 @@ public:
      */
     template<class T>
     LuaResultWithValue<T> Try_Read(int stack_index = -1) const {
-        return Get_Value_From_State<LuaResultWithValue<T>>([&stack_index](auto L) {
+        return Get_Value_From_State<LuaResultWithValue<T>>([&](auto L) {
             auto type = lua_type(L, stack_index);
 
             if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
@@ -366,10 +418,16 @@ public:
     }
 
     LuaResultWithValue<std::string> To_String(int stack_index = -1) const {
-        return Get_Value_From_State<LuaResultWithValue<std::string>>([&stack_index](auto L) {
+        return Get_Value_From_State<LuaResultWithValue<std::string>>([&](auto L) {
             return LuaResultWithValue<std::string>(
                 lua_tostring(L, stack_index)
             );
+        });
+    }
+
+    void Pop(int amount = 1) const {
+        With_State([&](auto L) {
+            lua_pop(L, amount);
         });
     }
 
@@ -401,7 +459,9 @@ public:
         ((Push_Value(args)), ...);
     }
 
-    // Read values using expressions
+    #pragma endregion
+
+    #pragma region // Read values using expressions
 
     template<class T>
     LuaResultWithValue<T> Eval(const std::string& expression) const {
@@ -430,8 +490,9 @@ public:
         return future;
     }
 
-    // bridge for API building
+    #pragma endregion
 
+    // for API building
     luabridge::Namespace Bridge() const {
         return luabridge::getGlobalNamespace(Get_State());
     }
