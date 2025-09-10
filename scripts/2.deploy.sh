@@ -7,14 +7,32 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/lib/vars.sh"
 . "${script_path}/lib/functions.sh"
 
+function deploy_test_files() {
+  log_info "Deploying test data files"
+
+  if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
+    cp -rfv "${td_resources_path}"/* "${target_dir}"
+  fi
+}
+
+function deploy_resources() {
+  log_info "Deploying resource files"
+
+  if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
+    cp -rfv "${td_test_resources_path}"/* "${target_dir}"
+  fi
+}
+
 function deploy_nco_lua() {
+  log_info "Deploying NCO Lua library"
+
   rm -rf "${target_dir}/lua"
   mkdir -p "${target_dir}/lua"
 
-  cp -rf "${common_lua_scripts_path}"/* "${target_dir}/lua"
+  cp -rfv "${common_lua_scripts_path}"/* "${target_dir}/lua"
 
   if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
-    cp -rf "${td_lua_scripts_path}"/* "${target_dir}/lua"
+    cp -rfv "${td_lua_scripts_path}"/* "${target_dir}/lua"
   fi
 }
 
@@ -43,6 +61,8 @@ function main() {
     -print0 | xargs -0 -I {} cp -fv "{}" "${target}"
 
   deploy_nco_lua
+  deploy_resources
+  deploy_test_files
 
   rm -fv "${target_dir}/"*.log
 }

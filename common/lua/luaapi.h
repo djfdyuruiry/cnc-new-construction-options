@@ -79,7 +79,7 @@ public:
                 CNC_LOGGER_FATAL(
                     "Failed to register native module using script '{}': {}",
                     require_script,
-                    r.Error.value()
+                    r.Error_Message()
                 );
             });
     }
@@ -104,7 +104,11 @@ public:
             engine.Exec_File(full_script_path.string())
                 .If_Ok([&](auto& r) { CNC_LOGGER_INFO("Loaded script OK: {}", script.string()); })
                 .On_Error([&](auto& r) {
-                    CNC_LOGGER_FATAL("Failed to load script '{}': {}", script.string(), r.Error.value());
+                    CNC_LOGGER_FATAL(
+                        "Failed to load script '{}': {}",
+                        script.string(),
+                        r.Error_Message()
+                    );
                 });
         }
     }

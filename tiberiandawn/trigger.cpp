@@ -102,7 +102,7 @@ static const char* ActionText[TriggerClass::ACTION_COUNT + 1] = {"None",
                                                                  "Autocreate",
                                                                  "Cap=Win/Des=Lose",
                                                                  "Allow Win",
-                                                                 "Lua Callback",
+                                                                 "Lua Event",
                                                                  "Lua Script"};
 
 void TriggerClass::Load()
@@ -895,12 +895,18 @@ bool TriggerClass::Spring(EventType event, HousesType house, int data)
         Do_All_To_Hunt();
         break;
 
-    case ACTION_LUA_CALLBACK:
-        success = ScenarioLua::Exec_Callback_Trigger(Name, StringData.value());
+    case ACTION_LUA_EVENT:
+        ScenarioLua::Exec_Event_Trigger(Name, StringData.value());
+
+        // Lua errors are probably non-recoverable, so set to true to prevent retries
+        success = true;
         break;
 
     case ACTION_LUA_SCRIPT:
-        success = ScenarioLua::Exec_Script_Trigger(Name, StringData.value());
+        ScenarioLua::Exec_Script_Trigger(Name, StringData.value());
+
+        // Lua errors are probably non-recoverable, so set to true to prevent retries
+        success = true;
         break;
 
     default:

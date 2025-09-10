@@ -149,5 +149,15 @@
   "Lua.diagnostics.globals": [
     "__CNC_API"
   ],
-  "Lua.runtime.version": "Lua 5.4"
+  "Lua.runtime.version": "Lua 5.4",
+  "Lua.runtime.path": [
+    "?.lua",
+    "?/init.lua",
+    "${workspaceFolder}/common/lua/scripts/?.lua",
+    "${workspaceFolder}/common/lua/scripts/?/init.lua",
+    "${workspaceFolder}/tiberiandawn/lua/scripts/?.lua",
+    "${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua",
+    "${workspaceFolder}/tests/lua/scripts/?.lua",
+    "${workspaceFolder}/tests/lua/scripts/?/init.lua"
+  ]
 }

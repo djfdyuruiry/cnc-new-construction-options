@@ -14,6 +14,16 @@ local function main()
   if not Scenario.triggers.deleteIfExists("RNF6") then
     Logger.warning("Attempted to delete missing trigger: RNF6")
   end
+
+  Event.handlers.onTimerTrigger = function(triggerName)
+    Logger.debug("Handling trigger %s", triggerName)
+
+    if triggerName == "TMR1" then
+      Logger.debug("5 second trigger execute")
+    elseif triggerName == "TMR2" then
+      Logger.debug("10 second trigger execute")
+    end
+  end
 end
 
 main()

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "../common/lua/event_luaapi.h"
 #include "../common/lua/logging_luaapi.h"
 #include "../common/lua/luaengine.h"
 #include "../common/lua/luascripts.h"
@@ -58,6 +59,7 @@ public:
                .With_Api<SystemLuaApi>()
                .With_Api<LoggingLuaApi>()
                .With_Api<RulesLuaApi<RuleSectionsProvider>>()
+               .With_Api<EventLuaApi>()
                .With_Api<GameLuaApi>()
                .With_Api<MessagesLuaApi>()
                .With_Api<UiLuaApi>()
@@ -74,28 +76,26 @@ public:
           Call_Back();
      }
 
-     static bool Exec_Callback_Trigger(std::string_view trigger_name, std::string_view callback) {
+     // TODO: Create similar to call lua events for things other than scenario trigger (on defeated, on building built etc.)
+     static bool Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name) {
           auto status = false;
 
-          Get_Engine()
-               .Eval<bool>(
-                    // TODO: native Lua Events module
-                    std::format(
-                         R"*(true -- Events.{}("{}"))*",
-                         callback,
-                         trigger_name
-                    )
-               )
-               .If_Value([&](auto lua_status) {
-                    status = lua_status;
-               })
-               .On_Error([&](auto& r) {
-                    CNC_LOGGER_ERROR(
-                         "Failed to exec lua callback on scenario trigger '{}' due to error: {}",
-                         trigger_name,
-                         r.Error.value()
-                    );
-               });
+          EventLuaApi::Execute_Event(
+               Get_Engine(),
+               event_name,
+               trigger_name
+          )
+          .If_Ok([&](auto& r) {
+               status = true;
+          })
+          .On_Error([&](auto& r) {
+               CNC_LOGGER_ERROR(
+                    "Failed to exec lua event '{}' on scenario trigger '{}' due to error: {}",
+                    event_name,
+                    trigger_name,
+                    r.Error_Message()
+               );
+          });
 
           return status;
      }
@@ -112,7 +112,7 @@ public:
                     CNC_LOGGER_ERROR(
                          "Failed to exec lua script on scenario trigger '{}' due to error: {}",
                          trigger_name,
-                         r.Error.value()
+                         r.Error_Message()
                     );
                });
 
@@ -178,7 +178,7 @@ private:
                          CNC_LOGGER_ERROR(
                               "Failed to load scenario script '{}' due to an error: {}",
                               script_path,
-                              r.Error.value_or("unknown error")
+                              r.Error_Message()
                          );
                     });
           }

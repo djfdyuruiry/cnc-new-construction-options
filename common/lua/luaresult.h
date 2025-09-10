@@ -74,6 +74,10 @@ public:
         return Lua_Error_Map[Lua_Code].value_or("Unknown");
     }
 
+    const std::string Error_Message() const {
+        return Error.value_or("unknown error");
+    }
+
     const LuaResult& If_Ok(std::function<void(const LuaResult&)> action) const {
         if (Is_Ok()) {
             action(*this);

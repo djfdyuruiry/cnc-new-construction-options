@@ -396,6 +396,11 @@ public:
         });
     }
 
+    template<typename... Args>
+    void Push_Values(Args&&... args) const {
+        ((Push_Value(args)), ...);
+    }
+
     // Read values using expressions
 
     template<class T>
@@ -476,7 +481,10 @@ public:
                 Lua_Path.string()
             )
         ).On_Error([](auto& r) {
-            CNC_LOGGER_CRITICAL("Failed to initialise Lua package paths: {}", r.Error.value());
+            CNC_LOGGER_CRITICAL(
+                "Failed to initialise Lua package paths: {}",
+                r.Error_Message()
+            );
         });
     }
 

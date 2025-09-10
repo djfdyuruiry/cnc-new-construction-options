@@ -2,6 +2,7 @@
 - GitHub actions workflows copy the contents of these data packs into the same archive as the game binary
 - Typically files from external patches etc. are only included here if they needed to be modified to work with the NCO engine or no easy source of download for specific files is available
 - Files are listed for each data pack directory below
+- `scripts/2.deploy.sh` copies these files to the runtime data path for debugging
 
 ## `td`
 

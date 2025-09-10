@@ -31,6 +31,7 @@ mockCncApi = function(callsHandler, mockHandler)
         getRuleValue = {},
         setRuleValue = {}
       },
+      Event = {},
       System = {
         gamePath = {},
         luaPath = {},
@@ -98,6 +99,13 @@ mockCncApi = function(callsHandler, mockHandler)
                 return 44
               end
             end
+          end
+        }
+      ),
+      Event = setmetatable(
+        {},
+        {
+          __index = function (_, field)
           end
         }
       ),
