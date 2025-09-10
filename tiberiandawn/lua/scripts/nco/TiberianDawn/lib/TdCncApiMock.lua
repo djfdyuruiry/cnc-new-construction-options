@@ -18,7 +18,12 @@ local function extendCallsTable(calls)
     getHouseNames = {},
     getHouseMoney = {},
     modifyHouseMoney = {},
+    getTeamTypeNames = {},
+    getTeamType = {},
+    addTeamType = {},
     getTriggerNames = {},
+    getTrigger = {},
+    addTrigger = {},
     deleteTriggerIfExists = {}
   }
 
@@ -100,11 +105,37 @@ local function extendMockTable(getCalls, mock)
           return function(...)
             table.insert(getCalls().Scenario.modifyHouseMoney, {...})
           end
+        elseif k == "getTeamTypeNames" then
+          return function(...)
+            table.insert(getCalls().Scenario.getTeamTypeNames, {...})
+
+            return { "GDIR1", "GDIR2" }
+          end
+        elseif k == "getTeamType" then
+          return function(...)
+            table.insert(getCalls().Scenario.getTeamType, {...})
+
+            return "GoodGuy,0,0,0,0,0,7,3,0,0,2,JEEP:1,LST:1,0,1,1"
+          end
+        elseif k == "addTeamType" then
+          return function(...)
+            table.insert(getCalls().Scenario.addTeamType, {...})
+          end
         elseif k == "getTriggerNames" then
           return function(...)
             table.insert(getCalls().Scenario.getTriggerNames, {...})
 
-            return { "TRI1", "TRI2" }
+            return { "RNF1", "RNF2" }
+          end
+        elseif k == "getTrigger" then
+          return function(...)
+            table.insert(getCalls().Scenario.getTriggerNames, {...})
+
+            return "Time,Reinforce.,3,GoodGuy,GDIR1,0"
+          end
+        elseif k == "addTrigger" then
+          return function(...)
+            table.insert(getCalls().Scenario.addTrigger, {...})
           end
         elseif k == "deleteTriggerIfExists" then
           return function(...)

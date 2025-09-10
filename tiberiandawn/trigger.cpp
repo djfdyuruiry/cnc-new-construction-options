@@ -896,16 +896,27 @@ bool TriggerClass::Spring(EventType event, HousesType house, int data)
         break;
 
     case ACTION_LUA_EVENT:
-        ScenarioLua::Exec_Event_Trigger(Name, StringData.value());
-
-        // Lua errors are probably non-recoverable, so set to true to prevent retries
-        success = true;
-        break;
-
     case ACTION_LUA_SCRIPT:
-        ScenarioLua::Exec_Script_Trigger(Name, StringData.value());
+        if (StringData.has_value()) {
+            if (Action == ACTION_LUA_EVENT) {
+                ScenarioLua::Exec_Event_Trigger(Name, StringData.value());
+            } else if (Action == ACTION_LUA_SCRIPT) {
+                ScenarioLua::Exec_Script_Trigger(Name, StringData.value());
+            } else {
+                CNC_LOGGER_FATAL(
+                    "Attempted to execute Lua trigger '{}' with unimplemented action type: {}",
+                    std::string(Name),
+                    (int)Action
+                );
+            }
+        } else {
+            CNC_LOGGER_WARN(
+                "Attempted to execute Lua trigger '{}' but no event/script string was found in CSV definition",
+                std::string(Name)
+            );
+        }
 
-        // Lua errors are probably non-recoverable, so set to true to prevent retries
+        // Lua errors are typically non-recoverable, so set to true to prevent retries
         success = true;
         break;
 
@@ -1063,13 +1074,7 @@ void TriggerClass::Read_INI(CCINIClass& ini)
         /*
         **	Add 'trigger' to the House's list.
         */
-        if (trigger->House != HOUSE_NONE) {
-            if (trigger->Action == ACTION_ALLOWWIN) {
-                HouseClass::As_Pointer(trigger->House)->Blockage++;
-            }
-            HouseTriggers[trigger->House].Add(trigger);
-            trigger->AttachCount++;
-        }
+
     }
 }
 
@@ -1136,8 +1141,13 @@ void TriggerClass::Fill_In(const char* name, const char* entry)
     /*
     **	5th token: StringData (Possibly a Team name).
     */
-    StringData = std::string(strtok(NULL, ","));
-    Team = TeamTypeClass::As_Pointer(StringData.value().data());
+    auto string_data = strtok(NULL, ",");
+    
+    if (string_data != NULL && strlen(string_data) > 1) {
+        // only set string data if at least one char was extracted
+        StringData = std::string(string_data);
+    }
+    Team = TeamTypeClass::As_Pointer(string_data);
 
     /*
     ** 6th token: IsPersistant.  This token was added later, so we must check
@@ -1149,6 +1159,25 @@ void TriggerClass::Fill_In(const char* name, const char* entry)
     } else {
         IsPersistant = VOLATILE;
     }
+}
+
+void TriggerClass::Write_INI_String(char* buffer)
+{
+    /*
+    **	Generate INI entry.
+    */
+    auto hname = House == HOUSE_NONE ? "None" : HouseClass::As_Pointer(House)->Class->IniName;
+
+    auto tname = Team == NULL ? "None" : Team->IniName;
+
+    sprintf(buffer,
+            "%s,%s,%d,%s,%s,%d",
+            TriggerClass::Name_From_Event(Event),
+            TriggerClass::Name_From_Action(Action),
+            Data,
+            hname,
+            tname,
+            IsPersistant);
 }
 
 /***********************************************************************************************
@@ -1194,29 +1223,8 @@ void TriggerClass::Write_INI(CCINIClass& ini, bool refresh)
         */
         trigger = Triggers.Ptr(index);
 
-        /*
-        **	Generate INI entry.
-        */
-        if (trigger->House == HOUSE_NONE) {
-            hname = "None";
-        } else {
-            hname = HouseClass::As_Pointer(trigger->House)->Class->IniName;
-        }
+        trigger->Write_INI_String(buf);
 
-        if (trigger->Team == NULL) {
-            tname = "None";
-        } else {
-            tname = trigger->Team->IniName;
-        }
-
-        sprintf(buf,
-                "%s,%s,%d,%s,%s,%d",
-                TriggerClass::Name_From_Event(trigger->Event),
-                TriggerClass::Name_From_Action(trigger->Action),
-                trigger->Data,
-                hname,
-                tname,
-                trigger->IsPersistant);
         ini.Put_String(INI_Name(), trigger->Get_Name(), buf);
     }
 }

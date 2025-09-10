@@ -12,8 +12,15 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@class ScenarioHouses
 ---@field getNames fun(): string[]
 
+---@class ScenarioTeamTypes
+---@field getNames fun(): string[]
+---@field get fun(team: string)
+---@field add fun(team: string, teamDefinition: string)
+
 ---@class ScenarioTriggers
 ---@field getNames fun(): string[]
+---@field get fun(trigger: string)
+---@field add fun(triggerName: string, triggerDefinition: string)
 ---@field deleteIfExists fun(triggerName: string): boolean
 
 --[[
@@ -27,6 +34,7 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@field type "single-player"|"multiplayer"
 ---@field player ScenarioPlayer
 ---@field houses ScenarioHouses | { [string]: House }
+---@field teams ScenarioTeamTypes
 ---@field triggers ScenarioTriggers
 
 ---@return Scenario
@@ -61,9 +69,22 @@ local function builder(cppApi)
       }
     ),
 
+    teams = setmetatable(
+      {
+        getNames = cppApi.getTeamTypeNames,
+        get = cppApi.getTeamType,
+        add = cppApi.addTeamType
+      },
+      {
+        -- TODO: Get trigger details by name via [] operator
+      }
+    ),
+
     triggers = setmetatable(
       {
         getNames = cppApi.getTriggerNames,
+        get = cppApi.getTrigger,
+        add = cppApi.addTrigger,
         deleteIfExists = cppApi.deleteTriggerIfExists
       },
       {

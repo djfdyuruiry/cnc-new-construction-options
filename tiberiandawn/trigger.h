@@ -148,6 +148,7 @@ public:
     */
     static void Read_INI(CCINIClass& ini);
     void Fill_In(const char* name, const char* entry);
+    void Write_INI_String(char* buffer);
     static void Write_INI(CCINIClass& ini, bool refresh);
     static const char* INI_Name(void)
     {
@@ -273,6 +274,8 @@ public:
     std::optional<std::string> StringData;
 
 private:
+    inline static const CncLogger& Logger = CncLogger("TriggerClass");
+
     /*
     **	Triggers can be referred to by their name, which can be up to 4
     **	characters.

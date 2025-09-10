@@ -374,6 +374,60 @@ void TeamTypeClass::Fill_In(const char* name, const char* entry)
     }
 }
 
+void TeamTypeClass::Write_INI_String(char* buffer)
+{
+    /*
+    .......................... Find house's name ..........................
+    */
+    auto hname = House == HOUSE_NONE ? "None" : HouseClass::As_Pointer(House)->Class->IniName;
+
+    /*
+    ......................... Generate INI entry ..........................
+    */
+    sprintf(buffer,
+            "%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+            hname,
+            IsRoundAbout,
+            IsLearning,
+            IsSuicide,
+            IsAutocreate,
+            IsMercenary,
+            RecruitPriority,
+            MaxAllowed,
+            InitNum,
+            Fear,
+            ClassCount);
+
+    /*.....................................................................
+    For every class in the team, record the class's name & desired count
+    .....................................................................*/
+    for (auto i = 0; i < ClassCount; i++) {
+        sprintf(buffer + strlen(buffer), ",%s:%d", Class[i]->IniName, DesiredNum[i]);
+    }
+
+    /*.....................................................................
+    Record the # of missions, and each mission name & argument value.
+    .....................................................................*/
+    sprintf(buffer + strlen(buffer), ",%d", MissionCount);
+    for (auto i = 0; i < MissionCount; i++) {
+        sprintf(buffer + strlen(buffer),
+                ",%s:%d",
+                Name_From_Mission(MissionList[i].Mission),
+                MissionList[i].Argument);
+    }
+
+    if (IsReinforcable) {
+        strcat(buffer, ",1");
+    } else {
+        strcat(buffer, ",0");
+    }
+    if (IsPrebuilt) {
+        strcat(buffer, ",1");
+    } else {
+        strcat(buffer, ",0");
+    }
+} 
+
 /***************************************************************************
  * TeamTypeClass::Write_INI -- writes INI data                             *
  *                                                                         *
@@ -425,60 +479,7 @@ void TeamTypeClass::Write_INI(CCINIClass& ini, bool refresh)
         */
         team = TeamTypes.Ptr(index);
 
-        /*
-        .......................... Find house's name ..........................
-        */
-        if (team->House == HOUSE_NONE) {
-            hname = "None";
-        } else {
-            hname = HouseClass::As_Pointer(team->House)->Class->IniName;
-        }
-
-        /*
-        ......................... Generate INI entry ..........................
-        */
-        sprintf(buf,
-                "%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-                hname,
-                team->IsRoundAbout,
-                team->IsLearning,
-                team->IsSuicide,
-                team->IsAutocreate,
-                team->IsMercenary,
-                team->RecruitPriority,
-                team->MaxAllowed,
-                team->InitNum,
-                team->Fear,
-                team->ClassCount);
-
-        /*.....................................................................
-        For every class in the team, record the class's name & desired count
-        .....................................................................*/
-        for (i = 0; i < team->ClassCount; i++) {
-            sprintf(buf + strlen(buf), ",%s:%d", team->Class[i]->IniName, team->DesiredNum[i]);
-        }
-
-        /*.....................................................................
-        Record the # of missions, and each mission name & argument value.
-        .....................................................................*/
-        sprintf(buf + strlen(buf), ",%d", team->MissionCount);
-        for (i = 0; i < team->MissionCount; i++) {
-            sprintf(buf + strlen(buf),
-                    ",%s:%d",
-                    Name_From_Mission(team->MissionList[i].Mission),
-                    team->MissionList[i].Argument);
-        }
-
-        if (team->IsReinforcable) {
-            strcat(buf, ",1");
-        } else {
-            strcat(buf, ",0");
-        }
-        if (team->IsPrebuilt) {
-            strcat(buf, ",1");
-        } else {
-            strcat(buf, ",0");
-        }
+        team->Write_INI_String(buf);
 
         ini.Put_String(INI_Name(), team->IniName, buf);
     }

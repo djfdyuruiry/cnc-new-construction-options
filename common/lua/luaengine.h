@@ -524,7 +524,9 @@ public:
     template<class T>
     void Push_Value(T value) const {
         With_State([&value](auto L) {
-            if constexpr (std::is_same_v<T, const char*>) {
+            if constexpr (std::is_same_v<T, char*>) {
+                lua_pushstring(L, value);
+            } else if constexpr (std::is_same_v<T, const char*>) {
                 lua_pushstring(L, value);
             } else if constexpr (std::is_same_v<T, std::string_view>) {
                 lua_pushstring(L, value.data());
@@ -539,7 +541,7 @@ public:
             } else if constexpr (std::is_same_v<T, bool>) {
                 lua_pushboolean(L, value);
             } else {
-                CNC_LOGGER_FATAL("Attempted to write unsupported C++ type");
+                CNC_LOGGER_FATAL("Attempted to write unsupported C++ type: {}", typeid(T).name());
             }
         });
     }

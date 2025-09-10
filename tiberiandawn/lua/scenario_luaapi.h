@@ -9,6 +9,8 @@
 
 #include "../externs.h"
 #include "../defines.h"
+#include "../teamtype.h"
+#include "../trigger.h"
 #include "../type.h"
 
 #include "td_luaapi.h"
@@ -57,7 +59,7 @@ public:
             })
             .addCFunction("getHouseMoney", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "<bool> Scenario.getHouseMoney(<string: name>)");
+                auto arguments = LuaArguments(engine, "<number> Scenario.getHouseMoney(<string: name>)");
 
                 arguments.Count_Is(1).First_Argument_Is<std::string>().Assert();
 
@@ -73,22 +75,85 @@ public:
 
                 return 1;
             })
-
-            .addCFunction("modifyHouseMoney", [](auto L) {
+            .addCFunction("getTeamTypeNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "<bool> Scenario.modifyHouseMoney(<string: name>, <number: modifier)");
+
+                auto trigger_names_table = LuaTableBuilder(engine);
+                auto i = 0;
+
+                while (i < Triggers.Count()) {
+                    auto trigger_name = Triggers.Ptr(i)->Get_Name();
+
+                    trigger_names_table.With_Index_Value(trigger_name);
+                    i++;
+                }
+
+                return 1;
+            })
+            .addCFunction("getTeamType", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "<string> Scenario.getTeamType(<string: name>...)");
+
+                arguments.Count_Is(1)
+                    .First_Argument_Is<std::string>()
+                    .Assert();
+    
+                auto team_type_name = arguments.Read_First<std::string>().Unpack();
+
+                auto team_type = TeamTypeClass::As_Pointer(team_type_name.data());
+
+                if (team_type == NULL) {
+                    engine.Raise_Error_Format("TeamType not found: {}", team_type_name);
+                }
+
+                char team_type_definition[500];
+
+                team_type->Write_INI_String(team_type_definition);
+
+                engine.Push_Value(team_type_definition);
+
+                return 1;
+            })
+            .addCFunction("addTeamType", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Scenario.addTeamType(<string: name>, <string: definitionCsv>)");
 
                 arguments.Count_Is(2)
                     .First_Argument_Is<std::string>()
-                    .Next_Argument_Is<int>()
+                    .First_Argument_Is<std::string>()
                     .Assert();
 
                 auto name = arguments.Read_First<std::string>().Unpack();
-                auto moneyModifier = arguments.Read_Next<int>().Unpack();
+                auto definition = arguments.Read_Next<std::string>().Unpack();
 
-                auto house = Parse_House_Name(engine, name);
+                // TODO: implement value validators in LuaArguments
+                if (name.length() < 1) {
+                    engine.Raise_Error_Format("Team type name was empty");
+                } else if (name.length() > 8) {
+                    engine.Raise_Error_Format(
+                        "Team type name '{}' too long, should be at most 8 characters long. Name: {}",
+                        name
+                    );
+                }
 
-                LuaList.Push<ModifyHouseMoneyLuaEvent>(house, moneyModifier);
+                if (definition.length() < 1) {
+                    engine.Raise_Error_Format("Team type CSV definition was empty");
+                } else if (definition.length() > 127) {
+                    engine.Raise_Error_Format(
+                        "Team type definition too long, should be at most 127 characters long. Definition: {}",
+                        definition
+                    );
+                }
+
+                CNC_LOGGER_DEBUG(
+                    "Loading team type '{}' from Lua call, CSV definition: {}",
+                    name,
+                    definition
+                );
+
+                auto team_type = new TeamTypeClass();
+
+                team_type->Fill_In(name.data(), definition.data());
 
                 return 0;
             })
@@ -106,6 +171,78 @@ public:
                 }
 
                 return 1;
+            })
+            .addCFunction("getTrigger", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "<string> Scenario.getTeamType(<string: name>...)");
+
+                arguments.Count_Is(1)
+                    .First_Argument_Is<std::string>()
+                    .Assert();
+    
+                auto trigger_name = arguments.Read_First<std::string>().Unpack();
+
+                auto trigger = TriggerClass::As_Pointer(trigger_name.c_str());
+
+                if (trigger == NULL) {
+                    engine.Raise_Error_Format("Trigger not found: {}", trigger_name);
+                }
+
+                char trigger_definition[128];
+
+                trigger->Write_INI_String(trigger_definition);
+
+                engine.Push_Value(trigger_definition);
+
+                return 1;
+            })
+            .addCFunction("addTrigger", [](auto L) {
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Scenario.addTrigger(<string: name>, <string: definitionCsv>)");
+
+                arguments.Count_Is(2)
+                    .First_Argument_Is<std::string>()
+                    .First_Argument_Is<std::string>()
+                    .Assert();
+
+                auto trigger_name = arguments.Read_First<std::string>().Unpack();
+                auto trigger_definition = arguments.Read_Next<std::string>().Unpack();
+
+                // TODO: implement value validators in LuaArguments
+                if (trigger_name.length() < 1) {
+                    engine.Raise_Error_Format("Trigger name was empty");
+                } else if (trigger_name.length() > 4) {
+                    engine.Raise_Error_Format(
+                        "Trigger name '{}' too long, should be at most 4 characters long. Name: {}",
+                        trigger_name
+                    );
+                }
+
+                if (trigger_name.length() < 1) {
+                    engine.Raise_Error_Format("Trigger CSV definition was empty");
+                } else if (trigger_definition.length() > 127) {
+                    engine.Raise_Error_Format(
+                        "Trigger definition too long, should be at most 127 characters long. Definition: {}",
+                        trigger_definition
+                    );
+                }
+
+                CNC_LOGGER_DEBUG(
+                    "Loading scenario trigger '{}' from Lua call, CSV definition: {}",
+                    trigger_name,
+                    trigger_definition
+                );
+
+                auto trigger = new TriggerClass();
+
+                trigger->Fill_In(
+                    trigger_name.c_str(),
+                    trigger_definition.c_str()
+                );
+
+                trigger->Load();
+
+                return 0;
             })
             .addCFunction("deleteTriggerIfExists", [](auto L) {
                 auto engine = SharedLuaEngine(L);
