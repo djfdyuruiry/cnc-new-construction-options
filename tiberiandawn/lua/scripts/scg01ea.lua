@@ -4,7 +4,11 @@ local Utils = require("nco.lib.Utils")
 local function main()
   Logger.info("Someone called scg01ea.lua")
 
+  -- test trigger lookups
   Logger.debug("Triggers: %s", Utils.arrayToCsv(Scenario.triggers.getNames()))
+  Logger.debug("WIN trigger: %s", Scenario.triggers.get("WIN"))
+
+  -- test editing existing scenario triggers
   Logger.info("Preventing GDI getting Hum-Vee's")
 
   if not Scenario.triggers.deleteIfExists("RNF4") then
@@ -15,10 +19,7 @@ local function main()
     Logger.warning("Attempted to delete missing trigger: RNF6")
   end
 
-  -- test trigger lookup
-  Logger.debug("WIN trigger: %s", Scenario.triggers.get("WIN"))
-
-  -- test lua trigger defined in scenario ini
+  -- test declaring lua trigger defined in scenario ini
   Event.handlers.onTimerTrigger = function(triggerName)
     Logger.debug("Handling trigger %s", triggerName)
 
@@ -41,8 +42,8 @@ local function main()
   Scenario.triggers.add("TMR3", "Time,Lua Event,15,GoodGuy,newTriggerTest,0")
 
   -- test adding a team
-  Scenario.teams.add("LUA1", "GoodGuy,0,0,0,0,0,7,3,0,0,2,MTNK:1,LST:1,0,1,1")
-  Scenario.triggers.add("TMR4", "Time,Reinforce.,20,GoodGuy,LUA1,0")
+  Scenario.teams.add("LUA1", "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1")
+  Scenario.triggers.add("TMR4", "Time,Reinforce.,8,GoodGuy,LUA1,0")
 end
 
 main()
