@@ -21,7 +21,8 @@ mockCncApi = function(callsHandler, mockHandler)
   local function buildCallsTable()
     local calls = {
       Logger = {
-        level = {},
+        getLevel = {},
+        setLevel = {},
         log = {}
       },
       Rules = {
@@ -55,9 +56,16 @@ mockCncApi = function(callsHandler, mockHandler)
         {},
         {
           __index = function (_, field)
-            if field == "level" then
-              table.insert(getCalls().Logger.level, true)
-              return "debug"
+            if field == "getLevel" then
+              return function(...)
+                table.insert(getCalls().Logger.getLevel, {...})
+
+                return "debug"
+              end
+            elseif field == "setLevel" then
+              return function(...)
+                table.insert(getCalls().Logger.setLevel, {...})
+              end
             elseif field == "log" then
               return function(...)
                 table.insert(getCalls().Logger.log, {...})

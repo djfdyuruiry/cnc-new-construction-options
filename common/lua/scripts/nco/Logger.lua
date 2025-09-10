@@ -13,7 +13,8 @@ local System = require("nco.System")
     ```
 ]]
 ---@class Logger : ApiModule
----@field level LogLevel
+---@field getLevel fun(): LogLevel
+---@field setLevel fun(level: LogLevel)
 ---@field log fun(level: LogLevel, message:string, ...)
 ---@field trace fun(message:string, ...)
 ---@field debug fun(message:string, ...)
@@ -26,7 +27,8 @@ local System = require("nco.System")
 ---@return Logger
 local function builder(cppApi)
   local logger = {
-    level = cppApi.level,
+    getLevel = cppApi.getLevel,
+    setLevel = cppApi.setLevel,
 
     ---@param level LogLevel
     ---@param message string

@@ -13,6 +13,22 @@ describe("Logger", function ()
     CncApiMock().__reset()
   end)
 
+  describe("getLevel", function()
+    should("call C++ API", function()
+      Logger.getLevel()
+
+      assert(#CncApiMock().__calls().Logger.getLevel == 1)
+    end)
+  end)
+
+  describe("setLevel", function()
+    should("call C++ API", function()
+      Logger.setLevel("debug")
+
+      assert(#CncApiMock().__calls().Logger.setLevel == 1)
+    end)
+  end)
+
   describe("log", function()
     should("call C++ API", function()
       Logger.log("debug", "nonsense")
@@ -34,10 +50,6 @@ describe("Logger", function ()
   end)
 
   describe("log levels", function()
-    should("have a level field", function()
-      assert(type(Logger.level) == "string", "Logger.level should be a string")
-    end)
-
     should("have a log function", function()
       assert(type(Logger.log) == "function", "Logger.log should be a function")
     end)
