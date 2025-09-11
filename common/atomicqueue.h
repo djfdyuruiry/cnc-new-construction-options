@@ -6,7 +6,7 @@
 
 /**
  * Thread safe queue, useful for message passing.
- *1
+ *
  * Used with @class{LuaEvent} classes for async Lua
  * calls back to game engine.
  */
