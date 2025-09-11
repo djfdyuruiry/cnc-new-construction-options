@@ -2741,7 +2741,8 @@ static int Extract_Compressed_Events(void* buf, int bufsize)
 /**
  * Iterate through FIFO lua events, discarding each after processing.
  */
-static void Process_Lua_Events() {
+static void Process_Lua_Events()
+{
     LuaList.Access([&](auto& q) {
          if (q->size() == 0) {
             CNC_LOG_TRACE("No Lua Events to process");

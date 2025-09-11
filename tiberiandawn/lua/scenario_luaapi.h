@@ -208,7 +208,13 @@ public:
                     definition.c_str()
                 );
 
-                trigger->Load();
+                if (trigger->House != HOUSE_NONE) {
+                    if (trigger->Action == TriggerClass::ActionType::ACTION_ALLOWWIN) {
+                        HouseClass::As_Pointer(trigger->House)->Blockage++;
+                    }
+                    HouseTriggers[trigger->House].Add(trigger);
+                    trigger->AttachCount++;
+                }
 
                 return 0;
             })

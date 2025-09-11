@@ -853,7 +853,7 @@ class LuaEngineBuilder
 public:
     template<class U, typename... Args>
     requires LuaApiConcept<U, LuaEngine>
-    LuaEngineBuilder& With_Api(Args&&... args
+    LuaEngineBuilder& With_Api(Args&&... args)
     {
         Lua.template Register_Api<U>(std::forward<Args>(args)...);
 

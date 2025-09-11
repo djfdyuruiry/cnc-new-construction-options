@@ -1074,7 +1074,13 @@ void TriggerClass::Read_INI(CCINIClass& ini)
         /*
         **	Add 'trigger' to the House's list.
         */
-
+        if (trigger->House != HOUSE_NONE) {
+            if (trigger->Action == ACTION_ALLOWWIN) {
+                HouseClass::As_Pointer(trigger->House)->Blockage++;
+            }
+            HouseTriggers[trigger->House].Add(trigger);
+            trigger->AttachCount++;
+        }
     }
 }
 
