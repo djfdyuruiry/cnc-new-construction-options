@@ -18,7 +18,8 @@
  * validate table fields before unpacking them
  * to concrete types.
  */
-class LuaMapParameter {
+class LuaMapParameter
+{
 public:
     LuaMapParameter(
         const LuaEngine& lua,
@@ -26,14 +27,15 @@ public:
         std::string_view parameter,
         std::map<std::string,
         LuaVariant> data
-    ): Lua(lua), Function_Signature(function_signature), Parameter(parameter), Data(data) {}
+    ): Lua(lua), FunctionSignature(function_signature), Parameter(parameter), Data(data) {}
 
     template<class T>
-    LuaMapParameter& With_Key(std::string key) {
+    LuaMapParameter& With_Key(std::string key)
+    {
         if (Data.find(key) == Data.end()) {
             Lua.Raise_Error_Format(
                 "({}) Parameter '{}' didn't contain expected key: {}",
-                Function_Signature,
+                FunctionSignature,
                 Parameter,
                 key
             );
@@ -55,10 +57,10 @@ public:
 
             Lua.Raise_Error_Format(
                 "({}) Invalid type for key '{}' in parameter '{}', expected '{}' but got '{}'",
-                Function_Signature,
+                FunctionSignature,
                 key,
                 Parameter,
-                LuaEngine::Lua_Type_Map[expected_lua_type].value(),
+                LuaEngine::LuaTypeMap[expected_lua_type].value(),
                 Lua.Get_Variant_Type(Data[key])
             );
         }
@@ -67,13 +69,14 @@ public:
     }
 
     template<class T>
-    T Get(std::string key) {
+    T Get(std::string key)
+    {
         return std::get<T>(Data[key]);
     }
 
 private:
     const LuaEngine& Lua;
-    std::string_view Function_Signature;
+    std::string_view FunctionSignature;
     std::string_view Parameter;
     std::map<std::string, LuaVariant> Data;
 };
@@ -83,25 +86,28 @@ private:
  * validate array items before unpacking them
  * to concrete types.
  */
-class LuaArrayParameter {
+class LuaArrayParameter
+{
 public:
     LuaArrayParameter(
         const LuaEngine& lua,
         std::string_view function_signature,
         std::string_view parameter,
         std::vector<LuaVariant> data
-    ): Lua(lua), Function_Signature(function_signature), Parameter(parameter), Data(data) {}
+    ): Lua(lua), FunctionSignature(function_signature), Parameter(parameter), Data(data) {}
 
-    std::size_t Get_Size() {
+    std::size_t Get_Size()
+    {
         return Data.size();
     }
 
     template<class T>
-    const LuaArrayParameter& With_Index(int idx) {
+    const LuaArrayParameter& With_Index(int idx)
+    {
         if (Data.size() < idx + 1) {
             Lua.Raise_Error_Format(
                 "({}) Parameter '{}' size is too small for expected index: {}",
-                Function_Signature,
+                FunctionSignature,
                 Parameter,
                 idx
             );
@@ -124,10 +130,10 @@ public:
 
             Lua.Raise_Error_Format(
                 "({}) Invalid type for index '{}' in parameter '{}', expected '{}' but got '{}'",
-                Function_Signature,
+                FunctionSignature,
                 idx,
                 Parameter,
-                LuaEngine::Lua_Type_Map[expected_lua_type].value(),
+                LuaEngine::LuaTypeMap[expected_lua_type].value(),
                 Lua.Get_Variant_Type(Data[idx])
             );
         }
@@ -138,13 +144,14 @@ public:
     // TODO: With_Values<T> to assert entire array is of type
 
     template<class T>
-    T Get(int idx) {
+    T Get(int idx)
+    {
         return std::get<T>(Data[idx]);
     }
 
 private:
     const LuaEngine& Lua;
-    std::string_view Function_Signature;
+    std::string_view FunctionSignature;
     std::string_view Parameter;
     std::vector<LuaVariant> Data;
 };
@@ -159,168 +166,180 @@ private:
  *   Call Read_First then zero or more Read_Next. Arguments can be peeked with
  *   First_Read_Is and Next_Read_Is to check upcoming types (useful for multi type args)
  */
-class LuaArguments {
+class LuaArguments
+{
 public:
     const int Count;
-    const std::string Function_Signature;
+    const std::string FunctionSignature;
 
     LuaArguments(const LuaEngine& lua, std::string function_signature) : 
         Lua(lua),
         Count(lua.Get_Stack_Count()),
-        Function_Signature(function_signature) {}
+        FunctionSignature(function_signature) {}
 
     // Fluent assert stream methods
 
-    LuaArguments& Count_Is(int expected) {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+    LuaArguments& Count_Is(int expected)
+    {
+        if (StreamIsValid.has_value() && !StreamIsValid.value()) {
             // already invalid, short circuit
             return *this;
         }
 
-        Stream_Is_Valid = Count == expected;
-        Stream_Argument_Index = 1;
+        StreamIsValid = Count == expected;
+        StreamArgumentIndex = 1;
 
         return *this;
     }
 
     template<class T>
-    LuaArguments& Next_Argument_Is() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+    LuaArguments& Next_Argument_Is()
+    {
+        if (StreamIsValid.has_value() && !StreamIsValid.value()) {
             // already invalid, short circuit
             return *this;
         }
 
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
+        if (!StreamArgumentIndex.has_value()) {
+            StreamArgumentIndex = 1;
         }
 
-        if (Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to validate more arguments than were expected", Function_Signature);
+        if (StreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to validate more arguments than were expected", FunctionSignature);
         }
 
-        Stream_Is_Valid = Lua.template Is_Type<T>(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+        StreamIsValid = Lua.template Is_Type<T>(StreamArgumentIndex.value());
+        StreamArgumentIndex = StreamArgumentIndex.value() + 1;
 
         return *this;
     }
 
     template<class T>
-    LuaArguments& First_Argument_Is() {
-        Stream_Argument_Index = 1;
+    LuaArguments& First_Argument_Is()
+    {
+        StreamArgumentIndex = 1;
 
         return Next_Argument_Is<T>();
     }
 
-    LuaArguments& Next_Argument_Is_Not_Nil() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+    LuaArguments& Next_Argument_Is_Not_Nil()
+    {
+        if (StreamIsValid.has_value() && !StreamIsValid.value()) {
             // already invalid, short circuit
             return *this;
         }
 
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
+        if (!StreamArgumentIndex.has_value()) {
+            StreamArgumentIndex = 1;
         }
 
-        if (Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to validate more arguments than were expected", Function_Signature);
+        if (StreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to validate more arguments than were expected", FunctionSignature);
         }
 
-        Stream_Is_Valid = !Lua.Is_Nil(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+        StreamIsValid = !Lua.Is_Nil(StreamArgumentIndex.value());
+        StreamArgumentIndex = StreamArgumentIndex.value() + 1;
 
         return *this;
     }
 
-    LuaArguments& First_Argument_Is_Not_Nil() {
-        Stream_Argument_Index = 1;
+    LuaArguments& First_Argument_Is_Not_Nil()
+    {
+        StreamArgumentIndex = 1;
 
         return Next_Argument_Is_Not_Nil();
     }
 
-    LuaArguments& Next_Argument_Is_Not_None() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+    LuaArguments& Next_Argument_Is_Not_None()
+    {
+        if (StreamIsValid.has_value() && !StreamIsValid.value()) {
             // already invalid, short circuit
             return *this;
         }
 
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
+        if (!StreamArgumentIndex.has_value()) {
+            StreamArgumentIndex = 1;
         }
 
-        if (Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to validate more arguments than were expected", Function_Signature);
+        if (StreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to validate more arguments than were expected", FunctionSignature);
         }
 
-        Stream_Is_Valid = !Lua.Is_None(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+        StreamIsValid = !Lua.Is_None(StreamArgumentIndex.value());
+        StreamArgumentIndex = StreamArgumentIndex.value() + 1;
 
         return *this;
     }
 
-    LuaArguments& First_Argument_Is_Not_None() {
-        Stream_Argument_Index = 1;
+    LuaArguments& First_Argument_Is_Not_None()
+    {
+        StreamArgumentIndex = 1;
 
         return Next_Argument_Is_Not_None();
     }
 
-    LuaArguments& Next_Argument_Is_Table() {
-        if (Stream_Is_Valid.has_value() && !Stream_Is_Valid.value()) {
+    LuaArguments& Next_Argument_Is_Table()
+    {
+        if (StreamIsValid.has_value() && !StreamIsValid.value()) {
             // already invalid, short circuit
             return *this;
         }
 
-        if (!Stream_Argument_Index.has_value()) {
-            Stream_Argument_Index = 1;
+        if (!StreamArgumentIndex.has_value()) {
+            StreamArgumentIndex = 1;
         }
 
-        if (Stream_Argument_Index > Count) {
+        if (StreamArgumentIndex > Count) {
             Lua.Raise_Error("CFunction attempted to validate more arguments than were expected");
         }
 
-        Stream_Is_Valid = Lua.Is_Table(Stream_Argument_Index.value());
-        Stream_Argument_Index = Stream_Argument_Index.value() + 1;
+        StreamIsValid = Lua.Is_Table(StreamArgumentIndex.value());
+        StreamArgumentIndex = StreamArgumentIndex.value() + 1;
 
         return *this;
     }
 
-    LuaArguments& First_Argument_Is_Table() {
-        Stream_Argument_Index = 1;
+    LuaArguments& First_Argument_Is_Table()
+    {
+        StreamArgumentIndex = 1;
 
         return Next_Argument_Is_Table();
     }
 
-    bool Assert() {
-        if (!Stream_Is_Valid.has_value()) {
+    bool Assert()
+    {
+        if (!StreamIsValid.has_value()) {
             // called before Is calls, assume invalid
-            Stream_Is_Valid = false;
+            StreamIsValid = false;
         }
 
-        auto result = Stream_Is_Valid.value();
+        auto result = StreamIsValid.value();
 
         if (!result) {
             Lua.Raise_Error(
                 std::format(
                     "Incorrect number of arguments, or argument type mis-match. Usage: {}",
-                    Function_Signature
+                    FunctionSignature
                 )
             );
         }
 
-        Stream_Is_Valid.reset();
-        Stream_Argument_Index.reset();
+        StreamIsValid.reset();
+        StreamArgumentIndex.reset();
 
         return result;
     }
 
     // Fluent read stream methods
 
-    LuaArrayParameter Read_Next_Array(std::string_view parameter_name) {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
+    LuaArrayParameter Read_Next_Array(std::string_view parameter_name)
+    {
+        if (!ReadStreamArgumentIndex.has_value()) {
+            ReadStreamArgumentIndex = 1;
         }
 
-        if (Read_Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", Function_Signature);
+        if (ReadStreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", FunctionSignature);
         }
 
         std::vector<LuaVariant> table_array;
@@ -328,7 +347,7 @@ public:
 
         Lua.Push_Nil();
 
-        while (!read_error.has_value() && Lua.Iterate_Over_Table(Read_Stream_Argument_Index.value())) {
+        while (!read_error.has_value() && Lua.Iterate_Over_Table(ReadStreamArgumentIndex.value())) {
             if (!Lua.Is_Type<int>(-2)) {
                 read_error = std::format(
                     "Argument '{}' was not an array (number indexed table)",
@@ -352,30 +371,31 @@ public:
         if (read_error.has_value()) {
             Lua.Raise_Error_Format(
                 "({}) Error reading {} parameter as array: {}",
-                Function_Signature,
+                FunctionSignature,
                 parameter_name,
                 read_error.value()
             );
         }
 
-        Read_Stream_Argument_Index = Read_Stream_Argument_Index.value() + 1;
+        ReadStreamArgumentIndex = ReadStreamArgumentIndex.value() + 1;
 
-        return LuaArrayParameter(Lua, Function_Signature, parameter_name, table_array);
+        return LuaArrayParameter(Lua, FunctionSignature, parameter_name, table_array);
     }
 
     LuaArrayParameter Read_First_Array(std::string_view parameter_name) {
-        Read_Stream_Argument_Index = 1;
+        ReadStreamArgumentIndex = 1;
 
         return Read_Next_Array(parameter_name);
     }
 
-    LuaMapParameter Read_Next_Map(std::string_view parameter_name) {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
+    LuaMapParameter Read_Next_Map(std::string_view parameter_name)
+    {
+        if (!ReadStreamArgumentIndex.has_value()) {
+            ReadStreamArgumentIndex = 1;
         }
 
-        if (Read_Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", Function_Signature);
+        if (ReadStreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", FunctionSignature);
         }
 
         std::map<std::string, LuaVariant> table_map;
@@ -383,14 +403,14 @@ public:
 
         Lua.Push_Nil();
 
-        if (!Lua.Is_Table(Read_Stream_Argument_Index.value())) {
+        if (!Lua.Is_Table(ReadStreamArgumentIndex.value())) {
             read_error = std::format(
                 "Argument '{}' was not a table",
                 parameter_name
             );
         }
 
-        while (!read_error.has_value() && Lua.Iterate_Over_Table(Read_Stream_Argument_Index.value())) {
+        while (!read_error.has_value() && Lua.Iterate_Over_Table(ReadStreamArgumentIndex.value())) {
             if (!Lua.Is_Type<std::string>(-2)) {
                 read_error = std::format(
                     "Argument '{}' was not a map (string indexed table)",
@@ -420,106 +440,116 @@ public:
         if (read_error.has_value()) {
             Lua.Raise_Error_Format(
                 "({}) Error reading {} parameter as map: {}",
-                Function_Signature,
+                FunctionSignature,
                 parameter_name,
                 read_error.value()
             );
         }
 
-        Read_Stream_Argument_Index = Read_Stream_Argument_Index.value() + 1;
+        ReadStreamArgumentIndex = ReadStreamArgumentIndex.value() + 1;
 
-        return LuaMapParameter(Lua, Function_Signature, parameter_name, table_map);
+        return LuaMapParameter(Lua, FunctionSignature, parameter_name, table_map);
     }
 
-    LuaMapParameter Read_First_Map(std::string_view parameter_name) {
-        Read_Stream_Argument_Index = 1;
+    LuaMapParameter Read_First_Map(std::string_view parameter_name)
+    {
+        ReadStreamArgumentIndex = 1;
 
         return Read_Next_Map(parameter_name);
     }
 
-    const std::string_view Get_Next_Read_Type() {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
+    const std::string_view Get_Next_Read_Type()
+    {
+        if (!ReadStreamArgumentIndex.has_value()) {
+            ReadStreamArgumentIndex = 1;
         }
 
-        return Lua.Get_Lua_Type(Read_Stream_Argument_Index.value());
+        return Lua.Get_Lua_Type(ReadStreamArgumentIndex.value());
     }
 
-    const std::string_view First_Read_Type() {
-        Read_Stream_Argument_Index = 1;
+    const std::string_view First_Read_Type()
+    {
+        ReadStreamArgumentIndex = 1;
 
-        return Lua.Get_Lua_Type(Read_Stream_Argument_Index.value());
+        return Lua.Get_Lua_Type(ReadStreamArgumentIndex.value());
     }
 
     template<class T>
-    bool Next_Read_Is() {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
+    bool Next_Read_Is()
+    {
+        if (!ReadStreamArgumentIndex.has_value()) {
+            ReadStreamArgumentIndex = 1;
         }
 
-        auto result = Lua.template Is_Type<T>(Read_Stream_Argument_Index.value());
+        auto result = Lua.template Is_Type<T>(ReadStreamArgumentIndex.value());
 
         return result;
     }
 
     template<class T>
-    LuaResultWithValue<T> First_Read_Is() {
-        Read_Stream_Argument_Index = 1;
+    LuaResultWithValue<T> First_Read_Is()
+    {
+        ReadStreamArgumentIndex = 1;
 
         return Next_Is<T>();
     }
 
-    LuaResultWithValue<LuaVariant> Read_Next_Variant() {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
+    LuaResultWithValue<LuaVariant> Read_Next_Variant()
+    {
+        if (!ReadStreamArgumentIndex.has_value()) {
+            ReadStreamArgumentIndex = 1;
         }
 
-        if (Read_Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", Function_Signature);
+        if (ReadStreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", FunctionSignature);
         }
 
-        auto result = Lua.Type_Read_Variant(Read_Stream_Argument_Index.value());
+        auto result = Lua.Type_Read_Variant(ReadStreamArgumentIndex.value());
 
-        Read_Stream_Argument_Index = Read_Stream_Argument_Index.value() + 1;
+        ReadStreamArgumentIndex = ReadStreamArgumentIndex.value() + 1;
 
         return result;
     }
 
-    LuaResultWithValue<LuaVariant> Read_First_Variant() {
-        Read_Stream_Argument_Index = 1;
+    LuaResultWithValue<LuaVariant> Read_First_Variant()
+    {
+        ReadStreamArgumentIndex = 1;
 
         return Read_Next_Variant();
     }
 
     template<class T>
-    LuaResultWithValue<T> Read_Next() {
-        if (!Read_Stream_Argument_Index.has_value()) {
-            Read_Stream_Argument_Index = 1;
+    LuaResultWithValue<T> Read_Next()
+    {
+        if (!ReadStreamArgumentIndex.has_value()) {
+            ReadStreamArgumentIndex = 1;
         }
 
-        if (Read_Stream_Argument_Index > Count) {
-            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", Function_Signature);
+        if (ReadStreamArgumentIndex > Count) {
+            Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", FunctionSignature);
         }
 
-        auto result = Lua.Try_Read<T>(Read_Stream_Argument_Index.value());
+        auto result = Lua.Try_Read<T>(ReadStreamArgumentIndex.value());
 
-        Read_Stream_Argument_Index = Read_Stream_Argument_Index.value() + 1;
+        ReadStreamArgumentIndex = ReadStreamArgumentIndex.value() + 1;
 
         return result;
     }
 
     template<class T>
-    LuaResultWithValue<T> Read_First() {
-        Read_Stream_Argument_Index = 1;
+    LuaResultWithValue<T> Read_First()
+    {
+        ReadStreamArgumentIndex = 1;
 
         return Read_Next<T>();
     }
 
-    void Assert_String_Parameter_Is_Valid(std::string_view name, std::string value, unsigned int max_chars){
+    void Assert_String_Parameter_Is_Valid(std::string_view name, std::string value, unsigned int max_chars)
+    {
         if (value.empty() || std::all_of(value.begin(), value.end(), ::isspace)) {
             Lua.Raise_Error_Format(
                 "({}) Parameter '{}' was blank",
-                Function_Signature,
+                FunctionSignature,
                 name,
                 max_chars
             );
@@ -528,7 +558,7 @@ public:
         if (value.length() > max_chars) {
             Lua.Raise_Error_Format(
                 "({}) Parameter '{}' was too long, should be at most {} characters long. Value: {}",
-                Function_Signature,
+                FunctionSignature,
                 name,
                 max_chars,
                 value
@@ -537,8 +567,8 @@ public:
     }
 private:
     const LuaEngine& Lua;
-    std::optional<bool> Stream_Is_Valid;
-    std::optional<int> Stream_Argument_Index;
+    std::optional<bool> StreamIsValid;
+    std::optional<int> StreamArgumentIndex;
 
-    std::optional<int> Read_Stream_Argument_Index;
+    std::optional<int> ReadStreamArgumentIndex;
 };

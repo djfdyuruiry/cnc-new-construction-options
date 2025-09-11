@@ -24,7 +24,7 @@ public:
     {
         Lua.With_State([](auto L) { lua_newtable(L); });
 
-        Table_Stream_Index = 1;
+        TableStreamIndex = 1;
 
         return *this;
     }
@@ -32,16 +32,16 @@ public:
     template <class T>
     LuaTableBuilder& With_Index_Value(T value)
     {
-        if (!Table_Stream_Index.has_value()) {
+        if (!TableStreamIndex.has_value()) {
             New_Table();
         }
 
         Lua.Push_Value<T>(value);
         Lua.With_State([&](auto L) {
-            lua_rawseti(L, -2, Table_Stream_Index.value());
+            lua_rawseti(L, -2, TableStreamIndex.value());
         });
     
-        Table_Stream_Index = Table_Stream_Index.value() + 1;
+        TableStreamIndex = TableStreamIndex.value() + 1;
 
         return *this;
     }
@@ -49,7 +49,7 @@ public:
     template <class T>
     LuaTableBuilder& With_Key_Value(std::string_view key, T value)
     {
-        if (!Table_Stream_Index.has_value()) {
+        if (!TableStreamIndex.has_value()) {
             New_Table();
         }
 
@@ -57,12 +57,12 @@ public:
         Lua.Push_Value<T>(value);
         Lua.With_State([](auto L) { lua_settable(L, -3); });
 
-        Table_Stream_Index = Table_Stream_Index.value() + 1;
+        TableStreamIndex = TableStreamIndex.value() + 1;
 
         return *this;
     }
 private:
     const LuaEngine& Lua;
 
-    std::optional<int> Table_Stream_Index;
+    std::optional<int> TableStreamIndex;
 };

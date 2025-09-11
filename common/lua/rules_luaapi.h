@@ -14,7 +14,8 @@
  * RuleSections instance.
  */
 template <typename T>
-concept RuleSectionsProviderConcept = requires() {
+concept RuleSectionsProviderConcept = requires()
+{
     { T::Sections } -> std::same_as<RuleSections&>;
 };
 
@@ -87,15 +88,15 @@ public:
 
                 if (const auto* value = std::get_if<int>(&rule_value_variant)) {
                     engine.Push_Value(
-                        LuaEngine::Lua_Type_Map[LUA_TNUMBER].value()
+                        LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
                     );
                 } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
                     engine.Push_Value(
-                        LuaEngine::Lua_Type_Map[LUA_TNUMBER].value()
+                        LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
                     );
                 }else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
                     engine.Push_Value(
-                        LuaEngine::Lua_Type_Map[LUA_TBOOLEAN].value()
+                        LuaEngine::LuaTypeMap[LUA_TBOOLEAN].value()
                     );
                 } else {
                     engine.Raise_Error("Illegal rule value variant detected");
@@ -187,7 +188,7 @@ public:
                 if (rule_type_error) {
                     engine.Raise_Error_Format(
                         "Incorrect type passed for rule value, expected '{}' but got: {}",
-                        LuaEngine::Lua_Type_Map[expected_type].value(),
+                        LuaEngine::LuaTypeMap[expected_type].value(),
                         arguments.Get_Next_Read_Type()
                     );
                 }
@@ -208,7 +209,8 @@ public:
 
 protected:
     template<RuleSectionsProviderConcept SR>
-    static void Assert_Rule_Exists(const LuaEngine& engine, const std::string& section, const std::string& key) {
+    static void Assert_Rule_Exists(const LuaEngine& engine, const std::string& section, const std::string& key)
+    {
         if (!SR::Sections.Has_Section(section)) {
             engine.Raise_Error_Format(
                 "Rule section does not exist: {}", 
@@ -225,7 +227,8 @@ protected:
         }
     }
 
-    virtual const char* Get_Cpp_Source() const override {
+    virtual const char* Get_Cpp_Source() const override
+    {
         return __FILE__;
     }
 

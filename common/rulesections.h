@@ -33,14 +33,16 @@
 
 using RuleValueVariant = std::variant<int, bool, float>;
 
-class RuleSection {
+class RuleSection
+{
 public:
     std::string_view SectionName;
 
     RuleSection(std::string_view section_name) : SectionName(section_name) {}
 
     template<typename T>
-    RuleSection& With(INIClass& context, std::function<void(T&)> actions) {
+    RuleSection& With(INIClass& context, std::function<void(T&)> actions)
+    {
         T contextWrapper = T(*this, context);
 
         actions(contextWrapper);
@@ -48,11 +50,13 @@ public:
         return *this;
     }
 
-    bool Has_Key(std::string_view name) {
+    bool Has_Key(std::string_view name)
+    {
         return Rules.find(name) != Rules.end();
     }
 
-    std::vector<std::string_view> Rule_Names() const {
+    std::vector<std::string_view> Rule_Names() const
+    {
         std::vector<std::string_view> keys;
         keys.reserve(Rules.size());
 
@@ -65,7 +69,8 @@ public:
 
     // TODO: Validation/value error handling
     template<typename T>
-    RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value) {
+    RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value)
+    {
         T value;
 
         auto sectionIsInIni = ini.Section_Present(SectionName.data());
@@ -104,7 +109,8 @@ public:
     }
 
     template<typename T>
-    const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const {
+    const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const
+    {
         auto value = Get<T>(name);
 
         CNC_LOGGER_DEBUG("Exporting rule to INI: [{}] -> {}", SectionName, name);
@@ -130,7 +136,8 @@ public:
     }
 
     template<typename T>
-    T Get(std::string_view name) const {
+    T Get(std::string_view name) const
+    {
         auto it = Rules.find(name);
 
         if (it != Rules.end()) {
@@ -140,7 +147,8 @@ public:
         CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
     }
 
-    const RuleValueVariant& Get_Variant(std::string_view name) const {
+    const RuleValueVariant& Get_Variant(std::string_view name) const
+    {
         auto it = Rules.find(name);
 
         if (it != Rules.end()) {
@@ -151,7 +159,8 @@ public:
     }
 
     template<typename T>
-    RuleSection& Set(std::string_view name, T value) {
+    RuleSection& Set(std::string_view name, T value)
+    {
         CNC_LOGGER_WARN("Updating rule at runtime: [{}] -> {}", SectionName, name);
 
         if constexpr (std::is_same_v<T, int> || std::is_same_v<T, bool> || std::is_same_v<T, float>) {
@@ -171,32 +180,37 @@ private:
     std::unordered_map<std::string_view, RuleValueVariant> Rules;
 };
 
-class IniRuleContext {
+class IniRuleContext
+{
 public:
     IniRuleContext(RuleSection& section, INIClass& context) : Section(section), Context(context) {}
 
     template<typename T>
-    const IniRuleContext& Load(std::string_view name, T default_value) const {
+    const IniRuleContext& Load(std::string_view name, T default_value) const
+    {
         Section.Load_From_Ini(Context, name, default_value);
 
         return *this;
     }
 
     template<typename T>
-    const IniRuleContext& Save(std::string_view name) const {
+    const IniRuleContext& Save(std::string_view name) const
+    {
         Section.Save_To_Ini<T>(Context, name);
 
         return *this;
     }
 
-    IniRuleContext& Load(std::string_view name) {
+    IniRuleContext& Load(std::string_view name)
+    {
         NameInStream = std::make_optional(name);
 
         return *this;
     }
 
     template<typename T>
-    IniRuleContext& With_Default(T default_value) {
+    IniRuleContext& With_Default(T default_value)
+    {
         if (!NameInStream.has_value()) {
             CNC_LOGGER_FATAL("Load(..) must be called before With_Default(..)");
         }
@@ -216,9 +230,11 @@ private:
     std::optional<std::string_view> NameInStream;
 };
 
-class RuleSections {
+class RuleSections
+{
 public:
-    std::vector<std::string_view> Section_Names() const {
+    std::vector<std::string_view> Section_Names() const
+    {
         std::vector<std::string_view> keys;
         keys.reserve(Sections.size());
 
@@ -229,11 +245,13 @@ public:
         return keys;
     }
 
-    bool Has_Section(std::string_view name) {
+    bool Has_Section(std::string_view name)
+    {
         return Sections.find(name) != Sections.end();
     }
 
-    RuleSection& operator[](std::string_view name) {
+    RuleSection& operator[](std::string_view name)
+    {
         auto it = Sections.find(name);
 
         if (it != Sections.end()) {

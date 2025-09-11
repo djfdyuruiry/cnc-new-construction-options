@@ -25,19 +25,19 @@ public:
         std::string scenario_house
     ) : TiberianDawnLuaApi("Scenario", true)
     {
-        Scenario_Name = scenario_name;
-        Scenario_Type = scenario_type;
-        Scenario_Faction = scenario_faction;
-        Scenario_House = scenario_house;
+        ScenarioName = scenario_name;
+        ScenarioType = scenario_type;
+        ScenarioFaction = scenario_faction;
+        ScenarioHouse = scenario_house;
     }
 
     virtual void Register_Consts(LuaEngine& engine) const override
     {
         With_Api_Namespace(engine, [&](auto& n) {
-            n.addConstant("name", Scenario_Name)
-                .addConstant("type", Scenario_Type)
-                .addConstant("faction", Scenario_Faction)
-                .addConstant("house", Scenario_House);
+            n.addConstant("name", ScenarioName)
+                .addConstant("type", ScenarioType)
+                .addConstant("faction", ScenarioFaction)
+                .addConstant("house", ScenarioHouse);
         });
     }
 
@@ -258,8 +258,8 @@ private:
         return houseType;
     }
 
-    std::string Scenario_Name;
-    std::string Scenario_Type;
-    std::string Scenario_Faction;
-    std::string Scenario_House;
+    std::string ScenarioName;
+    std::string ScenarioType;
+    std::string ScenarioFaction;
+    std::string ScenarioHouse;
 };

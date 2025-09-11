@@ -163,7 +163,8 @@ extern WWKeyboardClass* Keyboard;
 /**
  * Adapter for Lua API to pull in static RulesClass variable.
  */
-class RuleSectionsProvider {
+class RuleSectionsProvider
+{
 public:
     inline static RuleSections& Sections = Rule.Sections;
 };

@@ -9,12 +9,14 @@
  * thread wants to be executed async. Used to pass
  * messages to the game engine.
  */
-class LuaEvent {
+class LuaEvent
+{
 public:
     LuaEvent(const std::string_view type): EventType(type) {}
 
     virtual ~LuaEvent() = default;
-    virtual void Execute() const {
+    virtual void Execute() const
+    {
         CNC_LOGGER_DEBUG("Executing lua event of type: {}", EventType);
     };
 

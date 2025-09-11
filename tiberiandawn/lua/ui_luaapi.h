@@ -16,7 +16,8 @@ class UiLuaApi: public TiberianDawnLuaApi
 public:
     UiLuaApi() : TiberianDawnLuaApi("UI", true) {}
 
-    virtual void Register_Functions(LuaEngine& engine) const override {
+    virtual void Register_Functions(LuaEngine& engine) const override
+    {
         With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("popupOk", [](auto L) {
                 auto engine = SharedLuaEngine(L);
@@ -36,7 +37,8 @@ public:
     }
 
 protected:
-    virtual const char* Get_Cpp_Source() const override {
+    virtual const char* Get_Cpp_Source() const override
+    {
         return __FILE__;
     }
 

@@ -29,7 +29,8 @@
 class ScenarioLua final
 {
 public:
-     static const LuaEngine& Get_Engine() {
+     static const LuaEngine& Get_Engine()
+     {
           if (!Engine.has_value()) {
                CNC_LOGGER_FATAL("Attempted to access lua engine before it was loaded");
           }
@@ -41,7 +42,8 @@ public:
       * Scenario has been fully loaded, so time to 
       * initialize Lua runtime with scenario data.
       */
-     static void On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, ScenarioClass& scenario, HouseClass* player) {
+     static void On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, ScenarioClass& scenario, HouseClass* player)
+     {
           Call_Back();
 
           CNC_LOGGER_INFO("Game engine called Lua hook: On_Scenario_Load");
@@ -77,7 +79,8 @@ public:
      }
 
      // TODO: Create similar to call lua events for things other than scenario trigger (on defeated, on building built etc.)
-     static bool Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name) {
+     static bool Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name)
+     {
           auto status = false;
 
           EventLuaApi::Execute_Event(
@@ -100,7 +103,8 @@ public:
           return status;
      }
 
-     static bool Exec_Script_Trigger(std::string_view trigger_name, std::string_view script_path) {
+     static bool Exec_Script_Trigger(std::string_view trigger_name, std::string_view script_path)
+     {
           auto status = false;
 
           Get_Engine()
@@ -144,7 +148,8 @@ private:
           const std::string& scenario_name,
           const std::string& faction_name,
           const std::string& house_name
-     ) {
+     )
+     {
           auto lua_scripts_to_load = std::vector<std::string> {
                LuaScripts::On_Scenario_Load,
                std::format("{}.lua", scenario_name),

@@ -22,7 +22,8 @@ public:
         const LuaEngine& e,
         std::string_view event_name,
         Args&&... args
-    ) {
+    )
+    {
         return e.With_Global(EventGlobalTable, LUA_TTABLE, [&]() {
             return e.With_Table_Field(EventGlobalTable, HandlersTable, LUA_TTABLE, [&]() {
                 return e.With_Table_Field(HandlersTablePath, event_name, LUA_TFUNCTION, [&]() {
@@ -37,7 +38,8 @@ public:
 
     EventLuaApi() : LuaApi("Event", true) {}
 
-    virtual void Register_Dependencies(LuaEngine& engine) const override {
+    virtual void Register_Dependencies(LuaEngine& engine) const override
+    {
         engine.Register_Api<LoggingLuaApi>();
     }
 };

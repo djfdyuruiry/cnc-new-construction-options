@@ -29,7 +29,8 @@ class CncLogger
 public:
     inline static const std::string DefaultLoggerName = std::string("nco");
     
-    static const CncLogger& Default() {
+    static const CncLogger& Default()
+    {
         const static auto default_logger = CncLogger(DefaultLoggerName);
 
         return default_logger;
@@ -53,9 +54,9 @@ public:
     }
 
 private:
-    inline static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
-    inline static std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> rotating_sink;
-    inline static std::vector<spdlog::sink_ptr> sinks;
+    inline static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> StdoutSink;
+    inline static std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> RotatingSink;
+    inline static std::vector<spdlog::sink_ptr> Sinks;
 
     static bool Load_Env_Log_Levels()
     {
@@ -75,11 +76,12 @@ private:
         return log_env_defined;
     }
 
-    static std::shared_ptr<spdlog::async_logger> Build_Logger(const std::string name) {
+    static std::shared_ptr<spdlog::async_logger> Build_Logger(const std::string name)
+    {
         auto logger = std::make_shared<spdlog::async_logger>(
             name,
-            sinks.begin(),
-            sinks.end(),
+            Sinks.begin(),
+            Sinks.end(),
             spdlog::thread_pool(),
             spdlog::async_overflow_policy::block
         );
@@ -87,7 +89,8 @@ private:
         return logger;
     }
 
-    static void Init_SpdLog() {
+    static void Init_SpdLog()
+    {
         if (!Load_Env_Log_Levels()) {
             // set a global default if no env config found
             spdlog::set_level(spdlog::level::err);
@@ -97,13 +100,13 @@ private:
 
         auto log_file = std::format("{}.log", CncLogger::DefaultLoggerName);
 
-        stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file, 1024 * 1024 * 10, 3);
-        sinks = std::vector<spdlog::sink_ptr>{stdout_sink, rotating_sink};
+        StdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        RotatingSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file, 1024 * 1024 * 10, 3);
+        Sinks = std::vector<spdlog::sink_ptr>{StdoutSink, RotatingSink};
 
-        stdout_sink.get()->set_pattern("%^%L [%!]%$ %v");
+        StdoutSink.get()->set_pattern("%^%L [%!]%$ %v");
         // BUG: Newlines in message strings break JSONL format
-        rotating_sink.get()->set_pattern(
+        RotatingSink.get()->set_pattern(
             R"({ "time": "%Y-%m-%dT%H:%M:%S.%f%z", "name": "%n", "level": "%^%l%$", "at": "%@", "in": "%!", "process": %P, "thread": %t, "message": "%v" })"
         );
 

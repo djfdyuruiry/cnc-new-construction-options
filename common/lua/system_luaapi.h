@@ -13,27 +13,29 @@ class SystemLuaApi : public LuaApi
 public:
     SystemLuaApi() : LuaApi("System", true){}
 
-    virtual void Register_Consts(LuaEngine& engine) const override {
+    virtual void Register_Consts(LuaEngine& engine) const override
+    {
         With_Api_Namespace(engine, [](auto& n) { 
-            n.addConstant("gamePath", Program_Path)
-             .addConstant("luaPath", LuaEngine::Lua_Path.string())
-             .addConstant("userPath", User_Path)
+            n.addConstant("gamePath", ProgramPath)
+             .addConstant("luaPath", LuaEngine::LuaPath.string())
+             .addConstant("userPath", UserPath)
              .addConstant("pathSeparator", Paths.SEP)
-             .addConstant("isWindows", Is_Windows);
+             .addConstant("isWindows", IsWindows);
         });
     }
 
 protected:
-    virtual const char* Get_Cpp_Source() const override {
+    virtual const char* Get_Cpp_Source() const override
+    {
         return __FILE__;
     }
 
 private:
 #ifdef _WIN32
-    static inline bool Is_Windows = true;
+    static inline bool IsWindows = true;
 #else
-    static inline const bool Is_Windows = false;
+    static inline const bool IsWindows = false;
 #endif
-    static inline const std::string User_Path = std::string(Paths.User_Path());
-    static inline const std::string Program_Path = std::string(Paths.Program_Path());
+    static inline const std::string UserPath = std::string(Paths.User_Path());
+    static inline const std::string ProgramPath = std::string(Paths.Program_Path());
 };

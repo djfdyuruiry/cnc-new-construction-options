@@ -11,7 +11,8 @@
  * calls back to game engine.
  */
 template <class T>
-class AtomicQueue {
+class AtomicQueue
+{
 public:
     AtomicQueue(): Queue(std::make_unique<std::queue<std::unique_ptr<T>>>()), Mutex() {}
 

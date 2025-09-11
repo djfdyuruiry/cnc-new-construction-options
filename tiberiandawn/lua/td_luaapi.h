@@ -11,15 +11,9 @@ class TiberianDawnLuaApi : public LuaApi
 public:
     inline static const std::filesystem::path Td_Directory = "TiberianDawn";
 
-    TiberianDawnLuaApi(const std::string_view name)
-        : LuaApi(name)
-    {
-    }
+    TiberianDawnLuaApi(const std::string_view name) : LuaApi(name) {}
 
-    TiberianDawnLuaApi(const std::string_view name, const bool has_native_module)
-        : LuaApi(name, has_native_module)
-    {
-    }
+    TiberianDawnLuaApi(const std::string_view name, const bool has_native_module) : LuaApi(name, has_native_module) {}
 
     TiberianDawnLuaApi(const std::string_view name, const bool has_native_module, const std::vector<std::filesystem::path> scripts)
         : LuaApi(name, has_native_module)

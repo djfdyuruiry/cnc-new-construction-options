@@ -12,11 +12,13 @@ class LoggingLuaApi : public LuaApi
 public:
     LoggingLuaApi() : LuaApi("Logger", true) {}
 
-    virtual void Register_Dependencies(LuaEngine& engine) const override {
+    virtual void Register_Dependencies(LuaEngine& engine) const override
+    {
         engine.Register_Api<SystemLuaApi>();
     }
 
-    virtual void Register_Functions(LuaEngine& engine) const override {
+    virtual void Register_Functions(LuaEngine& engine) const override
+    {
         With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("getLevel", [](auto L) {
                 auto engine = SharedLuaEngine(L);
@@ -75,7 +77,8 @@ public:
 protected:
     inline static const CncLogger LuaLogger = CncLogger("Lua");
 
-    virtual const char* Get_Cpp_Source() const override {
+    virtual const char* Get_Cpp_Source() const override
+    {
         return __FILE__;
     }
 

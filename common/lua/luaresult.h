@@ -14,7 +14,8 @@
  * 
  * Uses callbacks for fluent consumption: If_Ok and On_Error.
  */
-class LuaResult {
+class LuaResult
+{
 public:
     inline static const TwoWayMap<int, std::string_view> Lua_Error_Map {
         { LUA_OK, "OK" },
@@ -25,15 +26,16 @@ public:
         { LUA_ERRERR, "Error Handling Failure" }
     };
 
-    int Lua_Code;
+    int LuaCode;
     std::optional<std::string> Error;
-    std::optional<lua_Debug> Debug_Info;
+    std::optional<lua_Debug> DebugInfo;
 
     /**
      * If @code is not LUA_OK, this constructor has side affects and will
      * pop the last error off the Lua stack @L.
      */
-    LuaResult(lua_State* L, int code) : Lua_Code(code) {
+    LuaResult(lua_State* L, int code) : LuaCode(code)
+    {
         if (code == LUA_ERRERR + 1) {
             // custom lua error provided
             return;
@@ -50,35 +52,40 @@ public:
             lua_Debug debug;
 
             if (lua_getstack(L, 0, &debug)) {
-                Debug_Info = debug;
+                DebugInfo = debug;
             }
 
             lua_pop(L, 1);
         }
     }
 
-    LuaResult(int code): Lua_Code(code) {}
+    LuaResult(int code): LuaCode(code) {}
 
     /**
      * Provide a custom error message and set a custom error state. 
      */
-    LuaResult(std::string error) : Lua_Code(LUA_ERRERR + 1) {
+    LuaResult(std::string error) : LuaCode(LUA_ERRERR + 1)
+    {
         Error = std::make_optional(error);
     }
 
-    bool Is_Ok() const {
-        return Lua_Code == LUA_OK;
+    bool Is_Ok() const
+    {
+        return LuaCode == LUA_OK;
     }
 
-    const std::string_view Code_As_String() const {
-        return Lua_Error_Map[Lua_Code].value_or("Unknown");
+    const std::string_view Code_As_String() const
+    {
+        return Lua_Error_Map[LuaCode].value_or("Unknown");
     }
 
-    const std::string Error_Message() const {
+    const std::string Error_Message() const
+    {
         return Error.value_or("unknown error");
     }
 
-    const LuaResult& If_Ok(std::function<void(const LuaResult&)> action) const {
+    const LuaResult& If_Ok(std::function<void(const LuaResult&)> action) const
+    {
         if (Is_Ok()) {
             action(*this);
         }
@@ -86,7 +93,8 @@ public:
         return *this;
     }
 
-    const LuaResult& On_Error(std::function<void(const LuaResult&)> action) const {
+    const LuaResult& On_Error(std::function<void(const LuaResult&)> action) const
+    {
         if (!Is_Ok()) {
             action(*this);
         }
@@ -101,50 +109,56 @@ public:
  * Use LuaResult fluent callbacks plus If_Value to read the value if set.
  */
 template<class T>
-class LuaResultWithValue : public LuaResult {
+class LuaResultWithValue : public LuaResult
+{
 public:
     LuaResultWithValue(const LuaResult& result) : LuaResult(result) {}
 
-    LuaResultWithValue(T lua_value) : LuaResult(LUA_OK) {
-        Value_Source = std::make_optional<T>(lua_value);
+    LuaResultWithValue(T lua_value) : LuaResult(LUA_OK)
+    {
+        ValueSource = std::make_optional<T>(lua_value);
     }
 
     // L param is to prevent conflicts when T == std::string
     LuaResultWithValue(lua_State* L, std::string error) : LuaResult(error) {}
 
-    const LuaResultWithValue& If_Value(std::function<void(T)> action) const {
-        if (Value_Source.has_value()) {
-            action(Value_Source.value());
+    const LuaResultWithValue& If_Value(std::function<void(T)> action) const
+    {
+        if (ValueSource.has_value()) {
+            action(ValueSource.value());
         }
 
         return *this;
     }
 
-    bool Has_Value() {
-        return Value_Source.has_value();
+    bool Has_Value()
+    {
+        return ValueSource.has_value();
     }
 
     /**
      * This method is dangerous, and must only be called after
      * checking Is_Ok and Has_Value both return `true`.
      */
-    T Unpack() {
-        if (!Value_Source.has_value()) {
+    T Unpack()
+    {
+        if (!ValueSource.has_value()) {
             CNC_LOG_FATAL("Attempted to unpack empty LuaResultWithValue");
         }
 
-        return Value_Source.value();
+        return ValueSource.value();
     }
 
     template<class U>
-    U Map(std::function<U(T)> mapper) {
-        if (!Value_Source.has_value()) {
+    U Map(std::function<U(T)> mapper)
+    {
+        if (!ValueSource.has_value()) {
             CNC_LOG_FATAL("Attempted to map empty LuaResultWithValue");
         }
 
-        return mapper(Value_Source.value());
+        return mapper(ValueSource.value());
     }
 
 private:
-    std::optional<T> Value_Source;
+    std::optional<T> ValueSource;
 };
