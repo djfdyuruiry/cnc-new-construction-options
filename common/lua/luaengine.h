@@ -33,6 +33,8 @@
 
 #include "luaresult.h"
 
+using LuaVariant = std::variant<int, double, bool, std::string>;
+
 /**
  * Avoids a circular dependency whilst enforcing
  * type constraints for LuaApi types.
@@ -427,7 +429,7 @@ public:
                         std::format(
                             "Failed to read int/number from stack index {} due to type mismatch, actual type: {}",
                             stack_index,
-                            type
+                            Get_Lua_Type(stack_index)
                         )
                     );
                 }
@@ -446,6 +448,17 @@ public:
                     (float)lua_tonumber(L, stack_index)
                 );
             } else if constexpr (std::is_same_v<T, bool>) {
+                if (type != LUA_TBOOLEAN) { 
+                    return LuaResultWithValue<T>(
+                        L,
+                        std::format(
+                            "Failed to read bool from stack index {} due to type mismatch, actual type: {}",
+                            stack_index,
+                            Get_Lua_Type(stack_index)
+                        )
+                    );
+                }
+
                 return LuaResultWithValue<T>(
                     lua_toboolean(L, stack_index)
                 );
@@ -456,7 +469,7 @@ public:
                         std::format(
                             "Failed to read string from stack index {} due to type mismatch, actual type: {}",
                             stack_index,
-                            type
+                            Get_Lua_Type(stack_index)
                         )
                     );
                 }
@@ -468,6 +481,65 @@ public:
 
             CNC_LOGGER_FATAL("Attempted to read Lua value using unsupported type: {}", typeid(T).name());
         });
+    }
+
+    LuaResultWithValue<LuaVariant> Type_Read_Variant(int stack_index = -1) const {
+        auto lua_value = Get_Value_From_State<std::optional<LuaVariant>>([&](auto L) {
+            std::optional<LuaVariant> lua_value;
+
+            auto int_result = Try_Read<int>(stack_index);
+
+            if (int_result.Has_Value()) {
+                lua_value = int_result.Unpack();
+                return lua_value;
+            }
+
+            auto double_result = Try_Read<double>(stack_index);
+
+            if (double_result.Has_Value()) {
+                lua_value = double_result.Unpack();
+                return lua_value;
+            }
+
+            auto bool_result = Try_Read<bool>(stack_index);
+
+            if (bool_result.Has_Value()) {
+                lua_value = bool_result.Unpack();
+                return lua_value;
+            }
+
+            auto str_result = Try_Read<std::string>(stack_index);
+
+            if (str_result.Has_Value()) {
+                lua_value = str_result.Unpack();
+                return lua_value;
+            }
+
+            return lua_value;
+        });
+
+        if (!lua_value.has_value()) {
+            return LuaResultWithValue<LuaVariant>(
+                Get_State(),
+                std::format("Attempted to read Lua value as variant, but type not supported by variant: {}", Get_Lua_Type(stack_index))
+            );
+        }
+
+        return LuaResultWithValue<LuaVariant>(lua_value.value());
+    }
+
+    const std::string_view Get_Variant_Type(const LuaVariant& lua_variant) const {
+        if (const auto* value = std::get_if<std::string>(&lua_variant)) {
+            return Lua_Type_Map[LUA_TSTRING].value();
+        } else if (const auto* value = std::get_if<int>(&lua_variant)) {
+            return Lua_Type_Map[LUA_TNUMBER].value();
+        } else if (const auto* value = std::get_if<double>(&lua_variant)) {
+            return Lua_Type_Map[LUA_TNUMBER].value();
+        } else if (const auto* value = std::get_if<bool>(&lua_variant)) {
+            return Lua_Type_Map[LUA_TBOOLEAN].value();
+        } else {
+            CNC_LOG_FATAL("Attempted to get type for unsupported LuaVariant type");
+        }
     }
 
     template<class T>
@@ -510,7 +582,7 @@ public:
     LuaResultWithValue<std::string> To_String(int stack_index = -1) const {
         return Get_Value_From_State<LuaResultWithValue<std::string>>([&](auto L) {
             return LuaResultWithValue<std::string>(
-                lua_tostring(L, stack_index)
+                std::string(lua_tostring(L, stack_index))
             );
         });
     }
@@ -549,6 +621,14 @@ public:
     template<typename... Args>
     void Push_Values(Args&&... args) const {
         ((Push_Value(args)), ...);
+    }
+
+    void Push_Nil() const {
+        With_State([](auto L){ lua_pushnil(L); });
+    }
+
+    bool Iterate_Over_Table(int stack_index = -1) const {
+       return Get_Value_From_State<bool>([&](auto L){ return lua_next(L, stack_index) != 0; });
     }
 
     template<class T>
