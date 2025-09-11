@@ -48,14 +48,14 @@ local function builder(cppApi)
         end
       end
 
-      local source_location = string.format(
+      local sourceLocation = string.format(
         "%s:%d %s()",
         callerSource,
         caller.currentline,
         caller.name
       )
 
-      cppApi.log(source_location, level, string.format(tostring(message), ...))
+      cppApi.log(sourceLocation, level, string.format(tostring(message), ...))
     end
   }
 

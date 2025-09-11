@@ -47,7 +47,7 @@ public:
             })
             .addCFunction("log", [](auto L) {
                 auto engine = SharedLuaEngine(L);
-                auto arguments = LuaArguments(engine, "Logger.log(<string: level>, <string: message>)");
+                auto arguments = LuaArguments(engine, "Logger.log(<string: sourceLocation>, <string: level>, <string: message>)");
 
                 arguments.Count_Is(3)
                     .First_Argument_Is<std::string>()
@@ -62,10 +62,9 @@ public:
 
                 auto log_level = spdlog::level::from_str(level.c_str());
 
-                // TODO: parse source_loc components here or lua and add to call GLIDE, YA DIG?
                 LuaLogger()->log(
                     log_level,
-                    std::format("<{}> {}", location, message)
+                    std::format("[{}] {}", location, message)
                 );
 
                 return 0;
