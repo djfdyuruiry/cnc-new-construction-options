@@ -14,11 +14,9 @@ function main() {
     error_and_exit "Usage: ${0} <lua_script_file>"
   fi
 
-  pushd_silent "${test_lua_scripts_path}"
-
-  ./test-game-script.lua "${lua_script_file}"
-
-  popd_silent
+  "${scripts_bin_path}/lua" \
+    "${test_lua_scripts_path}/test-game-script.lua" \
+    "${lua_script_file}"
 }
 
 main "$@"

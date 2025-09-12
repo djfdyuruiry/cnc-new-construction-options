@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   resolve_win_cmake_preset:
-    runs-on: windows-2022
+    runs-on: windows-2025
     outputs:
       preset: ${{ steps.set_preset.outputs.preset }}
     steps:
@@ -80,11 +80,13 @@ jobs:
         luaVersion: "5.4"
 
     - name: Run Lua Tests
-      shell: bash
+      shell: pwsh
       if: steps.changes.outputs.lua == 'true'
       run: |
-        ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
+        $ErrorActionPreference = "Stop"
+
+        ./scripts/98.run-lua-unit-tests.ps1 `
+          && ./scripts/bin/lua.ps1 tests/lua/scripts/test-game-script.lua tiberiandawn/lua/scripts/scg01ea.lua
 
     - name: Set Preset
       id: set_preset

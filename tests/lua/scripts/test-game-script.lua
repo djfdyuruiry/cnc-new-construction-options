@@ -1,4 +1,3 @@
-#! ../../../scripts/bin/lua
 require("nco.TiberianDawn.lib.TdCncApiMock")
 require("nco")
 require("nco.TiberianDawn")
@@ -10,4 +9,4 @@ end
 
 print(string.format("test-game-script.lua | Running game Lua script: %s", arg[1]))
 
-dofile(string.format("../../../%s", arg[1]))
+dofile(arg[1])
