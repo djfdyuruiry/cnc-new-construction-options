@@ -7,4 +7,4 @@
   - It invokes `scripts/test-game-script.lua`
   - Example: `./test-game-script.lua tiberiandawn/lua/scripts/scg01ea.lua`
 
-> `.ps1` versions of the above scripts exists to allow execution using Powershell Core (useful for Windows)
+> `.ps1` versions of the above scripts exist to allow execution using Powershell Core (useful for Windows)
