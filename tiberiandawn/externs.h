@@ -162,6 +162,8 @@ extern WWKeyboardClass* Keyboard;
 
 /**
  * Adapter for Lua API to pull in static RulesClass variable.
+ * 
+ * See: concept `RuleSectionsProviderConcept` in @file{common/lua/rules_luaapi.h}
  */
 class RuleSectionsProvider
 {

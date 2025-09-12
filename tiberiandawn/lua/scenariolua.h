@@ -11,6 +11,7 @@
 #include "../common/lua/luascripts.h"
 #include "../common/lua/rules_luaapi.h"
 #include "../common/lua/system_luaapi.h"
+#include "../common/atomicqueue.h"
 #include "../common/logger.h"
 
 #include "../externs.h"
@@ -57,16 +58,12 @@ public:
 
           CNC_LOG_INFO("Initializing Lua for scenario: {}", scenario_name);
 
-          Engine = LuaEngineBuilder<UniqueLuaEngine>()
-               .With_Api<SystemLuaApi>()
-               .With_Api<LoggingLuaApi>()
-               .With_Api<RulesLuaApi<RuleSectionsProvider>>()
-               .With_Api<EventLuaApi>()
-               .With_Api<GameLuaApi>()
-               .With_Api<MessagesLuaApi>()
-               .With_Api<UiLuaApi>()
-               .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name)
-               .Build();
+          Init_Tiberian_Dawn_Lua_Engine(
+               scenario_name,
+               scenario_type_name,
+               faction,
+               house_name
+          );
 
           // ensure house_name is lowercase for filename use
           std::transform(house_name.begin(), house_name.end(), house_name.begin(), ::tolower);
@@ -77,6 +74,8 @@ public:
 
           Call_Back();
      }
+
+     #pragma region Triggers
 
      // TODO: Create similar to call lua events for things other than scenario trigger (on defeated, on building built etc.)
      static bool Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name)
@@ -123,11 +122,61 @@ public:
           return status;
      }
 
+     #pragma endregion
+
+     #pragma region Events
+
+     /**
+      * Iterate through FIFO lua events, discarding each after processing.
+      */
+     static void Process_Lua_Events(AtomicQueue<LuaEvent>& events)
+     {
+          events.Access([](auto& q) {
+               if (q->size() == 0) {
+                    CNC_LOGGER_TRACE("No Lua Events to process");
+                    return;
+               }
+
+               CNC_LOGGER_DEBUG("Processing Lua Events");
+
+               while (!q->empty()) {
+                    q->front()->Execute();
+                    q->pop();
+               }
+          });
+     }
+
+     #pragma endregion
+
+     // static class
      ScenarioLua() = delete;
 
 private:
      static inline const CncLogger Logger = CncLogger("ScenarioLua");
      static inline std::optional<UniqueLuaEngine> Engine;
+
+     /**
+      * API management for TD Lua; think of this like
+      * an lite IoC container for the Lua runtime.
+      */
+     static void Init_Tiberian_Dawn_Lua_Engine(
+          std::string& scenario_name,
+          std::string& scenario_type_name,
+          std::string& faction,
+          std::string& house_name
+     )
+     {
+          Engine = LuaEngineBuilder<UniqueLuaEngine>()
+               .With_Api<SystemLuaApi>()
+               .With_Api<LoggingLuaApi>()
+               .With_Api<RulesLuaApi<RuleSectionsProvider>>()
+               .With_Api<EventLuaApi>()
+               .With_Api<GameLuaApi>()
+               .With_Api<MessagesLuaApi>()
+               .With_Api<UiLuaApi>()
+               .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name)
+               .Build();
+     }
 
      /**
       * Run various lua script files for the current scenario, scripts are attempted in the following order:

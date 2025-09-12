@@ -386,7 +386,10 @@ QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
 
 /**
  * Queued Lua events - ensures API calls from Lua that interact with game state happen
- * at the right time, on the correct thread and in order. See: @file{queue.cpp}.
+ * at the right time, on the correct thread and in order. Events enqueued by classes in
+ * `lua/events`.
+ * 
+ * See: @file{queue.cpp} and @file{lua/scenariolua.h} for dequeue operations
  */
 AtomicQueue<LuaEvent> LuaList;
 

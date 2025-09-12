@@ -138,6 +138,8 @@ private:
 };
 
 // alias SPD macros so we don't pollute code with SPD refs
+#define CNC_LOG(...) CncLogger::Default()()->log(__VA_ARGS__)
+
 #define CNC_LOG_TRACE(...) SPDLOG_LOGGER_CALL(CncLogger::Default()(), spdlog::level::trace, __VA_ARGS__)
 
 #define CNC_LOG_DEBUG(...) SPDLOG_LOGGER_CALL(CncLogger::Default()(), spdlog::level::debug, __VA_ARGS__)

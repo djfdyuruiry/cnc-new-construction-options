@@ -45,7 +45,6 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
-
 #include "common/framelimit.h"
 
 extern int PreserveVQAScreen;
@@ -103,6 +102,7 @@ ScenarioClass::ScenarioClass(void)
  *=============================================================================================*/
 bool Start_Scenario(char* root, bool briefing)
 {
+
     if (!Read_Scenario(root)) {
         CCDebugString("C&C95 - Failed to read scenario.\n");
         return (false);
@@ -281,7 +281,6 @@ bool Read_Scenario(char* root)
 #endif
         return (false);
     }
-
     ScenarioInit--;
     CCDebugString("C&C95 - Leaving Read_Scenario.\n");
     return (true);

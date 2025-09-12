@@ -75,6 +75,8 @@
 #include "function.h"
 #include "common/framelimit.h"
 
+#include "lua/scenariolua.h"
+
 /********************************** Defines *********************************/
 #define SHOW_MONO 1
 
@@ -2738,26 +2740,6 @@ static int Extract_Compressed_Events(void* buf, int bufsize)
 
 #endif // DEMO
 
-/**
- * Iterate through FIFO lua events, discarding each after processing.
- */
-static void Process_Lua_Events()
-{
-    LuaList.Access([&](auto& q) {
-         if (q->size() == 0) {
-            CNC_LOG_TRACE("No Lua Events to process");
-            return;
-        }
-
-        CNC_LOG_DEBUG("Processing Lua Events");
-
-        while (!q->empty()) {
-            q->front()->Execute();
-            q->pop();
-        }
-    });
-}
-
 /***************************************************************************
  * Execute_DoList -- Executes commands from the DoList                     *
  *                                                                         *
@@ -2811,7 +2793,7 @@ static int Execute_DoList(int,
             }
         }
 
-        Process_Lua_Events();
+        ScenarioLua::Process_Lua_Events(LuaList);
 
         return (1);
     }

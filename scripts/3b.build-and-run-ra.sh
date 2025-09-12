@@ -10,10 +10,6 @@ function main() {
   local preset="${1:-}"
   local build_type="${2:-}"
 
-  if [ -z "$(command perf)" ]; then
-    error_and_exit "perf command is required to run this script"
-  fi
-
   if [ -z "${RA_DATA_PATH:-}" ]; then
     load_env_file_if_present
   fi
@@ -49,6 +45,10 @@ function main() {
   local prefix_command=""
 
   if [ "${PROFILE:-false}" == "true" ]; then
+    if [ -z "$(command perf)" ]; then
+      error_and_exit "perf command is required to run this script"
+    fi
+
     prefix_command="perf record"
   fi
 

@@ -1,8 +1,10 @@
 # Test Lua Scripts
 
-- Run `./test-game-script.lua` to execute any game script on demand:
-  - This uses a mock C++ API backend
-  - Script paths are relative to the root of the repository
-  - Example: `./test-game-script.lua tiberiandawn/lua/scripts/scg01ea.lua`
 - Unit tests are stored in `tests/unit`
-  - Execute `./tests/unit/init.lua`
+  - Execute `scripts/98.run-lua-unit-tests.sh` from the root of the repo to execute `scripts/tests/unit/init.lua`
+- Run `scripts/99.test-lua-script.sh` from the root of the repo to execute any game script on demand:
+  - This uses a mock C++ API backend
+  - It invokes `scripts/test-game-script.lua`
+  - Example: `./test-game-script.lua tiberiandawn/lua/scripts/scg01ea.lua`
+
+> `.ps1` versions of the above scripts exists to allow execution using Powershell Core (useful for Windows)
