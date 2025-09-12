@@ -21,7 +21,7 @@ public:
 
     virtual void Register_Functions(LuaEngine& engine) const override
     {
-        With_Api_Namespace(engine, [](auto n) {
+        With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("getLevel", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 

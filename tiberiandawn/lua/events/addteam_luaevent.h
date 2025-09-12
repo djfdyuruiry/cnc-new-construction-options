@@ -2,7 +2,7 @@
 
 #include "../../../common/lua/luaevent.h"
 
-#include "../../team.h"
+#include "../../teamtype.h"
 
 class AddTeamLuaEvent : public LuaEvent
 {
