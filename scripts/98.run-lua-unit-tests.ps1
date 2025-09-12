@@ -12,3 +12,8 @@ $testsLuaScriptsPath = Join-Path $repoPath "tests/lua/scripts"
 $env:EXTRA_LUA_PATH = "$testsLuaScriptsPath/?.lua;$testsLuaScriptsPath/?/init.lua"
 
 & "$scriptsBinPath/lua.ps1" "$testsLuaScriptsPath/tests/unit/init.lua"
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Lua script failed with exit code $LASTEXITCODE"
+}
+

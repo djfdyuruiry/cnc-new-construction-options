@@ -30,3 +30,7 @@ $env:LUA_PATH = $luaPath
 
 # Execute Lua with all provided arguments
 lua @args
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Lua failed with exit code $LASTEXITCODE"
+}
