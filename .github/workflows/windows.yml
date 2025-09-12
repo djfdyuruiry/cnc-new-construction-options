@@ -39,6 +39,7 @@ jobs:
     runs-on: windows-2025
     outputs:
       preset: ${{ steps.set_preset.outputs.preset }}
+      luaChanges: ${{ steps.changes.outputs.lua }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -69,25 +70,6 @@ jobs:
             - tiberiandawn/lua/scripts/**
             - tests/lua/scripts/**
 
-    - name: Lua Action Dependency
-      if: steps.changes.outputs.lua == 'true'
-      uses: ilammy/msvc-dev-cmd@v1
-
-    - name: Init Lua
-      if: steps.changes.outputs.lua == 'true'
-      uses: leafo/gh-actions-lua@v11
-      with:
-        luaVersion: "5.4"
-
-    - name: Run Lua Tests
-      shell: pwsh
-      if: steps.changes.outputs.lua == 'true'
-      run: |
-        $ErrorActionPreference = "Stop"
-
-        ./scripts/98.run-lua-unit-tests.ps1 `
-          && ./scripts/bin/lua.ps1 tests/lua/scripts/test-game-script.lua tiberiandawn/lua/scripts/scg01ea.lua
-
     - name: Set Preset
       id: set_preset
       shell: bash
@@ -116,10 +98,32 @@ jobs:
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
 
+  run_win_lua_tests:
+    needs:
+      - resolve_win_cmake_preset
+    if: needs.resolve_win_cmake_preset.outputs.luaChanges == 'true'
+    runs-on: windows-2025
+    steps:
+    - name: Lua Action Dependency
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Init Lua
+      uses: leafo/gh-actions-lua@v11
+      with:
+        luaVersion: "5.4"
+
+    - name: Run Lua Tests
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+
+        ./scripts/98.run-lua-unit-tests.ps1 `
+          && ./scripts/bin/lua.ps1 tests/lua/scripts/test-game-script.lua tiberiandawn/lua/scripts/scg01ea.lua
+
   vanilla_win_msvc:
     needs:
       - resolve_win_cmake_preset
-    runs-on: windows-2022
+    runs-on: windows-2025
     strategy:
       matrix:
         arch:
