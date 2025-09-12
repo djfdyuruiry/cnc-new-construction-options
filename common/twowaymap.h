@@ -18,7 +18,16 @@ public:
     TwoWayMap(std::initializer_list<std::pair<A, B>> pairs)
     {
         for (const auto& pair : pairs) {
-            // TODO: Validate uniqueness of all pairs
+            // Check for duplicate forward mapping
+            if (ForwardMap.find(pair.first) != ForwardMap.end()) {
+                throw std::invalid_argument("Duplicate key in forward map");
+            }
+
+            // Check for duplicate backward mapping
+            if (BackwardMap.find(pair.second) != BackwardMap.end()) {
+                throw std::invalid_argument("Duplicate key in backward map");
+            }
+            
             ForwardMap[pair.first] = pair.second;
             BackwardMap[pair.second] = pair.first;
         }

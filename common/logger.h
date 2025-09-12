@@ -150,9 +150,18 @@ private:
 
 #define CNC_LOG_CRITICAL(...) SPDLOG_LOGGER_CALL(CncLogger::Default()(), spdlog::level::critical, __VA_ARGS__)
 
-// TODO: trigger debugger to break here
+#ifdef _WIN32
+    #include <intrin.h>
+    #define TRIGGER_DEBUGGER __debugbreak()
+#elif defined(__GNUC__) || defined(__clang__)
+    #define TRIGGER_DEBUGGER __builtin_debugtrap()
+#else
+    #define TRIGGER_DEBUGGER assert(false)
+#endif
+
 #define CNC_LOG_FATAL(...) \
     SPDLOG_LOGGER_CALL(CncLogger::Default()(), spdlog::level::critical, __VA_ARGS__); \
+    TRIGGER_DEBUGGER; \
     exit(1)
 
 #define CNC_LOGGER_TRACE(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::trace, __VA_ARGS__)
@@ -167,7 +176,7 @@ private:
 
 #define CNC_LOGGER_CRITICAL(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::critical, __VA_ARGS__)
 
-// TODO: trigger debugger to break here
 #define CNC_LOGGER_FATAL(...) \
     SPDLOG_LOGGER_CALL(Logger(), spdlog::level::critical, __VA_ARGS__); \
+    TRIGGER_DEBUGGER; \
     exit(1)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "luaapi.h"
 #include "luaarguments.h"
 #include "system_luaapi.h"
@@ -38,8 +40,9 @@ public:
                     .First_Argument_Is<std::string>()
                     .Assert();
 
-                // TODO: validation
                 auto level = arguments.Read_First<std::string>().Unpack();
+
+                Assert_Level_Value(engine, level);
 
                 auto log_level = spdlog::level::from_str(level.c_str());
 
@@ -57,12 +60,14 @@ public:
                     .Next_Argument_Is<std::string>()
                     .Assert();
 
-                // TODO: validation
                 auto location = arguments.Read_First<std::string>().Unpack();
                 auto level = arguments.Read_Next<std::string>().Unpack();
                 auto message = arguments.Read_Next<std::string>().Unpack();
 
-                auto log_level = spdlog::level::from_str(level.c_str());
+                arguments.Assert_String_Parameter_Is_Valid("location", location);
+                Assert_Level_Value(engine, level);
+
+                 auto log_level = spdlog::level::from_str(level.c_str());
 
                 LuaLogger()->log(
                     log_level,
@@ -76,6 +81,19 @@ public:
 
 protected:
     inline static const CncLogger LuaLogger = CncLogger("Lua");
+
+    static void Assert_Level_Value(const LuaEngine& engine, const std::string& level)
+    {
+        static const std::vector<spdlog::string_view_t> valid_log_levels SPDLOG_LEVEL_NAMES;
+
+        if (std::find(valid_log_levels.begin(), valid_log_levels.end(), level) == valid_log_levels.end())
+        {
+            engine.Raise_Error_Format(
+                "Invalid level value provided: {}",
+                level
+            );
+        }
+    }
 
     virtual const char* Get_Cpp_Source() const override
     {

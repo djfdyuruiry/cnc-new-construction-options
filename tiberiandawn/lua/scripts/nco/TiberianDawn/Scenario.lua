@@ -1,26 +1,23 @@
 local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
----@class ScenarioPlayer
----@field faction "gdi"|"nod"|"civilian"
----@field house string
-
 ---@class House
+---@field name string
 ---@field getMoney fun(): number
 ---@field giveMoney fun(amount: number)
 ---@field takeMoney fun(amount: number)
+
+---@class ScenarioPlayer
+---@field faction "gdi"|"nod"|"civilian"
+---@field house House
 
 ---@class ScenarioHouses
 ---@field getNames fun(): string[]
 
 ---@class ScenarioTeamTypes
 ---@field getNames fun(): string[]
----@field get fun(name: string)
----@field add fun(name: string, definition: string)
 
 ---@class ScenarioTriggers
 ---@field getNames fun(): string[]
----@field get fun(name: string)
----@field add fun(name: string, definition: string)
 ---@field deleteIfExists fun(name: string): boolean
 
 --[[
@@ -34,27 +31,19 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@field type "single-player"|"multiplayer"
 ---@field player ScenarioPlayer
 ---@field houses ScenarioHouses | { [string]: House }
----@field teams ScenarioTeamTypes
----@field triggers ScenarioTriggers
+---@field teams ScenarioTeamTypes | { [string]: string }
+---@field triggers ScenarioTriggers | { [string]: string }
 
 ---@return Scenario
 local function builder(cppApi)
-  return {
-    name = cppApi.name,
-    type = cppApi.type,
-
-    player = {
-      faction = cppApi.faction,
-      house = cppApi.house
-    },
-
-    houses = setmetatable(
+  local houses = setmetatable(
       {
         getNames = cppApi.getHouseNames
       },
       {
         __index = function (_, houseName)
           return {
+            name = houseName,
             getMoney = function ()
               return cppApi.getHouseMoney(houseName)
             end,
@@ -67,28 +56,45 @@ local function builder(cppApi)
           }
         end
       }
-    ),
+    )
+
+  return {
+    name = cppApi.name,
+    type = cppApi.type,
+
+    player = {
+      faction = cppApi.faction,
+      house = houses[cppApi.house]
+    },
+
+    houses = houses,
 
     teams = setmetatable(
       {
-        getNames = cppApi.getTeamTypeNames,
-        get = cppApi.getTeamType,
-        add = cppApi.addTeamType
+        getNames = cppApi.getTeamTypeNames
       },
       {
-        -- TODO: Get trigger details by name via [] operator
+        __index = function (_, teamName)
+          return cppApi.getTeamType(teamName)
+        end,
+        __newindex = function (_, teamName, csvDefinition)
+          return cppApi.addTeamType(teamName, csvDefinition)
+        end
       }
     ),
 
     triggers = setmetatable(
       {
         getNames = cppApi.getTriggerNames,
-        get = cppApi.getTrigger,
-        add = cppApi.addTrigger,
         deleteIfExists = cppApi.deleteTriggerIfExists
       },
       {
-        -- TODO: Get trigger details by name via [] operator
+        __index = function (_, triggerName)
+          return cppApi.getTrigger(triggerName)
+        end,
+        __newindex = function (_, triggerName, csvDefinition)
+          return cppApi.addTrigger(triggerName, csvDefinition)
+        end
       }
     )
   }

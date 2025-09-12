@@ -544,6 +544,12 @@ public:
         return Read_Next<T>();
     }
 
+
+    void Assert_String_Parameter_Is_Valid(std::string_view name, std::string value)
+    {
+        return Assert_String_Parameter_Is_Valid(name, value, INT_MAX);
+    }
+
     void Assert_String_Parameter_Is_Valid(std::string_view name, std::string value, unsigned int max_chars)
     {
         if (value.empty() || std::all_of(value.begin(), value.end(), ::isspace)) {

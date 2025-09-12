@@ -13,6 +13,10 @@
 #include "../trigger.h"
 #include "../type.h"
 
+#include "events/addteam_luaevent.h"
+#include "events/addtrigger_luaevent.h"
+#include "events/deletetrigger_luaevent.h"
+#include "events/modifyhousemoney_luaevent.h"
 #include "td_luaapi.h"
 
 class ScenarioLuaApi: public TiberianDawnLuaApi
@@ -75,6 +79,24 @@ public:
 
                 return 1;
             })
+            .addCFunction("modifyHouseMoney", [](auto L){
+                auto engine = SharedLuaEngine(L);
+                auto arguments = LuaArguments(engine, "Scenario.modifyHouseMoney(<string: name>, <number: modifier>)");
+
+                arguments.Count_Is(2)
+                    .First_Argument_Is<std::string>()
+                    .Next_Argument_Is<int>()
+                    .Assert();
+
+                auto name = arguments.Read_First<std::string>().Unpack();
+                auto money_modifier = arguments.Read_Next<int>().Unpack();
+
+                auto house = Parse_House_Name(engine, name);
+
+                LuaList.Push<ModifyHouseMoneyLuaEvent>(house, money_modifier);
+
+                return 0;
+            })
             .addCFunction("getTeamTypeNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 
@@ -129,15 +151,7 @@ public:
                 arguments.Assert_String_Parameter_Is_Valid("name", name, 8);
                 arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
-                CNC_LOGGER_DEBUG(
-                    "Loading team type '{}' from Lua call, CSV definition: {}",
-                    name,
-                    definition
-                );
-
-                auto team_type = new TeamTypeClass();
-
-                team_type->Fill_In(name.data(), definition.data());
+                LuaList.Push<AddTeamLuaEvent>(name, definition);
 
                 return 0;
             })
@@ -195,26 +209,7 @@ public:
                 arguments.Assert_String_Parameter_Is_Valid("name", name, 4);
                 arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
-                CNC_LOGGER_DEBUG(
-                    "Loading scenario trigger '{}' from Lua call, CSV definition: {}",
-                    name,
-                    definition
-                );
-
-                auto trigger = new TriggerClass();
-
-                trigger->Fill_In(
-                    name.c_str(),
-                    definition.c_str()
-                );
-
-                if (trigger->House != HOUSE_NONE) {
-                    if (trigger->Action == TriggerClass::ActionType::ACTION_ALLOWWIN) {
-                        HouseClass::As_Pointer(trigger->House)->Blockage++;
-                    }
-                    HouseTriggers[trigger->House].Add(trigger);
-                    trigger->AttachCount++;
-                }
+                LuaList.Push<AddTriggerLuaEvent>(name, definition);
 
                 return 0;
             })
@@ -225,16 +220,12 @@ public:
                 arguments.Count_Is(1).First_Argument_Is<std::string>().Assert();
 
                 auto name = arguments.Read_First<std::string>().Unpack();
+
+                LuaList.Push<DeleteTriggerLuaEvent>(name);
+
+                // return value
                 auto trigger = TriggerClass::As_Pointer(name.c_str());
                 auto trigger_exists = trigger != NULL;
-
-                if (trigger_exists) {
-                    CNC_LOGGER_DEBUG("Removing scenario trigger: {}", name);
-
-                    // TODO: consider lua event for thread safety
-                    trigger->Remove();
-                    delete trigger;
-                }
 
                 engine.Push_Value(trigger_exists);
 

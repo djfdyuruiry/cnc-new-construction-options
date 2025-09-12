@@ -52,8 +52,7 @@
       "request": "launch",
       "stopOnEntry": false,
       "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua",
-      "cwd": "${workspaceFolder}/tests/lua/scripts",
-      "program": "test-game-script.lua",
+      "program": "${workspaceFolder}/tests/lua/scripts/test-game-script.lua",
       "arg": [
         "tiberiandawn/lua/scripts/scg01ea.lua"
       ]

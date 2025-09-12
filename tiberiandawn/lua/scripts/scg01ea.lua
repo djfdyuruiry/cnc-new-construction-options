@@ -2,8 +2,8 @@
 local Utils = require("nco.lib.Utils")
 
 local function addingNewTeam()
-  Scenario.teams.add("LUA1", "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1")
-  Scenario.triggers.add("TMR4", "Time,Reinforce.,8,GoodGuy,LUA1,0")
+  Scenario.teams.LUA1 = "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1"
+  Scenario.triggers.TMR4 = "Time,Reinforce.,8,GoodGuy,LUA1,0"
 end
 
 local function addingNewTrigger()
@@ -11,12 +11,12 @@ local function addingNewTrigger()
       Logger.debug("10 second trigger execute (%s)", triggerName)
   end
 
-  Scenario.triggers.add("TMR3", "Time,Lua Event,15,GoodGuy,newTriggerTest,0")
+  Scenario.triggers.TMR3 = "Time,Lua Event,15,GoodGuy,newTriggerTest,0"
 end
 
 local function teamTypeLookups()
   Logger.debug("Team Types: %s", Utils.arrayToCsv(Scenario.teams.getNames()))
-  Logger.debug("Team GDIR2: %s", Scenario.teams.get("GDIR2"))
+  Logger.debug("Team GDIR2: %s", Scenario.teams.GDIR2)
 end
 
 local function timerTriggerSetup()
@@ -45,7 +45,7 @@ end
 
 local function triggerLookups()
   Logger.debug("Triggers: %s", Utils.arrayToCsv(Scenario.triggers.getNames()))
-  Logger.debug("WIN trigger: %s", Scenario.triggers.get("WIN"))
+  Logger.debug("WIN trigger: %s", Scenario.triggers.WIN)
 end
 
 local function main()

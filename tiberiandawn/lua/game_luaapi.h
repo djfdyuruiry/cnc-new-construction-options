@@ -5,7 +5,6 @@
 #include "../externs.h"
 
 #include "td_luaapi.h"
-#include "td_luaevents.h"
 
 class GameLuaApi: public TiberianDawnLuaApi
 {

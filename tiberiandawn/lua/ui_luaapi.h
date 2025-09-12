@@ -5,11 +5,10 @@
 #include "../common/lua/luaarguments.h"
 #include "../common/lua/luaapi.h"
 
-#include "td_luaevents.h"
 #include "../externs.h"
 
+#include "events/popup_luaevent.h"
 #include "td_luaapi.h"
-#include "td_luaevents.h"
 
 class UiLuaApi: public TiberianDawnLuaApi
 {

@@ -5,8 +5,7 @@
 #include "../common/lua/luaapi.h"
 #include "../common/lua/luaarguments.h"
 
-#include "../externs.h"
-
+#include "events/addmessage_luaevent.h"
 #include "td_luaapi.h"
 
 class MessagesLuaApi: public TiberianDawnLuaApi
@@ -27,16 +26,7 @@ public:
 
                 auto message = arguments.Read_First<std::string>().Unpack();
 
-                // ripped off from netdlg.cpp
-                Messages.Add_Message(
-                    message.data(),
-                    CC_GREEN,
-                    TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
-                    600,
-                    0,
-                    0
-                );
-                Map.Flag_To_Redraw(false);
+                LuaList.Push<AddMessageLuaEvent>(message);
 
                 return 0;
             });
