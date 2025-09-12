@@ -36,7 +36,7 @@ public:
         });
     }
 
-    EventLuaApi() : LuaApi("Event", true) {}
+    EventLuaApi() : LuaApi("Event") {}
 
     virtual void Register_Dependencies(LuaEngine& engine) const override
     {

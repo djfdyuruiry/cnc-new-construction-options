@@ -86,15 +86,15 @@ public:
                 // unpack variant to call corresponding engine Push_Value template
                 const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
 
-                if (const auto* value = std::get_if<int>(&rule_value_variant)) {
+                if (const auto value = std::get_if<int>(&rule_value_variant)) {
                     engine.Push_Value(
                         LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
                     );
-                } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
                     engine.Push_Value(
                         LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
                     );
-                }else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
+                }else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
                     engine.Push_Value(
                         LuaEngine::LuaTypeMap[LUA_TBOOLEAN].value()
                     );
@@ -120,11 +120,11 @@ public:
                 // unpack variant to call corresponding engine Push_Value template
                 const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
 
-                if (const auto* value = std::get_if<int>(&rule_value_variant)) {
+                if (const auto value = std::get_if<int>(&rule_value_variant)) {
                     engine.Push_Value(*value);
-                } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
                     engine.Push_Value(*value);
-                } else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
                     engine.Push_Value(*value);
                 } else {
                     engine.Raise_Error("Illegal rule value variant detected");
@@ -151,7 +151,7 @@ public:
                 auto rule_type_error = true;
                 auto expected_type = LUA_TNONE;
 
-                if (const auto* value = std::get_if<int>(&rule_value_variant)) {
+                if (const auto value = std::get_if<int>(&rule_value_variant)) {
                     expected_type = LUA_TNUMBER;
     
                     if (arguments.template Next_Read_Is<int>()) {
@@ -161,7 +161,7 @@ public:
                         );
                         rule_type_error = false;
                     } 
-                } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
                     expected_type = LUA_TNUMBER;
 
                     if (arguments.template Next_Read_Is<float>()) {
@@ -171,7 +171,7 @@ public:
                         );
                         rule_type_error = false;
                     }
-                } else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
                     expected_type = LUA_TBOOLEAN;
 
                     if (arguments.template Next_Read_Is<bool>()) {
@@ -194,11 +194,11 @@ public:
                 }
 
                 // return old rule value
-                if (const auto* value = std::get_if<int>(&rule_value_variant)) {
+                if (const auto value = std::get_if<int>(&rule_value_variant)) {
                     engine.Push_Value(*value);
-                } else if (const auto* value = std::get_if<float>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
                     engine.Push_Value(*value);
-                } else if (const auto* value = std::get_if<bool>(&rule_value_variant)) {
+                } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
                     engine.Push_Value(*value);
                 }
 

@@ -9,12 +9,10 @@ class AddTriggerLuaEvent : public LuaEvent
 {
 public:
     AddTriggerLuaEvent(
-        // event params
         std::string name,
         std::string definition
     ) : LuaEvent("AddTrigger")
     {
-        // store params as event data
         Name = name;
         Definition = definition;
     }
@@ -45,7 +43,6 @@ public:
     }
 
 private:
-    // event data
     std::string Name;
     std::string Definition;
 };

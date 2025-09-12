@@ -560,13 +560,13 @@ public:
 
     const std::string_view Get_Variant_Type(const LuaVariant& lua_variant) const
     {
-        if (const auto* value = std::get_if<std::string>(&lua_variant)) {
+        if (const auto value = std::get_if<std::string>(&lua_variant)) {
             return LuaTypeMap[LUA_TSTRING].value();
-        } else if (const auto* value = std::get_if<int>(&lua_variant)) {
+        } else if (const auto value = std::get_if<int>(&lua_variant)) {
             return LuaTypeMap[LUA_TNUMBER].value();
-        } else if (const auto* value = std::get_if<double>(&lua_variant)) {
+        } else if (const auto value = std::get_if<double>(&lua_variant)) {
             return LuaTypeMap[LUA_TNUMBER].value();
-        } else if (const auto* value = std::get_if<bool>(&lua_variant)) {
+        } else if (const auto value = std::get_if<bool>(&lua_variant)) {
             return LuaTypeMap[LUA_TBOOLEAN].value();
         } else {
             CNC_LOG_FATAL("Attempted to get type for unsupported LuaVariant type");

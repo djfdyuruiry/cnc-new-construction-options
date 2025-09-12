@@ -8,6 +8,7 @@
 #include "../paths.h"
 
 #include "luaengine.h"
+#include "luaarguments.h"
 
 /**
  * Wrapper around LuaEngine to register Lua
@@ -32,7 +33,7 @@ public:
     const bool Has_Native_Module;
 
     LuaApi(const std::string_view name)
-        : Name(name), Scripts(), Has_Native_Module(false) {}
+        : Name(name), Scripts(), Has_Native_Module(true) {}
 
     LuaApi(const std::string_view name, const bool has_native_module)
         : Name(name), Scripts(), Has_Native_Module(has_native_module) {}
@@ -134,6 +135,48 @@ protected:
     inline static const CncLogger Logger = CncLogger("LuaApi");
 
     std::vector<std::filesystem::path> Scripts;
+
+    static std::function<int(lua_State*)> Void_Lua_Function(std::function<void(LuaEngine&)> handler)
+    {
+        return [&](auto L) {
+            auto engine = SharedLuaEngine(L);
+
+            handler(engine);
+
+            return 0;
+        };
+    }
+
+    static std::function<int(lua_State*)> Void_Lua_Function_With_Args(std::string signature, std::function<void(LuaEngine&, LuaArguments&)> handler)
+    {
+        return [&](auto L) {
+            auto engine = SharedLuaEngine(L);
+            auto args = LuaArguments(engine, signature);
+
+            handler(engine, args);
+
+            return 0;
+        };
+    }
+
+    static std::function<int(lua_State*)> Lua_Function(std::function<int(LuaEngine&)> handler)
+    {
+        return [&](auto L) {
+            auto engine = SharedLuaEngine(L);
+
+            return handler(engine);
+        };
+    }
+
+    static std::function<int(lua_State*)> Lua_Function_With_Args(std::string signature, std::function<int(LuaEngine&, LuaArguments&)> handler)
+    {
+        return [&](auto L) {
+            auto engine = SharedLuaEngine(L);
+            auto args = LuaArguments(engine, signature);
+
+            return handler(engine, args);
+        };
+    }
 
     /**
      * Follow the directory mapping Lua does: x/y/z becomes x.y.z
