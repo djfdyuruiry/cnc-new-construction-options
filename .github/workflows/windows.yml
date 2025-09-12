@@ -64,6 +64,27 @@ jobs:
             - redalert/**
           td:
             - tiberiandawn/**
+          lua:
+            - common/lua/scripts/**
+            - tiberiandawn/lua/scripts/**
+            - tests/lua/scripts/**
+
+    - name: Lua Action Dependency
+      if: steps.changes.outputs.lua == 'true'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Init Lua
+      if: steps.changes.outputs.lua == 'true'
+      uses: leafo/gh-actions-lua@v11
+      with:
+        luaVersion: "5.4"
+
+    - name: Run Lua Tests
+      shell: bash
+      if: steps.changes.outputs.lua == 'true'
+      run: |
+        ./scripts/98.run-lua-unit-tests.sh \
+        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
 
     - name: Set Preset
       id: set_preset

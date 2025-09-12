@@ -60,6 +60,10 @@ function build_and_test() {
 
   pushd_silent "${repo_path}"
 
+  log_warning "Running Lua Unit Tests"
+
+  "${scripts_path}/98.run-lua-unit-tests.sh"
+
   log_warning "Ensuring vcpkg initialised"
 
   "${scripts_bin_path}/vcpkg" --init
