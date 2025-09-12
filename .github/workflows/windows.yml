@@ -104,6 +104,12 @@ jobs:
     if: needs.resolve_win_cmake_preset.outputs.luaChanges == 'true'
     runs-on: windows-2025
     steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 0
+        ref: "${{ github.event.pull_request.head.sha || github.sha }}"
+
     - name: Lua Action Dependency
       uses: ilammy/msvc-dev-cmd@v1
 
@@ -117,8 +123,8 @@ jobs:
       run: |
         $ErrorActionPreference = "Stop"
 
-        & .\scripts\98.run-lua-unit-tests.ps1
-        & .\scripts\bin\lua.ps1 tests\lua\scripts\test-game-script.lua tiberiandawn\lua\scripts\scg01ea.lua
+        .\scripts\98.run-lua-unit-tests.ps1 `
+         && .\scripts\bin\lua.ps1 tests\lua\scripts\test-game-script.lua tiberiandawn\lua\scripts\scg01ea.lua
 
   vanilla_win_msvc:
     needs:
