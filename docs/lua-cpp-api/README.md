@@ -4,14 +4,14 @@ This directory contains comprehensive documentation for the Lua/C++ integration 
 
 ## Documentation Structure
 
-- **index.md** - Main overview and architecture
-- **engine.md** - Detailed documentation for LuaEngine class
-- **unique_engine.md** - Documentation for UniqueLuaEngine 
-- **api.md** - Detailed documentation for LuaApi
-- **builder.md** - Information about LuaEngineBuilder
-- **result.md** - Details on LuaResult classes
-- **arguments.md** - Details on LuaArguments class
-- **summary.md** - Complete reference guide
+- [Overview](1.overview.md) - Main overview and architecture
+- [Engine](2.engine.md) - Detailed documentation for LuaEngine class
+- [Unique Engine](3.unique_engine.md) - Documentation for UniqueLuaEngine 
+- [Api](4.api.md) - Detailed documentation for LuaApi
+- [Builder](5.builder.md) - Information about LuaEngineBuilder
+- [Result](6.result.md) - Details on LuaResult classes
+- [Arguments](7.arguments.md) - Details on LuaArguments class
+- [Reference Guide](8.reference-guide.md) - Complete reference guide
 
 ## Getting Started
 
@@ -27,6 +27,8 @@ To use the API:
 - **UniqueLuaEngine** - Context-specific engines with clean state
 - **SharedLuaEngine** - For shared contexts
 - **LuaResult** - Error handling and value extraction
+- **LuaApi** - Abstraction for registering C++ types, values and functions accessible from Lua
+- **LuaArguments** - Fluent interface for validating args passed into C++ from Lua and reading their values
 
 ## Usage Examples
 

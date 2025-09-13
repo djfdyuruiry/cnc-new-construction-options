@@ -39,8 +39,8 @@
             "description": "Explanation of the rule"
           },
           "implemented": {
-            "type": "bool",
-            "description": "Is behaviour for this rule actually implemented yet?"
+            "type": "boolean",
+            "description": "Is behavior for this rule actually implemented yet?"
           }
         },
         "required": [

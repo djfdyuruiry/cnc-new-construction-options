@@ -7,7 +7,7 @@
       "name": "MaxBuildDistance",
       "type": "int",
       "default": 1,
-      "comment": "This controls how far away from an existing structure a player can place a building. _Note: values higher than 6 may cause performance problems._"
+      "comment": "This controls how far away from an existing structure a player can place a building. _Note: values higher than 6 may cause performance problems._ (Candidate for moving to enhancements)"
     },
     {
       "name": "PreventBuildingInShroud",
@@ -19,7 +19,7 @@
       "name": "AllowBuildingBesideWalls",
       "type": "bool",
       "default": true,
-      "comment": "Allow building structures off player walls. (Known issue with this - if turned off the game shows White instead of Red tiles when you try to place beside walls, but it does work - it won't let you place the building)"
+      "comment": "Allow building structures off player walls. (Known issue: if turned off the game shows White instead of Red tiles when you try to place beside walls, but it does work - it won't let you place the building)"
     },
     {
       "name": "TiberiumGrows",
