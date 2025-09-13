@@ -512,7 +512,7 @@ public:
         });
     }
 
-    LuaResultWithValue<LuaVariant> Type_Read_Variant(int stack_index = -1) const
+    LuaResultWithValue<LuaVariant> Try_Read_Variant(int stack_index = -1) const
     {
         auto lua_value = Get_Value_From_State<std::optional<LuaVariant>>([&](auto L) {
             std::optional<LuaVariant> lua_value;
@@ -769,7 +769,11 @@ public:
 class UniqueLuaEngine : public LuaEngine
 {
 public:
-    // for storing persistent Lua state globally
+    /**
+     * Global lua state for the lifetime of the C++ process.
+     * 
+     * Note: This state is NOT shared or accessible from instances of UniqueLuaEngine.
+     */
     static const UniqueLuaEngine& Global()
     {
         static UniqueLuaEngine global;

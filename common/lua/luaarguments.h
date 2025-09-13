@@ -357,7 +357,7 @@ public:
                 continue;
             }
 
-            Lua.Type_Read_Variant(-1)
+            Lua.Try_Read_Variant(-1)
                 .If_Value([&](auto value) {
                     table_array.emplace_back(value);
                 })
@@ -422,7 +422,7 @@ public:
 
             Lua.Try_Read<std::string>(-2)
                 .If_Value([&](auto key){ 
-                    Lua.Type_Read_Variant(-1)
+                    Lua.Try_Read_Variant(-1)
                         .If_Value([&](auto value) {
                             table_map[key] = value;
                         })
@@ -504,7 +504,7 @@ public:
             Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", FunctionSignature);
         }
 
-        auto result = Lua.Type_Read_Variant(ReadStreamArgumentIndex.value());
+        auto result = Lua.Try_Read_Variant(ReadStreamArgumentIndex.value());
 
         ReadStreamArgumentIndex = ReadStreamArgumentIndex.value() + 1;
 
