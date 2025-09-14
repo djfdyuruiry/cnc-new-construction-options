@@ -199,6 +199,11 @@ jobs:
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.pdb
         fi
 
+    - name: Add vcpkg deps to archive
+      shell: pwsh
+      run: >-
+        Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed | ForEach-Object { & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)" }
+
     - name: Add internal tools to archive
       run: |
         7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillamix.exe
