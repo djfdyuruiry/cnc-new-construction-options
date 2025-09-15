@@ -212,9 +212,13 @@ jobs:
 
     - name: Add vcpkg deps to archive
       shell: pwsh
-      run: >-
+      run: |
         # ignore lua.dll, patched version included in previous step
-        Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed | Where-Object { $_.Name -ne "lua.dll" } | ForEach-Object { & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)" }
+        Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed `
+        | Where-Object { -not $_.Name.EndsWith("lua.dll") } `
+        | ForEach-Object {
+          Write-Host & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)"
+        }
 
     - name: Add internal tools to archive
       run: |
