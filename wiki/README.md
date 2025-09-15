@@ -4,8 +4,8 @@
 
 ### [> Project Vision](1.Project-Vision)
 ### [> Enhancements](2.Enhancements)
-### [> Planned Features](3.Planned-Features)
-### [> Building](4.Building)
-### [> Contributing](5.Contributing)
-### [> Conventional Commits](6.Conventional-Commits)
-### [> Game Resources](7.Game-Resources)
+### [> Planned Features](4.Planned-Features)
+### [> Building](5.Building)
+### [> Contributing](6.Contributing)
+### [> Conventional Commits](7.Conventional-Commits)
+### [> Game Resources](8.Game-Resources)
