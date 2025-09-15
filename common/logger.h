@@ -155,7 +155,9 @@ private:
 #ifdef _WIN32
     #include <intrin.h>
     #define TRIGGER_DEBUGGER __debugbreak()
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__GNUC__)
+    #define TRIGGER_DEBUGGER __builtin_trap()
+#elif defined(__clang__)
     #define TRIGGER_DEBUGGER __builtin_debugtrap()
 #else
     #define TRIGGER_DEBUGGER assert(false)

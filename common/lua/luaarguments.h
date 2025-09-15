@@ -491,7 +491,7 @@ public:
     {
         ReadStreamArgumentIndex = 1;
 
-        return Next_Is<T>();
+        return this.template Next_Is<T>();
     }
 
     LuaResultWithValue<LuaVariant> Read_Next_Variant()
