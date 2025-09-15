@@ -163,6 +163,7 @@ jobs:
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
+    # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
         mkdir artifact

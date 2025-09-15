@@ -182,6 +182,7 @@ jobs:
         Copy-Item -Path "SDL2-2.0.12\lib\${{ matrix.arch.cmd }}\SDL2.dll" -Destination build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo
         cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
 
+    # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       shell: bash
       run: |
@@ -203,12 +204,17 @@ jobs:
           cp -rv common/lua/scripts/nco/* lua/nco
           cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
+
+          # patch for vcpkg lua.dll debug deps (use external clean build)
+          curl -L https://github.com/dyne/luabinaries/releases/download/4a12002/lua54.dll -o lua.dll
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip lua.dll
         fi
 
     - name: Add vcpkg deps to archive
       shell: pwsh
       run: >-
-        Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed | ForEach-Object { & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)" }
+        # ignore lua.dll, patched version included in previous step
+        Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed | Where-Object { $_.Name -ne "lua.dll" } | ForEach-Object { & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)" }
 
     - name: Add internal tools to archive
       run: |

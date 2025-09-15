@@ -161,6 +161,7 @@ jobs:
     #     cmake --build build/${{ steps.set_preset.outputs.preset }} --target format
     #     git diff --exit-code
 
+    # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then

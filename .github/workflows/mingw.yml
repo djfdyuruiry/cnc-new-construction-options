@@ -146,6 +146,7 @@ jobs:
       run: |
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
+    # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
         mkdir artifact
