@@ -11,7 +11,9 @@ This directory contains comprehensive documentation for the Lua/C++ integration 
 - [Builder](5.builder.md) - Information about LuaEngineBuilder
 - [Result](6.result.md) - Details on LuaResult classes
 - [Arguments](7.arguments.md) - Details on LuaArguments class
-- [Reference Guide](8.reference-guide.md) - Complete reference guide
+- [Events](8.events.md) - Details on LuaEvent class
+- [Game Engine Integration](9.game-engine-integration.md) - Specific details on how the game engines integrate with Lua
+- [Reference Guide](10.reference-guide.md) - Complete reference guide
 
 ## Getting Started
 
