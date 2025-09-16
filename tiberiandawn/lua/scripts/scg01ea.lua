@@ -1,6 +1,10 @@
 -- house goodguy scenario 1-east load test script
 local Utils = require("nco.lib.Utils")
 
+local function editRules()
+  Rules["Game.Misc"].McvRedeployable = true
+end
+
 local function addingNewTeam()
   Scenario.teams.LUA1 = "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1"
   Scenario.triggers.TMR4 = "Time,Reinforce.,8,GoodGuy,LUA1,0"
@@ -57,6 +61,7 @@ local function main()
   teamTypeLookups()
   addingNewTrigger()
   addingNewTeam()
+  editRules()
 end
 
 main()

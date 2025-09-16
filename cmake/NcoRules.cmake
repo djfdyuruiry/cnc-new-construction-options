@@ -278,7 +278,7 @@ function(Main)
       ResolveRuleValue("${RULE_DEFAULT}" RULE_VALUE)
 
       string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Default(${RULE_VALUE})")
-      string(APPEND RULE_EXPORT_CODE ".template Save<${RULE_TYPE}>(${RULE_DEFINE})")
+      string(APPEND RULE_EXPORT_CODE ".Save(${RULE_DEFINE})")
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close call chain for section

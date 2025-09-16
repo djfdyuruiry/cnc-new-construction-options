@@ -444,6 +444,8 @@ public:
 
     /**
      * Read a value from the stack, with type checking.
+     * 
+     * TODO: create LuaResultValueType variant to do compile time checking of template instantiation
      */
     template<class T>
     LuaResultWithValue<T> Try_Read(int stack_index = -1) const

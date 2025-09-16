@@ -126,8 +126,6 @@ public:
                     engine.Push_Value(*value);
                 } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
                     engine.Push_Value(*value);
-                } else {
-                    engine.Raise_Error("Illegal rule value variant detected");
                 }
 
                 return 1;
@@ -155,7 +153,7 @@ public:
                     expected_type = LUA_TNUMBER;
     
                     if (arguments.template Next_Read_Is<int>()) {
-                        R::Sections[section].template Set<int>(
+                        R::Sections[section].Set(
                             key,
                             arguments.Read_Next<int>().Unpack()
                         );
@@ -165,7 +163,7 @@ public:
                     expected_type = LUA_TNUMBER;
 
                     if (arguments.template Next_Read_Is<float>()) {
-                        R::Sections[section].template Set<float>(
+                        R::Sections[section].Set(
                             key,
                             arguments.Read_Next<float>().Unpack()
                         );
@@ -175,14 +173,12 @@ public:
                     expected_type = LUA_TBOOLEAN;
 
                     if (arguments.template Next_Read_Is<bool>()) {
-                        R::Sections[section].template Set<bool>(
+                        R::Sections[section].Set(
                             key,
                             arguments.Read_Next<bool>().Unpack()
                         );
                         rule_type_error = false;
                     }
-                } else {
-                    engine.Raise_Error("Illegal rule value variant detected");
                 }
 
                 if (rule_type_error) {

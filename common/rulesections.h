@@ -33,12 +33,53 @@
 
 using RuleValueVariant = std::variant<int, bool, float>;
 
+template<typename T>
+concept RuleValueVariantCompatible = (
+    std::is_same_v<T, int> || std::is_same_v<T, bool> || std::is_same_v<T, float>
+);
+
 class RuleSection
 {
 public:
-    std::string_view SectionName;
+    const std::string_view SectionName;
 
-    RuleSection(std::string_view section_name) : SectionName(section_name) {}
+    static bool Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
+    {
+        if (const auto value = std::get_if<int>(&value_variant_a)) {
+            return std::get_if<int>(&value_variant_b) != nullptr;
+        } else if (const auto value = std::get_if<bool>(&value_variant_a)) {
+            return std::get_if<bool>(&value_variant_b) != nullptr;
+        } else if (const auto value = std::get_if<float>(&value_variant_a)) {
+            return std::get_if<float>(&value_variant_b) != nullptr;
+        }
+    }
+
+    static std::string_view Get_Variant_Type(RuleValueVariant value_variant)
+    {
+        if (const auto value = std::get_if<int>(&value_variant)) {
+            return "int";
+        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+            return "bool";
+        } else if (const auto value = std::get_if<float>(&value_variant)) {
+            return "float";
+        }
+    }
+
+    static std::string Variant_To_String(RuleValueVariant value_variant)
+    {
+        if (const auto value = std::get_if<int>(&value_variant)) {
+            return std::format("{}", *value);
+        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+            return std::format("{}", *value);
+        } else if (const auto value = std::get_if<float>(&value_variant)) {
+            return std::format("{}", *value);
+        }
+    }
+
+    RuleSection(
+        std::string_view section_name,
+        std::function<void(void)> on_rules_changed
+    ) : SectionName(section_name), OnRulesChanged(on_rules_changed) {}
 
     template<typename T>
     RuleSection& With(INIClass& context, std::function<void(T&)> actions)
@@ -67,8 +108,43 @@ public:
         return keys;
     }
 
+    const RuleValueVariant Get_Variant(std::string_view name) const
+    {
+        auto it = Rules.find(name);
+
+        if (it != Rules.end()) {
+            return it->second;
+        }
+
+        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+    }
+
+    const std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const
+    {
+        auto it = Rules.find(name);
+
+        if (it != Rules.end()) {
+            return it->second;
+        }
+
+        return std::nullopt;
+    }
+
+    const std::string_view Get_Type(std::string_view name) const
+    {
+        auto it = Rules.find(name);
+
+        if (it != Rules.end()) {
+            auto value_variant = it->second;
+
+            return Get_Variant_Type(value_variant);
+        }
+
+        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+    }
+
     // TODO: Validation/value error handling
-    template<typename T>
+    template<RuleValueVariantCompatible T>
     RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value)
     {
         T value;
@@ -99,8 +175,6 @@ public:
             );
 
             CNC_LOGGER_DEBUG("Resolved value: {} | (default={})", value, default_value);
-        } else {
-            CNC_LOGGER_FATAL("Mapping for INI type not implemented, rule: [{}] -> {}", SectionName, name);
         }
 
         Rules[name] = value;
@@ -108,68 +182,107 @@ public:
         return *this;
     }
 
-    template<typename T>
     const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const
     {
-        auto value = Get<T>(name);
-
         CNC_LOGGER_DEBUG("Exporting rule to INI: [{}] -> {}", SectionName, name);
 
-        if constexpr (std::is_same_v<T, int>) {
-            ini.Put_Int(SectionName.data(), name.data(), value);
+        auto value_variant = Get_Variant(name);
 
-            CNC_LOGGER_DEBUG("Exported value: {}", value);
-        } else if constexpr (std::is_same_v<T, bool>) {
-            ini.Put_Bool(SectionName.data(), name.data(), value);
+        if (const auto value = std::get_if<int>(&value_variant)) {
+            ini.Put_Int(SectionName.data(), name.data(), *value);
 
-            CNC_LOGGER_DEBUG("Exported value: {}", value);
-        } else if constexpr (std::is_same_v<T, float>) {
-            auto value_str = std::format("{}", value);
+            CNC_LOGGER_DEBUG("Exported value: {}", *value);
+        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+            ini.Put_Bool(SectionName.data(), name.data(), *value);
+
+            CNC_LOGGER_DEBUG("Exported value: {}", *value);
+        } else if (const auto value = std::get_if<float>(&value_variant)) {
+            auto value_str = std::format("{}", *value);
             ini.Put_String(SectionName.data(), name.data(), value_str);
 
             CNC_LOGGER_DEBUG("Exported value: {}", value_str);
-        } else {
-            CNC_LOGGER_FATAL("Mapping for INI type not implemented, rule: [{}] -> {}", SectionName.data(), name.data());
         }
 
         return *this;
     }
 
-    template<typename T>
+    template<RuleValueVariantCompatible T>
+    std::optional<T> Try_Get(std::string_view name) const
+    {
+        auto value_variant_optional = Try_Get_Variant(name);
+
+        if (!value_variant_optional.has_value()) {
+            return std::nullopt;
+        }
+
+        auto value_variant = value_variant_optional.value();
+
+        if constexpr (std::is_same_v<T, int>) {
+            if (const auto value = std::get_if<int>(&value_variant)) {
+                return *value;
+            }
+        }
+        
+        if constexpr (std::is_same_v<T, bool>) {
+            if (const auto value = std::get_if<bool>(&value_variant)) {
+                return *value;
+            }
+        }
+
+        if constexpr (std::is_same_v<T, float>) {
+            if (const auto value = std::get_if<float>(&value_variant)) {
+                return *value;
+            }
+        }
+
+        CNC_LOGGER_FATAL(
+            "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
+            typeid(T).name(),
+            Get_Type(name),
+            SectionName,
+            name
+        );
+    }
+
+    template<RuleValueVariantCompatible T>
     T Get(std::string_view name) const
     {
-        auto it = Rules.find(name);
+        auto value_optional = Try_Get<T>(name);
 
-        if (it != Rules.end()) {
-            return std::get<T>(it->second);
+        if (!value_optional.has_value()) {
+            CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
         }
 
-        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+        return value_optional.value();
     }
 
-    const RuleValueVariant& Get_Variant(std::string_view name) const
+    RuleSection& Set(std::string_view name, RuleValueVariant value)
     {
-        auto it = Rules.find(name);
+        CNC_LOGGER_WARN(
+            "Updating rule at runtime: [{}] -> {} = {}",
+            SectionName,
+            name,
+            Variant_To_String(value)
+        );
 
-        if (it != Rules.end()) {
-            return it->second;
-        }
+        auto existing_rule = Try_Get_Variant(name);
 
-        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
-    }
-
-    template<typename T>
-    RuleSection& Set(std::string_view name, T value)
-    {
-        CNC_LOGGER_WARN("Updating rule at runtime: [{}] -> {}", SectionName, name);
-
-        if constexpr (std::is_same_v<T, int> || std::is_same_v<T, bool> || std::is_same_v<T, float>) {
-            CNC_LOGGER_WARN("New value: {}", value);
-        } else {
-            CNC_LOGGER_FATAL("Mapping for INI type not implemented, rule: [{}] -> {}", SectionName, name);
+        if (existing_rule.has_value()) {
+            if (!Variants_Have_Same_Type(existing_rule.value(), value)) {
+                CNC_LOGGER_FATAL(
+                    "Attempted to set rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
+                    Get_Variant_Type(value),
+                    Get_Variant_Type(existing_rule.value()),
+                    SectionName,
+                    name
+                );
+            }
         }
 
         Rules[name] = value;
+
+        CNC_LOGGER_WARN("Running OnRulesChanged() handler");
+        OnRulesChanged();
 
         return *this;
     }
@@ -178,6 +291,7 @@ private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
     std::unordered_map<std::string_view, RuleValueVariant> Rules;
+    std::function<void(void)> OnRulesChanged;
 };
 
 class IniRuleContext
@@ -185,7 +299,7 @@ class IniRuleContext
 public:
     IniRuleContext(RuleSection& section, INIClass& context) : Section(section), Context(context) {}
 
-    template<typename T>
+    template<RuleValueVariantCompatible T>
     const IniRuleContext& Load(std::string_view name, T default_value) const
     {
         Section.Load_From_Ini(Context, name, default_value);
@@ -193,10 +307,9 @@ public:
         return *this;
     }
 
-    template<typename T>
     const IniRuleContext& Save(std::string_view name) const
     {
-        Section.Save_To_Ini<T>(Context, name);
+        Section.Save_To_Ini(Context, name);
 
         return *this;
     }
@@ -208,7 +321,7 @@ public:
         return *this;
     }
 
-    template<typename T>
+    template<RuleValueVariantCompatible T>
     IniRuleContext& With_Default(T default_value)
     {
         if (!NameInStream.has_value()) {
@@ -233,6 +346,11 @@ private:
 class RuleSections
 {
 public:
+    void On_Rules_Changed(std::function<void(void)> on_rules_changed)
+    {
+        OnRulesChanged = on_rules_changed;
+    }
+
     std::vector<std::string_view> Section_Names() const
     {
         std::vector<std::string_view> keys;
@@ -260,7 +378,14 @@ public:
 
         CNC_LOGGER_DEBUG("Adding new rules section '{}'", name);
 
-        Sections[name] = std::make_unique<RuleSection>(name);
+        Sections[name] = std::make_unique<RuleSection>(
+            name,
+            [&]() {
+                if (OnRulesChanged.has_value()) {
+                    OnRulesChanged.value()();
+                }
+            }
+        );
 
         return *Sections[name];
     }
@@ -269,4 +394,5 @@ private:
     inline static CncLogger Logger = CncLogger("RuleSections");
 
     std::unordered_map<std::string_view, std::unique_ptr<RuleSection>> Sections;
+    std::optional<std::function<void(void)>> OnRulesChanged;
 };
