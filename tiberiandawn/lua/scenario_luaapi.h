@@ -151,6 +151,7 @@ public:
                 arguments.Assert_String_Parameter_Is_Valid("name", name, 8);
                 arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
+                // BUG: Game crashes on parse if definition CSV is not valid
                 LuaList.Push<AddTeamLuaEvent>(name, definition);
 
                 return 0;
@@ -209,6 +210,7 @@ public:
                 arguments.Assert_String_Parameter_Is_Valid("name", name, 4);
                 arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
+                // BUG: Game crashes on parse if definition CSV is not valid
                 LuaList.Push<AddTriggerLuaEvent>(name, definition);
 
                 return 0;
