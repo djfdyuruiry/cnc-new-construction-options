@@ -123,13 +123,13 @@ mockCncApi = function(callsHandler, mockHandler)
           __index = function (_, field)
             if field == "gamePath" then
               table.insert(getCalls().System.gamePath, true)
-              return Path("/game", "/", false)
+              return Path(".", "/", false)
             elseif field == "luaPath" then
               table.insert(getCalls().System.luaPath, true)
-              return Path("/game/lua", "/", false)
+              return Path(".", "/", false)
             elseif field == "userPath" then
               table.insert(getCalls().System.userPath, true)
-              return Path("/user", "/", false)
+              return Path(".", "/", false)
             elseif field == "pathSeparator" then
               table.insert(getCalls().System.pathSeparator, true)
               return "/"

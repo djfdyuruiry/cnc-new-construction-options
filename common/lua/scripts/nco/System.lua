@@ -26,11 +26,15 @@ local function builder(cppApi)
 
     ---@param rootPath Path|string
     ---@param subPath string
-    ---@param mode openmode
+    ---@param mode openmode?
     _openFile = function(rootPath, subPath, mode)
       local fullPath = Path(rootPath, cppApi.pathSeparator, cppApi.isWindows) / subPath
 
-      return io.open(fullPath, mode)
+      if type(mode) ~= "string" then
+        mode = "r"
+      end
+
+      return io.open(tostring(fullPath), mode)
     end,
 
     -- Wrapper around Path class that passes required system params
@@ -42,17 +46,17 @@ local function builder(cppApi)
   }
 
   -- make path objects and aliases to _openFile
-  for _, pathField in ipairs({ "gamePath", "luaPath", "userPath"}) do
+  for _, pathField in ipairs({ "game", "lua", "user"}) do
     local upperName = pathField:sub(1, 1):upper() .. pathField:sub(2)
-    local pathName = upperName:gmatch("[a-z]+")()
+  local funcName = string.format("open%sFile", upperName)
 
-    local funcName = string.format("open%sFile", pathName)
+    local fieldName = string.format("%sPath", pathField)
 
     ---@diagnostic disable-next-line: assign-type-mismatch
-    system[pathField] = system.Path(cppApi[pathField])
+    system[fieldName] = system.Path(cppApi[fieldName])
 
     system[funcName] = function(...)
-      system._openFile(system[pathField], ...)
+      return system._openFile(system[fieldName], ...)
     end
   end
 
