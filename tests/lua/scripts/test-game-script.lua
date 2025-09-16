@@ -1,5 +1,4 @@
 require("nco.TiberianDawn.lib.TdCncApiMock")
-require("nco")
 require("nco.TiberianDawn")
 
 if type(arg[1]) ~= "string" then

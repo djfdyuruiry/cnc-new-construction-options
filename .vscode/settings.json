@@ -136,6 +136,7 @@
     "Nyerguds",
     "Oddysee",
     "openmode",
+    "pcall",
     "redalert",
     "Redeployable",
     "Superweapons",
@@ -145,6 +146,7 @@
     "VCPKG",
     "Visceroids",
     "Westwood",
+    "xpcall",
     "xypand"
   ],
   "Lua.diagnostics.globals": [
