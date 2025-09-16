@@ -98,8 +98,6 @@ public:
                     engine.Push_Value(
                         LuaEngine::LuaTypeMap[LUA_TBOOLEAN].value()
                     );
-                } else {
-                    engine.Raise_Error("Illegal rule value variant detected");
                 }
 
                 return 1;

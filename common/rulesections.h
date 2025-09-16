@@ -152,30 +152,42 @@ public:
         auto sectionIsInIni = ini.Section_Present(SectionName.data());
 
         if (!sectionIsInIni) {
-            CNC_LOGGER_INFO("Loading default for '{}', rule section not found in provided INI: [{}]", name, SectionName);
+            CNC_LOGGER_INFO(
+                "Loading default value '{}' for '{}', rule section not found in provided INI: [{}]",
+                Variant_To_String(default_value),
+                name,
+                SectionName
+            );
 
             Rules[name] = default_value;
             return *this;
         }
 
-        CNC_LOGGER_DEBUG("Importing rule from INI: [{}] -> {}", SectionName, name);
+        CNC_LOGGER_DEBUG(
+            "Attempting to find rule in INI: [{}] -> {} (with default = {})",
+            SectionName,
+            name,
+            Variant_To_String(default_value)
+        );
 
         if constexpr (std::is_same_v<T, int>) {
             value = ini.Get_Int(SectionName.data(), name.data(), default_value);
-
-            CNC_LOGGER_DEBUG("Resolved value: {} | (default={})", value, default_value);
         } else if constexpr (std::is_same_v<T, bool>) {
             value = ini.Get_Bool(SectionName.data(), name.data(), default_value);
-
-            CNC_LOGGER_DEBUG("Resolved value: {} | (default={})", value, default_value);
         } else if constexpr (std::is_same_v<T, float>) {
             auto default_value_str = std::format("{}", default_value);
+
             value = std::stof(
                 ini.Get_String(SectionName.data(), name.data(), default_value_str)
             );
-
-            CNC_LOGGER_DEBUG("Resolved value: {} | (default={})", value, default_value);
         }
+
+        CNC_LOGGER_DEBUG(
+            "Imported rule from INI: [{}] -> {} = {}",
+            SectionName,
+            name,
+            Variant_To_String(value)
+        );
 
         Rules[name] = value;
 
@@ -184,23 +196,22 @@ public:
 
     const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const
     {
-        CNC_LOGGER_DEBUG("Exporting rule to INI: [{}] -> {}", SectionName, name);
-
         auto value_variant = Get_Variant(name);
+
+        CNC_LOGGER_DEBUG(
+            "Exporting rule to INI: [{}] -> {} = {}",
+            SectionName,
+            name,
+            Variant_To_String(value_variant)
+        );
 
         if (const auto value = std::get_if<int>(&value_variant)) {
             ini.Put_Int(SectionName.data(), name.data(), *value);
-
-            CNC_LOGGER_DEBUG("Exported value: {}", *value);
         } else if (const auto value = std::get_if<bool>(&value_variant)) {
             ini.Put_Bool(SectionName.data(), name.data(), *value);
-
-            CNC_LOGGER_DEBUG("Exported value: {}", *value);
         } else if (const auto value = std::get_if<float>(&value_variant)) {
             auto value_str = std::format("{}", *value);
             ini.Put_String(SectionName.data(), name.data(), value_str);
-
-            CNC_LOGGER_DEBUG("Exported value: {}", value_str);
         }
 
         return *this;
@@ -221,15 +232,11 @@ public:
             if (const auto value = std::get_if<int>(&value_variant)) {
                 return *value;
             }
-        }
-        
-        if constexpr (std::is_same_v<T, bool>) {
+        } else if constexpr (std::is_same_v<T, bool>) {
             if (const auto value = std::get_if<bool>(&value_variant)) {
                 return *value;
             }
-        }
-
-        if constexpr (std::is_same_v<T, float>) {
+        } else if constexpr (std::is_same_v<T, float>) {
             if (const auto value = std::get_if<float>(&value_variant)) {
                 return *value;
             }
