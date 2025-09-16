@@ -4,5 +4,5 @@ Logger.info(
   Scenario.type,
   Scenario.name,
   Scenario.player.faction,
-  Scenario.player.house
+  Scenario.player.house.name
 )

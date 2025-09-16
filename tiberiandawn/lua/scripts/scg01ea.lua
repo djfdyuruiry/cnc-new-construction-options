@@ -53,6 +53,7 @@ local function triggerLookups()
 end
 
 local function main()
+  Logger.setLevel("debug")
   Logger.info("Someone called scg01ea.lua")
 
   triggerLookups()
@@ -64,4 +65,13 @@ local function main()
   editRules()
 end
 
-main()
+local status, error = pcall(main)
+
+if not status then
+  -- show the error to the player
+  Messages.sendToPlayer("LUA ERROR: %s", error)
+
+  -- log for debugging later
+  Logger.error("Error in scg01ea.lua: %s", error)
+end
+

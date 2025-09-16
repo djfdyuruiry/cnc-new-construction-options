@@ -115,7 +115,7 @@ public:
         }
     }
 
-    virtual void Register(LuaEngine& engine)
+    virtual void Register(LuaEngine& engine) const
     {
         CNC_LOGGER_INFO("Registering Lua API: {}", Name);
 

@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <spdlog/spdlog.h>
+
 #include "luaapi.h"
 #include "luaarguments.h"
 #include "system_luaapi.h"
@@ -28,7 +30,7 @@ public:
                 engine.Push_Value(
                     spdlog::level::to_string_view(
                         LuaLogger()->level()
-                    )
+                    ).data()
                 );
 
                 return 1;
@@ -79,8 +81,19 @@ public:
         });
     }
 
+    virtual void Register(LuaEngine& engine) const override
+    {
+        // reset the logger level, it might have been changed by a Lua setLevel(..) call
+        LuaLogger()->set_level(
+            DefaultLogLevel
+        );
+
+        LuaApi::Register(engine);
+    }
+
 protected:
     inline static const CncLogger LuaLogger = CncLogger("Lua");
+    inline static spdlog::level::level_enum DefaultLogLevel = LuaLogger()->level();
 
     static void Assert_Level_Value(const LuaEngine& engine, const std::string& level)
     {
