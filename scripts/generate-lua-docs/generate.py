@@ -9,19 +9,32 @@ import os
 
 from jinja2 import Template
 
+
+def char_range(c1: str, c2: str):
+  for c in range(ord(c1), ord(c2)+1):
+    yield chr(c)
+
 def render_template(template_path: str, packages: dict):
-    print(f"Rendering jinja template file: {template_path}")
+  print(f"Rendering jinja template file: {template_path}")
 
-    if not os.path.exists(template_path):
-      raise FileNotFoundError(f"Markdown template file not found @ {template_path}")
+  if not os.path.exists(template_path):
+    raise FileNotFoundError(f"Markdown template file not found @ {template_path}")
 
-    with open(template_path, 'r') as f:
-        template_content = f.read()
+  with open(template_path, 'r') as f:
+      template_content = f.read()
 
-    template = Template(template_content)
-    rendered = template.render(packages=packages)
+  a_to_z_upper = list(char_range("A", "Z"))
+  
+  sections = {
+    "Global Objects": "globals",
+    "Classes": "classes",
+    "Types": "types"
+  }
 
-    return rendered
+  template = Template(template_content)
+  rendered = template.render(packages=packages, sections=sections, a_to_z_upper=a_to_z_upper)
+
+  return rendered
 
 def should_include_define(define: dict, prefix: str, exclude: str = "zzzzzz") -> bool:
   result = False

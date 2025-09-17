@@ -13,12 +13,16 @@ How to read this document:
   - [Classes](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-classes){% endif %}{%if types.types | length > 0 %}
   - [Types](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-types){% endif %}
 {% endfor %}
-{% for package, types in packages.items() %}{%if types.globals | length > 0 %}## `{{ package }}` Global Objects
+{% for package, types in packages.items() %}
+
+{% for name, category in sections.items() %}
+
+{%if types[category] | length > 0 %}## `{{ package }}` {{name}}
 
 {# globals #}
-{% endif %}{% for type in types.globals %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+{% endif %}{% for type in types[category] %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
 {% endfor %}
-{% for type in types.globals %}### `{{type.name}}`
+{% for type in types[category] %}### `{{type.name}}`
 {% if type.defines[0].desc is defined %}
 {{type.defines[0].desc}}
 ---
@@ -27,46 +31,11 @@ How to read this document:
 | Field | Type |
 |--------|-------------|
 {% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
-["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
-{% endif %}{% endfor %}
-
-> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
-{% endfor %}{%if types.types | length > 0 %}
-{# types #}
-## `{{ package }}` Types
-
-{% endif %}{% for type in types.types %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
-{% endfor %}
-{% for type in types.types %}### `{{type.name}}`
-{% if type.defines[0].desc is defined %}
-{{type.defines[0].desc}}
----
-{% endif %}
-
-| Field | Type |
-|--------|-------------|
-{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
-["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
-{% endif %}{% endfor %}
-
-> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
-{% endfor %}{%if types.classes | length > 0 %}
-## `{{ package }}` Classes
-
-{% endif %}{% for type in types.classes %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
-{% endfor %}
-{% for type in types.classes %}### `{{type.name}}`
-{% if type.defines[0].desc is defined %}
-{{type.defines[0].desc}}
----
-{% endif %}
-
-| Field | Type |
-|--------|-------------|
-{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
-["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
+a_to_z_upper) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
 {% endif %}{% endfor %}
 
 > See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
 {% endfor %}
+{% endfor %}
+
 {% endfor %}
