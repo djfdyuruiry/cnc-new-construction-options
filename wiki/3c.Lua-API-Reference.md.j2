@@ -1,0 +1,33 @@
+This page gives detailed information on the Lua API provided by NCO for scripting.
+
+How to read this document:
+
+  - Objects you can use directly in your scripts are marked with `Global Object` below their name
+  - `Type` is a table contained as a field or returned by global objects functions
+  - `Class` is something you import into your script: e.x. `local class = require("nco.Class")`
+
+
+## Lua Packages
+{% for package in packages %}- [{{ package }}](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }})
+{% endfor %}{% for package, types in packages.items() %}
+## `{{ package }}`
+
+{% for type in types %}### {{ type.name }}
+
+{% if "/lib/" in type.defines[0].file %}
+**Class**
+{% else %}
+**{% if type.defines[0].file.endswith(type.name + ".lua") %}Global Object{% else %}Type{% endif %}**
+{% endif %}
+
+See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
+
+{{type.defines[0].desc}}
+
+{# TODO: Provide way to link to type definition for field of custom type #}
+| Field | Type |
+|--------|-------------|
+{% for field in type.fields %}| **{{ field.name }}** | `{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}` |
+{% endfor %}
+{% endfor %}
+{% endfor %}
