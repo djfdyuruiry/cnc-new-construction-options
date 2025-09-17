@@ -34,8 +34,8 @@ def should_include_define(define: dict, prefix: str, exclude: str = "zzzzzz") ->
 
   return result
 
-def filter_type_doc(type_doc: dict, prefix: str, exclude: str = "zzzzzz") -> list[dict]:
-  return list(
+def filter_type_doc(type_doc: dict, internal_types: list[str], prefix: str, exclude: str = "zzzzzz") -> dict:
+  types = list(
     filter(
       lambda t: 
         t["type"] == "type" and "defines" in t and any(
@@ -44,6 +44,21 @@ def filter_type_doc(type_doc: dict, prefix: str, exclude: str = "zzzzzz") -> lis
       type_doc
     )
   )
+
+  return {
+    "classes": list(filter(
+      lambda t: ("/lib/" in t["defines"][0]["file"]) and t["defines"][0]["file"].endswith(f"{t["name"]}.lua") and (t["name"] not in internal_types),
+      types
+    )),
+    "globals": list(filter(
+      lambda t: (not "/lib/" in t["defines"][0]["file"]) and t["defines"][0]["file"].endswith(f"{t["name"]}.lua") and (t["name"] not in internal_types),
+      types
+    )),
+    "types": list(filter(
+      lambda t: (not "/lib/" in t["defines"][0]["file"]) and (not t["defines"][0]["file"].endswith(f"{t["name"]}.lua")) and (t["name"] not in internal_types),
+      types
+    ))
+  }
 
 def load_type_doc(root_dir: str) -> dict:
   data_path = os.path.join(
@@ -71,13 +86,18 @@ def main():
   )
 
   type_doc = load_type_doc(root_dir)
+  
+  internal_types = [
+    "ApiModule",
+    "CncApiMock"
+  ]
 
   # TODO: Move types to bottom of each package group
   packages = {
-    "nco": filter_type_doc(type_doc, common_prefix, common_lib_prefix),
-    "nco.TiberianDawn": filter_type_doc(type_doc, td_prefix, td_lib_prefix),
-    "nco.lib": filter_type_doc(type_doc, common_lib_prefix),
-    "nco.TiberianDawn.lib": filter_type_doc(type_doc, td_lib_prefix)
+    "nco": filter_type_doc(type_doc, internal_types, common_prefix, common_lib_prefix),
+    "nco.TiberianDawn": filter_type_doc(type_doc, internal_types, td_prefix, td_lib_prefix),
+    "nco.lib": filter_type_doc(type_doc, internal_types, common_lib_prefix),
+    "nco.TiberianDawn.lib": filter_type_doc(type_doc, internal_types, td_lib_prefix)
   }
 
   # render markdown template

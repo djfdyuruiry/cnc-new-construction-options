@@ -2,32 +2,72 @@ This page gives detailed information on the Lua API provided by NCO for scriptin
 
 How to read this document:
 
-  - Objects you can use directly in your scripts are marked with `Global Object` below their name
-  - `Type` is a table contained as a field or returned by global objects functions
-  - `Class` is something you import into your script: e.x. `local class = require("nco.Class")`
-
+  - Global Objects can be used directly in your scripts
+  - `Types` describe data contained as a field in global objects or returned by global objects functions
+  - `Classes` are something you can import into your script and use: e.x. `local class = require("nco.Class")`
 
 ## Lua Packages
-{% for package in packages %}- [{{ package }}](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }})
-{% endfor %}{% for package, types in packages.items() %}
-## `{{ package }}`
 
-{% for type in types %}### {{ type.name }}
+{% for package, types in packages.items() %}- `{{ package }}`{%if types.globals | length > 0 %}
+  - [Global Objects](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-global-objects){% endif %}{%if types.classes | length > 0 %}
+  - [Classes](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-classes){% endif %}{%if types.types | length > 0 %}
+  - [Types](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-types){% endif %}
+{% endfor %}
+{% for package, types in packages.items() %}{%if types.globals | length > 0 %}## `{{ package }}` Global Objects
 
-{% if "/lib/" in type.defines[0].file %}
-**Class**
-{% else %}
-**{% if type.defines[0].file.endswith(type.name + ".lua") %}Global Object{% else %}Type{% endif %}**
-{% endif %}
-
-See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
-
+{# globals #}
+{% endif %}{% for type in types.globals %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+{% endfor %}
+{% for type in types.globals %}### `{{type.name}}`
+{% if type.defines[0].desc is defined %}
 {{type.defines[0].desc}}
+---
+{% endif %}
 
 {# TODO: Provide way to link to type definition for field of custom type #}
 | Field | Type |
 |--------|-------------|
-{% for field in type.fields %}| **{{ field.name }}** | `{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}` |
+{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | `{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}` |
+{% endif %}{% endfor %}
+
+> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
+{% endfor %}{%if types.types | length > 0 %}
+{# types #}
+## `{{ package }}` Types
+
+{% endif %}{% for type in types.types %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
 {% endfor %}
+{% for type in types.types %}### `{{type.name}}`
+{% if type.defines[0].desc is defined %}
+{{type.defines[0].desc}}
+---
+{% endif %}
+
+{# TODO: Provide way to link to type definition for field of custom type #}
+| Field | Type |
+|--------|-------------|
+{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | `{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}` |
+{% endif %}{% endfor %}
+
+> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
+{% endfor %}{%if types.classes | length > 0 %}
+## `{{ package }}` Classes
+
+{% endif %}{% for type in types.classes %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+{% endfor %}
+{% for type in types.classes %}### `{{type.name}}`
+{% if type.defines[0].desc is defined %}
+{{type.defines[0].desc}}
+---
+{% endif %}
+
+{# TODO: Provide way to link to type definition for field of custom type #}
+| Field | Type |
+|--------|-------------|
+{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
+["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view }}](3c.Lua-API-Reference.md#{{ field.view | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
+{% endif %}{% endfor %}
+
+> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
 {% endfor %}
 {% endfor %}
