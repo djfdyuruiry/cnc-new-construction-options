@@ -24,10 +24,10 @@ How to read this document:
 ---
 {% endif %}
 
-{# TODO: Provide way to link to type definition for field of custom type #}
 | Field | Type |
 |--------|-------------|
-{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | `{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}` |
+{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
+["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
 {% endif %}{% endfor %}
 
 > See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
@@ -43,10 +43,10 @@ How to read this document:
 ---
 {% endif %}
 
-{# TODO: Provide way to link to type definition for field of custom type #}
 | Field | Type |
 |--------|-------------|
-{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | `{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}` |
+{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
+["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
 {% endif %}{% endfor %}
 
 > See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
@@ -61,11 +61,10 @@ How to read this document:
 ---
 {% endif %}
 
-{# TODO: Provide way to link to type definition for field of custom type #}
 | Field | Type |
 |--------|-------------|
 {% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
-["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view }}](3c.Lua-API-Reference.md#{{ field.view | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
+["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
 {% endif %}{% endfor %}
 
 > See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
