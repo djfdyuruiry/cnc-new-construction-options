@@ -21,12 +21,14 @@ function run_generate_python() {
 }
 
 function main() {
-  local lua_language_server_bin="${1:-}"
+  local lua_language_server_path="${1:-}"
 
-  if [ -z "${lua_language_server_bin}" ]; then
+  if [ -z "${lua_language_server_path}" ]; then
     # shellcheck disable=SC2125
-    lua_language_server_bin="$(ls "${HOME}/.vscode/extensions/"sumneko.lua*"/server/bin/lua-language-server")"
+    lua_language_server_path="$(printf '%s' "${HOME}/.vscode/extensions/"sumneko.lua*"/server")"
   fi
+
+  local lua_language_server_bin="${lua_language_server_path}/bin/lua-language-server"
 
   if [ ! -x "${lua_language_server_bin}" ]; then
     error_and_exit "Unable to find Lua Language Server binary, it is required to execute this script"
