@@ -17,7 +17,7 @@ public:
     inline static const std::string HandlersTable = "handlers";
     inline static const std::string HandlersTablePath = std::format("{}.{}", EventGlobalTable, HandlersTable);
 
-    template<typename... Args>
+    template<LuaPushType... Args>
     static LuaResult Execute_Event(
         const LuaEngine& e,
         std::string_view event_name,

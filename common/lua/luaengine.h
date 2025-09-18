@@ -33,7 +33,26 @@
 
 #include "luaresult.h"
 
-using LuaVariant = std::variant<int, double, bool, std::string>;
+using LuaVariant = std::variant<int, float, double, bool, std::string>;
+
+template<typename T>
+concept LuaVariantCompatible = (
+    std::is_same_v<T, int> || std::is_same_v<T, float> || std::is_same_v<T, double> || std::is_same_v<T, bool> || std::is_same_v<T, std::string>
+);
+
+template<typename T>
+concept LuaPushType = (
+    std::is_same_v<T, char*> ||
+    std::is_same_v<T, const char*> ||
+    std::is_same_v<T, std::string_view> ||
+    std::is_same_v<T, std::string_view&> ||
+    std::is_same_v<T, std::string> ||
+    std::is_same_v<T, std::string&> ||
+    std::is_same_v<T, double> ||
+    std::is_same_v<T, float> ||
+    std::is_same_v<T, int> ||
+    std::is_same_v<T, bool>
+);
 
 /**
  * Avoids a circular dependency whilst enforcing
@@ -43,7 +62,7 @@ template <typename T, typename U>
 concept LuaApiConcept = requires(T t, U& e)
 {
     { t.Register(e) } -> std::same_as<void>;
-    { t.Name } -> std::same_as<const std::basic_string_view<char> &>;
+    { t.Name } -> std::same_as<const std::string_view&>;
 };
 
 /**
@@ -282,7 +301,7 @@ public:
     }
 
     // TODO: Make variants of this
-    template<typename... Args>
+    template<LuaPushType... Args>
     LuaResult PCall_With_Args(std::string_view expression, Args&&... args) const
     {
         if (!Is_Function()) {
@@ -313,7 +332,7 @@ public:
         return lua_gettop(Get_State());
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     bool Is_Type(int stack_index = -1) const
     {
         return Get_Value_From_State<bool>([&](auto L) {
@@ -444,10 +463,8 @@ public:
 
     /**
      * Read a value from the stack, with type checking.
-     * 
-     * TODO: create LuaResultValueType variant to do compile time checking of template instantiation
      */
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaResultWithValue<T> Try_Read(int stack_index = -1) const
     {
         return Get_Value_From_State<LuaResultWithValue<T>>([&](auto L) {
@@ -509,8 +526,6 @@ public:
                     std::string(lua_tostring(L, stack_index))
                 );
             }
-
-            CNC_LOGGER_FATAL("Attempted to read Lua value using unsupported type: {}", typeid(T).name());
         });
     }
 
@@ -575,7 +590,7 @@ public:
         }
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaResultWithValue<T> Try_Read_Table_Field(
         std::string_view parent_expression,
         std::string_view name
@@ -585,17 +600,10 @@ public:
         
         if constexpr (std::is_same_v<T, bool>) {
             expected_type = LUA_TBOOLEAN;
-        } else if constexpr (std::is_same_v<T, double>) {
+        } else if constexpr (std::is_same_v<T, int> || std::is_same_v<T, float> || std::is_same_v<T, double>) {
             expected_type = LUA_TNUMBER;
         } else if constexpr (std::is_same_v<T, std::string>) {
             expected_type = LUA_TSTRING;
-        } else {
-            CNC_LOGGER_FATAL(
-                "Attempted to read Lua table field using unsupported type '{}': {}.{}",
-                typeid(T).name(),
-                parent_expression,
-                name
-            );
         }
 
         LuaResultWithValue<T> value_result = LuaResult(LUA_OK);
@@ -629,17 +637,15 @@ public:
         });
     }
 
-    template<class T>
+    template<LuaPushType T>
     void Push_Value(T value) const
     {
         With_State([&value](auto L) {
-            if constexpr (std::is_same_v<T, char*>) {
+            if constexpr (std::is_same_v<T, char*> || std::is_same_v<T, const char*>) {
                 lua_pushstring(L, value);
-            } else if constexpr (std::is_same_v<T, const char*>) {
-                lua_pushstring(L, value);
-            } else if constexpr (std::is_same_v<T, std::string_view>) {
+            } else if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string_view&>) {
                 lua_pushstring(L, value.data());
-            } else if constexpr (std::is_same_v<T, std::string>) {
+            } else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::string&>) {
                 lua_pushstring(L, value.c_str());
             } else if constexpr (std::is_same_v<T, double>) {
                 lua_pushnumber(L, value);
@@ -649,13 +655,11 @@ public:
                 lua_pushinteger(L, value);
             } else if constexpr (std::is_same_v<T, bool>) {
                 lua_pushboolean(L, value);
-            } else {
-                CNC_LOGGER_FATAL("Attempted to write unsupported C++ type: {}", typeid(T).name());
             }
         });
     }
 
-    template<typename... Args>
+    template<LuaPushType... Args>
     void Push_Values(Args&&... args) const
     {
         ((Push_Value(args)), ...);
@@ -671,7 +675,7 @@ public:
        return Get_Value_From_State<bool>([&](auto L){ return lua_next(L, stack_index) != 0; });
     }
 
-    template<class T>
+    template<LuaPushType T>
     LuaResult Set_Table_Field(
         std::string_view table_expression,
         std::string_view name,
@@ -702,7 +706,7 @@ public:
 
     #pragma region Expressions
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaResultWithValue<T> Eval(const std::string& expression) const
     {
         auto result = Exec(std::format("return {}", expression));
@@ -716,7 +720,7 @@ public:
         return Try_Read<T>();
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     std::future<LuaResultWithValue<T>> Eval_Async(const std::string& expression) const
     {
         auto promise = std::make_shared<std::promise<LuaResultWithValue<T>>>();

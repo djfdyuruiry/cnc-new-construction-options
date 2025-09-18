@@ -29,7 +29,7 @@ public:
         return *this;
     }
 
-    template <class T>
+    template <LuaPushType T>
     LuaTableBuilder& With_Index_Value(T value)
     {
         if (!TableStreamIndex.has_value()) {
@@ -46,7 +46,7 @@ public:
         return *this;
     }
 
-    template <class T>
+    template <LuaPushType T>
     LuaTableBuilder& With_Key_Value(std::string_view key, T value)
     {
         if (!TableStreamIndex.has_value()) {

@@ -29,7 +29,7 @@ public:
         LuaVariant> data
     ): Lua(lua), FunctionSignature(function_signature), Parameter(parameter), Data(data) {}
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaMapParameter& With_Key(std::string key)
     {
         if (Data.find(key) == Data.end()) {
@@ -47,12 +47,10 @@ public:
 
             if constexpr (std::is_same_v<T, std::string>) {
                 expected_lua_type = LUA_TSTRING;
-            } else if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double>) {
+            } else if constexpr (std::is_same_v<T, int> || std::is_same_v<T, float> || std::is_same_v<T, double>) {
                 expected_lua_type = LUA_TNUMBER;
             } else if constexpr (std::is_same_v<T, bool>) {
                 expected_lua_type = LUA_TBOOLEAN;
-            } else {
-                static_assert("Attempted to use non LuaVariant type when calling Assert_Key_Is");
             }
 
             Lua.Raise_Error_Format(
@@ -68,7 +66,7 @@ public:
         return *this;
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     T Get(std::string key)
     {
         return std::get<T>(Data[key]);
@@ -101,7 +99,7 @@ public:
         return Data.size();
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     const LuaArrayParameter& With_Index(int idx)
     {
         if (Data.size() < idx + 1) {
@@ -124,8 +122,6 @@ public:
                 expected_lua_type = LUA_TNUMBER;
             } else if constexpr (std::is_same_v<T, bool>) {
                 expected_lua_type = LUA_TBOOLEAN;
-            } else {
-                static_assert("Attempted to use non LuaVariant type when calling Assert_Index_Is");
             }
 
             Lua.Raise_Error_Format(
@@ -143,7 +139,7 @@ public:
 
     // TODO: With_Values<T> to assert entire array is of type
 
-    template<class T>
+    template<LuaVariantCompatible T>
     T Get(int idx)
     {
         return std::get<T>(Data[idx]);
@@ -192,7 +188,7 @@ public:
         return *this;
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaArguments& Next_Argument_Is()
     {
         if (StreamIsValid.has_value() && !StreamIsValid.value()) {
@@ -214,7 +210,7 @@ public:
         return *this;
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaArguments& First_Argument_Is()
     {
         StreamArgumentIndex = 1;
@@ -474,7 +470,7 @@ public:
         return Lua.Get_Lua_Type(ReadStreamArgumentIndex.value());
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     bool Next_Read_Is()
     {
         if (!ReadStreamArgumentIndex.has_value()) {
@@ -486,7 +482,7 @@ public:
         return result;
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaResultWithValue<T> First_Read_Is()
     {
         ReadStreamArgumentIndex = 1;
@@ -518,7 +514,7 @@ public:
         return Read_Next_Variant();
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaResultWithValue<T> Read_Next()
     {
         if (!ReadStreamArgumentIndex.has_value()) {
@@ -536,7 +532,7 @@ public:
         return result;
     }
 
-    template<class T>
+    template<LuaVariantCompatible T>
     LuaResultWithValue<T> Read_First()
     {
         ReadStreamArgumentIndex = 1;
