@@ -228,18 +228,8 @@ public:
 
         auto value_variant = value_variant_optional.value();
 
-        if constexpr (std::is_same_v<T, int>) {
-            if (const auto value = std::get_if<int>(&value_variant)) {
-                return *value;
-            }
-        } else if constexpr (std::is_same_v<T, bool>) {
-            if (const auto value = std::get_if<bool>(&value_variant)) {
-                return *value;
-            }
-        } else if constexpr (std::is_same_v<T, float>) {
-            if (const auto value = std::get_if<float>(&value_variant)) {
-                return *value;
-            }
+        if (const auto value = std::get_if<T>(&value_variant)) {
+            return *value;
         }
 
         CNC_LOGGER_FATAL(
