@@ -16,9 +16,9 @@ public:
     virtual void Register_Consts(LuaEngine& engine) const override
     {
         With_Api_Namespace(engine, [](auto& n) { 
-            n.addConstant("gamePath", ProgramPath)
-             .addConstant("luaPath", LuaEngine::LuaPath.string())
-             .addConstant("userPath", UserPath)
+            n.addConstant("gamePath", Paths.Program_Path())
+             .addConstant("luaPath", LuaEngine::Get_Lua_Path().string())
+             .addConstant("userPath", Paths.User_Path())
              .addConstant("pathSeparator", Paths.SEP)
              .addConstant("isWindows", IsWindows);
         });
@@ -36,6 +36,4 @@ private:
 #else
     static inline const bool IsWindows = false;
 #endif
-    static inline const std::string UserPath = std::string(Paths.User_Path());
-    static inline const std::string ProgramPath = std::string(Paths.Program_Path());
 };

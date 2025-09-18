@@ -71,8 +71,6 @@ concept LuaApiConcept = requires(T t, U& e)
 class LuaEngine
 {
 public:
-    // default path for lua script files - we ensure this is in the Lua 'package.path', see UniqueLuaEngine()
-    inline static const std::filesystem::path LuaPath = std::filesystem::path(Paths.Program_Path()) / "lua";
     // all APIs will be available from this global Lua table
     inline static const std::string_view RootApiNamespace = "__CNC_API";
     inline static const TwoWayMap<int, std::string_view> LuaTypeMap {
@@ -98,6 +96,14 @@ public:
         } else if constexpr (std::is_same_v<T, std::string>) {
             return LuaTypeMap[LUA_TSTRING].value();
         }
+    }
+
+    // default path for lua script files - we ensure this is in the Lua 'package.path', see UniqueLuaEngine()
+    static const std::filesystem::path& Get_Lua_Path()
+    {
+        static const auto lua_path = std::filesystem::path(Paths.Program_Path()) / "lua";
+
+        return lua_path;
     }
 
     virtual ~LuaEngine() = default;
@@ -233,7 +239,7 @@ public:
 
         if (script_path.is_relative()){
             // assume relative paths are part of @var{Lua_Path} file tree
-            full_script_path = LuaPath / script_path;
+            full_script_path = Get_Lua_Path() / script_path;
         }
 
         return full_script_path;
@@ -773,8 +779,8 @@ public:
                 auto package_path = std::format(
                     "{};{}/?.lua;{}/?/init.lua",
                     base_package_path,
-                    LuaPath.string(),
-                    LuaPath.string()
+                    Get_Lua_Path().string(),
+                    Get_Lua_Path().string()
                 );
 
                 return Set_Table_Field("package", "path", package_path);
