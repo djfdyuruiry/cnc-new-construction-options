@@ -44,5 +44,4 @@ protected:
     {
         return __FILE__;
     }
-
 };

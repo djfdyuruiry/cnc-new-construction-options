@@ -17,7 +17,7 @@
 class LuaResult
 {
 public:
-    inline static const TwoWayMap<int, std::string_view> Lua_Error_Map {
+    inline static const TwoWayMap<int, std::string_view> LuaErrorMap {
         { LUA_OK, "OK" },
         { LUA_ERRRUN, "Runtime" },
         { LUA_ERRSYNTAX, "Syntax" },
@@ -25,10 +25,6 @@ public:
         { LUA_ERRFILE, "File" },
         { LUA_ERRERR, "Error Handling Failure" }
     };
-
-    int LuaCode;
-    std::optional<std::string> Error;
-    std::optional<lua_Debug> DebugInfo;
 
     /**
      * If @code is not LUA_OK, this constructor has side affects and will
@@ -76,7 +72,7 @@ public:
 
     const std::string_view Code_As_String() const
     {
-        return Lua_Error_Map[LuaCode].value_or("Unknown");
+        return LuaErrorMap[LuaCode].value_or("Unknown");
     }
 
     const std::string Error_Message() const
@@ -101,6 +97,21 @@ public:
 
         return *this;
     }
+
+    bool Has_Debug_Info() const
+    {
+        return DebugInfo.has_value();
+    }
+
+    const std::optional<lua_Debug>& Debug_Info() const
+    {
+        return DebugInfo;
+    }
+
+protected:
+    int LuaCode;
+    std::optional<std::string> Error;
+    std::optional<lua_Debug> DebugInfo;
 };
 
 /**

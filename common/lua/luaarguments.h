@@ -25,8 +25,7 @@ public:
         const LuaEngine& lua,
         std::string_view function_signature,
         std::string_view parameter,
-        std::map<std::string,
-        LuaVariant> data
+        std::map<std::string, LuaVariant> data
     ): Lua(lua), FunctionSignature(function_signature), Parameter(parameter), Data(data) {}
 
     template<LuaVariantCompatible T>

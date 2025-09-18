@@ -148,9 +148,6 @@ public:
 
      #pragma endregion
 
-     // static class
-     ScenarioLua() = delete;
-
 private:
      static inline const CncLogger Logger = CncLogger("ScenarioLua");
      static inline std::optional<UniqueLuaEngine> Engine;
@@ -237,4 +234,6 @@ private:
                     });
           }
      }
+
+     ScenarioLua() = delete;
 };

@@ -88,6 +88,18 @@ public:
         {LUA_TTHREAD, "thread"}
     };
 
+    template<LuaVariantCompatible T>
+    static const std::string_view& Get_Type_Name_For_Variant_Compatible()
+    {
+        if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
+            return LuaTypeMap[LUA_TNUMBER].value();
+        } else if constexpr (std::is_same_v<T, bool>) {
+            return LuaTypeMap[LUA_TBOOLEAN].value();
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return LuaTypeMap[LUA_TSTRING].value();
+        }
+    }
+
     virtual ~LuaEngine() = default;
 
     #pragma region API
@@ -179,7 +191,7 @@ public:
                 CNC_LOGGER_TRACE(
                     "Error loading lua script due to '{}' error: {}",
                     result.Code_As_String(),
-                    result.Error.value()
+                    result.Error_Message()
                 );
                 return result;
             }
@@ -204,7 +216,7 @@ public:
             if (!result.Is_Ok()) {
                 CNC_LOGGER_ERROR(
                     "Error from background lua script: {} | script: {}",
-                    result.Error.value(),
+                    result.Error_Message(),
                     script
                 );
             }
@@ -215,7 +227,7 @@ public:
         return future;
     }
 
-    LuaResult Exec_File(std::filesystem::path script_path) const
+    std::filesystem::path Resolve_Script_Path(std::filesystem::path script_path) const
     {
         auto full_script_path = script_path;
 
@@ -224,32 +236,12 @@ public:
             full_script_path = LuaPath / script_path;
         }
 
-        if (!std::filesystem::is_regular_file(full_script_path))
-        {
-            return LuaResult(
-                std::format(
-                    "Unable to execute lua file '{}': file was not found at given path",
-                    full_script_path.string()
-                )
-            );
-        }
-
-        return Exec_File_If_Exists(full_script_path);
+        return full_script_path;
     }
 
-    LuaResult Exec_File_If_Exists(std::filesystem::path script_path) const
-    {
-        auto full_script_path = script_path;
-
-        if (script_path.is_relative()){
-            // assume relative paths are part of @var{Lua_Path} file tree
-            full_script_path = LuaPath / script_path;
-        }
-
-        if (!std::filesystem::is_regular_file(full_script_path)) {
-            CNC_LOGGER_WARN("Skipping lua file execution as it does not exist: {}", full_script_path.string());
-            return LuaResult(LUA_OK);
-        }
+    LuaResult Exec_File(std::filesystem::path script_path) const
+    {        
+        auto full_script_path = Resolve_Script_Path(script_path);
 
         CNC_LOGGER_DEBUG("Attempting to execute lua file: {}", full_script_path.string());
 
@@ -263,7 +255,7 @@ public:
                 CNC_LOGGER_TRACE(
                     "Error loading lua file '{}' due to error: {}",
                     full_script_path.string(),
-                    result.Error.value()
+                    result.Error_Message()
                 );
                 return result;
             }
@@ -273,9 +265,21 @@ public:
                 lua_pcall(L, 0, LUA_MULTRET, 0)
             );
         });
-    };
+    }
 
-    std::future<LuaResult> Exec_File_Async(std::string_view script_path) const
+    LuaResult Exec_File_If_Exists(std::filesystem::path script_path) const
+    {
+        auto full_script_path = Resolve_Script_Path(script_path);
+
+        if (!std::filesystem::is_regular_file(full_script_path)) {
+            CNC_LOGGER_WARN("Skipping lua file execution as it does not exist: {}", full_script_path.string());
+            return LuaResult(LUA_OK);
+        }
+
+        return Exec_File(full_script_path);
+    }
+
+    std::future<LuaResult> Exec_File_Async(std::filesystem::path script_path) const
     {
         auto promise = std::make_shared<std::promise<LuaResult>>();
         auto future = promise->get_future();
@@ -289,8 +293,8 @@ public:
                 // TODO: output debug info - maybe have a method in LuaEvent that builds a standard error message for logging or logs directly
                 CNC_LOGGER_ERROR(
                     "Error from background lua script file: {} | script_path: {}",
-                    result.Error.value(),
-                    script_path
+                    result.Error_Message(),
+                    script_path.string()
                 );
             }
 
@@ -300,7 +304,25 @@ public:
         return future;
     }
 
-    // TODO: Make variants of this
+    LuaResult PCall(std::string_view expression) const
+    {
+        if (!Is_Function()) {
+            return LuaResult(
+                std::format(
+                    "Unable to call '{}' as it is either undefined or not a function",
+                    expression
+                )
+            );
+        }
+
+        return Get_Value_From_State<LuaResult>([](auto L) {
+            return LuaResult(
+                L,
+                lua_pcall(L, 0, LUA_MULTRET, 0)
+            );
+        });
+    }
+
     template<LuaPushType... Args>
     LuaResult PCall_With_Args(std::string_view expression, Args&&... args) const
     {
@@ -318,7 +340,7 @@ public:
         return Get_Value_From_State<LuaResult>([](auto L) {
             return LuaResult(
                 L,
-                lua_pcall(L, sizeof...(Args), 1, 0)
+                lua_pcall(L, sizeof...(Args), LUA_MULTRET, 0)
             );
         });
     }
@@ -336,17 +358,15 @@ public:
     bool Is_Type(int stack_index = -1) const
     {
         return Get_Value_From_State<bool>([&](auto L) {
-            auto type = lua_type(L, stack_index);
-
-            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
-                return type == LUA_TNUMBER;
+            if constexpr (std::is_same_v<T, int>) {
+                return lua_isinteger(L, stack_index);
+            } else if constexpr (std::is_same_v<T, double> || std::is_same_v<T, float>) {
+                return lua_type(L, stack_index) == LUA_TNUMBER;
             } else if constexpr (std::is_same_v<T, bool>) {
-                return type == LUA_TBOOLEAN;
+                return lua_type(L, stack_index) == LUA_TBOOLEAN;
             } else if constexpr (std::is_same_v<T, std::string>) {
-                return type == LUA_TSTRING;
+                return lua_type(L, stack_index) == LUA_TSTRING;
             }
-
-            return false;
         });
     }
 
@@ -468,19 +488,16 @@ public:
     LuaResultWithValue<T> Try_Read(int stack_index = -1) const
     {
         return Get_Value_From_State<LuaResultWithValue<T>>([&](auto L) {
-            auto type = lua_type(L, stack_index);
-
-            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
-                if (type != LUA_TNUMBER) {
-                    return LuaResultWithValue<T>(
-                        L,
-                        std::format(
-                            "Failed to read int/number from stack index {} due to type mismatch, actual type: {}",
-                            stack_index,
-                            Get_Lua_Type(stack_index)
-                        )
-                    );
-                }
+            if (!Is_Type<T>(stack_index)) {
+                return LuaResultWithValue<T>(
+                    L,
+                    std::format(
+                        "Failed to read from stack index {} due to type mismatch, wanted '{}' but stack value is: {}",
+                        stack_index,
+                        Get_Type_Name_For_Variant_Compatible<T>(),
+                        Get_Lua_Type(stack_index)
+                    )
+                );
             }
 
             if constexpr (std::is_same_v<T, int>) {
@@ -496,32 +513,10 @@ public:
                     (float)lua_tonumber(L, stack_index)
                 );
             } else if constexpr (std::is_same_v<T, bool>) {
-                if (type != LUA_TBOOLEAN) { 
-                    return LuaResultWithValue<T>(
-                        L,
-                        std::format(
-                            "Failed to read bool from stack index {} due to type mismatch, actual type: {}",
-                            stack_index,
-                            Get_Lua_Type(stack_index)
-                        )
-                    );
-                }
-
                 return LuaResultWithValue<T>(
                     lua_toboolean(L, stack_index)
                 );
             } else if constexpr (std::is_same_v<T, std::string>) {
-                if (type != LUA_TSTRING) { 
-                    return LuaResultWithValue<T>(
-                        L,
-                        std::format(
-                            "Failed to read string from stack index {} due to type mismatch, actual type: {}",
-                            stack_index,
-                            Get_Lua_Type(stack_index)
-                        )
-                    );
-                }
-
                 return LuaResultWithValue<T>(
                     std::string(lua_tostring(L, stack_index))
                 );
@@ -531,48 +526,26 @@ public:
 
     LuaResultWithValue<LuaVariant> Try_Read_Variant(int stack_index = -1) const
     {
-        auto lua_value = Get_Value_From_State<std::optional<LuaVariant>>([&](auto L) {
-            std::optional<LuaVariant> lua_value;
+        return Get_Value_From_State<LuaResultWithValue<LuaVariant>>([&](auto L) {
+            std::optional<LuaVariant> variant_value;
 
-            auto int_result = Try_Read<int>(stack_index);
-
-            if (int_result.Has_Value()) {
-                lua_value = int_result.Unpack();
-                return lua_value;
+            if (Is_Type<int>(stack_index)) {
+                variant_value = Try_Read<int>(stack_index).Unpack();
+            } else if (Is_Type<double>(stack_index)) {
+                variant_value = Try_Read<double>(stack_index).Unpack();
+            } else if (Is_Type<std::string>(stack_index)) {
+                variant_value = Try_Read<std::string>(stack_index).Unpack();
             }
 
-            auto double_result = Try_Read<double>(stack_index);
-
-            if (double_result.Has_Value()) {
-                lua_value = double_result.Unpack();
-                return lua_value;
+            if (variant_value.has_value()) {
+                return LuaResultWithValue<LuaVariant>(variant_value.value());
             }
 
-            auto bool_result = Try_Read<bool>(stack_index);
-
-            if (bool_result.Has_Value()) {
-                lua_value = bool_result.Unpack();
-                return lua_value;
-            }
-
-            auto str_result = Try_Read<std::string>(stack_index);
-
-            if (str_result.Has_Value()) {
-                lua_value = str_result.Unpack();
-                return lua_value;
-            }
-
-            return lua_value;
-        });
-
-        if (!lua_value.has_value()) {
             return LuaResultWithValue<LuaVariant>(
                 Get_State(),
                 std::format("Attempted to read Lua value as variant, but type not supported by variant: {}", Get_Lua_Type(stack_index))
             );
-        }
-
-        return LuaResultWithValue<LuaVariant>(lua_value.value());
+        });
     }
 
     const std::string_view Get_Variant_Type(const LuaVariant& lua_variant) const

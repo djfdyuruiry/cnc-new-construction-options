@@ -165,10 +165,13 @@ extern WWKeyboardClass* Keyboard;
  * 
  * See: concept `RuleSectionsProviderConcept` in @file{common/lua/rules_luaapi.h}
  */
-class RuleSectionsProvider
+class RuleSectionsProvider final
 {
 public:
     inline static RuleSections& Sections = Rule.Sections;
+
+private:
+    RuleSectionsProvider() = delete;
 };
 
 /*
@@ -193,6 +196,9 @@ extern TFixedIHeapClass<HouseClass> Houses;
 extern QueueClass<EventClass, MAX_EVENTS> OutList;
 extern QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
 
+/**
+ * Lua event queue, see @file{globals.cpp}
+ */
 extern AtomicQueue<LuaEvent> LuaList;
 
 typedef DynamicVectorArrayClass<ObjectClass*, HOUSE_COUNT, HOUSE_FIRST> SelectedObjectsType;

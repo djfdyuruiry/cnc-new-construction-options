@@ -103,7 +103,7 @@ public:
         ACTION_WINLOSE,        // Win if captured, lose if destroyed.
         ACTION_ALLOWWIN,       // Allows winning if triggered.
 
-        ACTION_LUA_EVENT,   // Runs a registered lua callback.
+        ACTION_LUA_EVENT,      // Runs a registered lua callback.
         ACTION_LUA_SCRIPT,     // Runs a lua script file.
 
         ACTION_COUNT,

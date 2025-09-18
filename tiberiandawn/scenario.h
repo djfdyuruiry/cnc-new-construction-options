@@ -35,8 +35,6 @@
 #ifndef SCENARIO_H
 #define SCENARIO_H
 
-#include "common/lua/luaengine.h"
-
 /*
 **	This class holds the information about the current game being played. This information is
 **	global to the scenario and is generally of a similar nature to the information that was held

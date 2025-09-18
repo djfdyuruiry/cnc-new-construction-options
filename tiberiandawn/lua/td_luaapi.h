@@ -45,5 +45,4 @@ protected:
 
         return module;
     }
-
 };

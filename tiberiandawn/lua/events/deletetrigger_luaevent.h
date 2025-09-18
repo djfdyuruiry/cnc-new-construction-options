@@ -22,7 +22,8 @@ public:
         auto trigger_exists = trigger != NULL;
 
         if (!trigger_exists) {
-          CNC_LOGGER_DEBUG("Ignore DeleteTrigger event as trigger doesn't exist: {}", Name);
+          CNC_LOGGER_WARN("Ignoring DeleteTrigger event as trigger doesn't exist: {}", Name);
+          return;
         }
 
         CNC_LOGGER_DEBUG("Removing scenario trigger: {}", Name);
