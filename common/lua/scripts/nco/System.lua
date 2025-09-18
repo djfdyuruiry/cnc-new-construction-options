@@ -4,6 +4,9 @@ local Path = require("nco.lib.Path")
 --[[
   API to work with file paths and provide OS info.
 
+  - Returns file objects similar to io.open
+  - openXFile functions return file object and optional error string
+
   See: nco.lib.Path
 ]]
 ---@class System : ApiModule

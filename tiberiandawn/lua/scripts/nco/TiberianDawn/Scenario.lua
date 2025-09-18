@@ -1,11 +1,23 @@
 local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
+--[[
+  House management for current Scenario.
+
+  - Manage money: get current money, give money, take money away
+
+  Note: Money in this context is a sum of the credits and value of tiberium in silos
+]]
 ---@class House
 ---@field name string
 ---@field getMoney fun(): number
 ---@field giveMoney fun(amount: number)
 ---@field takeMoney fun(amount: number)
 
+--[[
+  Info on the player for the current scenario.
+
+  See: nco.TiberianDawn.House
+]]
 ---@class ScenarioPlayer
 ---@field faction "gdi"|"nod"|"civilian"
 ---@field house House
@@ -16,6 +28,9 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@class ScenarioTeamTypes
 ---@field getNames fun(): string[]
 
+--[[
+  Manage triggers for the current scenario.
+]]
 ---@class ScenarioTriggers
 ---@field getNames fun(): string[]
 ---@field deleteIfExists fun(name: string): boolean
@@ -24,7 +39,33 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
   API that provides controls for the current mission
   or skirmish match.
 
-  Provides scenario info, player info and trigger control.
+  - Manage Team Types with `teams`
+    ```lua
+      -- lookup existing team
+      local TM1 = Scenario.teams.TM1
+
+      -- add team
+      Scenario.teams.LUA1 = "GoodGuy,0,0,0,0,0,7,3,0,0,2,HTNK:1,LST:1,0,1,1"
+    ```
+  - Manage Triggers with `triggers`
+    ```lua
+      -- lookup existing trigger
+      local TMR1 = Scenario.triggers.TMR1
+
+      -- add a trigger
+      Scenario.triggers.TMR4 = "Time,Reinforce.,8,GoodGuy,LUA1,0"
+
+      -- delete a trigger
+      Scenario.triggers.deleteTriggerIfExists("TMR4")
+    ```
+  - Manage Houses with `houses` (and `player`)
+    ```lua
+      -- give badguy 2000 credits
+      Scenario.houses.goodguy.giveMoney(2000)
+
+      -- take 500 credits away from the player
+      Scenario.player.house.takeMoney(500)
+    ```
 ]]
 ---@class Scenario : ApiModule
 ---@field name string

@@ -9,9 +9,8 @@ local isType = TypeValidator.Validators.isType
   API for registering event callbacks.
 
   - Callbacks are currently called on scenario trigger execute
-  - Trigger definition in scenario INI file will setup the
-    execution when a certain condition is true
-  - To define a callback (assuming scenario INI triggers declared):
+  - Trigger definition can be done in scenario INI file or in Lua (see `Scenario` Global Object)
+  - To define a callback (assuming triggers have been registered):
     ```lua
       -- Event.X - X can be any valid name
       Event.handlers.onTimerTrigger = function(triggerName)

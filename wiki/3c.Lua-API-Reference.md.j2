@@ -9,9 +9,15 @@ How to read this document:
 ## Lua Packages
 
 {% for package, types in packages.items() %}- `{{ package }}`{%if types.globals | length > 0 %}
-  - [Global Objects](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-global-objects){% endif %}{%if types.classes | length > 0 %}
-  - [Classes](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-classes){% endif %}{%if types.types | length > 0 %}
-  - [Types](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-types){% endif %}
+  - [Global Objects](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-global-objects)
+  {% for type in types.globals %}  - [{{ type.name }}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+  {% endfor %}{% endif %}{%if types.classes | length > 0 %}
+  - [Classes](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-classes)
+  {% for type in types.classes %}  - [{{ type.name }}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+  {% endfor %}{% endif %}{%if types.types | length > 0 %}
+  - [Types](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-types)
+  {% for type in types.types %}  - [{{ type.name }}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+  {% endfor %}{% endif %}
 {% endfor %}
 {% for package, types in packages.items() %}
 

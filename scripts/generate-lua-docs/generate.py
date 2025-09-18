@@ -47,11 +47,11 @@ def should_include_define(define: dict, prefix: str, exclude: str = "zzzzzz") ->
 
   return result
 
-def filter_type_doc(type_doc: dict, internal_types: list[str], prefix: str, exclude: str = "zzzzzz") -> dict:
+def filter_type_doc(type_doc: dict, internal_types: list[str], prefix: str, exclude: str = "zzzzzz",  force_types: list[str] = []) -> dict:
   types = list(
     filter(
       lambda t: 
-        t["type"] == "type" and "defines" in t and any(
+        (t["type"] == "type" or t["name"] in force_types) and "defines" in t and any(
           should_include_define(d, prefix, exclude) for d in t["defines"]
         ),
       type_doc
@@ -107,7 +107,7 @@ def main():
 
   # TODO: Move types to bottom of each package group
   packages = {
-    "nco": filter_type_doc(type_doc, internal_types, common_prefix, common_lib_prefix),
+    "nco": filter_type_doc(type_doc, internal_types, common_prefix, exclude=common_lib_prefix, force_types=["Rules"]),
     "nco.TiberianDawn": filter_type_doc(type_doc, internal_types, td_prefix, td_lib_prefix),
     "nco.lib": filter_type_doc(type_doc, internal_types, common_lib_prefix),
     "nco.TiberianDawn.lib": filter_type_doc(type_doc, internal_types, td_lib_prefix)

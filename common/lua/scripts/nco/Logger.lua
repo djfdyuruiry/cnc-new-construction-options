@@ -4,12 +4,19 @@ local System = require("nco.System")
 ---@alias LogLevel "trace"|"debug"|"info"|"warning"|"error"|"critical"
 
 --[[
-  API that writes to game engine logs.
+  API that writes to game engine logs. You can view these logs by opening `nco.log`
+  file in the game folder.
 
   - Methods will capture the call stack of the caller automatically
   - Methods support printf style formatting for ease of use:
     ```lua
       Logger.error("Something bad happened. %s", errorMessage)
+    ```
+  - You can change the current log level to write debug logs etc.
+    ```lua
+      Logger.setLevel("debug")
+
+      Logger.debug("This debug message will be written to logs")
     ```
 ]]
 ---@class Logger : ApiModule
