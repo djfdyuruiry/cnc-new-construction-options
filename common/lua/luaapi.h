@@ -93,7 +93,7 @@ public:
             return;
         }
 
-        CNC_LOGGER_INFO("Registering scripts using base path: {}", LuaEngine::LuaPath.string());
+        CNC_LOGGER_INFO("Registering scripts using base path: {}", LuaEngine::Get_Lua_Path().string());
 
         for (const auto& script : Scripts) {
             auto full_script_path = script;
