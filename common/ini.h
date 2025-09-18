@@ -106,7 +106,8 @@ public:
     **	Get the various data types from the section and entry specified.
     */
     int Get_String(char const* section, char const* entry, char const* defvalue, char* buffer, int size) const;
-    std::string Get_String(char const* section, char const* entry, std::string const& defvalue) const;
+    std::string Get_String(char const* section, char const* entry, const std::string& defvalue) const;
+    std::string Get_String(char const* section, char const* entry, const std::string_view& defvalue) const;
     int Get_Int(char const* section, char const* entry, int defvalue = 0) const;
     int Get_Hex(char const* section, char const* entry, int defvalue = 0) const;
     bool Get_Bool(char const* section, char const* entry, bool defvalue = false) const;

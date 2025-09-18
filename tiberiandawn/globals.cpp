@@ -32,7 +32,9 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "common/atomicqueue.h"
 #include "common/vqaconfig.h"
+#include "common/lua/luaevent.h"
 
 #ifdef JAPANESE
 bool ForceEnglish = false;
@@ -119,10 +121,6 @@ char LoseMovie[_MAX_FNAME + _MAX_EXT];
 char ActionMovie[_MAX_FNAME + _MAX_EXT];
 char MovieThemeName[_MAX_FNAME + _MAX_EXT];
 
-/***************************************************************************
-**	These are the movie names to use for mission briefing, winning, and losing
-**	sequences. They are read from the INI file.
-*/
 ScenarioClass Scen;
 
 /***************************************************************************
@@ -385,6 +383,15 @@ unsigned char* Palette;
 */
 QueueClass<EventClass, MAX_EVENTS> OutList;
 QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
+
+/**
+ * Queued Lua events - ensures API calls from Lua that interact with game state happen
+ * at the right time, on the correct thread and in order. Events enqueued by classes in
+ * `lua/events`.
+ * 
+ * See: @file{queue.cpp} and @file{lua/scenariolua.h} for dequeue operations
+ */
+AtomicQueue<LuaEvent> LuaList;
 
 /***************************************************************************
 **	These are arrays/lists of trigger pointers for each cell & the houses.

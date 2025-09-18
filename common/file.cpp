@@ -2,8 +2,6 @@
 
 #include "file.h"
 
-const CncLogger Find_File_Data::Logger = CncLogger("Find_File_Data");
-
 #ifndef _WIN32
 static void Resolve_File_Single(char* fname)
 {

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <assert.h>
 #include <format>
 #include <memory>
@@ -15,12 +16,21 @@
  */
 void Debug_String_Log(unsigned level, const char* file, int line, const char* function_or_method, const char* fmt, ...)
 {
-    static const char* levels[] = {"off", "critical", "error", "warn", "info", "debug", "trace"};
     assert(level <= 6);
 
-    auto spd_level = spdlog::level::from_str(levels[level]);
+    static std::vector<spdlog::string_view_t> levels SPDLOG_LEVEL_NAMES;
+    static std::once_flag levels_init;
 
-    if (!CncLogger::Default()->should_log(spd_level)) {
+    std::call_once(levels_init, []() {
+        // reverse to match level param logic ( level indicates (0)off->trace(6), but SPDLOG_LEVEL_NAMES is (0)trace->off(6))
+        std::reverse(levels.begin(), levels.end());
+    });
+
+    auto spd_level = spdlog::level::from_str(
+        levels.at(level).data()
+    );
+
+    if (!CncLogger::Default()()->should_log(spd_level)) {
         return;
     }
 
@@ -32,7 +42,7 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
     va_end(args);
 
     if (message_size < 0) {
-        CncLogger::Default()->error(
+        CNC_LOG_ERROR(
             "vsnprintf failed to process legacy log message in Debug_String_Log. source={}:{} | fmt={}",
             file,
             line,
@@ -49,7 +59,7 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
     va_end(args);
 
     if (result < 0) {
-        CncLogger::Default()->error(
+        CNC_LOG_ERROR(
             "vsnprintf failed to process legacy log message in Debug_String_Log. source={}:{} | fmt={}",
             file,
             line,
@@ -62,10 +72,10 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
     auto message = std::string(formatted_message.get());
 
     if (spd_level == spdlog::level::critical) {
-        CncLogger::Default.Fatal(message);
+        CNC_LOG_FATAL(message);
     }
 
-    CncLogger::Default()->log(
+    CNC_LOG(
         spdlog::source_loc{file, line, function_or_method},
         spd_level,
         message

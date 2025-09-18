@@ -114,19 +114,29 @@
     "filesystem": "cpp",
     "cerrno": "cpp",
     "climits": "cpp",
-    "*.in": "cpp"
+    "*.in": "cpp",
+    "cassert": "cpp",
+    "cfloat": "cpp",
+    "*.rh": "cpp",
+    "ciso646": "cpp",
+    "*.template": "cpp"
   },
   "cSpell.words": [
     "Avalonia",
     "CCINI",
     "CCMAP",
+    "currentline",
     "endfor",
+    "goodguy",
+    "luabridge",
     "mobius",
     "modders",
     "MSVC",
     "Nyergud's",
     "Nyerguds",
     "Oddysee",
+    "openmode",
+    "pcall",
     "redalert",
     "Redeployable",
     "Superweapons",
@@ -136,6 +146,21 @@
     "VCPKG",
     "Visceroids",
     "Westwood",
+    "xpcall",
     "xypand"
+  ],
+  "Lua.diagnostics.globals": [
+    "__CNC_API"
+  ],
+  "Lua.runtime.version": "Lua 5.4",
+  "Lua.runtime.path": [
+    "?.lua",
+    "?/init.lua",
+    "${workspaceFolder}/common/lua/scripts/?.lua",
+    "${workspaceFolder}/common/lua/scripts/?/init.lua",
+    "${workspaceFolder}/tiberiandawn/lua/scripts/?.lua",
+    "${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua",
+    "${workspaceFolder}/tests/lua/scripts/?.lua",
+    "${workspaceFolder}/tests/lua/scripts/?/init.lua"
   ]
 }

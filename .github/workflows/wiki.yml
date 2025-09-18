@@ -6,10 +6,17 @@ on:
   # wiki workflow runs in 'dry run' mode on PRs
   pull_request:
     paths: &change-paths
+      # wiki workflow and source
       - .github/workflows/wiki.yml
       - wiki/**
+      # rules.ini rules
       - tiberiandawn/rules/**
-      - scripts/99.generate-tiberian-dawn-rules-doc.py
+      # lua code
+      - common/lua/scripts/**
+      - tiberiandawn/lua/scripts/**
+      # generated pages
+      - scripts/generate-lua-docs/**
+      - scripts/generate-td-rules-doc/**
 
   # wiki should only be deployed from main
   push:
@@ -30,8 +37,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Lua Language Server
+        run: |
+          curl -L https://github.com/LuaLS/lua-language-server/releases/download/3.15.0/lua-language-server-3.15.0-linux-x64.tar.gz -o /tmp/lls.tar.gz
+
+          rm -rf /tmp/lls
+          mkdir -p /tmp/lls
+
+          tar -xzf "/tmp/lls.tar.gz" -C "/tmp/lls"
+
       - name: Render Wiki Templates
         run: |
+          scripts/generate-lua-docs/generate.sh "/tmp/lls"
           scripts/generate-td-rules-doc/generate.sh
 
           # ensure normally ignored generated files get pushed to wiki

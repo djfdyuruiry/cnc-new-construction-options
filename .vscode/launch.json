@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug TD",
+      "name": "TD",
       "type": "cppdbg",
       "request": "launch",
       "preLaunchTask": "Build & Deploy TD",
@@ -15,12 +15,12 @@
       "environment": [
         {
           "name": "NCO_LOG_LEVEL",
-          "value": "debug,Find_File_Data=off"
+          "value": "debug,LuaEngine=trace,LuaApi=trace,Lua=trace,Find_File_Data=off"
         }
       ]
     },
     {
-      "name": "Debug RA",
+      "name": "RA",
       "type": "cppdbg",
       "request": "launch",
       "preLaunchTask": "Build & Deploy RA",
@@ -32,6 +32,29 @@
           "name": "NCO_LOG_LEVEL",
           "value": "debug,Find_File_Data=off"
         }
+      ]
+    },
+    // BUG: below launch configs require extension 'Lua Debug' v2.0.9 to work
+    {
+      "name": "Lua Unit Tests",
+      "type": "lua",
+      "luaVersion": "lua54",
+      "request": "launch",
+      "stopOnEntry": false,
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua;${workspaceFolder}/tests/lua/scripts/?.lua;${workspaceFolder}/tests/lua/scripts/?/init.lua",
+      "program": "${workspaceFolder}/tests/lua/scripts/tests/unit/init.lua",
+      "arg": []
+    },
+    {
+      "name": "scg01ea.lua",
+      "type": "lua",
+      "luaVersion": "lua54",
+      "request": "launch",
+      "stopOnEntry": false,
+      "path": "${workspaceFolder}/common/lua/scripts/?.lua;${workspaceFolder}/common/lua/scripts/?/init.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?.lua;${workspaceFolder}/tiberiandawn/lua/scripts/?/init.lua",
+      "program": "${workspaceFolder}/tests/lua/scripts/test-game-script.lua",
+      "arg": [
+        "tiberiandawn/lua/scripts/scg01ea.lua"
       ]
     }
   ]

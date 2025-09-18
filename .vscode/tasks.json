@@ -3,7 +3,7 @@
   "tasks": [
     {
       "label": "Build",
-      "type": "cppbuild",
+      "type": "shell",
       "command": "./scripts/1.build.sh",
       "group": "build"
     },

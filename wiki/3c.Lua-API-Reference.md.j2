@@ -1,0 +1,47 @@
+This page gives detailed information on the Lua API provided by NCO for scripting.
+
+How to read this document:
+
+  - Global Objects can be used directly in your scripts
+  - `Types` describe data contained as a field in global objects or returned by global objects functions
+  - `Classes` are something you can import into your script and use: e.x. `local class = require("nco.Class")`
+
+## Lua Packages
+
+{% for package, types in packages.items() %}- `{{ package }}`{%if types.globals | length > 0 %}
+  - [Global Objects](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-global-objects)
+  {% for type in types.globals %}  - [{{ type.name }}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+  {% endfor %}{% endif %}{%if types.classes | length > 0 %}
+  - [Classes](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-classes)
+  {% for type in types.classes %}  - [{{ type.name }}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+  {% endfor %}{% endif %}{%if types.types | length > 0 %}
+  - [Types](3c.Lua-API-Reference.md#{{ package | lower | replace(".", "") }}-types)
+  {% for type in types.types %}  - [{{ type.name }}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+  {% endfor %}{% endif %}
+{% endfor %}
+{% for package, types in packages.items() %}
+
+{% for name, category in sections.items() %}
+
+{%if types[category] | length > 0 %}## `{{ package }}` {{name}}
+
+{# globals #}
+{% endif %}{% for type in types[category] %}- [{{type.name}}](3c.Lua-API-Reference.md#{{ type.name | lower | replace(".", "") }})
+{% endfor %}
+{% for type in types[category] %}### `{{type.name}}`
+{% if type.defines[0].desc is defined %}
+{{type.defines[0].desc}}
+---
+{% endif %}
+
+| Field | Type |
+|--------|-------------|
+{% for field in type.fields %}{% if field.name not in ["__cppSource", "__name"]%}| **{{ field.name }}** | {% if ( field.view[:1] in 
+a_to_z_upper) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
+{% endif %}{% endfor %}
+
+> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
+{% endfor %}
+{% endfor %}
+
+{% endfor %}

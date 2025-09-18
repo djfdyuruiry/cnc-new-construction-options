@@ -38,6 +38,9 @@
 #include <stdarg.h>
 #include "common/filepcx.h"
 #include "common/rawfile.h"
+
+#include "lua/scenariolua.h"
+
 #ifdef CHEAT_KEYS
 
 extern bool ScreenRecording;
@@ -553,6 +556,10 @@ void Debug_Key(unsigned input)
             break;
 
 #endif
+
+        case KN_F5:
+            ScenarioLua::Get_Engine().Exec_File_If_Exists("__debug.lua");
+            break;
 
         case KN_F3:
             Debug_Icon = (Debug_Icon == false);

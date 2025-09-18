@@ -72,15 +72,6 @@ jobs:
         fetch-depth: 0
         ref: "${{ github.event.pull_request.head.sha || github.sha }}"
 
-    - name: Set Git Info
-      id: gitinfo
-      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update -y -qq > /dev/null
-        sudo apt-get install -qq -y libsdl2-dev libopenal-dev > /dev/null
-
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
       id: changes
@@ -99,6 +90,22 @@ jobs:
             - redalert/**
           td:
             - tiberiandawn/**
+          lua:
+            - common/lua/scripts/**
+            - tiberiandawn/lua/scripts/**
+            - tests/lua/scripts/**
+
+    - name: Init Lua
+      if: steps.changes.outputs.lua == 'true'
+      uses: leafo/gh-actions-lua@v11
+      with:
+        luaVersion: "5.4"
+
+    - name: Run Lua Tests
+      if: steps.changes.outputs.lua == 'true'
+      run: |
+        ./scripts/98.run-lua-unit-tests.sh \
+        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -127,6 +134,15 @@ jobs:
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
 
+    - name: Set Git Info
+      id: gitinfo
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y -qq > /dev/null
+        sudo apt-get install -qq -y libsdl2-dev libopenal-dev > /dev/null
+
     - name: Init vcpkg
       run: ./scripts/bin/vcpkg --init
 
@@ -145,6 +161,7 @@ jobs:
     #     cmake --build build/${{ steps.set_preset.outputs.preset }} --target format
     #     git diff --exit-code
 
+    # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
@@ -169,6 +186,12 @@ jobs:
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+
+          # lua library
+          mkdir -p lua/nco
+          cp -rv common/lua/scripts/nco/* lua/nco
+          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
     - name: Add internal tools to archive

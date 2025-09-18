@@ -1,0 +1,24 @@
+#pragma once 
+
+#include "../../../common/lua/luaevent.h"
+
+class NAMELuaEvent : public LuaEvent
+{
+public:
+    NAMELuaEvent(
+        // event params
+    ) : LuaEvent("NAME")
+    {
+        // store params as event data
+    }
+
+    virtual void Execute() const override
+    {
+        LuaEvent::Execute();
+
+        // logic
+    }
+
+private:
+    // event data
+};

@@ -7,13 +7,13 @@
       "name": "HideTempleFromGdi",
       "type": "bool",
       "default": true,
-      "comment": "Don't allow captured NOD con yards to build a NOD Temple"
+      "comment": "Don't allow NOD construction yards captured by GDI to build a NOD Temple"
     },
     {
       "name": "HideObeliskFromGdi",
       "type": "bool",
       "default": true,
-      "comment": "Don't allow captured NOD con yards to build an Obelisk"
+      "comment": "Don't allow NOD construction yards captured by GDI to build an Obelisk"
     },
     {
       "name": "HideApcFromNod",
@@ -37,7 +37,7 @@
       "name": "HideAdvancedCommCenterFromNod",
       "type": "bool",
       "default": true,
-      "comment": "Don't allow captured GDI con yards to build an Adv. Comm Center"
+      "comment": "Don't allow GDI construction yards captured by NOD to to build an Adv. Comm Center"
     },
     {
       "name": "OnlyGdiCanUseIonCannon",

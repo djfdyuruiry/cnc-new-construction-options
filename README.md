@@ -21,7 +21,7 @@ This project is under construction and intial development, so no release builds 
 ---
 
 ### [> Enhancements List](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/2.Enhancements)
-### [> Planned Features](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/3.Planned-Features)
+### [> Planned Features](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/4.Planned-Features)
 
 ### [> Project Wiki](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki)
 

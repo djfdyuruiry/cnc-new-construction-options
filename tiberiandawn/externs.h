@@ -50,8 +50,10 @@
 #include "options.h"
 #include "infantry.h"
 #include "jshell.h"
+#include "common/atomicqueue.h"
 #include "common/vqaconfig.h"
 #include "common/winstub.h"
+#include "common/lua/luaevent.h"
 #include "ccini.h"
 
 #ifdef REMASTER_BUILD
@@ -158,6 +160,20 @@ extern CCINIClass RuleINI;
 extern RulesClass Rule;
 extern WWKeyboardClass* Keyboard;
 
+/**
+ * Adapter for Lua API to pull in static RulesClass variable.
+ * 
+ * See: concept `RuleSectionsProviderConcept` in @file{common/lua/rules_luaapi.h}
+ */
+class RuleSectionsProvider final
+{
+public:
+    inline static RuleSections& Sections = Rule.Sections;
+
+private:
+    RuleSectionsProvider() = delete;
+};
+
 /*
 **	Game object allocation and tracking classes.
 */
@@ -179,6 +195,11 @@ extern TFixedIHeapClass<HouseClass> Houses;
 
 extern QueueClass<EventClass, MAX_EVENTS> OutList;
 extern QueueClass<EventClass, (MAX_EVENTS * 8)> DoList;
+
+/**
+ * Lua event queue, see @file{globals.cpp}
+ */
+extern AtomicQueue<LuaEvent> LuaList;
 
 typedef DynamicVectorArrayClass<ObjectClass*, HOUSE_COUNT, HOUSE_FIRST> SelectedObjectsType;
 extern SelectedObjectsType CurrentObject;

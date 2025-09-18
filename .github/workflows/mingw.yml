@@ -91,6 +91,22 @@ jobs:
             - redalert/**
           td:
             - tiberiandawn/**
+          lua:
+            - common/lua/scripts/**
+            - tiberiandawn/lua/scripts/**
+            - tests/lua/scripts/**
+
+    - name: Init Lua
+      if: steps.changes.outputs.lua == 'true'
+      uses: leafo/gh-actions-lua@v11
+      with:
+        luaVersion: "5.4"
+
+    - name: Run Lua Tests
+      if: steps.changes.outputs.lua == 'true'
+      run: |
+        ./scripts/98.run-lua-unit-tests.sh \
+        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -130,6 +146,7 @@ jobs:
       run: |
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
+    # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
         mkdir artifact
@@ -150,6 +167,12 @@ jobs:
           ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+
+          # lua library
+          mkdir -p lua/nco
+          cp -rv common/lua/scripts/nco/* lua/nco
+          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
     - name: Add internal tools to archive

@@ -469,6 +469,7 @@ void Keyboard_Process(KeyNumType& input)
         }
     }
 
+    // BUG: Does not work in single player mode (not skirmish/network)
     // Show special dialog
     if (Debug_Flag && input == KN_SLASH) {
         if (GameToPlay != GAME_NORMAL) {

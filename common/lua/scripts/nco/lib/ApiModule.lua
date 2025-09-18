@@ -1,0 +1,113 @@
+local TypeValidator = require("nco.lib.TypeValidator")
+
+local skipIfNotPresent = TypeValidator.Validators.skipIfNotPresent
+local isType = TypeValidator.Validators.isType
+local isNotBlank = TypeValidator.Validators.isNotBlank
+local isNotEmpty = TypeValidator.Validators.isNotEmpty
+
+---@class CppApi
+---@field __name string
+---@field __cppSource string
+
+---@alias CppApiInstance CppApi | { [string]: any|function }
+
+---@class ApiModuleSpec
+---@field name string
+---@field cppSource string
+---@field builder fun(cppApi: CppApiInstance, spec: ApiModuleSpec): table
+
+---@class ApiModule : CppApi
+
+--- Loads an native Lua API module, using a builder pattern and
+--- the option to mock the backend C++ API using CncApiMock.
+--- 
+--- Returned table is a wrapper around the native Lua module locking
+--- it down to be read only.
+---@generic T : ApiModule
+---@param moduleSpec ApiModuleSpec
+---@return T
+return function(moduleSpec)
+  TypeValidator.validateCall(
+    "ApiModule",
+    {
+      moduleSpec = { moduleSpec, isType("table") },
+      ["moduleSpec.name"] = { moduleSpec.name, isType("string"), isNotEmpty },
+      ["moduleSpec.cppSource"] = { moduleSpec.cppSource, isType("string"), isNotBlank },
+      ["moduleSpec.builder"] = { moduleSpec.builder, isType("function") },
+      ["_G.__CNC_API_MOCK"] = { _G.__CNC_API_MOCK, skipIfNotPresent, isType("table") }
+    }
+  )
+
+  local mockPresent = type(_G.__CNC_API_MOCK) == "table"
+
+  -- assert cppApi is loaded into Lua state
+  ---@diagnostic disable-next-line: undefined-field
+  if not mockPresent and not (type(_G.__CNC_API) == "table" and type(_G.__CNC_API[moduleSpec.name]) == "table") then
+    error(
+      string.format(
+       "%s API failed to init, required C++ backend not loaded: %s",
+       moduleSpec.name,
+       moduleSpec.cppSource
+      )
+    )
+  end
+
+  -- attempt to build module (use a mock cppApi via builder, if present)
+  ---@type CppApi
+  local cppApi = not mockPresent and _G.__CNC_API[moduleSpec.name] or _G.__CNC_API_MOCK(moduleSpec)
+
+  if mockPresent and type(cppApi) ~="table" then
+    error(
+      string.format(
+       "%s API failed to init, C++ backend mock builder didn't return a table, actual type returned: %s",
+        moduleSpec.name,
+        type(cppApi)
+      )
+    )
+  end
+
+  local status, moduleOrError = xpcall(function()
+    return moduleSpec.builder(cppApi, moduleSpec)
+  end, debug.traceback)
+
+  if not status then
+    error(
+      string.format(
+        "Failed to build API module '%s' due to error: %s",
+        moduleSpec.name,
+        moduleOrError
+      )
+    )
+  end
+
+  local module = moduleOrError
+
+  if type(module) ~= "table" then
+    error(
+      string.format(
+        "Builder for API module '%s' did not return a table, actual type returned: %s",
+        moduleSpec.name,
+        type(moduleOrError)
+      )
+    )
+  end
+
+  return setmetatable(
+    {},
+    {
+      __index = function (_, k)
+        -- provide generic metadata
+        if k == "__name" then
+          return cppApi.__name
+        elseif k == "__cppSource" then
+          return cppApi.__cppSource
+        end
+
+        return module[k]
+      end,
+      __newindex = function ()
+        error("API modules are read only. Did you mean to access an API method or field?")
+      end
+    }
+  )
+end

@@ -75,6 +75,8 @@
 #include "function.h"
 #include "common/framelimit.h"
 
+#include "lua/scenariolua.h"
+
 /********************************** Defines *********************************/
 #define SHOW_MONO 1
 
@@ -2790,6 +2792,9 @@ static int Execute_DoList(int,
                 DoList[i].IsExecuted = true; // mark as having been executed
             }
         }
+
+        ScenarioLua::Process_Lua_Events(LuaList);
+
         return (1);
     }
 

@@ -99,9 +99,12 @@ public:
         ACTION_DESTROY_XXXX,   // Destroy trigger XXXX.
         ACTION_DESTROY_YYYY,   // Destroy trigger YYYY.
         ACTION_DESTROY_ZZZZ,   // Destroy trigger ZZZZ.
-        ACTION_AUTOCREATE,     // Computer to autocreat teams.
+        ACTION_AUTOCREATE,     // Computer to autocreate teams.
         ACTION_WINLOSE,        // Win if captured, lose if destroyed.
         ACTION_ALLOWWIN,       // Allows winning if triggered.
+
+        ACTION_LUA_EVENT,      // Runs a registered lua callback.
+        ACTION_LUA_SCRIPT,     // Runs a lua script file.
 
         ACTION_COUNT,
         ACTION_FIRST = 0
@@ -145,6 +148,7 @@ public:
     */
     static void Read_INI(CCINIClass& ini);
     void Fill_In(const char* name, const char* entry);
+    void Write_INI_String(char* buffer);
     static void Write_INI(CCINIClass& ini, bool refresh);
     static const char* INI_Name(void)
     {
@@ -267,7 +271,11 @@ public:
     int Data;
     int DataCopy;
 
+    std::optional<std::string> StringData;
+
 private:
+    inline static const CncLogger& Logger = CncLogger("TriggerClass");
+
     /*
     **	Triggers can be referred to by their name, which can be up to 4
     **	characters.

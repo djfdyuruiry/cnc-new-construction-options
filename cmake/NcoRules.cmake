@@ -4,7 +4,7 @@
 #
 # Params (mandatory):
 #
-#   * RULES_PATH - Path to a directory that contains .json files describing a rules.ini section
+#   * RULES_PATH - Path to a directory that contains .json files, each describing a rules.ini section
 #   * RULES_KEYS_TEMPLATE_PATH - Template for generated .h file that defines consts for names of sections and rules
 #   * RULES_KEYS_PATH - Output path for rendered ${RULES_KEYS_TEMPLATE_PATH} template
 #   * RULES_NCO_TEMPLATE_PATH - Template for generated .cpp file that loads and exports rules
@@ -23,7 +23,7 @@
 #   }
 #   ```
 #
-# Generates four seperate blocks of C++ code and provides them as variables to the above templates:
+# Generates four separate blocks of C++ code and provides them as variables to the above templates:
 #
 #   * RULE_JSON_SOURCES_COMMENTS - Multiline comment lines containing a list of JSON files used to generated rules
 #   * RULE_KEYS_DEFINES - Define macros which provide const strings for section and rule names
@@ -278,7 +278,7 @@ function(Main)
       ResolveRuleValue("${RULE_DEFAULT}" RULE_VALUE)
 
       string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Default(${RULE_VALUE})")
-      string(APPEND RULE_EXPORT_CODE ".template Save<${RULE_TYPE}>(${RULE_DEFINE})")
+      string(APPEND RULE_EXPORT_CODE ".Save(${RULE_DEFINE})")
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close call chain for section

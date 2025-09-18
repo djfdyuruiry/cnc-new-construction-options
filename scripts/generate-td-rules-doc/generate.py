@@ -9,6 +9,23 @@ import os
 
 from jinja2 import Template
 
+def render_template(template_path, sections):
+    """Render the Jinja template with the loaded sections."""
+    print(f"Rendering jinja template file: {template_path}")
+
+    if not os.path.exists(template_path):
+      raise FileNotFoundError(f"Markdown template file not found @ {template_path}")
+
+    with open(template_path, 'r') as f:
+        template_content = f.read()
+    
+    # Create Jinja template
+    template = Template(template_content)
+
+    # Render with sections
+    rendered = template.render(sections=sections)
+    return rendered
+
 def load_json_files(directory):
     """Load all JSON files from the specified directory."""
     sections = []
@@ -24,20 +41,6 @@ def load_json_files(directory):
                 sections.append(data)
     
     return sections
-
-def render_template(template_path, sections):
-    """Render the Jinja template with the loaded sections."""
-    print(f"Rendering jinja template file: {template_path}")
-
-    with open(template_path, 'r') as f:
-        template_content = f.read()
-    
-    # Create Jinja template
-    template = Template(template_content)
-
-    # Render with sections
-    rendered = template.render(sections=sections)
-    return rendered
 
 def main():
     """Main function to deserialize JSON files and render template."""

@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# shellcheck source-path=SCRIPTDIR
 set -eEuo pipefail
 
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,19 +42,24 @@ function main() {
 
   pushd_silent "${RA_DATA_PATH}"
 
-  local log_path="${build_path}/vanillara.log"
-  start_logging "${log_path}"
-
   local exit_code=0
+  local prefix_command=""
 
-  NCO_LOG_LEVEL="debug" ./vanillara-dev "$@" || {
+  if [ "${PROFILE:-false}" == "true" ]; then
+    if [ -z "$(command perf)" ]; then
+      error_and_exit "perf command is required to run this script"
+    fi
+
+    prefix_command="perf record"
+  fi
+
+  # run with debug logging and capture profiling info
+  NCO_LOG_LEVEL="debug" ${prefix_command} ./vanillara-dev "$@" || {
     exit_code="$?"
-    stop_logging
     log_error "Game finished with non-zero exit code: ${exit_code}"
   }
 
-  stop_logging
-  log_warning "View full game log: ${log_path}"
+  log_warning "View full game log: $(pwd)/nco.log"
 
   rm "vanillara-dev"
   popd_silent
