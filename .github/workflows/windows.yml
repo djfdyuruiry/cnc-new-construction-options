@@ -174,21 +174,22 @@ jobs:
       run: IS_WINDOWS=true ./scripts/bin/vcpkg --init
 
     - name: Init Binary Cache
+      shell: bash
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json,readwrite"
       run: |
         ./scripts/bin/vcpkg fetch nuget
 
-        "$(./scripts/bin/vcpkg fetch nuget)" \
-          sources add \
+        cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
+
+        nuget.exe sources add \
           -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json" \
           -StorePasswordInClearText \
           -Name GitHubPackages \
           -UserName "${{ env.GITHUB_REPOSITORY_OWNER }}" \
           -Password "${{ secrets.GITHUB_TOKEN }}"
 
-        "$(./scripts/bin/vcpkg fetch nuget)" \
-          setapikey "${{ secrets.GITHUB_TOKEN }}" \
+        nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
           -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json"
 
     - name: Build Vanilla Conquer
