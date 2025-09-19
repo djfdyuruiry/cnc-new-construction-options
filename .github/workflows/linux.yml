@@ -162,7 +162,7 @@ jobs:
           curl \
           git \
           libtool \
-          mono-complete \
+          mono-runtime \
           ninja-build \
           pkg-config \
           python3 \
@@ -177,16 +177,14 @@ jobs:
         sudo apt-get install -y libltdl-dev
 
     - name: Init vcpkg
-      run: ./scripts/bin/vcpkg --init
+      run: |
+        ./scripts/bin/vcpkg --init
+        ./scripts/bin/vcpkg fetch nuget
 
     - name: Init Binary Cache
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
-        set -x
-
-        ./scripts/bin/vcpkg fetch nuget
-
         cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
 
         mono nuget.exe sources add \

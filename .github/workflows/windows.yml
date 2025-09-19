@@ -171,17 +171,17 @@ jobs:
 
     - name: Init vcpkg
       shell: bash
-      run: IS_WINDOWS=true ./scripts/bin/vcpkg --init
+      env:
+        IS_WINDOWS: "true"
+      run: |
+        ./scripts/bin/vcpkg --init
+        ./scripts/bin/vcpkg fetch nuget
 
-    - name: Init Binary Cache
+    - name: Init vcpkg Binary Cache
       shell: bash
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
-        set -x
-
-        ./scripts/bin/vcpkg fetch nuget
-
         cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
 
         nuget.exe sources add \

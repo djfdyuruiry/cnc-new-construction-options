@@ -64,7 +64,7 @@ jobs:
 
     - name: Install homebrew deps
       run: |
-        brew install imagemagick dylibbundler
+        brew install imagemagick dylibbundler mono
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -129,13 +129,34 @@ jobs:
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
 
     - name: Init vcpkg
-      run: ./scripts/bin/vcpkg --init
+      run: |
+        ./scripts/bin/vcpkg --init
+        ./scripts/bin/vcpkg fetch nuget
+
+    - name: Init vcpkg Binary Cache
+      shell: bash
+      env: 
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
+      run: |
+        cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
+
+        nuget.exe sources add \
+          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "djfdyuruiry" \
+          -Password "${{ secrets.GITHUB_TOKEN }}"
+
+        nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
+          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
+
 
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
         CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
