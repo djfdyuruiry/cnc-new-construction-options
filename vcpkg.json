@@ -23,7 +23,16 @@
         "vulkan",
         "wayland",
         "x11"
+      ],
+      "platform": "linux"
+    },
+    {
+      "name": "sdl2",
+      "version>=": "2.32.10",
+      "features": [
+        "vulkan"
       ]
+      "platform": "!linux"
     },
     {
       "name": "spdlog",
