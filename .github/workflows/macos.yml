@@ -133,6 +133,7 @@ jobs:
 
     - name: Build Vanilla Conquer
       env:
+        CMAKE_MAKE_PROGRAM: ninja
         CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
       run: |

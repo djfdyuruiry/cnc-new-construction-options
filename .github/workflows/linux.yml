@@ -176,7 +176,11 @@ jobs:
         CMAKE_MAKE_PROGRAM: ninja
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
       run: |
-        cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
+        cmake --workflow --preset ${{ steps.set_preset.outputs.preset }} || {
+          cat .vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
+          cat .vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
+          exit 1
+        }
 
     # TODO: re-enable after making formatting changes suggested (changes alot of files)
     # - name: Check formatting

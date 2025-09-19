@@ -150,6 +150,7 @@ jobs:
 
     - name: Build Vanilla Conquer
       env:
+        CMAKE_MAKE_PROGRAM: ninja
         CMAKE_FIND_ROOT_PATH: "/tmp/SDL2-2.0.12/${{ matrix.arch.lin }}-w64-mingw32;/tmp/openal-soft-1.21.0-bin"
         CMAKE_TOOLCHAIN_FILE: "cmake/${{ matrix.arch.lin }}-mingw-w64-toolchain.cmake"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
