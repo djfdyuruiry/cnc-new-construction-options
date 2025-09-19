@@ -172,8 +172,9 @@ jobs:
 
     - name: Build Vanilla Conquer
       env:
+        CMAKE_MAKE_PROGRAM: ninja
         CMAKE_FIND_ROOT_PATH: "${{ steps.deps.outputs.magickpath }}"
-        VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200"
+        VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
       run: |
         cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
 

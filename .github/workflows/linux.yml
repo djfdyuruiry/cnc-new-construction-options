@@ -148,6 +148,24 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+
+    - name: Ensure Build Tools Present
+      run: |
+        sudo apt-get install -y autoconf \
+          build-essential \
+          cmake \
+          clang \
+          curl \
+          git \
+          libtool \
+          ninja-build \
+          pkg-config \
+          python3 \
+          python3-jinja2 \
+          tar \
+          unzip \
+          zip
+
     - name: Init vcpkg
       run: ./scripts/bin/vcpkg --init
 
@@ -155,6 +173,7 @@ jobs:
       env:
         CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
+        CMAKE_MAKE_PROGRAM: ninja
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
       run: |
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
