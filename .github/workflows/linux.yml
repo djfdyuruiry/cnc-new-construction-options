@@ -157,6 +157,7 @@ jobs:
           clang \
           curl \
           git \
+          libltdl-dev \
           libtool \
           ninja-build \
           pkg-config \
