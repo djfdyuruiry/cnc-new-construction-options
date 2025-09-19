@@ -221,10 +221,7 @@ jobs:
           # lua library
           mkdir -p lua/nco
         
-          cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua || {
-            ls -la build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed
-            exit 1
-          }
+          cp -rv ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua
 
           cp -rv common/lua/scripts/nco/* lua/nco
           cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco

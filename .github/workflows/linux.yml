@@ -173,6 +173,7 @@ jobs:
           zip
 
     # vcpkg sub-dependency libxcrypt requires libltdl
+    # TODO: include these headers in the repo instead
     - name: Fetch Dependencies
       run: |
         sudo apt-get install -y libltdl-dev
