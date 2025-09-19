@@ -1,5 +1,8 @@
 name: windows
 
+permissions:
+  packages: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -170,11 +173,28 @@ jobs:
       shell: bash
       run: IS_WINDOWS=true ./scripts/bin/vcpkg --init
 
+    - name: Init Binary Cache
+      env: 
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json,readwrite"
+      run: |
+        "$(./scripts/bin/vcpkg fetch nuget)" \
+          sources add \
+          -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "${{ env.GITHUB_REPOSITORY_OWNER }}" \
+          -Password "${{ secrets.GITHUB_TOKEN }}"
+
+        "$(./scripts/bin/vcpkg fetch nuget)" \
+          setapikey "${{ secrets.GITHUB_TOKEN }}" \
+          -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json"
+
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
         CMAKE_FIND_ROOT_PATH: "${{ steps.deps.outputs.magickpath }}"
         VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json,readwrite"
       run: |
         cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
 

@@ -1,5 +1,8 @@
 name: linux
 
+permissions:
+  packages: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -148,8 +151,7 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-
-    - name: Ensure Build Tools Present
+    - name: Fetch Build Tools
       run: |
         sudo apt-get install -y autoconf \
           autoconf-archive \
@@ -159,8 +161,8 @@ jobs:
           clang \
           curl \
           git \
-          libltdl-dev \
           libtool \
+          mono-complete \
           ninja-build \
           pkg-config \
           python3 \
@@ -169,8 +171,29 @@ jobs:
           unzip \
           zip
 
+    # vcpkg sub-dependency libxcrypt requires libltdl
+    - name: Fetch Dependencies
+      run: |
+        sudo apt-get install -y libltdl-dev
+
     - name: Init vcpkg
       run: ./scripts/bin/vcpkg --init
+
+    - name: Init Binary Cache
+      env: 
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json,readwrite"
+      run: |
+        mono "$(./scripts/bin/vcpkg fetch nuget)" \
+          sources add \
+          -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "${{ env.GITHUB_REPOSITORY_OWNER }}" \
+          -Password "${{ secrets.GITHUB_TOKEN }}"
+
+        mono "$(./scripts/bin/vcpkg fetch nuget)" \
+          setapikey "${{ secrets.GITHUB_TOKEN }}" \
+          -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json"
 
     - name: Build Vanilla Conquer
       env:
@@ -178,12 +201,9 @@ jobs:
         CXX: ${{ matrix.compiler.cxx }}
         CMAKE_MAKE_PROGRAM: ninja
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json,readwrite"
       run: |
-        cmake --workflow --preset ${{ steps.set_preset.outputs.preset }} || {
-          cat .vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-out.log
-          cat .vcpkg/buildtrees/libxcrypt/autoconf-x64-linux-err.log
-          exit 1
-        }
+        cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
     # TODO: re-enable after making formatting changes suggested (changes alot of files)
     # - name: Check formatting
