@@ -177,6 +177,8 @@ jobs:
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json,readwrite"
       run: |
+        ./scripts/bin/vcpkg fetch nuget
+
         "$(./scripts/bin/vcpkg fetch nuget)" \
           sources add \
           -Source "https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json" \
@@ -216,7 +218,10 @@ jobs:
           # lua library
           mkdir -p lua/nco
         
-          cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua/nco
+          cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua || {
+            ls -la build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed
+            exit 1
+          }
 
           cp -rv common/lua/scripts/nco/* lua/nco
           cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
