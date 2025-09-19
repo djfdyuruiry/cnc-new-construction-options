@@ -29,6 +29,9 @@ function deploy_nco_lua() {
   rm -rf "${target_dir}/lua"
   mkdir -p "${target_dir}/lua"
 
+  # include lua binaries for testing
+  cp -rfv "${build_directory}/${cmake_preset}/vcpkg_installed"/*/tools/lua/* "${target_dir}/lua"
+
   cp -rfv "${common_lua_scripts_path}"/* "${target_dir}/lua"
 
   if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then

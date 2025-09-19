@@ -52,43 +52,9 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-    - name: Setting up Cache-Key
-      run: echo "DEP_CACHE_KEY=$(curl 'https://ports.macports.org/api/v1/ports/dylibbundler/?format=json' | grep -ioE '("version":).[^,]*')-$(curl 'https://ports.macports.org/api/v1/ports/libsdl2/?format=json' | grep -ioE '("version":).[^,]*')-$(curl 'https://ports.macports.org/api/v1/ports/openal-soft/?format=json' | grep -ioE '("version":).[^,]*')" >> $GITHUB_ENV
-
-    - name: Printing Cache-Key
-      run: echo $DEP_CACHE_KEY
-
-    - name: Restore cache
-      id: dep-cache
-      uses: actions/cache@v4
-      env:
-        cache-name: cache-dependencies
-      with:
-        path: ~/macports
-        key: "${{ env.DEP_CACHE_KEY }}"
-
     - name: Install homebrew deps
       run: |
         brew install imagemagick dylibbundler
-
-    # note: first run (with an empty cache) takes 30-40 mins
-    - if: ${{ steps.dep-cache.outputs.cache-hit != 'true' }}
-      name: Install macport dependencies
-      run: |
-        wget -q https://github.com/macports/macports-base/releases/download/v2.10.5/MacPorts-2.10.5-14-Sonoma.pkg
-        sudo installer -pkg ./MacPorts-2.10.5-14-Sonoma.pkg -target /
-        export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-        sudo port selfupdate -N
-        sudo port install libsdl2 +universal -N
-        sudo port install openal-soft +universal -N
-        mkdir ~/macports
-        sudo cp -R /opt/local ~/macports
-        sudo chown -R $USER:staff ~/macports
-
-    - if: ${{ steps.dep-cache.outputs.cache-hit == 'true' }}
-      name: Restore macport dependencies from cache
-      run: |
-        sudo cp -R ~/macports/local /opt/local
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -185,8 +151,12 @@ jobs:
 
           # lua library
           mkdir -p lua/nco
+        
+          cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua/nco
+
           cp -rv common/lua/scripts/nco/* lua/nco
           cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
+
           7z a vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
