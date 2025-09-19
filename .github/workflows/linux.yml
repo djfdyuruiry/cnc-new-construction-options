@@ -151,6 +151,7 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+    # TODO: refine from mono-complete to actual list of packages needed for nuget.exe
     - name: Fetch Build Tools
       run: |
         sudo apt-get install -y autoconf \
@@ -162,7 +163,7 @@ jobs:
           curl \
           git \
           libtool \
-          mono-runtime \
+          mono-complete \
           ninja-build \
           pkg-config \
           python3 \
