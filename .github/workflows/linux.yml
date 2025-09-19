@@ -21,7 +21,7 @@ on:
         default: 'ubuntu-24.04'
 
   pull_request:
-    paths: &change-paths
+    paths:
       - .clang-format
       - CMake**
       - .github/workflows/linux.yml
@@ -36,7 +36,17 @@ on:
   push:
     branches:
       - main
-    paths: *change-paths
+    paths:
+      - .clang-format
+      - CMake**
+      - .github/workflows/linux.yml
+      - cmake/**
+      - common/**
+      - redalert/**
+      - resources
+      - tests/**
+      - tiberiandawn/**
+      - tools/**
 
 concurrency:
   group: ${{ github.ref }}__linux

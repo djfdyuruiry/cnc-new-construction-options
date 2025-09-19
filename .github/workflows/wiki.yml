@@ -5,7 +5,7 @@ on:
 
   # wiki workflow runs in 'dry run' mode on PRs
   pull_request:
-    paths: &change-paths
+    paths:
       # wiki workflow and source
       - .github/workflows/wiki.yml
       - wiki/**
@@ -22,7 +22,18 @@ on:
   push:
     branches:
       - main
-    paths: *change-paths
+    paths:
+      # wiki workflow and source
+      - .github/workflows/wiki.yml
+      - wiki/**
+      # rules.ini rules
+      - tiberiandawn/rules/**
+      # lua code
+      - common/lua/scripts/**
+      - tiberiandawn/lua/scripts/**
+      # generated pages
+      - scripts/generate-lua-docs/**
+      - scripts/generate-td-rules-doc/**
 
 concurrency:
   group: ${{ github.ref }}__wiki

@@ -19,7 +19,7 @@ on:
   # TODO: Builds *only* run for PRs and *only* if you label the PR with 'mingw'.
   #       I want to save on action minute usage for now.
   pull_request:
-    paths: &change-paths
+    paths:
       - .clang-format
       - CMake**
       - .github/workflows/mingw.yml
@@ -34,7 +34,17 @@ on:
   # push:
   #   branches:
   #     - main
-  #   paths: *change-paths
+  #   paths:
+  #     - .clang-format
+  #     - CMake**
+  #     - .github/workflows/mingw.yml
+  #     - cmake/**
+  #     - common/**
+  #     - redalert/**
+  #     - resources
+  #     - tests/**
+  #     - tiberiandawn/**
+  #     - tools/**
 
 concurrency:
   group: ${{ github.ref }}__mingw
