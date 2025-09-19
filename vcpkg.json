@@ -18,7 +18,12 @@
     },
     {
       "name": "sdl2",
-      "version>=": "2.32.10"
+      "version>=": "2.32.10",
+      "features": [
+        "vulkan",
+        "wayland",
+        "x11"
+      ]
     },
     {
       "name": "spdlog",

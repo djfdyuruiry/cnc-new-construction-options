@@ -172,11 +172,14 @@ jobs:
           unzip \
           zip
 
-    # vcpkg sub-dependency libxcrypt requires libltdl
-    # TODO: include these headers in the repo instead
     - name: Fetch Dependencies
       run: |
+        # vcpkg sub-dependency libxcrypt
+        # TODO: include these headers in the repo instead
         sudo apt-get install -y libltdl-dev
+
+        # SDL2 X11/Wayland support
+        sudo apt-get install -y libegl1-mesa-dev libltdl-dev libwayland-dev libxkbcommon-dev libx11-dev libxext-dev libxft-dev
 
     - name: Init vcpkg
       run: |
