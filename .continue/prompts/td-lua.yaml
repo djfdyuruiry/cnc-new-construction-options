@@ -1,0 +1,13 @@
+name: TD Lua
+version: 0.0.1
+schema: v1
+prompts:
+  - name: Create TD Event Type
+    description: Create a new subclass of LuaEvent from template
+    prompt: |
+      - Use the template @/tiberiandawn/lua/events/td_luaevent.h.template to generate a new event class.
+      - Add parameters to the class that initialize event data
+      - Do not add additional methods not present in the template.
+      - IMPORTANT: Parameter names should be lower snake case and private fields upper camel case
+      - Name and parameters follow below:
+

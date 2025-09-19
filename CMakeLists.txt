@@ -141,9 +141,8 @@ if(SDL1)
 endif()
 
 if(SDL2)
-    find_package(SDL2 REQUIRED)
-    list(APPEND VANILLA_LIBS ${SDL2_LIBRARY})
-    include_directories(${SDL2_INCLUDE_DIR})
+    find_package(SDL2 CONFIG REQUIRED)
+    list(APPEND VANILLA_LIBS $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
 
     # winuser.h defines VK_ macros but it can be prevented
     if(WIN32)
@@ -153,10 +152,24 @@ if(SDL2)
 endif()
 
 if(OPENAL)
-    find_package(OpenAL REQUIRED)
+    find_package(OpenAL CONFIG REQUIRED)
     list(APPEND VANILLA_LIBS OpenAL::OpenAL)
     set(DSOUND OFF)
 endif()
+
+# lua
+find_package(Lua REQUIRED)
+include_directories(${LUA_INCLUDE_DIR})
+list(APPEND VANILLA_LIBS ${LUA_LIBRARIES})
+
+# luabridge
+find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/Array.h")
+include_directories(${LUABRIDGE_INCLUDE_DIRS})
+
+# spdlog
+find_package(spdlog CONFIG REQUIRED)
+list(APPEND COMMON_LIBS spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>) # TODO: determine why this is required
+list(APPEND VANILLA_LIBS spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 
 if(BUILD_TESTS)
     # Tests need to respect some options so need to occur after the options are set.
