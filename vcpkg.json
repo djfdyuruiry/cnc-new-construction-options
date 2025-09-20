@@ -31,7 +31,7 @@
       "version>=": "2.32.10",
       "features": [
         "vulkan"
-      ]
+      ],
       "platform": "!linux"
     },
     {
