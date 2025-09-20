@@ -6,7 +6,8 @@ $repoPath = Join-Path $scriptPath "../.."
 function Main {
   Push-Location -Path $repoPath
 
-  $vcpkgPath = "./.vcpkg"
+  $vcpkgPath = Join-Path $repoPath ".vcpkg"
+  $env:VCPKG_ROOT = $vcpkgPath
 
   if (-Not (Test-Path -Path "${vcpkgPath}/scripts/bootstrap.ps1" -PathType Leaf)) {
     git submodule update --init --recursive
@@ -27,8 +28,6 @@ function Main {
   if ($args[0] -eq "--init") {
     return
   }
-
-  $env:VCPKG_ROOT = $vcpkgPath
 
   & "${vcpkgPath}/vcpkg" @args
 
