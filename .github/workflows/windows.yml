@@ -164,11 +164,6 @@ jobs:
         $gitoutput = git rev-parse --short HEAD
         echo "sha_short=${gitoutput}" >> $env:GITHUB_OUTPUT
 
-    - name: Install Dependencies
-      id: deps
-      run: |
-        echo "magickpath=$(Split-Path -Path $(Get-Command magick).Path -Parent)" >> $env:GITHUB_OUTPUT
-
     - name: Init vcpkg
       run: scripts/bin/vcpkg.ps1 --init
 
@@ -187,10 +182,11 @@ jobs:
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
-        CMAKE_FIND_ROOT_PATH: "${{ steps.deps.outputs.magickpath }}"
         VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
+        $env:CMAKE_FIND_ROOT_PATH="$(Split-Path -Path $(Get-Command magick).Path -Parent)"
+
         cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
 
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
