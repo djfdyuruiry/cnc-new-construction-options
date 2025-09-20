@@ -171,23 +171,23 @@ jobs:
 
     - name: Init vcpkg
       run: |
-        powershell ./scripts/bin/vcpkg.ps1 --init
-        powershell ./scripts/bin/vcpkg.ps1 fetch nuget
+        scripts/bin/vcpkg.ps1 --init
+        scripts/bin/vcpkg.ps1 fetch nuget
 
     - name: Init vcpkg Binary Cache
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
-        Set-Location "$(Split-Path "$(. ./scripts/bin/vcpkg.ps1 fetch nuget)" -Parent)"
+        Set-Location "$(Split-Path "$(scripts/bin/vcpkg.ps1 fetch nuget)" -Parent)"
 
-        ./nuget.exe sources add `
+        nuget.exe sources add `
           -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" `
           -StorePasswordInClearText `
           -Name GitHubPackages `
           -UserName "djfdyuruiry" `
           -Password "${{ secrets.GITHUB_TOKEN }}"
 
-        ./nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" `
+        nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" `
           -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
 
     - name: Build Vanilla Conquer
