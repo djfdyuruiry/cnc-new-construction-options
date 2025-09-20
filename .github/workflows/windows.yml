@@ -170,28 +170,24 @@ jobs:
         echo "magickpath=$(Split-Path -Path $(Get-Command magick).Path -Parent)" >> $env:GITHUB_OUTPUT
 
     - name: Init vcpkg
-      shell: bash
-      env:
-        IS_WINDOWS: "true"
       run: |
-        ./scripts/bin/vcpkg --init
-        ./scripts/bin/vcpkg fetch nuget
+        powershell ./scripts/bin/vcpkg.ps1 --init
+        powershell ./scripts/bin/vcpkg.ps1 fetch nuget
 
     - name: Init vcpkg Binary Cache
-      shell: bash
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
-        cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
+        Set-Location "$(Split-Path "$(. ./scripts/bin/vcpkg.ps1 fetch nuget)" -Parent)"
 
-        nuget.exe sources add \
-          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" \
-          -StorePasswordInClearText \
-          -Name GitHubPackages \
-          -UserName "djfdyuruiry" \
+        ./nuget.exe sources add `
+          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" `
+          -StorePasswordInClearText `
+          -Name GitHubPackages `
+          -UserName "djfdyuruiry" `
           -Password "${{ secrets.GITHUB_TOKEN }}"
 
-        nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
+        ./nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" `
           -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
 
     - name: Build Vanilla Conquer
@@ -210,7 +206,7 @@ jobs:
         mkdir artifact
 
         # grab 3rd party libraries built by vcpkg
-        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/Release/*.dll
+        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.dll
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
@@ -230,10 +226,6 @@ jobs:
           cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
 
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
-
-          # patch for vcpkg lua.dll debug deps (use external clean build)
-          curl -L https://github.com/dyne/luabinaries/releases/download/4a12002/lua54.dll -o lua.dll
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip lua.dll
         fi
 
     - name: Add internal tools to archive

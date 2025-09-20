@@ -162,6 +162,7 @@ jobs:
           clang \
           curl \
           git \
+          imagemagick \
           libtool \
           mono-complete \
           ninja-build \
@@ -174,7 +175,7 @@ jobs:
 
     - name: Fetch Dependencies
       run: |
-        # vcpkg sub-dependency libxcrypt
+        # vcpkg sub-dependency libxcrypt needs this
         # TODO: include these headers in the repo instead
         sudo apt-get install -y libltdl-dev
 

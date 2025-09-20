@@ -64,7 +64,7 @@ jobs:
 
     - name: Install homebrew deps
       run: |
-        brew install imagemagick dylibbundler mono
+        brew install dylibbundler imagemagick jinja2-cli mono ninja python3
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
