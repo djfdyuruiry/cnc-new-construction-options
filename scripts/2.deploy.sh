@@ -53,7 +53,7 @@ function main() {
   local build_type="Debug"
 
   if [ "${cmake_preset}" == "nco" ]; then
-    build_type="Release"
+    build_type="RelWithDebInfo"
   fi
 
   find "${build_path}/${cmake_preset}/${build_type}" \

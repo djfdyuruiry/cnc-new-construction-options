@@ -27,13 +27,13 @@ function main() {
     preset="nco-tiberian-dawn-debug"
   fi
 
-  if [[ "${build_type}" =~ ^(Debug|Release)$ ]]; then
+  if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
     # custom build preset passed, remove it before forwarding args to game
     shift
   elif [[ "${preset}" =~ ^nco.+-debug$ ]]; then
     build_type="Debug"
   elif [[ "${preset}" =~ ^nco.* ]]; then
-    build_type="Release"
+    build_type="RelWithDebInfo"
   else
     # not a build type, don't pass to the build script
     build_type=""

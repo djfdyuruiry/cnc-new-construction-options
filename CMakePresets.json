@@ -2,8 +2,8 @@
     "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 31,
-        "patch": 6
+        "minor": 25,
+        "patch": 0
     },
     "configurePresets": [
         {
@@ -40,6 +40,16 @@
             }
         },
         {
+            "name": "internal",
+            "inherits": "release",
+            "displayName": "Vanilla Internal build",
+            "cacheVariables": {
+                "MAP_EDITORTD": "ON",
+                "MAP_EDITORRA": "ON",
+                "BUILD_TOOLS": "ON"
+            }
+        },
+        {
             "name": "testing",
             "inherits": "release",
             "displayName": "Vanilla build with tests",
@@ -48,6 +58,37 @@
                 "BUILD_VANILLARA": "OFF",
                 "BUILD_TESTS": "ON"
             }
+        },
+        {
+            "name": "nonet",
+            "inherits": "internal",
+            "displayName": "Vanilla build no networking",
+            "cacheVariables": {
+                "NETWORKING": "OFF"
+            }
+        },
+        {
+            "name": "msvc2019-i686-remaster",
+            "inherits": "remaster",
+            "binaryDir": "${sourceDir}/build_remaster",
+            "displayName": "MSVC 2019 32bit Remaster build",
+            "generator": "Visual Studio 16 2019",
+            "architecture": "Win32"
+        },
+        {
+            "name": "msvc2019-i686-vanilla",
+            "inherits": "release",
+            "binaryDir": "${sourceDir}/build_msvc32",
+            "displayName": "MSVC 2019 32bit Vanilla build",
+            "generator": "Visual Studio 16 2019",
+            "architecture": "Win32"
+        },
+        {
+            "name": "msvc2019-x86-64-vanilla",
+            "inherits": "release",
+            "binaryDir": "${sourceDir}/build_msvc64",
+            "displayName": "MSVC 2019 64bit Vanilla build",
+            "architecture": "x64"
         },
         {
             "name": "nco",
@@ -118,32 +159,67 @@
     ],
     "buildPresets": [
         {
+            "name": "remaster",
+            "configurePreset": "remaster",
+            "displayName": "Vanilla Game Build",
+            "description": "Vanilla Game Build",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "displayName": "Vanilla Game Build",
+            "description": "Vanilla Game Build",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "internal",
+            "configurePreset": "internal",
+            "displayName": "Vanilla Game Build",
+            "description": "Vanilla Game Build",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "testing",
+            "configurePreset": "testing",
+            "displayName": "Vanilla Game Build",
+            "description": "Vanilla Game Build",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "nonet",
+            "configurePreset": "nonet",
+            "displayName": "Vanilla Game Build",
+            "description": "Vanilla Game Build",
+            "configuration": "RelWithDebInfo"
+        },
+        {
             "name": "nco",
             "configurePreset": "nco",
             "displayName": "NCO Build",
             "description": "NCO Build",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         },
         {
             "name": "nco-debug",
             "configurePreset": "nco-debug",
             "displayName": "NCO Debug Build",
             "description": "NCO Debug Build",
-            "configuration": "RelWithDebInfo"
+            "configuration": "Debug"
         },
         {
             "name": "nco-red-alert",
             "configurePreset": "nco-red-alert",
             "displayName": "NCO Red Alert Build",
             "description": "NCO Red Alert Build",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         },
         {
             "name": "nco-tiberian-dawn",
             "configurePreset": "nco-tiberian-dawn",
             "displayName": "NCO Tiberian Dawn Build",
             "description": "NCO Tiberian Dawn Build",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         },
         {
             "name": "nco-red-alert-debug",
@@ -164,21 +240,21 @@
             "configurePreset": "nco-remaster",
             "displayName": "NCO Build (remaster)",
             "description": "NCO Build (remaster)",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         },
         {
             "name": "nco-red-alert-remaster",
             "configurePreset": "nco-red-alert-remaster",
             "displayName": "NCO Red Alert Build (remaster)",
             "description": "NCO Red Alert Build (remaster)",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         },
         {
             "name": "nco-tiberian-dawn-remaster",
             "configurePreset": "nco-tiberian-dawn-remaster",
             "displayName": "NCO Tiberian Dawn Build (remaster)",
             "description": "NCO Tiberian Dawn Build (remaster)",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         }
     ],
     "testPresets": [
@@ -196,6 +272,75 @@
         }
     ],
     "workflowPresets": [
+        {
+            "name": "release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release"
+                },
+                {
+                    "type": "build",
+                    "name": "release"
+                }
+            ]
+        },
+        {
+            "name": "remaster",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "remaster"
+                },
+                {
+                    "type": "build",
+                    "name": "remaster"
+                }
+            ]
+        },
+        {
+            "name": "internal",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "internal"
+                },
+                {
+                    "type": "build",
+                    "name": "internal"
+                }
+            ]
+        },
+        {
+            "name": "testing",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "testing"
+                },
+                {
+                    "type": "build",
+                    "name": "testing"
+                },
+                {
+                    "type": "test",
+                    "name": "testing"
+                }
+            ]
+        },
+        {
+            "name": "nonet",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "nonet"
+                },
+                {
+                    "type": "build",
+                    "name": "nonet"
+                }
+            ]
+        },
         {
             "name": "nco",
             "steps": [

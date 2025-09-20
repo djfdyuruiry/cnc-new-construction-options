@@ -210,11 +210,13 @@ jobs:
         mkdir artifact
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/Release/vanillara.exe
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.pdb
         fi
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip  ./resources/data/td/* ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/Release/vanillatd.exe
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip  ./resources/data/td/* ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.pdb
 
           # lua library
           mkdir -p lua/nco
@@ -225,6 +227,10 @@ jobs:
           cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
 
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
+
+          # patch for vcpkg lua.dll debug deps (use external clean build)
+          curl -L https://github.com/dyne/luabinaries/releases/download/4a12002/lua54.dll -o lua.dll
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip lua.dll
         fi
 
     - name: Add vcpkg deps to archive
@@ -232,13 +238,15 @@ jobs:
       run: |
         # ignore lua.dll, patched version included in previous step
         Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed `
+        | Where-Object { -not $_.Name.EndsWith("lua.dll") } `
         | ForEach-Object {
           Write-Host & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)"
         }
 
     - name: Add internal tools to archive
       run: |
-        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/Release/vanillamix.exe
+        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillamix.exe
+        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillamix.pdb
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -314,12 +322,14 @@ jobs:
   #       mkdir artifact
 
   #       if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/Release/RedAlert.dll
+  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/RedAlert.dll
+  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/RedAlert.pdb
   #         7z a artifact/vanilla-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/Vanilla_RA
   #       fi
 
   #       if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-red-alert" ]; then
-  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/Release/TiberianDawn.dll
+  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/TiberianDawn.dll
+  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/TiberianDawn.pdb
   #         7z a artifact/vanilla-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/Vanilla_TD
   #
   #         # lua library
@@ -330,6 +340,10 @@ jobs:
   #         cp -rv common/lua/scripts/nco/* lua/nco
   #         cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
   #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
+  #
+  #         # patch for vcpkg lua.dll debug deps (use external clean build)
+  #         curl -L https://github.com/dyne/luabinaries/releases/download/4a12002/lua54.dll -o lua.dll
+  #         7z a artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip lua.dll
   #       fi
 
   #   - name: Add vcpkg deps to archive
@@ -337,6 +351,7 @@ jobs:
   #     run: |
   #       # ignore lua.dll, patched version included in previous step
   #       Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed `
+  #       | Where-Object { -not $_.Name.EndsWith("lua.dll") } `
   #       | ForEach-Object {
   #         Write-Host & 7z a "artifact/vanilla-conquer-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)"
   #       }

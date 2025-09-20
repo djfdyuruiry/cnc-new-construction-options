@@ -222,14 +222,28 @@ jobs:
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
-        mkdir artifact
-
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/Release/vanillara
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara
+          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/* ./build/${{ steps.set_preset.outputs.preset }}/Release/vanillatd
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
+          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
+        fi
+
+        mkdir artifact
+
+        if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+        fi
+
+        if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
 
           # lua library
           mkdir -p lua/nco
@@ -244,7 +258,12 @@ jobs:
 
     - name: Add internal tools to archive
       run: |
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/Release/vanillamix
+        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg
+        objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
+        strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
+
+        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
+        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
