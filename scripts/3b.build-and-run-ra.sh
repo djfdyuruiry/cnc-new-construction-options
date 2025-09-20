@@ -27,11 +27,11 @@ function main() {
     preset="nco-red-alert-debug"
   fi
 
-  if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
+  if [[ "${build_type}" =~ ^(Debug|Release)$ ]]; then
     # custom build preset passed, remove it before forwarding args to game
     shift
   elif [[ "${preset}" =~ ^nco.* ]]; then
-    build_type="RelWithDebInfo"
+    build_type="Release"
   else
     # not a build type, don't pass to the build script
     build_type=""

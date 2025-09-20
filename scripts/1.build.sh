@@ -96,7 +96,7 @@ function main() {
   # remove arguments, so we can forward other arguments to cmake call later
   shift
 
-  if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
+  if [[ "${build_type}" =~ ^(Debug|Release)$ ]]; then
     shift
   fi
 
@@ -122,14 +122,14 @@ function main() {
       ;;
     release)
       cmake_preset="nco"
-      build_type="RelWithDebInfo"
+      build_type="Release"
       ;;
     # direct cmake access for scripts
     *)
       cmake_preset="${target}"
 
       if [ -z "${build_type}" ]; then
-        error_and_exit "When passing a literal cmake preset, you must also provide a build type - e.x. '$0 nco RelWithDebInfo'"
+        error_and_exit "When passing a literal cmake preset, you must also provide a build type - e.x. '$0 nco Release'"
       fi
       ;;
   esac
