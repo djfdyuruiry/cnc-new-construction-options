@@ -209,6 +209,9 @@ jobs:
       run: |
         mkdir artifact
 
+        # grab 3rd party libraries built by vcpkg
+        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/Release/*.dll
+
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.pdb
@@ -232,16 +235,6 @@ jobs:
           curl -L https://github.com/dyne/luabinaries/releases/download/4a12002/lua54.dll -o lua.dll
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip lua.dll
         fi
-
-    - name: Add vcpkg deps to archive
-      shell: pwsh
-      run: |
-        # ignore lua.dll, patched version included in previous step
-        Get-ChildItem -Recurse -Filter '*.dll' build/nco*/vcpkg_installed `
-        | Where-Object { -not $_.Name.EndsWith("lua.dll") } `
-        | ForEach-Object {
-          Write-Host & 7z a "artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip" "$($_.FullName)"
-        }
 
     - name: Add internal tools to archive
       run: |
