@@ -134,22 +134,20 @@ jobs:
         ./scripts/bin/vcpkg fetch nuget
 
     - name: Init vcpkg Binary Cache
-      shell: bash
       env: 
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
         cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
 
-        nuget.exe sources add \
+        mono nuget.exe sources add \
           -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" \
           -StorePasswordInClearText \
           -Name GitHubPackages \
           -UserName "djfdyuruiry" \
           -Password "${{ secrets.GITHUB_TOKEN }}"
 
-        nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
+        mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
           -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
-
 
     - name: Build Vanilla Conquer
       env:
