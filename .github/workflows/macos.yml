@@ -167,6 +167,8 @@ jobs:
         cd $installed_path
         python -m lipomerge arm64-osx x64-osx uni-osx
 
+        cp cmake/uni-osx.cmake .vcpkg/triplets
+
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
