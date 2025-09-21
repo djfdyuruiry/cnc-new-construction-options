@@ -64,7 +64,7 @@ jobs:
 
     - name: Install homebrew deps
       run: |
-        brew install dylibbundler imagemagick jinja2-cli mono ninja python3
+        brew install dylibbundler imagemagick jinja2-cli jq mono ninja python3
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -176,10 +176,11 @@ jobs:
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_PREFIX_PATH"] = "${sourceDir}/build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed"' CMakePresets.json > /tmp/CMakePresets.json
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx"' /tmp/CMakePresets.json > CMakePresets.json
+
         # build using universal triplet
-        cmake -DCMAKE_PREFIX_PATH=build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed \
-          -DVCPKG_TARGET_TRIPLET=uni-osx \
-          --workflow --preset ${{ steps.set_preset.outputs.preset }}
+        cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
