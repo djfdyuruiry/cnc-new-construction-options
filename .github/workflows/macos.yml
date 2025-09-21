@@ -176,12 +176,9 @@ jobs:
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 
-        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_PREFIX_PATH"] = "${sourceDir}/build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed"' CMakePresets.json > /tmp/CMakePresets1.json
-        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx"' /tmp/CMakePresets1.json > /tmp/CMakePresets2.json
-        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_MANIFEST_INSTALL"] = "OFF"' /tmp/CMakePresets2.json > CMakePresets.json
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_PREFIX_PATH"] = "${sourceDir}/build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/uni-osx"' CMakePresets.json > /tmp/CMakePresets.json
+        jq 'del((.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_TOOLCHAIN_FILE"])' /tmp/CMakePresets.json > CMakePresets.json
 
-        cp cmake/uni-osx.cmake .vcpkg/triplets
-  
         # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
