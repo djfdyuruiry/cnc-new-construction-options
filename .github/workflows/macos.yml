@@ -167,8 +167,6 @@ jobs:
         cd $installed_path
         python -m lipomerge arm64-osx x64-osx uni-osx
 
-        cp cmake/uni-osx.cmake .vcpkg/triplets
-
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
@@ -181,6 +179,8 @@ jobs:
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_PREFIX_PATH"] = "${sourceDir}/build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed"' CMakePresets.json > /tmp/CMakePresets.json
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx"' /tmp/CMakePresets.json > CMakePresets.json
 
+        cp cmake/uni-osx.cmake .vcpkg/triplets
+  
         # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
