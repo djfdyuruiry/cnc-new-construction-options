@@ -149,6 +149,20 @@ jobs:
         mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
           -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
 
+    - name: Create Universal vcpkg Triplet
+      run: |
+        ./scripts/bin/vcpkg install --triplet=x64-osx
+        ./scripts/bin/vcpkg install --triplet=arm64-osx
+
+        python -m venv /tmp/vcpkg.venv
+        . /tmp/vcpkg.venv/bin/activate
+
+        python -m ensurepip
+        python -m pip install lipomerge
+
+        cd ./vcpkg/installed
+        python -m lipomerge arm64-osx x64-osx uni-osx
+
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
@@ -157,7 +171,11 @@ jobs:
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-        cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
+
+        # build using universal triplet
+        cmake -DCMAKE_PREFIX_PATH=./vcpkg/installed/uni-osx \
+          -DVCPKG_TARGET_TRIPLET=uni-osx \
+          --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
