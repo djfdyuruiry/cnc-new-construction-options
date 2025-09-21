@@ -1,14 +1,7 @@
 find_program(ImageMagick_magick_EXECUTABLE magick)
 if(ImageMagick_magick_EXECUTABLE)
     set(ImageMagick_convert_FOUND TRUE)
-    set(ImageMagick_convert_EXECUTABLE ${ImageMagick_magick_EXECUTABLE})
-    set(ImageMagick_convert_ARGS convert)
-else()
-    find_program(ImageMagick_convert_EXECUTABLE convert)
-
-    if(ImageMagick_convert_EXECUTABLE)
-        set(ImageMagick_convert_FOUND TRUE)
-    endif()
+    set(     ${ImageMagick_magick_EXECUTABLE})
 endif()
 
 if(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # Make icns file.
@@ -58,7 +51,7 @@ function(make_icon)
                         set(_size ${size})
                     endif()
                     list(APPEND IMAGEMAGICK_CMDS
-                        COMMAND ${ImageMagick_convert_EXECUTABLE} ${ImageMagick_convert_ARGS} -background none -density "${density}" -resize "${_size}x${_size}" -units "PixelsPerInch" ${ARG_INPUT} "${ICON_DIR}/icon_${size}x${size}${xtwo}.png"
+                        COMMAND ${ImageMagick_convert_EXECUTABLE} -background none -density "${density}" -resize "${_size}x${_size}" -units "PixelsPerInch" ${ARG_INPUT} "${ICON_DIR}/icon_${size}x${size}${xtwo}.png"
                     )
                 endforeach()
             endforeach()
@@ -84,7 +77,7 @@ function(make_icon)
         add_custom_command(
 			OUTPUT ${ICON_FILE}
 			COMMAND ${ImageMagick_convert_EXECUTABLE}
-            ARGS ${ImageMagick_convert_ARGS} -background none ${ARG_INPUT} -define icon:auto-resize="256,64,48,32,16" ${ICON_FILE}
+            ARGS -background none ${ARG_INPUT} -define icon:auto-resize="256,64,48,32,16" ${ICON_FILE}
 			MAIN_DEPENDENCY ${ARG_INPUT}
 			COMMENT "ICO Generation: ${ARG_INPUT_FN}.ico")
         if(ARG_OUTPUT)
