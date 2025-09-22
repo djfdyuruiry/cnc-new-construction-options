@@ -289,7 +289,7 @@ if(BUILD_VANILLARA)
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
-            COMMAND ${CMAKE_COMMAND} -E rm -f "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -Rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app"
         )
     else()
         add_custom_command(

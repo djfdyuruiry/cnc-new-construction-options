@@ -279,7 +279,7 @@ if(BUILD_VANILLATD)
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/vanillatd.app"
-            COMMAND ${CMAKE_COMMAND} -E rm -f "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -Rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app"
         )
     else()
         add_custom_command(
