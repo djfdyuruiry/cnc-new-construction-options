@@ -183,7 +183,7 @@ jobs:
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_MANIFEST_INSTALL"] = "OFF"' /tmp/CMakePresets.json > CMakePresets.json
 
         cp cmake/uni-osx.cmake .vcpkg/triplets
-  
+
         # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
@@ -191,7 +191,7 @@ jobs:
     - name: Create archives
       run: |
         mkdir artifact
-        
+
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           # prep debug symbols
           dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
@@ -210,10 +210,10 @@ jobs:
           dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
           strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
           dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
-          
+
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM

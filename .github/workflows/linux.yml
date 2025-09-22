@@ -191,7 +191,7 @@ jobs:
         ./scripts/bin/vcpkg fetch nuget
 
     - name: Init Binary Cache
-      env: 
+      env:
         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
         cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
