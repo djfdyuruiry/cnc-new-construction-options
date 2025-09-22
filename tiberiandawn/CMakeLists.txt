@@ -266,4 +266,12 @@ if(BUILD_VANILLATD)
                     -g3 -fno-omit-frame-pointer)
         target_link_options(VanillaTD PUBLIC -fsanitize=address)
     endif()
+
+    add_custom_command(
+        TARGET VanillaTD POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/resources/data/td" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td"
+    )
+
+    # TODO: Output lua files as well as data pack
+    # TODO: Copy binary output file as well as data pack
 endif()

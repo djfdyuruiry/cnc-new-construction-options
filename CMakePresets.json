@@ -121,6 +121,11 @@
             }
         },
         {
+            "name": "nco-remaster",
+            "inherits": "remaster",
+            "displayName": "NCO Remaster build"
+        },
+        {
             "name": "nco-tiberian-dawn-remaster",
             "inherits": "nco-remaster",
             "displayName": "NCO Remaster build (TD)",
@@ -139,22 +144,26 @@
         {
             "name": "nco-debug",
             "inherits": "nco",
-            "displayName": "NCO debug build"
+            "displayName": "NCO debug build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         },
         {
             "name": "nco-red-alert-debug",
             "inherits": "nco-red-alert",
-            "displayName": "NCO debug build (RA)"
+            "displayName": "NCO debug build (RA)",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         },
         {
             "name": "nco-tiberian-dawn-debug",
             "inherits": "nco-tiberian-dawn",
-            "displayName": "NCO debug build (TD)"
-        },
-        {
-            "name": "nco-remaster",
-            "inherits": "remaster",
-            "displayName": "NCO Remaster build"
+            "displayName": "NCO debug build (TD)",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         }
     ],
     "buildPresets": [
