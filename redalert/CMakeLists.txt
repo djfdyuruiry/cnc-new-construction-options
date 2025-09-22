@@ -282,25 +282,20 @@ if(BUILD_VANILLARA)
             target_link_options(VanillaRA PUBLIC -fsanitize=address)
     endif()
 
-    # create ra package: binary + data packs -> $<TARGET_FILE_DIR:VanillaRA>/ra
-    add_custom_command(
-        TARGET VanillaRA POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" $<TARGET_FILE_DIR:VanillaRA>/ra
-    )
-
+    # create ra package: binary + data packs
     if(MAKE_BUNDLE)
-        # move macos app into package
         add_custom_command(
             TARGET VanillaRA POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra/vanillara.app
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE_DIR:VanillaRA>/vanillara.app $<TARGET_FILE_DIR:VanillaRA>/ra/vanillara.app
-            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE_DIR:VanillaRA>/vanillara.app
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -f "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app"
         )
     else()
-        # move binary into package
         add_custom_command(
             TARGET VanillaRA POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" $<TARGET_FILE_DIR:VanillaRA>/ra
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaRA> $<TARGET_FILE_DIR:VanillaRA>/ra
             COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaRA>
         )
