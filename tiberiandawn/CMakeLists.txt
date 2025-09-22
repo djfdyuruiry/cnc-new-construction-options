@@ -268,7 +268,7 @@ if(BUILD_VANILLATD)
         target_link_options(VanillaTD PUBLIC -fsanitize=address)
     endif()
 
-    # create td package: binary + lua library + data packs in $<TARGET_FILE_DIR:VanillaTD>/td
+    # create td package: lua library + data packs in $<TARGET_FILE_DIR:VanillaTD>/td
     add_custom_command(
         TARGET VanillaTD POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/lib
@@ -276,7 +276,22 @@ if(BUILD_VANILLATD)
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" $<TARGET_FILE_DIR:VanillaTD>/td
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaTD> $<TARGET_FILE_DIR:VanillaTD>/td
-        COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaTD>
     )
+
+    if(MAKE_BUNDLE)
+        # move macos app into package
+        add_custom_command(
+            TARGET VanillaTD POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/vanillatd.app
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE_DIR:VanillaTD>/vanillatd.app $<TARGET_FILE_DIR:VanillaTD>/td/vanillatd.app
+            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE_DIR:VanillaTD>/vanillatd.app
+        )
+    else()
+        # move binary into package
+        add_custom_command(
+            TARGET VanillaTD POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaTD> $<TARGET_FILE_DIR:VanillaTD>/td
+            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaTD>
+        )
+    endif()
 endif()

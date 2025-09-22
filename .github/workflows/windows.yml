@@ -135,7 +135,7 @@ jobs:
         $ErrorActionPreference = "Stop"
 
         .\scripts\98.run-lua-unit-tests.ps1 `
-         && .\scripts\bin\lua.ps1 tests\lua\scripts\test-game-script.lua tiberiandawn\lua\scripts\scg01ea.lua
+          && .\scripts\bin\lua.ps1 tests\lua\scripts\test-game-script.lua resources\test\td\lua\scg01ea.lua
 
   vanilla_win_msvc:
     needs:

@@ -287,7 +287,22 @@ if(BUILD_VANILLARA)
         TARGET VanillaRA POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" $<TARGET_FILE_DIR:VanillaRA>/ra
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaRA> $<TARGET_FILE_DIR:VanillaRA>/ra
-        COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaRA>
     )
+
+    if(MAKE_BUNDLE)
+        # move macos app into package
+        add_custom_command(
+            TARGET VanillaRA POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra/vanillara.app
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE_DIR:VanillaRA>/vanillara.app $<TARGET_FILE_DIR:VanillaRA>/ra/vanillara.app
+            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE_DIR:VanillaRA>/vanillara.app
+        )
+    else()
+        # move binary into package
+        add_custom_command(
+            TARGET VanillaRA POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaRA> $<TARGET_FILE_DIR:VanillaRA>/ra
+            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaRA>
+        )
+    endif()
 endif()
