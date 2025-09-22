@@ -1,0 +1,3 @@
+- All scripts are for testing features and debugging
+  - `__debug.lua` is callable by pressing F5 when the `-CHEAT` cli argument is passed to the game
+  - The whole file is reloaded every time, so it can be edited whilst the game is running

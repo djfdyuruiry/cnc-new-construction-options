@@ -196,6 +196,7 @@ if(BUILD_REMASTERTD)
     target_link_libraries(TiberianDawn commonr ${REMASTER_LIBS} ${STATIC_LIBS})
     set_target_properties(TiberianDawn PROPERTIES PREFIX "")
 
+    # TODO: When visiting remastered support, add lua and relevant data packs (may need to search user paths for lua scripts/rules.ini)
     add_custom_command(TARGET TiberianDawn POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/Vanilla_TD ${CMAKE_BINARY_DIR}/Vanilla_TD
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Vanilla_TD/Data
@@ -267,11 +268,15 @@ if(BUILD_VANILLATD)
         target_link_options(VanillaTD PUBLIC -fsanitize=address)
     endif()
 
+    # create td package: binary + lua library + data packs in $<TARGET_FILE_DIR:VanillaTD>/td
     add_custom_command(
         TARGET VanillaTD POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/resources/data/td" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td"
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/lib
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/TiberianDawn/lib
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" $<TARGET_FILE_DIR:VanillaTD>/td
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaTD> $<TARGET_FILE_DIR:VanillaTD>/td
+        COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaTD>
     )
-
-    # TODO: Output lua files as well as data pack
-    # TODO: Copy binary output file as well as data pack
 endif()

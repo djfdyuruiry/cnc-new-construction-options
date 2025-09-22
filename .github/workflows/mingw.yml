@@ -95,15 +95,17 @@ jobs:
             - CMake**
             - cmake/**
             - common/**
-            - resources
             - tools/**
           ra:
             - redalert/**
+            - resources/data/ra
           td:
             - tiberiandawn/**
+            - resources/data/td
           lua:
             - common/lua/scripts/**
             - tiberiandawn/lua/scripts/**
+            - resources/test/**/lua
             - tests/lua/scripts/**
 
     - name: Init Lua
@@ -116,7 +118,7 @@ jobs:
       if: steps.changes.outputs.lua == 'true'
       run: |
         ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
+        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -159,32 +161,37 @@ jobs:
       run: |
         mkdir artifact
 
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip /tmp/SDL2-2.0.12/${{ matrix.arch.lin }}-w64-mingw32/bin/SDL2.dll /tmp/openal-soft-1.21.0-bin/bin/${{ matrix.arch.win }}/OpenAL32.dll
-
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
+          # prepare debug symbols
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
+
+          # 3rd party libs
+          cp -fv /tmp/SDL2-2.0.12/${{ matrix.arch.lin }}-w64-mingw32/bin/SDL2.dll /tmp/openal-soft-1.21.0-bin/bin/${{ matrix.arch.win }}/OpenAL32.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # ra bundle
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
+          # prepare debug symbols
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
+
+          # 3rd party libs
+          cp -fv /tmp/SDL2-2.0.12/${{ matrix.arch.lin }}-w64-mingw32/bin/SDL2.dll /tmp/openal-soft-1.21.0-bin/bin/${{ matrix.arch.win }}/OpenAL32.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # td bundle
+          rm -f ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-
-          # data packs (remove *.bat scripts first)
-          rm -f resources/data/td/*.bat
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/*
-
-          # lua library
-          mkdir -p lua/nco
-          cp -rv common/lua/scripts/nco/* lua/nco
-          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
     - name: Add internal tools to archive

@@ -8,63 +8,40 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/lib/functions.sh"
 
 function deploy_test_files() {
-  log_info "Deploying test data files"
-
   if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
-    cp -rfv "${td_resources_path}"/* "${target_dir}"
-  fi
-}
-
-function deploy_resources() {
-  log_info "Deploying resource files"
-
-  if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
+    log_info "Deploying TD test files"
     cp -rfv "${td_test_resources_path}"/* "${target_dir}"
-  fi
-}
-
-function deploy_nco_lua() {
-  log_info "Deploying NCO Lua library"
-
-  rm -rf "${target_dir}/lua"
-  mkdir -p "${target_dir}/lua"
-
-  # include lua binaries for testing
-  cp -rfv "${build_directory}/${cmake_preset}/vcpkg_installed"/*/tools/lua/* "${target_dir}/lua"
-
-  cp -rfv "${common_lua_scripts_path}"/* "${target_dir}/lua"
-
-  if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
-    cp -rfv "${td_lua_scripts_path}"/* "${target_dir}/lua"
   fi
 }
 
 function main() {
   local cmake_preset="${1}"
-  local source="${2}"
-  local target="${3}"
+  local build_sub_dir="${2}"
+  local binary="${3}"
+  local target_binary="${4}"
 
   log_info "Expanding deploy target path using .env file (if present): ${env_file_path}"
   load_env_file_if_present
 
-  target="$(eval "echo ${target}")"
-  target_dir="$(dirname "${target}")"
+  target_binary="$(eval "echo ${target_binary}")"
+  target_dir="$(dirname "${target_binary}")"
 
   local build_type="Debug"
 
-  if [ "${cmake_preset}" == "nco" ]; then
+  if ! [[ "${cmake_preset}" =~ ^nco.+-debug$ ]]; then
     build_type="RelWithDebInfo"
   fi
 
-  find "${build_path}/${cmake_preset}/${build_type}" \
-    -maxdepth 1 \
-    -type f \
-    -executable \
-    -iname "${source}" \
-    -print0 | xargs -0 -I {} cp -fv "{}" "${target}"
+  local build_output="${build_path}/${cmake_preset}/${build_type}/${build_sub_dir}"
 
-  deploy_nco_lua
-  deploy_resources
+  log_info "Deploying Game Binary"
+  cp -fv "${build_output}/${binary}" "${target_binary}"
+
+  log_info "Deploying Game Data Files"
+  mv -f "${build_output}/$(basename "${binary}")" "/tmp"
+  cp -rfv "${build_output}"/* "${target_dir}"
+  mv -f "/tmp/$(basename "${binary}")" "${build_output}"
+
   deploy_test_files
 
   rm -fv "${target_dir}/"*.log

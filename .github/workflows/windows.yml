@@ -70,15 +70,17 @@ jobs:
             - CMake**
             - cmake/**
             - common/**
-            - resources
             - tools/**
           ra:
             - redalert/**
+            - resources/data/ra
           td:
             - tiberiandawn/**
+            - resources/data/td
           lua:
             - common/lua/scripts/**
             - tiberiandawn/lua/scripts/**
+            - resources/test/**/lua
             - tests/lua/scripts/**
 
     - name: Set Preset
@@ -195,31 +197,27 @@ jobs:
       run: |
         mkdir artifact
 
-        # grab 3rd party libraries built by vcpkg
-        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.dll
-
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
+          # 3rd party libraries (vcpkg generated)
+          cp -fv ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.dll ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # ra bundle
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.pdb
         fi
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip  ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
+          # 3rd party libraries (vcpkg generated)
+          cp -fv ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.dll ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # td bundle
+          rm -f ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.pdb
-
-          # data packs (remove *.sh scripts first)
-          rm -f resources/data/td/*.sh
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip  ./resources/data/td/* ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
-        
-          # lua library
-          mkdir -p lua/nco
-        
-          cp -rv ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua
-
-          cp -rv common/lua/scripts/nco/* lua/nco
-          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
     - name: Add internal tools to archive

@@ -57,7 +57,7 @@ Messages.sendToPlayer("Mission accomplished!")
 Scenario.modifyHouseMoney(1000)
 ```
 
-### Real Script Examples from tiberiandawn/lua/scripts
+### Real Script Examples from resources/test/td/lua
 
 Based on actual scripts found in the codebase:
 

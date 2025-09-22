@@ -40,7 +40,7 @@ function main() {
   fi
 
   "${script_path}/1.build.sh" "${preset}" "${build_type}"
-  "${script_path}/2.deploy.sh" "${preset}" "vanillatd" "${TD_DATA_PATH}/vanillatd-dev"
+  "${script_path}/2.deploy.sh" "${preset}" "td" "vanillatd" "${TD_DATA_PATH}/vanillatd-dev"
 
   pushd_silent "${TD_DATA_PATH}"
 

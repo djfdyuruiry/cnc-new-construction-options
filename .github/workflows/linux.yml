@@ -98,15 +98,17 @@ jobs:
             - CMake**
             - cmake/**
             - common/**
-            - resources
             - tools/**
           ra:
             - redalert/**
+            - resources/data/ra
           td:
             - tiberiandawn/**
+            - resources/data/td
           lua:
             - common/lua/scripts/**
             - tiberiandawn/lua/scripts/**
+            - resources/test/**/lua
             - tests/lua/scripts/**
 
     - name: Init Lua
@@ -119,7 +121,7 @@ jobs:
       if: steps.changes.outputs.lua == 'true'
       run: |
         ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
+        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -224,42 +226,36 @@ jobs:
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
+        # prep debug symbols
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
-          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara
-          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara
+          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
-          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd
+          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd
         fi
 
         mkdir artifact
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara
+          # ra bundle
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd
+          # td bundle
+          rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-
-          # data packs (remove *.bat scripts first)
-          rm -f resources/data/td/*.bat
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/*
-
-          # lua library
-          mkdir -p lua/nco
-        
-          cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua
-
-          cp -rv common/lua/scripts/nco/* lua/nco
-          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
     - name: Add internal tools to archive

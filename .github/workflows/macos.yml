@@ -87,6 +87,7 @@ jobs:
           lua:
             - common/lua/scripts/**
             - tiberiandawn/lua/scripts/**
+            - resources/test/**/lua
             - tests/lua/scripts/**
 
     - name: Init Lua
@@ -99,7 +100,7 @@ jobs:
       if: steps.changes.outputs.lua == 'true'
       run: |
         ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
+        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -192,33 +193,30 @@ jobs:
         mkdir artifact
         
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/MacOS/vanillara -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
-          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/MacOS/vanillara
-          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/MacOS/vanillara
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app
+          # prep debug symbols
+          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
+          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara
+          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara
+
+          # ra bundle
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
-          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/MacOS/vanillatd
-          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/MacOS/vanillatd
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app
+          # prep debug symbols
+          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
+          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
+          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
+          
+          # td bundle
+          rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
-
-          # data packs (remove *.bat scripts first)
-          rm -f resources/data/td/*.bat
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/*
-
-          # lua library
-          mkdir -p lua/nco
-        
-          cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua/nco
-
-          cp -rv common/lua/scripts/nco/* lua/nco
-          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-
-          7z a vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
         fi
 
     - name: Add internal tools to archive
