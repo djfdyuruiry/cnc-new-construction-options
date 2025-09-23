@@ -8,7 +8,7 @@
 ##
 FROM ubuntu:24.04
 
-ENV LANG=C.UTF-8
+ENV LANG="C.UTF-8"
 
 # note: tree is a utility for this Dockerfile only
 RUN apt-get update && \
@@ -20,6 +20,7 @@ RUN apt-get update && \
       clang \
       curl \
       git \
+      imagemagick \
       ninja-build \
       pkg-config \
       python3 \
@@ -51,6 +52,11 @@ RUN usermod -u ${UID} ubuntu \
 
 WORKDIR /build
 USER ubuntu
+
+ENV CC="clang"
+ENV CXX="clang++"
+ENV CMAKE_MAKE_PROGRAM="ninja"
+ENV VC_CXX_FLAGS="-w;-Wwrite-strings;-Werror=write-strings"
 
 # run build on container start
 ENTRYPOINT "/usr/bin/bash" "-c" "\

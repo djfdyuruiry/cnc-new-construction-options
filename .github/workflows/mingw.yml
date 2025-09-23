@@ -73,32 +73,26 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-    # BUG: mingw build is broken as we don't have spdlog, fmt, lua or luabridge binaries added
+    # BUG: Needs https://github.com/HolyBlackCat/quasi-msys2 instead
     - name: Install Dependencies
       run: |
         sudo apt-get install -y ninja-build mingw-w64 imagemagick
 
-        cd "$(mktemp -d)"
+        # deploys packages to /mingw64
+        sudo bash -c "wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libiconv-1.18-1-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-vulkan-loader-1~1.4.321.0-1-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-SDL2-2.32.10-1-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-zlib-1.3.1-1-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libmysofa-1.3.1-1-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-openal-1.24.3-2-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-fmt-11.2.0-3-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-spdlog-1.15.3-1-any.pkg.tar.zst | tar --zstd -x -C / \
+          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-lua-5.4.8-1-any.pkg.tar.zst | tar --zstd -x -C /"
 
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libiconv-1.18-1-any.pkg.tar.zst
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-vulkan-loader-1~1.4.321.0-1-any.pkg.tar.zst
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-SDL2-2.32.10-1-any.pkg.tar.zst
-
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-zlib-1.3.1-1-any.pkg.tar.zst
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libmysofa-1.3.1-1-any.pkg.tar.zst
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-openal-1.24.3-2-any.pkg.tar.zst
-
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-fmt-11.2.0-3-any.pkg.tar.zst
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-spdlog-1.15.3-1-any.pkg.tar.zst
-
-        wget https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-lua-5.4.8-1-any.pkg.tar.zst
-
-        find -name '*.zst' -print0 | xargs -0 -I {} tar -xf {} -C /tmp
-
-        wget -O LuaBridge-2.8.tar.gz https://github.com/vinniefalco/LuaBridge/archive/refs/tags/2.8.tar.gz
-        tar -xvf LuaBridge-2.8.tar.gz
-
-        mv LuaBridge-2.8/Source/LuaBridge /tmp/mingw64/include
+        cd /tmp \
+          && wget -q -O LuaBridge-2.8.tar.gz https://github.com/vinniefalco/LuaBridge/archive/refs/tags/2.8.tar.gz \
+          && tar -xf LuaBridge-2.8.tar.gz \
+          && mv LuaBridge-2.8/Source/LuaBridge /mingw64/include
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -167,7 +161,7 @@ jobs:
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
-        CMAKE_FIND_ROOT_PATH: "/tmp/mingw64"
+        CMAKE_FIND_ROOT_PATH: "/mingw64"
         CMAKE_TOOLCHAIN_FILE: "cmake/${{ matrix.arch.lin }}-mingw-w64-toolchain.cmake"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
       run: |

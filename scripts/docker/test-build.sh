@@ -5,11 +5,14 @@ set -eEuo pipefail
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function main() {
+  local target="${1:-ubuntu}"
+
   # create build image
-  docker build --file "${script_path}/ubuntu.Dockerfile" \
+  docker build --file "${script_path}/${target}.Dockerfile" \
     --build-arg "UID=$(id -u)" \
     --build-arg "GID=$(id -g)" \
-    -t nco-build .
+    --progress=plain \
+    -t "nco-${target}-build:latest" .
 
   # init src (if missing)
   mkdir -p "${script_path}/src"
@@ -25,7 +28,8 @@ function main() {
 
   # run the build
   rm -rf "${script_path:?}/bin"
-  docker run --name nco-run-build -it -v "${script_path}/src:/build" nco-build:latest || {
+  docker rm nco-run-build &> /dev/null || :
+  docker run --name nco-run-build -it -v "${script_path}/src:/build" "nco-${target}-build:latest" || {
     echo "ERROR: Docker build failed"
     echo "Source path: ${script_path}/src"
     exit 1
