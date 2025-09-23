@@ -95,8 +95,10 @@ jobs:
 
         find -name '*.zst' -print0 | xargs -0 -I {} tar -xf {} -C /tmp
 
-        git clone git@github.com:vinniefalco/LuaBridge.git LuaBridge
-        mv LuaBridge/Source/LuaBridge /tmp/mingw64/include
+        wget -O LuaBridge-2.8.tar.gz https://github.com/vinniefalco/LuaBridge/archive/refs/tags/2.8.tar.gz
+        tar -xvf LuaBridge-2.8.tar.gz
+
+        mv LuaBridge-2.8/Source/LuaBridge /tmp/mingw64/include
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
