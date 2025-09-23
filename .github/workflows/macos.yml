@@ -8,7 +8,7 @@ on:
         required: false
         default: 'nco-tiberian-dawn'
 
-  # TODO: Builds *only* run for PRs and *only* if you label the PR with 'macos'.
+  # TODO: PR Builds *only* run if you label the PR with 'macos'.
   #       I want to save on action minute usage for now.
   pull_request:
     paths:
@@ -23,28 +23,31 @@ on:
       - tiberiandawn/**
       - tools/**
 
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - .clang-format
-  #     - CMake**
-  #     - .github/workflows/macos.yml
-  #     - cmake/**
-  #     - common/**
-  #     - redalert/**
-  #     - resources
-  #     - tests/**
-  #     - tiberiandawn/**
-  #     - tools/**
+  push:
+    branches:
+      - main
+    paths:
+      - .clang-format
+      - CMake**
+      - .github/workflows/macos.yml
+      - cmake/**
+      - common/**
+      - redalert/**
+      - resources
+      - tests/**
+      - tiberiandawn/**
+      - tools/**
 
 concurrency:
   group: ${{ github.ref }}__macos
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+env:
+  NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
+
 jobs:
   vanilla-macos:
-    if: contains(github.event.pull_request.labels.*.name, 'macos')
+    if: ${{ github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'macos') }}
     runs-on: macos-15
     strategy:
       matrix:
@@ -139,18 +142,18 @@ jobs:
         cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
 
         mono nuget.exe sources add \
-          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" \
+          -Source "${{ env.NUGET_URL }}" \
           -StorePasswordInClearText \
           -Name GitHubPackages \
           -UserName "djfdyuruiry" \
           -Password "${{ secrets.GITHUB_TOKEN }}"
 
         mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
-          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
+          -Source "${{ env.NUGET_URL }}"
 
     - name: Create Universal vcpkg Triplet
       env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
         installed_path=build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed
 
@@ -175,7 +178,7 @@ jobs:
         CMAKE_MAKE_PROGRAM: ninja
         CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 
@@ -210,6 +213,9 @@ jobs:
           dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
           strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
           dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
+
+          # lua binaries
+          cp -fv ./build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
 
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat

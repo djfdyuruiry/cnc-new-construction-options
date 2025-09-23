@@ -50,10 +50,12 @@ on:
       - tests/**
       - tiberiandawn/**
       - tools/**
-
 concurrency:
   group: ${{ github.ref }}__linux
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
 
 jobs:
   # BUG: deleted from github, replace with https://github.com/marketplace/actions/auto-release
@@ -180,20 +182,18 @@ jobs:
         ./scripts/bin/vcpkg fetch nuget
 
     - name: Init Binary Cache
-      env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
       run: |
         cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
 
         mono nuget.exe sources add \
-          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json" \
+          -Source "${{ env.NUGET_URL }}" \
           -StorePasswordInClearText \
           -Name GitHubPackages \
           -UserName "djfdyuruiry" \
           -Password "${{ secrets.GITHUB_TOKEN }}"
 
         mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
-          -Source "https://nuget.pkg.github.com/djfdyuruiry/index.json"
+          -Source "${{ env.NUGET_URL }}"
 
     - name: Build Vanilla Conquer
       env:
@@ -201,7 +201,7 @@ jobs:
         CXX: ${{ matrix.compiler.cxx }}
         CMAKE_MAKE_PROGRAM: ninja
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/djfdyuruiry/index.json,readwrite"
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
@@ -239,6 +239,9 @@ jobs:
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
+          # lua binaries
+          cp -fv ./build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
+
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
