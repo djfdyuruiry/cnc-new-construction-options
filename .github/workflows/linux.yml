@@ -58,13 +58,12 @@ env:
   NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
 
 jobs:
-  # BUG: deleted from github, replace with https://github.com/marketplace/actions/auto-release
   create_dev_release:
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     runs-on: "${{ github.event.inputs.os || 'ubuntu-24.04' }}"
     steps:
     - name: Create Development release
-      uses: "0xDylan/action-auto-releases-n20@v1.1"
+      uses: "marvinpinto/action-automatic-releases@v1.2.1"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "latest"
