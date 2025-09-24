@@ -1,5 +1,9 @@
 name: macos
 
+permissions:
+  contents: write
+  packages: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +16,7 @@ on:
     paths:
       - .clang-format
       - CMake**
+      - vcpkg**
       - .github/workflows/macos.yml
       - cmake/**
       - common/**
@@ -27,6 +32,7 @@ on:
     paths:
       - .clang-format
       - CMake**
+      - vcpkg**
       - .github/workflows/macos.yml
       - cmake/**
       - common/**
@@ -244,8 +250,6 @@ jobs:
         prerelease: true
         files: |
           artifact/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload tagged release
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -253,5 +257,3 @@ jobs:
       with:
         files: |
           artifact/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

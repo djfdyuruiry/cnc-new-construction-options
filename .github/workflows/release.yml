@@ -1,0 +1,40 @@
+name: release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: {}
+
+  push:
+    branches:
+      - main
+    paths:
+      - CMake**
+      - vcpkg**
+      - .github/workflows/linux.yml
+      - .github/workflows/macos.yml
+      - .github/workflows/windows.yml
+      - cmake/**
+      - common/**
+      - redalert/**
+      - resources
+      - tiberiandawn/**
+      - tools/**
+
+concurrency:
+  group: ${{ github.ref }}__release
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  create_dev_release:
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Development release
+      uses: "marvinpinto/action-automatic-releases@v1.2.1"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        title: "Development Build"
+        automatic_release_tag: "latest"
+        prerelease: true
