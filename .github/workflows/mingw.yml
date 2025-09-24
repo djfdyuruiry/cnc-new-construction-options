@@ -50,6 +50,9 @@ concurrency:
   group: ${{ github.ref }}__mingw
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+env:
+  NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
+
 jobs:
   vanilla_win_gcc:
     if: contains(github.event.pull_request.labels.*.name, 'mingw')
@@ -76,23 +79,14 @@ jobs:
     # BUG: Needs https://github.com/HolyBlackCat/quasi-msys2 instead
     - name: Install Dependencies
       run: |
-        sudo apt-get install -y ninja-build mingw-w64 imagemagick
-
-        # deploys packages to /mingw64
-        sudo bash -c "wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libiconv-1.18-1-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-vulkan-loader-1~1.4.321.0-1-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-SDL2-2.32.10-1-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-zlib-1.3.1-1-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-libmysofa-1.3.1-1-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-openal-1.24.3-2-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-fmt-11.2.0-3-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-spdlog-1.15.3-1-any.pkg.tar.zst | tar --zstd -x -C / \
-          && wget -q -O - https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-lua-5.4.8-1-any.pkg.tar.zst | tar --zstd -x -C /"
-
-        cd /tmp \
-          && wget -q -O LuaBridge-2.8.tar.gz https://github.com/vinniefalco/LuaBridge/archive/refs/tags/2.8.tar.gz \
-          && tar -xf LuaBridge-2.8.tar.gz \
-          && mv LuaBridge-2.8/Source/LuaBridge /mingw64/include
+        sudo apt-get install -y autoconf-archive \
+          build-essential \
+          cmake \
+          clang \
+          imagemagick \
+          mingw-w64 \
+          mono-complete \
+          ninja-build
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -158,13 +152,41 @@ jobs:
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
 
+    - name: Init vcpkg
+      run: |
+        ./scripts/bin/vcpkg --init
+        ./scripts/bin/vcpkg fetch nuget
+
+    - name: Init Binary Cache
+      run: |
+        cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
+
+        mono nuget.exe sources add \
+          -Source "${{ env.NUGET_URL }}" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "djfdyuruiry" \
+          -Password "${{ secrets.GITHUB_TOKEN }}"
+
+        mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
+          -Source "${{ env.NUGET_URL }}"
+
     - name: Build Vanilla Conquer
       env:
         CMAKE_MAKE_PROGRAM: ninja
-        CMAKE_FIND_ROOT_PATH: "/mingw64"
+        CMAKE_FIND_ROOT_PATH: "/tmp/vcpkg_installed/x64-mingw-dynamic"
         CMAKE_TOOLCHAIN_FILE: "cmake/${{ matrix.arch.lin }}-mingw-w64-toolchain.cmake"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
+        # manually install vcpkg packages
+        mkdir -p /tmp/vcpkg_installed
+        ./scripts/bin/vcpkg install --triplet=x64-mingw-dynamic --x-install-root=/tmp/vcpkg_installed
+  
+        # disable vcpkg toolchain
+        jq 'del((.configurePresets[] | select(.name == \"release\")).cacheVariables[\"CMAKE_TOOLCHAIN_FILE\"])' CMakePresets.json > /tmp/CMakePresets1.json
+        mv /tmp/CMakePresets1.json CMakePresets.json
+
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
@@ -179,7 +201,7 @@ jobs:
           ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
 
           # 3rd party libs
-          cp -fv /tmp/mingw64/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
           # ra bundle
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
@@ -195,8 +217,8 @@ jobs:
           ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
 
           # 3rd party libs
-          cp -fv /tmp/mingw64/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
-          cp -fv /tmp/mingw64/bin/lua*.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
+          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
 
           # td bundle
           rm -f ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
