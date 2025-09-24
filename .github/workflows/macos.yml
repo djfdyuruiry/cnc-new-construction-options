@@ -8,8 +8,6 @@ on:
         required: false
         default: 'nco-tiberian-dawn'
 
-  # TODO: PR Builds *only* run if you label the PR with 'macos'.
-  #       I want to save on action minute usage for now.
   pull_request:
     paths:
       - .clang-format
@@ -47,7 +45,6 @@ env:
 
 jobs:
   vanilla-macos:
-    if: ${{ github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'macos') }}
     runs-on: macos-15
     strategy:
       matrix:
