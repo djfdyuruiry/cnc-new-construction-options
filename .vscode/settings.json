@@ -2,6 +2,7 @@
   "cmake.configureEnvironment": {
     "CC": "clang",
     "CXX": "clang++",
+    "CMAKE_MAKE_PROGRAM": "ninja",
     "VC_CXX_FLAGS": "-w;-Wwrite-strings;-Werror=write-strings"
   },
   "cmake.options.statusBarVisibility": "hidden",
@@ -140,6 +141,7 @@
     "redalert",
     "Redeployable",
     "Superweapons",
+    "tiberiandawn",
     "tiberium",
     "vanillara",
     "vanillatd",

@@ -8,10 +8,8 @@ on:
         required: false
         default: 'nco-tiberian-dawn'
 
-  # TODO: Builds *only* run for PRs and *only* if you label the PR with 'macos'.
-  #       I want to save on action minute usage for now.
   pull_request:
-    paths: &change-paths
+    paths:
       - .clang-format
       - CMake**
       - .github/workflows/macos.yml
@@ -23,19 +21,31 @@ on:
       - tiberiandawn/**
       - tools/**
 
-  # push:
-  #   branches:
-  #     - main
-  #   paths: *change-paths
+  push:
+    branches:
+      - main
+    paths:
+      - .clang-format
+      - CMake**
+      - .github/workflows/macos.yml
+      - cmake/**
+      - common/**
+      - redalert/**
+      - resources
+      - tests/**
+      - tiberiandawn/**
+      - tools/**
 
 concurrency:
   group: ${{ github.ref }}__macos
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+env:
+  NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
+
 jobs:
   vanilla-macos:
-    if: contains(github.event.pull_request.labels.*.name, 'macos')
-    runs-on: macos-14
+    runs-on: macos-15
     strategy:
       matrix:
         preset:
@@ -52,43 +62,9 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-    - name: Setting up Cache-Key
-      run: echo "DEP_CACHE_KEY=$(curl 'https://ports.macports.org/api/v1/ports/dylibbundler/?format=json' | grep -ioE '("version":).[^,]*')-$(curl 'https://ports.macports.org/api/v1/ports/libsdl2/?format=json' | grep -ioE '("version":).[^,]*')-$(curl 'https://ports.macports.org/api/v1/ports/openal-soft/?format=json' | grep -ioE '("version":).[^,]*')" >> $GITHUB_ENV
-
-    - name: Printing Cache-Key
-      run: echo $DEP_CACHE_KEY
-
-    - name: Restore cache
-      id: dep-cache
-      uses: actions/cache@v4
-      env:
-        cache-name: cache-dependencies
-      with:
-        path: ~/macports
-        key: "${{ env.DEP_CACHE_KEY }}"
-
     - name: Install homebrew deps
       run: |
-        brew install imagemagick dylibbundler
-
-    # note: first run (with an empty cache) takes 30-40 mins
-    - if: ${{ steps.dep-cache.outputs.cache-hit != 'true' }}
-      name: Install macport dependencies
-      run: |
-        wget -q https://github.com/macports/macports-base/releases/download/v2.10.5/MacPorts-2.10.5-14-Sonoma.pkg
-        sudo installer -pkg ./MacPorts-2.10.5-14-Sonoma.pkg -target /
-        export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-        sudo port selfupdate -N
-        sudo port install libsdl2 +universal -N
-        sudo port install openal-soft +universal -N
-        mkdir ~/macports
-        sudo cp -R /opt/local ~/macports
-        sudo chown -R $USER:staff ~/macports
-
-    - if: ${{ steps.dep-cache.outputs.cache-hit == 'true' }}
-      name: Restore macport dependencies from cache
-      run: |
-        sudo cp -R ~/macports/local /opt/local
+        brew install dylibbundler imagemagick jinja2-cli mono
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -111,6 +87,7 @@ jobs:
           lua:
             - common/lua/scripts/**
             - tiberiandawn/lua/scripts/**
+            - resources/test/**/lua
             - tests/lua/scripts/**
 
     - name: Init Lua
@@ -123,7 +100,7 @@ jobs:
       if: steps.changes.outputs.lua == 'true'
       run: |
         ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
+        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -153,41 +130,96 @@ jobs:
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
 
     - name: Init vcpkg
-      run: ./scripts/bin/vcpkg --init
+      run: |
+        ./scripts/bin/vcpkg --init
+        ./scripts/bin/vcpkg fetch nuget
+
+    - name: Init vcpkg Binary Cache
+      run: |
+        cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
+
+        mono nuget.exe sources add \
+          -Source "${{ env.NUGET_URL }}" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "djfdyuruiry" \
+          -Password "${{ secrets.GITHUB_TOKEN }}"
+
+        mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
+          -Source "${{ env.NUGET_URL }}"
+
+    - name: Create Universal vcpkg Triplet
+      env:
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
+      run: |
+        installed_path=build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed
+
+        mkdir -p $installed_path
+
+        mkdir /tmp/vcpkg-arm64
+        mkdir /tmp/vcpkg-x64
+
+        ./scripts/bin/vcpkg install --triplet=arm64-osx --x-install-root=/tmp/vcpkg-arm64
+        ./scripts/bin/vcpkg install --triplet=x64-osx --x-install-root=/tmp/vcpkg-x64
+
+        python -m venv /tmp/vcpkg.venv
+        . /tmp/vcpkg.venv/bin/activate
+
+        python -m ensurepip
+        python -m pip install lipomerge
+
+        python -m lipomerge /tmp/vcpkg-arm64/arm64-osx /tmp/vcpkg-x64/x64-osx $installed_path/uni-osx
 
     - name: Build Vanilla Conquer
       env:
+        CMAKE_MAKE_PROGRAM: ninja
         CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx"' CMakePresets.json > /tmp/CMakePresets.json
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_MANIFEST_INSTALL"] = "OFF"' /tmp/CMakePresets.json > CMakePresets.json
+
+        cp cmake/uni-osx.cmake .vcpkg/triplets
+
+        # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
     - name: Create archives
       run: |
         mkdir artifact
-        
+
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/MacOS/vanillara -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
-          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/MacOS/vanillara
-          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app/Contents/MacOS/vanillara
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.app
+          # prep debug symbols
+          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
+          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara
+          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara
+
+          # ra bundle
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
-          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/MacOS/vanillatd
-          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app/Contents/MacOS/vanillatd
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.app
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
+          # prep debug symbols
+          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
+          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
+          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
 
-          # lua library
-          mkdir -p lua/nco
-          cp -rv common/lua/scripts/nco/* lua/nco
-          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-          7z a vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
+          # lua binaries
+          cp -fv ./build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
+
+          # td bundle
+          rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # debug symbols
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
         fi
 
     - name: Add internal tools to archive

@@ -38,7 +38,7 @@ function main() {
   fi
 
   "${script_path}/1.build.sh" "${preset}" "${build_type}"
-  "${script_path}/2.deploy.sh" "${preset}" "vanillara" "${RA_DATA_PATH}/vanillara-dev"
+  "${script_path}/2.deploy.sh" "${preset}" "ra" "vanillara" "${RA_DATA_PATH}/vanillara-dev"
 
   pushd_silent "${RA_DATA_PATH}"
 

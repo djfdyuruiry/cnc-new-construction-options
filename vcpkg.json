@@ -2,23 +2,44 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "dependencies": [
     {
-      "name": "spdlog",
-      "version>=": "1.15.3"
-    },
-    {
       "name": "lua",
-      "version>=": "5.4.8"
+      "version>=": "5.4.8",
+      "features": [
+        "tools"
+      ]
     },
     {
       "name": "luabridge",
       "version>=": "2.8"
+    },
+    {
+      "name": "openal-soft",
+      "version>=": "1.24.3#1"
+    },
+    {
+      "name": "sdl2",
+      "version>=": "2.32.10",
+      "features": [
+        "vulkan",
+        "wayland",
+        "x11"
+      ],
+      "platform": "linux"
+    },
+    {
+      "name": "sdl2",
+      "version>=": "2.32.10",
+      "features": [
+        "vulkan"
+      ],
+      "platform": "!linux"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.15.3"
     }
   ],
   "overrides": [
-    { 
-      "name": "spdlog",
-      "version": "1.15.3"
-    },
     {
       "name": "lua",
       "version": "5.4.8"
@@ -26,6 +47,18 @@
     {
       "name": "luabridge",
       "version": "2.8"
+    },
+    { 
+      "name": "openal-soft",
+      "version": "1.24.3#1"
+    },
+    {
+      "name": "sdl2",
+      "version": "2.32.10"
+    },
+    { 
+      "name": "spdlog",
+      "version": "1.15.3"
     }
   ]
 }

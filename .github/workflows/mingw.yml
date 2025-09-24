@@ -19,7 +19,7 @@ on:
   # TODO: Builds *only* run for PRs and *only* if you label the PR with 'mingw'.
   #       I want to save on action minute usage for now.
   pull_request:
-    paths: &change-paths
+    paths:
       - .clang-format
       - CMake**
       - .github/workflows/mingw.yml
@@ -34,11 +34,24 @@ on:
   # push:
   #   branches:
   #     - main
-  #   paths: *change-paths
+  #   paths:
+  #     - .clang-format
+  #     - CMake**
+  #     - .github/workflows/mingw.yml
+  #     - cmake/**
+  #     - common/**
+  #     - redalert/**
+  #     - resources
+  #     - tests/**
+  #     - tiberiandawn/**
+  #     - tools/**
 
 concurrency:
   group: ${{ github.ref }}__mingw
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
 
 jobs:
   vanilla_win_gcc:
@@ -63,15 +76,17 @@ jobs:
       id: gitinfo
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+    # BUG: Needs https://github.com/HolyBlackCat/quasi-msys2 instead
     - name: Install Dependencies
       run: |
-        sudo apt-get update -qq > /dev/null
-        sudo apt-get install -qq -y ninja-build mingw-w64 imagemagick > /dev/null
-        wget -q https://www.libsdl.org/release/SDL2-devel-2.0.12-mingw.tar.gz
-        wget -q --no-check-certificate https://www.openal-soft.org/openal-binaries/openal-soft-1.21.0-bin.zip
-        tar -xf SDL2-devel-2.0.12-mingw.tar.gz -C /tmp
-        unzip -qq openal-soft-1.21.0-bin.zip -d /tmp
-        mv /tmp/openal-soft-1.21.0-bin/bin/${{ matrix.arch.win }}/soft_oal.dll /tmp/openal-soft-1.21.0-bin/bin/${{ matrix.arch.win }}/OpenAL32.dll
+        sudo apt-get install -y autoconf-archive \
+          build-essential \
+          cmake \
+          clang \
+          imagemagick \
+          mingw-w64 \
+          mono-complete \
+          ninja-build
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -85,15 +100,17 @@ jobs:
             - CMake**
             - cmake/**
             - common/**
-            - resources
             - tools/**
           ra:
             - redalert/**
+            - resources/data/ra
           td:
             - tiberiandawn/**
+            - resources/data/td
           lua:
             - common/lua/scripts/**
             - tiberiandawn/lua/scripts/**
+            - resources/test/**/lua
             - tests/lua/scripts/**
 
     - name: Init Lua
@@ -106,7 +123,7 @@ jobs:
       if: steps.changes.outputs.lua == 'true'
       run: |
         ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./tiberiandawn/lua/scripts/scg01ea.lua
+        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
@@ -136,14 +153,40 @@ jobs:
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
 
     - name: Init vcpkg
-      run: ./scripts/bin/vcpkg --init
+      run: |
+        ./scripts/bin/vcpkg --init
+        ./scripts/bin/vcpkg fetch nuget
+
+    - name: Init Binary Cache
+      run: |
+        cd "$(dirname "$(./scripts/bin/vcpkg fetch nuget)")"
+
+        mono nuget.exe sources add \
+          -Source "${{ env.NUGET_URL }}" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "djfdyuruiry" \
+          -Password "${{ secrets.GITHUB_TOKEN }}"
+
+        mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
+          -Source "${{ env.NUGET_URL }}"
 
     - name: Build Vanilla Conquer
       env:
-        CMAKE_FIND_ROOT_PATH: "/tmp/SDL2-2.0.12/${{ matrix.arch.lin }}-w64-mingw32;/tmp/openal-soft-1.21.0-bin"
+        CMAKE_MAKE_PROGRAM: ninja
+        CMAKE_FIND_ROOT_PATH: "/tmp/vcpkg_installed/x64-mingw-dynamic"
         CMAKE_TOOLCHAIN_FILE: "cmake/${{ matrix.arch.lin }}-mingw-w64-toolchain.cmake"
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
+        VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
+        # manually install vcpkg packages
+        mkdir -p /tmp/vcpkg_installed
+        ./scripts/bin/vcpkg install --triplet=x64-mingw-dynamic --x-install-root=/tmp/vcpkg_installed
+  
+        # disable vcpkg toolchain
+        jq 'del((.configurePresets[] | select(.name == \"release\")).cacheVariables[\"CMAKE_TOOLCHAIN_FILE\"])' CMakePresets.json > /tmp/CMakePresets1.json
+        mv /tmp/CMakePresets1.json CMakePresets.json
+
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
 
     # BUG: separate out ra and td into sep archives (data files cluttering zip)
@@ -151,28 +194,40 @@ jobs:
       run: |
         mkdir artifact
 
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip /tmp/SDL2-2.0.12/${{ matrix.arch.lin }}-w64-mingw32/bin/SDL2.dll /tmp/openal-soft-1.21.0-bin/bin/${{ matrix.arch.win }}/OpenAL32.dll
-
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.exe
+          # prepare debug symbols
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
+
+          # 3rd party libs
+          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # ra bundle
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+
+          # debug symbols
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./resources/data/td/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.exe
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          # prepare debug symbols
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
 
-          # lua library
-          mkdir -p lua/nco
-          cp -rv common/lua/scripts/nco/* lua/nco
-          cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
+          # lua binaries
+          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
+
+          # 3rd party libs
+          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # td bundle
+          rm -f ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+
+          # debug symbols
+          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
         fi
 
     - name: Add internal tools to archive

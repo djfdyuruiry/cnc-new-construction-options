@@ -52,6 +52,8 @@ public:
         } else if (const auto value = std::get_if<float>(&value_variant_a)) {
             return std::get_if<float>(&value_variant_b) != nullptr;
         }
+
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
     }
 
     static std::string_view Get_Variant_Type(RuleValueVariant value_variant)
@@ -63,6 +65,8 @@ public:
         } else if (const auto value = std::get_if<float>(&value_variant)) {
             return "float";
         }
+
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
     }
 
     static std::string Variant_To_String(RuleValueVariant value_variant)
@@ -74,6 +78,8 @@ public:
         } else if (const auto value = std::get_if<float>(&value_variant)) {
             return std::format("{}", *value);
         }
+
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code"); 
     }
 
     RuleSection(

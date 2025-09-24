@@ -17,11 +17,7 @@ function main() {
   fi
 
   if [ ! -x "${vcpkg_path}/vcpkg" ]; then
-    if [ "${IS_WINDOWS:-false}" == "true" ]; then
-      powershell.exe -NoProfile -ExecutionPolicy Bypass "${vcpkg_path}/scripts/bootstrap.ps1" -disableMetrics
-    else
-      "${vcpkg_path}/bootstrap-vcpkg.sh" -disableMetrics
-    fi
+    "${vcpkg_path}/bootstrap-vcpkg.sh" -disableMetrics
   fi
 
   if [ "${flag}" == "--init" ]; then

@@ -87,7 +87,7 @@ public:
     };
 
     template<LuaVariantCompatible T>
-    static const std::string_view& Get_Type_Name_For_Variant_Compatible()
+    static std::string_view Get_Type_Name_For_Variant_Compatible()
     {
         if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
             return LuaTypeMap[LUA_TNUMBER].value();
