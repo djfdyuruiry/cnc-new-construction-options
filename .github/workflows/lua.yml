@@ -1,0 +1,45 @@
+name: lua
+
+on:
+  workflow_dispatch: {}
+
+  pull_request:
+    paths:
+      - .github/workflows/lua.yml
+      - common/lua/scripts/**
+      - tiberiandawn/lua/scripts/**
+      - resources/test/**/lua
+      - tests/lua/scripts/**
+
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/lua.yml
+      - common/lua/scripts/**
+      - tiberiandawn/lua/scripts/**
+      - resources/test/**/lua
+      - tests/lua/scripts/**
+
+concurrency:
+  group: ${{ github.ref }}__lua
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  lua-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: "${{ github.event.pull_request.head.sha || github.sha }}"
+
+    - name: Init Lua
+      uses: leafo/gh-actions-lua@v11
+      with:
+        luaVersion: "5.4"
+
+    - name: Run Lua Tests
+      run: |
+        ./scripts/98.run-lua-unit-tests.sh \
+        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
