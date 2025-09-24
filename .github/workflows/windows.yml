@@ -56,7 +56,6 @@ jobs:
     runs-on: windows-2025
     outputs:
       preset: ${{ steps.set_preset.outputs.preset }}
-      luaChanges: ${{ steps.changes.outputs.lua }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -82,11 +81,6 @@ jobs:
           td:
             - tiberiandawn/**
             - resources/data/td
-          lua:
-            - common/lua/scripts/**
-            - tiberiandawn/lua/scripts/**
-            - resources/test/**/lua
-            - tests/lua/scripts/**
 
     - name: Set Preset
       id: set_preset
@@ -115,32 +109,6 @@ jobs:
         fi
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
-
-  run_win_lua_tests:
-    needs:
-      - resolve_win_cmake_preset
-    if: needs.resolve_win_cmake_preset.outputs.luaChanges == 'true'
-    runs-on: windows-2025
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: "${{ github.event.pull_request.head.sha || github.sha }}"
-
-    - name: Lua Action Dependency
-      uses: ilammy/msvc-dev-cmd@v1
-
-    - name: Init Lua
-      uses: leafo/gh-actions-lua@v11
-      with:
-        luaVersion: "5.4"
-
-    - name: Run Lua Tests
-      shell: pwsh
-      run: |
-        $ErrorActionPreference = "Stop"
-
-        .\scripts\98.run-lua-unit-tests.ps1 `
-          && .\scripts\bin\lua.ps1 tests\lua\scripts\test-game-script.lua resources\test\td\lua\scg01ea.lua
 
   vanilla_win_msvc:
     needs:

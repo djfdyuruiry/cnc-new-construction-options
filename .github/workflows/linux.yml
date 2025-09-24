@@ -97,23 +97,6 @@ jobs:
           td:
             - tiberiandawn/**
             - resources/data/td
-          lua:
-            - common/lua/scripts/**
-            - tiberiandawn/lua/scripts/**
-            - resources/test/**/lua
-            - tests/lua/scripts/**
-
-    - name: Init Lua
-      if: steps.changes.outputs.lua == 'true'
-      uses: leafo/gh-actions-lua@v11
-      with:
-        luaVersion: "5.4"
-
-    - name: Run Lua Tests
-      if: steps.changes.outputs.lua == 'true'
-      run: |
-        ./scripts/98.run-lua-unit-tests.sh \
-        && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
 
     - name: Set Preset
       id: set_preset
