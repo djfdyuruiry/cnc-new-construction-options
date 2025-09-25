@@ -5,3 +5,6 @@
 .vcpkg
 *.log
 perf.data*
+
+*.rockspec
+*.rock

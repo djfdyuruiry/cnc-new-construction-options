@@ -120,7 +120,8 @@
     "cfloat": "cpp",
     "*.rh": "cpp",
     "ciso646": "cpp",
-    "*.template": "cpp"
+    "*.template": "cpp",
+    "*.rockspec": "lua"
   },
   "cSpell.words": [
     "Avalonia",
