@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  lua-tests:
+  cnc-nco:
     runs-on: ubuntu-latest
 
     steps:
@@ -65,7 +65,7 @@ jobs:
         ROCK_VERSION: ${{ steps.rock.outputs.version }}
         ROCKSPEC_FILE: ${{ steps.rock.outputs.rockspec_file }}
       run: |
-        ./scripts/generate-rockspec/generate.sh '${ROCK_VERSION}'
+        ./scripts/generate-rockspec/generate.sh "${ROCK_VERSION}"
 
         luarocks --tree .luarocks make "${ROCKSPEC_FILE}"
         luarocks --tree .luarocks pack "${ROCK_NAME}"
