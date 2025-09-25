@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  lua-tests:
+  cnc-nco:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,7 +35,7 @@ jobs:
         ref: "${{ github.event.pull_request.head.sha || github.sha }}"
 
     - name: Init Lua
-      uses: leafo/gh-actions-lua@v11
+      uses: leafo/gh-actions-lua@v12
       with:
         luaVersion: "5.4"
 
@@ -43,3 +43,65 @@ jobs:
       run: |
         ./scripts/98.run-lua-unit-tests.sh \
         && ./scripts/99.test-lua-script.sh ./resources/test/td/lua/scg01ea.lua
+
+    - name: Init LuaRocks
+      uses: leafo/gh-actions-luarocks@v6
+
+    - name: Set Rock Info
+      id: rock
+      run: |
+        VERSION="$(git rev-parse --short HEAD)-0"
+
+        {
+          echo "name=cnc-nco"
+          echo "version=${VERSION}"
+          echo "rockspec_file=cnc-nco-${VERSION}.rockspec"
+          echo "rock_file=cnc-nco-${VERSION}.all.rock"
+        } >> "${GITHUB_OUTPUT}"
+
+    - name: Build Lua Rock
+      env:
+        ROCK_NAME: ${{ steps.rock.outputs.name }}
+        ROCK_VERSION: ${{ steps.rock.outputs.version }}
+        ROCKSPEC_FILE: ${{ steps.rock.outputs.rockspec_file }}
+        TREE_PATH: /tmp/nco-luarocks
+      run: |
+        ./scripts/generate-rockspec/generate.sh "${ROCK_VERSION}"
+
+        luarocks --tree "${TREE_PATH}" make "${ROCKSPEC_FILE}"
+        luarocks --tree "${TREE_PATH}" pack "${ROCK_NAME}"
+
+    - name: Test Lua Rock
+      env:
+        ROCK_FILE: ${{ steps.rock.outputs.rock_file }}
+        TREE_PATH: /tmp/nco-luarocks
+      run: |
+        rm -rf "${TREE_PATH}"
+        luarocks --tree "${TREE_PATH}" install "${ROCK_FILE}"
+
+        eval "$(luarocks --tree "${TREE_PATH}" path)"
+        lua tests/lua/scripts/test-game-script.lua resources/test/td/lua/scg01ea.lua
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cnc-nco-luarock
+        path: ${{ steps.rock.outputs.rock_file }}
+
+    - name: Upload development release
+      if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Development Build
+        tag_name: "latest"
+        prerelease: true
+        files: ${{ steps.rock.outputs.rock_file }}
+
+    - name: Publish RockSpec to LuaRocks (scm-0)
+      if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+      run: |
+        ./scripts/generate-rockspec/generate.sh
+
+        luarocks upload --api-key="${{ secrets.LUAROCKS_API_KEY }}" "cnc-nco-scm-0.rockspec"
+
+    # TODO: Generate and upload tagged rockspec to LuaRocks on git tag
