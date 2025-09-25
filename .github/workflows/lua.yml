@@ -7,9 +7,11 @@ on:
     paths:
       - .github/workflows/lua.yml
       - common/lua/scripts/**
-      - tiberiandawn/lua/scripts/**
       - resources/test/**/lua
+      - scripts/generate-rockspec/**
+      - tiberiandawn/lua/scripts/**
       - tests/lua/scripts/**
+      - cnc-nco.rockspec.j2
 
   push:
     branches:
@@ -17,9 +19,11 @@ on:
     paths:
       - .github/workflows/lua.yml
       - common/lua/scripts/**
-      - tiberiandawn/lua/scripts/**
       - resources/test/**/lua
+      - scripts/generate-rockspec/**
+      - tiberiandawn/lua/scripts/**
       - tests/lua/scripts/**
+      - cnc-nco.rockspec.j2
 
 concurrency:
   group: ${{ github.ref }}__lua
