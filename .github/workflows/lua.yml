@@ -67,17 +67,17 @@ jobs:
       run: |
         ./scripts/generate-rockspec/generate.sh "${ROCK_VERSION}"
 
-        luarocks --tree .luarocks make "${ROCKSPEC_FILE}"
-        luarocks --tree .luarocks pack "${ROCK_NAME}"
+        luarocks --tree .nco-luarocks make "${ROCKSPEC_FILE}"
+        luarocks --tree .nco-luarocks pack "${ROCK_NAME}"
 
     - name: Test Lua Rock
       env:
         ROCK_FILE: ${{ steps.rock.outputs.rock_file }}
       run: |
-        rm -rf .luarocks
-        luarocks --tree .luarocks install "${ROCK_FILE}"
+        rm -rf .nco-luarocks
+        luarocks --tree .nco-luarocks install "${ROCK_FILE}"
 
-        eval "$(luarocks --tree .luarocks path)"
+        eval "$(luarocks --tree .nco-luarocks path)"
         lua tests/lua/scripts/test-game-script.lua resources/test/td/lua/scg01ea.lua
 
     - name: Upload artifact
