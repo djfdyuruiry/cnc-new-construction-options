@@ -30,7 +30,7 @@ RUN apt-get update && \
       unzip \
       zip
 
-# vcpkg package: SDL2 (X11 & Wayland Support)
+# vcpkg package: SDL2 (X11 & Wayland support)
 RUN apt-get install -y \
       libx11-dev \
       libxft-dev \
@@ -38,6 +38,9 @@ RUN apt-get install -y \
       libwayland-dev \
       libxkbcommon-dev \
       libegl1-mesa-dev
+
+# vcpkg package: OpenAL (pipewire support)
+RUN apt-get install -y gettext
 
 # vcpkg package: libxcrypt
 RUN apt-get install -y libltdl-dev
