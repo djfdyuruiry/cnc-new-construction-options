@@ -16,7 +16,7 @@
     {
       "label": "Deploy TD",
       "type": "shell",
-      "command": "./scripts/2.deploy.sh 'nco-tiberian-dawn-debug' 'vanillatd' '$TD_DATA_PATH/vanillatd-dev'",
+      "command": "./scripts/2.deploy.sh 'nco-tiberian-dawn-debug' 'td' 'vanillatd' '$TD_DATA_PATH/vanillatd-dev'",
       "group": "build"
     },
     {
@@ -36,7 +36,7 @@
     {
       "label": "Deploy RA",
       "type": "shell",
-      "command": "./scripts/2.deploy.sh 'nco-red-alert-debug' 'vanillara' '$RA_DATA_PATH/vanillara-dev'",
+      "command": "./scripts/2.deploy.sh 'nco-red-alert-debug' 'ra' 'vanillara' '$RA_DATA_PATH/vanillara-dev'",
       "group": "build"
     },
     {
