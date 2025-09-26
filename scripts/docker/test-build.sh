@@ -19,11 +19,7 @@ function main() {
 
   if ! [ -d "${script_path}/src/.git" ]; then
     # fetch a clean repo
-    git clone https://github.com/djfdyuruiry/cnc-new-construction-options.git "${script_path}/src" \
-      && pushd "${script_path}/src" \
-      && git checkout feat/cmake_pull-sdl2-openal-from-vcpkg \
-      && git pull \
-      && popd
+    git clone https://github.com/djfdyuruiry/cnc-new-construction-options.git "${script_path}/src"
   fi
 
   # run the build

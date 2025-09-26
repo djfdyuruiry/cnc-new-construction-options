@@ -14,7 +14,16 @@
     },
     {
       "name": "openal-soft",
-      "version>=": "1.24.3#1"
+      "version>=": "1.24.3#1",
+      "features": [
+        "pipewire"
+      ],
+      "platform": "linux"
+    },
+    {
+      "name": "openal-soft",
+      "version>=": "1.24.3#1",
+      "platform": "!linux"
     },
     {
       "name": "sdl2",
