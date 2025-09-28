@@ -40,7 +40,7 @@ How to read this document:
 a_to_z_upper) %}[{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}](3c.Lua-API-Reference.md#{{ field.view.split("|")[0] | lower | replace(".", "") }}){% else %}`{{ field.view | replace("|", " \\| ")| replace("):", "): ") | replace("fun(", "function(") }}`{% endif %} |
 {% endif %}{% endfor %}
 
-> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main{{type.defines[0].file}})
+> See: [{{type.defines[0].file}}](https://github.com/djfdyuruiry/cnc-new-construction-options/blob/main/{{type.defines[0].file}})
 {% endfor %}
 {% endfor %}
 

@@ -39,9 +39,6 @@ RUN apt-get install -y \
       libxkbcommon-dev \
       libegl1-mesa-dev
 
-# vcpkg package: OpenAL (pipewire support)
-RUN apt-get install -y gettext
-
 # vcpkg package: libxcrypt
 RUN apt-get install -y libltdl-dev
 
