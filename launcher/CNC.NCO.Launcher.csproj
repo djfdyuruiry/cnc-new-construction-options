@@ -19,6 +19,14 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="DiscUtils" Version="0.16.13" />
+    <PackageReference Include="GitHub.Octokit.SDK" Version="0.0.31" />
     <PackageReference Include="SharpCompress" Version="0.40.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config,yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
