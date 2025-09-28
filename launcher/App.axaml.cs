@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace cnc_installer_poc;
+namespace CNC.NCO.Launcher;
 
 public partial class App : Application
 {

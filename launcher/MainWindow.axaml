@@ -5,6 +5,6 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         Width="1024"
         Height="768"
-        x:Class="cnc_installer_poc.MainWindow"
+        x:Class="CNC.NCO.Launcher.MainWindow"
         Title="cnc_installer_poc">
 </Window>

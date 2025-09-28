@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace InstallShieldExtractor
@@ -316,6 +317,9 @@ namespace InstallShieldExtractor
 
             public Huffman(byte[] rep, short symbolCount)
             {
+                Count = new short[MAXBITS + 1];
+                Symbol = new short[symbolCount];
+
                 var length = new short[256]; // code lengths
                 var s = 0; // current symbol
 
@@ -332,7 +336,6 @@ namespace InstallShieldExtractor
                 var n = s;
 
                 // count number of codes of each length
-                Count = new short[MAXBITS + 1];
                 for (var i = 0; i < n; i++)
                     Count[length[i]]++;
 
@@ -356,7 +359,6 @@ namespace InstallShieldExtractor
                     offs[len + 1] = (short)(offs[len] + Count[len]);
 
                 // put symbols in table sorted by length, by symbol order within each length
-                Symbol = new short[symbolCount];
                 for (short i = 0; i < n; i++)
                     if (length[i] != 0)
                         Symbol[offs[length[i]]++] = i;
@@ -364,6 +366,7 @@ namespace InstallShieldExtractor
         }
     }
 
+    [SuppressMessage("Reliability", "CA2022:Avoid inexact read with \'Stream.Read\'")]
     internal static class StreamExtensions
     {
         public static uint ReadUInt32(this Stream stream)

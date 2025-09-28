@@ -1,9 +1,9 @@
 ﻿using Avalonia;
 using System;
 
-namespace cnc_installer_poc;
+namespace CNC.NCO.Launcher;
 
-class Program
+internal static class Program
 {
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -13,6 +13,7 @@ class Program
         .StartWithClassicDesktopLifetime(args);
 
     // Avalonia configuration, don't remove; also used by visual designer.
+    // ReSharper disable once MemberCanBePrivate.Global
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
