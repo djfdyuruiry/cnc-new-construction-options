@@ -1,0 +1,57 @@
+NewConstructionOptions:
+  githubRepo: djfdyuruiry/cnc-new-construction-options
+  release: latest
+  assetPrefix: vanilla-conquer-nco-${OS}
+
+# TODO: Add dos demo files https://cnc.fandom.com/wiki/Command_%26_Conquer_demo and add nco feature matching info here https://github.com/TheAssemblyArmada/Vanilla-Conquer/wiki/Installing-VanillaTD#patching-cc95-gold-with-demo-for-dos-mode
+TiberianDawn:
+  discImages:
+    GDI:
+      sources:
+        - name: cnc-comm
+          url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
+          file: CNC95_GDI.ISO
+      provides:
+        _root:
+          - CCLOCAL.MIX
+          - CONQUER.MIX
+          - DESEICNH.MIX
+          - DESERT.MIX
+          - SOUNDS.MIX
+          - SPEECH.MIX
+          - TEMPERAT.MIX
+          - TEMPICNH.MIX
+          - TRANSIT.MIX
+          - UPDATE.MIX
+          - UPDATEC.MIX
+          - WINTER.MIX
+          - WINTICNH.MIX
+        GDI:
+          - GENERAL.MIX
+          - MOVIES.MIX
+          - SCORES.MIX
+    NOD:
+      sources:
+        - name: cnc-comm
+          url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
+          file: CNC95_Nod.ISO
+      provides:
+        NOD:
+          - GENERAL.MIX
+          - MOVIES.MIX
+          - SCORES.MIX
+    CovertOps:
+      sources:
+        - name: cnc-comm
+          url: https://bigdownloads.cnc-comm.com/cnc1/CD3_Covertops.zip
+          file: CD3_Covertops.bin
+      provides:
+        _root:
+          - INSTALL\\SC-000.MIX
+          - INSTALL\\SC-001.MIX
+          - INSTALL\\SPEECH.MIX
+        COVERTOPS:
+          - GENERAL.MIX
+          - MOVIES.MIX
+          - SCORES.MIX
+        
