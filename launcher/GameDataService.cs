@@ -8,15 +8,23 @@ using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
 using DiscUtils.Iso9660;
+using GitHub;
+using GitHub.Octokit.Client;
 using InstallShieldExtractor;
+using Microsoft.Kiota.Abstractions.Authentication;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
+using CNC.NCO.Launcher.Config;
+using CNC.NCO.Launcher.Model;
+
 namespace CNC.NCO.Launcher;
 
-public class GameDataService
+public class GameDataService(LauncherConfigLoader configLoader, string cachePath)
 {
-  private static async Task<Stream?> GetStreamForSetupPackageFile(CDReader iso, string name)
+  private readonly string _cacheOutPath = Path.Join(cachePath, "out");
+
+  private async Task<Stream?> GetStreamForSetupPackageFile(CDReader iso, string name)
   {
     await using var setupStream = iso.OpenFile(@"INSTALL\SETUP.Z", FileMode.Open);
     using var setupPackage = new InstallShieldPackage(setupStream, "SETUP.Z");
@@ -26,7 +34,7 @@ public class GameDataService
       .FirstOrDefault();
   }
 
-  private static async Task<string> ConvertBinToIso(string cachePath, string binPath)
+  private async Task<string> ConvertBinToIso(string binPath)
   {
     var isoFileNoExtensions = Path.GetFileNameWithoutExtension(binPath);
     var cuePath = Path.ChangeExtension(binPath, "cue");
@@ -61,41 +69,26 @@ public class GameDataService
       );
   }
 
-  private static async Task ExtractFile(CDReader iso, string cacheOutPath, string fullFile, string? stripPrefix = null, string? outFile = null)
+  private async Task ExtractFile(CDReader iso, string isoOrSetupPath, string outputPath)
   {
-    var resolvedStripPrefix = stripPrefix ?? string.Empty;
-    var resolvedOutFile = outFile ?? fullFile;
-    var outputPath = Path.Join(
-      cacheOutPath,
-      !string.IsNullOrEmpty(resolvedStripPrefix) && resolvedOutFile.StartsWith(resolvedStripPrefix)
-        ? resolvedOutFile.Replace(resolvedStripPrefix, string.Empty)
-        : resolvedOutFile
-    );
-
-    if (File.Exists(outputPath))
-    {
-      Console.WriteLine($"Skipping already extracted file: {outputPath}");
-      return;
-    }
-
     try
     {
-      Console.WriteLine($"Extracting {fullFile} to {outputPath}");
+      Console.WriteLine($"Extracting {isoOrSetupPath} to {outputPath}");
 
-      await using var sourceFileStream = iso.FileExists(fullFile)
-        ? iso.OpenFile(fullFile, FileMode.Open)
-        : (await GetStreamForSetupPackageFile(iso, fullFile))!;
+      await using var sourceFileStream = iso.FileExists(isoOrSetupPath)
+        ? iso.OpenFile(isoOrSetupPath, FileMode.Open)
+        : (await GetStreamForSetupPackageFile(iso, isoOrSetupPath))!;
 
       await using var outputStream = File.Open(outputPath, FileMode.Create);
       await sourceFileStream.CopyToAsync(outputStream);
     }
     catch (Exception ex)
     {
-      Console.WriteLine($"Error extracting {fullFile} to {outputPath}: {ex.Message}");
+      Console.WriteLine($"Error extracting {isoOrSetupPath} to {outputPath}: {ex.Message}");
     }
   }
 
-  private static async Task FetchCncIsoIfMissing(DiscImageSource source, string cachePath)
+  private async Task FetchCncIsoIfMissing(DiscImageSource source)
   {
     if (File.Exists(Path.Join(cachePath, source.ImageFileName)))
     {
@@ -133,25 +126,34 @@ public class GameDataService
     }
   }
 
-  private static async Task ExtractFromTdIso(
+  private async Task ExtractFromTdIso(
     DiscImageSource source,
-    string cachePath,
-    string cacheOutPath,
     Func<CDReader, Task> onIsoOpen
   )
   {
     var imagePath = Path.Join(cachePath, source.ImageFileName);
 
-    await FetchCncIsoIfMissing(
-      source,
-      cachePath
-    );
+    try
+    {
+      await FetchCncIsoIfMissing(source);
+    }
+    catch (Exception ex)
+    {
+      throw new Exception($"Failed to download CNC ISO {source.ImageFileName} from: {source.Url}", ex);
+    }
 
     Console.WriteLine($"Processing image file: {imagePath}");
 
     if (Path.GetExtension(imagePath).Equals(".bin", StringComparison.InvariantCultureIgnoreCase))
     {
-      imagePath = await ConvertBinToIso(cachePath, imagePath);
+      try
+      {
+        imagePath = await ConvertBinToIso(imagePath);
+      }
+      catch (Exception ex)
+      {
+        throw new Exception($"Failed to convert bin image to ISO: {source.ImageFileName}", ex);
+      }
     }
 
     try
@@ -163,30 +165,23 @@ public class GameDataService
 
       Console.WriteLine("Extracting files from image");
 
-      foreach (var file in source.Files)
+      foreach (var fileList in source.Files)
       {
-        await ExtractFile(iso, cacheOutPath, file, source.StripFilePrefix);
-      }
+        var outDir = fileList.Key == "_root"
+          ? _cacheOutPath
+          : Path.Join(_cacheOutPath, fileList.Key);
 
-      var factionFiles = new[]
-      {
-        "GENERAL.MIX",
-        "MOVIES.MIX",
-        "SCORES.MIX"
-      };
+        if (!Directory.Exists(outDir))
+        {
+          Directory.CreateDirectory(outDir);
+        }
 
-      var factionCachePath = Path.Join(cacheOutPath, source.Faction);
+        foreach (var file in fileList.Value)
+        {
+          var fileName = file.Split(@"\").Last();
 
-      Console.WriteLine("Extracting faction files from image");
-
-      if (!Directory.Exists(factionCachePath))
-      {
-        Directory.CreateDirectory(factionCachePath);
-      }
-
-      foreach (var file in factionFiles)
-      {
-        await ExtractFile(iso, cacheOutPath, file, source.StripFilePrefix, outFile: Path.Join(source.Faction, file));
+          await ExtractFile(iso, file, Path.Join(outDir, fileName));
+        }
       }
     }
     catch (Exception ex)
@@ -197,50 +192,34 @@ public class GameDataService
 
   public async Task LoadData(Action<Bitmap> onBackgroundLoaded)
   {
+    var config = configLoader.Load();
+
     DiscUtils.Complete.SetupHelper.SetupComplete();
 
-    var cachePath = Path.Join(AppContext.BaseDirectory, ".cache");
-    var cacheOutPath = Path.Join(cachePath, "out");
-
-    if (Directory.Exists(cacheOutPath))
+    if (Directory.Exists(_cacheOutPath))
     {
-      Directory.Delete(cacheOutPath, true);
+      Directory.Delete(_cacheOutPath, true);
     }
 
-    Directory.CreateDirectory(cacheOutPath);
+    Directory.CreateDirectory(_cacheOutPath);
 
     var backgroundLoaded = false;
-    var baseUrl = "https://bigdownloads.cnc-comm.com/cnc1";
-    var baseGameFiles = new[]
-    {
-      "CCLOCAL.MIX",
-      "CONQUER.MIX",
-      "DESEICNH.MIX",
-      "DESERT.MIX",
-      "SOUNDS.MIX",
-      "SPEECH.MIX",
-      "TEMPERAT.MIX",
-      "TEMPICNH.MIX",
-      "TRANSIT.MIX",
-      "UPDATE.MIX",
-      "UPDATEC.MIX",
-      "WINTER.MIX",
-      "WINTICNH.MIX"
-    };
 
-    var sources = new DiscImageSource[]
+    foreach (var image in config.TiberianDawn.DiscImages)
     {
-      new ("GDI", $"{baseUrl}/CNC95_GDI.zip", true, "CNC95_GDI.iso", baseGameFiles),
-      new ("NOD", $"{baseUrl}/CNC95_Nod.zip",  true, "CNC95_Nod.iso", baseGameFiles),
-      new ("COVERTOPS", $"{baseUrl}/CNC_Covertops.zip", true, "CD3_Covertops.bin",
-        [ @"INSTALL\SC-000.MIX", @"INSTALL\SC-001.MIX", @"INSTALL\SPEECH.MIX" ],
-        @"INSTALL\"
-      )
-    };
+      var provider = image.Value.Sources.First();
 
-    foreach (var source in sources)
-    {
-      await ExtractFromTdIso(source, cachePath, cacheOutPath, async iso =>
+      Console.WriteLine($"Pulling files from disc image '{image.Key}' using provider: {provider.Name}");
+
+      var source = new DiscImageSource(
+        image.Key,
+        provider.Url,
+        provider.Url.EndsWith(".zip"),
+        provider.File,
+        image.Value.Provides
+      );
+
+      await ExtractFromTdIso(source, async iso =>
       {
         if (backgroundLoaded || !iso.FileExists("setup.bmp"))
         {
@@ -257,9 +236,31 @@ public class GameDataService
 
     try
     {
-      using var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
+      var githubClient = new GitHubClient(
+        RequestAdapter.Create(new AnonymousAuthenticationProvider())
+      );
+
+      var ncoConfig = config.Options;
+      var ncoRelease = await githubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
+        .Releases
+        .Tags[ncoConfig.Release]
+        .GetAsync() ?? throw new Exception($"Failed to resolve NCO release: {ncoConfig.Release}");
+
+      var osName = OperatingSystem.IsWindows()
+        ? "win"
+        : (OperatingSystem.IsMacOS() ? "macos" : "linux");
+
+      var osAssetPrefix = ncoConfig.AssetPrefix.Replace("${OS}", osName);
+      var assetUrl = ncoRelease.Assets?.Where(a =>
+          (a.Name?.StartsWith(osAssetPrefix) ?? false) && !a.Name.Contains("-debug")
+        )
+        .Select(a => a.BrowserDownloadUrl)
+        .FirstOrDefault() ?? throw new Exception($"Failed to resolve NCO zip, release '{ncoConfig.Release}' and OS: {osName}");
+
+      using var client = new HttpClient();
+      client.Timeout = Timeout.InfiniteTimeSpan;
       using var response = await client.GetAsync(
-        "https://github.com/djfdyuruiry/cnc-new-construction-options/releases/download/latest/vanilla-conquer-nco-linux-clang-ubuntu-24.04-x86_64-c642166.zip",
+        assetUrl,
         HttpCompletionOption.ResponseHeadersRead
       );
     
@@ -270,9 +271,9 @@ public class GameDataService
 
       while (zipReader.MoveToNextEntry())
       {
-        if (!zipReader.Entry.IsDirectory && (zipReader.Entry.Key?.StartsWith("td") ?? false))
+        if (!zipReader.Entry.IsDirectory && (zipReader.Entry.Key?.StartsWith(config.TiberianDawn.NcoZipPath) ?? false))
         {
-          var outputPath = Path.Join(cacheOutPath, zipReader.Entry.Key.Replace("td/", string.Empty));
+          var outputPath = Path.Join(_cacheOutPath, zipReader.Entry.Key.Replace($"{config.TiberianDawn.NcoZipPath}/", string.Empty));
           var outputPathDir = Path.GetDirectoryName(outputPath) ?? string.Empty;
 
           if (!string.IsNullOrEmpty(outputPathDir) && !Directory.Exists(outputPathDir))

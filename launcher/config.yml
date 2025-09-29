@@ -1,17 +1,21 @@
-NewConstructionOptions:
-  githubRepo: djfdyuruiry/cnc-new-construction-options
-  release: latest
-  assetPrefix: vanilla-conquer-nco-${OS}
+Options:
+  GitHubRepo:
+    Owner: djfdyuruiry
+    Name: cnc-new-construction-options
+  Release: latest
+  AssetPrefix: vanilla-conquer-nco-${OS}
 
 # TODO: Add dos demo files https://cnc.fandom.com/wiki/Command_%26_Conquer_demo and add nco feature matching info here https://github.com/TheAssemblyArmada/Vanilla-Conquer/wiki/Installing-VanillaTD#patching-cc95-gold-with-demo-for-dos-mode
 TiberianDawn:
-  discImages:
+  NcoZipPath: td
+  InstallPostfix: td
+  DiscImages:
     GDI:
-      sources:
-        - name: cnc-comm
-          url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
-          file: CNC95_GDI.ISO
-      provides:
+      Sources:
+        - Name: cnc-comm
+          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
+          File: CNC95_GDI.iso
+      Provides:
         _root:
           - CCLOCAL.MIX
           - CONQUER.MIX
@@ -31,21 +35,21 @@ TiberianDawn:
           - MOVIES.MIX
           - SCORES.MIX
     NOD:
-      sources:
-        - name: cnc-comm
-          url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
-          file: CNC95_Nod.ISO
-      provides:
+      Sources:
+        - Name: cnc-comm
+          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
+          File: CNC95_Nod.iso
+      Provides:
         NOD:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
     CovertOps:
-      sources:
-        - name: cnc-comm
-          url: https://bigdownloads.cnc-comm.com/cnc1/CD3_Covertops.zip
-          file: CD3_Covertops.bin
-      provides:
+      Sources:
+        - Name: cnc-comm
+          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
+          File: CD3_Covertops.bin
+      Provides:
         _root:
           - INSTALL\\SC-000.MIX
           - INSTALL\\SC-001.MIX
@@ -54,4 +58,3 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
-        

@@ -1,10 +1,11 @@
-namespace CNC.NCO.Launcher;
+using System.Collections.Generic;
+
+namespace CNC.NCO.Launcher.Model;
 
 public record DiscImageSource(
-    string Faction,
-    string Url,
-    bool IsZipped,
-    string ImageFileName,
-    string[] Files,
-    string? StripFilePrefix = null
+  string Name,
+  string Url,
+  bool IsZipped,
+  string ImageFileName,
+  Dictionary<string, List<string>> Files
 );
