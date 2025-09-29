@@ -15,3 +15,11 @@
   - Note: PATSUX referenced in Source Code `scenario.cpp` to implement Laser ORCAs (for now)
 - `snow.mix`, `snowicnh.mix`, `snowifre.mix` and `snowiger.mix`: The snow theater from Red Alert, converted to work with Tiberian Dawn
   - **Note**: These files are part of Nyergud's C&C 1.06 patch, see [here](http://nyerguds.arsaneus-design.com/cnc95upd/cc95p106/patch106c_r3_en.html#toc_4) for credits of the original authors (specifically `Jafet Kackur` for these files)
+
+## `ra`
+
+> Counterstrike/Aftermath game data is included here because original game CDs include these files inside an RTP patch file (not worth parsing and extracting undocumented format)
+
+- `expand.mix`: Counterstrike expansion MIX file
+- `expand2.mix`: Aftermath expansion MIX file
+- `hires1.mix`: Aftermath resource MIX file
