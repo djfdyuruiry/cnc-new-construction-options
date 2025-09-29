@@ -58,3 +58,40 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
+
+RedAlert:
+  NcoZipPath: ra
+  InstallPostfix: ra
+  DiscImages:
+    ALLIES:
+      Sources:
+        - Name: cnc-comm
+          Url: zip
+          File: iso
+      Provides:
+        _root: []
+        ALLIES: []
+    SOVIET:
+      Sources:
+        - Name: cnc-comm
+          Url: zip
+          File: iso
+      Provides:
+        _root: []
+        SOVIET: []
+    COUNTERSTRIKE:
+      Sources:
+        - Name: cnc-comm
+          Url: zip
+          File: iso
+      Provides:
+        _root: []
+        COUNTERSTRIKE: []
+    AFTERMATH:
+      Sources:
+        - Name: cnc-comm
+          Url: zip
+          File: iso
+      Provides:
+        _root: []
+        AFTERMATH: []
