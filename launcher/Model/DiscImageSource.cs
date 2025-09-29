@@ -2,10 +2,9 @@ using System.Collections.Generic;
 
 namespace CNC.NCO.Launcher.Model;
 
-public record DiscImageSource(
-  string Name,
-  string Url,
-  bool IsZipped,
-  string ImageFileName,
-  Dictionary<string, List<string>> Files
-);
+public class DiscImageSource
+{
+  public string Name { get; set; }
+  public DiscImageSourceConfigWithName Config { get; set; }
+  public Dictionary<string, List<string>> Provides  { get; set; }
+}

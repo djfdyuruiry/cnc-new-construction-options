@@ -2,6 +2,7 @@ namespace CNC.NCO.Launcher.Model;
 
 public class LauncherConfig
 {
-  public NewConstructionOptions Options { get; set; }
+  public NewConstructionOptions NCO { get; set; }
   public GameDataConfig TiberianDawn { get; set; }
+  public GameDataConfig RedAlert { get; set; }
 }

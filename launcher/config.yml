@@ -1,4 +1,4 @@
-Options:
+NCO:
   GitHubRepo:
     Owner: djfdyuruiry
     Name: cnc-new-construction-options
@@ -12,7 +12,7 @@ TiberianDawn:
   DiscImages:
     GDI:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
           File: CNC95_GDI.iso
       Provides:
@@ -36,7 +36,7 @@ TiberianDawn:
           - SCORES.MIX
     NOD:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
           File: CNC95_Nod.iso
       Provides:
@@ -46,7 +46,7 @@ TiberianDawn:
           - SCORES.MIX
     CovertOps:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
           File: CD3_Covertops.bin
       Provides:
@@ -65,7 +65,7 @@ RedAlert:
   DiscImages:
     ALLIES:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: zip
           File: iso
       Provides:
@@ -73,7 +73,7 @@ RedAlert:
         ALLIES: []
     SOVIET:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: zip
           File: iso
       Provides:
@@ -81,7 +81,7 @@ RedAlert:
         SOVIET: []
     COUNTERSTRIKE:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: zip
           File: iso
       Provides:
@@ -89,7 +89,7 @@ RedAlert:
         COUNTERSTRIKE: []
     AFTERMATH:
       Sources:
-        - Name: cnc-comm
+        cnc-comm:
           Url: zip
           File: iso
       Provides:
