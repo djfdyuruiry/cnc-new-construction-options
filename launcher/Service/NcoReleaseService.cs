@@ -17,11 +17,11 @@ namespace CNC.NCO.Launcher.Service;
 
 public class NcoReleaseService(LauncherConfig config, string downloadPath)
 {
-  private void ExtractNcoFileFromZip(IReader zipReader)
+  private void ExtractNcoFileFromZip(GameDataConfig gameConfig, IReader zipReader)
   {
     var outputPath = Path.Join(
       downloadPath,
-      zipReader.Entry!.Key!.Replace($"{config.TiberianDawn.NcoZipPath}/", string.Empty)
+      zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/")
     );
     var outputPathDir = Path.GetDirectoryName(outputPath) ?? string.Empty;
 
@@ -81,14 +81,17 @@ public class NcoReleaseService(LauncherConfig config, string downloadPath)
 
       while (zipReader.MoveToNextEntry())
       {
-        if (
-          zipReader.Entry.IsDirectory || (!(zipReader.Entry.Key?.StartsWith(config.TiberianDawn.NcoZipPath) ?? false))
-        )
+        foreach (var dataConfig in new[] { config.TiberianDawn, config.RedAlert})
         {
-          continue;
-        }
+          if (
+            zipReader.Entry.IsDirectory || (!(zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath) ?? false))
+          )
+          {
+            continue;
+          }
 
-        ExtractNcoFileFromZip(zipReader);
+          ExtractNcoFileFromZip(dataConfig, zipReader);
+        }
       }
     }
     catch (Exception e)

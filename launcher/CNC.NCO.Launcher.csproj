@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <None Update="config.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="tools\bin2iso.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

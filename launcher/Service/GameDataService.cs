@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -19,7 +20,26 @@ namespace CNC.NCO.Launcher.Service;
 public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService bin2IsoService, string downloadPath)
 {
   private bool _backgroundLoaded;
+  
+  private void ZipUrlStreamHandler(ZipUrlSpec spec, string installPath, Stream downloadStream)
+  {
+    using var zipReader = ReaderFactory.Open(downloadStream);
+    var fileSuffix = spec.ProvidesFilesEndingWith.ToLower();
 
+    while (zipReader.MoveToNextEntry())
+    {
+      if (zipReader.Entry.Key?.ToLower().EndsWith(fileSuffix) ?? false)
+      {
+        Console.WriteLine($"Extracting {zipReader.Entry.Key} to {installPath}/{zipReader.Entry.Key.ToLower()}");
+
+        zipReader.WriteEntryToFile(
+          Path.Join(installPath, zipReader.Entry.Key.ToLower()),
+          new ExtractionOptions() { Overwrite = true }
+        );
+      }
+    }
+  }
+  
   private async Task FetchCncIsoIfMissing(DiscImageSource source, string destinationPath)
   {
     if (File.Exists(destinationPath))
@@ -48,7 +68,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
 
     while (zipReader.MoveToNextEntry())
     {
-      if (zipReader.Entry.Key != source.Config.File)
+      if (zipReader.Entry.Key == source.Config.File)
       {
         zipReader.WriteEntryToFile(destinationPath, new ExtractionOptions() { Overwrite = true });
       }
@@ -99,7 +119,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
       {
         var outDir = fileList.Key == "_root"
           ? installPath
-          : Path.Join(installPath, fileList.Key);
+          : Path.Join(installPath, fileList.Key.ToLower());
 
         if (!Directory.Exists(outDir))
         {
@@ -110,7 +130,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
         {
           var fileName = file.Split(@"\").Last();
 
-          await GameDiscUtils.ExtractFile(iso, file, Path.Join(outDir, fileName));
+          await GameDiscUtils.ExtractFile(iso, file, Path.Join(outDir, fileName.ToLower()));
         }
       }
     }
@@ -121,7 +141,6 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
   }
 
   private async Task DownloadGameData(
-    LauncherConfig rootConfig,
     GameDataConfig dataConfig,
     Action<Bitmap> onBackgroundLoaded
   )
@@ -159,9 +178,34 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
       });
     }
 
-    var releaseService = new NcoReleaseService(rootConfig, installPath);
+    foreach (var zipUrl in dataConfig.ZipUrls ?? new Dictionary<string, ZipUrlSpec>())
+    {
+      Console.WriteLine($"Downloading files from ZIP Url: {zipUrl.Value.Url}");
 
-    await releaseService.Download();
+      if (zipUrl.Value.Url.StartsWith("https://www.mediafire.com"))
+      {
+        var mediaFireDownloader = new MediaFireDownloader();
+
+        await mediaFireDownloader.WithFileStream(
+          zipUrl.Value.Url, 
+          s => ZipUrlStreamHandler(zipUrl.Value, installPath, s)
+        );
+      }
+      else
+      {
+        using var client = new HttpClient();
+        client.Timeout = Timeout.InfiniteTimeSpan;
+        using var response = await client.GetAsync(
+          zipUrl.Value.Url,
+          HttpCompletionOption.ResponseHeadersRead
+        );
+
+        response.EnsureSuccessStatusCode();
+        await using var responseStream = await response.Content.ReadAsStreamAsync();
+        
+        ZipUrlStreamHandler(zipUrl.Value, installPath, responseStream);
+      }
+    }
   }
 
   public async Task Download(Action<Bitmap> onBackgroundLoaded)
@@ -175,6 +219,12 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
       Directory.CreateDirectory(downloadPath);
     }
 
-    await DownloadGameData(config, config.TiberianDawn, onBackgroundLoaded);
+    foreach (var game in new[] { config.TiberianDawn, config.RedAlert })
+    {
+      await DownloadGameData(game, onBackgroundLoaded);
+    }
+
+    var releaseService = new NcoReleaseService(config, downloadPath);
+    await releaseService.Download();
   }
 }

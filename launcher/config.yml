@@ -58,6 +58,7 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
+  ZipUrls: {}
 
 RedAlert:
   NcoZipPath: ra
@@ -66,32 +67,40 @@ RedAlert:
     ALLIES:
       Sources:
         cnc-comm:
-          Url: zip
-          File: iso
+          Url: https://bigdownloads.cnc-comm.com/ra/RA_Allies.zip
+          File: CD1_ALLIES.iso
       Provides:
-        _root: []
-        ALLIES: []
+        _root:
+          - INSTALL\\REDALERT.MIX
+        ALLIES:
+          - MAIN.MIX
     SOVIET:
       Sources:
         cnc-comm:
-          Url: zip
-          File: iso
+          Url: https://bigdownloads.cnc-comm.com/ra/RA_Soviet.zip
+          File: CD2_Soviet.iso
       Provides:
-        _root: []
-        SOVIET: []
+        _root:
+          - INSTALL\\REDALERT.MIX
+        SOVIET:
+          - MAIN.MIX
     COUNTERSTRIKE:
       Sources:
         cnc-comm:
-          Url: zip
-          File: iso
+          Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
+          File: CD3_Counterstrike.bin
       Provides:
-        _root: []
-        COUNTERSTRIKE: []
+        COUNTERSTRIKE:
+          - MAIN.MIX
     AFTERMATH:
       Sources:
         cnc-comm:
-          Url: zip
-          File: iso
+          Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
+          File: CD4_Aftermath.bin
       Provides:
-        _root: []
-        AFTERMATH: []
+        AFTERMATH:
+          - MAIN.MIX
+  ZipUrls:
+    TheLostFiles:
+      Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip
+      ProvidesFilesEndingWith: .MIX

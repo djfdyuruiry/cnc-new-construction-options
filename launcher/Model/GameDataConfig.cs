@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Remote.Protocol.Viewport;
+using Tmds.DBus.Protocol;
 
 namespace CNC.NCO.Launcher.Model;
 
@@ -9,6 +10,7 @@ public class GameDataConfig
   public string NcoZipPath { get; set; }
   public string InstallPostfix { get; set; }
   public Dictionary<string, DiscImage> DiscImages { get; set; }
+  public Dictionary<string, ZipUrlSpec>? ZipUrls { get; set; }
   public Dictionary<string, List<DiscImageSource>> DiscImagesBySource => DiscImages.Values
     .SelectMany(x => x.Sources.Keys)
     .Distinct()
