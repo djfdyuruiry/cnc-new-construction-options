@@ -212,9 +212,6 @@ jobs:
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          # lua binaries
-          cp -fv ./build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
-
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td

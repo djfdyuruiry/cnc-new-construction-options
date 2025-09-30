@@ -286,16 +286,26 @@ if(BUILD_VANILLARA)
     if(MAKE_BUNDLE)
         add_custom_command(
             TARGET VanillaRA POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
-            COMMAND ${CMAKE_COMMAND} -E rm -Rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app"
         )
     else()
+        set(COPY_RA_BIN_CMD "")
+
+        if(WIN32)
+            # include vcpkg built DLLs on Windows
+            set(COPY_RA_BIN_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin" $<TARGET_FILE_DIR:VanillaRA>/ra)
+        endif()
+
         add_custom_command(
             TARGET VanillaRA POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:VanillaRA>/ra
             COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" $<TARGET_FILE_DIR:VanillaRA>/ra
+            ${COPY_RA_BIN_CMD}
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaRA> $<TARGET_FILE_DIR:VanillaRA>/ra
             COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaRA>
         )

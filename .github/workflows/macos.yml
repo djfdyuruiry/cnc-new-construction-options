@@ -200,9 +200,6 @@ jobs:
           strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
           dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
 
-          # lua binaries
-          cp -fv ./build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
-
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
