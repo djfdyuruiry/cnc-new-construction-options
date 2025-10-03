@@ -5,6 +5,7 @@ NCO:
   Release: latest
   AssetPrefix: vanilla-conquer-nco-${OS}
 
+# TODO: Read ICO files and add to UI as we install
 # TODO: Add dos demo files https://cnc.fandom.com/wiki/Command_%26_Conquer_demo and add nco feature matching info here https://github.com/TheAssemblyArmada/Vanilla-Conquer/wiki/Installing-VanillaTD#patching-cc95-gold-with-demo-for-dos-mode
 TiberianDawn:
   NcoZipPath: td
@@ -15,6 +16,7 @@ TiberianDawn:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
           File: CNC95_GDI.iso
+      SplashScreenFile: SETUP.BMP
       Provides:
         _root:
           - CCLOCAL.MIX
@@ -39,6 +41,7 @@ TiberianDawn:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
           File: CNC95_Nod.iso
+      SplashScreenFile: SETUP.BMP
       Provides:
         NOD:
           - GENERAL.MIX
@@ -69,6 +72,7 @@ RedAlert:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Allies.zip
           File: CD1_ALLIES.iso
+      SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         _root:
           - INSTALL\\REDALERT.MIX
@@ -79,6 +83,7 @@ RedAlert:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Soviet.zip
           File: CD2_Soviet.iso
+      SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         _root:
           - INSTALL\\REDALERT.MIX
@@ -89,6 +94,7 @@ RedAlert:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
           File: CD3_Counterstrike.bin
+      SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         COUNTERSTRIKE:
           - MAIN.MIX
@@ -97,9 +103,11 @@ RedAlert:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
           File: CD4_Aftermath.bin
+      SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         AFTERMATH:
-          - MAIN.MIX
+          - MAIN.MIX#
+  # TODO: SplashScreenUrl, pull image from internet for display during install
   ZipUrls:
     TheLostFiles:
       Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip

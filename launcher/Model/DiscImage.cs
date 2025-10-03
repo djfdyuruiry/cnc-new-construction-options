@@ -6,6 +6,7 @@ namespace CNC.NCO.Launcher.Model;
 public class DiscImage
 {
   public Dictionary<string, DiscImageSourceConfig> Sources { get; set; }
+  public string? SplashScreenFile { get; set; }
   public Dictionary<string, List<string>> Provides { get; set; }
 
   public Dictionary<string, DiscImageSource> BuildSources(string imageName)
@@ -19,6 +20,7 @@ public class DiscImage
       {
         Name = imageName,
         Config = s.Value,
+        SplashScreenFile = SplashScreenFile,
         Provides = Provides
       }
     );

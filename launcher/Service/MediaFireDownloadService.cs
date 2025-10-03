@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class MediaFireDownloader
+public class MediaFireDownloadService
 {
+  public bool IsMediaFireUrl(string? url) => !string.IsNullOrEmpty(url) && url.StartsWith("https://www.mediafire.com");
+
   public async Task WithFileStream(string url, Action<Stream> onDownloadStart)
   {
     Console.WriteLine($"Parsing MediaFire file URL from webpage: {url}");

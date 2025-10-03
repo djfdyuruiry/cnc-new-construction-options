@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 
 using Autofac;
 using Avalonia;
-using Avalonia.Logging;
 using Avalonia.ReactiveUI.Splat;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
+using CNC.NCO.Launcher.Service;
+using CNC.NCO.Launcher.View.Screens;
 using CNC.NCO.Launcher.ViewModel;
+using CNC.NCO.Launcher.ViewModel.Screens;
 
 namespace CNC.NCO.Launcher;
 
@@ -17,32 +17,20 @@ internal static class Program
 {
   private static readonly string[] IocTypes =
   [
-    "Service",
-    "View",
-    "ViewModel",
-    "Window"
+    "Service"
   ];
 
-  private static void ConfigureIoc(ContainerBuilder builder)
+  private static void ConfigureIocContainer(ContainerBuilder builder)
   {
     builder.RegisterInstance(new PathsConfig(AppContext.BaseDirectory));
     builder.RegisterType<LauncherConfigLoader>();
-    builder.RegisterType<MainViewModel>().As<IScreen>();
 
-    builder.RegisterAssemblyTypes(typeof(Program).Assembly)
-      .Where(t =>
-      {
-        var addType = t is { IsClass: true, IsAbstract: false, IsInterface: false } &&
-                      IocTypes.Any(it => t.Name.EndsWith(it));
+    builder.RegisterModule<ServicesModule>();
+    builder.RegisterModule<ScreensModule>();
+    builder.RegisterModule<ScreenViewModelsModule>();
 
-        if (addType)
-        {
-          Console.WriteLine($"Adding type: {t.FullName}");
-        }
-
-        return addType;
-      })
-      .AsSelf();
+    builder.RegisterType<MainViewModel>().SingleInstance().AsSelf().As<IScreen>();
+    builder.RegisterType<MainWindow>().SingleInstance().AsSelf();
   }
 
   // Initialization code. Don't use any Avalonia, third-party APIs or any
@@ -59,5 +47,6 @@ internal static class Program
       .UsePlatformDetect()
       .WithInterFont()
       .LogToTrace()
-      .UseReactiveUIWithAutofac(ConfigureIoc);
+      .UseReactiveUIWithAutofac(ConfigureIocContainer);
+
 }

@@ -1,12 +1,11 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-
 using Splat;
 
 namespace CNC.NCO.Launcher;
 
-public partial class App : Application
+public partial class App : Application 
 {
   public override void Initialize()
   {

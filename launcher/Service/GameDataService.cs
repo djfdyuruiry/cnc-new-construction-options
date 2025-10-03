@@ -17,10 +17,13 @@ using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService bin2IsoService, PathsConfig paths)
+public class GameDataService(
+  LauncherConfigLoader configLoader,
+  Bin2IsoService bin2IsoService,
+  MediaFireDownloadService mediaFireDownloadService,
+  PathsConfig paths
+)
 {
-  private bool _backgroundLoaded;
-  
   private void ZipUrlStreamHandler(ZipUrlSpec spec, string installPath, Stream downloadStream)
   {
     using var zipReader = ReaderFactory.Open(downloadStream);
@@ -142,7 +145,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
 
   private async Task DownloadGameData(
     GameDataConfig dataConfig,
-    Action<Bitmap> onBackgroundLoaded
+    Action<Bitmap> onSplashScreenLoaded
   )
   {
     var installPath = Path.Join(paths.CachePath, dataConfig.InstallPostfix);
@@ -155,6 +158,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
 
     Directory.CreateDirectory(installPath);
 
+    // TODO: Allow user to select source and pass into this method to filter (instead of first)
     var discImages = dataConfig.DiscImagesBySource.First().Value;
 
     foreach (var imageSource in discImages)
@@ -165,16 +169,14 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
 
       await ExtractGameDataFromDiscImage(imageSource, installPath, async iso =>
       {
-        if (_backgroundLoaded || !iso.FileExists("setup.bmp"))
+        if (imageSource.SplashScreenFile is null || !iso.FileExists(imageSource.SplashScreenFile))
         {
           return;
         }
 
-        await using var fileStream = iso.OpenFile(@"setup.bmp", FileMode.Open);
+        await using var fileStream = iso.OpenFile(imageSource.SplashScreenFile, FileMode.Open);
 
-        onBackgroundLoaded(Bitmap.DecodeToHeight(fileStream, 480));
-
-        _backgroundLoaded = true;
+        onSplashScreenLoaded(Bitmap.DecodeToHeight(fileStream, 480));
       });
     }
 
@@ -182,11 +184,9 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
     {
       Console.WriteLine($"Downloading files from ZIP Url: {zipUrl.Value.Url}");
 
-      if (zipUrl.Value.Url.StartsWith("https://www.mediafire.com"))
+      if (mediaFireDownloadService.IsMediaFireUrl(zipUrl.Value.Url))
       {
-        var mediaFireDownloader = new MediaFireDownloader();
-
-        await mediaFireDownloader.WithFileStream(
+        await mediaFireDownloadService.WithFileStream(
           zipUrl.Value.Url, 
           s => ZipUrlStreamHandler(zipUrl.Value, installPath, s)
         );
@@ -208,7 +208,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
     }
   }
 
-  public async Task Download(Action<Bitmap> onBackgroundLoaded)
+  public async Task Download(Action<Bitmap> onSplashScreenLoaded)
   {
     var config = configLoader.Load();
 
@@ -221,7 +221,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
 
     foreach (var game in new[] { config.TiberianDawn, config.RedAlert })
     {
-      await DownloadGameData(game, onBackgroundLoaded);
+      await DownloadGameData(game, onSplashScreenLoaded);
     }
 
     var releaseService = new NcoReleaseService(config, paths.CachePath);
