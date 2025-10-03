@@ -8,12 +8,10 @@ using ReactiveUI;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
-public class StartViewModel : ScreenViewModelBase
+public class StartViewModel(IScreen hostScreen) : ScreenViewModelBase("start-installer", hostScreen)
 {
   private IBrush? _backgroundImage;
-
-  public string Greeting { get; } = "Welcome to the Game Installer!";
-
+  
   public IBrush? BackgroundImage
   {
     get => _backgroundImage;

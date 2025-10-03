@@ -6,6 +6,7 @@
         <entry key="App.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="MainWindow.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/GameInstaller/StartView.axaml" value="CNC.NCO.Launcher.csproj" />
+        <entry key="View/Screens/GameInstaller/SelectGameData.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/GameInstaller/StartView.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/LaunchGame.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/StartView.axaml" value="CNC.NCO.Launcher.csproj" />

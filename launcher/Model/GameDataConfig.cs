@@ -7,6 +7,7 @@ namespace CNC.NCO.Launcher.Model;
 
 public class GameDataConfig
 {
+  public string DisplayName { get; set; }
   public string NcoZipPath { get; set; }
   public string InstallPostfix { get; set; }
   public Dictionary<string, DiscImage> DiscImages { get; set; }

@@ -8,6 +8,8 @@ NCO:
 # TODO: Read ICO files and add to UI as we install
 # TODO: Add dos demo files https://cnc.fandom.com/wiki/Command_%26_Conquer_demo and add nco feature matching info here https://github.com/TheAssemblyArmada/Vanilla-Conquer/wiki/Installing-VanillaTD#patching-cc95-gold-with-demo-for-dos-mode
 TiberianDawn:
+  DisplayName: >-
+    Command & Conquer: Tiberian Dawn
   NcoZipPath: td
   InstallPostfix: td
   DiscImages:
@@ -48,6 +50,8 @@ TiberianDawn:
           - MOVIES.MIX
           - SCORES.MIX
     CovertOps:
+      DisplayName: >-
+        Covert Operations (Expansion)
       Sources:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
@@ -64,10 +68,13 @@ TiberianDawn:
   ZipUrls: {}
 
 RedAlert:
+  DisplayName: >-
+    Command & Conquer: Red Alert
   NcoZipPath: ra
   InstallPostfix: ra
   DiscImages:
     ALLIES:
+      DisplayName: Soviet
       Sources:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Allies.zip
@@ -79,6 +86,7 @@ RedAlert:
         ALLIES:
           - MAIN.MIX
     SOVIET:
+      DisplayName: Soviet
       Sources:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Soviet.zip
@@ -90,6 +98,7 @@ RedAlert:
         SOVIET:
           - MAIN.MIX
     COUNTERSTRIKE:
+      DisplayName: Counterstrike
       Sources:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
@@ -99,6 +108,7 @@ RedAlert:
         COUNTERSTRIKE:
           - MAIN.MIX
     AFTERMATH:
+      DisplayName: The Aftermath
       Sources:
         cnc-comm:
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
@@ -110,5 +120,7 @@ RedAlert:
   # TODO: SplashScreenUrl, pull image from internet for display during install
   ZipUrls:
     TheLostFiles:
+      DisplayName:
+        The Lost Files ('Counterstrike'/'The Aftermath' Cutscenes)
       Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip
       ProvidesFilesEndingWith: .MIX
