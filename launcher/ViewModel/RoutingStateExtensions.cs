@@ -7,7 +7,7 @@ namespace CNC.NCO.Launcher.ViewModel;
 
 public static class RoutingStateExtensions
 {
-  public static IObservable<IRoutableViewModel> Execute<T>(this RoutingState router) where T : IRoutableViewModel
+  public static IObservable<IRoutableViewModel> NavigateTo<T>(this RoutingState router) where T : IRoutableViewModel
   {
     var viewModel = Locator.Current.GetService<T>()
                     ?? throw new InvalidOperationException($"Could not navigate toa view model: {typeof(T)}");

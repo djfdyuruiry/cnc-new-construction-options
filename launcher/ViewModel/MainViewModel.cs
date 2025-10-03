@@ -14,20 +14,20 @@ public class MainViewModel : ReactiveObject, IScreen
 {
   public RoutingState Router { get; } = new();
 
-  public ReactiveCommand<Unit, IRoutableViewModel> Play { get; }
-
   public ReactiveCommand<Unit, IRoutableViewModel> Install { get; }
+
+  public ReactiveCommand<Unit, IRoutableViewModel> Play { get; }
 
   public ReactiveCommand<Unit, Unit> Exit { get; }
 
   public MainViewModel()
   {
-    Play = ReactiveCommand.CreateFromObservable(() =>
-      Router.Execute<LaunchGameViewModel>()
+    Install = ReactiveCommand.CreateFromObservable(() =>
+      Router.NavigateTo<StartViewModel>()
     );
 
-    Install = ReactiveCommand.CreateFromObservable(() =>
-      Router.Execute<StartViewModel>()
+    Play = ReactiveCommand.CreateFromObservable(() =>
+      Router.NavigateTo<LaunchGameViewModel>()
     );
 
     Exit = ReactiveCommand.Create(() =>

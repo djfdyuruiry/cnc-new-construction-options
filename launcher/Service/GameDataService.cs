@@ -18,7 +18,7 @@ using CNC.NCO.Launcher.Util;
 namespace CNC.NCO.Launcher.Service;
 
 public class GameDataService(
-  LauncherConfigLoader configLoader,
+  Func<LauncherConfig> configProvider,
   Bin2IsoService bin2IsoService,
   MediaFireDownloadService mediaFireDownloadService,
   PathsConfig paths
@@ -210,9 +210,7 @@ public class GameDataService(
 
   public async Task Download(Action<Bitmap> onSplashScreenLoaded)
   {
-    var config = configLoader.Load();
-
-    DiscUtils.Complete.SetupHelper.SetupComplete();
+    var config = configProvider();
 
     if (!Directory.Exists(paths.CachePath))
     {

@@ -6,7 +6,10 @@ public class ServicesModule : Module
 {
   protected override void Load(ContainerBuilder builder)
   {
-    builder.RegisterAssemblyTypes(typeof(ServicesModule).Assembly)
+    // needs called once per application lifetime
+    DiscUtils.Complete.SetupHelper.SetupComplete();
+
+    builder.RegisterAssemblyTypes(ThisAssembly)
       .Where(t =>
         (t.Namespace?.StartsWith("CNC.NCO.Launcher.Service") ?? false) &&
         t is { IsClass: true, IsAbstract: false } &&
