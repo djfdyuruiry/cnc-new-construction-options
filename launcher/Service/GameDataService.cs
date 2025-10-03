@@ -17,7 +17,7 @@ using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService bin2IsoService, string downloadPath)
+public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService bin2IsoService, PathsConfig paths)
 {
   private bool _backgroundLoaded;
   
@@ -81,7 +81,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
     Func<CDReader, Task> onIsoOpen
   )
   {
-    var imagePath = Path.Join(downloadPath, source.Config.File);
+    var imagePath = Path.Join(paths.CachePath, source.Config.File);
 
     try
     {
@@ -145,7 +145,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
     Action<Bitmap> onBackgroundLoaded
   )
   {
-    var installPath = Path.Join(downloadPath, dataConfig.InstallPostfix);
+    var installPath = Path.Join(paths.CachePath, dataConfig.InstallPostfix);
 
     // TODO: Change to create if missing in final version (and no clobber config/save files logic)
     if (Directory.Exists(installPath))
@@ -214,9 +214,9 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
 
     DiscUtils.Complete.SetupHelper.SetupComplete();
 
-    if (!Directory.Exists(downloadPath))
+    if (!Directory.Exists(paths.CachePath))
     {
-      Directory.CreateDirectory(downloadPath);
+      Directory.CreateDirectory(paths.CachePath);
     }
 
     foreach (var game in new[] { config.TiberianDawn, config.RedAlert })
@@ -224,7 +224,7 @@ public class GameDataService(LauncherConfigLoader configLoader, Bin2IsoService b
       await DownloadGameData(game, onBackgroundLoaded);
     }
 
-    var releaseService = new NcoReleaseService(config, downloadPath);
+    var releaseService = new NcoReleaseService(config, paths.CachePath);
     await releaseService.Download();
   }
 }

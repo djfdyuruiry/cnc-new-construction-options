@@ -1,10 +1,31 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
-        Width="1024"
-        Height="768"
-        x:Class="CNC.NCO.Launcher.MainWindow"
-        Title="CNC: New Construction Options">
-</Window>
+<rxui:ReactiveWindow x:Class="CNC.NCO.Launcher.MainWindow"
+                     x:TypeArguments="vm:MainViewModel"
+                     x:DataType="vm:MainViewModel"
+                     xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:rxui="http://reactiveui.net"
+                     xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel"
+                     mc:Ignorable="d"
+                     d:DesignWidth="800"
+                     d:DesignHeight="600"
+                     Width="1024"
+                     Height="768"
+                     Title="CNC: New Construction Options">
+  <Design.DataContext>
+    <vm:MainViewModel/>
+  </Design.DataContext>
+
+  <!-- This could replicate an old windows 9x installer for retro feel -->
+  <Grid RowDefinitions="*,Auto">
+    <rxui:RoutedViewHost Grid.Row="0" 
+                         HorizontalContentAlignment="Stretch"
+                         VerticalContentAlignment="Stretch"
+                         Router="{Binding Router}"/>
+    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="15">
+      <Button Command="{Binding Install}" Content="Install" Margin="5 0 0 0" />
+      <Button Command="{Binding Play}" Content="Play" />
+    </StackPanel>
+  </Grid>
+</rxui:ReactiveWindow>

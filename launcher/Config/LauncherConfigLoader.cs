@@ -7,7 +7,7 @@ using CNC.NCO.Launcher.Model;
 
 namespace CNC.NCO.Launcher.Config;
 
-public class LauncherConfigLoader(string configPath)
+public class LauncherConfigLoader(PathsConfig paths)
 {
   public LauncherConfig Load()
   {
@@ -16,13 +16,13 @@ public class LauncherConfigLoader(string configPath)
       return new DeserializerBuilder()
         .Build()
         .Deserialize<LauncherConfig>(
-          File.ReadAllText(configPath)
+          File.ReadAllText(paths.ConfigYamlPath)
         );
     }
     catch (Exception ex)
     {
       throw new InvalidOperationException(
-        $"Failed to load configuration from {configPath}",
+        $"Failed to load configuration from {paths.ConfigYamlPath}",
         ex
       );
     }

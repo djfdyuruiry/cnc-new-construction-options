@@ -3,13 +3,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CNC.NCO.Launcher.Config;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class Bin2IsoService(string toolsPath)
+public class Bin2IsoService(PathsConfig paths)
 {
   private string OsBin2IsoPath => Path.Join(
-    toolsPath,
+    paths.ToolsPath,
     OperatingSystem.IsWindows() 
       ? "bin2iso.exe"
       : (OperatingSystem.IsMacOS() ? "bin2iso-macos" : "bin2iso-linux")
