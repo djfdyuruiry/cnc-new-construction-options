@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -180,15 +179,15 @@ public class GameDataService(
       });
     }
 
-    foreach (var zipUrl in dataConfig.ZipUrls ?? new Dictionary<string, ZipUrlSpec>())
+    foreach (var zipUrl in dataConfig.ZipUrls ?? [])
     {
-      Console.WriteLine($"Downloading files from ZIP Url: {zipUrl.Value.Url}");
+      Console.WriteLine($"Downloading files from ZIP Url: {zipUrl.Url}");
 
-      if (mediaFireDownloadService.IsMediaFireUrl(zipUrl.Value.Url))
+      if (mediaFireDownloadService.IsMediaFireUrl(zipUrl.Url))
       {
         await mediaFireDownloadService.WithFileStream(
-          zipUrl.Value.Url, 
-          s => ZipUrlStreamHandler(zipUrl.Value, installPath, s)
+          zipUrl.Url, 
+          s => ZipUrlStreamHandler(zipUrl, installPath, s)
         );
       }
       else
@@ -196,14 +195,14 @@ public class GameDataService(
         using var client = new HttpClient();
         client.Timeout = Timeout.InfiniteTimeSpan;
         using var response = await client.GetAsync(
-          zipUrl.Value.Url,
+          zipUrl.Url,
           HttpCompletionOption.ResponseHeadersRead
         );
 
         response.EnsureSuccessStatusCode();
         await using var responseStream = await response.Content.ReadAsStreamAsync();
         
-        ZipUrlStreamHandler(zipUrl.Value, installPath, responseStream);
+        ZipUrlStreamHandler(zipUrl, installPath, responseStream);
       }
     }
   }

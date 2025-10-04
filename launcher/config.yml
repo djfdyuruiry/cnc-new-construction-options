@@ -13,9 +13,10 @@ TiberianDawn:
   NcoZipPath: td
   InstallPostfix: td
   DiscImages:
-    GDI:
+    - Name: GDI
+      Required: true
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
           File: CNC95_GDI.iso
       SplashScreenFile: SETUP.BMP
@@ -38,9 +39,9 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
-    NOD:
+    - Name: NOD
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
           File: CNC95_Nod.iso
       SplashScreenFile: SETUP.BMP
@@ -49,11 +50,11 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
-    CovertOps:
+    - Name: CovertOps
       DisplayName: >-
         Covert Operations (Expansion)
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
           File: CD3_Covertops.bin
       Provides:
@@ -65,7 +66,7 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
-  ZipUrls: {}
+  ZipUrls: []
 
 RedAlert:
   DisplayName: >-
@@ -73,10 +74,11 @@ RedAlert:
   NcoZipPath: ra
   InstallPostfix: ra
   DiscImages:
-    ALLIES:
-      DisplayName: Soviet
+    - Name: ALLIES
+      DisplayName: Allies
+      Required: true
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Allies.zip
           File: CD1_ALLIES.iso
       SplashScreenFile: SETUP95\\SETUP.BMP
@@ -85,10 +87,10 @@ RedAlert:
           - INSTALL\\REDALERT.MIX
         ALLIES:
           - MAIN.MIX
-    SOVIET:
+    - Name: SOVIET
       DisplayName: Soviet
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Soviet.zip
           File: CD2_Soviet.iso
       SplashScreenFile: SETUP95\\SETUP.BMP
@@ -97,29 +99,29 @@ RedAlert:
           - INSTALL\\REDALERT.MIX
         SOVIET:
           - MAIN.MIX
-    COUNTERSTRIKE:
+    - Name: COUNTERSTRIKE
       DisplayName: Counterstrike
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
           File: CD3_Counterstrike.bin
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         COUNTERSTRIKE:
           - MAIN.MIX
-    AFTERMATH:
+    - Name: AFTERMATH
       DisplayName: The Aftermath
       Sources:
-        cnc-comm:
+        - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
           File: CD4_Aftermath.bin
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         AFTERMATH:
-          - MAIN.MIX#
+          - MAIN.MIX
   # TODO: SplashScreenUrl, pull image from internet for display during install
   ZipUrls:
-    TheLostFiles:
+    - Name: TheLostFiles
       DisplayName:
         The Lost Files ('Counterstrike'/'The Aftermath' Cutscenes)
       Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip

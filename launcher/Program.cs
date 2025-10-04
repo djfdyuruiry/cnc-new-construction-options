@@ -9,7 +9,9 @@ namespace CNC.NCO.Launcher;
 internal static class Program
 {
   [STAThread]
-  public static void Main(string[] args) =>
+  public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+
+  public static AppBuilder BuildAvaloniaApp() =>
     AppBuilder.Configure<App>()
       .UsePlatformDetect()
       .WithInterFont()
@@ -17,6 +19,5 @@ internal static class Program
       .UseReactiveUIWithAutofac(c =>
         // module auto-discovery
         c.RegisterAssemblyModules(typeof(Program).Assembly)
-      )
-      .StartWithClassicDesktopLifetime(args);
+      );
 }

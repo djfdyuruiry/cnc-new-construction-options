@@ -9,7 +9,31 @@
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
                           mc:Ignorable="d"
                           d:DesignWidth="800"
-                          d:DesignHeight="450">
+                          d:DesignHeight="600">
   <StackPanel>
+    <Grid ColumnDefinitions="*,*">
+      <StackPanel Grid.Column="0">
+        <CheckBox Content="{Binding TiberianDawn.DisplayName}" IsChecked="{Binding Path=TiberianDawn.Enabled, Mode=TwoWay }"/>
+        <ItemsControl ItemsSource="{Binding Path=TdDiscImages, Mode=TwoWay}" IsEnabled="{Binding TiberianDawn.Enabled}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <CheckBox Content="{Binding DisplayNameOrName}" IsEnabled="{Binding IsOptional}" IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1">
+        <CheckBox Content="{Binding RedAlert.DisplayName}" IsChecked="{Binding Path=RedAlert.Enabled, Mode=TwoWay }"/>
+        <ItemsControl ItemsSource="{Binding Path=RaDiscImages, Mode=TwoWay}" IsEnabled="{Binding RedAlert.Enabled}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <CheckBox Content="{Binding DisplayNameOrName}" IsEnabled="{Binding IsOptional}" IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Grid>
+    <Button Content="Next"></Button>
   </StackPanel>
 </rxui:ReactiveUserControl>

@@ -2,6 +2,7 @@ namespace CNC.NCO.Launcher.Model;
 
 public class ZipUrlSpec
 {
+  public string Name { get; set; }
   public string? DisplayName { get; set; }
   public required string Url { get; set; }
   public required string ProvidesFilesEndingWith { get; set; }

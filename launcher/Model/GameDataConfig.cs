@@ -1,26 +1,51 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using Avalonia.Remote.Protocol.Viewport;
-using Tmds.DBus.Protocol;
+using System.Runtime.CompilerServices;
 
 namespace CNC.NCO.Launcher.Model;
 
-public class GameDataConfig
+public class GameDataConfig : INotifyPropertyChanged
 {
+  private bool _enabled;
   public string DisplayName { get; set; }
   public string NcoZipPath { get; set; }
   public string InstallPostfix { get; set; }
-  public Dictionary<string, DiscImage> DiscImages { get; set; }
-  public Dictionary<string, ZipUrlSpec>? ZipUrls { get; set; }
-  public Dictionary<string, List<DiscImageSource>> DiscImagesBySource => DiscImages.Values
-    .SelectMany(x => x.Sources.Keys)
+  public DiscImage[] DiscImages { get; set; }
+  public ZipUrlSpec[]? ZipUrls { get; set; }
+  public bool Enabled
+  {
+    get => _enabled;
+    set
+    {
+      if (value == _enabled) return;
+      _enabled = value;
+      OnPropertyChanged();
+    }
+  }
+
+  public GameDataConfig()
+  {
+    // TODO: persist back to yml
+    Enabled = true;
+  }
+
+  public Dictionary<string, List<DiscImageSource>> DiscImagesBySource => DiscImages
+    .SelectMany(x => x.Sources.Select(s => s.Name))
     .Distinct()
     .ToDictionary(
       p => p,
       p => DiscImages
-        .Select(d => d.Value.BuildSources(d.Key).GetValueOrDefault(p))
+        .Select(d => d.BuildSources().GetValueOrDefault(p))
         .Where(d => d is not null)
         .Select(d => d!)
         .ToList()
     );
+
+  public event PropertyChangedEventHandler? PropertyChanged;
+
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+  {
+    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+  }
 }

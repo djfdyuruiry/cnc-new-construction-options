@@ -20,13 +20,14 @@
   <!-- This could replicate an old windows 9x installer for retro feel -->
   <Grid RowDefinitions="*,Auto">
     <rxui:RoutedViewHost Grid.Row="0" 
+                         Margin="15"
                          HorizontalContentAlignment="Stretch"
                          VerticalContentAlignment="Stretch"
                          Router="{Binding Router}"/>
     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="15">
-      <Button Command="{Binding Install}" Content="Install" Margin="5 0 0 0" />
-      <Button Command="{Binding Play}" Content="Play" />
-      <Button Command="{Binding Exit}" Content="Exit" />
+      <Button Command="{Binding Install}" Content="Install" Margin="5" />
+      <Button Command="{Binding Play}" Content="Play" Margin="5" />
+      <Button Command="{Binding Exit}" Content="Exit" Margin="5" />
     </StackPanel>
   </Grid>
 </rxui:ReactiveWindow>
