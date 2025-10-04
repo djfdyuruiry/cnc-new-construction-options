@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-
+using System.Reactive;
 using CNC.NCO.Launcher.Config;
 
 using ReactiveUI;
@@ -39,6 +39,8 @@ public class SelectGameDataViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _raDiscImages, value);
   }
 
+  public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
+
   public SelectGameDataViewModel(LauncherConfigLoader configLoader, IScreen hostScreen)
     : base("select-games", hostScreen)
   {
@@ -48,5 +50,9 @@ public class SelectGameDataViewModel : ScreenViewModelBase
     _ra = config.RedAlert;
     _tdDiscImages = new ObservableCollection<DiscImage>(config.TiberianDawn.DiscImages);
     _raDiscImages = new ObservableCollection<DiscImage>(config.RedAlert.DiscImages);
+    
+    Next = ReactiveCommand.CreateFromObservable(() => 
+      HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()
+    );
   }
 }
