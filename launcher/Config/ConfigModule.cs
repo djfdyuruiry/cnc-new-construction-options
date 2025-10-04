@@ -8,11 +8,13 @@ public class ConfigModule : Module
 {
   protected override void Load(ContainerBuilder builder)
   {
-    var pathsConfig = new PathsConfig(AppContext.BaseDirectory);
-    var configLoader = new LauncherConfigLoader(pathsConfig);
+    var pathsConfig = new PathsConfig(
+      AppContext.BaseDirectory, 
+      Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+    );
+    var configService = new LauncherConfigService(pathsConfig);
 
     builder.RegisterInstance(pathsConfig).SingleInstance().AsSelf();
-    builder.RegisterInstance(configLoader).SingleInstance().AsSelf();
-    builder.RegisterInstance(() => configLoader.Load()).SingleInstance().AsSelf();
+    builder.RegisterInstance(configService).SingleInstance().AsSelf();
   }
 }

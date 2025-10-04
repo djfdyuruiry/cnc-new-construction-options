@@ -3,6 +3,7 @@ using System.Reactive;
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using CNC.NCO.Launcher.Config;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.ViewModel.Screens;
@@ -20,7 +21,7 @@ public class MainViewModel : ReactiveObject, IScreen
 
   public ReactiveCommand<Unit, Unit> Exit { get; }
 
-  public MainViewModel()
+  public MainViewModel(LauncherConfigService configService)
   {
     Install = ReactiveCommand.CreateFromObservable(() =>
       Router.NavigateTo<StartViewModel>()
@@ -32,6 +33,15 @@ public class MainViewModel : ReactiveObject, IScreen
 
     Exit = ReactiveCommand.Create(() =>
     {
+      try
+      {
+        configService.Save();
+      }
+      catch (Exception e)
+      {
+        Console.Error.WriteLine(e);
+      }
+
       if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
       {
         desktop.Shutdown();

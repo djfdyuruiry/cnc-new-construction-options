@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-
+using CNC.NCO.Launcher.Config;
 using GitHub;
 using GitHub.Octokit.Client;
 using Microsoft.Kiota.Abstractions.Authentication;
@@ -15,9 +15,9 @@ using CNC.NCO.Launcher.Model;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class NcoReleaseService(LauncherConfig config, string downloadPath)
+public class NcoReleaseService(LauncherConfigService configService)
 {
-  private void ExtractNcoFileFromZip(GameDataConfig gameConfig, IReader zipReader)
+  private void ExtractNcoFileFromZip(GameDataConfig gameConfig, string downloadPath, IReader zipReader)
   {
     var outputPath = Path.Join(
       downloadPath,
@@ -40,7 +40,7 @@ public class NcoReleaseService(LauncherConfig config, string downloadPath)
       RequestAdapter.Create(new AnonymousAuthenticationProvider())
     );
 
-    var ncoConfig = config.NCO;
+    var ncoConfig = configService.Config.NCO;
     var ncoRelease = await githubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
       .Releases
       .Tags[ncoConfig.Release]
@@ -59,7 +59,7 @@ public class NcoReleaseService(LauncherConfig config, string downloadPath)
       .FirstOrDefault() ?? throw new Exception($"Failed to resolve NCO zip, release '{ncoConfig.Release}' and OS: {osName}");
   }
 
-  public async Task Download()
+  public async Task Download(string downloadPath)
   {
     try
     {
@@ -81,7 +81,7 @@ public class NcoReleaseService(LauncherConfig config, string downloadPath)
 
       while (zipReader.MoveToNextEntry())
       {
-        foreach (var dataConfig in new[] { config.TiberianDawn, config.RedAlert})
+        foreach (var dataConfig in new[] { configService.Config.TiberianDawn, configService.Config.RedAlert})
         {
           if (
             zipReader.Entry.IsDirectory || (!(zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath) ?? false))
@@ -90,7 +90,7 @@ public class NcoReleaseService(LauncherConfig config, string downloadPath)
             continue;
           }
 
-          ExtractNcoFileFromZip(dataConfig, zipReader);
+          ExtractNcoFileFromZip(dataConfig, downloadPath, zipReader);
         }
       }
     }

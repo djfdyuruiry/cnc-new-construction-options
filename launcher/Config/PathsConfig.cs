@@ -2,9 +2,14 @@ using System.IO;
 
 namespace CNC.NCO.Launcher.Config;
 
-public class PathsConfig(string baseDirectoryPath)
+public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPath)
 {
-  public string ConfigYamlPath { get; } = Path.Join(baseDirectoryPath, "config.yml");
-  public string ToolsPath { get; } = Path.Join(baseDirectoryPath, "tools");
-  public string CachePath { get; } = Path.Join(baseDirectoryPath, ".cache");
+  // launcher app paths
+  public string ConfigYamlPath { get; } = Path.Join(launcherDirectoryPath, "config.yml");
+  public string ToolsPath { get; } = Path.Join(launcherDirectoryPath, "tools");
+  
+  // user paths
+  public string AppDataPath { get; } = Path.Join(appDataDirectoryPath, "nco");
+  public string CachePath => Path.Join(AppDataPath, ".cache");
+  public string UserConfigYamlPath => Path.Join(AppDataPath, "config.yml");
 }

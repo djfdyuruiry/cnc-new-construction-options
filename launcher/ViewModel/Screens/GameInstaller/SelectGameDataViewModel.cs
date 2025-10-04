@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
 using CNC.NCO.Launcher.Config;
-
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Model;
@@ -41,10 +40,10 @@ public class SelectGameDataViewModel : ScreenViewModelBase
 
   public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
 
-  public SelectGameDataViewModel(LauncherConfigLoader configLoader, IScreen hostScreen)
+  public SelectGameDataViewModel(LauncherConfigService configService, IScreen hostScreen)
     : base("select-games", hostScreen)
   {
-    var config = configLoader.Load();
+    var config = configService.Config;
 
     _td = config.TiberianDawn;
     _ra = config.RedAlert;

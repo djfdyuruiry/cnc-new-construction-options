@@ -17,9 +17,10 @@ using CNC.NCO.Launcher.Util;
 namespace CNC.NCO.Launcher.Service;
 
 public class GameDataService(
-  Func<LauncherConfig> configProvider,
+  LauncherConfigService configService,
   Bin2IsoService bin2IsoService,
   MediaFireDownloadService mediaFireDownloadService,
+  NcoReleaseService releaseService,
   PathsConfig paths
 )
 {
@@ -209,19 +210,18 @@ public class GameDataService(
 
   public async Task Download(Action<Bitmap> onSplashScreenLoaded)
   {
-    var config = configProvider();
-
     if (!Directory.Exists(paths.CachePath))
     {
       Directory.CreateDirectory(paths.CachePath);
     }
+
+    var config = configService.Config;
 
     foreach (var game in new[] { config.TiberianDawn, config.RedAlert })
     {
       await DownloadGameData(game, onSplashScreenLoaded);
     }
 
-    var releaseService = new NcoReleaseService(config, paths.CachePath);
-    await releaseService.Download();
+    await releaseService.Download(paths.CachePath);
   }
 }

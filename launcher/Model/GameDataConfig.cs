@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using YamlDotNet.Serialization;
+
 namespace CNC.NCO.Launcher.Model;
 
 public class GameDataConfig : INotifyPropertyChanged
@@ -24,12 +26,7 @@ public class GameDataConfig : INotifyPropertyChanged
     }
   }
 
-  public GameDataConfig()
-  {
-    // TODO: persist back to yml
-    Enabled = true;
-  }
-
+  [YamlIgnore]
   public Dictionary<string, List<DiscImageSource>> DiscImagesBySource => DiscImages
     .SelectMany(x => x.Sources.Select(s => s.Name))
     .Distinct()
@@ -43,6 +40,12 @@ public class GameDataConfig : INotifyPropertyChanged
     );
 
   public event PropertyChangedEventHandler? PropertyChanged;
+
+  public GameDataConfig()
+  {
+    // TODO: persist back to yml
+    Enabled = true;
+  }
 
   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
   {
