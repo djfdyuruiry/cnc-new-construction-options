@@ -10,6 +10,8 @@ namespace CNC.NCO.Launcher.Model;
 public class GameDataConfig : INotifyPropertyChanged
 {
   private bool _enabled;
+
+  public string Name { get; set; }
   public string DisplayName { get; set; }
   public string NcoZipPath { get; set; }
   public string InstallPostfix { get; set; }
