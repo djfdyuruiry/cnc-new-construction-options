@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Splat;
 
 namespace CNC.NCO.Launcher;
 
@@ -16,7 +15,7 @@ public partial class App : Application
   {
     if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
     {
-      desktop.MainWindow = Locator.Current.GetService<MainWindow>();
+      desktop.MainWindow = new MainWindow();
     }
 
     base.OnFrameworkInitializationCompleted();

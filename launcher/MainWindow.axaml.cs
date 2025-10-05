@@ -1,15 +1,16 @@
 using Avalonia.ReactiveUI;
 
 using CNC.NCO.Launcher.ViewModel;
+using Splat;
 
 namespace CNC.NCO.Launcher;
 
 public partial class MainWindow : ReactiveWindow<MainViewModel>
 {
-  public MainWindow(MainViewModel viewModel)
+  public MainWindow()
   {
     InitializeComponent();
 
-    ViewModel = viewModel;
+    ViewModel = Locator.Current.GetService<MainViewModel>();
   }
 }

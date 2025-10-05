@@ -12,6 +12,7 @@ public class DiscImage : INotifyPropertyChanged
 
   private bool _enabled;
 
+  public int SortOrder { get; set; }
   public string Name { get; set; }
   public string? DisplayName { get; set; }
   [YamlIgnore]
@@ -47,6 +48,7 @@ public class DiscImage : INotifyPropertyChanged
       s => s.Key,
       s => new DiscImageSource
       {
+        SortOrder = SortOrder,
         Name = Name,
         DisplayName = DisplayName,
         Enabled = Enabled,

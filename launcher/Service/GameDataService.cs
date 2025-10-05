@@ -266,7 +266,7 @@ public class GameDataService(
         downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));
 
         await DownloadGameDiscImageFiles(game, downloadEventVisitor, onSplashScreenLoaded, installPath);
-        await DownloadGameZipUrlFiles(game, downloadEventVisitor, installPath);
+        //await DownloadGameZipUrlFiles(game, downloadEventVisitor, installPath);
 
         downloadEventVisitor.Visit(new FinishDownloadGameDataEvent(game));
       }

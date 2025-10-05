@@ -1,4 +1,5 @@
 using System.Linq;
+
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Model.ViewModel;
 
@@ -16,10 +17,20 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   public void Visit(ConvertDiscImageEvent e) =>
     AppendToInstallLog($"Converting disc image to ISO format: {e.Image.Config.File}");
 
-  public void Visit(StartDiscImageDownloadEvent e)
-  {
+  public void Visit(StartDiscImageDownloadEvent e) => 
     AppendToInstallLog($"Downloading disc image: {e.Image.Config.File}");
-    _currentDiscImage = host.DiscImages.FirstOrDefault(d => Equals(d.Source, e.Image));
+
+  public void Visit(WriteGameDataFileEvent e) =>
+    AppendToInstallLog($"Writing game data file: {e.File} to {e.DestPath}");
+
+  public void Visit(StartDownloadGameDataEvent e) =>
+    AppendToInstallLog($"Starting data download(s) for game: {e.GameData.DisplayName}");
+
+  public void Visit(StartDiscImageFileScanEvent e)
+  {
+    AppendToInstallLog($"Scanning files in disc image source: {e.Source.Config.File}");
+    
+    _currentDiscImage = host.DiscImages.FirstOrDefault(d => Equals(d.Source, e.Source));
 
     if (_currentDiscImage is null)
     {
@@ -30,33 +41,31 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     _currentDiscImage.Installing = true;
   }
 
-  public void Visit(WriteGameDataFileEvent e) =>
-    AppendToInstallLog($"Writing game data file: {e.File} to {e.DestPath}");
-
-  public void Visit(StartDownloadGameDataEvent e) =>
-    AppendToInstallLog($"Starting data download(s) for game: {e.GameData.DisplayName}");
-
-  public void Visit(StartDiscImageFileScanEvent e) =>
-    AppendToInstallLog($"Scanning files in disc image source: {e.Source.Config.File}");
-
   public void Visit(FetchNcoReleaseEvent e)
   {
-    throw new System.NotImplementedException();
+    AppendToInstallLog($"Fetching info on the latest version of NCO game engine");
+
+    host.NcoInstalling = true;
   }
 
-  public void Visit(StartNcoReleaseDownloadEvent e)
+  public void Visit(StartNcoReleaseDownloadEvent e) => 
+    AppendToInstallLog($"Downloading NCO game engine");
+
+  public void Visit(FinishNcoReleaseDownloadEvent e)
   {
-    throw new System.NotImplementedException();
+    AppendToInstallLog($"NCO game engine installed");
+
+    host.NcoInstalled = true;
+    host.NcoInstalling = false;
+    host.NcoErrored = false;
   }
 
-  public void Visit(FinishDiscImageDownloadEvent downloadGameDataErrorEvent)
-  {
-    throw new System.NotImplementedException();
-  }
+  public void Visit(FinishDiscImageDownloadEvent e) => 
+    AppendToInstallLog($"Game disc downloaded: {e.Image.DisplayNameOrName}");
 
-  public void Visit(FinishDiscImageFileScanEvent finishDiscImageFileScanEvent)
+  public void Visit(FinishDiscImageFileScanEvent e)
   {
-    AppendToInstallLog($"Disc image file scan complete: {finishDiscImageFileScanEvent.Source.Config.File}");
+    AppendToInstallLog($"Disc image file scan complete: {e.Source.Config.File}");
 
     if (_currentDiscImage is null)
     {
@@ -69,15 +78,13 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     _currentDiscImage.Errored = false;
   }
 
-  public void Visit(FinishDownloadGameDataEvent downloadGameDataErrorEvent)
-  {
-    throw new System.NotImplementedException();
-  }
+  public void Visit(FinishDownloadGameDataEvent e) => 
+    AppendToInstallLog($"Game data install complete: {e.GameData.DisplayName}");
 
   // error handling
   public void Visit(DownloadGameDataErrorEvent e)
   {
-    AppendToInstallLog($"Error installing '{e.GameData.DisplayName}': {e.Error}");
+    AppendToInstallLog($"Error installing '{e.GameData.DisplayName}' game data: {e.Error}");
 
     if (_currentDiscImage is null)
     {
@@ -92,6 +99,10 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
 
   public void Visit(DownloadNcoReleaseErrorEvent e)
   {
-    throw new System.NotImplementedException();
+    AppendToInstallLog($"Error installing NCO game engine: {e.Error}");
+
+    host.NcoErrored = true;
+    host.NcoInstalling = false;
+    host.NcoInstalled = false;
   }
 }

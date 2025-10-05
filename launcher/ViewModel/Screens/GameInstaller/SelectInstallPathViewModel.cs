@@ -33,17 +33,15 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
       LauncherConfigService configService,
       PathsConfig paths,
       MainWindow hostWindow
-    )
-      : base("select-install-path", hostScreen)
+    ) : base("select-install-path", hostScreen)
     {
       _storageProvider = hostWindow.StorageProvider;
       _ncoConfig = configService.Config.NCO;
-
-      InstallPath = _ncoConfig.InstallPath ?? paths.AppDataPath;
+      _installPath = _ncoConfig.InstallPath ?? paths.AppDataPath;
 
       Browse = ReactiveCommand.CreateFromTask(BrowseForInstallPath);
       Next = ReactiveCommand.CreateFromObservable(() =>
-        HostScreen.Router.NavigateTo<SelectGameDataViewModel>()
+        HostScreen.Router.NavigateTo<InstallGameViewModel>()
       );
     }
 

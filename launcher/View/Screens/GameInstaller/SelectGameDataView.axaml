@@ -8,32 +8,33 @@
                           xmlns:rxui="http://reactiveui.net"
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
                           mc:Ignorable="d"
-                          d:DesignWidth="800"
-                          d:DesignHeight="600">
-  <StackPanel>
-    <Grid ColumnDefinitions="*,*">
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="5">
+    <TextBlock FontWeight="Bold" FontSize="34" Text="Select Games to Install" Grid.Row="0"/>
+    <Grid ColumnDefinitions="*,*" Margin="15" Grid.Row="1">
       <StackPanel Grid.Column="0">
-        <CheckBox Content="{Binding TiberianDawn.DisplayName}" IsChecked="{Binding Path=TiberianDawn.Enabled, Mode=TwoWay }"/>
+        <CheckBox FontWeight="Bold" FontSize="22" Content="{Binding TiberianDawn.DisplayName}" IsChecked="{Binding Path=TiberianDawn.Enabled, Mode=TwoWay }"/>
         <ItemsControl ItemsSource="{Binding Path=TdDiscImages, Mode=TwoWay}" IsEnabled="{Binding TiberianDawn.Enabled}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <CheckBox Content="{Binding DisplayNameOrName}" IsEnabled="{Binding IsOptional}" IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
+              <CheckBox FontSize="18" Content="{Binding DisplayNameOrName}" IsEnabled="{Binding IsOptional}" IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
       </StackPanel>
 
       <StackPanel Grid.Column="1">
-        <CheckBox Content="{Binding RedAlert.DisplayName}" IsChecked="{Binding Path=RedAlert.Enabled, Mode=TwoWay }"/>
+        <CheckBox FontWeight="Bold" FontSize="22" Content="{Binding RedAlert.DisplayName}" IsChecked="{Binding Path=RedAlert.Enabled, Mode=TwoWay }"/>
         <ItemsControl ItemsSource="{Binding Path=RaDiscImages, Mode=TwoWay}" IsEnabled="{Binding RedAlert.Enabled}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <CheckBox Content="{Binding DisplayNameOrName}" IsEnabled="{Binding IsOptional}" IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
+              <CheckBox FontSize="18" Content="{Binding DisplayNameOrName}" IsEnabled="{Binding IsOptional}" IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
       </StackPanel>
     </Grid>
-    <Button Content="Next" Command="{Binding Next}" Margin="0, 15"></Button>
-  </StackPanel>
+    <Button HorizontalAlignment="Right" FontSize="22" Content="Next" Command="{Binding Next}" Grid.Row="2"/>
+  </Grid>
 </rxui:ReactiveUserControl>

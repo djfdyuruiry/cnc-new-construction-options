@@ -8,13 +8,22 @@
                           xmlns:rxui="http://reactiveui.net"
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
                           mc:Ignorable="d"
-                          d:DesignWidth="800"
-                          d:DesignHeight="600">
-  <StackPanel>
-    <Grid ColumnDefinitions="8*,2*">
-      <TextBox Grid.Column="0" Text="{Binding Path=InstallPath, Mode=TwoWay}" />
-      <Button Grid.Column="1" Command="{Binding Browse}" Margin="15,0">Browse</Button>
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
+  <Grid RowDefinitions="Auto,*,Auto,*,Auto" Margin="5">
+    <TextBlock FontWeight="Bold" FontSize="34" TextWrapping="Wrap" Margin="0,10" Grid.Row="0">
+      Select Install Directory
+    </TextBlock>
+    <StackPanel Grid.Row="1"/>
+    <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
+      <TextBox FontSize="22" Grid.Column="0" Text="{Binding Path=InstallPath, Mode=TwoWay}" />
+      <Button FontSize="22" Grid.Column="1" Command="{Binding Browse}" Margin="15,0">Browse</Button>
     </Grid>
-    <Button Content="Install" Command="{Binding Next}" Margin="0,15"></Button>
-  </StackPanel>
+    <StackPanel Grid.Row="3"/>
+    <Button HorizontalAlignment="Right"
+            FontSize="22"
+            Content="Install"
+            Command="{Binding Next}"
+            Grid.Row="4"/>
+  </Grid>
 </rxui:ReactiveUserControl>

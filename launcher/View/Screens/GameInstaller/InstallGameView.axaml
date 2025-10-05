@@ -9,42 +9,81 @@
                           xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
                           mc:Ignorable="d"
-                          d:DesignWidth="800"
-                          d:DesignHeight="450">
-  <StackPanel>
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
+  <Grid RowDefinitions="Auto,*,*,Auto" Margin="5">
+    <TextBlock FontWeight="Bold" FontSize="34" Text="Installing New Construction Options" Grid.Row="0"/>
+
     <!-- Disc Images Section -->
-    <TextBlock TextWrapping="Wrap" Margin="0,10">
-      Preparing disc images:
-    </TextBlock>
-    <ListBox Items="{Binding Path=DiscImages}" IsEnabled="False">
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Source.DisplayNameOrName}" Margin="0,0,5,0"/>
-            <Image IsVisible="{Binding Installing}" anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif" Width="20" Height="20"/>
-            <Image IsVisible="{Binding Installed}" Source="avares://CNC.NCO.Launcher/img/tick.png" Width="20" Height="20"/>
-            <Image IsVisible="{Binding Errored}" Source="avares://CNC.NCO.Launcher/img/error.png" Width="20" Height="20"/>
-          </StackPanel>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
+    <StackPanel  Margin="0,10,0,0" Grid.Row="1">
+      <ItemsControl ItemsSource="{Binding DiscImages}" IsEnabled="False">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal" Margin="5">
+              <TextBlock FontSize="18" Text="•"/>
+              <TextBlock FontSize="18"
+                         Text="{Binding Source.DisplayNameOrName}"
+                         Margin="0,0,5,0"/>
+              <Image IsVisible="{Binding Installing}"
+                     anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                     Width="20"
+                     Height="20"/>
+              <Image IsVisible="{Binding Installed}"
+                     Source="avares://CNC.NCO.Launcher/img/tick.png"
+                     Width="20"
+                     Height="20"/>
+              <Image IsVisible="{Binding Errored}"
+                     Source="avares://CNC.NCO.Launcher/img/error.png"
+                     Width="20"
+                     Height="20"/>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <StackPanel Orientation="Horizontal" Margin="0,7">
+        <TextBlock FontSize="18" Text="•"/>
+        <TextBlock FontSize="18" Text="New Construction Options - Game Engine" Margin="0,0,5,0"/>
+        <Image IsVisible="{Binding NcoInstalling}"
+               anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+               anim:ImageBehavior.RepeatBehavior="0x"
+               Width="20"
+               Height="20"/>
+        <Image IsVisible="{Binding NcoInstalled}"
+               Source="avares://CNC.NCO.Launcher/img/tick.png"
+               Width="20"
+               Height="20"/>
+        <Image IsVisible="{Binding NcoErrored}"
+               Source="avares://CNC.NCO.Launcher/img/error.png"
+               Width="20"
+               Height="20"/>
+      </StackPanel>
+    </StackPanel>
 
     <!-- Install Log and Status -->
-    <Border Margin="10">
-      <StackPanel>
-        <TextBlock FontWeight="Bold">Install Log</TextBlock>
-        <TextBox TextWrapping="Wrap"
-                   Text="{Binding InstallLog}"
-                   IsEnabled="False"
-                   Margin="5,0,5,0"/>
-      </StackPanel>
-    </Border>
+    <DockPanel LastChildFill="True" Margin="0,10,0,0" Grid.Row="2">
+      <TextBlock FontWeight="Bold" FontSize="22" Margin="0, 0, 0, 5" DockPanel.Dock="Top">
+        Install Log
+      </TextBlock>
+      <ScrollViewer x:Name="InstallLogViewer" AllowAutoHide="False">
+        <SelectableTextBlock FontSize="16"
+                             TextWrapping="NoWrap"
+                             Text="{Binding InstallLog}"
+                             DockPanel.Dock="Bottom"/>
+      </ScrollViewer>
+    </DockPanel>
 
-    <StackPanel>
-      <Button Content="Install" Command="{Binding Install}" Margin="15,20,0,0"
-              IsEnabled="{Binding IsInstalling}"/>
-      <Button Content="Next" Command="{Binding Next}" Margin="15,20,0,0"
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3">
+      <Button FontSize="22"
+              Content="Start"
+              Command="{Binding Start}" 
+              Margin="0,0,2,0"
+              IsEnabled="{Binding InstallNotClicked}"/>
+      <Button FontSize="22"
+              Content="Finish"
+              Command="{Binding Finish}"
+              Margin="2,0,0,0"
               IsEnabled="{Binding InstallFinished}"/>
     </StackPanel>
-  </StackPanel>
+  </Grid>
 </rxui:ReactiveUserControl>

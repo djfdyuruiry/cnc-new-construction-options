@@ -8,7 +8,7 @@
                           xmlns:rxui="http://reactiveui.net"
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens"
                           mc:Ignorable="d"
-                          d:DesignWidth="800"
-                          d:DesignHeight="450">
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
   <TextBlock Text="{Binding Greeting}"/>
 </rxui:ReactiveUserControl>

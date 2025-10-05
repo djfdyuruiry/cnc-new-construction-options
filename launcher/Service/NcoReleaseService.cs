@@ -104,6 +104,8 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
           }
         }
       }
+
+      eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
     }
     catch (Exception e)
     {

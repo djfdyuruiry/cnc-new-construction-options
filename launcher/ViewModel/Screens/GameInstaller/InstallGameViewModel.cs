@@ -17,9 +17,13 @@ public class InstallGameViewModel : ScreenViewModelBase
 {
   private string _installLog;
   private IBrush? _backgroundImage;
+  private bool _installNotClicked;
   private bool _isInstalling;
   private bool _installFinished;
   private ObservableCollection<DiscImageToBeInstalled> _enabledDiscImages;
+  private bool _ncoInstalling;
+  private bool _ncoInstalled;
+  private bool _ncoErrored;
 
   public ObservableCollection<DiscImageToBeInstalled> DiscImages
   {
@@ -39,6 +43,12 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _backgroundImage, value);
   }
 
+  public bool InstallNotClicked
+  {
+    get => _installNotClicked;
+    set => this.RaiseAndSetIfChanged(ref _installNotClicked, value);
+  }
+
   public bool IsInstalling
   {
     get => _isInstalling;
@@ -51,8 +61,26 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _installFinished, value);
   }
 
-  public ReactiveCommand<Unit, Unit> Install { get; }
-  public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
+  public bool NcoInstalling
+  {
+    get => _ncoInstalling;
+    set => this.RaiseAndSetIfChanged(ref _ncoInstalling, value);
+  }
+
+  public bool NcoInstalled
+  {
+    get => _ncoInstalled;
+    set => this.RaiseAndSetIfChanged(ref _ncoInstalled, value);
+  }
+
+  public bool NcoErrored
+  {
+    get => _ncoErrored;
+    set => this.RaiseAndSetIfChanged(ref _ncoErrored, value);
+  }
+
+  public ReactiveCommand<Unit, Unit> Start { get; }
+  public ReactiveCommand<Unit, IRoutableViewModel> Finish { get; }
 
   public InstallGameViewModel(
     IScreen hostScreen,
@@ -63,6 +91,7 @@ public class InstallGameViewModel : ScreenViewModelBase
     : base("install-games", hostScreen)
   {
     _installLog = string.Empty;
+    _installNotClicked = true;
     _isInstalling = false;
     _installFinished = false;
 
@@ -82,9 +111,10 @@ public class InstallGameViewModel : ScreenViewModelBase
     );
 
     // TODO: add NCO release download here
-    Install = ReactiveCommand.CreateFromTask(async () =>
+    Start = ReactiveCommand.CreateFromTask(async () =>
     {
-      IsInstalling = true;
+      InstallNotClicked = true;
+      IsInstalling = false;
       InstallFinished = false;
 
       var downloadEventVisitor = new InstallDownloadEventVisitor(this);
@@ -100,7 +130,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       InstallFinished = true;
     });
 
-    Next = ReactiveCommand.CreateFromObservable(() =>
+    Finish = ReactiveCommand.CreateFromObservable(() =>
       HostScreen.Router.NavigateTo<LaunchGameViewModel>()
     );
   }
