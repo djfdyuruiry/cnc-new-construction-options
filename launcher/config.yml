@@ -8,13 +8,15 @@ NCO:
 # TODO: Read ICO files and add to UI as we install
 # TODO: Add dos demo files https://cnc.fandom.com/wiki/Command_%26_Conquer_demo and add nco feature matching info here https://github.com/TheAssemblyArmada/Vanilla-Conquer/wiki/Installing-VanillaTD#patching-cc95-gold-with-demo-for-dos-mode
 TiberianDawn:
+  SortOrder: 1
   Name: Tiberian Dawn
   DisplayName: >-
     Command & Conquer: Tiberian Dawn
   NcoZipPath: td
   InstallPostfix: td
   DiscImages:
-    - Name: GDI
+    - SortOrder: 1
+      Name: GDI
       Required: true
       Sources:
         - Name: cnc-comm
@@ -40,7 +42,8 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
-    - Name: NOD
+    - SortOrder: 2
+      Name: NOD
       Sources:
         - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
@@ -51,7 +54,8 @@ TiberianDawn:
           - GENERAL.MIX
           - MOVIES.MIX
           - SCORES.MIX
-    - Name: CovertOps
+    - SortOrder: 3
+      Name: CovertOps
       DisplayName: >-
         Covert Operations (Expansion)
       Sources:
@@ -70,13 +74,15 @@ TiberianDawn:
   ZipUrls: []
 
 RedAlert:
+  SortOrder: 2
   Name: Red Alert
   DisplayName: >-
     Command & Conquer: Red Alert
   NcoZipPath: ra
   InstallPostfix: ra
   DiscImages:
-    - Name: ALLIES
+    - SortOrder: 1
+      Name: ALLIES
       DisplayName: Allies
       Required: true
       Sources:
@@ -89,7 +95,8 @@ RedAlert:
           - INSTALL\\REDALERT.MIX
         ALLIES:
           - MAIN.MIX
-    - Name: SOVIET
+    - SortOrder: 2
+      Name: SOVIET
       DisplayName: Soviet
       Sources:
         - Name: cnc-comm
@@ -101,7 +108,8 @@ RedAlert:
           - INSTALL\\REDALERT.MIX
         SOVIET:
           - MAIN.MIX
-    - Name: COUNTERSTRIKE
+    - SortOrder: 3
+      Name: COUNTERSTRIKE
       DisplayName: Counterstrike
       Sources:
         - Name: cnc-comm
@@ -111,7 +119,8 @@ RedAlert:
       Provides:
         COUNTERSTRIKE:
           - MAIN.MIX
-    - Name: AFTERMATH
+    - SortOrder: 4
+      Name: AFTERMATH
       DisplayName: The Aftermath
       Sources:
         - Name: cnc-comm

@@ -47,10 +47,7 @@ public class GameDataService(
 
       var destPath = Path.Join(installPath, zipReader.Entry.Key.ToLower());
 
-      zipReader.WriteEntryToFile(
-        destPath,
-        new ExtractionOptions() { Overwrite = true }
-      );
+      zipReader.WriteEntryToFile(destPath, new ExtractionOptions() { Overwrite = true });
         
       downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, destPath));
     }
@@ -73,99 +70,31 @@ public class GameDataService(
           zipUrl.Url, 
           s => ZipUrlStreamHandler(zipUrl, downloadEventVisitor, installPath, s)
         );
-      }
-      else
-      {
-        using var client = new HttpClient();
-        client.Timeout = Timeout.InfiniteTimeSpan;
-        using var response = await client.GetAsync(
-          zipUrl.Url,
-          HttpCompletionOption.ResponseHeadersRead
-        );
 
-        response.EnsureSuccessStatusCode();
-        await using var responseStream = await response.Content.ReadAsStreamAsync();
-        
-        ZipUrlStreamHandler(zipUrl, downloadEventVisitor, installPath, responseStream);
+        continue;
       }
+
+      using var client = new HttpClient();
+      client.Timeout = Timeout.InfiniteTimeSpan;
+      using var response = await client.GetAsync(
+        zipUrl.Url,
+        HttpCompletionOption.ResponseHeadersRead
+      );
+
+      response.EnsureSuccessStatusCode();
+      await using var responseStream = await response.Content.ReadAsStreamAsync();
+      
+      ZipUrlStreamHandler(zipUrl, downloadEventVisitor, installPath, responseStream);
     }
   }
-  
-  private async Task FetchCncIsoIfMissing(
+
+  private async Task ScanDiscImageFiles(
+    CDReader iso,
     DiscImageSource source,
-    string destinationPath,
-    IDownloadEventVisitor downloadEventVisitor
+    IDownloadEventVisitor downloadEventVisitor,
+    string installPath
   )
   {
-    if (File.Exists(destinationPath))
-    {
-      return;
-    }
-    
-    downloadEventVisitor.Visit(new StartDiscImageDownloadEvent(source));
-  
-    using var client = new HttpClient();
-    client.Timeout = Timeout.InfiniteTimeSpan;
-    using var response = await client.GetAsync(source.Config.Url, HttpCompletionOption.ResponseHeadersRead);
-
-    response.EnsureSuccessStatusCode();
-    await using var responseStream = await response.Content.ReadAsStreamAsync();
-
-    if (!source.Config.IsZipSource)
-    {
-      var isoFile = File.Open(destinationPath, FileMode.OpenOrCreate, FileAccess.Write);
-      await responseStream.CopyToAsync(isoFile);
-      
-      return;
-    }
-
-    using var zipReader = ReaderFactory.Open(responseStream);
-
-    while (zipReader.MoveToNextEntry())
-    {
-      if (zipReader.Entry.Key == source.Config.File)
-      {
-        zipReader.WriteEntryToFile(destinationPath, new ExtractionOptions() { Overwrite = true });
-      }
-    }
-  }
-
-  private async Task ExtractGameDataFromDiscImage(DiscImageSource source,
-    IDownloadEventVisitor downloadEventVisitor,
-    string installPath,
-    Func<CDReader, Task> onIsoOpen)
-  {
-    var imagePath = Path.Join(paths.CachePath, source.Config.File);
-
-    try
-    {
-      await FetchCncIsoIfMissing(source, imagePath, downloadEventVisitor);
-    }
-    catch (Exception ex)
-    {
-      throw new Exception($"Failed to download CNC ISO {source.Config.File} from: {source.Config.Url}", ex);
-    }
-
-    if (Path.GetExtension(imagePath).Equals(".bin", StringComparison.OrdinalIgnoreCase))
-    {
-      try
-      {
-        downloadEventVisitor.Visit(new ConvertDiscImageEvent(source, "bin", "iso"));
-        imagePath = await bin2IsoService.ConvertBinToIso(imagePath);
-      }
-      catch (Exception ex)
-      {
-        throw new Exception($"Failed to convert bin image to ISO: {source.Config.File}", ex);
-      }
-    }
-  
-    await using var isoStream = File.Open(imagePath, FileMode.Open, FileAccess.Read);
-    using var iso = new CDReader(isoStream, true);
-
-    downloadEventVisitor.Visit(new StartDiscImageFileScanEvent(source));
-
-    await onIsoOpen(iso);
-
     Console.WriteLine("Extracting files from image");
 
     foreach (var fileList in source.Provides)
@@ -184,64 +113,167 @@ public class GameDataService(
         var fileName = file.Split(@"\").Last();
         var destPath = Path.Join(outDir, fileName.ToLower());
 
-        await GameDiscUtils.ExtractFile(iso, file, destPath);
-        
-        downloadEventVisitor.Visit(new WriteGameDataFileEvent(file, destPath));
+        await GameDiscUtils.ExtractFile(iso, downloadEventVisitor, file, destPath);
       }
     }
   }
 
-  private async Task DownloadGameDiscImageFiles(GameDataConfig dataConfig,
+  private async Task<bool> FetchCncIsoIfMissing(
+    DiscImageSource source,
+    string destinationPath,
+    IDownloadEventVisitor downloadEventVisitor
+  )
+  {
+    if (File.Exists(destinationPath))
+    {
+      return false;
+    }
+    
+    downloadEventVisitor.Visit(new StartDiscImageDownloadEvent(source));
+  
+    using var client = new HttpClient();
+    client.Timeout = Timeout.InfiniteTimeSpan;
+    using var response = await client.GetAsync(source.Config.Url, HttpCompletionOption.ResponseHeadersRead);
+
+    response.EnsureSuccessStatusCode();
+    await using var responseStream = await response.Content.ReadAsStreamAsync();
+    
+    if (!source.Config.IsZipSource)
+    {
+      await using var isoFile = File.Open(destinationPath, FileMode.OpenOrCreate, FileAccess.Write);
+      await responseStream.CopyToAsync(isoFile);
+
+      return true;
+    }
+  
+    using var zipReader = ReaderFactory.Open(responseStream);
+
+    while (zipReader.MoveToNextEntry())
+    {
+      if (zipReader.Entry.Key == source.Config.File)
+      {
+        zipReader.WriteEntryToFile(destinationPath, new ExtractionOptions() { Overwrite = true });
+      }
+    }
+
+    return !File.Exists(destinationPath)
+      ? throw new FileNotFoundException("Could not locate image file inside ZIP archive", source.Config.File)
+      : true;
+  }
+
+  private async Task ExtractGameDataFromDiscImage(
+    DiscImageSource source,
+    IDownloadEventVisitor downloadEventVisitor,
+    string installPath,
+    Func<CDReader, Task> onIsoOpen)
+  {
+    var imagePath = Path.Join(paths.CachePath, source.Config.File);
+
+    // fetch ISO image (if required)
+    try
+    {
+      if (await FetchCncIsoIfMissing(source, imagePath, downloadEventVisitor))
+      {
+        downloadEventVisitor.Visit(new FinishDiscImageDownloadEvent(source));
+      }
+    }
+    catch (Exception ex)
+    {
+      throw new GameDataDownloadException(
+        $"Failed to fetch CNC ISO '{source.Config.File}' from: {source.Config.Url}",
+        ex
+      );
+    }
+
+    // covert .bin to .iso (if required)
+    if (Path.GetExtension(imagePath).Equals(".bin", StringComparison.OrdinalIgnoreCase))
+    {
+      try
+      {
+        downloadEventVisitor.Visit(new ConvertDiscImageEvent(source, "bin", "iso"));
+        imagePath = await bin2IsoService.ConvertBinToIso(imagePath);
+      }
+      catch (Exception ex)
+      {
+        throw new GameDataDownloadException($"Failed to convert bin image to ISO: {source.Config.File}", ex);
+      }
+    }
+
+    // open ISO image and extract files
+    try
+    {
+      await using var isoStream = File.Open(imagePath, FileMode.Open, FileAccess.Read);
+      using var iso = new CDReader(isoStream, true);
+
+      downloadEventVisitor.Visit(new StartDiscImageFileScanEvent(source));
+
+      await onIsoOpen(iso);
+
+      await ScanDiscImageFiles(iso, source, downloadEventVisitor, installPath);
+      
+      downloadEventVisitor.Visit(new FinishDiscImageFileScanEvent(source));
+    }
+    catch (Exception ex)
+    {
+      throw new GameDataDownloadException($"Failed to open ISO disc image: {source.DisplayName ?? source.Name}", ex);
+    }
+  }
+
+  private async Task DownloadGameDiscImageFiles(
+    GameDataConfig dataConfig,
     IDownloadEventVisitor downloadEventVisitor,
     Action<Bitmap> onSplashScreenLoaded,
     string installPath
   )
   {
-    if (!Directory.Exists(installPath))
-    {
-      Directory.CreateDirectory(installPath);
-    }
-  
-    downloadEventVisitor.Visit(new StartDownloadGameDataEvent(dataConfig));
-
     // TODO: Allow user to select source and pass into this method to filter (instead of first)
     var discImages = dataConfig.DiscImagesBySource.First().Value;
 
-    foreach (var imageSource in discImages)
+    foreach (var imageSource in discImages.OrderBy(d => d.SortOrder))
     {
-      await ExtractGameDataFromDiscImage(imageSource, downloadEventVisitor, installPath, async iso =>
+      await ExtractGameDataFromDiscImage(
+        imageSource,
+        downloadEventVisitor,
+        installPath,
+        i => OnIsoOpen(imageSource, i)
+      );
+    }
+
+    return;
+
+    async Task OnIsoOpen(DiscImageSource imageSource, CDReader iso)
+    {
+      if (imageSource.SplashScreenFile is not null && iso.FileExists(imageSource.SplashScreenFile))
       {
-        if (imageSource.SplashScreenFile is null || !iso.FileExists(imageSource.SplashScreenFile))
-        {
-          return;
-        }
-
         await using var fileStream = iso.OpenFile(imageSource.SplashScreenFile, FileMode.Open);
-
         onSplashScreenLoaded(Bitmap.DecodeToHeight(fileStream, 480));
-      });
+      }
     }
   }
 
   public async Task Download(IDownloadEventVisitor downloadEventVisitor, Action<Bitmap> onSplashScreenLoaded)
   {
-    if (!Directory.Exists(paths.CachePath))
-    {
-      Directory.CreateDirectory(paths.CachePath);
-    }
+    DirectoryUtils.CreateDirectoryIfMissing(paths.CachePath);
 
-    foreach (var game in new[] { _config.TiberianDawn, _config.RedAlert })
+    foreach (var game in _config.Games.Where(c => c.Enabled).OrderBy(c => c.SortOrder))
     {
-      if (!game.Enabled)
+      try
       {
-        Console.WriteLine($"Skipping disabled game: {game.DisplayName}");
-        continue;
-      }
-      
-      var installPath = Path.Join(_config.NCO.InstallPath, game.InstallPostfix);
+        var installPath = Path.Join(_config.NCO.InstallPath, game.InstallPostfix);
 
-      await DownloadGameDiscImageFiles(game, downloadEventVisitor, onSplashScreenLoaded, installPath);
-      await DownloadGameZipUrlFiles(game, downloadEventVisitor, installPath);
+        DirectoryUtils.CreateDirectoryIfMissing(installPath);
+
+        downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));
+
+        await DownloadGameDiscImageFiles(game, downloadEventVisitor, onSplashScreenLoaded, installPath);
+        await DownloadGameZipUrlFiles(game, downloadEventVisitor, installPath);
+
+        downloadEventVisitor.Visit(new FinishDownloadGameDataEvent(game));
+      }
+      catch (Exception ex)
+      {
+        downloadEventVisitor.Visit(new DownloadGameDataErrorEvent(game, ex.Message));
+      }
     }
   }
 }

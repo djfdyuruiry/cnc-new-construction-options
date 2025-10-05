@@ -11,6 +11,7 @@ public class GameDataConfig : INotifyPropertyChanged
 {
   private bool _enabled;
 
+  public int SortOrder { get; set; }
   public string Name { get; set; }
   public string DisplayName { get; set; }
   public string NcoZipPath { get; set; }
@@ -35,7 +36,7 @@ public class GameDataConfig : INotifyPropertyChanged
     .ToDictionary(
       p => p,
       p => DiscImages
-        .Select(d => d.BuildSources().GetValueOrDefault(p))
+        .Select(d => d.BuildSources(this).GetValueOrDefault(p))
         .Where(d => d is not null)
         .Select(d => d!)
         .ToList()

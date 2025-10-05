@@ -7,10 +7,11 @@ public interface IDownloadEventVisitor : IVisitor
   void Visit(WriteGameDataFileEvent e);
   void Visit(StartDownloadGameDataEvent e);
   void Visit(StartDiscImageFileScanEvent e);
+  void Visit(FetchNcoReleaseEvent e);
+  void Visit(StartNcoReleaseDownloadEvent e);
   void Visit(FinishDiscImageDownloadEvent e);
   void Visit(FinishDownloadGameDataEvent e);
-  void Visit(FetchNcoReleaseEvent e);
+  void Visit(FinishDiscImageFileScanEvent finishDiscImageFileScanEvent);
   void Visit(DownloadGameDataErrorEvent e);
-  void Visit(StartNcoReleaseDownloadEvent e);
   void Visit(DownloadNcoReleaseErrorEvent e);
 }

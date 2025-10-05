@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
+using CNC.NCO.Launcher.Model.Events.Download;
 using DiscUtils.Iso9660;
 using InstallShieldExtractor;
 
@@ -20,7 +20,12 @@ public class GameDiscUtils
       .FirstOrDefault();
   }
 
-  public static async Task ExtractFile(CDReader iso, string isoOrSetupPath, string outputPath)
+  public static async Task ExtractFile(
+    CDReader iso,
+    IDownloadEventVisitor downloadEventVisitor,
+    string isoOrSetupPath,
+    string outputPath
+  )
   {
     try
     {
@@ -32,10 +37,12 @@ public class GameDiscUtils
 
       await using var outputStream = File.Open(outputPath, FileMode.Create);
       await sourceFileStream.CopyToAsync(outputStream);
+
+      downloadEventVisitor.Visit(new WriteGameDataFileEvent(isoOrSetupPath, outputPath));
     }
     catch (Exception ex)
     {
-      Console.WriteLine($"Error extracting {isoOrSetupPath} to {outputPath}: {ex.Message}");
+      throw new Exception($"Error extracting {isoOrSetupPath} to {outputPath}: {ex.Message}");
     }
   }
 

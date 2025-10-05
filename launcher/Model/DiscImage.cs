@@ -38,7 +38,7 @@ public class DiscImage : INotifyPropertyChanged
     Enabled = true;
   }
 
-  public Dictionary<string, DiscImageSource> BuildSources()
+  public Dictionary<string, DiscImageSource> BuildSources(GameDataConfig gameDataConfig)
   {
     return Sources.ToDictionary(
       s => s.Name,
@@ -49,7 +49,9 @@ public class DiscImage : INotifyPropertyChanged
       {
         Name = Name,
         DisplayName = DisplayName,
+        Enabled = Enabled,
         Config = s.Value,
+        Game = gameDataConfig,
         SplashScreenFile = SplashScreenFile,
         Provides = Provides
       }

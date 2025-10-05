@@ -89,16 +89,19 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
 
       while (zipReader.MoveToNextEntry())
       {
-        foreach (var dataConfig in new[] { configService.Config.TiberianDawn, configService.Config.RedAlert})
+        if (zipReader.Entry.IsDirectory)
+        {
+          continue;
+        }
+
+        foreach (var dataConfig in configService.Config.Games)
         {
           if (
-            zipReader.Entry.IsDirectory || (!(zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath) ?? false))
+            zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
           )
           {
-            continue;
+            ExtractNcoFileFromZip(dataConfig, eventVisitor, configService.Config.NCO.InstallPath!, zipReader);
           }
-
-          ExtractNcoFileFromZip(dataConfig, eventVisitor, configService.Config.NCO.InstallPath!, zipReader);
         }
       }
     }
