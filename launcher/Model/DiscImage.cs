@@ -8,6 +8,8 @@ namespace CNC.NCO.Launcher.Model;
 
 public class DiscImage : INotifyPropertyChanged
 {
+  public static readonly string RootPlaceholder = "_root";
+
   private bool _enabled;
 
   public string Name { get; set; }

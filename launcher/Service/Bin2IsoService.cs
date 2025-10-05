@@ -52,8 +52,8 @@ public class Bin2IsoService(PathsConfig paths)
     // find data track iso output file 
     return Directory.GetFileSystemEntries(Path.GetDirectoryName(cuePath)!)
       .First(f => 
-        Path.GetExtension(f).Equals(".iso", StringComparison.InvariantCultureIgnoreCase)
-        && Path.GetFileName(f).StartsWith(isoFileNoExtensions, StringComparison.InvariantCultureIgnoreCase)
+        Path.GetExtension(f).Equals(".iso", StringComparison.OrdinalIgnoreCase)
+        && Path.GetFileName(f).StartsWith(isoFileNoExtensions, StringComparison.OrdinalIgnoreCase)
       );
   }
 }
