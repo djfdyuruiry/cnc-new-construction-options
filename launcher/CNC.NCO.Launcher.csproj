@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AnimatedImage.Avalonia" Version="2.1.2" />
     <PackageReference Include="Autofac" Version="8.4.0" />
     <PackageReference Include="Avalonia" Version="11.3.6" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.6" />
@@ -25,6 +26,10 @@
     <PackageReference Include="SharpCompress" Version="0.40.0" />
     <PackageReference Include="Splat.Avalonia.Autofac" Version="15.5.3" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="img\**"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -7,7 +7,6 @@
                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                           xmlns:rxui="http://reactiveui.net"
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
-                          Background="{Binding BackgroundImage}"
                           mc:Ignorable="d"
                           d:DesignWidth="800"
                           d:DesignHeight="450">

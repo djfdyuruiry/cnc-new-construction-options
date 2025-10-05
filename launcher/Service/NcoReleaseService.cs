@@ -4,20 +4,26 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CNC.NCO.Launcher.Config;
+
 using GitHub;
 using GitHub.Octokit.Client;
 using Microsoft.Kiota.Abstractions.Authentication;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
+using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
+using CNC.NCO.Launcher.Model.Events.Download;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class NcoReleaseService(LauncherConfigService configService)
+public class NcoReleaseService(LauncherConfigService configService, PathsConfig pathsConfig)
 {
-  private void ExtractNcoFileFromZip(GameDataConfig gameConfig, string downloadPath, IReader zipReader)
+  private void ExtractNcoFileFromZip(
+    GameDataConfig gameConfig,
+    IDownloadEventVisitor downloadEventVisitor,
+    string downloadPath,
+    IReader zipReader)
   {
     var outputPath = Path.Join(
       downloadPath,
@@ -30,8 +36,8 @@ public class NcoReleaseService(LauncherConfigService configService)
       Directory.CreateDirectory(outputPathDir);
     }
 
-    Console.WriteLine($"Deploying NCO file {zipReader.Entry.Key} to: {outputPath}");
     zipReader.WriteEntryToFile(outputPath, new ExtractionOptions() { Overwrite = true });
+    downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, outputPath));
   }
 
   private async Task<string> GetAssetForNcoRelease()
@@ -59,13 +65,15 @@ public class NcoReleaseService(LauncherConfigService configService)
       .FirstOrDefault() ?? throw new Exception($"Failed to resolve NCO zip, release '{ncoConfig.Release}' and OS: {osName}");
   }
 
-  public async Task Download(string downloadPath)
+  public async Task Download(IDownloadEventVisitor eventVisitor)
   {
     try
     {
+      eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.NCO));
+
       var assetUrl = await GetAssetForNcoRelease();
 
-      Console.WriteLine($"Downloading NCO release from URL: {assetUrl}");
+      eventVisitor.Visit(new StartNcoReleaseDownloadEvent(assetUrl));
 
       using var client = new HttpClient();
       client.Timeout = Timeout.InfiniteTimeSpan;
@@ -90,13 +98,14 @@ public class NcoReleaseService(LauncherConfigService configService)
             continue;
           }
 
-          ExtractNcoFileFromZip(dataConfig, downloadPath, zipReader);
+          ExtractNcoFileFromZip(dataConfig, eventVisitor, configService.Config.NCO.InstallPath!, zipReader);
         }
       }
     }
     catch (Exception e)
     {
-      Console.Error.WriteLine(e);
+      eventVisitor.Visit(new DownloadNcoReleaseErrorEvent(e.Message));
     }
   }
 }
+
