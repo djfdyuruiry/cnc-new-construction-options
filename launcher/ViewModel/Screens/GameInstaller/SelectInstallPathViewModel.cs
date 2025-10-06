@@ -3,28 +3,18 @@ using System.Reactive;
 using System.Threading.Tasks;
 
 using Avalonia.Platform.Storage;
+using ReactiveUI;
+
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
-using ReactiveUI;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
 {
   public class SelectInstallPathViewModel : ScreenViewModelBase
   {
     private readonly IStorageProvider _storageProvider;
-    private readonly NewConstructionOptions _ncoConfig;
-    private string _installPath;
 
-    public string InstallPath
-    {
-      get => _installPath;
-      set
-      {
-        _ncoConfig.InstallPath = value;
-        this.RaiseAndSetIfChanged(ref _installPath, value); 
-      }
-    }
-
+    public NewConstructionOptions Nco { get; }
     public ReactiveCommand<Unit, Unit> Browse { get; }
     public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
 
@@ -36,8 +26,13 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
     ) : base("select-install-path", hostScreen)
     {
       _storageProvider = hostWindow.StorageProvider;
-      _ncoConfig = configService.Config.NCO;
-      _installPath = _ncoConfig.InstallPath ?? paths.AppDataPath;
+      Nco = configService.Config.NCO;
+
+      if (string.IsNullOrWhiteSpace(Nco.InstallPath))
+      {
+        // default install path
+        Nco.InstallPath = paths.AppDataPath;
+      }
 
       Browse = ReactiveCommand.CreateFromTask(BrowseForInstallPath);
       Next = ReactiveCommand.CreateFromObservable(() =>
@@ -51,12 +46,12 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
       {
         AllowMultiple = false,
         Title = "Select Install Path",
-        SuggestedStartLocation = await _storageProvider.TryGetFolderFromPathAsync(InstallPath)
+        SuggestedStartLocation = await _storageProvider.TryGetFolderFromPathAsync(Nco.InstallPath)
       });
 
       if (installFolders.Any())
       {
-        InstallPath = installFolders[0].Path.AbsolutePath;
+        Nco.InstallPath = installFolders[0].Path.AbsolutePath;
       }
     }
   }

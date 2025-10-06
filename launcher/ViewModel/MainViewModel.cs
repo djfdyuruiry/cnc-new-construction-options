@@ -44,5 +44,5 @@ public class MainViewModel : ReactiveObject, IScreen
   }
 
   public IObservable<IRoutableViewModel> NavigateToFirstScreen() =>
-    NcoConfig.HasInstallPath ? Router.NavigateTo<LaunchGameViewModel>() : Router.NavigateTo<StartViewModel>();
+    NcoConfig.Installed ? Router.NavigateTo<LaunchGameViewModel>() : Router.NavigateTo<StartViewModel>();
 }

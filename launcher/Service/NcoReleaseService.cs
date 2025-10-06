@@ -31,7 +31,7 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
     );
     var outputPathDir = Path.GetDirectoryName(outputPath) ?? string.Empty;
 
-    if (!string.IsNullOrEmpty(outputPathDir) && !Directory.Exists(outputPathDir))
+    if (!string.IsNullOrWhiteSpace(outputPathDir) && !Directory.Exists(outputPathDir))
     {
       Directory.CreateDirectory(outputPathDir);
     }

@@ -7,12 +7,13 @@ namespace CNC.NCO.Launcher.Model;
 
 public class NewConstructionOptions : INotifyPropertyChanged
 {
-  private string? _installPath;
+  private string _installPath;
+  private bool _installed;
 
   public GitHubRepo GitHubRepo { get; set; }
   public string Release { get; set; }
   public string AssetPrefix { get; set; }
-  public string? InstallPath
+  public string InstallPath
   {
     get => _installPath;
     set
@@ -21,13 +22,24 @@ public class NewConstructionOptions : INotifyPropertyChanged
       OnPropertyChanged();
     }
   }
-  public bool? Installed { get; set; }
-  [YamlIgnore]
-  public bool IsInstalled => Installed ?? false;
-  [YamlIgnore]
-  public bool HasInstallPath => !string.IsNullOrEmpty(InstallPath);
+
+  public bool Installed
+  {
+    get => _installed;
+    set
+    {
+      _installed = value;
+      OnPropertyChanged();
+    }
+  }
 
   public event PropertyChangedEventHandler? PropertyChanged;
+
+  public NewConstructionOptions()
+  {
+    _installPath = string.Empty;
+    _installed = false;
+  }
 
   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
   {

@@ -147,7 +147,7 @@ public class InstallGameViewModel : ScreenViewModelBase
 
   private IObservable<IRoutableViewModel> GoToLaunchGameScreen()
   {
-    _config.NCO.InstallPath = ;
+    _config.NCO.Installed = true;
     return HostScreen.Router.NavigateTo<LaunchGameViewModel>();
   }
 

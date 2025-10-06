@@ -9,7 +9,7 @@ namespace CNC.NCO.Launcher.Service;
 
 public class MediaFireDownloadService
 {
-  public bool IsMediaFireUrl(string? url) => !string.IsNullOrEmpty(url) && url.StartsWith("https://www.mediafire.com");
+  public bool IsMediaFireUrl(string? url) => !string.IsNullOrWhiteSpace(url) && url.StartsWith("https://www.mediafire.com");
 
   public async Task WithFileStream(string url, Action<Stream> onDownloadStart)
   {
