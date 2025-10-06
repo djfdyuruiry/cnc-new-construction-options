@@ -11,12 +11,12 @@ public class LauncherConfigService
 {
   private readonly PathsConfig _paths;
 
-  public LauncherConfig Config { get; }
+  public LauncherConfig Config { get; private set;  }
 
   public LauncherConfigService(PathsConfig paths)
   {
     _paths = paths;
-    Config = Load();
+    RefreshFromUserOrDefaultConfig();
   }
 
   private LauncherConfig LoadFromFile(string filePath)
@@ -38,12 +38,12 @@ public class LauncherConfigService
     }
   }
 
-  public LauncherConfig Load()
+  public void RefreshFromUserOrDefaultConfig()
   {
     try
     {
       // Try to load from app data directory first
-      return LoadFromFile(
+      Config = LoadFromFile(
         File.Exists(_paths.UserConfigYamlPath) ? _paths.UserConfigYamlPath : _paths.ConfigYamlPath
       );
     }
@@ -56,7 +56,7 @@ public class LauncherConfigService
     }
   }
 
-  public void Save()
+  public void SaveUserConfig()
   {
     try
     {

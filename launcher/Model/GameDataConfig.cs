@@ -10,6 +10,7 @@ namespace CNC.NCO.Launcher.Model;
 public class GameDataConfig : INotifyPropertyChanged
 {
   private bool _enabled;
+  private ZipUrlSpec[]? _zipUrls;
 
   public int SortOrder { get; set; }
   public string Name { get; set; }
@@ -17,7 +18,20 @@ public class GameDataConfig : INotifyPropertyChanged
   public string NcoZipPath { get; set; }
   public string InstallPostfix { get; set; }
   public DiscImage[] DiscImages { get; set; }
-  public ZipUrlSpec[]? ZipUrls { get; set; }
+
+  public ZipUrlSpec[]? ZipUrls
+  {
+    get => _zipUrls;
+    set
+    {
+      _zipUrls = value?.Select(z =>
+      {
+        z.Game = this;
+        return z;
+      }).ToArray();
+    }
+  }
+
   public bool Enabled
   {
     get => _enabled;
@@ -46,7 +60,6 @@ public class GameDataConfig : INotifyPropertyChanged
 
   public GameDataConfig()
   {
-    // TODO: persist back to yml
     Enabled = true;
   }
 

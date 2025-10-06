@@ -14,53 +14,93 @@
   <Grid RowDefinitions="Auto,*,*,Auto" Margin="5">
     <TextBlock Classes="h1" Text="Installing New Construction Options" Grid.Row="0"/>
 
-    <!-- Disc Images Section -->
-    <StackPanel Margin="0,10,0,0" Grid.Row="1">
-      <ItemsControl ItemsSource="{Binding DiscImages}" IsEnabled="False">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal" Margin="5">
-              <TextBlock Classes="p" Text="•"/>
-              <TextBlock Classes="p"
-                         Text="{Binding Source.DisplayNameOrName}"
-                         Margin="0,0,5,0"/>
-              <Image IsVisible="{Binding Installing}"
-                     anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
-                     Width="20"
-                     Height="20"/>
-              <Image IsVisible="{Binding Installed}"
-                     Source="avares://CNC.NCO.Launcher/img/tick.png"
-                     Width="20"
-                     Height="20"/>
-              <Image IsVisible="{Binding Errored}"
-                     Source="avares://CNC.NCO.Launcher/img/error.png"
-                     Width="20"
-                     Height="20"/>
-            </StackPanel>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-
-      <StackPanel Orientation="Horizontal" Margin="0,7">
-        <TextBlock Classes="p" Text="•"/>
-        <TextBlock Classes="p" Text="New Construction Options - Game Engine" Margin="0,0,5,0"/>
-        <Image IsVisible="{Binding NcoInstalling}"
-               anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
-               anim:ImageBehavior.RepeatBehavior="0x"
-               Width="20"
-               Height="20"/>
-        <Image IsVisible="{Binding NcoInstalled}"
-               Source="avares://CNC.NCO.Launcher/img/tick.png"
-               Width="20"
-               Height="20"/>
-        <Image IsVisible="{Binding NcoErrored}"
-               Source="avares://CNC.NCO.Launcher/img/error.png"
-               Width="20"
-               Height="20"/>
+    <Grid ColumnDefinitions="4*,6*" Margin="0,15,0,0" Grid.Row="1">
+      <!-- disc images -->
+      <StackPanel Grid.Column="0">
+        <TextBlock Classes="h2" Margin="0,0,0,15">
+          Disc Images
+        </TextBlock>
+        <ItemsControl ItemsSource="{Binding DiscImages}" IsEnabled="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Classes="p" Text="•"/>
+                <TextBlock Classes="p"
+                           Text="{Binding Item.DisplayNameOrName}"
+                           Margin="0,0,5,0"/>
+                <Image IsVisible="{Binding Installing}"
+                       anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding Installed}"
+                       Source="avares://CNC.NCO.Launcher/img/tick.png"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding Errored}"
+                       Source="avares://CNC.NCO.Launcher/img/error.png"
+                       Width="20"
+                       Height="20"/>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
       </StackPanel>
-    </StackPanel>
 
-    <!-- Install Log and Status -->
+      <StackPanel Grid.Column="1" >
+        <!-- mods/addons -->
+        <TextBlock Classes="h2" IsVisible="{Binding ModsAndAddonsPresent}" Margin="0,0,0,15">
+          Mods/Addons
+        </TextBlock>
+        <ItemsControl IsVisible="{Binding ModsAndAddonsPresent}" ItemsSource="{Binding ModsAndAddons}" IsEnabled="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Classes="p" Text="•"/>
+                <TextBlock Classes="p"
+                           Text="{Binding Item.DisplayNameOrName}"
+                           Margin="0,0,5,0"/>
+                <Image IsVisible="{Binding Installing}"
+                       anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding Installed}"
+                       Source="avares://CNC.NCO.Launcher/img/tick.png"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding Errored}"
+                       Source="avares://CNC.NCO.Launcher/img/error.png"
+                       Width="20"
+                       Height="20"/>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- nco -->
+        <TextBlock Classes="h2" Margin="0,15">
+          NCO
+        </TextBlock>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="p" Text="•"/>
+          <TextBlock Classes="p" Text="Game Engine" Margin="0,0,5,0"/>
+          <Image IsVisible="{Binding Nco.Installing}"
+                 anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                 anim:ImageBehavior.RepeatBehavior="0x"
+                 Width="20"
+                 Height="20"/>
+          <Image IsVisible="{Binding Nco.Installed}"
+                 Source="avares://CNC.NCO.Launcher/img/tick.png"
+                 Width="20"
+                 Height="20"/>
+          <Image IsVisible="{Binding Nco.Errored}"
+                 Source="avares://CNC.NCO.Launcher/img/error.png"
+                 Width="20"
+                 Height="20"/>
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+
+    <!-- install log -->
     <DockPanel LastChildFill="True" Margin="0,10,0,0" Grid.Row="2">
       <TextBlock Classes="h2" Margin="0, 0, 0, 5" DockPanel.Dock="Top">
         Install Log

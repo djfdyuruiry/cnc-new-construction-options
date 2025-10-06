@@ -48,44 +48,44 @@ public class GameDataService(
       var destPath = Path.Join(installPath, zipReader.Entry.Key.ToLower());
 
       zipReader.WriteEntryToFile(destPath, new ExtractionOptions() { Overwrite = true });
-        
+
       downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, destPath));
     }
   }
 
   private async Task DownloadGameZipUrlFiles(
-    GameDataConfig dataConfig,
+    ZipUrlSpec zip,
     IDownloadEventVisitor downloadEventVisitor,
     string installPath
   )
   {
-    
-    foreach (var zipUrl in dataConfig.ZipUrls ?? [])
+    Console.WriteLine($"Downloading files from ZIP Url: {zip.Url}");
+
+    downloadEventVisitor.Visit(new StartZipUrlDownloadEvent(zip));
+
+    if (mediaFireDownloadService.IsMediaFireUrl(zip.Url))
     {
-      Console.WriteLine($"Downloading files from ZIP Url: {zipUrl.Url}");
-
-      if (mediaFireDownloadService.IsMediaFireUrl(zipUrl.Url))
-      {
-        await mediaFireDownloadService.WithFileStream(
-          zipUrl.Url, 
-          s => ZipUrlStreamHandler(zipUrl, downloadEventVisitor, installPath, s)
-        );
-
-        continue;
-      }
-
-      using var client = new HttpClient();
-      client.Timeout = Timeout.InfiniteTimeSpan;
-      using var response = await client.GetAsync(
-        zipUrl.Url,
-        HttpCompletionOption.ResponseHeadersRead
+      await mediaFireDownloadService.WithFileStream(
+        zip.Url,
+        s => ZipUrlStreamHandler(zip, downloadEventVisitor, installPath, s)
       );
 
-      response.EnsureSuccessStatusCode();
-      await using var responseStream = await response.Content.ReadAsStreamAsync();
-      
-      ZipUrlStreamHandler(zipUrl, downloadEventVisitor, installPath, responseStream);
+      return;
     }
+
+    using var client = new HttpClient();
+    client.Timeout = Timeout.InfiniteTimeSpan;
+    using var response = await client.GetAsync(
+      zip.Url,
+      HttpCompletionOption.ResponseHeadersRead
+    );
+
+    response.EnsureSuccessStatusCode();
+    await using var responseStream = await response.Content.ReadAsStreamAsync();
+
+    ZipUrlStreamHandler(zip, downloadEventVisitor, installPath, responseStream);
+
+    downloadEventVisitor.Visit(new FinishZipUrlDownloadEvent(zip));
   }
 
   private async Task ScanDiscImageFiles(
@@ -128,16 +128,16 @@ public class GameDataService(
     {
       return false;
     }
-    
+
     downloadEventVisitor.Visit(new StartDiscImageDownloadEvent(source));
-  
+
     using var client = new HttpClient();
     client.Timeout = Timeout.InfiniteTimeSpan;
     using var response = await client.GetAsync(source.Config.Url, HttpCompletionOption.ResponseHeadersRead);
 
     response.EnsureSuccessStatusCode();
     await using var responseStream = await response.Content.ReadAsStreamAsync();
-    
+
     if (!source.Config.IsZipSource)
     {
       await using var isoFile = File.Open(destinationPath, FileMode.OpenOrCreate, FileAccess.Write);
@@ -145,7 +145,7 @@ public class GameDataService(
 
       return true;
     }
-  
+
     using var zipReader = ReaderFactory.Open(responseStream);
 
     while (zipReader.MoveToNextEntry())
@@ -210,7 +210,7 @@ public class GameDataService(
       await onIsoOpen(iso);
 
       await ScanDiscImageFiles(iso, source, downloadEventVisitor, installPath);
-      
+
       downloadEventVisitor.Visit(new FinishDiscImageFileScanEvent(source));
     }
     catch (Exception ex)
@@ -253,12 +253,16 @@ public class GameDataService(
 
   public async Task Download(IDownloadEventVisitor downloadEventVisitor, Action<Bitmap> onSplashScreenLoaded)
   {
-    DirectoryUtils.CreateDirectoryIfMissing(paths.CachePath);
+    GameDataConfig? currentGame = null;
 
-    foreach (var game in _config.Games.Where(c => c.Enabled).OrderBy(c => c.SortOrder))
+    try
     {
-      try
+      DirectoryUtils.CreateDirectoryIfMissing(paths.CachePath);
+
+      foreach (var game in _config.Games.Where(c => c.Enabled).OrderBy(c => c.SortOrder))
       {
+        currentGame  = game;
+
         var installPath = Path.Join(_config.NCO.InstallPath, game.InstallPostfix);
 
         DirectoryUtils.CreateDirectoryIfMissing(installPath);
@@ -266,15 +270,20 @@ public class GameDataService(
         downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));
 
         await DownloadGameDiscImageFiles(game, downloadEventVisitor, onSplashScreenLoaded, installPath);
-        //await DownloadGameZipUrlFiles(game, downloadEventVisitor, installPath);
+
+        foreach (var zipUrl in (game.ZipUrls ?? []).Where(z => z.Enabled).OrderBy(z => z.SortOrder))
+        {
+          await DownloadGameZipUrlFiles(zipUrl, downloadEventVisitor, installPath);
+        }
 
         downloadEventVisitor.Visit(new FinishDownloadGameDataEvent(game));
       }
-      catch (Exception ex)
-      {
-        downloadEventVisitor.Visit(new DownloadGameDataErrorEvent(game, ex.Message));
-      }
     }
-  }
+    catch (Exception ex)
+    {
+      downloadEventVisitor.Visit(new DownloadGameDataErrorEvent(currentGame, ex.Message));
+    }
+ }
+
 }
 

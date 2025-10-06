@@ -1,9 +1,9 @@
-using System;
 using System.Reactive;
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using CNC.NCO.Launcher.Config;
+using CNC.NCO.Launcher.Model;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.ViewModel.Screens;
@@ -13,7 +13,11 @@ namespace CNC.NCO.Launcher.ViewModel;
 
 public class MainViewModel : ReactiveObject, IScreen
 {
+  private readonly LauncherConfig _config;
+
   public RoutingState Router { get; } = new();
+
+  public NewConstructionOptions NcoConfig => _config.NCO;
 
   public ReactiveCommand<Unit, IRoutableViewModel> Install { get; }
 
@@ -23,6 +27,8 @@ public class MainViewModel : ReactiveObject, IScreen
 
   public MainViewModel(LauncherConfigService configService)
   {
+    _config = configService.Config;
+
     Install = ReactiveCommand.CreateFromObservable(() =>
       Router.NavigateTo<StartViewModel>()
     );
@@ -31,25 +37,20 @@ public class MainViewModel : ReactiveObject, IScreen
       Router.NavigateTo<LaunchGameViewModel>()
     );
 
-    Exit = ReactiveCommand.Create(() =>
-    {
-      try
-      {
-        configService.Save();
-      }
-      catch (Exception e)
-      {
-        Console.Error.WriteLine(e);
-      }
+    Exit = ReactiveCommand.Create(() => 
+      (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown()
+    );
+  }
 
-      if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-      {
-        desktop.Shutdown();
-      }
-      else
-      {
-        Environment.Exit(0);
-      }
-    });
+  public void NavigateToFirstScreen()
+  {
+    if (NcoConfig.HasInstallPath)
+    {
+      Router.NavigateTo<LaunchGameViewModel>();
+    }
+    else
+    {
+      Router.NavigateTo<StartViewModel>();
+    }
   }
 }

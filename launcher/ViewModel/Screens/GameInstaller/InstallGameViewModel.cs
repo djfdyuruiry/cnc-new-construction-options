@@ -6,6 +6,7 @@ using Avalonia.Media;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
+using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.ViewModel;
 using CNC.NCO.Launcher.Service;
 
@@ -13,32 +14,28 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class InstallGameViewModel : ScreenViewModelBase
 {
-  private string _installLog;
   private IBrush? _backgroundImage;
+  private string _installLog;
+
   private bool _installNotClicked;
   private bool _isInstalling;
+  private bool _hasErrored;
   private bool _installFinished;
-  private ObservableCollection<DiscImageToBeInstalled> _enabledDiscImages;
-  private bool _ncoInstalling;
-  private bool _ncoInstalled;
-  private bool _ncoErrored;
 
-  public ObservableCollection<DiscImageToBeInstalled> DiscImages
+  private ObservableCollection<ItemToBeInstalled<DiscImageSource>> _enabledDiscImages;
+  private ObservableCollection<ItemToBeInstalled<ZipUrlSpec>> _modsAndAddons;
+  private ItemToBeInstalled<NewConstructionOptions> _nco;
+
+  public IBrush? BackgroundImage
   {
-    get => _enabledDiscImages;
-    set => this.RaiseAndSetIfChanged(ref _enabledDiscImages, value);
+    get => _backgroundImage;
+    set => this.RaiseAndSetIfChanged(ref _backgroundImage, value);
   }
 
   public string InstallLog
   {
     get => _installLog;
     set => this.RaiseAndSetIfChanged(ref _installLog, value);
-  }
-
-  public IBrush? BackgroundImage
-  {
-    get => _backgroundImage;
-    set => this.RaiseAndSetIfChanged(ref _backgroundImage, value);
   }
 
   public bool InstallNotClicked
@@ -53,28 +50,36 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _isInstalling, value);
   }
 
+  public bool HasErrored
+  {
+    get => _hasErrored;
+    set => this.RaiseAndSetIfChanged(ref _hasErrored, value);
+  }
+
   public bool InstallFinished
   {
     get => _installFinished;
     set => this.RaiseAndSetIfChanged(ref _installFinished, value);
   }
 
-  public bool NcoInstalling
+  public ObservableCollection<ItemToBeInstalled<DiscImageSource>> DiscImages
   {
-    get => _ncoInstalling;
-    set => this.RaiseAndSetIfChanged(ref _ncoInstalling, value);
+    get => _enabledDiscImages;
+    set => this.RaiseAndSetIfChanged(ref _enabledDiscImages, value);
   }
 
-  public bool NcoInstalled
+  public ObservableCollection<ItemToBeInstalled<ZipUrlSpec>> ModsAndAddons
   {
-    get => _ncoInstalled;
-    set => this.RaiseAndSetIfChanged(ref _ncoInstalled, value);
+    get => _modsAndAddons;
+    set => this.RaiseAndSetIfChanged(ref _modsAndAddons, value);
   }
+  
+  public bool ModsAndAddonsPresent => ModsAndAddons.Count > 0;
 
-  public bool NcoErrored
+  public ItemToBeInstalled<NewConstructionOptions> Nco
   {
-    get => _ncoErrored;
-    set => this.RaiseAndSetIfChanged(ref _ncoErrored, value);
+    get => _nco;
+    set => this.RaiseAndSetIfChanged(ref _nco, value);
   }
 
   public ReactiveCommand<Unit, Unit> Start { get; }
@@ -88,12 +93,12 @@ public class InstallGameViewModel : ScreenViewModelBase
   )
     : base("install-games", hostScreen)
   {
-    _installLog = string.Empty;
-    _installNotClicked = true;
-    _isInstalling = false;
-    _installFinished = false;
+    InstallNotClicked = true;
+    IsInstalling = false;
+    InstallFinished = false;
+    HasErrored = false;
 
-    _enabledDiscImages = new ObservableCollection<DiscImageToBeInstalled>(
+    _enabledDiscImages = new ObservableCollection<ItemToBeInstalled<DiscImageSource>>(
       configService.Config
         .Games
         .SelectMany(
@@ -101,19 +106,28 @@ public class InstallGameViewModel : ScreenViewModelBase
           g => g.DiscImagesBySource
             .First()
             .Value
-            .Where(d => d.Enabled)
+            .Where(d => d.Game.Enabled && d.Enabled)
         )
-        .Select(d => new DiscImageToBeInstalled(d))
-        .OrderBy(d => d.Source.Game.SortOrder)
-        .ThenBy(d => d.Source.SortOrder)
+        .Select(d => new ItemToBeInstalled<DiscImageSource>(d))
+        .OrderBy(d => d.Item.Game.SortOrder)
+        .ThenBy(d => d.Item.SortOrder)
     );
+    _modsAndAddons = new ObservableCollection<ItemToBeInstalled<ZipUrlSpec>>(
+      configService.Config
+        .Games
+        .SelectMany(g => (g.ZipUrls ?? []).Where(z => z.Game.Enabled && z.Enabled))
+        .Select(z => new ItemToBeInstalled<ZipUrlSpec>(z))
+        .OrderBy(z => z.Item.Game.SortOrder)
+        .ThenBy(z => z.Item.SortOrder)
+    );
+    _nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
 
-    // TODO: add NCO release download here
     Start = ReactiveCommand.CreateFromTask(async () =>
     {
-      InstallNotClicked = true;
+      InstallNotClicked = false;
       IsInstalling = false;
       InstallFinished = false;
+      HasErrored = false;
 
       var downloadEventVisitor = new InstallDownloadEventVisitor(this);
 
@@ -121,11 +135,10 @@ public class InstallGameViewModel : ScreenViewModelBase
         downloadEventVisitor,
         b => BackgroundImage = new ImageBrush(b)
       );
-
       await releaseService.Download(downloadEventVisitor);
 
       IsInstalling = false;
-      InstallFinished = true;
+      InstallFinished = !HasErrored;
     });
 
     Finish = ReactiveCommand.CreateFromObservable(() =>

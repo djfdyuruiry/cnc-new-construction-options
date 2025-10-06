@@ -94,7 +94,7 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
           continue;
         }
 
-        foreach (var dataConfig in configService.Config.Games)
+        foreach (var dataConfig in configService.Config.Games.Where(g => g.Enabled))
         {
           if (
             zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false

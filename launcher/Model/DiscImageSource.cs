@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+
 using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
@@ -18,6 +20,6 @@ public class DiscImageSource
 
   public override bool Equals(object? obj)
   {
-    return DisplayNameOrName.Equals((obj as DiscImageSource)?.DisplayNameOrName);
+    return DisplayNameOrName.Equals((obj as DiscImageSource)?.DisplayNameOrName, StringComparison.Ordinal);
   }
 }

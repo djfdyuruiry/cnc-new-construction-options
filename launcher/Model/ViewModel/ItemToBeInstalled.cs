@@ -3,13 +3,13 @@ using System.Runtime.CompilerServices;
 
 namespace CNC.NCO.Launcher.Model.ViewModel;
 
-public class DiscImageToBeInstalled(DiscImageSource source) : INotifyPropertyChanged
+public class ItemToBeInstalled<T>(T item) : INotifyPropertyChanged
 {
   private bool _errored;
   private bool _installing;
   private bool _installed;
 
-  public DiscImageSource Source { get; } = source;
+  public T Item { get; } = item;
 
   public bool Installing
   {

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
+
 using CNC.NCO.Launcher.Config;
 using ReactiveUI;
 
@@ -13,6 +14,8 @@ public class SelectGameDataViewModel : ScreenViewModelBase
   private GameDataConfig _ra;
   private ObservableCollection<DiscImage> _tdDiscImages;
   private ObservableCollection<DiscImage> _raDiscImages;
+  private ObservableCollection<ZipUrlSpec> _tdMods;
+  private ObservableCollection<ZipUrlSpec> _raMods;
 
   public GameDataConfig TiberianDawn
   {
@@ -32,11 +35,27 @@ public class SelectGameDataViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _tdDiscImages, value);
   }
 
+  public ObservableCollection<ZipUrlSpec> TdMods
+  {
+    get => _tdMods;
+    set => this.RaiseAndSetIfChanged(ref _tdMods, value);
+  }
+
+  public bool TdModsAvailable => TdMods.Count > 0;
+
   public ObservableCollection<DiscImage> RaDiscImages
   {
     get => _raDiscImages;
     set => this.RaiseAndSetIfChanged(ref _raDiscImages, value);
   }
+
+  public ObservableCollection<ZipUrlSpec> RaMods
+  {
+    get => _raMods;
+    set => this.RaiseAndSetIfChanged(ref _raMods, value);
+  }
+
+  public bool RaModsAvailable => RaMods.Count > 0;
 
   public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
 
@@ -46,9 +65,12 @@ public class SelectGameDataViewModel : ScreenViewModelBase
     var config = configService.Config;
 
     _td = config.TiberianDawn;
-    _ra = config.RedAlert;
     _tdDiscImages = new ObservableCollection<DiscImage>(config.TiberianDawn.DiscImages);
+    _tdMods = new ObservableCollection<ZipUrlSpec>(config.TiberianDawn.ZipUrls ?? []);
+
+    _ra = config.RedAlert;
     _raDiscImages = new ObservableCollection<DiscImage>(config.RedAlert.DiscImages);
+    _raMods = new ObservableCollection<ZipUrlSpec>(config.RedAlert.ZipUrls ?? []);
     
     Next = ReactiveCommand.CreateFromObservable(() => 
       HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()

@@ -13,7 +13,9 @@ public interface IDownloadEventVisitor : IVisitor
   void Visit(FinishDownloadGameDataEvent e);
   void Visit(DownloadGameDataErrorEvent e);
 
-  // TODO: zip URL events
+  // Mods/addons install
+  void Visit(StartZipUrlDownloadEvent e);
+  void Visit(FinishZipUrlDownloadEvent e);
 
   // NCO game engine install events, see: launcher/Service/NcoReleaseService.cs
   void Visit(FetchNcoReleaseEvent e);

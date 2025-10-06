@@ -110,7 +110,7 @@ RedAlert:
           - MAIN.MIX
     - SortOrder: 3
       Name: COUNTERSTRIKE
-      DisplayName: Counterstrike
+      DisplayName: Counterstrike (Expansion)
       Sources:
         - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
@@ -121,7 +121,7 @@ RedAlert:
           - MAIN.MIX
     - SortOrder: 4
       Name: AFTERMATH
-      DisplayName: The Aftermath
+      DisplayName: The Aftermath (Expansion)
       Sources:
         - Name: cnc-comm
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
@@ -136,4 +136,5 @@ RedAlert:
       DisplayName:
         The Lost Files ('Counterstrike'/'The Aftermath' Cutscenes)
       Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip
+      InfoUrl: https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/2c.Red-Alert-Enhancements
       ProvidesFilesEndingWith: .MIX
