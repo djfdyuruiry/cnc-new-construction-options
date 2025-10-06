@@ -21,6 +21,9 @@ public class NewConstructionOptions : INotifyPropertyChanged
       OnPropertyChanged();
     }
   }
+  public bool? Installed { get; set; }
+  [YamlIgnore]
+  public bool IsInstalled => Installed ?? false;
   [YamlIgnore]
   public bool HasInstallPath => !string.IsNullOrEmpty(InstallPath);
 

@@ -1,3 +1,5 @@
+using System;
+using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
@@ -18,8 +20,11 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
       ViewModel = Locator.Current.GetService<MainViewModel>();
     }
 
-    this.WhenActivated(_ =>
-      ViewModel?.NavigateToFirstScreen()
+    this.WhenActivated(d =>
+      ReactiveCommand.CreateFromObservable(ViewModel!.NavigateToFirstScreen)
+        .Execute()
+        .Subscribe()
+        .DisposeWith(d)
     );
   }
 }

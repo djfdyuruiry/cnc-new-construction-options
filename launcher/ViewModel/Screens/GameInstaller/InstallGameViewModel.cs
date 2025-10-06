@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 using Avalonia.Media;
 using ReactiveUI;
@@ -9,11 +13,16 @@ using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.ViewModel;
 using CNC.NCO.Launcher.Service;
+using DynamicData.Binding;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class InstallGameViewModel : ScreenViewModelBase
 {
+  private readonly LauncherConfig _config;
+  private readonly GameDataService _gameDataService;
+  private readonly NcoReleaseService _releaseService;
+
   private IBrush? _backgroundImage;
   private string _installLog;
 
@@ -82,9 +91,6 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _nco, value);
   }
 
-  public ReactiveCommand<Unit, Unit> Start { get; }
-  public ReactiveCommand<Unit, IRoutableViewModel> Finish { get; }
-
   public InstallGameViewModel(
     IScreen hostScreen,
     LauncherConfigService configService,
@@ -93,13 +99,17 @@ public class InstallGameViewModel : ScreenViewModelBase
   )
     : base("install-games", hostScreen)
   {
+    _config = configService.Config;
+    _gameDataService = gameDataService;
+    _releaseService = releaseService;
+
     InstallNotClicked = true;
     IsInstalling = false;
     InstallFinished = false;
     HasErrored = false;
 
     _enabledDiscImages = new ObservableCollection<ItemToBeInstalled<DiscImageSource>>(
-      configService.Config
+      _config
         .Games
         .SelectMany(
           // TODO: Allow user to select source and pass into this method to filter (instead of first)
@@ -113,7 +123,7 @@ public class InstallGameViewModel : ScreenViewModelBase
         .ThenBy(d => d.Item.SortOrder)
     );
     _modsAndAddons = new ObservableCollection<ItemToBeInstalled<ZipUrlSpec>>(
-      configService.Config
+      _config
         .Games
         .SelectMany(g => (g.ZipUrls ?? []).Where(z => z.Game.Enabled && z.Enabled))
         .Select(z => new ItemToBeInstalled<ZipUrlSpec>(z))
@@ -122,27 +132,36 @@ public class InstallGameViewModel : ScreenViewModelBase
     );
     _nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
 
-    Start = ReactiveCommand.CreateFromTask(async () =>
-    {
-      InstallNotClicked = false;
-      IsInstalling = false;
-      InstallFinished = false;
-      HasErrored = false;
-
-      var downloadEventVisitor = new InstallDownloadEventVisitor(this);
-
-      await gameDataService.Download(
-        downloadEventVisitor,
-        b => BackgroundImage = new ImageBrush(b)
-      );
-      await releaseService.Download(downloadEventVisitor);
-
-      IsInstalling = false;
-      InstallFinished = !HasErrored;
-    });
-
-    Finish = ReactiveCommand.CreateFromObservable(() =>
-      HostScreen.Router.NavigateTo<LaunchGameViewModel>()
+    this.WhenNavigatedTo(() =>
+      new CompositeDisposable(
+        this.WhenValueChanged(x => x.InstallFinished)
+          .Where(x => x)
+          .Subscribe(_ => GoToLaunchGameScreen()),
+        ReactiveCommand.CreateFromTask(Install)
+          .Execute()
+          .ObserveOn(RxApp.TaskpoolScheduler)
+          .Subscribe()
+      )
     );
+  }
+
+  private IObservable<IRoutableViewModel> GoToLaunchGameScreen()
+  {
+    _config.NCO.InstallPath = ;
+    return HostScreen.Router.NavigateTo<LaunchGameViewModel>();
+  }
+
+  public async Task Install()
+  {
+    var downloadEventVisitor = new InstallDownloadEventVisitor(this);
+
+    await _gameDataService.Download(
+      downloadEventVisitor,
+      b => BackgroundImage = new ImageBrush(b)
+    );
+    await _releaseService.Download(downloadEventVisitor);
+
+    IsInstalling = false;
+    InstallFinished = !HasErrored;
   }
 }

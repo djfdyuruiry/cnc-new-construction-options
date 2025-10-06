@@ -30,7 +30,7 @@
 
     <Button Classes="nco-button"
             Content="Get Started"
-            Command="{Binding Begin}"
+            Command="{Binding Next}"
             HorizontalAlignment="Right"
             Grid.Row="4"/>
   </Grid>

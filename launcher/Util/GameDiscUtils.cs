@@ -2,9 +2,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CNC.NCO.Launcher.Model.Events.Download;
+
 using DiscUtils.Iso9660;
 using InstallShieldExtractor;
+
+using CNC.NCO.Launcher.Model.Events.Download;
 
 namespace CNC.NCO.Launcher.Util;
 

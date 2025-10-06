@@ -20,8 +20,8 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
       get => _installPath;
       set
       {
+        _ncoConfig.InstallPath = value;
         this.RaiseAndSetIfChanged(ref _installPath, value); 
-        _ncoConfig.InstallPath = InstallPath;
       }
     }
 

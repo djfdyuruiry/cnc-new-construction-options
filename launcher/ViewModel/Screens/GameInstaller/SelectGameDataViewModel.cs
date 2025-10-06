@@ -73,7 +73,7 @@ public class SelectGameDataViewModel : ScreenViewModelBase
     _raMods = new ObservableCollection<ZipUrlSpec>(config.RedAlert.ZipUrls ?? []);
     
     Next = ReactiveCommand.CreateFromObservable(() => 
-      HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()
+      HostScreen.Router.NavigateTo<InstallGameViewModel>()
     );
   }
 }

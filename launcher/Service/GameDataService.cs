@@ -229,7 +229,7 @@ public class GameDataService(
     // TODO: Allow user to select source and pass into this method to filter (instead of first)
     var discImages = dataConfig.DiscImagesBySource.First().Value;
 
-    foreach (var imageSource in discImages.OrderBy(d => d.SortOrder))
+    foreach (var imageSource in discImages.Where(d => d.Enabled).OrderBy(d => d.SortOrder))
     {
       await ExtractGameDataFromDiscImage(
         imageSource,

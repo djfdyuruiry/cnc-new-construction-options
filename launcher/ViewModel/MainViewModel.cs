@@ -1,3 +1,4 @@
+using System;
 using System.Reactive;
 
 using Avalonia;
@@ -42,15 +43,6 @@ public class MainViewModel : ReactiveObject, IScreen
     );
   }
 
-  public void NavigateToFirstScreen()
-  {
-    if (NcoConfig.HasInstallPath)
-    {
-      Router.NavigateTo<LaunchGameViewModel>();
-    }
-    else
-    {
-      Router.NavigateTo<StartViewModel>();
-    }
-  }
+  public IObservable<IRoutableViewModel> NavigateToFirstScreen() =>
+    NcoConfig.HasInstallPath ? Router.NavigateTo<LaunchGameViewModel>() : Router.NavigateTo<StartViewModel>();
 }

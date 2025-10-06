@@ -108,7 +108,7 @@
 
     <Button Classes="nco-button"
             HorizontalAlignment="Right"
-            Content="Next"
+            Content="Install"
             Command="{Binding Next}"
             Grid.Row="2"/>
   </Grid>
