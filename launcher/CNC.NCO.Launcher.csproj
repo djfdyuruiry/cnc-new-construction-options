@@ -61,5 +61,8 @@
       <DependentUpon>SelectInstallPathView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Screens\GameInstaller\InstallGameView.axaml.cs">
+      <DependentUpon>InstallGameView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

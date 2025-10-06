@@ -11,17 +11,26 @@
                           d:DesignWidth="1024"
                           d:DesignHeight="740">
   <Grid RowDefinitions="Auto,*,Auto,*,Auto" Margin="5">
-    <TextBlock FontWeight="Bold" FontSize="34" TextWrapping="Wrap" Margin="0,10" Grid.Row="0">
+    <TextBlock Classes="h1" Margin="0,10" Grid.Row="0">
       Select Install Directory
     </TextBlock>
+
     <StackPanel Grid.Row="1"/>
+
     <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
-      <TextBox FontSize="22" Grid.Column="0" Text="{Binding Path=InstallPath, Mode=TwoWay}" />
-      <Button FontSize="22" Grid.Column="1" Command="{Binding Browse}" Margin="15,0">Browse</Button>
+      <TextBox Classes="p-large" Grid.Column="0" Text="{Binding Path=InstallPath, Mode=TwoWay}"/>
+      <Button Classes="nco-button"
+              Grid.Column="1"
+              Command="{Binding Browse}"
+              Margin="15,0">
+        Browse
+      </Button>
     </Grid>
+
     <StackPanel Grid.Row="3"/>
-    <Button HorizontalAlignment="Right"
-            FontSize="22"
+
+    <Button Classes="nco-button"
+            HorizontalAlignment="Right"
             Content="Install"
             Command="{Binding Next}"
             Grid.Row="4"/>

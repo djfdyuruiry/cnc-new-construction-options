@@ -12,16 +12,16 @@
                           d:DesignWidth="1024"
                           d:DesignHeight="740">
   <Grid RowDefinitions="Auto,*,*,Auto" Margin="5">
-    <TextBlock FontWeight="Bold" FontSize="34" Text="Installing New Construction Options" Grid.Row="0"/>
+    <TextBlock Classes="h1" Text="Installing New Construction Options" Grid.Row="0"/>
 
     <!-- Disc Images Section -->
-    <StackPanel  Margin="0,10,0,0" Grid.Row="1">
+    <StackPanel Margin="0,10,0,0" Grid.Row="1">
       <ItemsControl ItemsSource="{Binding DiscImages}" IsEnabled="False">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <StackPanel Orientation="Horizontal" Margin="5">
-              <TextBlock FontSize="18" Text="•"/>
-              <TextBlock FontSize="18"
+              <TextBlock Classes="p" Text="•"/>
+              <TextBlock Classes="p"
                          Text="{Binding Source.DisplayNameOrName}"
                          Margin="0,0,5,0"/>
               <Image IsVisible="{Binding Installing}"
@@ -42,8 +42,8 @@
       </ItemsControl>
 
       <StackPanel Orientation="Horizontal" Margin="0,7">
-        <TextBlock FontSize="18" Text="•"/>
-        <TextBlock FontSize="18" Text="New Construction Options - Game Engine" Margin="0,0,5,0"/>
+        <TextBlock Classes="p" Text="•"/>
+        <TextBlock Classes="p" Text="New Construction Options - Game Engine" Margin="0,0,5,0"/>
         <Image IsVisible="{Binding NcoInstalling}"
                anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
                anim:ImageBehavior.RepeatBehavior="0x"
@@ -62,24 +62,24 @@
 
     <!-- Install Log and Status -->
     <DockPanel LastChildFill="True" Margin="0,10,0,0" Grid.Row="2">
-      <TextBlock FontWeight="Bold" FontSize="22" Margin="0, 0, 0, 5" DockPanel.Dock="Top">
+      <TextBlock Classes="h2" Margin="0, 0, 0, 5" DockPanel.Dock="Top">
         Install Log
       </TextBlock>
       <ScrollViewer x:Name="InstallLogViewer" AllowAutoHide="False">
         <SelectableTextBlock FontSize="16"
-                             TextWrapping="NoWrap"
+                             TextWrapping="Wrap"
                              Text="{Binding InstallLog}"
                              DockPanel.Dock="Bottom"/>
       </ScrollViewer>
     </DockPanel>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3">
-      <Button FontSize="22"
+      <Button Classes="nco-button"
               Content="Start"
               Command="{Binding Start}" 
               Margin="0,0,2,0"
               IsEnabled="{Binding InstallNotClicked}"/>
-      <Button FontSize="22"
+      <Button Classes="nco-button"
               Content="Finish"
               Command="{Binding Finish}"
               Margin="2,0,0,0"

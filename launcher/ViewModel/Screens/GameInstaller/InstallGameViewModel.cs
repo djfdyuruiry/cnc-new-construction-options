@@ -6,13 +6,11 @@ using Avalonia.Media;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
-using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Model.ViewModel;
 using CNC.NCO.Launcher.Service;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
-// TODO: impl view model and bind
 public class InstallGameViewModel : ScreenViewModelBase
 {
   private string _installLog;
