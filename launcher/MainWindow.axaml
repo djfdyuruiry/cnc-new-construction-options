@@ -14,7 +14,25 @@
                      Height="768"
                      Title="CNC: New Construction Options"
                      CanResize="False">
-  <!-- This could replicate an old windows 9x installer for retro feel -->
+  <rxui:ReactiveWindow.Styles>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="34"/>  
+    </Style>
+    
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="22"/>  
+    </Style>
+    
+    <Style Selector="TextBlock.p">
+      <Setter Property="FontSize" Value="18"/>  
+    </Style>
+
+    <Style Selector="Button.nco-button">
+      <Setter Property="FontSize" Value="22"/>  
+    </Style>
+  </rxui:ReactiveWindow.Styles>
+
+    <!-- This could replicate an old windows 9x installer for retro feel -->
   <Grid RowDefinitions="*,Auto">
     <rxui:RoutedViewHost Grid.Row="0" 
                          Margin="15"
@@ -23,9 +41,9 @@
                          Router="{Binding Router}"/>
     <Border BorderBrush="White" BorderThickness="2" CornerRadius="2" Margin="10" Grid.Row="1">
       <StackPanel Orientation="Horizontal" Margin="5">
-        <Button FontSize="22" Command="{Binding Play}" Content="Play" Margin="0,0,5,0" />
-        <Button FontSize="22" Command="{Binding Install}" Content="Install" Margin="0,0,5,0" />
-        <Button FontSize="22" Command="{Binding Exit}" Content="Exit" Margin="0,0,5,0" />
+        <Button Classes="nco-button" Command="{Binding Play}" Content="Play"/>
+        <Button Classes="nco-button" Command="{Binding Install}" Content="Install" Margin="5,0,5,0"/>
+        <Button Classes="nco-button" Command="{Binding Exit}" Content="Exit"/>
       </StackPanel>
     </Border>
   </Grid>
