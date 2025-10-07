@@ -22,7 +22,7 @@
         This wizard will help you get both NCO and all required Command &amp; Conquer data installed, so you can play the games.
       </TextBlock>
       <TextBlock Classes="p-large" Margin="0,10,0,0">
-        On the next screen you can choose which games and features you want to install.
+        On the next screens you can choose the install path and which games/features you want to install.
       </TextBlock>
     </StackPanel>
 

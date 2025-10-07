@@ -10,5 +10,99 @@
                           mc:Ignorable="d"
                           d:DesignWidth="1024"
                           d:DesignHeight="740">
-  <TextBlock Text="{Binding Greeting}"/>
+  <Grid RowDefinitions="Auto,*,Auto,*,Auto,*" Margin="5">
+    <TextBlock Classes="h1" HorizontalAlignment="Center" Margin="0,10" Grid.Row="0">
+      New Construction Options (NCO) Launcher
+    </TextBlock>
+
+    <StackPanel Grid.Row="1"/>
+
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                IsVisible="{Binding !Nco.Installed}"
+                Margin="0,0,0,5"
+                Grid.Row="2">
+      <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
+      <TextBlock Classes="h2" VerticalAlignment="Center">
+        NCO not installed - click 'Install' below to get started  
+      </TextBlock>
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                IsVisible="{Binding !Nco.Installed}"
+                Margin="0,0,0,5"
+                Grid.Row="2">
+      <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
+      <TextBlock Classes="h2" VerticalAlignment="Center">
+        NCO not installed - click 'Install' below to get started  
+      </TextBlock>
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                IsVisible="{Binding LaunchFailed}"
+                Margin="0,0,0,5"
+                Grid.Row="2">
+      <Image Source="avares://CNC.NCO.Launcher/img/error.png" Width="60" Height="60" Margin="0,0,5,0"/>
+      <TextBlock Classes="h2" VerticalAlignment="Center">
+        Failed to launch game  
+      </TextBlock>
+    </StackPanel>
+
+    <StackPanel Grid.Row="3"/>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="4">
+      <Panel>
+        <Panel.IsEnabled>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="Nco.Installed" />
+            <Binding Path="Td.Enabled" />
+            <Binding Path="TdProcess" Converter="{x:Static ObjectConverters.IsNull}"/>
+          </MultiBinding>
+        </Panel.IsEnabled>
+
+        <Panel.Effect>
+          <DropShadowEffect BlurRadius="15"></DropShadowEffect>
+        </Panel.Effect>
+
+        <Image Source="avares://CNC.NCO.Launcher/img/cnc-gold.png"/>
+        <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
+          <Image.IsVisible>
+            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+              <Binding Path="!Nco.Installed" />
+              <Binding Path="!Td.Enabled" />
+              <Binding Path="TdProcess" Converter="{x:Static ObjectConverters.IsNotNull}"/>
+            </MultiBinding>
+          </Image.IsVisible>
+        </Image>
+      </Panel>
+      <Panel Margin="10,0,0,0">
+        <Panel.IsEnabled>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="Nco.Installed" />
+            <Binding Path="Ra.Enabled" />
+            <Binding Path="RaProcess" Converter="{x:Static ObjectConverters.IsNull}"/>
+          </MultiBinding>
+        </Panel.IsEnabled>
+
+        <Panel.Effect>
+          <DropShadowEffect BlurRadius="15"></DropShadowEffect>
+        </Panel.Effect>
+    
+        <Image Source="avares://CNC.NCO.Launcher/img/red-alert.png"/>
+        <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
+          <Image.IsVisible>
+            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+              <Binding Path="!Nco.Installed" />
+              <Binding Path="!Ra.Enabled" />
+              <Binding Path="RaProcess" Converter="{x:Static ObjectConverters.IsNotNull}"/>
+            </MultiBinding>
+          </Image.IsVisible>
+        </Image>
+      </Panel>
+    </StackPanel>
+
+    <StackPanel Grid.Row="5"/>
+  </Grid>
 </rxui:ReactiveUserControl>

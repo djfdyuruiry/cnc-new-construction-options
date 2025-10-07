@@ -17,6 +17,7 @@ public class GameDataConfig : INotifyPropertyChanged
   public string DisplayName { get; set; }
   public string NcoZipPath { get; set; }
   public string InstallPostfix { get; set; }
+  public string Binary { get; set; }
   public DiscImage[] DiscImages { get; set; }
 
   public ZipUrlSpec[]? ZipUrls

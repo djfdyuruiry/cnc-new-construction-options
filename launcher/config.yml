@@ -14,6 +14,7 @@ TiberianDawn:
     Command & Conquer: Tiberian Dawn
   NcoZipPath: td
   InstallPostfix: td
+  Binary: vanillatd
   DiscImages:
     - SortOrder: 1
       Name: GDI
@@ -80,6 +81,7 @@ RedAlert:
     Command & Conquer: Red Alert
   NcoZipPath: ra
   InstallPostfix: ra
+  Binary: vanillara
   DiscImages:
     - SortOrder: 1
       Name: ALLIES

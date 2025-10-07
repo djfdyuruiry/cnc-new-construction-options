@@ -8,18 +8,20 @@
                           xmlns:rxui="http://reactiveui.net"
                           xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
                           xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
+                          Background="{Binding BackgroundImage}"
                           mc:Ignorable="d"
                           d:DesignWidth="1024"
                           d:DesignHeight="740">
-  <Grid RowDefinitions="Auto,*,*" Margin="5">
-    <TextBlock Classes="h1" Text="Installing New Construction Options" Grid.Row="0"/>
+  <Grid RowDefinitions="Auto,*,*" Opacity="0.8" Background="Black">
+    <TextBlock Classes="h1" Text="Installing New Construction Options" Margin="5,5,0,0" Grid.Row="0"/>
 
-    <Grid ColumnDefinitions="4*,6*" Margin="0,15,0,0" Grid.Row="1">
+    <Grid ColumnDefinitions="4*,6*" Margin="5,15,0,0" Grid.Row="1">
       <!-- disc images -->
       <StackPanel Grid.Column="0">
         <TextBlock Classes="h2" Margin="0,0,0,15">
           Disc Images
         </TextBlock>
+
         <ItemsControl ItemsSource="{Binding DiscImages}" IsEnabled="False">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
@@ -51,6 +53,7 @@
         <TextBlock Classes="h2" IsVisible="{Binding ModsAndAddonsPresent}" Margin="0,0,0,15">
           Mods/Addons
         </TextBlock>
+
         <ItemsControl IsVisible="{Binding ModsAndAddonsPresent}" ItemsSource="{Binding ModsAndAddons}"
                       IsEnabled="False">
           <ItemsControl.ItemTemplate>
@@ -81,6 +84,7 @@
         <TextBlock Classes="h2" Margin="0,15">
           NCO
         </TextBlock>
+
         <StackPanel Orientation="Horizontal">
           <TextBlock Classes="p" Text="•"/>
           <TextBlock Classes="p" Text="Game Engine" Margin="0,0,5,0"/>
@@ -102,10 +106,11 @@
     </Grid>
 
     <!-- install log -->
-    <DockPanel LastChildFill="True" Margin="0,10,0,0" Grid.Row="2">
+    <DockPanel LastChildFill="True" Margin="5,10,0,0" Grid.Row="2">
       <TextBlock Classes="h2" Margin="0,0,0,5" DockPanel.Dock="Top">
         Install Log
       </TextBlock>
+
       <ScrollViewer x:Name="InstallLogViewer" AllowAutoHide="False">
         <SelectableTextBlock FontSize="16"
                              TextWrapping="Wrap"

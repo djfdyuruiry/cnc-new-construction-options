@@ -65,6 +65,7 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
       .FirstOrDefault() ?? throw new Exception($"Failed to resolve NCO zip, release '{ncoConfig.Release}' and OS: {osName}");
   }
 
+  // TODO: Install .app to Applications on macos
   public async Task Download(IDownloadEventVisitor eventVisitor)
   {
     try
