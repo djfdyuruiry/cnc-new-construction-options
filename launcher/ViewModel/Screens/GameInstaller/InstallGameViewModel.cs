@@ -1,5 +1,5 @@
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -14,51 +14,37 @@ using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.ViewModel;
 using CNC.NCO.Launcher.Service;
-using GitHub.Models;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class InstallGameViewModel : ScreenViewModelBase
 {
-  private readonly LauncherConfig _config;
   private readonly GameDataService _gameDataService;
   private readonly NcoReleaseService _releaseService;
   private readonly PathsConfig _paths;
 
-  private IBrush? _backgroundImage;
-  private string _installLog;
-
-  private bool _installNotClicked;
   private bool _isInstalling;
+  private string _installLog;
+  private IBrush? _backgroundImage;
   private bool _hasErrored;
   private bool _installFinished;
 
-  private ObservableCollection<ItemToBeInstalled<DiscImageSource>> _enabledDiscImages;
-  private ObservableCollection<ItemToBeInstalled<ZipUrlSpec>> _modsAndAddons;
-  private ItemToBeInstalled<NewConstructionOptions> _nco;
-
-  public IBrush? BackgroundImage
+  public bool IsInstalling
   {
-    get => _backgroundImage;
-    set => this.RaiseAndSetIfChanged(ref _backgroundImage, value);
+    get => _isInstalling;
+    set => this.RaiseAndSetIfChanged(ref _isInstalling, value);
   }
-
+  
   public string InstallLog
   {
     get => _installLog;
     set => this.RaiseAndSetIfChanged(ref _installLog, value);
   }
 
-  public bool InstallNotClicked
+  public IBrush? BackgroundImage
   {
-    get => _installNotClicked;
-    set => this.RaiseAndSetIfChanged(ref _installNotClicked, value);
-  }
-
-  public bool IsInstalling
-  {
-    get => _isInstalling;
-    set => this.RaiseAndSetIfChanged(ref _isInstalling, value);
+    get => _backgroundImage;
+    set => this.RaiseAndSetIfChanged(ref _backgroundImage, value);
   }
 
   public bool HasErrored
@@ -73,25 +59,11 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _installFinished, value);
   }
 
-  public ObservableCollection<ItemToBeInstalled<DiscImageSource>> DiscImages
-  {
-    get => _enabledDiscImages;
-    set => this.RaiseAndSetIfChanged(ref _enabledDiscImages, value);
-  }
+  public IList<ItemToBeInstalled<DiscImageSource>> DiscImages { get; }
 
-  public ObservableCollection<ItemToBeInstalled<ZipUrlSpec>> ModsAndAddons
-  {
-    get => _modsAndAddons;
-    set => this.RaiseAndSetIfChanged(ref _modsAndAddons, value);
-  }
+  public IList<ItemToBeInstalled<ZipUrlSpec>> ModsAndAddons { get; }
   
-  public bool ModsAndAddonsPresent => ModsAndAddons.Count > 0;
-
-  public ItemToBeInstalled<NewConstructionOptions> Nco
-  {
-    get => _nco;
-    set => this.RaiseAndSetIfChanged(ref _nco, value);
-  }
+  public ItemToBeInstalled<NewConstructionOptions> Nco { get; }
 
   public InstallGameViewModel(
     IScreen hostScreen,
@@ -99,42 +71,23 @@ public class InstallGameViewModel : ScreenViewModelBase
     GameDataService gameDataService,
     NcoReleaseService releaseService,
     PathsConfig paths
-  )
-    : base("install-games", hostScreen)
+  ) : base("install-games", hostScreen)
   {
-    _config = configService.Config;
     _gameDataService = gameDataService;
     _releaseService = releaseService;
     _paths = paths;
 
-    InstallNotClicked = true;
     IsInstalling = false;
     InstallFinished = false;
     HasErrored = false;
 
-    _enabledDiscImages = new ObservableCollection<ItemToBeInstalled<DiscImageSource>>(
-      _config
-        .Games
-        .SelectMany(
-          // TODO: Allow user to select source and pass into this method to filter (instead of first)
-          g => g.DiscImagesBySource
-            .First()
-            .Value
-            .Where(d => d.Game.Enabled && d.Enabled)
-        )
-        .Select(d => new ItemToBeInstalled<DiscImageSource>(d))
-        .OrderBy(d => d.Item.Game.SortOrder)
-        .ThenBy(d => d.Item.SortOrder)
-    );
-    _modsAndAddons = new ObservableCollection<ItemToBeInstalled<ZipUrlSpec>>(
-      _config
-        .Games
-        .SelectMany(g => (g.ZipUrls ?? []).Where(z => z.Game.Enabled && z.Enabled))
-        .Select(z => new ItemToBeInstalled<ZipUrlSpec>(z))
-        .OrderBy(z => z.Item.Game.SortOrder)
-        .ThenBy(z => z.Item.SortOrder)
-    );
-    _nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
+    DiscImages = configService.Config.EnabledDiscImageSources 
+      .Select(ItemToBeInstalled<DiscImageSource>.Build)
+      .ToList();
+    ModsAndAddons = configService.Config.EnabledZipUrlSpecs
+      .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
+      .ToList();
+    Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
 
     this.WhenNavigatedTo(() =>
       new CompositeDisposable(
@@ -154,11 +107,11 @@ public class InstallGameViewModel : ScreenViewModelBase
     var downloadEventVisitor = new InstallDownloadEventVisitor(this);
 
     await _gameDataService.Download(
-      _config.NCO.PendingInstallPath,
+      Nco.Item.PendingInstallPath,
       downloadEventVisitor,
       b => BackgroundImage = new ImageBrush(b)
     );
-    await _releaseService.Download(_config.NCO.PendingInstallPath, downloadEventVisitor);
+    await _releaseService.Download(Nco.Item.PendingInstallPath, downloadEventVisitor);
 
     IsInstalling = false;
     InstallFinished = !HasErrored;
@@ -173,8 +126,8 @@ public class InstallGameViewModel : ScreenViewModelBase
       return;
     }
 
-    _config.NCO.InstallPath = _config.NCO.PendingInstallPath;
-    _config.NCO.Installed = isInstalled;
+    Nco.Item.InstallPath = Nco.Item.PendingInstallPath;
+    Nco.Item.Installed = isInstalled;
 
     HostScreen.Router.NavigateTo<LaunchGameViewModel>();
   }

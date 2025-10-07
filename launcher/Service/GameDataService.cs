@@ -227,9 +227,7 @@ public class GameDataService(
   )
   {
     // TODO: Allow user to select source and pass into this method to filter (instead of first)
-    var discImages = dataConfig.DiscImagesBySource.First().Value;
-
-    foreach (var imageSource in discImages.Where(d => d.Enabled).OrderBy(d => d.SortOrder))
+    foreach (var imageSource in dataConfig.EnabledDiscImagesBySource.First().Value)
     {
       await ExtractGameDataFromDiscImage(
         imageSource,
@@ -263,7 +261,7 @@ public class GameDataService(
     {
       DirectoryUtils.CreateDirectoryIfMissing(paths.CachePath);
 
-      foreach (var game in _config.Games.Where(c => c.Enabled).OrderBy(c => c.SortOrder))
+      foreach (var game in _config.EnabledGames)
       {
         currentGame  = game;
 
@@ -275,7 +273,7 @@ public class GameDataService(
 
         await DownloadGameDiscImageFiles(game, downloadEventVisitor, onSplashScreenLoaded, installPath);
 
-        foreach (var zipUrl in (game.ZipUrls ?? []).Where(z => z.Enabled).OrderBy(z => z.SortOrder))
+        foreach (var zipUrl in game.EnabledZipUrlSpecs)
         {
           await DownloadGameZipUrlFiles(zipUrl, downloadEventVisitor, installPath);
         }

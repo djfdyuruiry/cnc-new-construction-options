@@ -1,8 +1,6 @@
 using System.Reactive;
-using CNC.NCO.Launcher.Config;
-using ReactiveUI;
 
-using CNC.NCO.Launcher.Service;
+using ReactiveUI;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 

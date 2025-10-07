@@ -26,6 +26,11 @@
           <Setter Property="FontSize" Value="22"/>
           <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
+    
+        <Style Selector="TextBox.p-large">
+          <Setter Property="FontSize" Value="22"/>
+          <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
 
         <Style Selector="TextBlock.p">
           <Setter Property="FontSize" Value="18"/>  

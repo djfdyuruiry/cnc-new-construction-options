@@ -50,11 +50,14 @@
 
       <StackPanel Grid.Column="1" >
         <!-- mods/addons -->
-        <TextBlock Classes="h2" IsVisible="{Binding ModsAndAddonsPresent}" Margin="0,0,0,15">
+        <TextBlock Classes="h2"
+                   IsVisible="{Binding !!ModsAndAddons.Count}"
+                   Margin="0,0,0,15">
           Mods/Addons
         </TextBlock>
 
-        <ItemsControl IsVisible="{Binding ModsAndAddonsPresent}" ItemsSource="{Binding ModsAndAddons}"
+        <ItemsControl IsVisible="{Binding !!ModsAndAddons.Count}"
+                      ItemsSource="{Binding ModsAndAddons}"
                       IsEnabled="False">
           <ItemsControl.ItemTemplate>
             <DataTemplate>

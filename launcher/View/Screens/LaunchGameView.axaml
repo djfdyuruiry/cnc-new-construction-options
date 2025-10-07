@@ -19,18 +19,7 @@
 
     <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Center"
-                IsVisible="{Binding !Nco.Installed}"
-                Margin="0,0,0,5"
-                Grid.Row="2">
-      <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
-      <TextBlock Classes="h2" VerticalAlignment="Center">
-        NCO not installed - click 'Install' below to get started  
-      </TextBlock>
-    </StackPanel>
-
-    <StackPanel Orientation="Horizontal"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !Nco.Installed}"
+                IsVisible="{Binding !Config.NCO.Installed}"
                 Margin="0,0,0,5"
                 Grid.Row="2">
       <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
@@ -57,8 +46,8 @@
       <Panel x:Name="TdPanel">
         <Panel.IsEnabled>
           <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="Nco.Installed" />
-            <Binding Path="Td.Enabled" />
+            <Binding Path="Config.NCO.Installed" />
+            <Binding Path="Config.TiberianDawn.Enabled" />
             <Binding Path="TdProcess" Converter="{x:Static ObjectConverters.IsNull}"/>
           </MultiBinding>
         </Panel.IsEnabled>
@@ -71,8 +60,8 @@
         <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.Or}">
-              <Binding Path="!Nco.Installed" />
-              <Binding Path="!Td.Enabled" />
+              <Binding Path="!Config.NCO.Installed" />
+              <Binding Path="!Config.TiberianDawn.Enabled" />
               <Binding Path="TdProcess" Converter="{x:Static ObjectConverters.IsNotNull}"/>
             </MultiBinding>
           </Image.IsVisible>
@@ -83,8 +72,8 @@
       <Panel x:Name="RaPanel" Margin="10,0,0,0">
         <Panel.IsEnabled>
           <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="Nco.Installed" />
-            <Binding Path="Ra.Enabled" />
+            <Binding Path="Config.NCO.Installed" />
+            <Binding Path="Config.RedAlert.Enabled" />
             <Binding Path="RaProcess" Converter="{x:Static ObjectConverters.IsNull}"/>
           </MultiBinding>
         </Panel.IsEnabled>
@@ -97,8 +86,8 @@
         <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.Or}">
-              <Binding Path="!Nco.Installed" />
-              <Binding Path="!Ra.Enabled" />
+              <Binding Path="!Config.NCO.Installed" />
+              <Binding Path="!Config.RedAlert.Enabled" />
               <Binding Path="RaProcess" Converter="{x:Static ObjectConverters.IsNotNull}"/>
             </MultiBinding>
           </Image.IsVisible>

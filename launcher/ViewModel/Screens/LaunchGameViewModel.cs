@@ -16,9 +16,7 @@ public class LaunchGameViewModel : ScreenViewModelBase
   private Process? _raProcess;
   private bool _launchFailed;
 
-  public NewConstructionOptions Nco { get; }
-  public GameDataConfig Td { get; }
-  public GameDataConfig Ra { get; }
+  public LauncherConfig Config { get; }
 
   public Process? TdProcess
   {
@@ -44,16 +42,15 @@ public class LaunchGameViewModel : ScreenViewModelBase
   public LaunchGameViewModel(LauncherConfigService configService, IScreen hostScreen)
     : base("play-game", hostScreen)
   {
-    Nco = configService.Config.NCO;
-    Td = configService.Config.TiberianDawn;
-    Ra = configService.Config.RedAlert;
+    Config = configService.Config;
+    LaunchFailed = false;
 
     LaunchTd = ReactiveCommand.Create((EventPattern<object> _) =>
-      LaunchGame(configService.Config.TiberianDawn, () => TdProcess, p => TdProcess = p)
+      LaunchGame(Config.TiberianDawn, () => TdProcess, p => TdProcess = p)
     );
 
     LaunchRa = ReactiveCommand.Create((EventPattern<object> _)  => 
-      LaunchGame(configService.Config.RedAlert, () => RaProcess, p => RaProcess = p)
+      LaunchGame(Config.RedAlert, () => RaProcess, p => RaProcess = p)
     );
   }
 
@@ -72,8 +69,8 @@ public class LaunchGameViewModel : ScreenViewModelBase
     var gameProcess = Process.Start(
       new ProcessStartInfo
       {
-        FileName = Path.Join(Nco.InstallPath, game.InstallPostfix, game.PlatformBinary),
-        WorkingDirectory = Path.Join(Nco.InstallPath, game.InstallPostfix),
+        FileName = Path.Join(Config.NCO.InstallPath, game.InstallPostfix, game.PlatformBinary),
+        WorkingDirectory = Path.Join(Config.NCO.InstallPath, game.InstallPostfix),
         RedirectStandardOutput = true,
         RedirectStandardError = true
       }

@@ -17,10 +17,10 @@
     <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,*" Margin="15" Grid.Row="1">
       <StackPanel Grid.Row="0" Grid.Column="0">
         <CheckBox Classes="header"
-                  Content="{Binding TiberianDawn.DisplayName}"
-                  IsChecked="{Binding Path=TiberianDawn.Enabled, Mode=TwoWay}"/>
-        <ItemsControl ItemsSource="{Binding Path=TdDiscImages, Mode=TwoWay}"
-                      IsEnabled="{Binding TiberianDawn.Enabled}">
+                  Content="{Binding Config.TiberianDawn.DisplayName}"
+                  IsChecked="{Binding Path=Config.TiberianDawn.Enabled, Mode=TwoWay}"/>
+        <ItemsControl ItemsSource="{Binding Path=Config.TiberianDawn.OrderedDiscImages, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.TiberianDawn.Enabled}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <CheckBox Classes="node"
@@ -34,15 +34,15 @@
       </StackPanel>
       
       <TextBlock Classes="h2"
-                 IsVisible="{Binding TdModsAvailable}"
+                 IsVisible="{Binding !!Config.TiberianDawn.ZipUrlSpecs.Count}"
                  Grid.Row="1"
                  Grid.Column="0">
         Tiberian Dawn Mods/Addons
       </TextBlock>
 
       <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,15,0,0">
-        <ItemsControl ItemsSource="{Binding Path=TdMods, Mode=TwoWay}"
-                      IsEnabled="{Binding TiberianDawn.Enabled}">
+        <ItemsControl ItemsSource="{Binding Path=Config.TiberianDawn.ZipUrlSpecs, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.TiberianDawn.Enabled}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <StackPanel>
@@ -63,10 +63,10 @@
       <!-- RA data & mods -->
       <StackPanel Grid.Row="0" Grid.Column="1">
         <CheckBox Classes="header"
-                  Content="{Binding RedAlert.DisplayName}"
-                  IsChecked="{Binding Path=RedAlert.Enabled, Mode=TwoWay }"/>
-        <ItemsControl ItemsSource="{Binding Path=RaDiscImages, Mode=TwoWay}"
-                      IsEnabled="{Binding RedAlert.Enabled}">
+                  Content="{Binding Config.RedAlert.DisplayName}"
+                  IsChecked="{Binding Path=Config.RedAlert.Enabled, Mode=TwoWay }"/>
+        <ItemsControl ItemsSource="{Binding Path=Config.RedAlert.OrderedDiscImages, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.RedAlert.Enabled}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <CheckBox Classes="node"
@@ -79,15 +79,15 @@
       </StackPanel>
 
       <TextBlock Classes="h2"
-                 IsVisible="{Binding RaModsAvailable}"
+                 IsVisible="{Binding !!Config.RedAlert.ZipUrlSpecs.Count}"
                  Grid.Row="1"
                  Grid.Column="1">
         Red Alert Mods/Addons
       </TextBlock>
 
       <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,15,0,0">
-        <ItemsControl ItemsSource="{Binding Path=RaMods, Mode=TwoWay}"
-                      IsEnabled="{Binding RedAlert.Enabled}">
+        <ItemsControl ItemsSource="{Binding Path=Config.RedAlert.ZipUrlSpecs, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.RedAlert.Enabled}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <StackPanel>
@@ -106,10 +106,14 @@
       </StackPanel>
     </Grid>
 
-    <Button Classes="nco-button"
-            HorizontalAlignment="Right"
-            Content="Install"
-            Command="{Binding Next}"
-            Grid.Row="2"/>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+      <Button Classes="nco-button"
+              Content="Back"
+              Command="{Binding Back}"/>
+      <Button Classes="nco-button"
+              Content="Install"
+              Command="{Binding Next}"
+              Margin="5,0,0,0"/>
+    </StackPanel>
   </Grid>
 </rxui:ReactiveUserControl>
