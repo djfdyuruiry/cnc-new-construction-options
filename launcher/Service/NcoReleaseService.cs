@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,8 +18,22 @@ using CNC.NCO.Launcher.Model.Events.Download;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class NcoReleaseService(LauncherConfigService configService, PathsConfig pathsConfig)
+// TODO: Support macos .app extract and install in Applications (plus data paths outside of app bundle)
+public class NcoReleaseService(LauncherConfigService configService)
 {
+  private readonly LauncherConfig _config = configService.Config;
+
+  [SupportedOSPlatform("linux")]
+  private void MakeEngineBinariesExecutable(string installRoot)
+  {
+    foreach (var game in _config.Games.Where(g => g.Enabled))
+    {
+      var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
+
+      File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
+    }
+  }
+
   private void ExtractNcoFileFromZip(
     GameDataConfig gameConfig,
     IDownloadEventVisitor downloadEventVisitor,
@@ -40,13 +55,40 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
     downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, outputPath));
   }
 
+  private void ScanNcoReleaseArchiveFiles(
+    string installRoot,
+    IDownloadEventVisitor eventVisitor,
+    Stream responseStream
+  )
+  {
+    using var zipReader = ReaderFactory.Open(responseStream);
+
+    while (zipReader.MoveToNextEntry())
+    {
+      if (zipReader.Entry.IsDirectory)
+      {
+        continue;
+      }
+
+      foreach (var dataConfig in _config.Games.Where(g => g.Enabled))
+      {
+        if (
+          zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
+        )
+        {
+          ExtractNcoFileFromZip(dataConfig, eventVisitor, installRoot, zipReader);
+        }
+      }
+    }
+  }
+
   private async Task<string> GetAssetForNcoRelease()
   {
     var githubClient = new GitHubClient(
       RequestAdapter.Create(new AnonymousAuthenticationProvider())
     );
 
-    var ncoConfig = configService.Config.NCO;
+    var ncoConfig = _config.NCO;
     var ncoRelease = await githubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
       .Releases
       .Tags[ncoConfig.Release]
@@ -65,45 +107,43 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
       .FirstOrDefault() ?? throw new Exception($"Failed to resolve NCO zip, release '{ncoConfig.Release}' and OS: {osName}");
   }
 
-  // TODO: Install .app to Applications on macos
-  public async Task Download(IDownloadEventVisitor eventVisitor)
+  private async Task WithNcoReleaseArchive(
+    IDownloadEventVisitor eventVisitor,
+    Action<Stream> responseHandler
+  )
+  {
+    eventVisitor.Visit(new FetchNcoReleaseEvent(_config.NCO));
+
+    var assetUrl = await GetAssetForNcoRelease();
+
+    eventVisitor.Visit(new StartNcoReleaseDownloadEvent(assetUrl));
+
+    using var client = new HttpClient();
+    client.Timeout = Timeout.InfiniteTimeSpan;
+    using var response = await client.GetAsync(
+      assetUrl,
+      HttpCompletionOption.ResponseHeadersRead
+    );
+    
+    response.EnsureSuccessStatusCode();
+
+    await using var stream = await response.Content.ReadAsStreamAsync();
+
+    responseHandler(stream);
+  }
+
+  public async Task Download(string installRoot, IDownloadEventVisitor eventVisitor)
   {
     try
     {
-      eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.NCO));
-
-      var assetUrl = await GetAssetForNcoRelease();
-
-      eventVisitor.Visit(new StartNcoReleaseDownloadEvent(assetUrl));
-
-      using var client = new HttpClient();
-      client.Timeout = Timeout.InfiniteTimeSpan;
-      using var response = await client.GetAsync(
-        assetUrl,
-        HttpCompletionOption.ResponseHeadersRead
+      await WithNcoReleaseArchive(
+        eventVisitor,
+        s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)
       );
-    
-      response.EnsureSuccessStatusCode();
-      await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-      using var zipReader = ReaderFactory.Open(responseStream);
-
-      while (zipReader.MoveToNextEntry())
+      if (OperatingSystem.IsLinux())
       {
-        if (zipReader.Entry.IsDirectory)
-        {
-          continue;
-        }
-
-        foreach (var dataConfig in configService.Config.Games.Where(g => g.Enabled))
-        {
-          if (
-            zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
-          )
-          {
-            ExtractNcoFileFromZip(dataConfig, eventVisitor, configService.Config.NCO.InstallPath!, zipReader);
-          }
-        }
+        MakeEngineBinariesExecutable(installRoot);
       }
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());

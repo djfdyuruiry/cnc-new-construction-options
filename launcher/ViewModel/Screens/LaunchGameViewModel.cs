@@ -2,10 +2,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive;
-using System.Threading.Tasks;
+
+using ReactiveUI;
+
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
-using ReactiveUI;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens;
 
@@ -37,8 +38,8 @@ public class LaunchGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _launchFailed, value);
   }
 
-  public ReactiveCommand<Unit, Unit> LaunchTd { get; }
-  public ReactiveCommand<Unit, Unit> LaunchRa { get; }
+  public ReactiveCommand<EventPattern<object>, Unit> LaunchTd { get; }
+  public ReactiveCommand<EventPattern<object>, Unit> LaunchRa { get; }
 
   public LaunchGameViewModel(LauncherConfigService configService, IScreen hostScreen)
     : base("play-game", hostScreen)
@@ -47,19 +48,17 @@ public class LaunchGameViewModel : ScreenViewModelBase
     Td = configService.Config.TiberianDawn;
     Ra = configService.Config.RedAlert;
 
-    LaunchTd = ReactiveCommand.Create(() =>
+    LaunchTd = ReactiveCommand.Create((EventPattern<object> _) =>
       LaunchGame(configService.Config.TiberianDawn, () => TdProcess, p => TdProcess = p)
     );
 
-    LaunchRa = ReactiveCommand.Create(() => 
-      LaunchGame(configService.Config.TiberianDawn, () => RaProcess, p => RaProcess = p)
+    LaunchRa = ReactiveCommand.Create((EventPattern<object> _)  => 
+      LaunchGame(configService.Config.RedAlert, () => RaProcess, p => RaProcess = p)
     );
   }
 
   private void LaunchGame(GameDataConfig game, Func<Process?> getProcess, Action<Process?> setProcess)
   {
-    LaunchFailed = false;
-
     var existingProcess = getProcess();
 
     if (existingProcess is not null && !existingProcess.HasExited)
@@ -67,27 +66,38 @@ public class LaunchGameViewModel : ScreenViewModelBase
       Console.Error.WriteLine($"WARN: Game '{game.DisplayName}' already running");
       return;
     }
-
+    
     // TODO: Review macos path when NcoReleaseService deploys .app to Applications
-    var binaryName = OperatingSystem.IsWindows()
-      ? $"${game.Binary}.exe"
-      : OperatingSystem.IsMacOS() ? $"/Applications/${game.Binary}.app/Contents/MacOS/${game.Binary}" : game.Binary;
+    LaunchFailed = false;
+    var gameProcess = Process.Start(
+      new ProcessStartInfo
+      {
+        FileName = Path.Join(Nco.InstallPath, game.InstallPostfix, game.PlatformBinary),
+        WorkingDirectory = Path.Join(Nco.InstallPath, game.InstallPostfix),
+        RedirectStandardOutput = true,
+        RedirectStandardError = true
+      }
+    );
 
-    var gameProcessInfo = new ProcessStartInfo
+    if (gameProcess?.HasExited ?? true)
     {
-      FileName = Path.Join(Nco.InstallPath, game.InstallPostfix, binaryName),
-      WorkingDirectory = Path.Join(Nco.InstallPath, game.InstallPostfix),
-      RedirectStandardOutput = true,
-      RedirectStandardError = true
-    };
+      LaunchFailed = true;
+      gameProcess?.Dispose();
 
-    var gameProcess = Process.Start(gameProcessInfo);
+      return;
+    }
 
     setProcess(gameProcess);
 
-    if (gameProcess is null || gameProcess.HasExited)
+    gameProcess.EnableRaisingEvents = true;
+    gameProcess.Exited += (p, _) =>
     {
-      LaunchFailed = true;
-    }
+      var process = p as Process;
+
+      LaunchFailed = (process?.ExitCode ?? -1) != 0;
+
+      process?.Dispose();
+      setProcess(null);
+    };
   }
 }

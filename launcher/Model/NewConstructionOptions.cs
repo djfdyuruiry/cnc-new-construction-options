@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+
 using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
@@ -9,7 +10,7 @@ public class NewConstructionOptions : INotifyPropertyChanged
   private string _installPath;
   private bool _installed;
 
-  private string _newInstallPath;
+  private string _pendingInstallPath;
 
   public GitHubRepo GitHubRepo { get; set; }
   public string Release { get; set; }
@@ -39,12 +40,12 @@ public class NewConstructionOptions : INotifyPropertyChanged
    * to InstallPath when install succeeds.
    */
   [YamlIgnore]
-  public string NewInstallPath
+  public string PendingInstallPath
   {
-    get => _newInstallPath;
+    get => _pendingInstallPath;
     set
     {
-      _newInstallPath = value;
+      _pendingInstallPath = value;
       OnPropertyChanged();
     }
   }

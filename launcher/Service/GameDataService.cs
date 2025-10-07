@@ -251,7 +251,11 @@ public class GameDataService(
     }
   }
 
-  public async Task Download(IDownloadEventVisitor downloadEventVisitor, Action<Bitmap> onSplashScreenLoaded)
+  public async Task Download(
+    string installRoot,
+    IDownloadEventVisitor downloadEventVisitor,
+    Action<Bitmap> onSplashScreenLoaded
+  )
   {
     GameDataConfig? currentGame = null;
 
@@ -263,7 +267,7 @@ public class GameDataService(
       {
         currentGame  = game;
 
-        var installPath = Path.Join(_config.NCO.InstallPath, game.InstallPostfix);
+        var installPath = Path.Join(installRoot, game.InstallPostfix);
 
         DirectoryUtils.CreateDirectoryIfMissing(installPath);
 

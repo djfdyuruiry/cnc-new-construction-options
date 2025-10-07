@@ -26,7 +26,7 @@
         <SelectableTextBlock Classes="p-large" VerticalAlignment="Center" Text="{Binding Nco.InstallPath}"/>
       </StackPanel>
 
-      <TextBox Classes="p-large" Text="{Binding Path=Nco.NewInstallPath, Mode=TwoWay}" Grid.Row="1" Grid.Column="0"/>
+      <TextBox Classes="p-large" Text="{Binding Path=Nco.PendingInstallPath, Mode=TwoWay}" Grid.Row="1" Grid.Column="0"/>
       <Button Classes="nco-button"
               Command="{Binding Browse}"
               Margin="15,0"

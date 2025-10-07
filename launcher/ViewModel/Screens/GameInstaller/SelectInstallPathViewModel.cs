@@ -29,7 +29,7 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
       Nco = configService.Config.NCO;
 
       // default or existing path
-      Nco.NewInstallPath = string.IsNullOrWhiteSpace(Nco.InstallPath) ? paths.AppDataPath : Nco.InstallPath;
+      Nco.PendingInstallPath = string.IsNullOrWhiteSpace(Nco.InstallPath) ? paths.AppDataPath : Nco.InstallPath;
 
       Browse = ReactiveCommand.CreateFromTask(BrowseForInstallPath);
       Next = ReactiveCommand.CreateFromObservable(() =>
@@ -48,7 +48,7 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
 
       if (installFolders.Any())
       {
-        Nco.NewInstallPath = installFolders[0].Path.AbsolutePath;
+        Nco.PendingInstallPath = installFolders[0].Path.AbsolutePath;
       }
     }
   }

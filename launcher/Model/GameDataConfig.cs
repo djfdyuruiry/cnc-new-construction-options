@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -57,6 +58,14 @@ public class GameDataConfig : INotifyPropertyChanged
         .Select(d => d!)
         .ToList()
     );
+
+  [YamlIgnore]
+  public string PlatformBinary =>
+    OperatingSystem.IsWindows()
+      ? $"${Binary}.exe"
+      : OperatingSystem.IsMacOS()
+        ? $"/Applications/${Binary}.app/Contents/MacOS/${Binary}"
+        : Binary;
 
   public event PropertyChangedEventHandler? PropertyChanged;
 

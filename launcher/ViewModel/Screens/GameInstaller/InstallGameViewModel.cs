@@ -1,18 +1,20 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia.Media;
+using DynamicData.Binding;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.ViewModel;
 using CNC.NCO.Launcher.Service;
-using DynamicData.Binding;
+using GitHub.Models;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
@@ -21,6 +23,7 @@ public class InstallGameViewModel : ScreenViewModelBase
   private readonly LauncherConfig _config;
   private readonly GameDataService _gameDataService;
   private readonly NcoReleaseService _releaseService;
+  private readonly PathsConfig _paths;
 
   private IBrush? _backgroundImage;
   private string _installLog;
@@ -94,13 +97,15 @@ public class InstallGameViewModel : ScreenViewModelBase
     IScreen hostScreen,
     LauncherConfigService configService,
     GameDataService gameDataService,
-    NcoReleaseService releaseService
+    NcoReleaseService releaseService,
+    PathsConfig paths
   )
     : base("install-games", hostScreen)
   {
     _config = configService.Config;
     _gameDataService = gameDataService;
     _releaseService = releaseService;
+    _paths = paths;
 
     InstallNotClicked = true;
     IsInstalling = false;
@@ -135,7 +140,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)
           .Where(x => x)
-          .Subscribe(_ => GoToLaunchGameScreen()),
+          .InvokeCommand(ReactiveCommand.Create<bool>(GoToLaunchGameScreen)),
         ReactiveCommand.CreateFromTask(Install)
           .Execute()
           .ObserveOn(RxApp.TaskpoolScheduler)
@@ -144,26 +149,33 @@ public class InstallGameViewModel : ScreenViewModelBase
     );
   }
 
-  private IObservable<IRoutableViewModel> GoToLaunchGameScreen()
-  {
-    _config.NCO.InstallPath = _config.NCO.NewInstallPath;
-    _config.NCO.Installed = true;
-
-    return HostScreen.Router.NavigateTo<LaunchGameViewModel>();
-  }
-
-  public async Task Install()
+  private async Task Install()
   {
     var downloadEventVisitor = new InstallDownloadEventVisitor(this);
 
     await _gameDataService.Download(
+      _config.NCO.PendingInstallPath,
       downloadEventVisitor,
       b => BackgroundImage = new ImageBrush(b)
     );
-    await _releaseService.Download(downloadEventVisitor);
+    await _releaseService.Download(_config.NCO.PendingInstallPath, downloadEventVisitor);
 
     IsInstalling = false;
     InstallFinished = !HasErrored;
+
+    await File.WriteAllTextAsync(Path.Join(_paths.AppDataPath, "install.log"), InstallLog);
   }
 
+  private void GoToLaunchGameScreen(bool isInstalled)
+  {
+    if (!isInstalled)
+    {
+      return;
+    }
+
+    _config.NCO.InstallPath = _config.NCO.PendingInstallPath;
+    _config.NCO.Installed = isInstalled;
+
+    HostScreen.Router.NavigateTo<LaunchGameViewModel>();
+  }
 }
