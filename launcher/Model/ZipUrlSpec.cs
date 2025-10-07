@@ -13,8 +13,6 @@ public class ZipUrlSpec : INotifyPropertyChanged
   public int SortOrder { get; set; }
   public string Name { get; set; }
   public string? DisplayName { get; set; }
-  [YamlIgnore]
-  public string DisplayNameOrName => DisplayName ?? Name;
   public bool Enabled
   {
     get => _enabled;
@@ -27,6 +25,10 @@ public class ZipUrlSpec : INotifyPropertyChanged
   public required string Url { get; set; }
   public required string ProvidesFilesEndingWith { get; set; }
   public string? InfoUrl { get; set; }
+
+  // virtual properties for processing and view models
+  [YamlIgnore]
+  public string DisplayNameOrName => DisplayName ?? Name;
   [YamlIgnore]
   public bool HasInfoUrl => InfoUrl is not null;
   [YamlIgnore]
@@ -39,13 +41,9 @@ public class ZipUrlSpec : INotifyPropertyChanged
     Enabled = true;
   }
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-  {
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
 
-  public override bool Equals(object? obj)
-  {
-    return DisplayNameOrName.Equals((obj as  ZipUrlSpec)?.DisplayNameOrName, StringComparison.Ordinal);
-  }
+  public override bool Equals(object? obj) => 
+    DisplayNameOrName.Equals((obj as  ZipUrlSpec)?.DisplayNameOrName, StringComparison.Ordinal);
 }

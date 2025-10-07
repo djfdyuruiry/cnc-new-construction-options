@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+
 using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
@@ -15,11 +16,7 @@ public class DiscImage : INotifyPropertyChanged
   public int SortOrder { get; set; }
   public string Name { get; set; }
   public string? DisplayName { get; set; }
-  [YamlIgnore]
-  public string DisplayNameOrName => DisplayName ?? Name;
   public bool Required { get; set; }
-  [YamlIgnore]
-  public bool IsOptional => !Required;
   public bool Enabled
   {
     get => _enabled;
@@ -32,6 +29,12 @@ public class DiscImage : INotifyPropertyChanged
   public DiscImageSourceConfig[] Sources { get; set; }
   public string? SplashScreenFile { get; set; }
   public Dictionary<string, List<string>> Provides { get; set; }
+
+  // virtual properties for processing and view models
+  [YamlIgnore]
+  public string DisplayNameOrName => DisplayName ?? Name;
+  [YamlIgnore]
+  public bool IsOptional => !Required;
 
   public DiscImage()
   {
@@ -62,8 +65,6 @@ public class DiscImage : INotifyPropertyChanged
 
   public event PropertyChangedEventHandler? PropertyChanged;
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-  {
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
 }

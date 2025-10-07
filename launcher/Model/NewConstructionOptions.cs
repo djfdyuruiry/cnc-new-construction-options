@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using YamlDotNet.Serialization;
@@ -9,6 +8,8 @@ public class NewConstructionOptions : INotifyPropertyChanged
 {
   private string _installPath;
   private bool _installed;
+
+  private string _newInstallPath;
 
   public GitHubRepo GitHubRepo { get; set; }
   public string Release { get; set; }
@@ -33,6 +34,21 @@ public class NewConstructionOptions : INotifyPropertyChanged
     }
   }
 
+  /**
+   * Virtual property by installer flow to hold path in a temp variable, commited
+   * to InstallPath when install succeeds.
+   */
+  [YamlIgnore]
+  public string NewInstallPath
+  {
+    get => _newInstallPath;
+    set
+    {
+      _newInstallPath = value;
+      OnPropertyChanged();
+    }
+  }
+
   public event PropertyChangedEventHandler? PropertyChanged;
 
   public NewConstructionOptions()
@@ -41,8 +57,6 @@ public class NewConstructionOptions : INotifyPropertyChanged
     _installed = false;
   }
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-  {
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
 }

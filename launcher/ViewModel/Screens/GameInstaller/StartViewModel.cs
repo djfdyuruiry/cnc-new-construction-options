@@ -8,14 +8,11 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class StartViewModel : ScreenViewModelBase
 {
-  public bool IsInstalled { get; }
   public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
   
-  public StartViewModel(LauncherConfigService configService, IScreen hostScreen)
+  public StartViewModel(IScreen hostScreen)
     : base("start-installer", hostScreen)
   {
-    IsInstalled = configService.Config.NCO.Installed;
-
     Next = ReactiveCommand.CreateFromObservable(() => 
       HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()
     );

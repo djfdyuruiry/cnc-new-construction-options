@@ -43,6 +43,7 @@ public class GameDataConfig : INotifyPropertyChanged
     }
   }
 
+  // virtual properties for processing and view models
   [YamlIgnore]
   public Dictionary<string, List<DiscImageSource>> DiscImagesBySource => DiscImages
     .SelectMany(x => x.Sources.Select(s => s.Name))
@@ -63,8 +64,6 @@ public class GameDataConfig : INotifyPropertyChanged
     Enabled = true;
   }
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-  {
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-  }
 }
