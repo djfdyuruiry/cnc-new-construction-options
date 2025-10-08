@@ -10,7 +10,7 @@
                      Title="CNC: New Construction Options"
                      Width="1024"
                      Height="768"
-                     CanResize="False"
+                     WindowStartupLocation="CenterScreen"
                      mc:Ignorable="d"
                      d:DesignWidth="1024"
                      d:DesignHeight="768">
