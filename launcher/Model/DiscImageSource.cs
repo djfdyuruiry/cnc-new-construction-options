@@ -5,16 +5,17 @@ using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
 
-public class DiscImageSource
+public class DiscImageSource(DiscImage image)
 {
-  public int SortOrder { get; set; }
-  public string Name { get; set; }
-  public string? DisplayName { get; set; }
-  public bool Enabled { get; set; }
+  public int SortOrder => image.SortOrder;
+  public string Name => image.Name;
+  public string? DisplayName => image.DisplayName;
+  public bool Enabled => image.Enabled;
   public DiscImageSourceConfig Config { get; set; }
   public GameDataConfig Game { get; set; }
-  public string? SplashScreenFile { get; set; }
-  public Dictionary<string, List<string>> Provides  { get; set; }
+  public string? SplashScreenFile => image.SplashScreenFile;
+  public string? SetupPackageFile => image.SetupPackageFile;
+  public Dictionary<string, List<string>> Provides => image.Provides;
 
   // virtual properties for processing and view models
   [YamlIgnore]

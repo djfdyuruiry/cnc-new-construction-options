@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -13,8 +14,14 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
   public class SelectInstallPathViewModel : ScreenViewModelBase
   {
     private readonly IStorageProvider _storageProvider;
+    private NewConstructionOptions _nco;
 
-    public NewConstructionOptions Nco { get; }
+    public NewConstructionOptions Nco
+    {
+      get => _nco;
+      set => this.RaiseAndSetIfChanged(ref _nco, value);
+    }
+
     public ReactiveCommand<Unit, Unit> Browse { get; }
     public ReactiveCommand<Unit, IRoutableViewModel> Next { get; }
 
@@ -26,15 +33,18 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
     ) : base("select-install-path", hostScreen)
     {
       _storageProvider = hostWindow.StorageProvider;
-      Nco = configService.Config.NCO;
-
-      // default or existing path
-      Nco.PendingInstallPath = string.IsNullOrWhiteSpace(Nco.InstallPath) ? paths.AppDataPath : Nco.InstallPath;
 
       Browse = ReactiveCommand.CreateFromTask(BrowseForInstallPath);
       Next = ReactiveCommand.CreateFromObservable(() =>
         HostScreen.Router.NavigateTo<SelectGameDataViewModel>()
       );
+
+      SafeWhenNavigatedTo(() =>
+      {
+        Nco = configService.Config.NCO;
+        // default or existing path
+        Nco.PendingInstallPath = string.IsNullOrWhiteSpace(Nco.InstallPath) ? paths.AppDataPath : Nco.InstallPath;
+      });
     }
 
     private async Task BrowseForInstallPath()

@@ -6,6 +6,8 @@ namespace CNC.NCO.Launcher.Model;
 
 public class LauncherConfig
 {
+  [YamlMember(Alias = "$schema")]
+  public string Schema { get; set; }
   public NewConstructionOptions NCO { get; set; }
   public GameDataConfig TiberianDawn { get; set; }
   public GameDataConfig RedAlert { get; set; }

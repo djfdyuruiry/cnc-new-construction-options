@@ -48,7 +48,7 @@
               <StackPanel>
                 <CheckBox Classes="node"
                           Content="{Binding DisplayNameOrName}"
-                          IsChecked="{Binding Path=Enabled, Mode=TwoWay }"
+                          IsChecked="{Binding Path=Enabled, Mode=TwoWay}"
                           Margin="5"/>
                 <HyperlinkButton IsVisible="{Binding HasInfoUrl}"
                                  NavigateUri="{Binding InfoUrl}">
@@ -64,7 +64,7 @@
       <StackPanel Grid.Row="0" Grid.Column="1">
         <CheckBox Classes="header"
                   Content="{Binding Config.RedAlert.DisplayName}"
-                  IsChecked="{Binding Path=Config.RedAlert.Enabled, Mode=TwoWay }"/>
+                  IsChecked="{Binding Path=Config.RedAlert.Enabled, Mode=TwoWay}"/>
         <ItemsControl ItemsSource="{Binding Path=Config.RedAlert.OrderedDiscImages, Mode=TwoWay}"
                       IsEnabled="{Binding Config.RedAlert.Enabled}">
           <ItemsControl.ItemTemplate>
@@ -72,7 +72,7 @@
               <CheckBox Classes="node"
                         Content="{Binding DisplayNameOrName}"
                         IsEnabled="{Binding IsOptional}"
-                        IsChecked="{Binding Path=Enabled, Mode=TwoWay }" Margin="5"/>
+                        IsChecked="{Binding Path=Enabled, Mode=TwoWay}" Margin="5"/>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -93,7 +93,7 @@
               <StackPanel>
                 <CheckBox Classes="node"
                           Content="{Binding DisplayNameOrName}"
-                          IsChecked="{Binding Path=Enabled, Mode=TwoWay }"
+                          IsChecked="{Binding Path=Enabled, Mode=TwoWay}"
                           Margin="5"/>
                 <HyperlinkButton IsVisible="{Binding HasInfoUrl}"
                                  NavigateUri="{Binding InfoUrl}">

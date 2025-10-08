@@ -28,6 +28,7 @@ public class DiscImage : INotifyPropertyChanged
   }
   public DiscImageSourceConfig[] Sources { get; set; }
   public string? SplashScreenFile { get; set; }
+  public string? SetupPackageFile { get; set; }
   public Dictionary<string, List<string>> Provides { get; set; }
 
   // virtual properties for processing and view models
@@ -35,6 +36,10 @@ public class DiscImage : INotifyPropertyChanged
   public string DisplayNameOrName => DisplayName ?? Name;
   [YamlIgnore]
   public bool IsOptional => !Required;
+  [YamlIgnore]
+  public bool HasSplashScreenFile => string.IsNullOrWhiteSpace(SplashScreenFile);
+  [YamlIgnore]
+  public bool HasSetupPackageFile => string.IsNullOrWhiteSpace(SetupPackageFile);
 
   public DiscImage()
   {
@@ -49,16 +54,10 @@ public class DiscImage : INotifyPropertyChanged
       s => s
     ).ToDictionary(
       s => s.Key,
-      s => new DiscImageSource
+      s => new DiscImageSource(this)
       {
-        SortOrder = SortOrder,
-        Name = Name,
-        DisplayName = DisplayName,
-        Enabled = Enabled,
         Config = s.Value,
-        Game = gameDataConfig,
-        SplashScreenFile = SplashScreenFile,
-        Provides = Provides
+        Game = gameDataConfig
       }
     );
   }

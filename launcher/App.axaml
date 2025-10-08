@@ -8,33 +8,38 @@
         <Style Selector="TextBlock.h1">
           <Setter Property="FontWeight" Value="Bold"/>
           <Setter Property="FontSize" Value="34"/>
-          <Setter Property="TextWrapping" Value="Wrap"/>
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
 
         <Style Selector="TextBlock.h2">
           <Setter Property="FontWeight" Value="Bold"/>
           <Setter Property="FontSize" Value="22"/> 
-          <Setter Property="TextWrapping" Value="Wrap"/>
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
     
         <Style Selector="SelectableTextBlock.p-large">
           <Setter Property="FontSize" Value="22"/>
-          <Setter Property="TextWrapping" Value="Wrap"/>
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
     
         <Style Selector="TextBlock.p-large">
           <Setter Property="FontSize" Value="22"/>
-          <Setter Property="TextWrapping" Value="Wrap"/>
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
     
         <Style Selector="TextBox.p-large">
           <Setter Property="FontSize" Value="22"/>
-          <Setter Property="TextWrapping" Value="Wrap"/>
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
 
+        <Style Selector="SelectableTextBlock.p">
+          <Setter Property="FontSize" Value="18"/>  
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
+        </Style>
+  
         <Style Selector="TextBlock.p">
           <Setter Property="FontSize" Value="18"/>  
-          <Setter Property="TextWrapping" Value="Wrap"/>
+          <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
         
         <Style Selector="CheckBox.header">

@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive;
-
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
@@ -15,8 +14,13 @@ public class LaunchGameViewModel : ScreenViewModelBase
   private Process? _tdProcess;
   private Process? _raProcess;
   private bool _launchFailed;
+  private LauncherConfig _config;
 
-  public LauncherConfig Config { get; }
+  public LauncherConfig Config
+  {
+    get => _config;
+    set => this.RaiseAndSetIfChanged(ref _config, value);
+  }
 
   public Process? TdProcess
   {
@@ -42,7 +46,6 @@ public class LaunchGameViewModel : ScreenViewModelBase
   public LaunchGameViewModel(LauncherConfigService configService, IScreen hostScreen)
     : base("play-game", hostScreen)
   {
-    Config = configService.Config;
     LaunchFailed = false;
 
     LaunchTd = ReactiveCommand.Create((EventPattern<object> _) =>
@@ -51,6 +54,10 @@ public class LaunchGameViewModel : ScreenViewModelBase
 
     LaunchRa = ReactiveCommand.Create((EventPattern<object> _)  => 
       LaunchGame(Config.RedAlert, () => RaProcess, p => RaProcess = p)
+    );
+
+    SafeWhenNavigatedTo(() =>
+      Config = configService.Config
     );
   }
 

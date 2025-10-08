@@ -1,17 +1,21 @@
-using System;
-using System.Collections.ObjectModel;
 using System.Reactive;
 
-using CNC.NCO.Launcher.Config;
 using ReactiveUI;
 
+using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class SelectGameDataViewModel : ScreenViewModelBase
 {
-  public LauncherConfig Config { get; }
+  private LauncherConfig _config;
+
+  public LauncherConfig Config
+  {
+    get => _config;
+    set => this.RaiseAndSetIfChanged(ref _config, value);
+  }
 
   public ReactiveCommand<Unit, IRoutableViewModel> Back { get; }
 
@@ -20,15 +24,15 @@ public class SelectGameDataViewModel : ScreenViewModelBase
   public SelectGameDataViewModel(LauncherConfigService configService, IScreen hostScreen)
     : base("select-games", hostScreen)
   {
-    Config = configService.Config;
-
-    throw new Exception("Oh shit!");
-    
     Back = ReactiveCommand.CreateFromObservable(() => 
       HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()
     );
     Next = ReactiveCommand.CreateFromObservable(() => 
       HostScreen.Router.NavigateTo<InstallGameViewModel>()
+    );
+
+    this.SafeWhenNavigatedTo(() =>
+      Config = configService.Config
     );
   }
 }

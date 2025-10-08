@@ -21,12 +21,10 @@ namespace CNC.NCO.Launcher.Service;
 // TODO: Support macos .app extract and install in Applications (plus data paths outside of app bundle)
 public class NcoReleaseService(LauncherConfigService configService)
 {
-  private readonly LauncherConfig _config = configService.Config;
-
   [SupportedOSPlatform("linux")]
   private void MakeEngineBinariesExecutable(string installRoot)
   {
-    foreach (var game in _config.Games.Where(g => g.Enabled))
+    foreach (var game in configService.Config.Games.Where(g => g.Enabled))
     {
       var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
 
@@ -70,7 +68,7 @@ public class NcoReleaseService(LauncherConfigService configService)
         continue;
       }
 
-      foreach (var dataConfig in _config.EnabledGames)
+      foreach (var dataConfig in configService.Config.EnabledGames)
       {
         if (
           zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
@@ -88,7 +86,7 @@ public class NcoReleaseService(LauncherConfigService configService)
       RequestAdapter.Create(new AnonymousAuthenticationProvider())
     );
 
-    var ncoConfig = _config.NCO;
+    var ncoConfig = configService.Config.NCO;
     var ncoRelease = await githubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
       .Releases
       .Tags[ncoConfig.Release]
@@ -112,7 +110,7 @@ public class NcoReleaseService(LauncherConfigService configService)
     Action<Stream> responseHandler
   )
   {
-    eventVisitor.Visit(new FetchNcoReleaseEvent(_config.NCO));
+    eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.NCO));
 
     var assetUrl = await GetAssetForNcoRelease();
 
@@ -150,8 +148,7 @@ public class NcoReleaseService(LauncherConfigService configService)
     }
     catch (Exception e)
     {
-      eventVisitor.Visit(new DownloadNcoReleaseErrorEvent(e.Message));
+      eventVisitor.Visit(new DownloadNcoReleaseErrorEvent(e));
     }
   }
 }
-

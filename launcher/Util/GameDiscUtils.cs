@@ -12,19 +12,30 @@ namespace CNC.NCO.Launcher.Util;
 
 public class GameDiscUtils
 {
-  private static async Task<Stream?> GetStreamForSetupPackageFile(CDReader iso, string name)
+  private static async Task<Stream?> GetStreamForSetupPackageFile(
+    CDReader iso,
+    string? setupPackagePath,
+    string fileName
+  )
   {
-    await using var setupStream = iso.OpenFile(@"INSTALL\SETUP.Z", FileMode.Open);
-    using var setupPackage = new InstallShieldPackage(setupStream, "SETUP.Z");
+    if (string.IsNullOrWhiteSpace(setupPackagePath) || !iso.FileExists(setupPackagePath))
+    {
+      return null;
+    }
+
+    await using var setupStream = iso.OpenFile(setupPackagePath, FileMode.Open);
+    using var setupPackage = new InstallShieldPackage(setupStream, setupPackagePath.Split(@"\").Last());
 
     return setupPackage.Contents
-      .Where(p => p.EndsWith(name)).Select(p => setupPackage.GetStream(p))
+      .Where(p => p.EndsWith(fileName))
+      .Select(p => setupPackage.GetStream(p))
       .FirstOrDefault();
   }
 
   public static async Task ExtractFile(
     CDReader iso,
     IDownloadEventVisitor downloadEventVisitor,
+    string? setupPackagePath,
     string isoOrSetupPath,
     string outputPath
   )
@@ -33,9 +44,25 @@ public class GameDiscUtils
     {
       Console.WriteLine($"Extracting {isoOrSetupPath} to {outputPath}");
 
-      await using var sourceFileStream = iso.FileExists(isoOrSetupPath)
+      if (!string.IsNullOrWhiteSpace(setupPackagePath) && !iso.FileExists(setupPackagePath))
+      {
+        throw new Exception($"ISO image does not contain required setup package file: {setupPackagePath}");
+      }
+      
+      var isIsoFile = iso.FileExists(isoOrSetupPath);
+
+      await using var sourceFileStream = isIsoFile
         ? iso.OpenFile(isoOrSetupPath, FileMode.Open)
-        : (await GetStreamForSetupPackageFile(iso, isoOrSetupPath))!;
+        : await GetStreamForSetupPackageFile(iso, setupPackagePath, isoOrSetupPath);
+
+      if (sourceFileStream is null)
+      {
+        throw new Exception(
+          isIsoFile
+            ? "File not found in ISO image"
+            : $"File not found in ISO setup package file: {setupPackagePath}"
+        );
+      }
 
       await using var outputStream = File.Open(outputPath, FileMode.Create);
       await sourceFileStream.CopyToAsync(outputStream);
@@ -44,8 +71,7 @@ public class GameDiscUtils
     }
     catch (Exception ex)
     {
-      throw new Exception($"Error extracting {isoOrSetupPath} to {outputPath}: {ex.Message}");
+      throw new Exception($"Error extracting {isoOrSetupPath} to {outputPath}", ex);
     }
   }
-
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Model.ViewModel;

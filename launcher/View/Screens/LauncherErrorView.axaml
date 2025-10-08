@@ -10,20 +10,17 @@
                           mc:Ignorable="d"
                           d:DesignWidth="1024"
                           d:DesignHeight="740">
-  <Grid RowDefinitions="Auto,Auto,*">
+  <Grid RowDefinitions="Auto,*">
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0">
       <Image Source="avares://CNC.NCO.Launcher/img/error.png" Width="30" Height="30"/>
       <TextBlock Classes="h1" Margin="5,0,0,0">
         NCO Launcher Error
       </TextBlock>
     </StackPanel>
-    <!-- BUG: Not wrapping -->
-    <TextBlock Classes="p-large"
-               Text="{Binding Error.Message}"
-               Margin="0,15,0,0"
-               Grid.Row="1"/>
-    <TextBlock Text="{Binding Error.StackTrace}"
-               Margin="0,15,0,0"
-               Grid.Row="2"/>
+    <ScrollViewer AllowAutoHide="False" Grid.Row="1">
+      <SelectableTextBlock Classes="p"
+                 Text="{Binding Error}"
+                 Margin="0,15,0,0"/>
+    </ScrollViewer>
   </Grid>
 </rxui:ReactiveUserControl>

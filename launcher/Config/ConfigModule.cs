@@ -12,9 +12,8 @@ public class ConfigModule : Module
       AppContext.BaseDirectory, 
       Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
     );
-    var configService = new LauncherConfigService(pathsConfig);
 
     builder.RegisterInstance(pathsConfig).SingleInstance().AsSelf();
-    builder.RegisterInstance(configService).SingleInstance().AsSelf();
+    builder.RegisterType<LauncherConfigService>().SingleInstance().AsSelf();
   }
 }

@@ -28,6 +28,9 @@ public class InstallGameViewModel : ScreenViewModelBase
   private IBrush? _backgroundImage;
   private bool _hasErrored;
   private bool _installFinished;
+  private IList<ItemToBeInstalled<DiscImageSource>> _discImages;
+  private IList<ItemToBeInstalled<ZipUrlSpec>> _modsAndAddons;
+  private ItemToBeInstalled<NewConstructionOptions> _nco;
 
   public bool IsInstalling
   {
@@ -59,11 +62,23 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _installFinished, value);
   }
 
-  public IList<ItemToBeInstalled<DiscImageSource>> DiscImages { get; }
+  public IList<ItemToBeInstalled<DiscImageSource>> DiscImages
+  {
+    get => _discImages;
+    set => this.RaiseAndSetIfChanged(ref _discImages, value);
+  }
 
-  public IList<ItemToBeInstalled<ZipUrlSpec>> ModsAndAddons { get; }
-  
-  public ItemToBeInstalled<NewConstructionOptions> Nco { get; }
+  public IList<ItemToBeInstalled<ZipUrlSpec>> ModsAndAddons
+  {
+    get => _modsAndAddons;
+    set => this.RaiseAndSetIfChanged(ref _modsAndAddons, value);
+  }
+
+  public ItemToBeInstalled<NewConstructionOptions> Nco
+  {
+    get => _nco;
+    set => this.RaiseAndSetIfChanged(ref _nco, value);
+  }
 
   public InstallGameViewModel(
     IScreen hostScreen,
@@ -81,16 +96,21 @@ public class InstallGameViewModel : ScreenViewModelBase
     InstallFinished = false;
     HasErrored = false;
 
-    DiscImages = configService.Config.EnabledDiscImageSources 
-      .Select(ItemToBeInstalled<DiscImageSource>.Build)
-      .ToList();
-    ModsAndAddons = configService.Config.EnabledZipUrlSpecs
-      .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
-      .ToList();
-    Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
+    SafeWhenNavigatedTo(() =>
+    {
+      DiscImages = configService.Config
+        .EnabledDiscImageSources 
+        .Select(ItemToBeInstalled<DiscImageSource>.Build)
+        .ToList();
 
-    this.WhenNavigatedTo(() =>
-      new CompositeDisposable(
+      ModsAndAddons = configService.Config
+        .EnabledZipUrlSpecs
+        .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
+        .ToList();
+
+      Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
+
+      return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)
           .Where(x => x)
           .InvokeCommand(ReactiveCommand.Create<bool>(GoToLaunchGameScreen)),
@@ -98,8 +118,8 @@ public class InstallGameViewModel : ScreenViewModelBase
           .Execute()
           .ObserveOn(RxApp.TaskpoolScheduler)
           .Subscribe()
-      )
-    );
+      );
+    });
   }
 
   private async Task Install()

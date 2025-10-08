@@ -27,6 +27,7 @@ TiberianDawn:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
           File: CNC95_GDI.iso
       SplashScreenFile: SETUP.BMP
+      SetupPackageFile: INSTALL\\SETUP.Z
       Provides:
         _root:
           - CCLOCAL.MIX
@@ -53,6 +54,7 @@ TiberianDawn:
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
           File: CNC95_Nod.iso
       SplashScreenFile: SETUP.BMP
+      SetupPackageFile: INSTALL\\SETUP.Z
       Provides:
         NOD:
           - GENERAL.MIX

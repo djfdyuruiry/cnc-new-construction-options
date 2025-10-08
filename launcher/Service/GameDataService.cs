@@ -24,8 +24,6 @@ public class GameDataService(
   PathsConfig paths
 )
 {
-  private readonly LauncherConfig _config = configService.Config;
-
   private void ZipUrlStreamHandler(
     ZipUrlSpec spec,
     IDownloadEventVisitor downloadEventVisitor,
@@ -113,7 +111,9 @@ public class GameDataService(
         var fileName = file.Split(@"\").Last();
         var destPath = Path.Join(outDir, fileName.ToLower());
 
-        await GameDiscUtils.ExtractFile(iso, downloadEventVisitor, file, destPath);
+        await GameDiscUtils.ExtractFile(
+          iso, downloadEventVisitor, source.SetupPackageFile, file, destPath
+        );
       }
     }
   }
@@ -261,9 +261,9 @@ public class GameDataService(
     {
       DirectoryUtils.CreateDirectoryIfMissing(paths.CachePath);
 
-      foreach (var game in _config.EnabledGames)
+      foreach (var game in configService.Config.EnabledGames)
       {
-        currentGame  = game;
+        currentGame = game;
 
         var installPath = Path.Join(installRoot, game.InstallPostfix);
 
@@ -283,9 +283,8 @@ public class GameDataService(
     }
     catch (Exception ex)
     {
-      downloadEventVisitor.Visit(new DownloadGameDataErrorEvent(currentGame, ex.Message));
+      downloadEventVisitor.Visit(new DownloadGameDataErrorEvent(currentGame, ex));
     }
- }
-
+  }
 }
 

@@ -7,8 +7,6 @@ using Avalonia.ReactiveUI;
 using DynamicData.Binding;
 using ReactiveUI;
 
-using CNC.NCO.Launcher.ViewModel;
-using CNC.NCO.Launcher.ViewModel.Screens;
 using CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 namespace CNC.NCO.Launcher.View.Screens.GameInstaller;

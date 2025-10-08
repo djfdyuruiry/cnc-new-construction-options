@@ -39,7 +39,6 @@ public class GameDataConfig : INotifyPropertyChanged
     get => _enabled;
     set
     {
-      if (value == _enabled) return;
       _enabled = value;
       OnPropertyChanged();
     }
@@ -48,6 +47,12 @@ public class GameDataConfig : INotifyPropertyChanged
   // virtual properties for processing and view models
   [YamlIgnore]
   public IList<DiscImage> OrderedDiscImages => DiscImages.OrderBy(d => d.SortOrder).ToList();
+
+  [YamlIgnore]
+  public IList<DiscImage> EnabledDiscImages => 
+    DiscImages.Where(d => d.Enabled)
+      .OrderBy(d => d.SortOrder)
+      .ToList();
 
   [YamlIgnore]
   public IDictionary<string, IList<DiscImageSource>> DiscImagesBySource => DiscImages
@@ -63,13 +68,12 @@ public class GameDataConfig : INotifyPropertyChanged
     );
 
   [YamlIgnore]
-  public IDictionary<string, IList<DiscImageSource>> EnabledDiscImagesBySource => DiscImages
-    .Where(d => d.Enabled)
+  public IDictionary<string, IList<DiscImageSource>> EnabledDiscImagesBySource => EnabledDiscImages
     .SelectMany(x => x.Sources.Select(s => s.Name))
     .Distinct()
     .ToDictionary(
       p => p,
-      IList<DiscImageSource> (p) => OrderedDiscImages
+      IList<DiscImageSource> (p) => EnabledDiscImages
         .Select(d => d.BuildSources(this).GetValueOrDefault(p))
         .Where(d => d is not null)
         .Select(d => d!)

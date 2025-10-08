@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 
 using YamlDotNet.Serialization;
 
@@ -9,14 +10,48 @@ namespace CNC.NCO.Launcher.Config;
 
 public class LauncherConfigService
 {
-  private readonly PathsConfig _paths;
+  private static readonly Mutex SetConfigMutex = new();
 
-  public LauncherConfig Config { get; private set;  }
+  private readonly PathsConfig _paths;
+  private LauncherConfig? _config;
+
+  /// <summary>
+  /// <para>
+  /// - Lazy loaded thread-safe shared config instance intended to
+  /// be used throughout the lifetime of a service instance
+  /// </para>
+  /// - Ensures any issues with YAML deserialization only bubble up
+  /// when properties in LauncherConfig are required
+  /// <para>
+  /// - Do not access this directly in a constructor, reference in methods
+  /// or callbacks instead
+  /// </para>
+  /// </summary>
+  public LauncherConfig Config
+  {
+    get
+    {
+      if (_config is not null)
+      {
+        return _config;
+      }
+
+      try
+      {
+        SetConfigMutex.WaitOne();
+
+        return _config ??= LoadFromUserOrDefaultConfig();
+      }
+      finally
+      {
+        SetConfigMutex.ReleaseMutex();
+      }
+    }
+  }
 
   public LauncherConfigService(PathsConfig paths)
   {
     _paths = paths;
-    RefreshFromUserOrDefaultConfig();
   }
 
   private LauncherConfig LoadFromFile(string filePath)
@@ -31,25 +66,25 @@ public class LauncherConfigService
     }
     catch (Exception ex)
     {
-      throw new InvalidOperationException(
+      throw new Exception(
         $"Failed to load configuration from {filePath}",
         ex
       );
     }
   }
 
-  public void RefreshFromUserOrDefaultConfig()
+  public LauncherConfig LoadFromUserOrDefaultConfig()
   {
     try
     {
       // Try to load from app data directory first
-      Config = LoadFromFile(
+      return LoadFromFile(
         File.Exists(_paths.UserConfigYamlPath) ? _paths.UserConfigYamlPath : _paths.ConfigYamlPath
       );
     }
     catch (Exception ex)
     {
-      throw new InvalidOperationException(
+      throw new Exception(
         $"Failed to load configuration from {_paths.ConfigYamlPath} or {_paths.UserConfigYamlPath}",
         ex
       );
@@ -58,6 +93,11 @@ public class LauncherConfigService
 
   public void SaveUserConfig()
   {
+    if (_config is null)
+    {
+      throw new InvalidOperationException("Attempted to save user config, but it has not been loaded yet");
+    }
+
     try
     {
       Directory.CreateDirectory(
@@ -66,13 +106,13 @@ public class LauncherConfigService
 
       var yaml = new SerializerBuilder()
         .Build()
-        .Serialize(Config);
+        .Serialize(_config);
 
       File.WriteAllText(_paths.UserConfigYamlPath, yaml);
     }
     catch (Exception ex)
     {
-      throw new InvalidOperationException(
+      throw new Exception(
         $"Failed to save configuration to {_paths.UserConfigYamlPath}",
         ex
       );

@@ -1,11 +1,12 @@
 using System;
 using System.Reactive;
+
 using Autofac;
 using ReactiveUI;
+using Splat;
 
 using CNC.NCO.Launcher.ViewModel;
 using CNC.NCO.Launcher.ViewModel.Screens;
-using Splat;
 
 namespace CNC.NCO.Launcher;
 

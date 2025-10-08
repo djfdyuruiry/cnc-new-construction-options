@@ -1,4 +1,5 @@
 using System;
+
 using ReactiveUI;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens;
