@@ -140,7 +140,8 @@ RedAlert:
           - MAIN.MIX
   # TODO: SplashScreenUrl, pull image from internet for display during install
   ZipUrls:
-    - Name: TheLostFiles
+    - SortOrder: 1
+      Name: TheLostFiles
       DisplayName:
         The Lost Files ('Counterstrike'/'The Aftermath' Cutscenes)
       Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip

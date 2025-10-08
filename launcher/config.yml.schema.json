@@ -23,9 +23,18 @@
         },
         "AssetPrefix": {
           "type": "string"
+        },
+        "MsvcRuntimeUrl": {
+          "type": "string"
+        },
+        "InstallPath": {
+          "type": "string"
+        },
+        "Installed": {
+          "type": "boolean"
         }
       },
-      "required": ["GitHubRepo", "Release", "AssetPrefix"]
+      "required": ["GitHubRepo", "Release", "AssetPrefix", "MsvcRuntimeUrl"]
     },
     "TiberianDawn": {
       "$ref": "#/definitions/GameDataConfig"
@@ -99,6 +108,9 @@
               "SplashScreenFile": {
                 "type": "string"
               },
+              "SetupPackageFile": {
+                "type": "string"
+              },
               "Provides": {
                 "type": "object",
                 "patternProperties": {
@@ -140,7 +152,7 @@
                 "format": "uri"
               }
             },
-            "required": ["Name", "Url", "ProvidesFilesEndingWith"]
+            "required": ["SortOrder", "Name", "Url", "ProvidesFilesEndingWith"]
           }
         }
       },
