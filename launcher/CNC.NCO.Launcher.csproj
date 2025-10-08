@@ -6,6 +6,16 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Version>0.1.0</Version>
+    <Title>NCO Launcher</Title>
+    <Authors>djfdyuruiry</Authors>
+    <Description>Cross platform UI for installing the New Construction Options game engine and required game data; also provides a game launcher.</Description>
+    <PackageProjectUrl>https://github.com/djfdyuruiry/cnc-new-construction-options</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/djfdyuruiry/cnc-new-construction-options</RepositoryUrl>
+    <Company>com.github.djfdyuruiry.cnc-new-construction-options</Company>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <FileVersion>0.1.0</FileVersion>
+    <NeutralLanguage>en-IE</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

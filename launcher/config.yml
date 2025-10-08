@@ -1,3 +1,6 @@
+# yaml-language-server: $schema=./config.yml.schema.json
+$schema: config.yml.schema.json
+
 NCO:
   GitHubRepo:
     Owner: djfdyuruiry
