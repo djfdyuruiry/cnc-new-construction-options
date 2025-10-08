@@ -1,8 +1,9 @@
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -19,14 +20,20 @@ public partial class InstallGameView : ReactiveUserControl<InstallGameViewModel>
 
     this.WhenActivated(d =>
     {
+      BackgroundShaderGrid.Background = new SolidColorBrush(
+        Equals("Dark", Application.Current?.ActualThemeVariant.Key)
+          ? Colors.Black
+          : Colors.White
+      );
+
       if (ViewModel is null)
       {
         return;
       }
 
-      ViewModel.WhenPropertyChanged(vm => vm.InstallLog)
+      ViewModel.WhenValueChanged(x => x.InstallLog)
         .ObserveOn(RxApp.MainThreadScheduler)
-        .Subscribe(p =>
+        .Subscribe(_ =>
           this.GetControl<ScrollViewer>("InstallLogViewer").ScrollToEnd()
         )
         .DisposeWith(d);

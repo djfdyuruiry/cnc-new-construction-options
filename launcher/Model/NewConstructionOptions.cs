@@ -35,6 +35,8 @@ public class NewConstructionOptions : INotifyPropertyChanged
     }
   }
 
+  public string MsvcRuntimeUrl { get; set; }
+
   /**
    * Virtual property by installer flow to hold path in a temp variable, commited
    * to InstallPath when install succeeds.

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-
+using System.Runtime.Versioning;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Model.ViewModel;
@@ -21,8 +21,23 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   public void Visit(ConvertDiscImageEvent e) =>
     AppendToInstallLog($"Converting disc image to ISO format: {e.Image.Config.File}");
 
-  public void Visit(StartDiscImageDownloadEvent e) => 
+  public void Visit(StartDiscImageDownloadEvent e)
+  {
     AppendToInstallLog($"Downloading disc image: {e.Image.Config.File}");
+    
+    _currentDiscImage = host.DiscImages.FirstOrDefault(d => Equals(d.Item, e.Image));
+
+    if (_currentDiscImage is null)
+    {
+      Console.Error.WriteLine(
+        $"WARN: {nameof(StartDiscImageFileScanEvent)} received with disc image {e.Image.Config.File} " +
+        $"that was not found in view model property '{nameof(host.DiscImages)}'"
+      );
+      return;
+    }
+
+    _currentDiscImage.Installing = true;
+  }
 
   public void Visit(WriteGameDataFileEvent e) =>
     AppendToInstallLog($"Writing game data file: {e.File} to {e.DestPath}");
@@ -126,6 +141,10 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     host.Nco.Installing = false;
     host.Nco.Errored = false;
   }
+
+  [SupportedOSPlatform("windows")]
+  public void Visit(FetchMsvcRuntimeEvent e) =>
+    AppendToInstallLog("Ensuring MSVC runtime is installed - please accept any UAC prompts");
 
   // error handling
   public void Visit(DownloadGameDataErrorEvent e)

@@ -43,13 +43,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="tools\bin2iso.exe">
+    <None Update="tools\runtimes\osx\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\bin2iso-linux">
+    <None Update="tools\runtimes\osx\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\bin2iso-macos">
+    <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Link="tools\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config.yml">

@@ -12,9 +12,7 @@ public class Bin2IsoService(PathsConfig paths)
 {
   private string OsBin2IsoPath => Path.Join(
     paths.ToolsPath,
-    OperatingSystem.IsWindows() 
-      ? "bin2iso.exe"
-      : (OperatingSystem.IsMacOS() ? "bin2iso-macos" : "bin2iso-linux")
+    OperatingSystem.IsWindows() ? "bin2iso.exe" : "bin2iso"
   );
 
   public async Task<int> CallBin2Iso(string[] cliParameters)

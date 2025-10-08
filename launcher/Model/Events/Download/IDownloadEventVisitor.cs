@@ -1,3 +1,5 @@
+using System.Runtime.Versioning;
+
 namespace CNC.NCO.Launcher.Model.Events.Download;
 
 public interface IDownloadEventVisitor : IVisitor
@@ -21,5 +23,7 @@ public interface IDownloadEventVisitor : IVisitor
   void Visit(FetchNcoReleaseEvent e);
   void Visit(StartNcoReleaseDownloadEvent e);
   void Visit(FinishNcoReleaseDownloadEvent e);
+  [SupportedOSPlatform("windows")]
+  void Visit(FetchMsvcRuntimeEvent e);
   void Visit(DownloadNcoReleaseErrorEvent e);
 }

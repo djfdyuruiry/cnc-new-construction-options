@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -21,6 +22,46 @@ namespace CNC.NCO.Launcher.Service;
 // TODO: Support macos .app extract and install in Applications (plus data paths outside of app bundle)
 public class NcoReleaseService(LauncherConfigService configService)
 {
+  [SupportedOSPlatform("windows")]
+  private async Task InstallMsvcRuntime(IDownloadEventVisitor eventVisitor)
+  {
+    eventVisitor.Visit(new FetchMsvcRuntimeEvent());
+
+    var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".exe");
+
+    using var client = new HttpClient();
+    var response = await client.GetAsync(configService.Config.NCO.MsvcRuntimeUrl);
+
+    response.EnsureSuccessStatusCode();
+
+    await using (var fileStream = new FileStream(tempFile, FileMode.Create))
+    {
+      await response.Content.CopyToAsync(fileStream);
+    }
+
+    using var process = Process.Start(
+      new ProcessStartInfo
+      {
+        FileName = tempFile,
+        Arguments = "/install /quiet /norestart",
+        UseShellExecute = true,
+        Verb = "runas"
+      }
+    );
+
+    if (process is null || process.HasExited)
+    {
+      throw new Exception($"Failed to install MSVC redistributable, exit code: {process?.ExitCode ?? -1}");
+    }
+
+    await process.WaitForExitAsync();
+
+    if (process.ExitCode != 0)
+    {
+      throw new Exception($"Failed to install MSVC redistributable, exit code: {process.ExitCode}");
+    }
+  }
+
   [SupportedOSPlatform("linux")]
   private void MakeEngineBinariesExecutable(string installRoot)
   {
@@ -142,6 +183,12 @@ public class NcoReleaseService(LauncherConfigService configService)
       if (OperatingSystem.IsLinux())
       {
         MakeEngineBinariesExecutable(installRoot);
+      }
+
+      // Ensure MSVC redist present on first install
+      if (OperatingSystem.IsWindows() && !configService.Config.NCO.Installed)
+      {
+        await InstallMsvcRuntime(eventVisitor);  
       }
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());

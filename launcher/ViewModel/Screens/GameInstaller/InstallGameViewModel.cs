@@ -6,7 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using DynamicData.Binding;
 using ReactiveUI;
 
@@ -25,7 +25,7 @@ public class InstallGameViewModel : ScreenViewModelBase
 
   private bool _isInstalling;
   private string _installLog;
-  private IBrush? _backgroundImage;
+  private Bitmap? _currentSplashScreen;
   private bool _hasErrored;
   private bool _installFinished;
   private IList<ItemToBeInstalled<DiscImageSource>> _discImages;
@@ -44,10 +44,10 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _installLog, value);
   }
 
-  public IBrush? BackgroundImage
+  public Bitmap? CurrentSplashScreen
   {
-    get => _backgroundImage;
-    set => this.RaiseAndSetIfChanged(ref _backgroundImage, value);
+    get => _currentSplashScreen;
+    set => this.RaiseAndSetIfChanged(ref _currentSplashScreen, value);
   }
 
   public bool HasErrored
@@ -113,6 +113,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)
           .Where(x => x)
+          .ObserveOn(RxApp.MainThreadScheduler)
           .InvokeCommand(ReactiveCommand.Create<bool>(GoToLaunchGameScreen)),
         ReactiveCommand.CreateFromTask(Install)
           .Execute()
@@ -122,21 +123,30 @@ public class InstallGameViewModel : ScreenViewModelBase
     });
   }
 
-  private async Task Install()
+  private Task Install()
   {
-    var downloadEventVisitor = new InstallDownloadEventVisitor(this);
+    return Task.Run(async () =>
+    {
+      var downloadEventVisitor = new InstallDownloadEventVisitor(this);
 
-    await _gameDataService.Download(
-      Nco.Item.PendingInstallPath,
-      downloadEventVisitor,
-      b => BackgroundImage = new ImageBrush(b)
-    );
-    await _releaseService.Download(Nco.Item.PendingInstallPath, downloadEventVisitor);
+      await _gameDataService.Download(
+        Nco.Item.PendingInstallPath,
+        downloadEventVisitor,
+        b => CurrentSplashScreen = b
+      );
 
-    IsInstalling = false;
-    InstallFinished = !HasErrored;
+      if (!HasErrored)
+      {
+        await _releaseService.Download(Nco.Item.PendingInstallPath, downloadEventVisitor);
+      }
 
-    await File.WriteAllTextAsync(Path.Join(_paths.AppDataPath, "install.log"), InstallLog);
+      InstallLog += HasErrored ? "Install failed to complete due to errors" : "Install complete";
+
+      IsInstalling = false;
+      InstallFinished = !HasErrored;
+
+      await File.WriteAllTextAsync(Path.Join(_paths.AppDataPath, "install.log"), InstallLog);
+    });
   }
 
   private void GoToLaunchGameScreen(bool isInstalled)

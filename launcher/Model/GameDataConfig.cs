@@ -89,9 +89,9 @@ public class GameDataConfig : INotifyPropertyChanged
   [YamlIgnore]
   public string PlatformBinary =>
     OperatingSystem.IsWindows()
-      ? $"${Binary}.exe"
+      ? $"{Binary}.exe"
       : OperatingSystem.IsMacOS()
-        ? $"/Applications/${Binary}.app/Contents/MacOS/${Binary}"
+        ? $"/Applications/{Binary}.app/Contents/MacOS/{Binary}"
         : Binary;
 
   public event PropertyChangedEventHandler? PropertyChanged;
