@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
 
@@ -20,7 +21,9 @@ public class SelectGameDataViewModel : ScreenViewModelBase
     : base("select-games", hostScreen)
   {
     Config = configService.Config;
-  
+
+    throw new Exception("Oh shit!");
+    
     Back = ReactiveCommand.CreateFromObservable(() => 
       HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()
     );

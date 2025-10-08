@@ -74,5 +74,9 @@
     <Compile Update="View\Screens\GameInstaller\InstallGameView.axaml.cs">
       <DependentUpon>InstallGameView.axaml</DependentUpon>
     </Compile>
+    <Compile Update="View\Screens\LauncherErrorView.axaml.cs">
+      <DependentUpon>StartView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

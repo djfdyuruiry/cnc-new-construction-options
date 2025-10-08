@@ -1,11 +1,12 @@
 using System;
-
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Splat;
 
 using CNC.NCO.Launcher.Config;
+using ReactiveUI;
 
 namespace CNC.NCO.Launcher;
 
