@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using DiscUtils.OpticalDisk;
+
 using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
