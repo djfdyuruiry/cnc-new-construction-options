@@ -29,10 +29,9 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
 
     foreach (var game in configService.Config.EnabledGames)
     {
-      var gameBinaryPath = Path.Join(installRoot, game.InstallPostfix, game.Binary);
-      gameBinaryPath = $"{gameBinaryPath}.exe";
+      var gameBinaryPath = $"{Path.Join(installRoot, game.InstallPostfix, game.Binary)}.exe";
 
-      await winUtils.CreateShortcut("Tiberian Dawn (NCO)", gameBinaryPath);
+      await winUtils.CreateShortcut($"{game.DisplayName} (NCO)", gameBinaryPath);
     }
   }
 
@@ -67,6 +66,7 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
     }
   }
 
+  [SupportedOSPlatform("linux")]
   private void GenerateDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
   {
     var desktopTemplate = File.ReadAllText(
@@ -77,13 +77,14 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
     {
       var gamePath = Path.Join(installRoot, game.InstallPostfix);
       var binaryPath = Path.Join(gamePath, game.PlatformBinary);
-      var desktopFilePath = "?";
+      var desktopName = $"nco-{game.InstallPostfix}";
 
-      var desktopFile = desktopTemplate.Replace("<BINARY>", binaryPath)
-        .Replace("<DISPLAY_NAME>", game.DisplayName)
-        .Replace("<INSTALL_PATH>", gamePath);
-
-      File.WriteAllText(desktopFilePath, desktopFile);
+      File.WriteAllText(
+        $"{Path.Join(pathsConfig.AppDataDirectoryPath, "applications", desktopName)}.desktop",
+        desktopTemplate.Replace("<BINARY>", binaryPath)
+          .Replace("<DISPLAY_NAME>", $"{game.DisplayName} (NCO)")
+          .Replace("<INSTALL_PATH>", gamePath)
+      );
     }
   }
 

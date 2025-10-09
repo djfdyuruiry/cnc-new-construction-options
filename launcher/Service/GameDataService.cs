@@ -167,7 +167,7 @@ public class GameDataService(
     string installPath,
     Func<CDReader, Task> onIsoOpen)
   {
-    var imagePath = Path.Join(paths.CachePath, source.Config.File);
+    var imagePath = Path.Join(paths.NcoCachePath, source.Config.File);
 
     // fetch ISO image (if required)
     try
@@ -259,7 +259,7 @@ public class GameDataService(
 
     try
     {
-      DirectoryUtils.CreateDirectoryIfMissing(paths.CachePath);
+      DirectoryUtils.CreateDirectoryIfMissing(paths.NcoCachePath);
 
       foreach (var game in configService.Config.EnabledGames)
       {

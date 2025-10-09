@@ -25,7 +25,8 @@ public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPa
 #endif
 
   // user paths
-  public string AppDataPath { get; } = Path.Join(appDataDirectoryPath, "nco");
-  public string CachePath => Path.Join(AppDataPath, ".cache");
-  public string UserConfigYamlPath => Path.Join(AppDataPath, "config.yml");
+  public string AppDataDirectoryPath => appDataDirectoryPath;
+  public string NcoAppDataPath { get; } = Path.Join(appDataDirectoryPath, "nco");
+  public string NcoCachePath => Path.Join(NcoAppDataPath, ".cache");
+  public string UserConfigYamlPath => Path.Join(NcoAppDataPath, "config.yml");
 }

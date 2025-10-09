@@ -43,7 +43,7 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
       {
         Nco = configService.Config.NCO;
         // default or existing path
-        Nco.PendingInstallPath = string.IsNullOrWhiteSpace(Nco.InstallPath) ? paths.AppDataPath : Nco.InstallPath;
+        Nco.PendingInstallPath = string.IsNullOrWhiteSpace(Nco.InstallPath) ? paths.NcoAppDataPath : Nco.InstallPath;
       });
     }
 

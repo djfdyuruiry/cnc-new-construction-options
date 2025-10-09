@@ -52,7 +52,13 @@
     <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Link="tools\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Link="tools\create-or-update-shortcut.ps1" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="tools\runtimes\linux-x64\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco.desktop" Link="tools\nco.desktop" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="tools\runtimes\linux-x64\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
@@ -62,6 +68,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco.desktop" Condition="'$(RuntimeIdentifier)' == ''">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config.yml">

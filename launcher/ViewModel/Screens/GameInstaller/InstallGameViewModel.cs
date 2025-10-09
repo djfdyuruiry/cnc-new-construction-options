@@ -145,7 +145,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       IsInstalling = false;
       InstallFinished = !HasErrored;
 
-      await File.WriteAllTextAsync(Path.Join(_paths.AppDataPath, "install.log"), InstallLog);
+      await File.WriteAllTextAsync(Path.Join(_paths.NcoAppDataPath, "install.log"), InstallLog);
     });
   }
 
