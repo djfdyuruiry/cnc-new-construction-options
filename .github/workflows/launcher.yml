@@ -61,6 +61,8 @@ jobs:
         run: |
           ARTIFACT_DIR="$(pwd)/artifact"
 
+          mkdir -p "${ARTIFACT_DIR}"
+
           cd bin/Release/net*/${{ matrix.runtime }}/publish
 
           if [[ "${{ matrix.runtime }}" == "win-x64" ]]; then
