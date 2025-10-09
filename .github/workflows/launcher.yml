@@ -50,11 +50,11 @@ jobs:
         run: dotnet build CNC.NCO.Launcher.csproj -c Release
 
       - name: Publish Native Launcher App
-        run: >-
-          dotnet publish CNC.NCO.Launcher.csproj
-            -c Release
-            -r ${{ matrix.runtime }}
-            -p:PublishSingleFile=true
+        run: |
+          dotnet publish CNC.NCO.Launcher.csproj \
+            -c Release \
+            -r ${{ matrix.runtime }} \
+            -p:PublishSingleFile=true \
             --self-contained
 
       - name: Package Native Launcher App
