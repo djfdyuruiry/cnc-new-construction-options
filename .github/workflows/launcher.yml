@@ -73,7 +73,7 @@ jobs:
             if [[ "${runtime}" == "win-x64" ]]; then
               zip -9 -r "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.zip" .
             else
-              tar -czf "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.tar.gz" .
+              tar cvf - . | gzip -9 - > "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.tar.gz"
             fi
 
             popd
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cnc-nco-launcher
-          path: artifact
+          path: launcher/artifact
 
       - name: Upload development release
         if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
@@ -93,11 +93,11 @@ jobs:
           tag_name: "latest"
           prerelease: true
           files: |
-            artifact/*
+            launcher/artifact/*
 
       - name: Upload tagged release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifact/*
+            launcher/artifact/*
