@@ -1,10 +1,11 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 using CNC.NCO.Launcher.Config;
+using CNC.NCO.Launcher.Model.Util;
+using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
@@ -15,27 +16,8 @@ public class Bin2IsoService(PathsConfig paths)
     OperatingSystem.IsWindows() ? "bin2iso.exe" : "bin2iso"
   );
 
-  public async Task<int> CallBin2Iso(string[] cliParameters)
-  {
-    using var convertToCueProc = Process.Start(
-      new ProcessStartInfo
-      {
-        FileName = OsBin2IsoPath, 
-        Arguments = string.Join(" ", cliParameters),
-        UseShellExecute = false,
-        CreateNoWindow = true
-      }
-    );
-
-    if (convertToCueProc is null)
-    {
-      return -1;
-    }
-
-    await convertToCueProc.WaitForExitAsync();
-
-    return convertToCueProc.ExitCode;
-  }
+  public async Task<ProcessExecuteResult> CallBin2Iso(params string[] cliParameters) =>
+    await ProcessUtils.Exec(OsBin2IsoPath, cliParameters);
 
   public async Task<string> ConvertBinToIso(string binImagePath)
   {
@@ -49,16 +31,12 @@ public class Bin2IsoService(PathsConfig paths)
     }
 
     // generate cue file from bin image (ignore existing)
-    if (await CallBin2Iso([ cuePath, "-c", binImagePath ]) != 0)
-    {
-      throw new Exception($"Failed to generate cue from bin file: {binImagePath}");
-    }
+    var generateCueResult = await CallBin2Iso(cuePath, "-c", binImagePath);
+    generateCueResult.AssertExitCode($"Failed to generate cue from bin file: {binImagePath}");
 
     // extract data track from bin/cue image
-    if (await CallBin2Iso([ cuePath, isoImageDirectory, "-t", "1" ]) != 0)
-    {
-      throw new Exception($"Failed to extract iso from bin file: {binImagePath}");
-    }
+    var extractCueTrackResult = await CallBin2Iso(cuePath, isoImageDirectory, "-t", "1");
+    generateCueResult.AssertExitCode($"Failed to extract iso from bin file: {binImagePath}");
 
     // find data track iso output file 
     return Directory.GetFileSystemEntries(Path.GetDirectoryName(cuePath)!)

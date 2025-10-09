@@ -1,10 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
-
+ 
 using CNC.NCO.Launcher.Config;
 
 namespace CNC.NCO.Launcher.Util;
@@ -16,7 +15,6 @@ public class WindowsUtils(PathsConfig paths)
   {
     try
     {
-      var powershellScriptPath = Path.Join(paths.LauncherDirectoryPath, "create-or-update-shortcut.ps1");
       var shortcutPath = Path.Join(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Microsoft",
@@ -26,74 +24,61 @@ public class WindowsUtils(PathsConfig paths)
         shortcutName
       );
 
-      using var powershellProcess = Process.Start(new ProcessStartInfo
-      {
-        FileName = "powershell",
-        Arguments = string.Join(
-          " ",
-          "-ExecutionPolicy Bypass",
-          $"-File '{powershellScriptPath}'",
-          $"-ShortcutName '{shortcutPath}'",
-          $"-TargetPath '{targetPath}'"
-        ),
-        UseShellExecute = false,
-        CreateNoWindow = true
-      });
+      var startInfo = ProcessUtils.BuildStartInfo(
+        "powershell",
+        @"-ExecutionPolicy Bypass",
+        @"-File create-or-update-shortcut.ps1",
+        $"-ShortcutPath '{shortcutPath}'",
+        $"-TargetPath '{targetPath}'"
+      );
+      startInfo.WorkingDirectory = paths.ToolsPath;
 
-      if (powershellProcess is null)
-      {
-        throw new Exception($"Failed to start powershell process");
-      }
-
-      await powershellProcess.WaitForExitAsync();
-
-      if (powershellProcess.ExitCode != 0)
-      {
-        throw new Exception($"PowerShell script failed with exit code {powershellProcess.ExitCode}");
-      }
+      (await ProcessUtils.Exec(startInfo))
+        .AssertExitCode($"PowerShell script 'create-or-update-shortcut.ps1' failed", 2);
     }
     catch (Exception ex)
     {
-      Console.WriteLine($"Error creating shortcut: {shortcutName}", ex);
+      throw new Exception($"Error creating shortcut: {shortcutName}", ex);
     }
   }
 
   public async Task InstallMsvcRuntime(string msvcInstallerUrl)
   {
-    var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".exe");
-
-    using var client = new HttpClient();
-    var response = await client.GetAsync(msvcInstallerUrl);
-
-    response.EnsureSuccessStatusCode();
-
-    await using (var fileStream = new FileStream(tempFile, FileMode.Create))
+    try
     {
-      await response.Content.CopyToAsync(fileStream);
-    }
+      // fetch runtime installer
+      var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".exe");
 
-    using var msvcInstaller = Process.Start(
-      new ProcessStartInfo
+      using var client = new HttpClient();
+      var response = await client.GetAsync(msvcInstallerUrl);
+
+      response.EnsureSuccessStatusCode();
+
+      await using (var fileStream = new FileStream(tempFile, FileMode.Create))
       {
-        FileName = tempFile,
-        Arguments = "/install /quiet /norestart",
-        UseShellExecute = true,
-        Verb = "runas"
+        await response.Content.CopyToAsync(fileStream);
       }
-    );
 
-    if (msvcInstaller is null || msvcInstaller.HasExited)
-    {
-      throw new Exception($"Failed to install MSVC redistributable, exit code: {msvcInstaller?.ExitCode ?? -1}");
+      // exec runtime installer
+      var startInfo = ProcessUtils.BuildStartInfo(
+        tempFile,
+        "/install",
+        "/quiet",
+        "/norestart"
+      );
+      startInfo.CreateNoWindow = false;
+      startInfo.UseShellExecute = true;
+      startInfo.Verb = "runas";
+
+      var execResult = await ProcessUtils.Exec(startInfo);
+
+      File.Delete(tempFile);
+
+      execResult.AssertExitCode("MSVC redistributable exec failed");
     }
-
-    await msvcInstaller.WaitForExitAsync();
-
-    File.Delete(tempFile);
-
-    if (msvcInstaller.ExitCode != 0)
+    catch (Exception e)
     {
-      throw new Exception($"Failed to install MSVC redistributable, exit code: {msvcInstaller.ExitCode}");
+      throw new Exception("MSVC runtime failed to install due to an error", e);
     }
   }
 }

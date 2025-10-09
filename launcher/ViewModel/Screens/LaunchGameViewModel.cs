@@ -2,15 +2,18 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive;
+
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
+using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens;
 
 public class LaunchGameViewModel : ScreenViewModelBase
 {
+  private readonly PathsConfig _pathsConfig;
   private Process? _tdProcess;
   private Process? _raProcess;
   private bool _launchFailed;
@@ -43,9 +46,10 @@ public class LaunchGameViewModel : ScreenViewModelBase
   public ReactiveCommand<EventPattern<object>, Unit> LaunchTd { get; }
   public ReactiveCommand<EventPattern<object>, Unit> LaunchRa { get; }
 
-  public LaunchGameViewModel(LauncherConfigService configService, IScreen hostScreen)
+  public LaunchGameViewModel(LauncherConfigService configService, PathsConfig pathsConfig, IScreen hostScreen)
     : base("play-game", hostScreen)
   {
+    _pathsConfig = pathsConfig;
     LaunchFailed = false;
 
     LaunchTd = ReactiveCommand.Create((EventPattern<object> _) =>
@@ -73,35 +77,33 @@ public class LaunchGameViewModel : ScreenViewModelBase
     
     // TODO: Review macos path when NcoReleaseService deploys .app to Applications
     LaunchFailed = false;
-    var gameProcess = Process.Start(
+
+    var stdOutLog = Path.Join(_pathsConfig.NcoAppDataPath, $"{game.InstallPostfix}-stdout.log");
+    var stdErrLog = Path.Join(_pathsConfig.NcoAppDataPath, $"{game.InstallPostfix}-stderr.log");
+
+    File.WriteAllText(stdOutLog, string.Empty);
+    File.WriteAllText(stdErrLog, string.Empty);
+
+    var gameProcess = ProcessUtils.ExecWithCallback(
       new ProcessStartInfo
       {
         FileName = Path.Join(Config.NCO.InstallPath, game.InstallPostfix, game.PlatformBinary),
         WorkingDirectory = Path.Join(Config.NCO.InstallPath, game.InstallPostfix),
         RedirectStandardOutput = true,
         RedirectStandardError = true
+      },
+      r =>
+      {
+        LaunchFailed = r.ExitCode != 0;
+
+        File.WriteAllText(stdOutLog, r.StdOut);
+        File.WriteAllText(stdErrLog, r.StdErr);
+
+        getProcess()?.Dispose();
+        setProcess(null);
       }
     );
 
-    if (gameProcess?.HasExited ?? true)
-    {
-      LaunchFailed = true;
-      gameProcess?.Dispose();
-
-      return;
-    }
-
     setProcess(gameProcess);
-
-    gameProcess.EnableRaisingEvents = true;
-    gameProcess.Exited += (p, _) =>
-    {
-      var process = p as Process;
-
-      LaunchFailed = (process?.ExitCode ?? -1) != 0;
-
-      process?.Dispose();
-      setProcess(null);
-    };
   }
 }

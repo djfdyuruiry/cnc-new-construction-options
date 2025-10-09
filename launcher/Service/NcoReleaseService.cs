@@ -31,7 +31,10 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
     {
       var gameBinaryPath = $"{Path.Join(installRoot, game.InstallPostfix, game.Binary)}.exe";
 
-      await winUtils.CreateShortcut($"{game.DisplayName} (NCO)", gameBinaryPath);
+      await winUtils.CreateShortcut(
+        $"{game.DisplayName.Replace("Command & Conquer:", "C&C -")} (NCO)",
+        gameBinaryPath
+      );
     }
   }
 
@@ -72,6 +75,9 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
     var desktopTemplate = File.ReadAllText(
       Path.Join(pathsConfig.ToolsPath, "nco.desktop")
     );
+    var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
+
+    Directory.CreateDirectory(appsPath);
 
     foreach (var game in configService.Config.EnabledGames)
     {
@@ -80,9 +86,9 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
       var desktopName = $"nco-{game.InstallPostfix}";
 
       File.WriteAllText(
-        $"{Path.Join(pathsConfig.AppDataDirectoryPath, "applications", desktopName)}.desktop",
+        $"{Path.Join(appsPath, desktopName)}.desktop",
         desktopTemplate.Replace("<BINARY>", binaryPath)
-          .Replace("<DISPLAY_NAME>", $"{game.DisplayName} (NCO)")
+          .Replace("<DISPLAY_NAME>", $"{game.DisplayName.Replace("Command & Conquer:", "C&C -")} (NCO)")
           .Replace("<INSTALL_PATH>", gamePath)
       );
     }
@@ -158,9 +164,8 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
 
   private async Task<string> GetAssetForNcoRelease()
   {
-    var githubClient = new GitHubClient(
-      RequestAdapter.Create(new AnonymousAuthenticationProvider())
-    );
+    using var requestAdapter = RequestAdapter.Create(new AnonymousAuthenticationProvider());
+    var githubClient = new GitHubClient(requestAdapter);
 
     var ncoConfig = configService.Config.NCO;
     var ncoRelease = await githubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
@@ -210,6 +215,7 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
   {
     try
     {
+      // BUG: get 'instance has already started requests' when calling this method for second time
       await WithNcoReleaseArchive(
         eventVisitor,
         s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)
