@@ -1,0 +1,93 @@
+name: launcher
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs: {}
+
+  pull_request:
+    paths:
+      - launcher/**
+
+  push:
+    branches:
+      - main
+    paths:
+      - launcher/**
+concurrency:
+  group: ${{ github.ref }}__launcher
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  launcher-build:
+    runs-on: ubuntu-24.04
+    
+    defaults:
+      run:
+        working-directory: ./launcher
+
+    strategy:
+     matrix:
+       # see: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/PortableRuntimeIdentifierGraph.json
+       runtime:
+         - win-x64
+         - linux-x64
+         - osx-x64
+         - osx-arm64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - name: Set Git Info
+        id: git-info
+        run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build Launcher
+        run: dotnet build CNC.NCO.Launcher.csproj -c Release
+
+      - name: Publish Native Launcher App
+        run: >-
+          dotnet publish CNC.NCO.Launcher.csproj
+            -c Release
+            -r ${{ matrix.runtime }}
+            -p:PublishSingleFile=true
+            --self-contained
+
+      - name: Package Native Launcher App
+        run: |
+          ARTIFACT_DIR="$(pwd)/artifact"
+
+          cd bin/Release/net*/${{ matrix.runtime }}/publish
+
+          if [[ "${{ matrix.runtime }}" == "win-x64" ]]; then
+            zip -9 -r "${ARTIFACT_DIR}/cnc-nco-launcher-${{ matrix.runtime }}-${{ steps.git-info.outputs.sha-short }}.zip" .
+          else
+            tar -czf "${ARTIFACT_DIR}/cnc-nco-launcher-${{ matrix.runtime }}-${{ steps.git-info.outputs.sha-short }}.tar.gz" .
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cnc-nco-launcher-${{ matrix.runtime }}
+          path: artifact
+
+      - name: Upload development release
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Development Build
+          tag_name: "latest"
+          prerelease: true
+          files: |
+            artifact/*
+
+      - name: Upload tagged release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifact/*

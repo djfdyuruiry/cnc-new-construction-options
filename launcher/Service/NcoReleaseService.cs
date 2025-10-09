@@ -124,9 +124,9 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
       downloadPath,
       zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/")
     );
-    var outputPathDir = Path.GetDirectoryName(outputPath) ?? string.Empty;
+    var outputPathDir = Path.GetDirectoryName(outputPath);
 
-    if (!string.IsNullOrWhiteSpace(outputPathDir) && !Directory.Exists(outputPathDir))
+    if (!string.IsNullOrWhiteSpace(outputPathDir))
     {
       Directory.CreateDirectory(outputPathDir);
     }
