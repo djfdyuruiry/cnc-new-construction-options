@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,60 +15,95 @@ using SharpCompress.Readers;
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
+using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
 // TODO: Support macos .app extract and install in Applications (plus data paths outside of app bundle)
-public class NcoReleaseService(LauncherConfigService configService)
+public class NcoReleaseService(LauncherConfigService configService, PathsConfig pathsConfig)
 {
+  [SupportedOSPlatform("windows")]
+  public async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
+  {
+    var winUtils = new WindowsUtils(pathsConfig);
+
+    foreach (var game in configService.Config.EnabledGames)
+    {
+      var gameBinaryPath = Path.Join(installRoot, game.InstallPostfix, game.Binary);
+      gameBinaryPath = $"{gameBinaryPath}.exe";
+
+      await winUtils.CreateShortcut("Tiberian Dawn (NCO)", gameBinaryPath);
+    }
+  }
+
+  /**
+   * Windows binaries require MSVC 2022 runtime to run, so we install it for the
+   * user here.
+   */
   [SupportedOSPlatform("windows")]
   private async Task InstallMsvcRuntime(IDownloadEventVisitor eventVisitor)
   {
+    if (configService.Config.NCO.Installed)
+    {
+      // only needs installed once, so skip on subsequent installer executions
+      return;
+    }
+
     eventVisitor.Visit(new FetchMsvcRuntimeEvent());
 
-    var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".exe");
+    var winUtils = new WindowsUtils(pathsConfig);
 
-    using var client = new HttpClient();
-    var response = await client.GetAsync(configService.Config.NCO.MsvcRuntimeUrl);
-
-    response.EnsureSuccessStatusCode();
-
-    await using (var fileStream = new FileStream(tempFile, FileMode.Create))
-    {
-      await response.Content.CopyToAsync(fileStream);
-    }
-
-    using var process = Process.Start(
-      new ProcessStartInfo
-      {
-        FileName = tempFile,
-        Arguments = "/install /quiet /norestart",
-        UseShellExecute = true,
-        Verb = "runas"
-      }
-    );
-
-    if (process is null || process.HasExited)
-    {
-      throw new Exception($"Failed to install MSVC redistributable, exit code: {process?.ExitCode ?? -1}");
-    }
-
-    await process.WaitForExitAsync();
-
-    if (process.ExitCode != 0)
-    {
-      throw new Exception($"Failed to install MSVC redistributable, exit code: {process.ExitCode}");
-    }
+    await winUtils.InstallMsvcRuntime(configService.Config.NCO.MsvcRuntimeUrl);
   }
 
   [SupportedOSPlatform("linux")]
   private void MakeEngineBinariesExecutable(string installRoot)
   {
-    foreach (var game in configService.Config.Games.Where(g => g.Enabled))
+    foreach (var game in configService.Config.EnabledGames)
     {
       var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
 
       File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
+    }
+  }
+
+  private void GenerateDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
+  {
+    var desktopTemplate = File.ReadAllText(
+      Path.Join(pathsConfig.ToolsPath, "nco.desktop")
+    );
+
+    foreach (var game in configService.Config.EnabledGames)
+    {
+      var gamePath = Path.Join(installRoot, game.InstallPostfix);
+      var binaryPath = Path.Join(gamePath, game.PlatformBinary);
+      var desktopFilePath = "?";
+
+      var desktopFile = desktopTemplate.Replace("<BINARY>", binaryPath)
+        .Replace("<DISPLAY_NAME>", game.DisplayName)
+        .Replace("<INSTALL_PATH>", gamePath);
+
+      File.WriteAllText(desktopFilePath, desktopFile);
+    }
+  }
+
+  private async Task RunPostInstallConfig(string installRoot, IDownloadEventVisitor eventVisitor)
+  {
+    if (OperatingSystem.IsLinux())
+    {
+      GenerateDesktopFiles(installRoot, eventVisitor);
+      MakeEngineBinariesExecutable(installRoot);
+    }
+
+    if (OperatingSystem.IsWindows())
+    {
+      await InstallMsvcRuntime(eventVisitor);  
+      await GenerateWindowsShortcuts(installRoot, eventVisitor);
+    }
+
+    if (OperatingSystem.IsMacOS())
+    {
+      // TODO: any required macos config
     }
   }
 
@@ -180,16 +214,7 @@ public class NcoReleaseService(LauncherConfigService configService)
         s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)
       );
 
-      if (OperatingSystem.IsLinux())
-      {
-        MakeEngineBinariesExecutable(installRoot);
-      }
-
-      // Ensure MSVC redist present on first install
-      if (OperatingSystem.IsWindows() && !configService.Config.NCO.Installed)
-      {
-        await InstallMsvcRuntime(eventVisitor);  
-      }
+      await RunPostInstallConfig(installRoot, eventVisitor);
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
     }

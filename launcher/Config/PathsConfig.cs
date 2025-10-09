@@ -6,6 +6,7 @@ namespace CNC.NCO.Launcher.Config;
 public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPath)
 {
   // launcher app paths
+  public string LauncherDirectoryPath => launcherDirectoryPath; 
   public string ConfigYamlPath { get; } = Path.Join(launcherDirectoryPath, "config.yml");
 
 #if DEBUG

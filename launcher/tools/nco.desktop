@@ -1,0 +1,6 @@
+[Desktop Entry]
+Exec=<BINARY>
+Name=<DISPLAY_NAME>
+NoDisplay=false
+Path=<INSTALL_PATH>
+Terminal=false

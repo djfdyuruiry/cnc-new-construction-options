@@ -17,7 +17,20 @@ public class Bin2IsoService(PathsConfig paths)
 
   public async Task<int> CallBin2Iso(string[] cliParameters)
   {
-    var convertToCueProc = Process.Start(OsBin2IsoPath, cliParameters);
+    using var convertToCueProc = Process.Start(
+      new ProcessStartInfo
+      {
+        FileName = OsBin2IsoPath, 
+        Arguments = string.Join(" ", cliParameters),
+        UseShellExecute = false,
+        CreateNoWindow = true
+      }
+    );
+
+    if (convertToCueProc is null)
+    {
+      return -1;
+    }
 
     await convertToCueProc.WaitForExitAsync();
 
