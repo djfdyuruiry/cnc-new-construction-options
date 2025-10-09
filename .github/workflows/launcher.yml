@@ -5,7 +5,11 @@ permissions:
 
 on:
   workflow_dispatch:
-    inputs: {}
+    inputs:
+      runtimes:
+        description: List of .NET runtimes to target for distribution
+        required: false
+        default: win-x64 linux-x64 osx-x64 osx-arm64
 
   pull_request:
     paths:
@@ -28,14 +32,8 @@ jobs:
       run:
         working-directory: ./launcher
 
-    strategy:
-     matrix:
-       # see: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/PortableRuntimeIdentifierGraph.json
-       runtime:
-         - win-x64
-         - linux-x64
-         - osx-x64
-         - osx-arm64
+    env:
+      RUNTIMES: "${{ github.event.inputs.runtimes || 'win-x64 linux-x64 osx-x64 osx-arm64'}}"
 
     steps:
       - uses: actions/checkout@v4
@@ -51,30 +49,40 @@ jobs:
 
       - name: Publish Native Launcher App
         run: |
-          dotnet publish CNC.NCO.Launcher.csproj \
-            -c Release \
-            -r ${{ matrix.runtime }} \
-            -p:PublishSingleFile=true \
-            --self-contained
+          set -x
+
+          for runtime in ${RUNTIMES}; do
+            dotnet publish CNC.NCO.Launcher.csproj \
+              -c Release \
+              -r "${runtime}" \
+              -p:PublishSingleFile=true \
+              --self-contained
+          done
 
       - name: Package Native Launcher App
         run: |
+          set -x
+
           ARTIFACT_DIR="$(pwd)/artifact"
 
           mkdir -p "${ARTIFACT_DIR}"
 
-          cd bin/Release/net*/${{ matrix.runtime }}/publish
+          for runtime in ${RUNTIMES}; do
+            pushd bin/Release/net*/${runtime}/publish
 
-          if [[ "${{ matrix.runtime }}" == "win-x64" ]]; then
-            zip -9 -r "${ARTIFACT_DIR}/cnc-nco-launcher-${{ matrix.runtime }}-${{ steps.git-info.outputs.sha-short }}.zip" .
-          else
-            tar -czf "${ARTIFACT_DIR}/cnc-nco-launcher-${{ matrix.runtime }}-${{ steps.git-info.outputs.sha-short }}.tar.gz" .
-          fi
+            if [[ "${runtime}" == "win-x64" ]]; then
+              zip -9 -r "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.zip" .
+            else
+              tar -czf "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.tar.gz" .
+            fi
+
+            popd
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cnc-nco-launcher-${{ matrix.runtime }}
+          name: cnc-nco-launcher
           path: artifact
 
       - name: Upload development release
