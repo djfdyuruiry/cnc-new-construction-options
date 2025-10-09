@@ -67,7 +67,7 @@ public class LauncherConfigService
     catch (Exception ex)
     {
       throw new Exception(
-        $"Failed to load configuration from {filePath}",
+        $"Failed to load configuration from file: {filePath}",
         ex
       );
     }
@@ -75,20 +75,12 @@ public class LauncherConfigService
 
   public LauncherConfig LoadFromUserOrDefaultConfig()
   {
-    try
-    {
-      // Try to load from app data directory first
-      return LoadFromFile(
-        File.Exists(_paths.UserConfigYamlPath) ? _paths.UserConfigYamlPath : _paths.ConfigYamlPath
-      );
-    }
-    catch (Exception ex)
-    {
-      throw new Exception(
-        $"Failed to load configuration from {_paths.ConfigYamlPath} or {_paths.UserConfigYamlPath}",
-        ex
-      );
-    }
+    // Try to load from app data directory first
+    var resolvedConfigPath = File.Exists(_paths.UserConfigYamlPath) 
+      ? _paths.UserConfigYamlPath
+      : _paths.ConfigYamlPath;
+
+    return LoadFromFile(resolvedConfigPath);
   }
 
   public void SaveUserConfig()
@@ -113,7 +105,7 @@ public class LauncherConfigService
     catch (Exception ex)
     {
       throw new Exception(
-        $"Failed to save configuration to {_paths.UserConfigYamlPath}",
+        $"Failed to save configuration to file: {_paths.UserConfigYamlPath}",
         ex
       );
     }
