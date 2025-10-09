@@ -5,6 +5,7 @@ using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
 
+#pragma warning disable CS8618 // YAML deserialization populates these members
 public class DiscImageSource(DiscImage image)
 {
   public int SortOrder => image.SortOrder;
@@ -23,4 +24,6 @@ public class DiscImageSource(DiscImage image)
 
   public override bool Equals(object? obj) => 
     DisplayNameOrName.Equals((obj as DiscImageSource)?.DisplayNameOrName, StringComparison.Ordinal);
+
+  public override int GetHashCode() => HashCode.Combine(DisplayName);
 }

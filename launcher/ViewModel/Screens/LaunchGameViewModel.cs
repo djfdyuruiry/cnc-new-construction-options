@@ -17,9 +17,9 @@ public class LaunchGameViewModel : ScreenViewModelBase
   private Process? _tdProcess;
   private Process? _raProcess;
   private bool _launchFailed;
-  private LauncherConfig _config;
+  private LauncherConfig? _config;
 
-  public LauncherConfig Config
+  public LauncherConfig? Config
   {
     get => _config;
     set => this.RaiseAndSetIfChanged(ref _config, value);
@@ -53,11 +53,11 @@ public class LaunchGameViewModel : ScreenViewModelBase
     LaunchFailed = false;
 
     LaunchTd = ReactiveCommand.Create((EventPattern<object> _) =>
-      LaunchGame(Config.TiberianDawn, () => TdProcess, p => TdProcess = p)
+      LaunchGame(Config!.TiberianDawn, () => TdProcess, p => TdProcess = p)
     );
 
     LaunchRa = ReactiveCommand.Create((EventPattern<object> _)  => 
-      LaunchGame(Config.RedAlert, () => RaProcess, p => RaProcess = p)
+      LaunchGame(Config!.RedAlert, () => RaProcess, p => RaProcess = p)
     );
 
     SafeWhenNavigatedTo(() =>
@@ -87,7 +87,7 @@ public class LaunchGameViewModel : ScreenViewModelBase
     var gameProcess = ProcessUtils.ExecWithCallback(
       new ProcessStartInfo
       {
-        FileName = Path.Join(Config.NCO.InstallPath, game.InstallPostfix, game.PlatformBinary),
+        FileName = Path.Join(Config!.NCO.InstallPath, game.InstallPostfix, game.PlatformBinary),
         WorkingDirectory = Path.Join(Config.NCO.InstallPath, game.InstallPostfix),
         RedirectStandardOutput = true,
         RedirectStandardError = true

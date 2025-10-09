@@ -28,9 +28,9 @@ public class InstallGameViewModel : ScreenViewModelBase
   private Bitmap? _currentSplashScreen;
   private bool _hasErrored;
   private bool _installFinished;
-  private IList<ItemToBeInstalled<DiscImageSource>> _discImages;
-  private IList<ItemToBeInstalled<ZipUrlSpec>> _modsAndAddons;
-  private ItemToBeInstalled<NewConstructionOptions> _nco;
+  private IList<ItemToBeInstalled<DiscImageSource>>? _discImages;
+  private IList<ItemToBeInstalled<ZipUrlSpec>>? _modsAndAddons;
+  private ItemToBeInstalled<NewConstructionOptions>? _nco;
 
   public bool IsInstalling
   {
@@ -62,19 +62,19 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _installFinished, value);
   }
 
-  public IList<ItemToBeInstalled<DiscImageSource>> DiscImages
+  public IList<ItemToBeInstalled<DiscImageSource>>? DiscImages
   {
     get => _discImages;
     set => this.RaiseAndSetIfChanged(ref _discImages, value);
   }
 
-  public IList<ItemToBeInstalled<ZipUrlSpec>> ModsAndAddons
+  public IList<ItemToBeInstalled<ZipUrlSpec>>? ModsAndAddons
   {
     get => _modsAndAddons;
     set => this.RaiseAndSetIfChanged(ref _modsAndAddons, value);
   }
 
-  public ItemToBeInstalled<NewConstructionOptions> Nco
+  public ItemToBeInstalled<NewConstructionOptions>? Nco
   {
     get => _nco;
     set => this.RaiseAndSetIfChanged(ref _nco, value);
@@ -91,6 +91,8 @@ public class InstallGameViewModel : ScreenViewModelBase
     _gameDataService = gameDataService;
     _releaseService = releaseService;
     _paths = paths;
+
+    _installLog = string.Empty;
 
     IsInstalling = false;
     InstallFinished = false;
@@ -130,7 +132,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       var downloadEventVisitor = new InstallDownloadEventVisitor(this);
 
       await _gameDataService.Download(
-        Nco.Item.PendingInstallPath,
+        Nco!.Item.PendingInstallPath,
         downloadEventVisitor,
         b => CurrentSplashScreen = b
       );
@@ -156,7 +158,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       return;
     }
 
-    Nco.Item.InstallPath = Nco.Item.PendingInstallPath;
+    Nco!.Item.InstallPath = Nco.Item.PendingInstallPath;
     Nco.Item.Installed = isInstalled;
 
     HostScreen.Router.NavigateTo<LaunchGameViewModel>();

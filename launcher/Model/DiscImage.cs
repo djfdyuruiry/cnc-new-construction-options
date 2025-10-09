@@ -7,6 +7,7 @@ using YamlDotNet.Serialization;
 
 namespace CNC.NCO.Launcher.Model;
 
+#pragma warning disable CS8618 // YAML deserialization populates these members
 public class DiscImage : INotifyPropertyChanged
 {
   public static readonly string RootPlaceholder = "_root";

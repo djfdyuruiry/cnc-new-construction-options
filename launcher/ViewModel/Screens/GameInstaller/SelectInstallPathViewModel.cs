@@ -14,9 +14,9 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
   public class SelectInstallPathViewModel : ScreenViewModelBase
   {
     private readonly IStorageProvider _storageProvider;
-    private NewConstructionOptions _nco;
+    private NewConstructionOptions? _nco;
 
-    public NewConstructionOptions Nco
+    public NewConstructionOptions? Nco
     {
       get => _nco;
       set => this.RaiseAndSetIfChanged(ref _nco, value);
@@ -53,7 +53,7 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller
       {
         AllowMultiple = false,
         Title = "Select Install Path",
-        SuggestedStartLocation = await _storageProvider.TryGetFolderFromPathAsync(Nco.InstallPath)
+        SuggestedStartLocation = await _storageProvider.TryGetFolderFromPathAsync(Nco!.InstallPath)
       });
 
       if (installFolders.Any())

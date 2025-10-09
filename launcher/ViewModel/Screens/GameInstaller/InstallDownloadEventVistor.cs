@@ -25,7 +25,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   {
     AppendToInstallLog($"Downloading disc image: {e.Image.Config.File}");
     
-    _currentDiscImage = host.DiscImages.FirstOrDefault(d => Equals(d.Item, e.Image));
+    _currentDiscImage = host.DiscImages!.FirstOrDefault(d => Equals(d.Item, e.Image));
 
     if (_currentDiscImage is null)
     {
@@ -49,7 +49,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   {
     AppendToInstallLog($"Scanning files in disc image source: {e.Source.Config.File}");
     
-    _currentDiscImage = host.DiscImages.FirstOrDefault(d => Equals(d.Item, e.Source));
+    _currentDiscImage = host.DiscImages!.FirstOrDefault(d => Equals(d.Item, e.Source));
 
     if (_currentDiscImage is null)
     {
@@ -91,7 +91,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   {
     AppendToInstallLog($"Starting zip url download: {e.Spec.Url}");
 
-    _currentZip = host.ModsAndAddons.FirstOrDefault(z => Equals(z.Item, e.Spec));
+    _currentZip = host.ModsAndAddons!.FirstOrDefault(z => Equals(z.Item, e.Spec));
     
     if (_currentZip is null)
     {
@@ -127,7 +127,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   {
     AppendToInstallLog($"Fetching info on the latest version of NCO game engine");
 
-    host.Nco.Installing = true;
+    host.Nco!.Installing = true;
   }
 
   public void Visit(StartNcoReleaseDownloadEvent e) => 
@@ -137,7 +137,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   {
     AppendToInstallLog($"NCO game engine installed");
 
-    host.Nco.Installed = true;
+    host.Nco!.Installed = true;
     host.Nco.Installing = false;
     host.Nco.Errored = false;
   }
@@ -181,7 +181,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
 
     host.HasErrored = true;
 
-    host.Nco.Errored = true;
+    host.Nco!.Errored = true;
     host.Nco.Installing = false;
     host.Nco.Installed = false;
   }

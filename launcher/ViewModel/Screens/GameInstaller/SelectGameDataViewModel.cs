@@ -9,9 +9,9 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class SelectGameDataViewModel : ScreenViewModelBase
 {
-  private LauncherConfig _config;
+  private LauncherConfig? _config;
 
-  public LauncherConfig Config
+  public LauncherConfig? Config
   {
     get => _config;
     set => this.RaiseAndSetIfChanged(ref _config, value);
@@ -31,7 +31,7 @@ public class SelectGameDataViewModel : ScreenViewModelBase
       HostScreen.Router.NavigateTo<InstallGameViewModel>()
     );
 
-    this.SafeWhenNavigatedTo(() =>
+    SafeWhenNavigatedTo(() =>
       Config = configService.Config
     );
   }
