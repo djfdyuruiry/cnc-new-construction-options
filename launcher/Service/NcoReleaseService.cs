@@ -20,7 +20,7 @@ using CNC.NCO.Launcher.Util;
 namespace CNC.NCO.Launcher.Service;
 
 // TODO: Support macos .app extract and install in Applications (plus data paths outside of app bundle)
-public class NcoReleaseService(LauncherConfigService configService, PathsConfig pathsConfig)
+public class NcoReleaseService(LauncherConfigService configService, GitHubClient gitHubClient, PathsConfig pathsConfig)
 {
   [SupportedOSPlatform("windows")]
   public async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
@@ -164,11 +164,8 @@ public class NcoReleaseService(LauncherConfigService configService, PathsConfig 
 
   private async Task<string> GetAssetForNcoRelease()
   {
-    using var requestAdapter = RequestAdapter.Create(new AnonymousAuthenticationProvider());
-    var githubClient = new GitHubClient(requestAdapter);
-
     var ncoConfig = configService.Config.NCO;
-    var ncoRelease = await githubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
+    var ncoRelease = await gitHubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
       .Releases
       .Tags[ncoConfig.Release]
       .GetAsync() ?? throw new Exception($"Failed to resolve NCO release: {ncoConfig.Release}");
