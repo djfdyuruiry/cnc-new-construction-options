@@ -4,23 +4,14 @@ using System.Linq;
 
 namespace CNC.NCO.Launcher.Model.Util;
 
-public class ProcessExecuteResult
+public class ProcessExecuteResult(Process? process)
 {
-  public ProcessExecuteResult(Process? process)
-  {
-    CreateProcessFailed = process is null;
-
-    ExitCode = process?.ExitCode ?? -1;
-    StdOut = process?.StandardOutput.ReadToEnd();
-    StdErr = process?.StandardError.ReadToEnd();
-  }
-
   public ProcessExecuteResult() : this(null) {}
 
-  public int ExitCode { get; }
-  public string? StdOut { get; }
-  public string? StdErr { get; }
-  public bool CreateProcessFailed { get; }
+  public int ExitCode { get; } = process?.ExitCode ?? -1;
+  public string? StdOut { get; } = process?.StandardOutput.ReadToEnd();
+  public string? StdErr { get; } = process?.StandardError.ReadToEnd();
+  public bool CreateProcessFailed { get; } = process is null;
 
   public void AssertExitCode(string message, int exitCode = 0)
   {

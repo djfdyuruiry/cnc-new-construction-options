@@ -110,7 +110,7 @@ public class InstallGameViewModel : ScreenViewModelBase
         .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
         .ToList();
 
-      Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.NCO);
+      Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.Nco);
 
       return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)

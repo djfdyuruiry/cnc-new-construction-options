@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
+using CNC.NCO.Launcher.Model;
 using DiscUtils.Iso9660;
 using InstallShieldExtractor;
 
@@ -35,7 +35,7 @@ public class GameDiscUtils
   public static async Task ExtractFile(
     CDReader iso,
     IDownloadEventVisitor downloadEventVisitor,
-    string? setupPackagePath,
+    DiscImageSource isoSource,
     string isoOrSetupPath,
     string outputPath
   )
@@ -44,23 +44,23 @@ public class GameDiscUtils
     {
       Console.WriteLine($"Extracting {isoOrSetupPath} to {outputPath}");
 
-      if (!string.IsNullOrWhiteSpace(setupPackagePath) && !iso.FileExists(setupPackagePath))
+      if (isoSource.HasSetupPackageFile && !iso.FileExists(isoSource.SetupPackageFile))
       {
-        throw new Exception($"ISO image does not contain required setup package file: {setupPackagePath}");
+        throw new Exception($"ISO image does not contain required setup package file: {isoSource.SetupPackageFile}");
       }
       
       var isIsoFile = iso.FileExists(isoOrSetupPath);
 
       await using var sourceFileStream = isIsoFile
         ? iso.OpenFile(isoOrSetupPath, FileMode.Open)
-        : await GetStreamForSetupPackageFile(iso, setupPackagePath, isoOrSetupPath);
+        : await GetStreamForSetupPackageFile(iso, isoSource.SetupPackageFile, isoOrSetupPath);
 
       if (sourceFileStream is null)
       {
         throw new Exception(
           isIsoFile
             ? "File not found in ISO image"
-            : $"File not found in ISO setup package file: {setupPackagePath}"
+            : $"File not found in ISO setup package file: {isoSource.SetupPackageFile}"
         );
       }
 

@@ -21,6 +21,10 @@ public class DiscImageSource(DiscImage image)
   // virtual properties for processing and view models
   [YamlIgnore]
   public string DisplayNameOrName => DisplayName ?? Name;
+  [YamlIgnore]
+  public bool HasSplashScreenFile => !string.IsNullOrWhiteSpace(SplashScreenFile);
+  [YamlIgnore]
+  public bool HasSetupPackageFile => !string.IsNullOrWhiteSpace(SetupPackageFile);
 
   public override bool Equals(object? obj) => 
     DisplayNameOrName.Equals((obj as DiscImageSource)?.DisplayNameOrName, StringComparison.Ordinal);

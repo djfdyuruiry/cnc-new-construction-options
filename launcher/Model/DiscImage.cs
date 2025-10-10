@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -37,10 +38,6 @@ public class DiscImage : INotifyPropertyChanged
   public string DisplayNameOrName => DisplayName ?? Name;
   [YamlIgnore]
   public bool IsOptional => !Required;
-  [YamlIgnore]
-  public bool HasSplashScreenFile => string.IsNullOrWhiteSpace(SplashScreenFile);
-  [YamlIgnore]
-  public bool HasSetupPackageFile => string.IsNullOrWhiteSpace(SetupPackageFile);
 
   public DiscImage()
   {
@@ -64,6 +61,9 @@ public class DiscImage : INotifyPropertyChanged
   }
 
   public event PropertyChangedEventHandler? PropertyChanged;
+
+  public static bool ProvidesKeyIsRoot(string key) =>
+    string.Equals(RootPlaceholder, key, StringComparison.OrdinalIgnoreCase);
 
   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

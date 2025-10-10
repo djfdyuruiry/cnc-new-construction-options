@@ -8,8 +8,8 @@ namespace CNC.NCO.Launcher.Model;
 #pragma warning disable CS8618 // YAML deserialization populates these members
 public class NewConstructionOptions : INotifyPropertyChanged
 {
-  private string _installPath;
-  private bool _installed;
+  private string _installPath = string.Empty;
+  private bool _installed = false;
 
   private string _pendingInstallPath;
 
@@ -54,12 +54,6 @@ public class NewConstructionOptions : INotifyPropertyChanged
   }
 
   public event PropertyChangedEventHandler? PropertyChanged;
-
-  public NewConstructionOptions()
-  {
-    _installPath = string.Empty;
-    _installed = false;
-  }
 
   protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

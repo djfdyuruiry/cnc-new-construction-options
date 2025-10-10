@@ -45,7 +45,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
   [SupportedOSPlatform("windows")]
   private async Task InstallMsvcRuntime(IDownloadEventVisitor eventVisitor)
   {
-    if (configService.Config.NCO.Installed)
+    if (configService.Config.Nco.Installed)
     {
       // only needs installed once, so skip on subsequent installer executions
       return;
@@ -55,7 +55,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
     var winUtils = new WindowsUtils(pathsConfig);
 
-    await winUtils.InstallMsvcRuntime(configService.Config.NCO.MsvcRuntimeUrl);
+    await winUtils.InstallMsvcRuntime(configService.Config.Nco.MsvcRuntimeUrl);
   }
 
   [SupportedOSPlatform("linux")]
@@ -96,6 +96,8 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
   private async Task RunPostInstallConfig(string installRoot, IDownloadEventVisitor eventVisitor)
   {
+    // TODO: Deploy basic ini file (if not present) for C&C/RA that sets video mode (fix issue with scaled displays)
+
     if (OperatingSystem.IsLinux())
     {
       GenerateDesktopFiles(installRoot, eventVisitor);
@@ -164,7 +166,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
   private async Task<string> GetAssetForNcoRelease()
   {
-    var ncoConfig = configService.Config.NCO;
+    var ncoConfig = configService.Config.Nco;
     var ncoRelease = await gitHubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
       .Releases
       .Tags[ncoConfig.Release]
@@ -188,7 +190,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
     Action<Stream> responseHandler
   )
   {
-    eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.NCO));
+    eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.Nco));
 
     var assetUrl = await GetAssetForNcoRelease();
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,8 +10,10 @@ using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class Bin2IsoService(PathsConfig paths)
+public class Bin2IsoService(PathsConfig paths) : IDisposable
 {
+  private readonly List<string> _genreatedIsoImages = [];
+
   private string OsBin2IsoPath => Path.Join(
     paths.ToolsPath,
     OperatingSystem.IsWindows() ? "bin2iso.exe" : "bin2iso"
@@ -36,13 +39,34 @@ public class Bin2IsoService(PathsConfig paths)
 
     // extract data track from bin/cue image
     var extractCueTrackResult = await CallBin2Iso(cuePath, isoImageDirectory, "-t", "1");
-    generateCueResult.AssertExitCode($"Failed to extract iso from bin file: {binImagePath}");
+    extractCueTrackResult.AssertExitCode($"Failed to extract iso from bin file: {binImagePath}");
 
     // find data track iso output file 
-    return Directory.GetFileSystemEntries(Path.GetDirectoryName(cuePath)!)
-      .First(f => 
+    var isoImage = Directory.GetFileSystemEntries(Path.GetDirectoryName(cuePath)!)
+      .First(f =>
         Path.GetExtension(f).Equals(".iso", StringComparison.OrdinalIgnoreCase)
         && Path.GetFileName(f).StartsWith(isoFileNoExtensions, StringComparison.OrdinalIgnoreCase)
       );
+
+    _genreatedIsoImages.Add(isoImage);
+
+    return isoImage;
+  }
+
+  public void Dispose()
+  {
+    foreach (var image in _genreatedIsoImages.Where(File.Exists))
+    {
+      try
+      {
+        File.Delete(image);
+      }
+      catch (Exception ex) 
+      {
+        Console.Error.WriteLine($"Failed to delete iso image {image}: {ex}");
+      };
+    }
+
+    GC.SuppressFinalize(this);
   }
 }

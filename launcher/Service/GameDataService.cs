@@ -14,12 +14,12 @@ using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Util;
+using Splat;
 
 namespace CNC.NCO.Launcher.Service;
 
 public class GameDataService(
   LauncherConfigService configService,
-  Bin2IsoService bin2IsoService,
   MediaFireDownloadService mediaFireDownloadService,
   PathsConfig paths
 )
@@ -97,7 +97,7 @@ public class GameDataService(
 
     foreach (var fileList in source.Provides)
     {
-      var outDir = fileList.Key.Equals(DiscImage.RootPlaceholder, StringComparison.OrdinalIgnoreCase)
+      var outDir = DiscImage.ProvidesKeyIsRoot(fileList.Key)
         ? installPath
         : Path.Join(installPath, fileList.Key.ToLower());
 
@@ -112,7 +112,7 @@ public class GameDataService(
         var destPath = Path.Join(outDir, fileName.ToLower());
 
         await GameDiscUtils.ExtractFile(
-          iso, downloadEventVisitor, source.SetupPackageFile, file, destPath
+          iso, downloadEventVisitor, source, file, destPath
         );
       }
     }
@@ -185,13 +185,15 @@ public class GameDataService(
       );
     }
 
+    using var bin2IsoService = Locator.Current.GetService<Bin2IsoService>();
+
     // covert .bin to .iso (if required)
     if (Path.GetExtension(imagePath).Equals(".bin", StringComparison.OrdinalIgnoreCase))
     {
       try
       {
         downloadEventVisitor.Visit(new ConvertDiscImageEvent(source, "bin", "iso"));
-        imagePath = await bin2IsoService.ConvertBinToIso(imagePath);
+        imagePath = await bin2IsoService!.ConvertBinToIso(imagePath);
       }
       catch (Exception ex)
       {
@@ -215,7 +217,7 @@ public class GameDataService(
     }
     catch (Exception ex)
     {
-      throw new GameDataDownloadException($"Failed to open ISO disc image: {source.DisplayName ?? source.Name}", ex);
+      throw new GameDataDownloadException($"Failed to open ISO disc image: {source.DisplayNameOrName}", ex);
     }
   }
 
@@ -241,7 +243,7 @@ public class GameDataService(
 
     async Task OnIsoOpen(DiscImageSource imageSource, CDReader iso)
     {
-      if (imageSource.SplashScreenFile is not null && iso.FileExists(imageSource.SplashScreenFile))
+      if (imageSource.HasSplashScreenFile && iso.FileExists(imageSource.SplashScreenFile))
       {
         await using var fileStream = iso.OpenFile(imageSource.SplashScreenFile, FileMode.Open);
         onSplashScreenLoaded(Bitmap.DecodeToHeight(fileStream, 480));

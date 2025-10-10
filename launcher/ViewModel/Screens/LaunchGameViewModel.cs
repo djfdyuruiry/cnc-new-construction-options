@@ -87,8 +87,8 @@ public class LaunchGameViewModel : ScreenViewModelBase
     var gameProcess = ProcessUtils.ExecWithCallback(
       new ProcessStartInfo
       {
-        FileName = Path.Join(Config!.NCO.InstallPath, game.InstallPostfix, game.PlatformBinary),
-        WorkingDirectory = Path.Join(Config.NCO.InstallPath, game.InstallPostfix),
+        FileName = Path.Join(Config!.Nco.InstallPath, game.InstallPostfix, game.PlatformBinary),
+        WorkingDirectory = Path.Join(Config.Nco.InstallPath, game.InstallPostfix),
         RedirectStandardOutput = true,
         RedirectStandardError = true
       },

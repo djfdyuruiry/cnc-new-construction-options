@@ -9,7 +9,8 @@ public class LauncherConfig
 {
   [YamlMember(Alias = "$schema")]
   public string Schema { get; set; }
-  public NewConstructionOptions NCO { get; set; }
+  [YamlMember(Alias = "NCO")]
+  public NewConstructionOptions Nco { get; set; }
   public GameDataConfig TiberianDawn { get; set; }
   public GameDataConfig RedAlert { get; set; }
   
@@ -19,10 +20,7 @@ public class LauncherConfig
     new List<GameDataConfig> { TiberianDawn, RedAlert }.OrderBy(g => g.SortOrder);
 
   [YamlIgnore]
-  public IEnumerable<DiscImage> DiscImages =>
-    Games.SelectMany(g => 
-      g.DiscImages.OrderBy(d => d.SortOrder)
-    );
+  public IEnumerable<DiscImage> DiscImages => Games.SelectMany(g => g.OrderedDiscImages);
 
   [YamlIgnore]
   public IEnumerable<DiscImageSource> DiscImageSources =>
@@ -30,42 +28,26 @@ public class LauncherConfig
       g.DiscImagesBySource
         .First()
         .Value
-        .OrderBy(d => d.SortOrder)
     );
 
   [YamlIgnore]
-  public IEnumerable<ZipUrlSpec> ZipUrlSpecs => 
-    Games.SelectMany(g => 
-      (g.ZipUrls ?? []).OrderBy(z => z.SortOrder)
-    );
+  public IEnumerable<ZipUrlSpec> ZipUrlSpecs => Games.SelectMany(g => g.ZipUrlSpecs);
 
   [YamlIgnore]
   public IEnumerable<GameDataConfig> EnabledGames => Games.Where(g => g.Enabled);
 
   [YamlIgnore]
-  public IEnumerable<DiscImage> EnabledDiscImages =>
-    EnabledGames
-      .SelectMany(g => 
-        g.DiscImages
-          .Where(d => d.Enabled)
-          .OrderBy(d => d.SortOrder)
-      );
+  public IEnumerable<DiscImage> EnabledDiscImages => EnabledGames.SelectMany(g => g.EnabledDiscImages);
 
   [YamlIgnore]
   public IEnumerable<DiscImageSource> EnabledDiscImageSources =>
     EnabledGames
       .SelectMany(g => 
-        g.DiscImagesBySource
+        g.EnabledDiscImagesBySource
           .First()
           .Value
-          .Where(d => d.Enabled)
-          .OrderBy(d => d.SortOrder)
       );
-  
+
   [YamlIgnore]
-  public IEnumerable<ZipUrlSpec> EnabledZipUrlSpecs =>
-    EnabledGames
-      .SelectMany(g => 
-        (g.ZipUrls?.Where(z => z.Enabled) ?? []).OrderBy(z => z.SortOrder)
-      );
+  public IEnumerable<ZipUrlSpec> EnabledZipUrlSpecs => EnabledGames.SelectMany(g => g.EnabledZipUrlSpecs);
 }

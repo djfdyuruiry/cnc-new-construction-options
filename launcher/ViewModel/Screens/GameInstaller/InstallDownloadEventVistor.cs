@@ -23,7 +23,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
 
   public void Visit(StartDiscImageDownloadEvent e)
   {
-    AppendToInstallLog($"Downloading disc image: {e.Image.Config.File}");
+    AppendToInstallLog($"Downloading disc image {e.Image.Config.File} from source: {e.Image.Config.DisplayName}");
     
     _currentDiscImage = host.DiscImages!.FirstOrDefault(d => Equals(d.Item, e.Image));
 

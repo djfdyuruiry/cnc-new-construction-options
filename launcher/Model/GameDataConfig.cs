@@ -50,10 +50,7 @@ public class GameDataConfig : INotifyPropertyChanged
   public IList<DiscImage> OrderedDiscImages => DiscImages.OrderBy(d => d.SortOrder).ToList();
 
   [YamlIgnore]
-  public IList<DiscImage> EnabledDiscImages => 
-    DiscImages.Where(d => d.Enabled)
-      .OrderBy(d => d.SortOrder)
-      .ToList();
+  public IList<DiscImage> EnabledDiscImages => OrderedDiscImages.Where(d => d.Enabled).ToList();
 
   [YamlIgnore]
   public IDictionary<string, IList<DiscImageSource>> DiscImagesBySource => DiscImages
@@ -65,6 +62,7 @@ public class GameDataConfig : INotifyPropertyChanged
         .Select(d => d.BuildSources(this).GetValueOrDefault(p))
         .Where(d => d is not null)
         .Select(d => d!)
+        .OrderBy(d => d.SortOrder)
         .ToList()
     );
 
@@ -78,6 +76,7 @@ public class GameDataConfig : INotifyPropertyChanged
         .Select(d => d.BuildSources(this).GetValueOrDefault(p))
         .Where(d => d is not null)
         .Select(d => d!)
+        .OrderBy(d => d.SortOrder)
         .ToList()
     );
 

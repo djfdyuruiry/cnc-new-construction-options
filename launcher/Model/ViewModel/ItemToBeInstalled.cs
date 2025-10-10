@@ -45,6 +45,6 @@ public class ItemToBeInstalled<T>(T item) : INotifyPropertyChanged
 
   public static ItemToBeInstalled<T> Build(T instance) => new(instance);
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
+  private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

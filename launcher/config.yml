@@ -25,6 +25,7 @@ TiberianDawn:
       Required: true
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
           File: CNC95_GDI.iso
       SplashScreenFile: SETUP.BMP
@@ -52,6 +53,7 @@ TiberianDawn:
       Name: NOD
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
           File: CNC95_Nod.iso
       SplashScreenFile: SETUP.BMP
@@ -67,6 +69,7 @@ TiberianDawn:
         Covert Operations (Expansion)
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
           File: CD3_Covertops.bin
       Provides:
@@ -95,6 +98,7 @@ RedAlert:
       Required: true
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Allies.zip
           File: CD1_ALLIES.iso
       SplashScreenFile: SETUP95\\SETUP.BMP
@@ -108,6 +112,7 @@ RedAlert:
       DisplayName: Soviet
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Soviet.zip
           File: CD2_Soviet.iso
       SplashScreenFile: SETUP95\\SETUP.BMP
@@ -121,6 +126,7 @@ RedAlert:
       DisplayName: Counterstrike (Expansion)
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
           File: CD3_Counterstrike.bin
       SplashScreenFile: SETUP95\\SETUP.BMP
@@ -132,6 +138,7 @@ RedAlert:
       DisplayName: The Aftermath (Expansion)
       Sources:
         - Name: cnc-comm
+          DisplayName: C&C Communications Center
           Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
           File: CD4_Aftermath.bin
       SplashScreenFile: SETUP95\\SETUP.BMP

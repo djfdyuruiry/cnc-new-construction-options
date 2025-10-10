@@ -58,7 +58,7 @@ public class MainViewModel : ReactiveObject, IScreen
   {
     try
     {
-      NcoInstalled = _configService.Config.NCO.Installed;
+      NcoInstalled = _configService.Config.Nco.Installed;
       InstallerEnabled = true;
 
       return NcoInstalled

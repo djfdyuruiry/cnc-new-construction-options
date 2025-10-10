@@ -19,7 +19,7 @@
 
     <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Center"
-                IsVisible="{Binding !Config.NCO.Installed}"
+                IsVisible="{Binding !Config.Nco.Installed}"
                 Margin="0,0,0,5"
                 Grid.Row="2">
       <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
@@ -46,7 +46,7 @@
       <Panel x:Name="TdPanel">
         <Panel.IsEnabled>
           <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="Config.NCO.Installed" />
+            <Binding Path="Config.Nco.Installed" />
             <Binding Path="Config.TiberianDawn.Enabled" />
             <Binding Path="TdProcess" Converter="{x:Static ObjectConverters.IsNull}"/>
           </MultiBinding>
@@ -60,7 +60,7 @@
         <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.Or}">
-              <Binding Path="!Config.NCO.Installed" />
+              <Binding Path="!Config.Nco.Installed" />
               <Binding Path="!Config.TiberianDawn.Enabled" />
               <Binding Path="TdProcess" Converter="{x:Static ObjectConverters.IsNotNull}"/>
             </MultiBinding>
@@ -72,7 +72,7 @@
       <Panel x:Name="RaPanel" Margin="10,0,0,0">
         <Panel.IsEnabled>
           <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="Config.NCO.Installed" />
+            <Binding Path="Config.Nco.Installed" />
             <Binding Path="Config.RedAlert.Enabled" />
             <Binding Path="RaProcess" Converter="{x:Static ObjectConverters.IsNull}"/>
           </MultiBinding>
@@ -86,7 +86,7 @@
         <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.Or}">
-              <Binding Path="!Config.NCO.Installed" />
+              <Binding Path="!Config.Nco.Installed" />
               <Binding Path="!Config.RedAlert.Enabled" />
               <Binding Path="RaProcess" Converter="{x:Static ObjectConverters.IsNotNull}"/>
             </MultiBinding>
