@@ -6,7 +6,6 @@ using Avalonia.Markup.Xaml;
 using Splat;
 
 using CNC.NCO.Launcher.Config;
-using Splat.Autofac;
 
 namespace CNC.NCO.Launcher;
 
@@ -30,17 +29,9 @@ public partial class App : Application
 
   private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
   {
-    SaveUserConfig();
-    
     try
     {
-      if (Locator.GetLocator() is not AutofacDependencyResolver autofac)
-      {
-        Console.Error.WriteLine("WARN Unable to access Autofac dependency resolver, services will not be disposed");
-        return;
-      }
-      
-      autofac.Dispose();
+      SaveUserConfig();
     }
     catch (Exception ex)
     {
@@ -48,15 +39,5 @@ public partial class App : Application
     }
   }
 
-  private void SaveUserConfig()
-  {
-    try
-    {
-      Locator.Current.GetService<LauncherConfigService>()?.SaveUserConfig();
-    }
-    catch (Exception ex)
-    {
-      Console.Error.WriteLine(ex);
-    }
-  }
+  private void SaveUserConfig() => Locator.Current.GetService<LauncherConfigService>()?.SaveUserConfig();
 }

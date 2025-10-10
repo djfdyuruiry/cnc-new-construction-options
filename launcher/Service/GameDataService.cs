@@ -164,8 +164,10 @@ public class GameDataService(
   private async Task ExtractGameDataFromDiscImage(
     DiscImageSource source,
     IDownloadEventVisitor downloadEventVisitor,
+    Bin2IsoService bin2IsoService,
     string installPath,
-    Func<CDReader, Task> onIsoOpen)
+    Func<CDReader, Task> onIsoOpen
+  )
   {
     var imagePath = Path.Join(paths.NcoCachePath, source.Config.File);
 
@@ -184,8 +186,6 @@ public class GameDataService(
         ex
       );
     }
-
-    using var bin2IsoService = Locator.Current.GetService<Bin2IsoService>();
 
     // covert .bin to .iso (if required)
     if (Path.GetExtension(imagePath).Equals(".bin", StringComparison.OrdinalIgnoreCase))
@@ -224,6 +224,7 @@ public class GameDataService(
   private async Task DownloadGameDiscImageFiles(
     GameDataConfig dataConfig,
     IDownloadEventVisitor downloadEventVisitor,
+    Bin2IsoService bin2IsoService,
     Action<Bitmap> onSplashScreenLoaded,
     string installPath
   )
@@ -234,6 +235,7 @@ public class GameDataService(
       await ExtractGameDataFromDiscImage(
         imageSource,
         downloadEventVisitor,
+        bin2IsoService,
         installPath,
         i => OnIsoOpen(imageSource, i)
       );
@@ -262,6 +264,7 @@ public class GameDataService(
     try
     {
       DirectoryUtils.CreateDirectoryIfMissing(paths.NcoCachePath);
+      using var bin2IsoService = Locator.Current.GetService<Bin2IsoService>()!;
 
       foreach (var game in configService.Config.EnabledGames)
       {
@@ -273,7 +276,7 @@ public class GameDataService(
 
         downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));
 
-        await DownloadGameDiscImageFiles(game, downloadEventVisitor, onSplashScreenLoaded, installPath);
+        await DownloadGameDiscImageFiles(game, downloadEventVisitor, bin2IsoService, onSplashScreenLoaded, installPath);
 
         foreach (var zipUrl in game.EnabledZipUrlSpecs)
         {

@@ -12,7 +12,7 @@ namespace CNC.NCO.Launcher.Service;
 
 public class Bin2IsoService(PathsConfig paths) : IDisposable
 {
-  private readonly List<string> _genreatedIsoImages = [];
+  private readonly List<string> _generatedIsoImages = [];
 
   private string OsBin2IsoPath => Path.Join(
     paths.ToolsPath,
@@ -48,14 +48,14 @@ public class Bin2IsoService(PathsConfig paths) : IDisposable
         && Path.GetFileName(f).StartsWith(isoFileNoExtensions, StringComparison.OrdinalIgnoreCase)
       );
 
-    _genreatedIsoImages.Add(isoImage);
+    _generatedIsoImages.Add(isoImage);
 
     return isoImage;
   }
 
   public void Dispose()
   {
-    foreach (var image in _genreatedIsoImages.Where(File.Exists))
+    foreach (var image in _generatedIsoImages.Where(File.Exists))
     {
       try
       {
@@ -63,7 +63,7 @@ public class Bin2IsoService(PathsConfig paths) : IDisposable
       }
       catch (Exception ex) 
       {
-        Console.Error.WriteLine($"Failed to delete iso image {image}: {ex}");
+        Console.Error.WriteLine($"Failed to cleanup generated iso file '{image}': {ex}");
       };
     }
 
