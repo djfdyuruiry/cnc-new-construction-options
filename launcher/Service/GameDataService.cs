@@ -1,12 +1,16 @@
 using System;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
+using Blake3;
 using DiscUtils.Iso9660;
+using Splat;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
@@ -14,7 +18,6 @@ using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Util;
-using Splat;
 
 namespace CNC.NCO.Launcher.Service;
 
@@ -32,22 +35,26 @@ public class GameDataService(
   )
   {
     using var zipReader = ReaderFactory.Open(downloadStream);
-    var fileSuffix = spec.ProvidesFilesEndingWith.ToLower();
 
     while (zipReader.MoveToNextEntry())
     {
-      if (!(zipReader.Entry.Key?.EndsWith(fileSuffix, StringComparison.OrdinalIgnoreCase) ?? false))
+      var entryKey = zipReader.Entry.Key;
+
+      if (
+        entryKey is null
+        || !entryKey.EndsWith(spec.ProvidesFilesEndingWith, StringComparison.OrdinalIgnoreCase)
+      )
       {
         continue;
       }
 
-      Console.WriteLine($"Extracting {zipReader.Entry.Key} to {installPath}/{zipReader.Entry.Key.ToLower()}");
+      var destPath = Path.Join(installPath, entryKey.ToLower());
 
-      var destPath = Path.Join(installPath, zipReader.Entry.Key.ToLower());
+      Console.WriteLine($"Extracting {entryKey} to {destPath}");
 
       zipReader.WriteEntryToFile(destPath, new ExtractionOptions() { Overwrite = true });
 
-      downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, destPath));
+      downloadEventVisitor.Visit(new WriteGameDataFileEvent(entryKey, destPath));
     }
   }
 
@@ -101,15 +108,12 @@ public class GameDataService(
         ? installPath
         : Path.Join(installPath, fileList.Key.ToLower());
 
-      if (!Directory.Exists(outDir))
-      {
-        Directory.CreateDirectory(outDir);
-      }
-
+      Directory.CreateDirectory(outDir);
+  
       foreach (var file in fileList.Value)
       {
-        var fileName = file.Split(@"\").Last();
-        var destPath = Path.Join(outDir, fileName.ToLower());
+        var fileName = file.Split(@"\").Last().ToLower();
+        var destPath = Path.Join(outDir, fileName);
 
         await GameDiscUtils.ExtractFile(
           iso, downloadEventVisitor, source, file, destPath
@@ -124,7 +128,13 @@ public class GameDataService(
     IDownloadEventVisitor downloadEventVisitor
   )
   {
-    if (File.Exists(destinationPath))
+    if (
+      HashingUtils.FileChecksumIsValid(
+        destinationPath,
+        source.Config.Checksum, 
+        deleteInvalidFiles: true
+      ) 
+    )
     {
       return false;
     }
@@ -156,9 +166,25 @@ public class GameDataService(
       }
     }
 
-    return !File.Exists(destinationPath)
-      ? throw new FileNotFoundException("Could not locate image file inside ZIP archive", source.Config.File)
-      : true;
+    if(!File.Exists(destinationPath))
+    {
+      throw new FileNotFoundException("Could not locate image file inside ZIP archive", source.Config.File);
+    }
+    
+    if (
+      HashingUtils.FileChecksumIsValid(
+        destinationPath,
+        source.Config.Checksum, 
+        deleteInvalidFiles: true
+      ) 
+    )
+    {
+      return true;
+    }
+
+    throw new InvalidDataException(
+      "Downloaded image file was corrupt. Check source website is up and internet connection is OK, then try again"
+    );
   }
 
   private async Task ExtractGameDataFromDiscImage(

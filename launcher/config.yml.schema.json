@@ -100,9 +100,12 @@
                     },
                     "File": {
                       "type": "string"
+                    },
+                    "Checksum": {
+                      "type": "string"
                     }
                   },
-                  "required": ["Name", "Url", "File"]
+                  "required": ["Name", "DisplayName", "Url", "File", "Checksum"]
                 }
               },
               "SplashScreenFile": {

@@ -9,6 +9,7 @@ public class DiscImageSourceConfig
   public string DisplayName { get; set; }
   public string Url { get; set; }
   public string File { get; set; }
+  public string Checksum { get; set; }
 
   // virtual properties for processing and view models
   [YamlIgnore]
