@@ -129,7 +129,7 @@ public class GameDataService(
   )
   {
     if (
-      HashingUtils.FileChecksumIsValid(
+      await HashingUtils.FileChecksumIsValid(
         destinationPath,
         source.Config.Checksum, 
         deleteInvalidFiles: true
@@ -172,7 +172,7 @@ public class GameDataService(
     }
     
     if (
-      HashingUtils.FileChecksumIsValid(
+      await HashingUtils.FileChecksumIsValid(
         destinationPath,
         source.Config.Checksum, 
         deleteInvalidFiles: true
@@ -183,7 +183,7 @@ public class GameDataService(
     }
 
     throw new InvalidDataException(
-      "Downloaded image file was corrupt. Check source website is up and internet connection is OK, then try again"
+      "Downloaded image file was corrupt. Check source website is working and internet connection is OK, then try again"
     );
   }
 

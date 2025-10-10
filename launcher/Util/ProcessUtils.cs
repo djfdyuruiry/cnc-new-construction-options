@@ -6,7 +6,7 @@ using CNC.NCO.Launcher.Model.Util;
 
 namespace CNC.NCO.Launcher.Util;
 
-public class ProcessUtils
+public static class ProcessUtils
 {
   public static ProcessStartInfo BuildStartInfo(string binaryPath, params string[] arguments) =>
     new()

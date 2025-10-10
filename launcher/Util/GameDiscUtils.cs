@@ -10,7 +10,7 @@ using CNC.NCO.Launcher.Model.Events.Download;
 
 namespace CNC.NCO.Launcher.Util;
 
-public class GameDiscUtils
+public static class GameDiscUtils
 {
   private static async Task<Stream?> GetStreamForSetupPackageFile(
     CDReader iso,
