@@ -25,5 +25,6 @@ public interface IDownloadEventVisitor : IVisitor
   void Visit(FinishNcoReleaseDownloadEvent e);
   [SupportedOSPlatform("windows")]
   void Visit(FetchMsvcRuntimeEvent e);
+  void Visit(ShortcutCreatedEvent e);
   void Visit(DownloadNcoReleaseErrorEvent e);
 }

@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Runtime.Versioning;
 
 using Autofac;
 using Avalonia;
 using Avalonia.ReactiveUI.Splat;
+
+[assembly: SupportedOSPlatform("windows")]
+[assembly: SupportedOSPlatform("linux")]
+[assembly: SupportedOSPlatform("osx")]
 
 namespace CNC.NCO.Launcher;
 

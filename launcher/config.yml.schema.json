@@ -1,165 +1,165 @@
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "NCO Launcher Configuration",
-  "type": "object",
-  "properties": {
-    "NCO": {
-      "type": "object",
-      "properties": {
-        "GitHubRepo": {
-          "type": "object",
-          "properties": {
-            "Owner": {
-              "type": "string"
-            },
-            "Name": {
-              "type": "string"
-            }
-          },
-          "required": ["Owner", "Name"]
-        },
-        "Release": {
-          "type": "string"
-        },
-        "AssetPrefix": {
-          "type": "string"
-        },
-        "MsvcRuntimeUrl": {
-          "type": "string"
-        },
-        "InstallPath": {
-          "type": "string"
-        },
-        "Installed": {
-          "type": "boolean"
-        }
-      },
-      "required": ["GitHubRepo", "Release", "AssetPrefix", "MsvcRuntimeUrl"]
-    },
-    "TiberianDawn": {
-      "$ref": "#/definitions/GameDataConfig"
-    },
-    "RedAlert": {
-      "$ref": "#/definitions/GameDataConfig"
-    }
-  },
-  "required": ["NCO", "TiberianDawn", "RedAlert"],
-  "definitions": {
-    "GameDataConfig": {
-      "type": "object",
-      "properties": {
-        "SortOrder": {
-          "type": "integer"
-        },
-        "Name": {
-          "type": "string"
-        },
-        "DisplayName": {
-          "type": "string"
-        },
-        "NcoZipPath": {
-          "type": "string"
-        },
-        "InstallPostfix": {
-          "type": "string"
-        },
-        "Binary": {
-          "type": "string"
-        },
-        "DiscImages": {
-          "type": "array",
-          "items": {
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "NCO Launcher Configuration",
+    "type": "object",
+    "properties": {
+      "NCO": {
+        "type": "object",
+        "properties": {
+          "GitHubRepo": {
             "type": "object",
             "properties": {
-              "SortOrder": {
-                "type": "integer"
+              "Owner": {
+                "type": "string"
               },
               "Name": {
                 "type": "string"
-              },
-              "DisplayName": {
-                "type": "string"
-              },
-              "Required": {
-                "type": "boolean"
-              },
-              "Sources": {
-                "type": "array",
-                "items": {
+              }
+            },
+            "required": ["Owner", "Name"]
+          },
+          "Release": {
+            "type": "string"
+          },
+          "AssetPrefix": {
+            "type": "string"
+          },
+          "MsvcRuntimeUrl": {
+            "type": "string"
+          },
+          "InstallPath": {
+            "type": "string"
+          },
+          "Installed": {
+            "type": "boolean"
+          }
+        },
+        "required": ["GitHubRepo", "Release", "AssetPrefix", "MsvcRuntimeUrl"]
+      },
+      "TiberianDawn": {
+        "$ref": "#/definitions/GameDataConfig"
+      },
+      "RedAlert": {
+        "$ref": "#/definitions/GameDataConfig"
+      }
+    },
+    "required": ["NCO", "TiberianDawn", "RedAlert"],
+    "definitions": {
+      "GameDataConfig": {
+        "type": "object",
+        "properties": {
+          "SortOrder": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "DisplayName": {
+            "type": "string"
+          },
+          "NcoZipPath": {
+            "type": "string"
+          },
+          "InstallPostfix": {
+            "type": "string"
+          },
+          "Binary": {
+            "type": "string"
+          },
+          "DiscImages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "SortOrder": {
+                  "type": "integer"
+                },
+                "Name": {
+                  "type": "string"
+                },
+                "DisplayName": {
+                  "type": "string"
+                },
+                "Required": {
+                  "type": "boolean"
+                },
+                "Sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string"
+                      },
+                      "DisplayName": {
+                        "type": "string"
+                      },
+                      "Url": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "File": {
+                        "type": "string"
+                      },
+                      "Checksum": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["Name", "DisplayName", "Url", "File", "Checksum"]
+                  }
+                },
+                "SplashScreenFile": {
+                  "type": "string"
+                },
+                "SetupPackageFile": {
+                  "type": "string"
+                },
+                "Provides": {
                   "type": "object",
-                  "properties": {
-                    "Name": {
-                      "type": "string"
-                    },
-                    "DisplayName": {
-                      "type": "string"
-                    },
-                    "Url": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "File": {
-                      "type": "string"
-                    },
-                    "Checksum": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["Name", "DisplayName", "Url", "File", "Checksum"]
-                }
-              },
-              "SplashScreenFile": {
-                "type": "string"
-              },
-              "SetupPackageFile": {
-                "type": "string"
-              },
-              "Provides": {
-                "type": "object",
-                "patternProperties": {
-                  ".*": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
+                  "patternProperties": {
+                    ".*": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   }
                 }
-              }
-            },
-            "required": ["SortOrder", "Name", "Sources"]
+              },
+              "required": ["SortOrder", "Name", "Sources"]
+            }
+          },
+          "ZipUrls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "SortOrder": {
+                  "type": "integer"
+                },
+                "Name": {
+                  "type": "string"
+                },
+                "DisplayName": {
+                  "type": "string"
+                },
+                "Url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "ProvidesFilesEndingWith": {
+                  "type": "string"
+                },
+                "InfoUrl": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": ["SortOrder", "Name", "Url", "ProvidesFilesEndingWith"]
+            }
           }
         },
-        "ZipUrls": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "SortOrder": {
-                "type": "integer"
-              },
-              "Name": {
-                "type": "string"
-              },
-              "DisplayName": {
-                "type": "string"
-              },
-              "Url": {
-                "type": "string",
-                "format": "uri"
-              },
-              "ProvidesFilesEndingWith": {
-                "type": "string"
-              },
-              "InfoUrl": {
-                "type": "string",
-                "format": "uri"
-              }
-            },
-            "required": ["SortOrder", "Name", "Url", "ProvidesFilesEndingWith"]
-          }
-        }
-      },
-      "required": ["SortOrder", "Name", "DisplayName", "NcoZipPath", "InstallPostfix", "Binary", "DiscImages"]
+        "required": ["SortOrder", "Name", "DisplayName", "NcoZipPath", "InstallPostfix", "Binary", "DiscImages"]
+      }
     }
   }
-}

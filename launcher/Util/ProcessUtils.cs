@@ -42,6 +42,8 @@ public static class ProcessUtils
       StartInfo = startInfo
     };
 
+    // Reason: process is only disposed if process fails to start
+    // ReSharper disable once AccessToDisposedClosure
     process.Exited += (_, _) => onExit(new ProcessExecuteResult(process));
 
     if (!process.Start())

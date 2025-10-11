@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -26,12 +27,7 @@ public partial class InstallGameView : ReactiveUserControl<InstallGameViewModel>
           : Colors.White
       );
 
-      if (ViewModel is null)
-      {
-        return;
-      }
-
-      ViewModel.WhenValueChanged(x => x.InstallLog)
+      ViewModel?.WhenValueChanged(x => x.InstallLog)
         .ObserveOn(RxApp.MainThreadScheduler)
         .Subscribe(_ =>
           this.GetControl<ScrollViewer>("InstallLogViewer").ScrollToEnd()

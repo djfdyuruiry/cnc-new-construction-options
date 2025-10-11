@@ -16,7 +16,7 @@ public class ServicesModule : Module
     // BUG: without singleton scope RequestAdapter throws error on second instantiation
     //      (even if previous instance is disposed)
     var gitHubClient = new GitHubClient(
-      RequestAdapter.Create(new AnonymousAuthenticationProvider() )
+      RequestAdapter.Create(new AnonymousAuthenticationProvider())
     );
 
     builder.RegisterInstance(gitHubClient).SingleInstance().AsSelf();

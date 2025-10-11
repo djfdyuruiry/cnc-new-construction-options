@@ -11,18 +11,19 @@ namespace CNC.NCO.Launcher.Util;
 [SupportedOSPlatform("windows")]
 public class WindowsUtils(PathsConfig paths)
 {
+  private static readonly string StartMenuPath = Path.Join(
+    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+    "Microsoft",
+    "Windows",
+    "Start Menu",
+    "Programs"
+  );
+
   public async Task CreateShortcut(string shortcutName, string targetPath)
   {
     try
     {
-      var shortcutPath = Path.Join(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Microsoft",
-        "Windows",
-        "Start Menu",
-        "Programs",
-        shortcutName
-      );
+      var shortcutPath = Path.Join(StartMenuPath, shortcutName);
 
       var startInfo = ProcessUtils.BuildStartInfo(
         "powershell",

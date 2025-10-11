@@ -35,6 +35,8 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
         $"{game.DisplayName.Replace("Command & Conquer:", "C&C -")} (NCO)",
         gameBinaryPath
       );
+
+      eventVisitor.Visit(new ShortcutCreatedEvent(game));
     }
   }
 
@@ -59,20 +61,9 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
   }
 
   [SupportedOSPlatform("linux")]
-  private void MakeEngineBinariesExecutable(string installRoot)
+  private async Task GenerateDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
   {
-    foreach (var game in configService.Config.EnabledGames)
-    {
-      var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
-
-      File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
-    }
-  }
-
-  [SupportedOSPlatform("linux")]
-  private void GenerateDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
-  {
-    var desktopTemplate = File.ReadAllText(
+    var desktopTemplate = await File.ReadAllTextAsync(
       Path.Join(pathsConfig.ToolsPath, "nco.desktop")
     );
     var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
@@ -85,12 +76,26 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
       var binaryPath = Path.Join(gamePath, game.PlatformBinary);
       var desktopName = $"nco-{game.InstallPostfix}";
 
-      File.WriteAllText(
+      await File.WriteAllTextAsync(
         $"{Path.Join(appsPath, desktopName)}.desktop",
         desktopTemplate.Replace("<BINARY>", binaryPath)
           .Replace("<DISPLAY_NAME>", $"{game.DisplayName.Replace("Command & Conquer:", "C&C -")} (NCO)")
           .Replace("<INSTALL_PATH>", gamePath)
       );
+
+      eventVisitor.Visit(new ShortcutCreatedEvent(game));
+    }
+  }
+
+  // TODO: Remove once linux releases use .tar.gz to preserve executable bit
+  [SupportedOSPlatform("linux")]
+  private void MakeEngineBinariesExecutable(string installRoot)
+  {
+    foreach (var game in configService.Config.EnabledGames)
+    {
+      var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
+
+      File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
     }
   }
 
@@ -100,8 +105,8 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
     if (OperatingSystem.IsLinux())
     {
-      GenerateDesktopFiles(installRoot, eventVisitor);
       MakeEngineBinariesExecutable(installRoot);
+      await GenerateDesktopFiles(installRoot, eventVisitor);
     }
 
     if (OperatingSystem.IsWindows())
@@ -214,7 +219,6 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
   {
     try
     {
-      // BUG: get 'instance has already started requests' when calling this method for second time
       await WithNcoReleaseArchive(
         eventVisitor,
         s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)

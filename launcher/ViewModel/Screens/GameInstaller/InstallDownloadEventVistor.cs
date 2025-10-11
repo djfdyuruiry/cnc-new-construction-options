@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
+
 using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Model.ViewModel;
@@ -145,6 +146,9 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   [SupportedOSPlatform("windows")]
   public void Visit(FetchMsvcRuntimeEvent e) =>
     AppendToInstallLog("Ensuring MSVC runtime is installed - please accept any UAC prompts");
+
+  public void Visit(ShortcutCreatedEvent e) =>
+    AppendToInstallLog($"Created desktop shortcut for game '{e.game.DisplayName}'");
 
   // error handling
   public void Visit(DownloadGameDataErrorEvent e)

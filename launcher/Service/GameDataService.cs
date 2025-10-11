@@ -1,14 +1,12 @@
 using System;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
-using Blake3;
 using DiscUtils.Iso9660;
 using Splat;
 using SharpCompress.Common;
@@ -219,7 +217,7 @@ public class GameDataService(
       try
       {
         downloadEventVisitor.Visit(new ConvertDiscImageEvent(source, "bin", "iso"));
-        imagePath = await bin2IsoService!.ConvertBinToIso(imagePath);
+        imagePath = await bin2IsoService.ConvertBinToIso(imagePath);
       }
       catch (Exception ex)
       {
@@ -289,7 +287,8 @@ public class GameDataService(
 
     try
     {
-      DirectoryUtils.CreateDirectoryIfMissing(paths.NcoCachePath);
+      Directory.CreateDirectory(paths.NcoCachePath);
+
       using var bin2IsoService = Locator.Current.GetService<Bin2IsoService>()!;
 
       foreach (var game in configService.Config.EnabledGames)
@@ -298,7 +297,7 @@ public class GameDataService(
 
         var installPath = Path.Join(installRoot, game.InstallPostfix);
 
-        DirectoryUtils.CreateDirectoryIfMissing(installPath);
+        Directory.CreateDirectory(installPath);
 
         downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));
 

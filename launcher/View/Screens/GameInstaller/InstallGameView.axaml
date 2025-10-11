@@ -11,7 +11,7 @@
                           mc:Ignorable="d"
                           d:DesignWidth="1024"
                           d:DesignHeight="650">
-  <Grid x:Name="BackgroundGrid" RowDefinitions="*" ColumnDefinitions="*">
+  <Grid RowDefinitions="*" ColumnDefinitions="*">
     <Image Source="{Binding CurrentSplashScreen}" Stretch="Fill"/>
 
     <Grid x:Name="BackgroundShaderGrid" RowDefinitions="*" ColumnDefinitions="*" Opacity="0.8">
@@ -118,8 +118,7 @@
           </TextBlock>
 
           <ScrollViewer x:Name="InstallLogViewer" AllowAutoHide="False">
-            <SelectableTextBlock FontSize="16"
-                                 TextWrapping="Wrap"
+            <SelectableTextBlock Classes="p-small"
                                  Text="{Binding InstallLog}"
                                  DockPanel.Dock="Bottom"/>
           </ScrollViewer>

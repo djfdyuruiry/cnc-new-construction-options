@@ -6,6 +6,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
+using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.ViewModel.Screens;
 using CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
@@ -14,15 +15,15 @@ namespace CNC.NCO.Launcher.ViewModel;
 public class MainViewModel : ReactiveObject, IScreen
 {
   private readonly LauncherConfigService _configService;
-  private bool _ncoInstalled;
+  private NewConstructionOptions? _nco;
   private bool _installerEnabled;
 
   public RoutingState Router { get; } = new();
 
-  public bool NcoInstalled
+  public NewConstructionOptions? Nco
   {
-    get => _ncoInstalled;
-    private set => this.RaiseAndSetIfChanged(ref _ncoInstalled, value);
+    get => _nco;
+    private set => this.RaiseAndSetIfChanged(ref _nco, value);
   }
 
   public bool InstallerEnabled
@@ -58,10 +59,10 @@ public class MainViewModel : ReactiveObject, IScreen
   {
     try
     {
-      NcoInstalled = _configService.Config.Nco.Installed;
+      Nco = _configService.Config.Nco;
       InstallerEnabled = true;
 
-      return NcoInstalled
+      return Nco.Installed
         ? Router.NavigateTo<LaunchGameViewModel>()
         : Router.NavigateTo<StartViewModel>();
     }

@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CNC.NCO.Launcher.Model;
+
 using DiscUtils.Iso9660;
 using InstallShieldExtractor;
 
+using CNC.NCO.Launcher.Model;
 using CNC.NCO.Launcher.Model.Events.Download;
 
 namespace CNC.NCO.Launcher.Util;
@@ -14,17 +15,17 @@ public static class GameDiscUtils
 {
   private static async Task<Stream?> GetStreamForSetupPackageFile(
     CDReader iso,
-    string? setupPackagePath,
+    DiscImageSource source,
     string fileName
   )
   {
-    if (string.IsNullOrWhiteSpace(setupPackagePath) || !iso.FileExists(setupPackagePath))
+    if (source.HasSetupPackageFile || !iso.FileExists(source.SetupPackageFile))
     {
       return null;
     }
 
-    await using var setupStream = iso.OpenFile(setupPackagePath, FileMode.Open);
-    using var setupPackage = new InstallShieldPackage(setupStream, setupPackagePath.Split(@"\").Last());
+    await using var setupStream = iso.OpenFile(source.SetupPackageFile, FileMode.Open);
+    using var setupPackage = new InstallShieldPackage(setupStream, source.SetupPackageFile!.Split(@"\").Last());
 
     return setupPackage.Contents
       .Where(p => p.EndsWith(fileName))
@@ -53,7 +54,7 @@ public static class GameDiscUtils
 
       await using var sourceFileStream = isIsoFile
         ? iso.OpenFile(isoOrSetupPath, FileMode.Open)
-        : await GetStreamForSetupPackageFile(iso, isoSource.SetupPackageFile, isoOrSetupPath);
+        : await GetStreamForSetupPackageFile(iso, isoSource, isoOrSetupPath);
 
       if (sourceFileStream is null)
       {

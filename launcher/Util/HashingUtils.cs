@@ -1,12 +1,16 @@
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 using Blake3;
 
 namespace CNC.NCO.Launcher.Util;
 
-public class HashingUtils
+[SupportedOSPlatform("linux")]
+[SupportedOSPlatform("windows")]
+[SupportedOSPlatform("osx")]
+public static class HashingUtils
 {
   public static async Task<Hash> CalculateFileChecksum(string path, int bufferSize = 4096 * 32)
   {
