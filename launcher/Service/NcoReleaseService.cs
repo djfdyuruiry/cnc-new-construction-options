@@ -209,38 +209,38 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
     responseHandler(stream);
   }
 
-  public async Task Download(string installRoot, IDownloadEventVisitor eventVisitor)
+  [SupportedOSPlatform("macos")]
+  private async Task DownloadMacOS(IDownloadEventVisitor eventVisitor)
   {
-    try
-    {
-      await WithNcoReleaseArchive(
-        eventVisitor,
-        s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)
-      );
-
-      await RunPostInstallConfig(installRoot, eventVisitor);
-
-      eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
-    }
-    catch (Exception e)
-    {
-      eventVisitor.Visit(new DownloadNcoReleaseErrorEvent(e));
-    }
+    // TODO: Implement using WithNcoReleaseArchive and other methods
+    // installRoot = pathsConfig.AppDataDirectoryPath
+    //
+    // 1. download .app from release package OR change release package to .dmg
+    // 2. install or prompt user to install .app file
+    // 3. if embedded files inside .app (data files) don't work, need to include
+    //    in release package and extract these to installRoot
+    //
   }
 
-  [SupportedOSPlatform("macos")]
-  public async Task DownloadMacOS(IDownloadEventVisitor eventVisitor)
+  public async Task Download(IDownloadEventVisitor eventVisitor)
   {
     try
     {
-      // TODO: Implement using WithNcoReleaseArchive and other methods
-      // installRoot = pathsConfig.AppDataDirectoryPath
-      //
-      // 1. download .app from release package OR change release package to .dmg
-      // 2. install or prompt user to install .app file
-      // 3. if embedded files inside .app (data files) don't work, need to include
-      //    in release package and extract these to installRoot
-      //
+      if (OperatingSystem.IsMacOS())
+      {
+        await DownloadMacOS(eventVisitor);
+      }
+      else
+      {
+        var installRoot = configService.Config.Nco.PendingInstallPath;
+
+        await WithNcoReleaseArchive(
+          eventVisitor,
+          s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)
+        );
+
+        await RunPostInstallConfig(installRoot, eventVisitor);
+      }
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
     }

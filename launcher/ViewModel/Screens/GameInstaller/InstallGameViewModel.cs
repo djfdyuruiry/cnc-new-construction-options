@@ -132,21 +132,13 @@ public class InstallGameViewModel : ScreenViewModelBase
       var downloadEventVisitor = new InstallDownloadEventVisitor(this);
 
       await _gameDataService.Download(
-        Nco!.Item.PendingInstallPath,
         downloadEventVisitor,
         b => CurrentSplashScreen = b
       );
 
       if (!HasErrored)
       {
-        if (OperatingSystem.IsMacOS())
-        {
-          await _releaseService.DownloadMacOS(downloadEventVisitor);
-        }
-        else
-        {
-          await _releaseService.Download(Nco.Item.PendingInstallPath, downloadEventVisitor);
-        }
+        await _releaseService.Download(downloadEventVisitor);
       }
 
       InstallLog += HasErrored ? "Install failed to complete due to errors" : "Install complete";

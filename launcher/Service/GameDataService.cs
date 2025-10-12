@@ -278,7 +278,6 @@ public class GameDataService(
   }
 
   public async Task Download(
-    string installRoot,
     IDownloadEventVisitor downloadEventVisitor,
     Action<Bitmap> onSplashScreenLoaded
   )
@@ -287,6 +286,10 @@ public class GameDataService(
 
     try
     {
+      var installRoot = OperatingSystem.IsMacOS()
+        ? paths.AppDataDirectoryPath
+        : configService.Config.Nco.PendingInstallPath;
+
       Directory.CreateDirectory(paths.NcoCachePath);
 
       using var bin2IsoService = Locator.Current.GetService<Bin2IsoService>()!;
