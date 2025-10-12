@@ -13,7 +13,6 @@ public static class ProcessUtils
     {
       FileName = binaryPath, 
       Arguments = string.Join(" ", arguments),
-      UseShellExecute = false,
       CreateNoWindow = true,
       RedirectStandardOutput = true,
       RedirectStandardError = true

@@ -19,7 +19,6 @@ using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
-// TODO: Support macos .app extract and install in Applications (plus data paths outside of app bundle)
 public class NcoReleaseService(LauncherConfigService configService, GitHubClient gitHubClient, PathsConfig pathsConfig)
 {
   [SupportedOSPlatform("windows")]
@@ -113,11 +112,6 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
     {
       await InstallMsvcRuntime(eventVisitor);  
       await GenerateWindowsShortcuts(installRoot, eventVisitor);
-    }
-
-    if (OperatingSystem.IsMacOS())
-    {
-      // TODO: any required macos config
     }
   }
 
@@ -225,6 +219,28 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
       );
 
       await RunPostInstallConfig(installRoot, eventVisitor);
+
+      eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
+    }
+    catch (Exception e)
+    {
+      eventVisitor.Visit(new DownloadNcoReleaseErrorEvent(e));
+    }
+  }
+
+  [SupportedOSPlatform("macos")]
+  public async Task DownloadMacOS(IDownloadEventVisitor eventVisitor)
+  {
+    try
+    {
+      // TODO: Implement using WithNcoReleaseArchive and other methods
+      // installRoot = pathsConfig.AppDataDirectoryPath
+      //
+      // 1. download .app from release package OR change release package to .dmg
+      // 2. install or prompt user to install .app file
+      // 3. if embedded files inside .app (data files) don't work, need to include
+      //    in release package and extract these to installRoot
+      //
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
     }

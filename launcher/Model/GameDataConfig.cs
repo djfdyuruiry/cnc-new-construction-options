@@ -87,12 +87,7 @@ public class GameDataConfig : INotifyPropertyChanged
   public IList<ZipUrlSpec> EnabledZipUrlSpecs => ZipUrlSpecs.Where(z => z.Enabled).ToList();
 
   [YamlIgnore]
-  public string PlatformBinary =>
-    OperatingSystem.IsWindows()
-      ? $"{Binary}.exe"
-      : OperatingSystem.IsMacOS()
-        ? $"/Applications/{Binary}.app/Contents/MacOS/{Binary}"
-        : Binary;
+  public string PlatformBinary => OperatingSystem.IsWindows() ? $"{Binary}.exe" : Binary;
 
   public event PropertyChangedEventHandler? PropertyChanged;
 

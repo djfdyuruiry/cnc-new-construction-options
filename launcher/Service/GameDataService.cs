@@ -295,7 +295,10 @@ public class GameDataService(
       {
         currentGame = game;
 
-        var installPath = Path.Join(installRoot, game.InstallPostfix);
+        // macOS has a specific data prefix
+        var installPath = OperatingSystem.IsMacOS()
+          ? Path.Join(installRoot, $"vanilla{game.InstallPostfix}")
+          : Path.Join(installRoot, game.InstallPostfix);
 
         Directory.CreateDirectory(installPath);
 

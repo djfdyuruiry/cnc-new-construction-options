@@ -3,7 +3,7 @@ using System.IO;
 
 namespace CNC.NCO.Launcher.Config;
 
-public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPath)
+public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPath, string userHomePath)
 {
   // launcher app paths
   public string LauncherDirectoryPath => launcherDirectoryPath; 
@@ -25,8 +25,13 @@ public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPa
 #endif
 
   // user paths
+  public string UserHomePath => userHomePath;
   public string AppDataDirectoryPath => appDataDirectoryPath;
-  public string NcoAppDataPath { get; } = Path.Join(appDataDirectoryPath, "nco");
+  public string NcoAppDataPath =>
+    OperatingSystem.IsMacOS()
+    ? Path.Join(UserHomePath, "Library/Application Support/Vanilla-Conquer")
+    : Path.Join(appDataDirectoryPath, "nco");
+
   public string NcoCachePath => Path.Join(NcoAppDataPath, ".cache");
   public string UserConfigYamlPath => Path.Join(NcoAppDataPath, "config.yml");
 }

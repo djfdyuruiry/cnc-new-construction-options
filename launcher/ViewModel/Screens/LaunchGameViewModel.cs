@@ -74,8 +74,7 @@ public class LaunchGameViewModel : ScreenViewModelBase
       Console.Error.WriteLine($"WARN: Game '{game.DisplayName}' already running");
       return;
     }
-    
-    // TODO: Review macos path when NcoReleaseService deploys .app to Applications
+
     LaunchFailed = false;
 
     var stdOutLog = Path.Join(_pathsConfig.NcoAppDataPath, $"{game.InstallPostfix}-stdout.log");
@@ -84,11 +83,18 @@ public class LaunchGameViewModel : ScreenViewModelBase
     File.WriteAllText(stdOutLog, string.Empty);
     File.WriteAllText(stdErrLog, string.Empty);
 
+    var workingPath = OperatingSystem.IsMacOS()
+      ? Path.Join($"{Path.VolumeSeparatorChar}", "Applications", $"{game.PlatformBinary}.app")
+      : Path.Join(Config!.Nco.InstallPath, game.InstallPostfix);
+    var gameBinaryPath = OperatingSystem.IsMacOS()
+      ? Path.Join("Contents", "MacOS", game.PlatformBinary)
+      : game.PlatformBinary;
+
     var gameProcess = ProcessUtils.ExecWithCallback(
       new ProcessStartInfo
       {
-        FileName = Path.Join(Config!.Nco.InstallPath, game.InstallPostfix, game.PlatformBinary),
-        WorkingDirectory = Path.Join(Config.Nco.InstallPath, game.InstallPostfix),
+        FileName = gameBinaryPath,
+        WorkingDirectory = workingPath,
         RedirectStandardOutput = true,
         RedirectStandardError = true
       },

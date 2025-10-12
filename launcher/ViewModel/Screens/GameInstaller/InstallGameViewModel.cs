@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
@@ -140,7 +139,14 @@ public class InstallGameViewModel : ScreenViewModelBase
 
       if (!HasErrored)
       {
-        await _releaseService.Download(Nco.Item.PendingInstallPath, downloadEventVisitor);
+        if (OperatingSystem.IsMacOS())
+        {
+          await _releaseService.DownloadMacOS(downloadEventVisitor);
+        }
+        else
+        {
+          await _releaseService.Download(Nco.Item.PendingInstallPath, downloadEventVisitor);
+        }
       }
 
       InstallLog += HasErrored ? "Install failed to complete due to errors" : "Install complete";
