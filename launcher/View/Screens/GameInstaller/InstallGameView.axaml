@@ -34,15 +34,15 @@
                                Text="{Binding Item.DisplayNameOrName}"
                                Margin="0,0,5,0"/>
                     <Image IsVisible="{Binding Installing}"
-                           anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                           anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
                            Width="20"
                            Height="20"/>
                     <Image IsVisible="{Binding Installed}"
-                           Source="avares://CNC.NCO.Launcher/img/tick.png"
+                           Source="avares://NCO Launcher/img/tick.png"
                            Width="20"
                            Height="20"/>
                     <Image IsVisible="{Binding Errored}"
-                           Source="avares://CNC.NCO.Launcher/img/error.png"
+                           Source="avares://NCO Launcher/img/error.png"
                            Width="20"
                            Height="20"/>
                   </StackPanel>
@@ -70,15 +70,15 @@
                                Text="{Binding Item.DisplayNameOrName}"
                                Margin="0,0,5,0"/>
                     <Image IsVisible="{Binding Installing}"
-                           anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                           anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
                            Width="20"
                            Height="20"/>
                     <Image IsVisible="{Binding Installed}"
-                           Source="avares://CNC.NCO.Launcher/img/tick.png"
+                           Source="avares://NCO Launcher/img/tick.png"
                            Width="20"
                            Height="20"/>
                     <Image IsVisible="{Binding Errored}"
-                           Source="avares://CNC.NCO.Launcher/img/error.png"
+                           Source="avares://NCO Launcher/img/error.png"
                            Width="20"
                            Height="20"/>
                   </StackPanel>
@@ -95,16 +95,16 @@
               <TextBlock Classes="p" Text="•"/>
               <TextBlock Classes="p" Text="Game Engine" Margin="0,0,5,0"/>
               <Image IsVisible="{Binding Nco.Installing}"
-                     anim:ImageBehavior.AnimatedSource="avares://CNC.NCO.Launcher/img/install.gif"
+                     anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
                      anim:ImageBehavior.RepeatBehavior="0x"
                      Width="20"
                      Height="20"/>
               <Image IsVisible="{Binding Nco.Installed}"
-                     Source="avares://CNC.NCO.Launcher/img/tick.png"
+                     Source="avares://NCO Launcher/img/tick.png"
                      Width="20"
                      Height="20"/>
               <Image IsVisible="{Binding Nco.Errored}"
-                     Source="avares://CNC.NCO.Launcher/img/error.png"
+                     Source="avares://NCO Launcher/img/error.png"
                      Width="20"
                      Height="20"/>
             </StackPanel>

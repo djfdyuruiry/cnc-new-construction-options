@@ -52,11 +52,17 @@ jobs:
           set -x
 
           for runtime in ${RUNTIMES}; do
+            RUNTIME_OPTS=""
+
+            if [[ "${runtime}" == osx-* ]]; then
+              RUNTIME_OPTS="-t:BundleApp"
+            fi
+
             dotnet publish CNC.NCO.Launcher.csproj \
               -c Release \
               -r "${runtime}" \
               -p:PublishSingleFile=true \
-              --self-contained
+              --self-contained ${RUNTIME_OPTS}
           done
 
       - name: Package Native Launcher App
@@ -70,8 +76,11 @@ jobs:
           for runtime in ${RUNTIMES}; do
             pushd bin/Release/net*/${runtime}/publish
 
-            if [[ "${runtime}" == "win-x64" ]]; then
+            # TODO: lipomerge two mac app binary files into a universal app
+            if [[ "${runtime}" == win-* ]]; then
               zip -9 -r "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.zip" .
+            elif [[ "${runtime}" == osx-* ]]; then
+              tar cvf - "NCO Launcher.app" | gzip -9 - > "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.tar.gz"
             else
               tar cvf - . | gzip -9 - > "${ARTIFACT_DIR}/cnc-nco-launcher-${runtime}-${{ steps.git-info.outputs.sha-short }}.tar.gz"
             fi

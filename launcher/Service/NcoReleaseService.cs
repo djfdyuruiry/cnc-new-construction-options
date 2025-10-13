@@ -114,14 +114,15 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
   }
 
   private void ExtractNcoFileFromZip(
-    GameDataConfig gameConfig,
-    IDownloadEventVisitor downloadEventVisitor,
+    IReader zipReader,
     string downloadPath,
-    IReader zipReader)
+    GameDataConfig gameConfig,
+    IDownloadEventVisitor downloadEventVisitor
+  )
   {
     var outputPath = Path.Join(
       downloadPath,
-      zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/")
+      zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.PlatformInstallPrefix}/")
     );
     var outputPathDir = Path.GetDirectoryName(outputPath);
 
@@ -134,29 +135,25 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
     downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, outputPath));
   }
 
-  private void ScanNcoReleaseArchiveFiles(
+  private void ExtractGameFiles(
+    IReader zipReader,
+    IEntry entry,
     string installRoot,
-    IDownloadEventVisitor eventVisitor,
-    Stream responseStream
+    IDownloadEventVisitor eventVisitor
   )
   {
-    using var zipReader = ReaderFactory.Open(responseStream);
-
-    while (zipReader.MoveToNextEntry())
+    if (entry.IsDirectory)
     {
-      if (zipReader.Entry.IsDirectory)
-      {
-        continue;
-      }
+      return;
+    }
 
-      foreach (var dataConfig in configService.Config.EnabledGames)
+    foreach (var dataConfig in configService.Config.EnabledGames)
+    {
+      if (
+        entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
+      )
       {
-        if (
-          zipReader.Entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
-        )
-        {
-          ExtractNcoFileFromZip(dataConfig, eventVisitor, installRoot, zipReader);
-        }
+        ExtractNcoFileFromZip(zipReader, installRoot, dataConfig, eventVisitor);
       }
     }
   }
@@ -184,15 +181,17 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
   private async Task WithNcoReleaseArchive(
     IDownloadEventVisitor eventVisitor,
-    Action<Stream> responseHandler
+    Action<IReader, IEntry> entryHandler
   )
   {
+    // fetch release zip url
     eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.Nco));
 
     var assetUrl = await GetAssetForNcoRelease();
 
     eventVisitor.Visit(new StartNcoReleaseDownloadEvent(assetUrl));
 
+    // request release zip
     using var client = new HttpClient();
     client.Timeout = Timeout.InfiniteTimeSpan;
     using var response = await client.GetAsync(
@@ -202,14 +201,41 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
     response.EnsureSuccessStatusCode();
 
+    // process release zip
     await using var stream = await response.Content.ReadAsStreamAsync();
+    using var zipReader = ReaderFactory.Open(stream);
 
-    responseHandler(stream);
+    while (zipReader.MoveToNextEntry())
+    {
+      entryHandler(zipReader, zipReader.Entry);
+    }
   }
 
   [SupportedOSPlatform("macos")]
-  private async Task DownloadMacOS(IDownloadEventVisitor eventVisitor)
-  {
+  private async Task DownloadMacOs(IDownloadEventVisitor eventVisitor)
+  {        
+    await WithNcoReleaseArchive(
+      eventVisitor,
+      (r, e) =>
+      {
+        if (e.IsDirectory)
+        {
+          return;
+        }
+
+        foreach (var dataConfig in configService.Config.EnabledGames)
+        {
+          if (
+            e.Key is not null
+            && e.Key.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase)
+          )
+          {
+
+            ExtractNcoFileFromZip(r, pathsConfig.AppDataDirectoryPath, dataConfig, eventVisitor);
+          }
+        }
+      }
+    );
     // TODO: Implement using WithNcoReleaseArchive and other methods
     // installRoot = pathsConfig.AppDataDirectoryPath
     //
@@ -226,7 +252,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
     {
       if (OperatingSystem.IsMacOS())
       {
-        await DownloadMacOS(eventVisitor);
+        await DownloadMacOs(eventVisitor);
       }
       else
       {
@@ -234,7 +260,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
         await WithNcoReleaseArchive(
           eventVisitor,
-          s => ScanNcoReleaseArchiveFiles(installRoot, eventVisitor, s)
+          (r, e) => ExtractGameFiles(r, e, installRoot, eventVisitor)
         );
 
         await RunPostInstallConfig(installRoot, eventVisitor);

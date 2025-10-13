@@ -22,7 +22,7 @@
                 IsVisible="{Binding !Config.Nco.Installed}"
                 Margin="0,0,0,5"
                 Grid.Row="2">
-      <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
+      <Image Source="avares://NCO Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
       <TextBlock Classes="h2" VerticalAlignment="Center">
         NCO not installed - click 'Install' below to get started
       </TextBlock>
@@ -33,7 +33,7 @@
                 IsVisible="{Binding LaunchFailed}"
                 Margin="0,0,0,5"
                 Grid.Row="2">
-      <Image Source="avares://CNC.NCO.Launcher/img/error.png" Width="60" Height="60" Margin="0,0,5,0"/>
+      <Image Source="avares://NCO Launcher/img/error.png" Width="60" Height="60" Margin="0,0,5,0"/>
       <TextBlock Classes="h2" VerticalAlignment="Center">
         Failed to launch game
       </TextBlock>
@@ -56,8 +56,8 @@
           <DropShadowEffect BlurRadius="15"></DropShadowEffect>
         </Panel.Effect>
 
-        <Image Source="avares://CNC.NCO.Launcher/img/cnc-gold.png"/>
-        <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
+        <Image Source="avares://NCO Launcher/img/cnc-gold.png"/>
+        <Image Source="avares://NCO Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.Or}">
               <Binding Path="!Config.Nco.Installed" />
@@ -82,8 +82,8 @@
           <DropShadowEffect BlurRadius="15"></DropShadowEffect>
         </Panel.Effect>
 
-        <Image Source="avares://CNC.NCO.Launcher/img/red-alert.png"/>
-        <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
+        <Image Source="avares://NCO Launcher/img/red-alert.png"/>
+        <Image Source="avares://NCO Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.Or}">
               <Binding Path="!Config.Nco.Installed" />

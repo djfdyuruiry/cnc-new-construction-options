@@ -9,6 +9,7 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Version>0.1.0</Version>
     <Title>NCO Launcher</Title>
+    <AssemblyName>NCO Launcher</AssemblyName>
     <Authors>djfdyuruiry</Authors>
     <Description>Cross platform UI for installing the New Construction Options game engine and required game data; also provides a game launcher.</Description>
     <PackageProjectUrl>https://github.com/djfdyuruiry/cnc-new-construction-options</PackageProjectUrl>
@@ -17,6 +18,19 @@
     <AssemblyVersion>0.1.0</AssemblyVersion>
     <FileVersion>0.1.0</FileVersion>
     <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- macos app bundle metadata-->
+  <PropertyGroup>
+    <CFBundleName>new-construction-options-launcher</CFBundleName>
+    <CFBundleDisplayName>NCO Launcher</CFBundleDisplayName>
+    <CFBundleIdentifier>com.github.djfdyuruiry.cnc-new-construction-options</CFBundleIdentifier>
+    <CFBundleVersion>0.1.0</CFBundleVersion>
+    <CFBundleShortVersionString>0.1</CFBundleShortVersionString>
+    <CFBundlePackageType>APPL</CFBundlePackageType>
+    <CFBundleExecutable>NCO Launcher</CFBundleExecutable>
+    <NSPrincipalClass>NSApplication</NSPrincipalClass>
+    <NSHighResolutionCapable>true</NSHighResolutionCapable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +48,7 @@
     </PackageReference>
     <PackageReference Include="Blake3" Version="2.0.0" />
     <PackageReference Include="DiscUtils" Version="0.16.13" />
+    <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
     <PackageReference Include="GitHub.Octokit.SDK" Version="0.0.31" />
     <PackageReference Include="SharpCompress" Version="0.40.0" />
     <PackageReference Include="Splat.Avalonia.Autofac" Version="15.5.3" />
@@ -108,6 +123,10 @@
     </Compile>
     <Compile Update="View\Screens\LauncherErrorView.axaml.cs">
       <DependentUpon>StartView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Screens\GameInstaller\MacOsGuideView.axaml.cs">
+      <DependentUpon>MacOsGuideView.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

@@ -7,6 +7,7 @@
         <entry key="MainWindow.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/GameInstaller/StartView.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/GameInstaller/InstallGameView.axaml" value="CNC.NCO.Launcher.csproj" />
+        <entry key="View/Screens/GameInstaller/MacOsGuideView.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/GameInstaller/SelectGameData.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/GameInstaller/SelectGameDataView.axaml" value="CNC.NCO.Launcher.csproj" />
         <entry key="View/Screens/GameInstaller/SelectInstallPath.axaml" value="CNC.NCO.Launcher.csproj" />
