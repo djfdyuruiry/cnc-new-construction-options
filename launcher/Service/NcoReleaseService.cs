@@ -7,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using GitHub;
-using GitHub.Octokit.Client;
-using Microsoft.Kiota.Abstractions.Authentication;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
