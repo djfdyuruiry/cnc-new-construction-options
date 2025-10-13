@@ -24,10 +24,10 @@ public class SelectGameDataViewModel : ScreenViewModelBase
   public SelectGameDataViewModel(LauncherConfigService configService, IScreen hostScreen)
     : base("select-games", hostScreen)
   {
-    Back = ReactiveCommand.CreateFromObservable(() => 
+    Back = ReactiveCommand.CreateFromObservable(() =>
       HostScreen.Router.NavigateTo<SelectInstallPathViewModel>()
     );
-    Next = ReactiveCommand.CreateFromObservable(() => 
+    Next = ReactiveCommand.CreateFromObservable(() =>
       HostScreen.Router.NavigateTo<InstallGameViewModel>()
     );
 

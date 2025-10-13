@@ -37,7 +37,7 @@ public class InstallGameViewModel : ScreenViewModelBase
     get => _isInstalling;
     set => this.RaiseAndSetIfChanged(ref _isInstalling, value);
   }
-  
+
   public string InstallLog
   {
     get => _installLog;
@@ -101,7 +101,7 @@ public class InstallGameViewModel : ScreenViewModelBase
     SafeWhenNavigatedTo(() =>
     {
       DiscImages = configService.Config
-        .EnabledDiscImageSources 
+        .EnabledDiscImageSources
         .Select(ItemToBeInstalled<DiscImageSource>.Build)
         .ToList();
 

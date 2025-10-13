@@ -32,7 +32,7 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
       </StackPanel>
-      
+
       <TextBlock Classes="h2"
                  IsVisible="{Binding !!Config.TiberianDawn.ZipUrlSpecs.Count}"
                  Grid.Row="1"

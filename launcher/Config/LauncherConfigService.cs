@@ -76,7 +76,7 @@ public class LauncherConfigService
   public LauncherConfig LoadFromUserOrDefaultConfig()
   {
     // Try to load from app data directory first
-    var resolvedConfigPath = File.Exists(_paths.UserConfigYamlPath) 
+    var resolvedConfigPath = File.Exists(_paths.UserConfigYamlPath)
       ? _paths.UserConfigYamlPath
       : _paths.ConfigYamlPath;
 

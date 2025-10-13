@@ -65,6 +65,6 @@ public class DiscImage : INotifyPropertyChanged
   public static bool ProvidesKeyIsRoot(string key) =>
     string.Equals(RootPlaceholder, key, StringComparison.OrdinalIgnoreCase);
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

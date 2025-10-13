@@ -11,7 +11,7 @@ public static class ProcessUtils
   public static ProcessStartInfo BuildStartInfo(string binaryPath, params string[] arguments) =>
     new()
     {
-      FileName = binaryPath, 
+      FileName = binaryPath,
       Arguments = string.Join(" ", arguments),
       CreateNoWindow = true,
       RedirectStandardOutput = true,
@@ -30,7 +30,7 @@ public static class ProcessUtils
     return new ProcessExecuteResult(process);
   }
 
-  public static async Task<ProcessExecuteResult> Exec(string binaryPath, params string[] arguments) => 
+  public static async Task<ProcessExecuteResult> Exec(string binaryPath, params string[] arguments) =>
     await Exec(BuildStartInfo(binaryPath, arguments));
 
   public static Process? ExecWithCallback(ProcessStartInfo startInfo, Action<ProcessExecuteResult> onExit)

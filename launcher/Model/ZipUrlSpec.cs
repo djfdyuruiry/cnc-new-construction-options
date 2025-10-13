@@ -42,12 +42,12 @@ public class ZipUrlSpec : INotifyPropertyChanged
     Enabled = true;
   }
 
-  public override bool Equals(object? obj) => 
+  public override bool Equals(object? obj) =>
     DisplayNameOrName.Equals((obj as  ZipUrlSpec)?.DisplayNameOrName, StringComparison.Ordinal);
 
   public override int GetHashCode() => HashCode.Combine(DisplayNameOrName);
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
 }

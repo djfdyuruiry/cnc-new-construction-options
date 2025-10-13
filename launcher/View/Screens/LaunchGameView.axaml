@@ -24,7 +24,7 @@
                 Grid.Row="2">
       <Image Source="avares://CNC.NCO.Launcher/img/caution.png" Width="60" Height="60" Margin="0,0,5,0"/>
       <TextBlock Classes="h2" VerticalAlignment="Center">
-        NCO not installed - click 'Install' below to get started  
+        NCO not installed - click 'Install' below to get started
       </TextBlock>
     </StackPanel>
 
@@ -35,7 +35,7 @@
                 Grid.Row="2">
       <Image Source="avares://CNC.NCO.Launcher/img/error.png" Width="60" Height="60" Margin="0,0,5,0"/>
       <TextBlock Classes="h2" VerticalAlignment="Center">
-        Failed to launch game  
+        Failed to launch game
       </TextBlock>
     </StackPanel>
 
@@ -67,7 +67,7 @@
           </Image.IsVisible>
         </Image>
       </Panel>
-      
+
       <!-- red alert -->
       <Panel x:Name="RaPanel" Margin="10,0,0,0">
         <Panel.IsEnabled>
@@ -81,7 +81,7 @@
         <Panel.Effect>
           <DropShadowEffect BlurRadius="15"></DropShadowEffect>
         </Panel.Effect>
-    
+
         <Image Source="avares://CNC.NCO.Launcher/img/red-alert.png"/>
         <Image Source="avares://CNC.NCO.Launcher/img/gray-cover.png" BlendMode="Color">
           <Image.IsVisible>

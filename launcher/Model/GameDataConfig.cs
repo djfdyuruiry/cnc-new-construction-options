@@ -57,7 +57,7 @@ public class GameDataConfig : INotifyPropertyChanged
     .SelectMany(x => x.Sources.Select(s => s.Name))
     .Distinct()
     .ToDictionary(
-      p => p, 
+      p => p,
       IList<DiscImageSource> (p) => OrderedDiscImages
         .Select(d => d.BuildSources(this).GetValueOrDefault(p))
         .Where(d => d is not null)
@@ -96,6 +96,6 @@ public class GameDataConfig : INotifyPropertyChanged
     Enabled = true;
   }
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) => 
+  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

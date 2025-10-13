@@ -6,7 +6,7 @@ namespace CNC.NCO.Launcher.Config;
 public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPath, string userHomePath)
 {
   // launcher app paths
-  public string LauncherDirectoryPath => launcherDirectoryPath; 
+  public string LauncherDirectoryPath => launcherDirectoryPath;
   public string ConfigYamlPath { get; } = Path.Join(launcherDirectoryPath, "config.yml");
 
 #if DEBUG
@@ -15,8 +15,8 @@ public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPa
     launcherDirectoryPath,
     "tools",
     "runtimes",
-    OperatingSystem.IsWindows() 
-      ? "win-x64" 
+    OperatingSystem.IsWindows()
+      ? "win-x64"
       : OperatingSystem.IsMacOS() ? "osx" : "linux-x64",
     "native"
   );

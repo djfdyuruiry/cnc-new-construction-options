@@ -107,7 +107,7 @@ public class GameDataService(
         : Path.Join(installPath, fileList.Key.ToLower());
 
       Directory.CreateDirectory(outDir);
-  
+
       foreach (var file in fileList.Value)
       {
         var fileName = file.Split(@"\").Last().ToLower();
@@ -129,9 +129,9 @@ public class GameDataService(
     if (
       await HashingUtils.FileChecksumIsValid(
         destinationPath,
-        source.Config.Checksum, 
+        source.Config.Checksum,
         deleteInvalidFiles: true
-      ) 
+      )
     )
     {
       return false;
@@ -168,13 +168,13 @@ public class GameDataService(
     {
       throw new FileNotFoundException("Could not locate image file inside ZIP archive", source.Config.File);
     }
-    
+
     if (
       await HashingUtils.FileChecksumIsValid(
         destinationPath,
-        source.Config.Checksum, 
+        source.Config.Checksum,
         deleteInvalidFiles: true
-      ) 
+      )
     )
     {
       return true;

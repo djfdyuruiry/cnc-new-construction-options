@@ -14,7 +14,7 @@ public class MediaFireDownloadService
   public async Task WithFileStream(string url, Action<Stream> onDownloadStart)
   {
     Console.WriteLine($"Parsing MediaFire file URL from webpage: {url}");
-    
+
     // generate valid download link by requesting webpage html
     using var client = new HttpClient();
     client.Timeout = Timeout.InfiniteTimeSpan;
@@ -29,7 +29,7 @@ public class MediaFireDownloadService
 
     var resolvedDownloadUrl = downloadHtml.Split("\"").Length > 1
       ? downloadHtml.Split("\"")[1]
-      : throw new Exception("Unable to parse download URL from MediaFire response");    
+      : throw new Exception("Unable to parse download URL from MediaFire response");
 
     Console.WriteLine($"Downloading MediaFire file URL: {resolvedDownloadUrl}");
 
@@ -38,10 +38,10 @@ public class MediaFireDownloadService
       resolvedDownloadUrl,
       HttpCompletionOption.ResponseHeadersRead
     );
-    
+
     response.EnsureSuccessStatusCode();
     await using var responseStream = await response.Content.ReadAsStreamAsync();
-    
+
     onDownloadStart(responseStream);
   }
 }

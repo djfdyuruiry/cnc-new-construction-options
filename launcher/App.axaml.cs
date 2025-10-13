@@ -9,7 +9,7 @@ using CNC.NCO.Launcher.Config;
 
 namespace CNC.NCO.Launcher;
 
-public partial class App : Application 
+public partial class App : Application
 {
   public override void Initialize()
   {

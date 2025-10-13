@@ -36,7 +36,7 @@ public class LaunchGameViewModel : ScreenViewModelBase
     get => _raProcess;
     set => this.RaiseAndSetIfChanged(ref _raProcess, value);
   }
-  
+
   public bool LaunchFailed
   {
     get => _launchFailed;
@@ -56,7 +56,7 @@ public class LaunchGameViewModel : ScreenViewModelBase
       LaunchGame(Config!.TiberianDawn, () => TdProcess, p => TdProcess = p)
     );
 
-    LaunchRa = ReactiveCommand.Create((EventPattern<object> _)  => 
+    LaunchRa = ReactiveCommand.Create((EventPattern<object> _)  =>
       LaunchGame(Config!.RedAlert, () => RaProcess, p => RaProcess = p)
     );
 

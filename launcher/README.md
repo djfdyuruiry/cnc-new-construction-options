@@ -72,7 +72,7 @@ The app uses the MVVM pattern using Avalonia + ReactiveUI, with Autofac for IOC 
 ```mermaid
 graph TD
     MainWindow--> AppFlow
-    
+
     subgraph AppFlow
         Install --> InstallFlow
         Play --> PlayFlow
@@ -85,7 +85,7 @@ graph TD
         SelectGameDataView --> InstallGameView
         InstallGameView --> PlayFlow
     end
-    
+
     subgraph PlayFlow
         LaunchGameView
     end
@@ -106,7 +106,7 @@ graph TD
 
 ## Tools
 
-- [`bin2iso`](https://gitlab.com/bunnylin/bin2iso) is used to convert any `.bin` disc images into `iso` format 
+- [`bin2iso`](https://gitlab.com/bunnylin/bin2iso) is used to convert any `.bin` disc images into `iso` format
   - Required due to the `DiscUtils` library only supporting ISO format
   - Binaries for all supported OSs are distributed with the launcher
 - [`tools/runtimes/win-x64/native/create-or-update-shortcut.ps1`](`tools/runtimes/win-x64/native/create-or-update-shortcut.ps1`) is a powershell script to create Windows shortcuts

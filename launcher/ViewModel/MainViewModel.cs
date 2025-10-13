@@ -50,7 +50,7 @@ public class MainViewModel : ReactiveObject, IScreen
       Router.NavigateTo<LaunchGameViewModel>()
     );
 
-    Exit = ReactiveCommand.Create(() => 
+    Exit = ReactiveCommand.Create(() =>
       (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown()
     );
   }

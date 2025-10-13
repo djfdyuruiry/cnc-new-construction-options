@@ -26,7 +26,7 @@ public class DiscImageSource(DiscImage image)
   [YamlIgnore]
   public bool HasSetupPackageFile => !string.IsNullOrWhiteSpace(SetupPackageFile);
 
-  public override bool Equals(object? obj) => 
+  public override bool Equals(object? obj) =>
     DisplayNameOrName.Equals((obj as DiscImageSource)?.DisplayNameOrName, StringComparison.Ordinal);
 
   public override int GetHashCode() => HashCode.Combine(DisplayName);

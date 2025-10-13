@@ -25,7 +25,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   public void Visit(StartDiscImageDownloadEvent e)
   {
     AppendToInstallLog($"Downloading disc image {e.Image.Config.File} from source: {e.Image.Config.DisplayName}");
-    
+
     _currentDiscImage = host.DiscImages!.FirstOrDefault(d => Equals(d.Item, e.Image));
 
     if (_currentDiscImage is null)
@@ -49,7 +49,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
   public void Visit(StartDiscImageFileScanEvent e)
   {
     AppendToInstallLog($"Scanning files in disc image source: {e.Source.Config.File}");
-    
+
     _currentDiscImage = host.DiscImages!.FirstOrDefault(d => Equals(d.Item, e.Source));
 
     if (_currentDiscImage is null)
@@ -64,7 +64,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     _currentDiscImage.Installing = true;
   }
 
-  public void Visit(FinishDiscImageDownloadEvent e) => 
+  public void Visit(FinishDiscImageDownloadEvent e) =>
     AppendToInstallLog($"Game disc downloaded: {e.Image.DisplayNameOrName}");
 
   public void Visit(FinishDiscImageFileScanEvent e)
@@ -84,16 +84,16 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     _currentDiscImage.Errored = false;
   }
 
-  public void Visit(FinishDownloadGameDataEvent e) => 
+  public void Visit(FinishDownloadGameDataEvent e) =>
     AppendToInstallLog($"Game data install complete: {e.GameData.DisplayName}");
 
-  // mods/addons install  
+  // mods/addons install
   public void Visit(StartZipUrlDownloadEvent e)
   {
     AppendToInstallLog($"Starting zip url download: {e.Spec.Url}");
 
     _currentZip = host.ModsAndAddons!.FirstOrDefault(z => Equals(z.Item, e.Spec));
-    
+
     if (_currentZip is null)
     {
       Console.Error.WriteLine(
@@ -131,7 +131,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     host.Nco!.Installing = true;
   }
 
-  public void Visit(StartNcoReleaseDownloadEvent e) => 
+  public void Visit(StartNcoReleaseDownloadEvent e) =>
     AppendToInstallLog($"Downloading NCO game engine");
 
   public void Visit(FinishNcoReleaseDownloadEvent e)
@@ -173,7 +173,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
       );
       return;
     }
-  
+
     _currentDiscImage.Installing = false;
     _currentDiscImage.Installed = false;
     _currentDiscImage.Errored = true;

@@ -12,7 +12,7 @@ public class StartViewModel : ScreenViewModelBase
   public StartViewModel(IScreen hostScreen)
     : base("start-installer", hostScreen)
   {
-    Next = ReactiveCommand.CreateFromObservable(() => 
+    Next = ReactiveCommand.CreateFromObservable(() =>
       // custom install path not supported on macOS
       OperatingSystem.IsMacOS()
         ? HostScreen.Router.NavigateTo<SelectGameDataViewModel>()

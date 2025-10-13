@@ -13,10 +13,10 @@ public class LauncherConfig
   public NewConstructionOptions Nco { get; set; }
   public GameDataConfig TiberianDawn { get; set; }
   public GameDataConfig RedAlert { get; set; }
-  
+
   // virtual properties for processing and view models
   [YamlIgnore]
-  public IEnumerable<GameDataConfig> Games => 
+  public IEnumerable<GameDataConfig> Games =>
     new List<GameDataConfig> { TiberianDawn, RedAlert }.OrderBy(g => g.SortOrder);
 
   [YamlIgnore]
@@ -24,7 +24,7 @@ public class LauncherConfig
 
   [YamlIgnore]
   public IEnumerable<DiscImageSource> DiscImageSources =>
-    Games.SelectMany(g => 
+    Games.SelectMany(g =>
       g.DiscImagesBySource
         .First()
         .Value
@@ -42,7 +42,7 @@ public class LauncherConfig
   [YamlIgnore]
   public IEnumerable<DiscImageSource> EnabledDiscImageSources =>
     EnabledGames
-      .SelectMany(g => 
+      .SelectMany(g =>
         g.EnabledDiscImagesBySource
           .First()
           .Value

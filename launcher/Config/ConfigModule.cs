@@ -9,7 +9,7 @@ public class ConfigModule : Module
   protected override void Load(ContainerBuilder builder)
   {
     var pathsConfig = new PathsConfig(
-      AppContext.BaseDirectory, 
+      AppContext.BaseDirectory,
       Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
       Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
     );

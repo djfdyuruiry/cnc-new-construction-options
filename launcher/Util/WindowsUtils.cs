@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
- 
+
 using CNC.NCO.Launcher.Config;
 
 namespace CNC.NCO.Launcher.Util;

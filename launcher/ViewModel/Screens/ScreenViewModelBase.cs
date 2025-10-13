@@ -11,13 +11,13 @@ public abstract class ScreenViewModelBase(string urlPathSegment, IScreen hostScr
 {
   public string? UrlPathSegment { get; } = urlPathSegment;
   public IScreen HostScreen { get; } = hostScreen;
-  
+
   /**
    * WhenNavigatedTo wrapper that renders the LauncherErrorView screen if an exception is raised.
    */
   protected IDisposable SafeWhenNavigatedTo(Action onNavigatedTo)
   {
-    return this.WhenNavigatedTo(() => 
+    return this.WhenNavigatedTo(() =>
     {
       try
       {
@@ -39,7 +39,7 @@ public abstract class ScreenViewModelBase(string urlPathSegment, IScreen hostScr
    */
   protected IDisposable SafeWhenNavigatedTo(Func<IDisposable?> onNavigatedTo)
   {
-    return this.WhenNavigatedTo(() => 
+    return this.WhenNavigatedTo(() =>
     {
       try
       {

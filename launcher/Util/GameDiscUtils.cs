@@ -49,7 +49,7 @@ public static class GameDiscUtils
       {
         throw new Exception($"ISO image does not contain required setup package file: {isoSource.SetupPackageFile}");
       }
-      
+
       var isIsoFile = iso.FileExists(isoOrSetupPath);
 
       await using var sourceFileStream = isIsoFile

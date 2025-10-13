@@ -41,7 +41,7 @@ public class Bin2IsoService(PathsConfig paths) : IDisposable
     var extractCueTrackResult = await CallBin2Iso(cuePath, isoImageDirectory, "-t", "1");
     extractCueTrackResult.AssertExitCode($"Failed to extract iso from bin file: {binImagePath}");
 
-    // find data track iso output file 
+    // find data track iso output file
     var isoImage = Directory.GetFileSystemEntries(Path.GetDirectoryName(cuePath)!)
       .First(f =>
         Path.GetExtension(f).Equals(".iso", StringComparison.OrdinalIgnoreCase)
@@ -61,7 +61,7 @@ public class Bin2IsoService(PathsConfig paths) : IDisposable
       {
         File.Delete(image);
       }
-      catch (Exception ex) 
+      catch (Exception ex)
       {
         Console.Error.WriteLine($"Failed to cleanup generated iso file '{image}': {ex}");
       };

@@ -110,7 +110,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
     if (OperatingSystem.IsWindows())
     {
-      await InstallMsvcRuntime(eventVisitor);  
+      await InstallMsvcRuntime(eventVisitor);
       await GenerateWindowsShortcuts(installRoot, eventVisitor);
     }
   }
@@ -201,7 +201,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
       assetUrl,
       HttpCompletionOption.ResponseHeadersRead
     );
-    
+
     response.EnsureSuccessStatusCode();
 
     await using var stream = await response.Content.ReadAsStreamAsync();
