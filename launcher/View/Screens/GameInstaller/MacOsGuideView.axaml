@@ -11,25 +11,42 @@
                           d:DesignWidth="1024"
                           d:DesignHeight="740">
   <Grid RowDefinitions="Auto,*,Auto,*,Auto" Margin="5">
-    <TextBlock Classes="h1" Margin="0,10" Grid.Row="0">
-      Welcome to the New Construction Options (NCO) Installer
-    </TextBlock>
+    <StackPanel Orientation="Horizontal" Margin="0,10" Grid.Row="0">
+      <Image Source="avares://NCO Launcher/img/caution.png" Width="40" Height="40" Margin="0,0,5,0"/>
+      <TextBlock Classes="h1" Margin="5,0,0,0">
+        Manual Steps Required (macOS)
+      </TextBlock>
+    </StackPanel>
 
     <StackPanel Grid.Row="1"/>
 
     <StackPanel Grid.Row="2">
-      <TextBlock Classes="p-large" Margin="0,10">
-        This wizard will help you get both NCO and all required Command &amp; Conquer data installed, so you can play the games.
+      <TextBlock Classes="p-large">
+        All required Command &amp; Conquer data has been installed, but you need to complete some steps before you can 
+        play the games:
       </TextBlock>
-      <TextBlock Classes="p-large" Margin="0,10,0,0">
-        On the next screens you can choose the install path and which games/features you want to install.
+      <TextBlock Classes="p-large" Margin="0,40,0,0">
+        1. MacOS apps have been copied to your desktop to run the games. Manually copy these into your 
+        Applications folder.
+      </TextBlock>
+      <TextBlock Classes="p-large" Margin="0,15,0,0">
+        2. When you launch the games for the first time you will get a macOS warning and the game will exit. You need 
+        to allow the game in your security settings. (Similar to running this Launcher for the first time)
+      </TextBlock>
+      <HyperlinkButton Classes="p-large" NavigateUri="https://support.apple.com/en/guide/mac-help/mh40616/mac"
+                       Margin="0,10,0,0">
+      Read the guide here to allow the game apps
+      </HyperlinkButton>
+      <TextBlock Classes="p-large" FontWeight="Bold" Margin="0,40,0,0">
+        Click 'Done' below when you have read the above
       </TextBlock>
     </StackPanel>
 
     <StackPanel Grid.Row="3"/>
 
     <Button Classes="nco-button"
-            Content="Get Started"
+            Content="OK"
+            Command="{Binding Next}"
             HorizontalAlignment="Right"
             Grid.Row="4"/>
   </Grid>

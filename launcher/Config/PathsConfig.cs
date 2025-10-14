@@ -3,7 +3,12 @@ using System.IO;
 
 namespace CNC.NCO.Launcher.Config;
 
-public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPath, string userHomePath)
+public class PathsConfig(
+  string launcherDirectoryPath,
+  string appDataDirectoryPath,
+  string userHomePath,
+  string userDesktopPath
+)
 {
   // launcher app paths
   public string LauncherDirectoryPath => launcherDirectoryPath;
@@ -26,6 +31,7 @@ public class PathsConfig(string launcherDirectoryPath, string appDataDirectoryPa
 
   // user paths
   public string UserHomePath => userHomePath;
+  public string UserDesktopPath => userDesktopPath;
   public string AppDataDirectoryPath => appDataDirectoryPath;
   public string NcoAppDataPath =>
     OperatingSystem.IsMacOS()

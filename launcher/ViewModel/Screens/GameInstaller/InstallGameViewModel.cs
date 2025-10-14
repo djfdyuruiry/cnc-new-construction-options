@@ -160,6 +160,13 @@ public class InstallGameViewModel : ScreenViewModelBase
     Nco!.Item.InstallPath = Nco.Item.PendingInstallPath;
     Nco.Item.Installed = isInstalled;
 
+    if (OperatingSystem.IsMacOS())
+    {
+      // show user some guidance for using the app bundles
+      HostScreen.Router.NavigateTo<MacOsGuideViewModel>();
+      return;
+    }
+    
     HostScreen.Router.NavigateTo<LaunchGameViewModel>();
   }
 }

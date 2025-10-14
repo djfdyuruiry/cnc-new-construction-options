@@ -225,25 +225,26 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
         foreach (var dataConfig in configService.Config.EnabledGames)
         {
-          if (
-            e.Key is not null
-            && e.Key.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase)
-          )
+          if (!e.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? true)
           {
-
-            ExtractNcoFileFromZip(r, pathsConfig.AppDataDirectoryPath, dataConfig, eventVisitor);
+            continue;
           }
+
+          if (string.Equals(Path.GetExtension(e.Key), ".app", StringComparison.OrdinalIgnoreCase))
+          {
+            // put app bundles on desktop for user
+            var outputPath = Path.Join(pathsConfig.UserDesktopPath, Path.GetFileName(e.Key));
+
+            r.WriteEntryToFile(outputPath, new ExtractionOptions() { Overwrite = true });
+            eventVisitor.Visit(new WriteGameDataFileEvent(e.Key!, outputPath));
+
+            continue;
+          }
+
+          ExtractNcoFileFromZip(r, pathsConfig.AppDataDirectoryPath, dataConfig, eventVisitor);
         }
       }
     );
-    // TODO: Implement using WithNcoReleaseArchive and other methods
-    // installRoot = pathsConfig.AppDataDirectoryPath
-    //
-    // 1. download .app from release package OR change release package to .dmg
-    // 2. install or prompt user to install .app file
-    // 3. if embedded files inside .app (data files) don't work, need to include
-    //    in release package and extract these to installRoot
-    //
   }
 
   public async Task Download(IDownloadEventVisitor eventVisitor)

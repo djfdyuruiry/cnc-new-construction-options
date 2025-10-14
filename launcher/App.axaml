@@ -16,6 +16,10 @@
           <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
         </Style>
 
+        <Style Selector="HyperlinkButton.p-large">
+          <Setter Property="FontSize" Value="22"/>
+        </Style>
+
         <Style Selector="SelectableTextBlock.p-large">
           <Setter Property="FontSize" Value="22"/>
           <Setter Property="TextWrapping" Value="WrapWithOverflow"/>

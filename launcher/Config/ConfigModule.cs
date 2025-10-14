@@ -11,7 +11,8 @@ public class ConfigModule : Module
     var pathsConfig = new PathsConfig(
       AppContext.BaseDirectory,
       Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-      Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+      Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+      Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
     );
 
     builder.RegisterInstance(pathsConfig).SingleInstance().AsSelf();
