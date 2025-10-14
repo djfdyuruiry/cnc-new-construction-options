@@ -86,9 +86,12 @@ public class LaunchGameViewModel : ScreenViewModelBase
     var workingPath = OperatingSystem.IsMacOS()
       ? Path.Join($"{Path.VolumeSeparatorChar}", "Applications", $"{game.PlatformBinary}.app")
       : Path.Join(Config!.Nco.InstallPath, game.InstallPostfix);
-    var gameBinaryPath = OperatingSystem.IsMacOS()
-      ? Path.Join("Contents", "MacOS", game.PlatformBinary)
-      : game.PlatformBinary;
+    var gameBinaryPath = Path.Join(
+      workingPath,
+      OperatingSystem.IsMacOS()
+        ? Path.Join("Contents", "MacOS", game.PlatformBinary)
+        : game.PlatformBinary
+    );
 
     var gameProcess = ProcessUtils.ExecWithCallback(
       new ProcessStartInfo
