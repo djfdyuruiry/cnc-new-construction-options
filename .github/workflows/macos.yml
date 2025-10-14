@@ -160,7 +160,7 @@ jobs:
         python -m ensurepip
         python -m pip install lipomerge
 
-        python -m lipomerge /tmp/vcpkg-arm64/arm64-osx /tmp/vcpkg-x64/x64-osx $installed_path/uni-osx
+        python -m lipomerge /tmp/vcpkg-arm64/arm64-osx14 /tmp/vcpkg-x64/x64-osx14 $installed_path/uni-osx14
 
     - name: Build Vanilla Conquer
       env:
