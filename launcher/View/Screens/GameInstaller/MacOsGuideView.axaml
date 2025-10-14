@@ -45,8 +45,8 @@
     <StackPanel Grid.Row="3"/>
 
     <Button Classes="nco-button"
-            Content="OK"
-            Command="{Binding Next}"
+            Content="Done"
+            Command="{Binding Done}"
             HorizontalAlignment="Right"
             Grid.Row="4"/>
   </Grid>

@@ -19,7 +19,7 @@ public static class GameDiscUtils
     string fileName
   )
   {
-    if (source.HasSetupPackageFile || !iso.FileExists(source.SetupPackageFile))
+    if (!source.HasSetupPackageFile || !iso.FileExists(source.SetupPackageFile))
     {
       return null;
     }
