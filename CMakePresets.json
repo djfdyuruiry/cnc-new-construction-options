@@ -20,7 +20,7 @@
                 "SDL2": "ON",
                 "OPENAL": "ON",
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-overlays"
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg/overlays"
             },
             "environment": {
                 "VCPKG_ROOT": "${sourceDir}/.vcpkg"

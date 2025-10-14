@@ -50,9 +50,6 @@ if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    # BUG: VCPKG packages not built with this target (defaults to host macOS version)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
-
     option(MAKE_BUNDLE "Create a standard app bundle rather than command line program." ON)
     add_feature_info(MakeBundle MAKE_BUNDLE "App bundles will be generated")
 

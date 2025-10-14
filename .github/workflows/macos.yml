@@ -148,8 +148,11 @@ jobs:
         mkdir /tmp/vcpkg-arm64
         mkdir /tmp/vcpkg-x64
 
-        ./scripts/bin/vcpkg install --triplet=arm64-osx --x-install-root=/tmp/vcpkg-arm64
-        ./scripts/bin/vcpkg install --triplet=x64-osx --x-install-root=/tmp/vcpkg-x64
+        cp cmake/vcpkg/triplets/arm64-osx14.cmake .vcpkg/triplets
+        cp cmake/vcpkg/triplets/osx64-osx14.cmake .vcpkg/triplets
+
+        ./scripts/bin/vcpkg install --triplet=arm64-osx14 --x-install-root=/tmp/vcpkg-arm64
+        ./scripts/bin/vcpkg install --triplet=x64-osx14 --x-install-root=/tmp/vcpkg-x64
 
         python -m venv /tmp/vcpkg.venv
         . /tmp/vcpkg.venv/bin/activate
@@ -168,10 +171,11 @@ jobs:
       run: |
         export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
 
-        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx"' CMakePresets.json > /tmp/CMakePresets.json
-        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_MANIFEST_INSTALL"] = "OFF"' /tmp/CMakePresets.json > CMakePresets.json
-
-        cp cmake/uni-osx.cmake .vcpkg/triplets
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx14"' CMakePresets.json > /tmp/CMakePresets.json
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_MANIFEST_INSTALL"] = "OFF"' /tmp/CMakePresets.json > /tmp/CMakePresets1.json
+        jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_OSX_DEPLOYMENT_TARGET"] = "14.0"' /tmp/CMakePresets1.json > CMakePresets.json
+  
+        cp cmake/vcpkg/triplets/uni-osx14.cmake .vcpkg/triplets
 
         # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
