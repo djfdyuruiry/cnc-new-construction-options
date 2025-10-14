@@ -15,7 +15,7 @@ body:
 
         Please be specific about what you were trying to do, your Operating System and what games you have installed.
   - type: dropdown
-    id: game
+    id: is_install
     attributes:
       label: Did the bug happen during game install?
       description: You can select multiple
@@ -25,7 +25,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: game
+    id: is_launch
     attributes:
       label: Did the bug happen during game launch?
       description: You can select multiple
