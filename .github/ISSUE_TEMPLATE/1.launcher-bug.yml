@@ -1,0 +1,81 @@
+name: Launcher Bug Report
+description: Raise an issue with the NCO Launcher
+
+title: "[Bug] Launcher: "
+labels: ["bug", "triage", "launcher"]
+
+assignees:
+  - djfdyuruiry
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use the form below to give information about the bug you found.
+
+        Please be specific about what you were trying to do, your Operating System and what games you have installed.
+  - type: dropdown
+    id: game
+    attributes:
+      label: Did the bug happen during game install?
+      description: You can select multiple
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: dropdown
+    id: game
+    attributes:
+      label: Did the bug happen during game launch?
+      description: You can select multiple
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: checkboxes
+    id: game
+    attributes:
+      label: What game were you trying to install/launch?
+      description: You can select multiple
+      options:
+        - label: Tiberian Dawn
+        - label: Red Alert
+    validations:
+      required: true
+  - type: dropdown
+    id: is_latest
+    attributes:
+      label: Did you try it on the latest version of NCO?
+      description: Click install from the launcher to update
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: checkboxes
+    id: os
+    attributes:
+      label: What OS did the bug happen on?
+      description: You can select multiple
+      options:
+        - label: Linux
+        - label: MacOS
+        - label: Windows
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also, what did you expect to happen?
+      placeholder: Enter details here
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant logs - ENSURE NO PERSONAL INFO IS INCLUDED IN LOGS
+      render: shell
