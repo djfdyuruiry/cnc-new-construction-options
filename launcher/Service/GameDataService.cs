@@ -296,12 +296,9 @@ public class GameDataService(
       foreach (var game in configService.Config.EnabledGames)
       {
         currentGame = game;
-
-        // macOS has a specific data prefix
         var installPath = Path.Join(installRoot, game.PlatformInstallPrefix);
 
         Directory.CreateDirectory(installPath);
-
         downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));
 
         await DownloadGameDiscImageFiles(game, downloadEventVisitor, bin2IsoService, onSplashScreenLoaded, installPath);
