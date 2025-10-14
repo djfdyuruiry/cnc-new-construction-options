@@ -149,7 +149,7 @@ jobs:
         mkdir /tmp/vcpkg-x64
 
         cp cmake/vcpkg/triplets/arm64-osx14.cmake .vcpkg/triplets
-        cp cmake/vcpkg/triplets/osx64-osx14.cmake .vcpkg/triplets
+        cp cmake/vcpkg/triplets/x64-osx14.cmake .vcpkg/triplets
 
         ./scripts/bin/vcpkg install --triplet=arm64-osx14 --x-install-root=/tmp/vcpkg-arm64
         ./scripts/bin/vcpkg install --triplet=x64-osx14 --x-install-root=/tmp/vcpkg-x64
