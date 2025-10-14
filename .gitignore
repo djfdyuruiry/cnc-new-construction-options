@@ -8,3 +8,5 @@ perf.data*
 
 *.rockspec
 *.rock
+
+.idea

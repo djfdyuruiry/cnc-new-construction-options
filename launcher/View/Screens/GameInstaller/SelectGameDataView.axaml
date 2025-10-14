@@ -1,0 +1,119 @@
+<rxui:ReactiveUserControl x:Class="CNC.NCO.Launcher.View.Screens.GameInstaller.SelectGameDataView"
+                          x:TypeArguments="vm:SelectGameDataViewModel"
+                          x:DataType="vm:SelectGameDataViewModel"
+                          xmlns="https://github.com/avaloniaui"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:rxui="http://reactiveui.net"
+                          xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
+                          mc:Ignorable="d"
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="5">
+    <TextBlock Classes="h1" Text="Select Game Data to Install" Grid.Row="0"/>
+
+    <!-- TD data & mods -->
+    <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,*" Margin="15" Grid.Row="1">
+      <StackPanel Grid.Row="0" Grid.Column="0">
+        <CheckBox Classes="header"
+                  Content="{Binding Config.TiberianDawn.DisplayName}"
+                  IsChecked="{Binding Path=Config.TiberianDawn.Enabled, Mode=TwoWay}"/>
+        <ItemsControl ItemsSource="{Binding Path=Config.TiberianDawn.OrderedDiscImages, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.TiberianDawn.Enabled}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <CheckBox Classes="node"
+                        Content="{Binding DisplayNameOrName}"
+                        IsEnabled="{Binding IsOptional}"
+                        IsChecked="{Binding Path=Enabled, Mode=TwoWay}"
+                        Margin="5"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <TextBlock Classes="h2"
+                 IsVisible="{Binding !!Config.TiberianDawn.ZipUrlSpecs.Count}"
+                 Grid.Row="1"
+                 Grid.Column="0">
+        Tiberian Dawn Mods/Addons
+      </TextBlock>
+
+      <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,15,0,0">
+        <ItemsControl ItemsSource="{Binding Path=Config.TiberianDawn.ZipUrlSpecs, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.TiberianDawn.Enabled}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <CheckBox Classes="node"
+                          Content="{Binding DisplayNameOrName}"
+                          IsChecked="{Binding Path=Enabled, Mode=TwoWay}"
+                          Margin="5"/>
+                <HyperlinkButton IsVisible="{Binding HasInfoUrl}"
+                                 NavigateUri="{Binding InfoUrl}">
+                  Info
+                </HyperlinkButton>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- RA data & mods -->
+      <StackPanel Grid.Row="0" Grid.Column="1">
+        <CheckBox Classes="header"
+                  Content="{Binding Config.RedAlert.DisplayName}"
+                  IsChecked="{Binding Path=Config.RedAlert.Enabled, Mode=TwoWay}"/>
+        <ItemsControl ItemsSource="{Binding Path=Config.RedAlert.OrderedDiscImages, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.RedAlert.Enabled}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <CheckBox Classes="node"
+                        Content="{Binding DisplayNameOrName}"
+                        IsEnabled="{Binding IsOptional}"
+                        IsChecked="{Binding Path=Enabled, Mode=TwoWay}" Margin="5"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <TextBlock Classes="h2"
+                 IsVisible="{Binding !!Config.RedAlert.ZipUrlSpecs.Count}"
+                 Grid.Row="1"
+                 Grid.Column="1">
+        Red Alert Mods/Addons
+      </TextBlock>
+
+      <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,15,0,0">
+        <ItemsControl ItemsSource="{Binding Path=Config.RedAlert.ZipUrlSpecs, Mode=TwoWay}"
+                      IsEnabled="{Binding Config.RedAlert.Enabled}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <CheckBox Classes="node"
+                          Content="{Binding DisplayNameOrName}"
+                          IsChecked="{Binding Path=Enabled, Mode=TwoWay}"
+                          Margin="5"/>
+                <HyperlinkButton IsVisible="{Binding HasInfoUrl}"
+                                 NavigateUri="{Binding InfoUrl}">
+                  Info
+                </HyperlinkButton>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Grid>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+      <Button Classes="nco-button"
+              Content="Back"
+              Command="{Binding Back}"/>
+      <Button Classes="nco-button"
+              Content="Install"
+              Command="{Binding Next}"
+              Margin="5,0,0,0"/>
+    </StackPanel>
+  </Grid>
+</rxui:ReactiveUserControl>

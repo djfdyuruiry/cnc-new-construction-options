@@ -1,0 +1,26 @@
+<rxui:ReactiveUserControl xmlns="https://github.com/avaloniaui"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:rxui="http://reactiveui.net"
+                          xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          x:Class="CNC.NCO.Launcher.View.Screens.LauncherErrorView"
+                          x:TypeArguments="vm:LauncherErrorViewModel"
+                          x:DataType="vm:LauncherErrorViewModel"
+                          mc:Ignorable="d"
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
+  <Grid RowDefinitions="Auto,*" Margin="5">
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0">
+      <Image Source="avares://NCO Launcher/img/error.png" Width="30" Height="30"/>
+      <TextBlock Classes="h1" Margin="5,0,0,0">
+        NCO Launcher Error
+      </TextBlock>
+    </StackPanel>
+    <ScrollViewer AllowAutoHide="False" Grid.Row="1">
+      <SelectableTextBlock Classes="p"
+                 Text="{Binding Error}"
+                 Margin="0,15,0,0"/>
+    </ScrollViewer>
+  </Grid>
+</rxui:ReactiveUserControl>

@@ -50,8 +50,9 @@ if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(APPLE OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    option(MAKE_BUNDLE "Create a standard app bundle rather than command line program." ON)   
+    option(MAKE_BUNDLE "Create a standard app bundle rather than command line program." ON)
     add_feature_info(MakeBundle MAKE_BUNDLE "App bundles will be generated")
+
     if(MAKE_BUNDLE)
         set(MAKE_BUNDLE_OPTION MACOSX_BUNDLE)
     endif()

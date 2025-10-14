@@ -1,0 +1,133 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Version>0.1.0</Version>
+    <Title>NCO Launcher</Title>
+    <AssemblyName>NCO Launcher</AssemblyName>
+    <Authors>djfdyuruiry</Authors>
+    <Description>Cross platform UI for installing the New Construction Options game engine and required game data; also provides a game launcher.</Description>
+    <PackageProjectUrl>https://github.com/djfdyuruiry/cnc-new-construction-options</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/djfdyuruiry/cnc-new-construction-options</RepositoryUrl>
+    <Company>com.github.djfdyuruiry.cnc-new-construction-options</Company>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <FileVersion>0.1.0</FileVersion>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- macos app bundle metadata-->
+  <PropertyGroup>
+    <CFBundleName>new-construction-options-launcher</CFBundleName>
+    <CFBundleDisplayName>NCO Launcher</CFBundleDisplayName>
+    <CFBundleIdentifier>com.github.djfdyuruiry.cnc-new-construction-options</CFBundleIdentifier>
+    <CFBundleVersion>0.1.0</CFBundleVersion>
+    <CFBundleShortVersionString>0.1</CFBundleShortVersionString>
+    <CFBundlePackageType>APPL</CFBundlePackageType>
+    <CFBundleExecutable>NCO Launcher</CFBundleExecutable>
+    <NSPrincipalClass>NSApplication</NSPrincipalClass>
+    <NSHighResolutionCapable>true</NSHighResolutionCapable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AnimatedImage.Avalonia" Version="2.1.2" />
+    <PackageReference Include="Autofac" Version="8.4.0" />
+    <PackageReference Include="Avalonia" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.6" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.6" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.6">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Blake3" Version="2.0.0" />
+    <PackageReference Include="DiscUtils" Version="0.16.13" />
+    <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
+    <PackageReference Include="GitHub.Octokit.SDK" Version="0.0.31" />
+    <PackageReference Include="SharpCompress" Version="0.40.0" />
+    <PackageReference Include="Splat.Avalonia.Autofac" Version="15.5.3" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="img\**"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="tools\runtimes\osx\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\osx\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Link="tools\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Link="tools\create-or-update-shortcut.ps1" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco.desktop" Link="tools\nco.desktop" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco.desktop" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config.yml.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="View\Screens\GameInstaller\StartView.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="View\Screens\LaunchGameView.axaml.cs">
+      <DependentUpon>StartView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Screens\GameInstaller\SelectGameDataView.axaml.cs">
+      <DependentUpon>SelectGameData.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Screens\GameInstaller\SelectInstallPathView.axaml.cs">
+      <DependentUpon>SelectInstallPathView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Screens\GameInstaller\InstallGameView.axaml.cs">
+      <DependentUpon>InstallGameView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="View\Screens\LauncherErrorView.axaml.cs">
+      <DependentUpon>StartView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Screens\GameInstaller\MacOsGuideView.axaml.cs">
+      <DependentUpon>MacOsGuideView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

@@ -189,9 +189,6 @@ jobs:
           ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
           ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
 
-          # 3rd party libs
-          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
-
           # ra bundle
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
@@ -204,12 +201,6 @@ jobs:
           cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
           ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
           ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
-
-          # lua binaries
-          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/tools/lua/* ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/lua
-
-          # 3rd party libs
-          cp -fv /tmp/vcpkg_installed/x64-mingw-dynamic/bin/*.dll ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # td bundle
           rm -f ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.sh

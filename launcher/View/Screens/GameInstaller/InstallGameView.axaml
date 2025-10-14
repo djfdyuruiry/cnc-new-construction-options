@@ -1,0 +1,129 @@
+<rxui:ReactiveUserControl x:Class="CNC.NCO.Launcher.View.Screens.GameInstaller.InstallGameView"
+                          x:TypeArguments="vm:InstallGameViewModel"
+                          x:DataType="vm:InstallGameViewModel"
+                          xmlns="https://github.com/avaloniaui"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:rxui="http://reactiveui.net"
+                          xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+                          xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
+                          mc:Ignorable="d"
+                          d:DesignWidth="1024"
+                          d:DesignHeight="650">
+  <Grid RowDefinitions="*" ColumnDefinitions="*">
+    <Image Source="{Binding CurrentSplashScreen}" Stretch="Fill"/>
+
+    <Grid x:Name="BackgroundShaderGrid" RowDefinitions="*" ColumnDefinitions="*" Opacity="0.8">
+      <Grid RowDefinitions="Auto,*,*" Margin="5">
+        <TextBlock Classes="h1" Text="Installing New Construction Options" Margin="5,5,0,0" Grid.Row="0"/>
+
+        <Grid ColumnDefinitions="4*,6*" Margin="5,15,0,0" Grid.Row="1">
+          <!-- disc images -->
+          <StackPanel Grid.Column="0">
+            <TextBlock Classes="h2" Margin="0,0,0,15">
+              Disc Images
+            </TextBlock>
+
+            <ItemsControl ItemsSource="{Binding DiscImages}" IsEnabled="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Classes="p" Text="•"/>
+                    <TextBlock Classes="p"
+                               Text="{Binding Item.DisplayNameOrName}"
+                               Margin="0,0,5,0"/>
+                    <Image IsVisible="{Binding Installing}"
+                           anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
+                           Width="20"
+                           Height="20"/>
+                    <Image IsVisible="{Binding Installed}"
+                           Source="avares://NCO Launcher/img/tick.png"
+                           Width="20"
+                           Height="20"/>
+                    <Image IsVisible="{Binding Errored}"
+                           Source="avares://NCO Launcher/img/error.png"
+                           Width="20"
+                           Height="20"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" >
+            <!-- mods/addons -->
+            <TextBlock Classes="h2"
+                       IsVisible="{Binding !!ModsAndAddons.Count}"
+                       Margin="0,0,0,15">
+              Mods/Addons
+            </TextBlock>
+
+            <ItemsControl IsVisible="{Binding !!ModsAndAddons.Count}"
+                          ItemsSource="{Binding ModsAndAddons}"
+                          IsEnabled="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Classes="p" Text="•"/>
+                    <TextBlock Classes="p"
+                               Text="{Binding Item.DisplayNameOrName}"
+                               Margin="0,0,5,0"/>
+                    <Image IsVisible="{Binding Installing}"
+                           anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
+                           Width="20"
+                           Height="20"/>
+                    <Image IsVisible="{Binding Installed}"
+                           Source="avares://NCO Launcher/img/tick.png"
+                           Width="20"
+                           Height="20"/>
+                    <Image IsVisible="{Binding Errored}"
+                           Source="avares://NCO Launcher/img/error.png"
+                           Width="20"
+                           Height="20"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- nco -->
+            <TextBlock Classes="h2" Margin="0,15">
+              NCO
+            </TextBlock>
+
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Classes="p" Text="•"/>
+              <TextBlock Classes="p" Text="Game Engine" Margin="0,0,5,0"/>
+              <Image IsVisible="{Binding Nco.Installing}"
+                     anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
+                     anim:ImageBehavior.RepeatBehavior="0x"
+                     Width="20"
+                     Height="20"/>
+              <Image IsVisible="{Binding Nco.Installed}"
+                     Source="avares://NCO Launcher/img/tick.png"
+                     Width="20"
+                     Height="20"/>
+              <Image IsVisible="{Binding Nco.Errored}"
+                     Source="avares://NCO Launcher/img/error.png"
+                     Width="20"
+                     Height="20"/>
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+
+        <!-- install log -->
+        <DockPanel LastChildFill="True" Margin="5,10,0,0" Grid.Row="2">
+          <TextBlock Classes="h2" Margin="0,0,0,5" DockPanel.Dock="Top">
+            Install Log
+          </TextBlock>
+
+          <ScrollViewer x:Name="InstallLogViewer" AllowAutoHide="False">
+            <SelectableTextBlock Classes="p-small"
+                                 Text="{Binding InstallLog}"
+                                 DockPanel.Dock="Bottom"/>
+          </ScrollViewer>
+        </DockPanel>
+      </Grid>
+    </Grid>
+  </Grid>
+</rxui:ReactiveUserControl>

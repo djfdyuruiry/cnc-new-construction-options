@@ -272,23 +272,35 @@ if(BUILD_VANILLATD)
     if(MAKE_BUNDLE)
         add_custom_command(
             TARGET VanillaTD POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco/lib"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco/TiberianDawn/lib"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/vanillatd.app"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/lua" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/vanillatd.app"
-            COMMAND ${CMAKE_COMMAND} -E rm -Rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app"
         )
     else()
+        set(COPY_TD_BIN_CMD "")
+
+        if(WIN32)
+            # include vcpkg built DLLs on Windows
+            set(COPY_TD_BIN_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin" $<TARGET_FILE_DIR:VanillaTD>/td)
+        endif()
+
         add_custom_command(
             TARGET VanillaTD POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:VanillaTD>/td
             COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/lib
             COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/TiberianDawn/lib
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" $<TARGET_FILE_DIR:VanillaTD>/td
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/lua" $<TARGET_FILE_DIR:VanillaTD>/td/lua
+            ${COPY_TD_BIN_CMD}
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaTD> $<TARGET_FILE_DIR:VanillaTD>/td
             COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaTD>
         )

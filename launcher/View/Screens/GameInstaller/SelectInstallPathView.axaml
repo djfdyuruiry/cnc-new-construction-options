@@ -1,0 +1,47 @@
+<rxui:ReactiveUserControl x:Class="CNC.NCO.Launcher.View.Screens.GameInstaller.SelectInstallPathView"
+                          x:TypeArguments="vm:SelectInstallPathViewModel"
+                          x:DataType="vm:SelectInstallPathViewModel"
+                          xmlns="https://github.com/avaloniaui"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:rxui="http://reactiveui.net"
+                          xmlns:vm="clr-namespace:CNC.NCO.Launcher.ViewModel.Screens.GameInstaller"
+                          mc:Ignorable="d"
+                          d:DesignWidth="1024"
+                          d:DesignHeight="740">
+  <Grid RowDefinitions="Auto,*,Auto,*,Auto" Margin="5">
+    <TextBlock Classes="h1" Margin="0,10" Grid.Row="0">
+      Select Install Directory
+    </TextBlock>
+
+    <StackPanel Grid.Row="1"/>
+
+    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" Grid.Row="2">
+      <StackPanel IsVisible="{Binding Nco.Installed}" Orientation="Horizontal" Margin="0,0,0,5" Grid.Row="0" Grid.Column="0">
+        <Image Source="avares://NCO Launcher/img/caution.png" Width="40" Height="40" Margin="0,0,5,0"/>
+        <TextBlock Classes="p-large" VerticalAlignment="Center">
+          Previous install detected @
+        </TextBlock>
+        <SelectableTextBlock Classes="p-large" VerticalAlignment="Center" Text="{Binding Nco.InstallPath}"/>
+      </StackPanel>
+
+      <TextBox Classes="p-large" Text="{Binding Path=Nco.PendingInstallPath, Mode=TwoWay}" Grid.Row="1" Grid.Column="0"/>
+      <Button Classes="nco-button"
+              Command="{Binding Browse}"
+              Margin="15,0"
+              Grid.Row="1"
+              Grid.Column="1">
+        Browse
+      </Button>
+    </Grid>
+
+    <StackPanel Grid.Row="3"/>
+
+    <Button Classes="nco-button"
+            HorizontalAlignment="Right"
+            Content="Next"
+            Command="{Binding Next}"
+            Grid.Row="4"/>
+  </Grid>
+</rxui:ReactiveUserControl>

@@ -6,7 +6,4 @@
 
 ## Overlays
 
-- **gettext**
-  - Sub-dependency of `pipewire` package (used by OpenAL on Linux)
-  - Empty virtual package to allow using system `gettext` instead
-  - Download link in the public package is broken, see: https://github.com/microsoft/vcpkg/issues/47462
+*None at the moment*

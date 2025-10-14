@@ -1,0 +1,9 @@
+root=true
+
+[*.{c,cpp,h,hpp,in}]
+indent_style = space
+indent_size = 4
+
+[*.{cmake,lua,md,j2,json,yml}]
+indent_style = space
+indent_size = 2
