@@ -39,18 +39,6 @@ on:
   # push:
   #   branches:
   #     - main
-  #   paths:
-  #     - .clang-format
-  #     - CMake**
-  #     - vcpkg**
-  #     - .github/workflows/mingw.yml
-  #     - cmake/**
-  #     - common/**
-  #     - redalert/**
-  #     - resources
-  #     - tests/**
-  #     - tiberiandawn/**
-  #     - tools/**
 
 concurrency:
   group: ${{ github.ref }}__mingw

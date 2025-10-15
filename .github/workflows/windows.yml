@@ -32,17 +32,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - CMake**
-      - vcpkg**
-      - .github/workflows/windows.yml
-      - cmake/**
-      - common/**
-      - redalert/**
-      - resources
-      - tests/**
-      - tiberiandawn/**
-      - tools/**
 
 concurrency:
   group: ${{ github.ref }}__windows
