@@ -42,6 +42,9 @@ RUN apt-get install -y \
 # vcpkg package: libxcrypt
 RUN apt-get install -y libltdl-dev
 
+# vcpkg package: gettext
+RUN apt-get install -y bison
+
 ARG UID=1000
 ARG GID=1000
 
