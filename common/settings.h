@@ -27,6 +27,7 @@ public:
         bool Windowed;
         bool Boxing;
         std::string BoxingAspectRatio;
+        int Display;
         int Width;
         int Height;
         int FrameLimit;
@@ -35,7 +36,8 @@ public:
         bool DOSMode;
         int ButtonStyle;
         std::string Scaler;
-        std::string Driver;
+        std::string VideoDriver;
+        std::string RenderDriver;
         std::string PixelFormat;
     } Video;
 

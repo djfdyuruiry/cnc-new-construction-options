@@ -19,19 +19,22 @@ SettingsClass::SettingsClass()
     /*
     ** Video settings
     */
-    Video.WindowWidth = 640;
-    Video.WindowHeight = 400;
+    // TODO: Could offer presets through the launcher or a ini setting (retro, modern etc.)
+    Video.WindowWidth = 1280;
+    Video.WindowHeight = 800;
     Video.Windowed = false;
+    Video.Display = 1;
     Video.Width = 0;
     Video.Height = 0;
     Video.Boxing = true;
-    Video.BoxingAspectRatio = "16:10";
+    Video.BoxingAspectRatio = "4:3";
     Video.FrameLimit = 120;
     Video.InterpolationMode = 2;
     Video.HardwareCursor = false;
     Video.DOSMode = false;
     Video.Scaler = "nearest";
-    Video.Driver = "default";
+    Video.VideoDriver = "default";
+    Video.RenderDriver = "default";
     Video.PixelFormat = "default";
 }
 
@@ -60,13 +63,15 @@ void SettingsClass::Load(INIClass& ini)
     Video.Windowed = ini.Get_Bool("Video", "Windowed", Video.Windowed);
     Video.Boxing = ini.Get_Bool("Video", "Boxing", Video.Boxing);
     Video.BoxingAspectRatio = ini.Get_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio);
+    Video.Display = ini.Get_Int("Video", "Display", Video.Display);
     Video.Width = ini.Get_Int("Video", "Width", Video.Width);
     Video.Height = ini.Get_Int("Video", "Height", Video.Height);
     Video.FrameLimit = ini.Get_Int("Video", "FrameLimit", Video.FrameLimit);
     Video.HardwareCursor = ini.Get_Bool("Video", "HardwareCursor", Video.HardwareCursor);
     Video.DOSMode = ini.Get_Bool("Video", "DOSMode", Video.DOSMode);
     Video.Scaler = ini.Get_String("Video", "Scaler", Video.Scaler);
-    Video.Driver = ini.Get_String("Video", "Driver", Video.Driver);
+    Video.VideoDriver = ini.Get_String("Video", "VideoDriver", Video.VideoDriver);
+    Video.RenderDriver = ini.Get_String("Video", "RenderDriver", Video.RenderDriver);
     Video.PixelFormat = ini.Get_String("Video", "PixelFormat", Video.PixelFormat);
 
     /*
@@ -110,13 +115,15 @@ void SettingsClass::Save(INIClass& ini)
     ini.Put_Bool("Video", "Windowed", Video.Windowed);
     ini.Put_Bool("Video", "Boxing", Video.Boxing);
     ini.Put_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio);
+    ini.Put_Int("Video", "Display", Video.Display);
     ini.Put_Int("Video", "Width", Video.Width);
     ini.Put_Int("Video", "Height", Video.Height);
     ini.Put_Int("Video", "FrameLimit", Video.FrameLimit);
     ini.Put_Bool("Video", "HardwareCursor", Video.HardwareCursor);
     ini.Put_Bool("Video", "DOSMode", Video.DOSMode);
     ini.Put_String("Video", "Scaler", Video.Scaler);
-    ini.Put_String("Video", "Driver", Video.Driver);
+    ini.Put_String("Video", "VideoDriver", Video.VideoDriver);
+    ini.Put_String("Video", "RenderDriver", Video.RenderDriver);
     ini.Put_String("Video", "PixelFormat", Video.PixelFormat);
 
     /*

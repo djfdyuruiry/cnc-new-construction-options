@@ -44,6 +44,7 @@
 #include "wwmouse.h"
 #include "settings.h"
 #include "debugstring.h"
+#include "logger.h"
 
 #include <SDL.h>
 
@@ -216,9 +217,49 @@ SurfaceMonitorClass& AllSurfaces = AllSurfacesDummy; // List of all direct draw 
  *=============================================================================================*/
 bool Set_Video_Mode(int w, int h, int bits_per_pixel)
 {
+    if (Settings.Video.VideoDriver != "default") {
+        CNC_LOG_INFO("Using SDL video driver hint: {}", Settings.Video.VideoDriver);
+        SDL_SetHint(SDL_HINT_VIDEODRIVER, Settings.Video.VideoDriver.c_str());
+    } else {
+#ifdef __linux__
+        // Workaround for XWayland on linux returning all displays as one massive render surface; image under XWayland
+        // can be zoomed in (due to a large reported resolution) and always renders on left most monitor.
+        //
+        // Note: SDL2 video driver auto selection prefers x11 over wayland, so XWayland is automatically selected under
+        // wayland environments. SDL3 prefers wayland over x11, so this can be removed if library is upgraded.
+        if (std::getenv("WAYLAND_DISPLAY") != nullptr) {
+            CNC_LOG_INFO("Environment variable 'WAYLAND_DISPLAY' found, using SDL video driver hint: wayland");
+            SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland");
+        }
+#else
+        CNC_LOG_DEBUG("No default video driver override logic for this platform");
+#endif
+    }
+
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     SDL_ShowCursor(SDL_DISABLE);
 
+    // dump info on detected displays
+    auto num_displays = SDL_GetNumVideoDisplays();
+
+    CNC_LOG_INFO("Found {} display(s)", num_displays);
+    for (auto i = 0; i < num_displays; i++)
+    {
+        SDL_DisplayMode display_mode;
+        SDL_GetCurrentDisplayMode(i, &display_mode);
+
+        if (display_mode.refresh_rate == 0) {
+            CNC_LOG_INFO("Display #{} mode: {}x{}@?hz", i + 1, display_mode.w, display_mode.h);
+        } else {
+            CNC_LOG_INFO(
+                "Display #{} mode: {}x{}@{}hz", i + 1, display_mode.w, display_mode.h, display_mode.refresh_rate
+            );
+        }
+    }
+
+    const auto display = Settings.Video.Display - 1; // SDL displays are 0 indexed
+    int x = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
+    int y = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
     int win_w = w;
     int win_h = h;
     int win_flags = 0;
@@ -237,6 +278,9 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
             win_h = Settings.Video.Height;
             win_flags |= SDL_WINDOW_FULLSCREEN;
         }
+
+        x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
+        y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
     } else if (Settings.Video.WindowWidth > w || Settings.Video.WindowHeight > h) {
         win_w = Settings.Video.WindowWidth;
         win_h = Settings.Video.WindowHeight;
@@ -245,8 +289,8 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
         Settings.Video.WindowHeight = win_h;
     }
 
-    window =
-        SDL_CreateWindow("Vanilla Conquer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, win_w, win_h, win_flags);
+    window = SDL_CreateWindow("Vanilla Conquer", x, y, win_w, win_h, win_flags);
+
     if (window == nullptr) {
         DBG_ERROR("SDL_CreateWindow failed: %s", SDL_GetError());
         Reset_Video_Mode();
@@ -266,12 +310,12 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
 
     DBG_INFO("  pixel format: %s (%d bpp)", SDL_GetPixelFormatName(pixel_format), SDL_BITSPERPIXEL(pixel_format));
 
-    DBG_INFO("SDL2 drivers available: (user preference '%s')", Settings.Video.Driver.c_str());
+    DBG_INFO("SDL2 render drivers available: (user preference '%s')", Settings.Video.RenderDriver.c_str());
     int renderer_index = -1;
     for (int i = 0; i < SDL_GetNumRenderDrivers(); i++) {
         SDL_RendererInfo info;
         if (SDL_GetRenderDriverInfo(i, &info) == 0) {
-            if (Settings.Video.Driver.compare(info.name) == 0) {
+            if (Settings.Video.RenderDriver.compare(info.name) == 0) {
                 renderer_index = i;
             }
 
