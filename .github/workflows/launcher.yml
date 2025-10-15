@@ -13,6 +13,7 @@ on:
 
   pull_request:
     paths:
+      - .github/workflows/launcher.yml
       - launcher/**
 
   push:
