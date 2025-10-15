@@ -13,13 +13,13 @@ on:
 
   pull_request:
     paths:
+      - .github/workflows/launcher.yml
       - launcher/**
 
   push:
     branches:
       - main
-    paths:
-      - launcher/**
+
 concurrency:
   group: ${{ github.ref }}__launcher
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

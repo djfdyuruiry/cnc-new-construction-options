@@ -41,18 +41,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - .clang-format
-      - CMake**
-      - vcpkg**
-      - .github/workflows/linux.yml
-      - cmake/**
-      - common/**
-      - redalert/**
-      - resources
-      - tests/**
-      - tiberiandawn/**
-      - tools/**
+
 concurrency:
   group: ${{ github.ref }}__linux
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
