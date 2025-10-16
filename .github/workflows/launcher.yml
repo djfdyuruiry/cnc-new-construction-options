@@ -44,6 +44,14 @@ jobs:
         id: git-info
         run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Validate Linux Desktop Files
+        run: |
+          sudo apt-get install -y desktop-file-utils
+
+          for f in tools/runtimes/linux-x64/native/*.desktop; do
+            desktop-file-validate "${f}"
+          done
+
       - name: Build Launcher
         run: dotnet build CNC.NCO.Launcher.csproj -c Release
 
