@@ -498,7 +498,7 @@ static void Process_Type_Instances(CCINIClass& ini, U first, U count)
     }
 }
 
-// TODO: Read each type from a separate rules file
+// TODO: Read each type from a separate rules file (maybe a rules directory of files)
 bool RulesClass::Process_Types(CCINIClass& ini)
 {
     // TODO: Add other entities (house, overlay, terrain etc.)
@@ -550,7 +550,7 @@ static void Export_Type_Instances(CCINIClass& ini, U first, U count)
     }
 }
 
-// TODO: Write each type to a separate rules file
+// TODO: Write each type to a separate rules file (maybe a rules directory of files)
 bool RulesClass::Export_Types(CCINIClass& ini)
 {
     // TODO: Add other entities (house, overlay, terrain etc.)
