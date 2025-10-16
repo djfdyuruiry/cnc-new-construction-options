@@ -75,9 +75,9 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
       await File.WriteAllTextAsync(
         $"{Path.Join(appsPath, desktopName)}.desktop",
-        desktopTemplate.Replace("<BINARY>", binaryPath)
-          .Replace("<DISPLAY_NAME>", $"{game.DisplayName.Replace("Command & Conquer:", "C&C -")} (NCO)")
-          .Replace("<INSTALL_PATH>", gamePath)
+        desktopTemplate.Replace("BINARY", binaryPath)
+          .Replace("DISPLAY_NAME", $"{game.DisplayName.Replace("Command & Conquer: ", string.Empty)} (NCO)")
+          .Replace("/INSTALL_PATH", gamePath)
       );
 
       eventVisitor.Visit(new ShortcutCreatedEvent(game));

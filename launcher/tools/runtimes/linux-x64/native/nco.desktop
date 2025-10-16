@@ -1,7 +1,9 @@
 [Desktop Entry]
-Exec=<BINARY>
-Name=<DISPLAY_NAME>
+Type=Application
+Categories=Game
+Exec=BINARY
+Name=DISPLAY_NAME
 Comment=New Construction Options
 NoDisplay=false
-Path=<INSTALL_PATH>
+Path=/INSTALL_PATH
 Terminal=false
