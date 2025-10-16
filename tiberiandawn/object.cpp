@@ -259,6 +259,22 @@ void const* ObjectTypeClass::Get_Cameo_Data(void) const
     return (NULL);
 }
 
+bool ObjectTypeClass::Read_INI(CCINIClass& ini)
+{
+    if (!ini.Is_Present(Name())) {
+        return false;
+    }
+
+    IsCrushable = ini.Get_Bool(Name(), "IsCrushable", IsCrushable);
+
+    return true;
+}
+
+void ObjectTypeClass::Write_INI(CCINIClass& ini) const
+{
+    ini.Put_Bool(Name(), "IsCrushable", IsCrushable);
+}
+
 /***********************************************************************************************
  * ObjectClass::ObjectClass -- Default constructor for objects.                                *
  *                                                                                             *

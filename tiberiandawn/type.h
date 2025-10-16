@@ -403,6 +403,9 @@ public:
     virtual void Display(int, int, WindowNumberType, HousesType) const {};
 #endif
 
+    virtual bool Read_INI(CCINIClass& ini);
+    virtual void Write_INI(CCINIClass& ini) const;
+
     static void const* SelectShapes;
     static void const* PipShapes;
 };
@@ -601,6 +604,9 @@ public:
 #ifdef USE_RA_AI
     int Legal_Placement(CELL pos) const; // From RA for AI. ST - 7/24/2019 5:20PM
 #endif                                   // USE_RA_AI
+
+    bool Read_INI(CCINIClass& ini) override;
+    void Write_INI(CCINIClass& ini) const override;
 };
 
 /***************************************************************************
@@ -825,6 +831,12 @@ public:
     };
 
     static BuildingTypeClass const& As_Reference(StructType type);
+
+    static BuildingTypeClass & As_Mutable_Reference(StructType type)
+    {
+        return *const_cast<BuildingTypeClass*>(Pointers[type]);
+    }
+
     static StructType From_Name(char const* name);
     static void Init(TheaterType theater);
     static void One_Time(void);
@@ -1079,6 +1091,12 @@ public:
 
     static UnitType From_Name(char const* name);
     static UnitTypeClass const& As_Reference(UnitType type);
+
+    static UnitTypeClass & As_Mutable_Reference(UnitType type)
+    {
+        return *const_cast<UnitTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType);
     static void One_Time(void);
     static void Prep_For_Add(void);
@@ -1224,6 +1242,12 @@ public:
     {
         return *Pointers[type];
     };
+
+    static InfantryTypeClass & As_Mutable_Reference(InfantryType type)
+    {
+        return *const_cast<InfantryTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType);
     static void One_Time(void);
     static void Prep_For_Add(void);
@@ -1406,6 +1430,12 @@ public:
     {
         return *Pointers[type];
     };
+
+    static BulletTypeClass & As_Mutable_Reference(BulletType type)
+    {
+        return *const_cast<BulletTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType){};
     static void One_Time(void);
 
@@ -1898,6 +1928,12 @@ public:
     {
         return *Pointers[a];
     };
+
+    static AircraftTypeClass & As_Mutable_Reference(AircraftType type)
+    {
+        return *const_cast<AircraftTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType);
     static void One_Time(void);
     static void Prep_For_Add(void);

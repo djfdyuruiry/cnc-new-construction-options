@@ -1873,7 +1873,8 @@ typedef enum WarheadType : signed char
     WARHEAD_HEADBUTT,     // Other dinosaurs butt into people
     WARHEAD_FEEDME,       // T-Rex eats people, hurts vehicles/buildings
 
-    WARHEAD_COUNT
+    WARHEAD_COUNT,
+    WARHEAD_FIRST = WARHEAD_SA
 } WarheadType;
 
 /**********************************************************************
@@ -1910,7 +1911,9 @@ typedef enum WeaponType : signed char
     WEAPON_HONEST_JOHN,
     WEAPON_STEG,
     WEAPON_TREX,
-    WEAPON_COUNT
+
+    WEAPON_COUNT,
+    WEAPON_FIRST = WEAPON_RIFLE
 } WeaponType;
 
 /**********************************************************************

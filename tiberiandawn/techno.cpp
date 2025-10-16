@@ -4889,3 +4889,17 @@ int TechnoTypeClass::Legal_Placement(CELL pos) const
     return (1);
 }
 #endif // USE_RA_AI
+
+bool TechnoTypeClass::Read_INI(CCINIClass& ini)
+{
+    if (!ObjectTypeClass::Read_INI(ini)) {
+        return false;
+    }
+
+    return true;
+}
+
+void TechnoTypeClass::Write_INI(CCINIClass& ini) const
+{
+    ObjectTypeClass::Write_INI(ini);
+}

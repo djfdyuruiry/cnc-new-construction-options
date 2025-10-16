@@ -65,6 +65,9 @@ class RuleSections;
 class RulesClass
 {
 public:
+    static bool Process_Types(CCINIClass& ini);
+    static bool Export_Types(CCINIClass& ini);
+
     RulesClass(void);
 
     bool Process(CCINIClass& file);

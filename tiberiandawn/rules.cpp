@@ -263,6 +263,7 @@ bool RulesClass::Process(CCINIClass& ini)
     IQ(ini);
     Difficulty(ini);
     Process_Sections(ini);
+    Process_Types(ini);
 
     Apply_Static_And_Global_Values();
 
@@ -289,6 +290,7 @@ bool RulesClass::Export(CCINIClass& ini)
     Export_IQ(ini);
     Export_Difficulty(ini);
     Export_Sections(ini);
+    Export_Types(ini);
 
     return (true);
 }
@@ -481,6 +483,41 @@ bool RulesClass::Difficulty(CCINIClass& ini)
     return (true);
 }
 
+
+template<typename T>
+concept DerivedFromObjectTypeClass = std::is_base_of_v<ObjectTypeClass, T>;
+
+template<typename T>
+concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
+
+template<DerivedFromObjectTypeClass T, EnumSignedChar U>
+static void Process_Type_Instances(CCINIClass& ini, U first, U count)
+{
+    for (auto i = first; i < count; ++i) {
+        T::As_Mutable_Reference(i).Read_INI(ini);
+    }
+}
+
+// TODO: Read each type from a separate rules file
+bool RulesClass::Process_Types(CCINIClass& ini)
+{
+    // TODO: Add other entities (house, overlay, terrain etc.)
+
+    Process_Type_Instances<BulletTypeClass, BulletType>(ini, BULLET_FIRST, BULLET_COUNT);
+    // TODO: impl INI routines separately
+    // (they do not derive from ObjectTypeClass, make a abstract base class of ObjectTypeClass like 'RulesTypeClass' OR
+    // interface via concept)
+    //Process_Type_Instances<WarheadTypeClass, WarheadType>(ini, WARHEAD_FIRST, WARHEAD_COUNT);
+    //Process_Type_Instances<WeaponTypeClass, WeaponType>(ini, WEAPON_FIRST, WEAPON_COUNT);
+
+    Process_Type_Instances<AircraftTypeClass, AircraftType>(ini, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
+    Process_Type_Instances<BuildingTypeClass, StructType>(ini, STRUCT_FIRST, STRUCT_COUNT);
+    Process_Type_Instances<InfantryTypeClass, InfantryType>(ini, INFANTRY_FIRST, INFANTRY_COUNT);
+    Process_Type_Instances<UnitTypeClass, UnitType>(ini, UNIT_FIRST, UNIT_COUNT);
+
+    return true;
+}
+
 /***********************************************************************************************
  * RulesClass::Export_Difficulty -- Export the various difficulty group settings.              *
  *                                                                                             *
@@ -503,4 +540,32 @@ bool RulesClass::Export_Difficulty(CCINIClass& ini)
     Difficulty_Put(ini, Diff[DIFF_HARD], "Difficult");
 #endif
     return (true);
+}
+
+template<DerivedFromObjectTypeClass T, EnumSignedChar U>
+static void Export_Type_Instances(CCINIClass& ini, U first, U count)
+{
+    for (auto i = first; i < count; ++i) {
+        T::As_Reference(i).Write_INI(ini);
+    }
+}
+
+// TODO: Write each type to a separate rules file
+bool RulesClass::Export_Types(CCINIClass& ini)
+{
+    // TODO: Add other entities (house, overlay, terrain etc.)
+
+    Export_Type_Instances<BulletTypeClass, BulletType>(ini, BULLET_FIRST, BULLET_COUNT);
+    // TODO: impl INI routines separately
+    // (they do not derive from ObjectTypeClass, make a abstract base class of ObjectTypeClass like 'RulesTypeClass' OR
+    // interface via concept)
+    //Export_Type_Instances<WarheadTypeClass, WarheadType>(ini, WARHEAD_FIRST, WARHEAD_COUNT);
+    //Export_Type_Instances<WeaponTypeClass, WeaponType>(ini, WEAPON_FIRST, WEAPON_COUNT);
+
+    Export_Type_Instances<AircraftTypeClass, AircraftType>(ini, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
+    Export_Type_Instances<BuildingTypeClass, StructType>(ini, STRUCT_FIRST, STRUCT_COUNT);
+    Export_Type_Instances<InfantryTypeClass, InfantryType>(ini, INFANTRY_FIRST, INFANTRY_COUNT);
+    Export_Type_Instances<UnitTypeClass, UnitType>(ini, UNIT_FIRST, UNIT_COUNT);
+
+    return true;
 }
