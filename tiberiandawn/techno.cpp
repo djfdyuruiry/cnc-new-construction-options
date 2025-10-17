@@ -4890,16 +4890,22 @@ int TechnoTypeClass::Legal_Placement(CELL pos) const
 }
 #endif // USE_RA_AI
 
-bool TechnoTypeClass::Read_INI(CCINIClass& ini)
+const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
 {
-    if (!ObjectTypeClass::Read_INI(ini)) {
-        return false;
-    }
-
-    return true;
-}
-
-void TechnoTypeClass::Write_INI(CCINIClass& ini) const
-{
-    ObjectTypeClass::Write_INI(ini);
+    return ObjectTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsLeader)
+        .Load_Bool_Var(IsScanner)
+        .Load_Bool_Var(IsNominal)
+        .Load_Bool_Var(IsTheater)
+        .Load_Bool_Var(IsTurretEquipped)
+        .Load_Bool_Var(IsTwoShooter)
+        .Load_Bool_Var(IsRepairable)
+        .Load_Bool_Var(IsBuildable)
+        .Load_Bool_Var(IsCrew)
+        .Load_Bool_Var(IsTransporter)
+        .Load_Int_Var(SightRange)
+        .Load_Int_Var(Cost)
+        .Load_Int_Var(Risk) // TODO: Scenario/Level (uchar), Pre (calculated csv field)
+        .Load_Int_Var(Reward) // TODO: MaxSpeed (MPHType)
+        .Load_Int_Var(MaxAmmo); // TODO: Ownable (calculated csv field), Primary/Secondary (WeaponType)
 }

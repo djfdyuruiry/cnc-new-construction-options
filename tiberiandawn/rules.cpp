@@ -491,10 +491,15 @@ template<typename T>
 concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
 
 template<DerivedFromObjectTypeClass T, EnumSignedChar U>
-static void Process_Type_Instances(CCINIClass& ini, U first, U count)
+static void Process_Type_Instances(CCINIClass& ini, RuleSections& sections, U first, U count)
 {
     for (auto i = first; i < count; ++i) {
-        T::As_Mutable_Reference(i).Read_INI(ini);
+        auto& typeInstance = T::As_Mutable_Reference(i);
+        auto name = typeInstance.Name();
+
+        sections[name].template With<IniRuleContext>(ini, [&](auto& c) {
+            typeInstance.Read_INI(c);
+        });
     }
 }
 
@@ -503,17 +508,17 @@ bool RulesClass::Process_Types(CCINIClass& ini)
 {
     // TODO: Add other entities (house, overlay, terrain etc.)
 
-    Process_Type_Instances<BulletTypeClass, BulletType>(ini, BULLET_FIRST, BULLET_COUNT);
+    Process_Type_Instances<BulletTypeClass, BulletType>(ini, Bullets, BULLET_FIRST, BULLET_COUNT);
     // TODO: impl INI routines separately
     // (they do not derive from ObjectTypeClass, make a abstract base class of ObjectTypeClass like 'RulesTypeClass' OR
     // interface via concept)
-    //Process_Type_Instances<WarheadTypeClass, WarheadType>(ini, WARHEAD_FIRST, WARHEAD_COUNT);
-    //Process_Type_Instances<WeaponTypeClass, WeaponType>(ini, WEAPON_FIRST, WEAPON_COUNT);
+    //Process_Type_Instances<WarheadTypeClass, WarheadType>(ini, Warheads, WARHEAD_FIRST, WARHEAD_COUNT);
+    //Process_Type_Instances<WeaponTypeClass, WeaponType>(ini, Weapons, WEAPON_FIRST, WEAPON_COUNT);
 
-    Process_Type_Instances<AircraftTypeClass, AircraftType>(ini, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
-    Process_Type_Instances<BuildingTypeClass, StructType>(ini, STRUCT_FIRST, STRUCT_COUNT);
-    Process_Type_Instances<InfantryTypeClass, InfantryType>(ini, INFANTRY_FIRST, INFANTRY_COUNT);
-    Process_Type_Instances<UnitTypeClass, UnitType>(ini, UNIT_FIRST, UNIT_COUNT);
+    Process_Type_Instances<AircraftTypeClass, AircraftType>(ini, Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
+    Process_Type_Instances<BuildingTypeClass, StructType>(ini, Buildings, STRUCT_FIRST, STRUCT_COUNT);
+    Process_Type_Instances<InfantryTypeClass, InfantryType>(ini, Infantry, INFANTRY_FIRST, INFANTRY_COUNT);
+    Process_Type_Instances<UnitTypeClass, UnitType>(ini, Units, UNIT_FIRST, UNIT_COUNT);
 
     return true;
 }
@@ -542,12 +547,11 @@ bool RulesClass::Export_Difficulty(CCINIClass& ini)
     return (true);
 }
 
-template<DerivedFromObjectTypeClass T, EnumSignedChar U>
-static void Export_Type_Instances(CCINIClass& ini, U first, U count)
+bool RulesClass::Export_Sections(CCINIClass& ini)
 {
-    for (auto i = first; i < count; ++i) {
-        T::As_Reference(i).Write_INI(ini);
-    }
+    Sections.Save_All_To_Ini(ini);
+
+    return true;
 }
 
 // TODO: Write each type to a separate rules file (maybe a rules directory of files)
@@ -555,17 +559,17 @@ bool RulesClass::Export_Types(CCINIClass& ini)
 {
     // TODO: Add other entities (house, overlay, terrain etc.)
 
-    Export_Type_Instances<BulletTypeClass, BulletType>(ini, BULLET_FIRST, BULLET_COUNT);
+    Bullets.Save_All_To_Ini(ini);
     // TODO: impl INI routines separately
     // (they do not derive from ObjectTypeClass, make a abstract base class of ObjectTypeClass like 'RulesTypeClass' OR
     // interface via concept)
-    //Export_Type_Instances<WarheadTypeClass, WarheadType>(ini, WARHEAD_FIRST, WARHEAD_COUNT);
-    //Export_Type_Instances<WeaponTypeClass, WeaponType>(ini, WEAPON_FIRST, WEAPON_COUNT);
+    //Warheads.Save_All_To_Ini(ini);
+    //Weapons.Save_All_To_Ini(ini);
 
-    Export_Type_Instances<AircraftTypeClass, AircraftType>(ini, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
-    Export_Type_Instances<BuildingTypeClass, StructType>(ini, STRUCT_FIRST, STRUCT_COUNT);
-    Export_Type_Instances<InfantryTypeClass, InfantryType>(ini, INFANTRY_FIRST, INFANTRY_COUNT);
-    Export_Type_Instances<UnitTypeClass, UnitType>(ini, UNIT_FIRST, UNIT_COUNT);
+    Aircraft.Save_All_To_Ini(ini);
+    Buildings.Save_All_To_Ini(ini);
+    Infantry.Save_All_To_Ini(ini);
+    Units.Save_All_To_Ini(ini);
 
     return true;
 }

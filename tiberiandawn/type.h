@@ -403,8 +403,7 @@ public:
     virtual void Display(int, int, WindowNumberType, HousesType) const {};
 #endif
 
-    virtual bool Read_INI(CCINIClass& ini);
-    virtual void Write_INI(CCINIClass& ini) const;
+    virtual const IniRuleContext& Read_INI(const IniRuleContext& ini);
 
     static void const* SelectShapes;
     static void const* PipShapes;
@@ -605,8 +604,7 @@ public:
     int Legal_Placement(CELL pos) const; // From RA for AI. ST - 7/24/2019 5:20PM
 #endif                                   // USE_RA_AI
 
-    bool Read_INI(CCINIClass& ini) override;
-    void Write_INI(CCINIClass& ini) const override;
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
 };
 
 /***************************************************************************

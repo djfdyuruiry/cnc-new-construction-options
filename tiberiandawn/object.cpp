@@ -259,20 +259,20 @@ void const* ObjectTypeClass::Get_Cameo_Data(void) const
     return (NULL);
 }
 
-bool ObjectTypeClass::Read_INI(CCINIClass& ini)
+// TODO: Logic to allow selecting FullName by text file const name (or wait until lang file refactored into text format)
+const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
 {
-    if (!ini.Is_Present(Name())) {
-        return false;
-    }
-
-    IsCrushable = ini.Get_Bool(Name(), "IsCrushable", IsCrushable);
-
-    return true;
-}
-
-void ObjectTypeClass::Write_INI(CCINIClass& ini) const
-{
-    ini.Put_Bool(Name(), "IsCrushable", IsCrushable);
+    // TODO: Armor (ArmorType)
+    return ini.Load_Bool_Var(IsCrushable)
+       .Load_Bool_Var(IsStealthy)
+       .Load_Bool_Var(IsStealthy)
+       .Load_Bool_Var(IsSelectable)
+       .Load_Bool_Var(IsLegalTarget)
+       .Load_Bool_Var(IsInsignificant)
+       .Load_Bool_Var(IsImmune)
+       .Load_Bool_Var(IsFlammable)
+       .Load_Bool_Var(IsSentient)
+       .Load_UShort_Var(MaxStrength);
 }
 
 /***********************************************************************************************

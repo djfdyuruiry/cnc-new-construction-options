@@ -30,9 +30,6 @@
 #   * RULE_PROCESS_CODE - Calls the index operator on a Sections variable/class member for each section
 #                         and invokes 'With<IniRuleContext>' with a 'Load' call inside the lambda for each rule
 #                         (Sections expected to be of type RuleSections, see: common/rulesections.h)
-#   * RULE_EXPORT_CODE - Calls the index operator on a Sections variable/class member for each section
-#                        and invokes 'With<IniRuleContext>' with a 'Save' call inside the lambda for each rule
-#                        (Sections expected to be of type RuleSections, see: common/rulesections.h)
 #
 # All JSON files are watched for changes, automatically regenerating code before build and on configure. Adding/deleting
 # JSON files is also detected automatically. The template files passed in as params are also watched.
@@ -222,7 +219,6 @@ function(Main)
   set(RULE_KEYS_DEFINES "")
 
   set(RULE_PROCESS_CODE "")
-  set(RULE_EXPORT_CODE "")
 
   foreach(RULE_FILE ${RULES_FILES})
     ParseRuleFilePath("${RULE_FILE}" RELATIVE_RULE_FILE)
@@ -252,12 +248,6 @@ function(Main)
                                  "        c")
     string(APPEND RULE_PROCESS_CODE "${SECTION_LEAD_IN}")
 
-    string(CONCAT SECTION_LEAD_IN "\n    CNC_LOG_INFO(\"Exporting rule section: [{}]\", ${SECTION_DEFINE});\n"
-                                 "\n"
-                                 "    Sections[${SECTION_DEFINE}].With<IniRuleContext>(ini, [](auto& c) {\n"
-                                 "        c")
-    string(APPEND RULE_EXPORT_CODE "${SECTION_LEAD_IN}")
-
     string(JSON RULE_COUNT LENGTH "${RULES_JSON}" rules)
 
     MATH(EXPR RULE_COUNT "${RULE_COUNT}-1")
@@ -266,7 +256,6 @@ function(Main)
       if(${RULE_INDEX} GREATER 0)
         # rules-nco.cpp
         string(APPEND RULE_PROCESS_CODE "\n         ")
-        string(APPEND RULE_EXPORT_CODE "\n         ")
       endif()
 
       LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_DEFAULT)
@@ -278,24 +267,20 @@ function(Main)
       ResolveRuleValue("${RULE_DEFAULT}" RULE_VALUE)
 
       string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Default(${RULE_VALUE})")
-      string(APPEND RULE_EXPORT_CODE ".Save(${RULE_DEFINE})")
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close call chain for section
         string(APPEND RULE_PROCESS_CODE ";")
-        string(APPEND RULE_EXPORT_CODE ";")
       endif()
 
       if(${IS_IMPLEMENTED} STREQUAL "OFF")
         # add TODO if not implemented yet
         string(APPEND RULE_PROCESS_CODE " // TODO: implement")
-        string(APPEND RULE_EXPORT_CODE " // TODO: implement")
       endif()
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close section lambda parameter and With method call
         string(APPEND RULE_PROCESS_CODE "\n    });")
-        string(APPEND RULE_EXPORT_CODE "\n    });")
       endif()
 
       # rulekeys.h rule defines

@@ -65,9 +65,6 @@ class RuleSections;
 class RulesClass
 {
 public:
-    static bool Process_Types(CCINIClass& ini);
-    static bool Export_Types(CCINIClass& ini);
-
     RulesClass(void);
 
     bool Process(CCINIClass& file);
@@ -75,12 +72,14 @@ public:
     bool IQ(CCINIClass& ini);
     bool Difficulty(CCINIClass& ini);
     bool Process_Sections(CCINIClass& ini);
+    bool Process_Types(CCINIClass& ini);
 
     bool Export(CCINIClass& file);
     bool Export_AI(CCINIClass& ini);
     bool Export_IQ(CCINIClass& ini);
     bool Export_Difficulty(CCINIClass& ini);
     bool Export_Sections(CCINIClass& ini);
+    bool Export_Types(CCINIClass& ini);
 
     /*
     **	This specifies the average number of minutes between each computer attack.
@@ -293,6 +292,14 @@ public:
 
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
+    // TODO: Load below from separate INI files
+    RuleSections Bullets;
+    RuleSections Warheads; // TODO: process/export
+    RuleSections Weapons; // TODO: process/export
+    RuleSections Aircraft;
+    RuleSections Buildings;
+    RuleSections Infantry;
+    RuleSections Units;
 
 private:
     void Apply_Special_Properties();

@@ -21,21 +21,26 @@
 #include <functional>
 #include <optional>
 #include <memory>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
-#include <unordered_map>
 #include <variant>
 
 #include "fixed.h"
 #include "ini.h"
 #include "logger.h"
 
-using RuleValueVariant = std::variant<int, bool, float>;
+#include <map>
+
+using RuleValueVariant = std::variant<int, bool, float, ushort>;
 
 template<typename T>
 concept RuleValueVariantCompatible = (
-    std::is_same_v<T, int> || std::is_same_v<T, bool> || std::is_same_v<T, float>
+    std::is_same_v<T, int> ||
+    std::is_same_v<T, bool> ||
+    std::is_same_v<T, float> ||
+    std::is_same_v<T, ushort>
 );
 
 class RuleSection
@@ -51,6 +56,8 @@ public:
             return std::get_if<bool>(&value_variant_b) != nullptr;
         } else if (const auto value = std::get_if<float>(&value_variant_a)) {
             return std::get_if<float>(&value_variant_b) != nullptr;
+        } else if (const auto value = std::get_if<ushort>(&value_variant_a)) {
+            return std::get_if<ushort>(&value_variant_b) != nullptr;
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -64,6 +71,8 @@ public:
             return "bool";
         } else if (const auto value = std::get_if<float>(&value_variant)) {
             return "float";
+        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+            return "ushort";
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -76,6 +85,8 @@ public:
         } else if (const auto value = std::get_if<bool>(&value_variant)) {
             return std::format("{}", *value);
         } else if (const auto value = std::get_if<float>(&value_variant)) {
+            return std::format("{}", *value);
+        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
             return std::format("{}", *value);
         }
 
@@ -107,8 +118,8 @@ public:
         std::vector<std::string_view> keys;
         keys.reserve(Rules.size());
 
-        for (const auto& pair : Rules) {
-            keys.emplace_back(pair.first);
+        for (const auto& key : Rules | std::views::keys) {
+            keys.emplace_back(key);
         }
 
         return keys;
@@ -149,7 +160,7 @@ public:
         CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
     }
 
-    // TODO: Validation/value error handling
+    // TODO: Type Validation (for non trival types, unsigned/float etc.)/value error handling
     template<RuleValueVariantCompatible T>
     RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value)
     {
@@ -186,6 +197,19 @@ public:
             value = std::stof(
                 ini.Get_String(SectionName.data(), name.data(), default_value_str)
             );
+        } else if constexpr (std::is_same_v<T, ushort>) {
+            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
+
+            if (ini_value < 0 || ini_value > std::numeric_limits<ushort>::max()) {
+                CNC_LOGGER_FATAL(
+                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
+                    ini_value,
+                    0,
+                    std::numeric_limits<ushort>::max()
+                );
+            }
+
+            value = static_cast<ushort>(ini_value);
         }
 
         CNC_LOGGER_DEBUG(
@@ -218,9 +242,18 @@ public:
         } else if (const auto value = std::get_if<float>(&value_variant)) {
             auto value_str = std::format("{}", *value);
             ini.Put_String(SectionName.data(), name.data(), value_str);
+        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+            ini.Put_Int(SectionName.data(), name.data(), *value);
         }
 
         return *this;
+    }
+
+    void Save_All_To_Ini(INIClass& ini) const
+    {
+        for (const auto& key : Rules | std::views::keys) {
+            Save_To_Ini(ini, key);
+        }
     }
 
     template<RuleValueVariantCompatible T>
@@ -293,7 +326,7 @@ public:
 private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
-    std::unordered_map<std::string_view, RuleValueVariant> Rules;
+    std::map<std::string_view, RuleValueVariant> Rules;
     std::function<void(void)> OnRulesChanged;
 };
 
@@ -306,6 +339,16 @@ public:
     const IniRuleContext& Load(std::string_view name, T default_value) const
     {
         Section.Load_From_Ini(Context, name, default_value);
+
+        return *this;
+    }
+
+    template<RuleValueVariantCompatible T>
+    const IniRuleContext& Load_With_Callback(std::string_view name, T default_value, std::function<void(T)> callback) const
+    {
+        Section.Load_From_Ini(Context, name, default_value);
+
+        callback(Section.Get<T>(name));
 
         return *this;
     }
@@ -346,6 +389,18 @@ private:
     std::optional<std::string_view> NameInStream;
 };
 
+// IniRuleContext macro 'methods' - useful for setting variables and class members from rules
+
+// Load a variable/member by its C++ name (with a specific type) from an INI context and set its value
+// to equal the INI value
+#define Load_Var_With_Type(VAR, T) Load_With_Callback<T>(#VAR, VAR, [&](const auto v) { VAR = v; })
+
+// Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
+#define Load_Var(VAR) Load_With_Callback(#VAR, VAR, [&](const auto v) { VAR = v; })
+#define Load_Bool_Var(VAR) Load_Var_With_Type(VAR, bool)
+#define Load_UShort_Var(VAR) Load_Var_With_Type(VAR, ushort)
+#define Load_Int_Var(VAR) Load_Var_With_Type(VAR, int)
+
 class RuleSections
 {
 public:
@@ -369,6 +424,13 @@ public:
     bool Has_Section(std::string_view name)
     {
         return Sections.find(name) != Sections.end();
+    }
+
+    void Save_All_To_Ini(INIClass& ini) const
+    {
+        for (const auto& section : Sections | std::views::values) {
+            section->Save_All_To_Ini(ini);
+        }
     }
 
     RuleSection& operator[](std::string_view name)
@@ -396,6 +458,6 @@ public:
 private:
     inline static CncLogger Logger = CncLogger("RuleSections");
 
-    std::unordered_map<std::string_view, std::unique_ptr<RuleSection>> Sections;
+    std::map<std::string_view, std::unique_ptr<RuleSection>> Sections;
     std::optional<std::function<void(void)>> OnRulesChanged;
 };
