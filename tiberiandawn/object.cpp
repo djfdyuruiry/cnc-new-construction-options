@@ -76,6 +76,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /*
 **	Selected objects have a special marking box around them. This is the shapes that are
@@ -272,6 +273,7 @@ const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
        .Load_Bool_Var(IsImmune)
        .Load_Bool_Var(IsFlammable)
        .Load_Bool_Var(IsSentient)
+       .Load_With_Converter_Callback<TdTypeConverter, ArmorType>("Armor", Armor, [&](auto v) { Armor = v; })
        .Load_UShort_Var(MaxStrength);
 }
 

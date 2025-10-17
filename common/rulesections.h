@@ -33,15 +33,22 @@
 
 #include <map>
 
-using RuleValueVariant = std::variant<int, bool, float, ushort>;
+using RuleValueVariant = std::variant<int, bool, float, ushort, std::string>;
 
 template<typename T>
 concept RuleValueVariantCompatible = (
     std::is_same_v<T, int> ||
     std::is_same_v<T, bool> ||
     std::is_same_v<T, float> ||
-    std::is_same_v<T, ushort>
+    std::is_same_v<T, ushort> ||
+    std::is_same_v<T, std::string>
 );
+
+template<typename T>
+concept TypeConverter = requires() {
+    { T::Try_Parse(std::same_as<std::string>) } -> std::same_as<std::optional<T>>;
+    { T::To_String(std::same_as<T>) } -> std::same_as<std::string>;
+};
 
 class RuleSection
 {
@@ -58,6 +65,8 @@ public:
             return std::get_if<float>(&value_variant_b) != nullptr;
         } else if (const auto value = std::get_if<ushort>(&value_variant_a)) {
             return std::get_if<ushort>(&value_variant_b) != nullptr;
+        } else if (const auto value = std::get_if<std::string>(&value_variant_a)) {
+            return std::get_if<std::string>(&value_variant_b) != nullptr;
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -73,6 +82,8 @@ public:
             return "float";
         } else if (const auto value = std::get_if<ushort>(&value_variant)) {
             return "ushort";
+        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+            return "string";
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -88,6 +99,8 @@ public:
             return std::format("{}", *value);
         } else if (const auto value = std::get_if<ushort>(&value_variant)) {
             return std::format("{}", *value);
+        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+            return *value;
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code"); 
@@ -210,6 +223,8 @@ public:
             }
 
             value = static_cast<ushort>(ini_value);
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            value = ini.Get_String(SectionName.data(), name.data(), default_value);
         }
 
         CNC_LOGGER_DEBUG(
@@ -244,6 +259,8 @@ public:
             ini.Put_String(SectionName.data(), name.data(), value_str);
         } else if (const auto value = std::get_if<ushort>(&value_variant)) {
             ini.Put_Int(SectionName.data(), name.data(), *value);
+        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+            ini.Put_String(SectionName.data(), name.data(), *value);
         }
 
         return *this;
@@ -257,6 +274,7 @@ public:
     }
 
     template<RuleValueVariantCompatible T>
+    [[nodiscard]]
     std::optional<T> Try_Get(std::string_view name) const
     {
         auto value_variant_optional = Try_Get_Variant(name);
@@ -292,6 +310,14 @@ public:
         return value_optional.value();
     }
 
+    template<class T, TypeConverter U>
+    std::optional<T> Get_With_Converter(std::string_view name) const
+    {
+        return U::template Try_Parse<T>(
+            Get<std::string>(name)
+        );
+    }
+
     RuleSection& Set(std::string_view name, RuleValueVariant value)
     {
         CNC_LOGGER_WARN(
@@ -323,6 +349,12 @@ public:
         return *this;
     }
 
+    template<TypeConverter T, class U>
+    RuleSection& Set_With_Converter(std::string_view name, U instance) const
+    {
+        return Set(name, T::To_String(instance));
+    }
+
 private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
@@ -343,12 +375,30 @@ public:
         return *this;
     }
 
+    template< TypeConverter T, class U>
+    const IniRuleContext& Load_With_Converter(std::string_view name, U default_value) const
+    {
+        Section.Load_From_Ini<std::string>(Context, name, T::To_String(default_value));
+
+        return *this;
+    }
+
     template<RuleValueVariantCompatible T>
     const IniRuleContext& Load_With_Callback(std::string_view name, T default_value, std::function<void(T)> callback) const
     {
-        Section.Load_From_Ini(Context, name, default_value);
+        Load(name, default_value);
 
         callback(Section.Get<T>(name));
+
+        return *this;
+    }
+
+    template< TypeConverter T, class U>
+    const IniRuleContext& Load_With_Converter_Callback(std::string_view name, U default_value, std::function<void(U)> callback) const
+    {
+        Load_With_Callback<T, U>(name, default_value);
+
+        callback(Section.Get_With_Converter<U>(name));
 
         return *this;
     }
