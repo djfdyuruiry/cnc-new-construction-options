@@ -111,6 +111,8 @@
  *   TechnoClass::Refund_Amount -- Returns with the money to refund if this object is sold.    *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <numeric>
+
 #include "function.h"
 #include "typeconverter.h"
 
@@ -148,7 +150,7 @@ int const TechnoClass::BodyShape[32] = {0,  31, 30, 29, 28, 27, 26, 25, 24, 23, 
 TechnoTypeClass::TechnoTypeClass(int name,
                                  char const* ininame,
                                  unsigned char level,
-                                 int pre,
+                                 StructType prereq,
                                  bool is_leader,
                                  bool is_scanner,
                                  bool is_nominal,
@@ -174,7 +176,7 @@ TechnoTypeClass::TechnoTypeClass(int name,
                                  int scenario,
                                  int risk,
                                  int reward,
-                                 int ownable,
+                                 std::vector<HousesType> ownableBy,
                                  WeaponType primary,
                                  WeaponType secondary,
                                  ArmorType armor)
@@ -192,7 +194,6 @@ TechnoTypeClass::TechnoTypeClass(int name,
                       strength)
 {
     Level = level;
-    Pre = pre;
     MaxAmmo = ammo;
     MaxSpeed = maxspeed;
     CameoData = NULL;
@@ -207,20 +208,38 @@ TechnoTypeClass::TechnoTypeClass(int name,
     IsRepairable = is_repairable;
     IsTurretEquipped = is_turret_equipped;
     IsNominal = is_nominal;
-    Ownable = ownable;
     Reward = reward;
     Scenario = scenario;
     SightRange = sightrange;
 
-    /*
-    ** Units risk value is based on the type of weapon he has and the
-    ** rate of fire it shoots at.
-    */
-    risk = risk;
+    Prerequisite = prereq;
+    OwnableBy = std::move(ownableBy);
+
+    Set_Pre();
+    Set_Ownable();
+    Calc_Risk();
+}
+
+/**
+ * Units risk value is based on the type of weapon he has and the
+ * rate of fire it shoots at.
+ */
+void TechnoTypeClass::Calc_Risk()
+{
     Risk = 0;
-    if (primary != WEAPON_NONE) {
-        Risk = (Weapons[primary].Attack * (Weapons[primary].Range >> 4)) / Weapons[primary].ROF;
+    if (Primary != WEAPON_NONE) {
+        Risk = (Weapons[Primary].Attack * (Weapons[Primary].Range >> 4)) / Weapons[Primary].ROF;
     }
+}
+
+void TechnoTypeClass::Set_Pre()
+{
+    Pre = (1L << Prerequisite);
+}
+
+void TechnoTypeClass::Set_Ownable()
+{
+    Ownable = std::accumulate(OwnableBy.begin(), OwnableBy.end(), 0, std::bit_or());
 }
 
 /***********************************************************************************************
@@ -4893,7 +4912,7 @@ int TechnoTypeClass::Legal_Placement(CELL pos) const
 
 const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
 {
-    return ObjectTypeClass::Read_INI(ini)
+    ObjectTypeClass::Read_INI(ini)
         .Load_Bool_Var(IsLeader)
         .Load_Bool_Var(IsScanner)
         .Load_Bool_Var(IsNominal)
@@ -4906,10 +4925,18 @@ const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Bool_Var(IsTransporter)
         .Load_Int_Var(SightRange)
         .Load_Int_Var(Cost)
-        .Load_Int_Var(Risk) // TODO: Scenario/Level (uchar), Pre (calculated csv field)
+        .Load_Int_Var(Risk) // TODO: Scenario/Level (uchar)
+        .Load_With_TdConverter(StructType, Prerequisite)
         .Load_With_TdConverter(MPHType, MaxSpeed)
         .Load_Int_Var(Reward)
         .Load_With_TdConverter(WeaponType, Primary)
         .Load_With_TdConverter(WeaponType, Secondary)
-        .Load_Int_Var(MaxAmmo); // TODO: Ownable (calculated csv field)
+        .Load_Int_Var(MaxAmmo)
+        .Load_Csv_With_TdConverter(HousesType, OwnableBy);
+
+    Set_Pre();
+    Set_Ownable();
+    Calc_Risk();
+
+    return ini;
 }

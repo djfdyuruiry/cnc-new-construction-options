@@ -44,9 +44,11 @@ concept RuleValueVariantCompatible = (
 );
 
 template<typename C, typename T>
-concept TypeConverter = requires(std::string str, T instance) {
+concept TypeConverter = requires(std::string str, const std::string& str_ref, const std::vector<T>& instances, const char c, T instance) {
     { C::template Try_Parse<T>(str) } -> std::same_as<std::optional<T>>;
+    { C::template Try_Parse_Csv<T>(str_ref, c) } -> std::same_as<std::vector<T>>;
     { C::template To_String<T>(instance) } -> std::same_as<std::string>;
+    { C::template To_Csv_String<T>(instances) }  -> std::same_as<std::string>;
 };
 
 class RuleSection
@@ -323,6 +325,14 @@ public:
         );
     }
 
+    template<class T, TypeConverter<T> C>
+    std::vector<T> Get_With_Csv_Converter(std::string_view name) const
+    {
+        return C::template Try_Parse_Csv<T>(
+            Get<std::string>(name)
+        );
+    }
+
     RuleSection& Set(std::string_view name, RuleValueVariant value)
     {
         CNC_LOGGER_WARN(
@@ -360,6 +370,12 @@ public:
         return Set(name, C::To_String(instance));
     }
 
+    template<class T, TypeConverter<T> C>
+    RuleSection& Set_With_Csv_Converter(std::string_view name, const std::vector<T>& instances) const
+    {
+        return Set(name, C::To_Csv_String(instances));
+    }
+
 private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
@@ -388,6 +404,14 @@ public:
         return *this;
     }
 
+    template<class T, TypeConverter<T> C>
+    const IniRuleContext& Load_With_Csv_Converter(std::string_view name, const std::vector<T>& default_values) const
+    {
+        Section.Load_From_Ini<std::string>(Context, name, C::To_Csv_String(default_values));
+
+        return *this;
+    }
+
     template<RuleValueVariantCompatible T>
     const IniRuleContext& Load_With_Callback(std::string_view name, T default_value, std::function<void(T)> callback) const
     {
@@ -405,9 +429,23 @@ public:
         std::function<void(T)> callback
     ) const
     {
-        Load<std::string>(name, C::template To_String<T>(default_value));
+        Load_With_Converter<T, C>(name, default_value);
 
         callback(Section.Get_With_Converter<T, C>(name).value_or(default_value));
+
+        return *this;
+    }
+
+    template<class T, TypeConverter<T> C>
+    const IniRuleContext& Load_With_Csv_Converter_Callback(
+        std::string_view name,
+        const std::vector<T>& default_values,
+        std::function<void(std::vector<T>)> callback
+    ) const
+    {
+        Load_With_Csv_Converter<T, C>(name, default_values);
+
+        callback(Section.Get_With_Csv_Converter<T, C>(name));
 
         return *this;
     }

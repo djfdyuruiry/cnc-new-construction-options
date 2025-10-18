@@ -56,7 +56,7 @@ static AircraftTypeClass const AttackPlane(AIRCRAFT_A10, // What kind of aircraf
                                            TXT_A10,      // Translated text number for aircraft.
                                            "A10",        // INI name of aircraft.
                                            99,           // Build level.
-                                           STRUCTF_NONE, // Building prerequisite.
+                                           STRUCT_NONE, // Building prerequisite.
                                            false,        // Is a leader type?
                                            false,        // Does it fire a pair of shots in quick succession?
                                            false,        //	Is this a typical transport vehicle?
@@ -97,7 +97,7 @@ static AircraftTypeClass const TransportHeli(AIRCRAFT_TRANSPORT, // What kind of
                                              TXT_TRANS,          // Translated text number for aircraft.
                                              "TRAN",             // INI name of aircraft.
                                              6,                  // Build level.
-                                             STRUCTF_HELIPAD,    // Building prerequisite.
+                                             STRUCT_HELIPAD,    // Building prerequisite.
                                              false,              // Is a leader type?
                                              false,              // Does it fire a pair of shots in quick succession?
                                              true,               //	Is this a typical transport vehicle?
@@ -138,7 +138,7 @@ static AircraftTypeClass const AttackHeli(AIRCRAFT_HELICOPTER, // What kind of a
                                           TXT_HELI,            // Translated text number for aircraft.
                                           "HELI",              // INI name of aircraft.
                                           6,                   // Build level.
-                                          STRUCTF_HELIPAD,     // Building prerequisite.
+                                          STRUCT_HELIPAD,     // Building prerequisite.
                                           true,                // Is a leader type?
                                           true,                // Does it fire a pair of shots in quick succession?
                                           false,               //	Is this a typical transport vehicle?
@@ -179,7 +179,7 @@ static AircraftTypeClass const OrcaHeli(AIRCRAFT_ORCA,   // What kind of aircraf
                                         TXT_ORCA,        // Translated text number for aircraft.
                                         "ORCA",          // INI name of aircraft.
                                         6,               // Build level.
-                                        STRUCTF_HELIPAD, // Building prerequisite.
+                                        STRUCT_HELIPAD, // Building prerequisite.
                                         true,            // Is a leader type?
                                         true,            // Does it fire a pair of shots in quick succession?
                                         false,           //	Is this a typical transport vehicle?
@@ -220,7 +220,7 @@ static AircraftTypeClass const CargoPlane(AIRCRAFT_CARGO, // What kind of aircra
                                           TXT_C17,        // Translated text number for aircraft.
                                           "C17",          // INI name of aircraft.
                                           99,             // Build level.
-                                          STRUCTF_NONE,   // Building prerequisite.
+                                          STRUCT_NONE,   // Building prerequisite.
                                           false,          // Is a leader type?
                                           false,          // Does it fire a pair of shots in quick succession?
                                           true,           //	Is this a typical transport vehicle?

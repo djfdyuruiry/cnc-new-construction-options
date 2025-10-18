@@ -506,6 +506,8 @@ public:
     **	multi-player or special events.
     */
     unsigned char Level;
+
+    StructType Prerequisite;
     int Pre;
 
     /*
@@ -528,6 +530,7 @@ public:
     */
     int MaxAmmo;
 
+    std::vector<HousesType> OwnableBy;
     /*
     **	This is a bit field representing the houses that are allowed to
     **	own (by normal means) this particular object type. This value is
@@ -557,7 +560,7 @@ public:
     TechnoTypeClass(int name,
                     char const* ininame,
                     unsigned char level,
-                    int pre,
+                    StructType prereq,
                     bool is_leader,
                     bool is_scanner,
                     bool is_nominal,
@@ -583,13 +586,17 @@ public:
                     int scenario,
                     int risk,
                     int reward,
-                    int ownable,
+                    std::vector<HousesType> ownableBy,
                     WeaponType primary,
                     WeaponType secondary,
                     ArmorType armor);
     virtual ~TechnoTypeClass()
     {
     }
+
+    void Calc_Risk();
+    void Set_Pre();
+    void Set_Ownable();
 
     virtual int Raw_Cost(void) const;
     virtual int Max_Passengers(void) const;
