@@ -263,7 +263,6 @@ void const* ObjectTypeClass::Get_Cameo_Data(void) const
 // TODO: Logic to allow selecting FullName by text file const name (or wait until lang file refactored into text format)
 const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
 {
-    // TODO: Armor (ArmorType)
     return ini.Load_Bool_Var(IsCrushable)
        .Load_Bool_Var(IsStealthy)
        .Load_Bool_Var(IsStealthy)
@@ -273,7 +272,7 @@ const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
        .Load_Bool_Var(IsImmune)
        .Load_Bool_Var(IsFlammable)
        .Load_Bool_Var(IsSentient)
-       .Load_With_Converter_Callback<TdTypeConverter, ArmorType>("Armor", Armor, [&](auto v) { Armor = v; })
+       .Load_With_TdConverter(Armor, ArmorType)
        .Load_UShort_Var(MaxStrength);
 }
 

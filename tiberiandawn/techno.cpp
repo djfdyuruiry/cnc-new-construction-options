@@ -112,6 +112,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /***************************************************************************
 **	Cloaking control values.
@@ -4906,6 +4907,9 @@ const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Int_Var(SightRange)
         .Load_Int_Var(Cost)
         .Load_Int_Var(Risk) // TODO: Scenario/Level (uchar), Pre (calculated csv field)
-        .Load_Int_Var(Reward) // TODO: MaxSpeed (MPHType)
-        .Load_Int_Var(MaxAmmo); // TODO: Ownable (calculated csv field), Primary/Secondary (WeaponType)
+        .Load_With_TdConverter(MaxSpeed, MPHType)
+        .Load_Int_Var(Reward)
+        .Load_With_TdConverter(Primary, WeaponType)
+        .Load_With_TdConverter(Secondary, WeaponType)
+        .Load_Int_Var(MaxAmmo); // TODO: Ownable (calculated csv field)
 }

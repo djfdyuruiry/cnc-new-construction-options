@@ -44,10 +44,10 @@ concept RuleValueVariantCompatible = (
     std::is_same_v<T, std::string>
 );
 
-template<typename T>
-concept TypeConverter = requires() {
-    { T::Try_Parse(std::same_as<std::string>) } -> std::same_as<std::optional<T>>;
-    { T::To_String(std::same_as<T>) } -> std::same_as<std::string>;
+template<typename C, typename T>
+concept TypeConverter = requires(std::string str, T instance) {
+    { C::template Try_Parse<T>(str) } -> std::same_as<std::optional<T>>;
+    { C::template To_String<T>(instance) } -> std::same_as<std::string>;
 };
 
 class RuleSection
@@ -224,7 +224,13 @@ public:
 
             value = static_cast<ushort>(ini_value);
         } else if constexpr (std::is_same_v<T, std::string>) {
-            value = ini.Get_String(SectionName.data(), name.data(), default_value);
+            auto str_value = ini.Get_String(SectionName.data(), name.data(), default_value);
+
+            // TODO: trim string to forgive spacing around rule string
+            // forgive incorrect casing in rule values
+            std::transform(str_value.begin(), str_value.end(), str_value.begin(), ::toupper);
+
+            value = str_value;
         }
 
         CNC_LOGGER_DEBUG(
@@ -310,10 +316,10 @@ public:
         return value_optional.value();
     }
 
-    template<class T, TypeConverter U>
+    template<class T, TypeConverter<T> C>
     std::optional<T> Get_With_Converter(std::string_view name) const
     {
-        return U::template Try_Parse<T>(
+        return C::template Try_Parse<T>(
             Get<std::string>(name)
         );
     }
@@ -349,10 +355,10 @@ public:
         return *this;
     }
 
-    template<TypeConverter T, class U>
-    RuleSection& Set_With_Converter(std::string_view name, U instance) const
+    template<class T, TypeConverter<T> C>
+    RuleSection& Set_With_Converter(std::string_view name, T instance) const
     {
-        return Set(name, T::To_String(instance));
+        return Set(name, C::To_String(instance));
     }
 
 private:
@@ -375,10 +381,10 @@ public:
         return *this;
     }
 
-    template< TypeConverter T, class U>
-    const IniRuleContext& Load_With_Converter(std::string_view name, U default_value) const
+    template<class T, TypeConverter<T> C>
+    const IniRuleContext& Load_With_Converter(std::string_view name, T default_value) const
     {
-        Section.Load_From_Ini<std::string>(Context, name, T::To_String(default_value));
+        Section.Load_From_Ini<std::string>(Context, name, C::To_String(default_value));
 
         return *this;
     }
@@ -393,12 +399,16 @@ public:
         return *this;
     }
 
-    template< TypeConverter T, class U>
-    const IniRuleContext& Load_With_Converter_Callback(std::string_view name, U default_value, std::function<void(U)> callback) const
+    template<class T, TypeConverter<T> C>
+    const IniRuleContext& Load_With_Converter_Callback(
+        std::string_view name,
+        T default_value,
+        std::function<void(T)> callback
+    ) const
     {
-        Load_With_Callback<T, U>(name, default_value);
+        Load<std::string>(name, C::template To_String<T>(default_value));
 
-        callback(Section.Get_With_Converter<U>(name));
+        callback(Section.Get_With_Converter<T, C>(name).value_or(default_value));
 
         return *this;
     }
