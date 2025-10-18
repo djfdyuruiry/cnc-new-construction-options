@@ -272,7 +272,7 @@ const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
        .Load_Bool_Var(IsImmune)
        .Load_Bool_Var(IsFlammable)
        .Load_Bool_Var(IsSentient)
-       .Load_With_TdConverter(Armor, ArmorType)
+       .Load_With_TdConverter(ArmorType, Armor)
        .Load_UShort_Var(MaxStrength);
 }
 

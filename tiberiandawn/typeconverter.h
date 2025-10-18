@@ -118,7 +118,9 @@ public:
 
 private:
     TdTypeConverter() = delete;
+
 };
 
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trival type
-#define Load_With_TdConverter(VAR, TYPE) Load_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = v; })
+// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
+#define Load_With_TdConverter(TYPE, VAR) \
+    Load_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = v; })

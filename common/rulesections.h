@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <optional>
+#include <map>
 #include <memory>
 #include <ranges>
 #include <stdexcept>
@@ -30,8 +31,6 @@
 #include "fixed.h"
 #include "ini.h"
 #include "logger.h"
-
-#include <map>
 
 using RuleValueVariant = std::variant<int, bool, float, ushort, std::string>;
 
