@@ -875,6 +875,8 @@ public:
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
 
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+
 private:
     /*
     **	This is a pointer to a list of offsets (from the upper left corner) that

@@ -16,7 +16,13 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, MPHType> ||
     std::is_same_v<T, WeaponType> ||
     std::is_same_v<T, HousesType> ||
-    std::is_same_v<T, StructType>
+    std::is_same_v<T, StructType> ||
+    std::is_same_v<T, FactoryType> ||
+    std::is_same_v<T, DirType> ||
+    std::is_same_v<T, BSizeType> ||
+    std::is_same_v<T, AircraftType> ||
+    std::is_same_v<T, MissionType> ||
+    std::is_same_v<T, AnimType>
 );
 
 #define ARMOR_PAIR(ARMOR_NAME) { ARMOR_##ARMOR_NAME, #ARMOR_NAME }
@@ -24,6 +30,12 @@ concept SupportedByTdTypeConverter = (
 #define WEAPON_PAIR(WEAPON_NAME) { WEAPON_##WEAPON_NAME, #WEAPON_NAME }
 #define HOUSE_PAIR(HOUSE_NAME) { HOUSE_##HOUSE_NAME, #HOUSE_NAME }
 #define STRUCT_PAIR(STRUCT_NAME) { STRUCT_##STRUCT_NAME, #STRUCT_NAME }
+#define FACTORY_PAIR(FACTORY_NAME) { FACTORY_TYPE_##FACTORY_NAME, #FACTORY_NAME }
+#define DIR_PAIR(DIR_NAME) { DIR_##DIR_NAME, #DIR_NAME }
+#define BSIZE_PAIR(BSIZE_NAME) { BSIZE_##BSIZE_NAME, #BSIZE_NAME }
+#define AIRCRAFT_PAIR(AIRCRAFT_NAME) { AIRCRAFT_##AIRCRAFT_NAME, #AIRCRAFT_NAME }
+#define MISSION_PAIR(MISSION_NAME) { MISSION_##MISSION_NAME, #MISSION_NAME }
+#define ANIM_PAIR(ANIM_NAME) { ANIM_##ANIM_NAME, #ANIM_NAME }
 
 class TdTypeConverter final
 {
@@ -159,6 +171,162 @@ public:
         STRUCT_PAIR(BARBWIRE_WALL),
         STRUCT_PAIR(WOOD_WALL)
     };
+    inline static const TwoWayMap<FactoryType, std::string> Factory_Types {
+        FACTORY_PAIR(NONE),
+        FACTORY_PAIR(INFANTRY),
+        FACTORY_PAIR(UNIT),
+        FACTORY_PAIR(AIRCRAFT),
+        FACTORY_PAIR(BUILDING)
+    };
+    inline static const TwoWayMap<DirType, std::string> Dir_Types {
+        DIR_PAIR(MIN),
+        DIR_PAIR(N),
+        DIR_PAIR(NE),
+        DIR_PAIR(E),
+        DIR_PAIR(SE),
+        DIR_PAIR(S),
+        DIR_PAIR(SW),
+        DIR_PAIR(SW_X1),
+        DIR_PAIR(SW_X2),
+        DIR_PAIR(W),
+        DIR_PAIR(NW)
+    };
+    inline static const TwoWayMap<BSizeType, std::string> BSize_Types {
+        BSIZE_PAIR(NONE),
+        BSIZE_PAIR(11),
+        BSIZE_PAIR(21),
+        BSIZE_PAIR(12),
+        BSIZE_PAIR(22),
+        BSIZE_PAIR(23),
+        BSIZE_PAIR(32),
+        BSIZE_PAIR(33),
+        BSIZE_PAIR(42),
+        BSIZE_PAIR(55)
+    };
+    inline static const TwoWayMap<AircraftType, std::string> Aircraft_Types {
+        AIRCRAFT_PAIR(NONE),
+        AIRCRAFT_PAIR(TRANSPORT),
+        AIRCRAFT_PAIR(A10),
+        AIRCRAFT_PAIR(HELICOPTER),
+        AIRCRAFT_PAIR(CARGO),
+        AIRCRAFT_PAIR(ORCA)
+    };
+    inline static const TwoWayMap<MissionType, std::string> Mission_Types {
+        MISSION_PAIR(NONE),
+        MISSION_PAIR(SLEEP),
+        MISSION_PAIR(ATTACK),
+        MISSION_PAIR(MOVE),
+        MISSION_PAIR(RETREAT),
+        MISSION_PAIR(GUARD),
+        MISSION_PAIR(STICKY),
+        MISSION_PAIR(ENTER),
+        MISSION_PAIR(CAPTURE),
+        MISSION_PAIR(HARVEST),
+        MISSION_PAIR(GUARD_AREA),
+        MISSION_PAIR(RETURN),
+        MISSION_PAIR(STOP),
+        MISSION_PAIR(AMBUSH),
+        MISSION_PAIR(HUNT),
+        MISSION_PAIR(TIMED_HUNT),
+        MISSION_PAIR(UNLOAD),
+        MISSION_PAIR(SABOTAGE),
+        MISSION_PAIR(CONSTRUCTION),
+        MISSION_PAIR(DECONSTRUCTION),
+        MISSION_PAIR(REPAIR),
+        MISSION_PAIR(RESCUE),
+        MISSION_PAIR(MISSILE),
+        MISSION_PAIR(COUNT)
+    };
+    inline static const TwoWayMap<AnimType, std::string> Anim_Types {
+        ANIM_PAIR(NONE),
+        ANIM_PAIR(FBALL1),
+        ANIM_PAIR(GRENADE),
+        ANIM_PAIR(FRAG1),
+        ANIM_PAIR(FRAG2),
+        ANIM_PAIR(VEH_HIT1),
+        ANIM_PAIR(VEH_HIT2),
+        ANIM_PAIR(VEH_HIT3),
+        ANIM_PAIR(ART_EXP1),
+        ANIM_PAIR(NAPALM1),
+        ANIM_PAIR(NAPALM2),
+        ANIM_PAIR(NAPALM3),
+        ANIM_PAIR(SMOKE_PUFF),
+        ANIM_PAIR(PIFF),
+        ANIM_PAIR(PIFFPIFF),
+        ANIM_PAIR(FLAME_N),
+        ANIM_PAIR(FLAME_NE),
+        ANIM_PAIR(FLAME_E),
+        ANIM_PAIR(FLAME_SE),
+        ANIM_PAIR(FLAME_S),
+        ANIM_PAIR(FLAME_SW),
+        ANIM_PAIR(FLAME_W),
+        ANIM_PAIR(FLAME_NW),
+        ANIM_PAIR(CHEM_N),
+        ANIM_PAIR(CHEM_NE),
+        ANIM_PAIR(CHEM_E),
+        ANIM_PAIR(CHEM_SE),
+        ANIM_PAIR(CHEM_S),
+        ANIM_PAIR(CHEM_SW),
+        ANIM_PAIR(CHEM_W),
+        ANIM_PAIR(CHEM_NW),
+        ANIM_PAIR(FIRE_SMALL),
+        ANIM_PAIR(FIRE_MED),
+        ANIM_PAIR(FIRE_MED2),
+        ANIM_PAIR(FIRE_TINY),
+        ANIM_PAIR(MUZZLE_FLASH),
+        ANIM_PAIR(SMOKE_M),
+        ANIM_PAIR(BURN_SMALL),
+        ANIM_PAIR(BURN_MED),
+        ANIM_PAIR(BURN_BIG),
+        ANIM_PAIR(ON_FIRE_SMALL),
+        ANIM_PAIR(ON_FIRE_MED),
+        ANIM_PAIR(ON_FIRE_BIG),
+        ANIM_PAIR(SAM_N),
+        ANIM_PAIR(SAM_NE),
+        ANIM_PAIR(SAM_E),
+        ANIM_PAIR(SAM_SE),
+        ANIM_PAIR(SAM_S),
+        ANIM_PAIR(SAM_SW),
+        ANIM_PAIR(SAM_W),
+        ANIM_PAIR(SAM_NW),
+        ANIM_PAIR(GUN_N),
+        ANIM_PAIR(GUN_NE),
+        ANIM_PAIR(GUN_E),
+        ANIM_PAIR(GUN_SE),
+        ANIM_PAIR(GUN_S),
+        ANIM_PAIR(GUN_SW),
+        ANIM_PAIR(GUN_W),
+        ANIM_PAIR(GUN_NW),
+        ANIM_PAIR(LZ_SMOKE),
+        ANIM_PAIR(ION_CANNON),
+        ANIM_PAIR(ATOM_BLAST),
+        ANIM_PAIR(CRATE_DEVIATOR),
+        ANIM_PAIR(CRATE_DOLLAR),
+        ANIM_PAIR(CRATE_EARTH),
+        ANIM_PAIR(CRATE_EMPULSE),
+        ANIM_PAIR(CRATE_INVUN),
+        ANIM_PAIR(CRATE_MINE),
+        ANIM_PAIR(CRATE_RAPID),
+        ANIM_PAIR(CRATE_STEALTH),
+        ANIM_PAIR(CRATE_MISSILE),
+        ANIM_PAIR(ATOM_DOOR),
+        ANIM_PAIR(MOVE_FLASH),
+        ANIM_PAIR(OILFIELD_BURN),
+        ANIM_PAIR(TRIC_DIE),
+        ANIM_PAIR(TREX_DIE),
+        ANIM_PAIR(STEG_DIE),
+        ANIM_PAIR(RAPT_DIE),
+        ANIM_PAIR(CHEM_BALL),
+        ANIM_PAIR(FLAG),
+        ANIM_PAIR(BEACON),
+        ANIM_PAIR(FIRE_SMALL_VIRTUAL),
+        ANIM_PAIR(FIRE_MED_VIRTUAL),
+        ANIM_PAIR(FIRE_MED2_VIRTUAL),
+        ANIM_PAIR(FIRE_TINY_VIRTUAL),
+        ANIM_PAIR(BEACON_VIRTUAL),
+        ANIM_PAIR(COUNT),
+        ANIM_PAIR(FIRST)
+    };
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -183,6 +351,30 @@ public:
         } else if constexpr (std::is_same_v<T, StructType>) {
             return Struct_Types[instance].value_or(
                 Struct_Types[STRUCT_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, FactoryType>) {
+            return Factory_Types[instance].value_or(
+                Factory_Types[FACTORY_TYPE_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, DirType>) {
+            return Dir_Types[instance].value_or(
+                Dir_Types[DIR_MIN].value()
+            );
+        } else if constexpr (std::is_same_v<T, BSizeType>) {
+            return BSize_Types[instance].value_or(
+                BSize_Types[BSIZE_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, AircraftType>) {
+            return Aircraft_Types[instance].value_or(
+                Aircraft_Types[AIRCRAFT_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, MissionType>) {
+            return Mission_Types[instance].value_or(
+                Mission_Types[MISSION_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, AnimType>) {
+            return Anim_Types[instance].value_or(
+                Anim_Types[ANIM_NONE].value()
             );
         }
 
@@ -225,8 +417,20 @@ public:
             return Weapon_Types[str];
         } else if constexpr (std::is_same_v<T, HousesType>) {
             return House_Types[str];
-        }else if constexpr (std::is_same_v<T, StructType>) {
+        } else if constexpr (std::is_same_v<T, StructType>) {
             return Struct_Types[str];
+        } else if constexpr (std::is_same_v<T, FactoryType>) {
+            return Factory_Types[str];
+        } else if constexpr (std::is_same_v<T, DirType>) {
+            return Dir_Types[str];
+        } else if constexpr (std::is_same_v<T, BSizeType>) {
+            return BSize_Types[str];
+        } else if constexpr (std::is_same_v<T, AircraftType>) {
+            return Aircraft_Types[str];
+        } else if constexpr (std::is_same_v<T, MissionType>) {
+            return Mission_Types[str];
+        } else if constexpr (std::is_same_v<T, AnimType>) {
+            return Anim_Types[str];
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");

@@ -248,13 +248,12 @@ void TechnoTypeClass::Set_Pre()
  */
 void TechnoTypeClass::Set_Ownable()
 {
-    unsigned short ownable = 0L;
-
-    for (const auto& house : OwnableBy) {
-        ownable = ownable | 1L << house;
-    }
-
-    Ownable = ownable;
+    Ownable = std::accumulate(
+        OwnableBy.begin(),
+        OwnableBy.end(),
+        0L,
+        [](auto ownable, const auto& house) { return ownable | 1L << house; }
+    );
 }
 
 /***********************************************************************************************

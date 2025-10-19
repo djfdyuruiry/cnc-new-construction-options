@@ -55,6 +55,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 #define MCW MAP_CELL_W
 
@@ -4489,4 +4490,24 @@ int BuildingTypeClass::Cost_Of(void) const
 COORDINATE BuildingTypeClass::Coord_Fixup(COORDINATE coord) const
 {
     return Coord_Whole(coord);
+}
+
+const IniRuleContext& BuildingTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return TechnoTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsBibbed)
+        .Load_Bool_Var(IsWall)
+        .Load_Bool_Var(IsFactory)
+        .Load_Bool_Var(IsSimpleDamage)
+        .Load_Bool_Var(IsSturdy)
+        .Load_Bool_Var(IsCaptureable)
+        .Load_Bool_Var(IsRegulated)
+        .Load_Bool_Var(IsUnsellable)
+        .Load_Bool_Var(IsCaptureable)
+        .Load_With_TdConverter(FactoryType, ToBuild)
+        .Load_With_TdConverter(StructType, Type)
+        .Load_With_TdConverter(DirType, StartFace) // TODO: CanEnter logic
+        .Load_Int_Var(Power) // TODO: Capacity (uint)
+        .Load_Int_Var(Drain)
+        .Load_With_TdConverter(BSizeType, Size);
 }
