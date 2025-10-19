@@ -22,7 +22,8 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, BSizeType> ||
     std::is_same_v<T, AircraftType> ||
     std::is_same_v<T, MissionType> ||
-    std::is_same_v<T, AnimType>
+    std::is_same_v<T, AnimType> ||
+    std::is_same_v<T, InfantryType>
 );
 
 #define ARMOR_PAIR(ARMOR_NAME) { ARMOR_##ARMOR_NAME, #ARMOR_NAME }
@@ -36,6 +37,7 @@ concept SupportedByTdTypeConverter = (
 #define AIRCRAFT_PAIR(AIRCRAFT_NAME) { AIRCRAFT_##AIRCRAFT_NAME, #AIRCRAFT_NAME }
 #define MISSION_PAIR(MISSION_NAME) { MISSION_##MISSION_NAME, #MISSION_NAME }
 #define ANIM_PAIR(ANIM_NAME) { ANIM_##ANIM_NAME, #ANIM_NAME }
+#define INFANTRY_PAIR(INFANTRY_NAME) { INFANTRY_##INFANTRY_NAME, #INFANTRY_NAME }
 
 class TdTypeConverter final
 {
@@ -326,6 +328,27 @@ public:
         ANIM_PAIR(BEACON_VIRTUAL),
         ANIM_PAIR(COUNT),
         ANIM_PAIR(FIRST)
+    };
+    inline static const TwoWayMap<InfantryType, std::string> Infantry_Types {
+        INFANTRY_PAIR(E2),
+        INFANTRY_PAIR(E3),
+        INFANTRY_PAIR(E4),
+        INFANTRY_PAIR(E5),
+        INFANTRY_PAIR(E7),
+        INFANTRY_PAIR(RAMBO),
+        INFANTRY_PAIR(C1),
+        INFANTRY_PAIR(C2),
+        INFANTRY_PAIR(C3),
+        INFANTRY_PAIR(C4),
+        INFANTRY_PAIR(C5),
+        INFANTRY_PAIR(C6),
+        INFANTRY_PAIR(C7),
+        INFANTRY_PAIR(C8),
+        INFANTRY_PAIR(C9),
+        INFANTRY_PAIR(C10),
+        INFANTRY_PAIR(MOEBIUS),
+        INFANTRY_PAIR(DELPHI),
+        INFANTRY_PAIR(CHAN)
     };
 
     template<class T>

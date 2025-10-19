@@ -45,6 +45,7 @@
 
 #include "function.h"
 #include "type.h"
+#include "typeconverter.h"
 
 /*
  * There were too many parameters for the InfantryTypeClass constructor so I have
@@ -1969,4 +1970,15 @@ int InfantryTypeClass::Full_Name(void) const
         return (TechnoTypeClass::Full_Name());
     }
     return (TXT_CIVILIAN);
+}
+
+const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return TechnoTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsFemale)
+        .Load_Bool_Var(IsCrawling)
+        .Load_Bool_Var(IsCapture)
+        .Load_Bool_Var(IsFraidyCat)
+        .Load_Bool_Var(IsAvoidingTiberium)
+        .Load_With_TdConverter(InfantryType, Type);
 }

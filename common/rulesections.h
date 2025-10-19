@@ -32,7 +32,11 @@
 #include "ini.h"
 #include "logger.h"
 
-using RuleValueVariant = std::variant<int, bool, float, ushort, std::string>;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned char uchar;
+
+using RuleValueVariant = std::variant<int, bool, float, ushort, std::string, uint, uchar>;
 
 template<typename T>
 concept RuleValueVariantCompatible = (
@@ -40,7 +44,9 @@ concept RuleValueVariantCompatible = (
     std::is_same_v<T, bool> ||
     std::is_same_v<T, float> ||
     std::is_same_v<T, ushort> ||
-    std::is_same_v<T, std::string>
+    std::is_same_v<T, std::string> ||
+    std::is_same_v<T, uint> ||
+    std::is_same_v<T, uchar>
 );
 
 template<typename C, typename T>
@@ -68,6 +74,10 @@ public:
             return std::get_if<ushort>(&value_variant_b) != nullptr;
         } else if (const auto value = std::get_if<std::string>(&value_variant_a)) {
             return std::get_if<std::string>(&value_variant_b) != nullptr;
+        } else if (const auto value = std::get_if<uint>(&value_variant_a)) {
+            return std::get_if<uint>(&value_variant_b) != nullptr;
+        } else if (const auto value = std::get_if<uchar>(&value_variant_a)) {
+            return std::get_if<uchar>(&value_variant_b) != nullptr;
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -85,6 +95,10 @@ public:
             return "ushort";
         } else if (const auto value = std::get_if<std::string>(&value_variant)) {
             return "string";
+        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+            return "uint";
+        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
+            return "uchar";
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -102,6 +116,10 @@ public:
             return std::format("{}", *value);
         } else if (const auto value = std::get_if<std::string>(&value_variant)) {
             return *value;
+        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+            return std::format("{}", *value);
+        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
+            return std::format("{}", *value);
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code"); 
@@ -224,6 +242,32 @@ public:
             }
 
             value = static_cast<ushort>(ini_value);
+        } else if constexpr (std::is_same_v<T, uint>) {
+            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
+
+            if (ini_value < 0 || ini_value > std::numeric_limits<uint>::max()) {
+                CNC_LOGGER_FATAL(
+                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
+                    ini_value,
+                    0,
+                    std::numeric_limits<uint>::max()
+                );
+            }
+
+            value = static_cast<uint>(ini_value);
+        } else if constexpr (std::is_same_v<T, uchar>) {
+            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
+
+            if (ini_value < 0 || ini_value > std::numeric_limits<uchar>::max()) {
+                CNC_LOGGER_FATAL(
+                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
+                    ini_value,
+                    0,
+                    std::numeric_limits<uchar>::max()
+                );
+            }
+
+            value = static_cast<uchar>(ini_value);
         } else if constexpr (std::is_same_v<T, std::string>) {
             auto str_value = ini.Get_String(SectionName.data(), name.data(), default_value);
 
@@ -265,6 +309,10 @@ public:
             auto value_str = std::format("{}", *value);
             ini.Put_String(SectionName.data(), name.data(), value_str);
         } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+            ini.Put_Int(SectionName.data(), name.data(), *value);
+        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+            ini.Put_Int(SectionName.data(), name.data(), *value);
+        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
             ini.Put_Int(SectionName.data(), name.data(), *value);
         } else if (const auto value = std::get_if<std::string>(&value_variant)) {
             ini.Put_String(SectionName.data(), name.data(), *value);
@@ -497,6 +545,8 @@ private:
 #define Load_Bool_Var(VAR) Load_Var_With_Type(VAR, bool)
 #define Load_UShort_Var(VAR) Load_Var_With_Type(VAR, ushort)
 #define Load_Int_Var(VAR) Load_Var_With_Type(VAR, int)
+#define Load_UInt_Var(VAR) Load_Var_With_Type(VAR, uint)
+#define Load_UChar_Var(VAR) Load_Var_With_Type(VAR, uchar)
 
 class RuleSections
 {

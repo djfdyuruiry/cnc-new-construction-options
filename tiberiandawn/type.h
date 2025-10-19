@@ -1273,6 +1273,8 @@ public:
 #ifdef SCENARIO_EDITOR
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
+
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
 };
 
 /***************************************************************************

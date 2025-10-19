@@ -4507,7 +4507,8 @@ const IniRuleContext& BuildingTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_With_TdConverter(FactoryType, ToBuild)
         .Load_With_TdConverter(StructType, Type)
         .Load_With_TdConverter(DirType, StartFace) // TODO: CanEnter logic
-        .Load_Int_Var(Power) // TODO: Capacity (uint)
+        .Load_UInt_Var(Capacity)
+        .Load_Int_Var(Power)
         .Load_Int_Var(Drain)
         .Load_With_TdConverter(BSizeType, Size);
 }
