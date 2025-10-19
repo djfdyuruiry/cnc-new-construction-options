@@ -38,6 +38,7 @@
 #include "mission.h"
 #include "target.h"
 #include "noinit.h"
+#include "typeconverter.h"
 
 class MapEditClass;
 class HouseClass;
@@ -50,6 +51,14 @@ class HouseClass;
 class WeaponTypeClass
 {
 public:
+    WeaponType Type;
+
+    /*
+    **	The INI name of the house is pointed to by this element. This is the
+    **	identification name used in the scenario INI file.
+    */
+    char const* IniName;
+
     /*
     **	This is the unit class of the projectile fired. A subset of the unit types
     **	represent projectiles. It is one of these classes that is specified here.
@@ -88,6 +97,24 @@ public:
     **	This is the animation to display at the firing coordinate.
     */
     AnimType Anim;
+
+    static WeaponTypeClass& As_Mutable_Reference(WeaponType type);
+
+    const char* Name() const
+    {
+        return IniName;
+    }
+
+    const IniRuleContext& Read_INI(const IniRuleContext& ini)
+    {
+        return ini.Load_With_TdConverter(WeaponType, Type)
+            .Load_With_TdConverter(BulletType, Fires)
+            .Load_UChar_Var(Attack)
+            .Load_UChar_Var(ROF)
+            .Load_Int_Var(Range)
+            .Load_With_TdConverter(VocType, Sound)
+            .Load_With_TdConverter(AnimType, Anim);
+    }
 };
 
 /**********************************************************************
@@ -97,6 +124,14 @@ public:
 class WarheadTypeClass
 {
 public:
+    WarheadType Type;
+
+    /*
+    **	The INI name of the house is pointed to by this element. This is the
+    **	identification name used in the scenario INI file.
+    */
+    char const* IniName;
+
     /*
     **	This value control how damage from this warhead type will reduce
     **	over distance. The larger the number, the less the damage is reduced
@@ -124,6 +159,22 @@ public:
     **	defender has. This table is what gives weapons their "character".
     */
     unsigned Modifier[ARMOR_COUNT];
+
+    static WarheadTypeClass& As_Mutable_Reference(WarheadType type);
+
+    const char* Name() const
+    {
+        return IniName;
+    }
+
+    const IniRuleContext& Read_INI(const IniRuleContext& ini)
+    {
+        return ini.Load_With_TdConverter(WarheadType, Type)
+            .Load_Int_Var(SpreadFactor)
+            .Load_Bool_Var(IsWallDestroyer)
+            .Load_Bool_Var(IsWoodDestroyer)
+            .Load_Bool_Var(IsTiberiumDestroyer); // TODO: Modifier (uint array), maybe refactor into a lookup
+    }
 };
 
 /**********************************************************************
