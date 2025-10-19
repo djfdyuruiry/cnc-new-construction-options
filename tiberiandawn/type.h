@@ -1122,6 +1122,8 @@ public:
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
 
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+
     /*
     **	This is a pointer to the wake shape (as needed by the gunboat).
     */
@@ -1960,6 +1962,8 @@ public:
 #ifdef SCENARIO_EDITOR
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
+
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
 
     static void const* LRotorData;
     static void const* RRotorData;

@@ -23,7 +23,9 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, AircraftType> ||
     std::is_same_v<T, MissionType> ||
     std::is_same_v<T, AnimType> ||
-    std::is_same_v<T, InfantryType>
+    std::is_same_v<T, InfantryType> ||
+    std::is_same_v<T, UnitType> ||
+    std::is_same_v<T, SpeedType>
 );
 
 #define ARMOR_PAIR(ARMOR_NAME) { ARMOR_##ARMOR_NAME, #ARMOR_NAME }
@@ -38,6 +40,8 @@ concept SupportedByTdTypeConverter = (
 #define MISSION_PAIR(MISSION_NAME) { MISSION_##MISSION_NAME, #MISSION_NAME }
 #define ANIM_PAIR(ANIM_NAME) { ANIM_##ANIM_NAME, #ANIM_NAME }
 #define INFANTRY_PAIR(INFANTRY_NAME) { INFANTRY_##INFANTRY_NAME, #INFANTRY_NAME }
+#define UNIT_PAIR(UNIT_NAME) { UNIT_##UNIT_NAME, #UNIT_NAME }
+#define SPEED_PAIR(SPEED_NAME) { SPEED_##SPEED_NAME, #SPEED_NAME }
 
 class TdTypeConverter final
 {
@@ -181,7 +185,6 @@ public:
         FACTORY_PAIR(BUILDING)
     };
     inline static const TwoWayMap<DirType, std::string> Dir_Types {
-        DIR_PAIR(MIN),
         DIR_PAIR(N),
         DIR_PAIR(NE),
         DIR_PAIR(E),
@@ -236,8 +239,7 @@ public:
         MISSION_PAIR(DECONSTRUCTION),
         MISSION_PAIR(REPAIR),
         MISSION_PAIR(RESCUE),
-        MISSION_PAIR(MISSILE),
-        MISSION_PAIR(COUNT)
+        MISSION_PAIR(MISSILE)
     };
     inline static const TwoWayMap<AnimType, std::string> Anim_Types {
         ANIM_PAIR(NONE),
@@ -325,11 +327,11 @@ public:
         ANIM_PAIR(FIRE_MED_VIRTUAL),
         ANIM_PAIR(FIRE_MED2_VIRTUAL),
         ANIM_PAIR(FIRE_TINY_VIRTUAL),
-        ANIM_PAIR(BEACON_VIRTUAL),
-        ANIM_PAIR(COUNT),
-        ANIM_PAIR(FIRST)
+        ANIM_PAIR(BEACON_VIRTUAL)
     };
     inline static const TwoWayMap<InfantryType, std::string> Infantry_Types {
+        INFANTRY_PAIR(NONE),
+        INFANTRY_PAIR(E1),
         INFANTRY_PAIR(E2),
         INFANTRY_PAIR(E3),
         INFANTRY_PAIR(E4),
@@ -349,6 +351,41 @@ public:
         INFANTRY_PAIR(MOEBIUS),
         INFANTRY_PAIR(DELPHI),
         INFANTRY_PAIR(CHAN)
+    };
+    inline static const TwoWayMap<UnitType, std::string> Unit_Types {
+        UNIT_PAIR(NONE),
+        UNIT_PAIR(HTANK),
+        UNIT_PAIR(MTANK),
+        UNIT_PAIR(LTANK),
+        UNIT_PAIR(STANK),
+        UNIT_PAIR(FTANK),
+        UNIT_PAIR(VICE),
+        UNIT_PAIR(APC),
+        UNIT_PAIR(MLRS),
+        UNIT_PAIR(JEEP),
+        UNIT_PAIR(BUGGY),
+        UNIT_PAIR(HARVESTER),
+        UNIT_PAIR(ARTY),
+        UNIT_PAIR(MSAM),
+        UNIT_PAIR(HOVER),
+        UNIT_PAIR(MHQ),
+        UNIT_PAIR(GUNBOAT),
+        UNIT_PAIR(MCV),
+        UNIT_PAIR(BIKE),
+        UNIT_PAIR(TRIC),
+        UNIT_PAIR(TREX),
+        UNIT_PAIR(RAPT),
+        UNIT_PAIR(STEG)
+    };
+    inline static const TwoWayMap<SpeedType, std::string> Speed_Types {
+        SPEED_PAIR(NONE),
+        SPEED_PAIR(FOOT),
+        SPEED_PAIR(TRACK),
+        SPEED_PAIR(HARVESTER),
+        SPEED_PAIR(WHEEL),
+        SPEED_PAIR(WINGED),
+        SPEED_PAIR(HOVER),
+        SPEED_PAIR(FLOAT)
     };
 
     template<class T>
@@ -381,7 +418,7 @@ public:
             );
         } else if constexpr (std::is_same_v<T, DirType>) {
             return Dir_Types[instance].value_or(
-                Dir_Types[DIR_MIN].value()
+                Dir_Types[DIR_N].value()
             );
         } else if constexpr (std::is_same_v<T, BSizeType>) {
             return BSize_Types[instance].value_or(
@@ -398,6 +435,18 @@ public:
         } else if constexpr (std::is_same_v<T, AnimType>) {
             return Anim_Types[instance].value_or(
                 Anim_Types[ANIM_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, InfantryType>) {
+            return Infantry_Types[instance].value_or(
+                Infantry_Types[INFANTRY_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, UnitType>) {
+            return Unit_Types[instance].value_or(
+                Unit_Types[UNIT_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, SpeedType>) {
+            return Speed_Types[instance].value_or(
+                Speed_Types[SPEED_NONE].value()
             );
         }
 
@@ -454,6 +503,12 @@ public:
             return Mission_Types[str];
         } else if constexpr (std::is_same_v<T, AnimType>) {
             return Anim_Types[str];
+        } else if constexpr (std::is_same_v<T, InfantryType>) {
+            return Infantry_Types[str];
+        } else if constexpr (std::is_same_v<T, UnitType>) {
+            return Unit_Types[str];
+        } else if constexpr (std::is_same_v<T, SpeedType>) {
+            return Speed_Types[str];
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");

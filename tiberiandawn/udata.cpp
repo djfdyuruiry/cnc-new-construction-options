@@ -45,6 +45,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 void const* UnitTypeClass::WakeShapes = 0;
 
@@ -1785,4 +1786,27 @@ int UnitTypeClass::Max_Pips(void) const
         return (Max_Passengers());
     }
     return (0);
+}
+
+const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return TechnoTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsCrateGoodie)
+        .Load_Bool_Var(IsPieceOfEight)
+        .Load_Bool_Var(IsCrusher)
+        .Load_Bool_Var(IsToHarvest)
+        .Load_Bool_Var(IsChunkyShape)
+        .Load_Bool_Var(IsRadarEquipped)
+        .Load_Bool_Var(IsFireAnim)
+        .Load_Bool_Var(IsLockTurret)
+        .Load_Bool_Var(IsTracked)
+        .Load_Bool_Var(IsGigundo)
+        .Load_Bool_Var(IsCloakable)
+        .Load_Bool_Var(IsAnimating)
+        .Load_With_TdConverter(UnitType, Type)
+        .Load_With_TdConverter(SpeedType, Speed)
+        .Load_UChar_Var(ROT)
+        .Load_With_TdConverter(MissionType, Mission) // TODO: TurretOffset (char)
+        .Load_With_TdConverter(AnimType, Explosion)
+        .Load_Int_Var(MaxSize);
 }

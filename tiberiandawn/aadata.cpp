@@ -47,6 +47,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 void const* AircraftTypeClass::LRotorData = NULL;
 void const* AircraftTypeClass::RRotorData = NULL;
@@ -758,3 +759,15 @@ RTTIType AircraftTypeClass::What_Am_I(void) const
 {
     return RTTI_AIRCRAFTTYPE;
 };
+
+const IniRuleContext& AircraftTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return TechnoTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsFixedWing)
+        .Load_Bool_Var(IsLandable)
+        .Load_Bool_Var(IsRotorEquipped)
+        .Load_Bool_Var(IsRotorCustom)
+        .Load_With_TdConverter(AircraftType, Type)
+        .Load_UChar_Var(ROT)
+        .Load_With_TdConverter(MissionType, Mission);
+}

@@ -1979,6 +1979,7 @@ const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Bool_Var(IsCrawling)
         .Load_Bool_Var(IsCapture)
         .Load_Bool_Var(IsFraidyCat)
+        .Load_Bool_Var(IsCivilian)
         .Load_Bool_Var(IsAvoidingTiberium)
-        .Load_With_TdConverter(InfantryType, Type);
+        .Load_With_TdConverter(InfantryType, Type); // TODO: IsImmuneToTiberium and HasC4Charges
 }
