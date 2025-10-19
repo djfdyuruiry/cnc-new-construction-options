@@ -164,7 +164,7 @@ static BuildingTypeClass const ClassTemple(STRUCT_TEMPLE,
                                            "TMPL",          // NAME:			Short name of the structure.
                                            XYP_COORD(0, 0), // Exit point for produced units.
                                            7,               // Build level.
-                                           STRUCT_RADAR,   // Building prerequisite.
+                                           STRUCT_RADAR,    // Building prerequisite.
                                            false,           // Has ability to detect adjacent cloaked objects?
                                            false,           // Animation rate is regulated for constant speed?
                                            true,            // Requires a bib dirt patch?
@@ -194,9 +194,7 @@ static BuildingTypeClass const ClassTemple(STRUCT_TEMPLE,
                                            13,              // SCENARIO:	Starting availability scenario.
                                            0,
                                            20, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP
-                                               | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_NONE,
                                            WEAPON_NONE,
                                            ARMOR_ALUMINUM,         // ARMOR:		Armor type
@@ -215,7 +213,7 @@ static BuildingTypeClass const ClassEye(STRUCT_EYE,
                                         "EYE",           // NAME:			Short name of the structure.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         7,               // Build level.
-                                        STRUCT_RADAR,   // Building prerequisite.
+                                        STRUCT_RADAR,    // Building prerequisite.
                                         false,           // Has ability to detect adjacent cloaked objects?
                                         true,            // Animation rate is regulated for constant speed?
                                         true,            // Requires a bib dirt patch?
@@ -245,9 +243,7 @@ static BuildingTypeClass const ClassEye(STRUCT_EYE,
                                         13,              // SCENARIO:	Starting availability scenario.
                                         0,
                                         100, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,            // ARMOR:		Armor type
@@ -268,7 +264,7 @@ static BuildingTypeClass const
                 XYP_COORD(10 + (CELL_PIXEL_W / 2),
                           ((CELL_PIXEL_H * 3) - (CELL_PIXEL_H / 2)) - 21), // Exit point for produced units.
                 2,                                                         // Build level.
-                STRUCT_REFINERY,                                          // Building prerequisite.
+                STRUCT_REFINERY,                                           // Building prerequisite.
                 false,         // Has ability to detect adjacent cloaked objects?
                 false,         // Animation rate is regulated for constant speed?
                 true,          // Requires a bib dirt patch?
@@ -302,8 +298,7 @@ static BuildingTypeClass const
                 5,    // SCENARIO:	Starting availability scenario.
                 0,
                 86, // RISK/RWRD:	Risk/reward rating values.
-                HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5 | HOUSEF_MULTI6
-                    | HOUSEF_JP | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                 WEAPON_NONE,
                 WEAPON_NONE,
                 ARMOR_ALUMINUM,         // ARMOR:		Armor type
@@ -322,7 +317,7 @@ static BuildingTypeClass const ClassGTower(STRUCT_GTOWER,
                                            "GTWR",           // NAME:			Short name of the structure.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            2,                // Build level.
-                                           STRUCT_BARRACKS, // Building prerequisite.
+                                           STRUCT_BARRACKS,  // Building prerequisite.
                                            true,             // Has ability to detect adjacent cloaked objects?
                                            false,            // Animation rate is regulated for constant speed?
                                            false,            // Requires a bib dirt patch?
@@ -352,9 +347,7 @@ static BuildingTypeClass const ClassGTower(STRUCT_GTOWER,
                                            7,                // SCENARIO:	Starting availability scenario.
                                            100,
                                            25, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP
-                                               | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_CHAIN_GUN,
                                            WEAPON_NONE,
                                            //	WEAPON_M60MG,WEAPON_NONE,
@@ -374,7 +367,7 @@ static BuildingTypeClass const ClassATower(STRUCT_ATOWER,
                                            "ATWR",           // NAME:			Short name of the structure.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            4,                // Build level.
-                                           STRUCT_RADAR,    // Building prerequisite.
+                                           STRUCT_RADAR,     // Building prerequisite.
                                            true,             // Has ability to detect adjacent cloaked objects?
                                            false,            // Animation rate is regulated for constant speed?
                                            false,            // Requires a bib dirt patch?
@@ -404,9 +397,7 @@ static BuildingTypeClass const ClassATower(STRUCT_ATOWER,
                                            13,               // SCENARIO:	Starting availability scenario.
                                            100,
                                            30, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP
-                                               | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_TOW_TWO,
                                            WEAPON_NONE,
                                            //	WEAPON_TOMAHAWK,WEAPON_NONE,
@@ -426,7 +417,7 @@ static BuildingTypeClass const ClassObelisk(STRUCT_OBELISK,
                                             "OBLI",          // NAME:			Short name of the structure.
                                             XYP_COORD(0, 0), // Exit point for produced units.
                                             4,               // Build level.
-                                            STRUCT_RADAR,   // Building prerequisite.
+                                            STRUCT_RADAR,    // Building prerequisite.
                                             true,            // Has ability to detect adjacent cloaked objects?
                                             false,           // Animation rate is regulated for constant speed?
                                             false,           // Requires a bib dirt patch?
@@ -456,9 +447,7 @@ static BuildingTypeClass const ClassObelisk(STRUCT_OBELISK,
                                             11,              // SCENARIO:	Starting availability scenario.
                                             100,
                                             35, // RISK/RWRD:	Risk/reward rating values.
-                                            HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP
-                                                | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                            { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                             WEAPON_OBELISK_LASER,
                                             WEAPON_NONE,
                                             ARMOR_ALUMINUM,       // ARMOR:		Armor type
@@ -477,7 +466,7 @@ static BuildingTypeClass const ClassTurret(STRUCT_TURRET,
                                            "GUN",            // NAME:			Short name of the structure.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            2,                // Build level.
-                                           STRUCT_BARRACKS, // Building prerequisite.
+                                           STRUCT_BARRACKS,  // Building prerequisite.
                                            true,             // Has ability to detect adjacent cloaked objects?
                                            false,            // Animation rate is regulated for constant speed?
                                            false,            // Requires a bib dirt patch?
@@ -515,9 +504,7 @@ static BuildingTypeClass const ClassTurret(STRUCT_TURRET,
                                            8, // SCENARIO:	Starting availability scenario.
                                            300,
                                            26, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP
-                                               | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_TURRET_GUN,
                                            WEAPON_NONE,
                                            ARMOR_STEEL,         // ARMOR:		Armor type
@@ -536,7 +523,7 @@ static BuildingTypeClass const ClassConst(STRUCT_CONST,
                                           "FACT",            // NAME:			Short name of the structure.
                                           XYP_COORD(0, 0),   // Exit point for produced units.
                                           99,                // Build level.
-                                          STRUCT_NONE,      // Building prerequisite.
+                                          STRUCT_NONE,       // Building prerequisite.
                                           false,             // Has ability to detect adjacent cloaked objects?
                                           false,             // Animation rate is regulated for constant speed?
                                           true,              // Requires a bib dirt patch?
@@ -566,9 +553,7 @@ static BuildingTypeClass const ClassConst(STRUCT_CONST,
                                           1,                 // SCENARIO:	Starting availability scenario.
                                           0,
                                           70, // RISK/RWRD:	Risk/reward rating values.
-                                          HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                              | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                              | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                          { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                           WEAPON_NONE,
                                           WEAPON_NONE,
                                           ARMOR_WOOD,           // ARMOR:		Armor type
@@ -588,7 +573,7 @@ static BuildingTypeClass const
                   "PROC",          // NAME:			Short name of the structure.
                   XYP_COORD(0, 0), // Exit point for produced units.
                   1,               // Build level.
-                  STRUCT_POWER,   // Building prerequisite.
+                  STRUCT_POWER,    // Building prerequisite.
                   false,           // Has ability to detect adjacent cloaked objects?
                   false,           // Animation rate is regulated for constant speed?
                   true,            // Requires a bib dirt patch?
@@ -618,8 +603,7 @@ static BuildingTypeClass const
                   2,               // SCENARIO:	Starting availability scenario.
                   0,
                   55, // RISK/RWRD:	Risk/reward rating values.
-                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5 | HOUSEF_MULTI6
-                      | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                   WEAPON_NONE,
                   WEAPON_NONE,
                   ARMOR_WOOD,                  // ARMOR:		Armor type
@@ -639,7 +623,7 @@ static BuildingTypeClass const
                  "SILO",           // NAME:			Short name of the structure.
                  XYP_COORD(0, 0),  // Exit point for produced units.
                  1,                // Build level.
-                 STRUCT_REFINERY, // Building prerequisite.
+                 STRUCT_REFINERY,  // Building prerequisite.
                  false,            // Has ability to detect adjacent cloaked objects?
                  false,            // Animation rate is regulated for constant speed?
                  true,             // Requires a bib dirt patch?
@@ -670,8 +654,7 @@ static BuildingTypeClass const
                  2,                // SCENARIO:	Starting availability scenario.
                  0,
                  16, // RISK/RWRD:	Risk/reward rating values.
-                 HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5 | HOUSEF_MULTI6
-                     | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                 { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                  WEAPON_NONE,
                  WEAPON_NONE,
                  ARMOR_WOOD,              // ARMOR:		Armor type
@@ -690,7 +673,7 @@ static BuildingTypeClass const ClassHelipad(STRUCT_HELIPAD,
                                             "HPAD",            // NAME:			Short name of the structure.
                                             XYP_COORD(0, 0),   // Exit point for produced units.
                                             6,                 // Build level.
-                                            STRUCT_BARRACKS,  // Building prerequisite.
+                                            STRUCT_BARRACKS,   // Building prerequisite.
                                             false,             // Has ability to detect adjacent cloaked objects?
                                             false,             // Animation rate is regulated for constant speed?
                                             true,              // Requires a bib dirt patch?
@@ -720,9 +703,7 @@ static BuildingTypeClass const ClassHelipad(STRUCT_HELIPAD,
                                             10,                // SCENARIO:	Starting availability scenario.
                                             0,
                                             65, // RISK/RWRD:	Risk/reward rating values.
-                                            HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                                | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                            { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                             WEAPON_NONE,
                                             WEAPON_NONE,
                                             ARMOR_WOOD,          // ARMOR:		Armor type
@@ -741,7 +722,7 @@ static BuildingTypeClass const ClassCommand(STRUCT_RADAR,
                                             "HQ",             // NAME:			Short name of the structure.
                                             XYP_COORD(0, 0),  // Exit point for produced units.
                                             2,                // Build level.
-                                            STRUCT_REFINERY, // Building prerequisite.
+                                            STRUCT_REFINERY,  // Building prerequisite.
                                             true,             // Has ability to detect adjacent cloaked objects?
                                             true,             // Animation rate is regulated for constant speed?
                                             true,             // Requires a bib dirt patch?
@@ -771,9 +752,7 @@ static BuildingTypeClass const ClassCommand(STRUCT_RADAR,
                                             3,                // SCENARIO:	Starting availability scenario.
                                             0,
                                             20, // RISK/RWRD:	Risk/reward rating values.
-                                            HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                                | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                            { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                             WEAPON_NONE,
                                             WEAPON_NONE,
                                             ARMOR_WOOD,            // ARMOR:		Armor type
@@ -792,7 +771,7 @@ static BuildingTypeClass const ClassSAM(STRUCT_SAM,
                                         "SAM",            // NAME:			Short name of the structure.
                                         XYP_COORD(0, 0),  // Exit point for produced units.
                                         6,                // Build level.
-                                        STRUCT_BARRACKS, // Building prerequisite.
+                                        STRUCT_BARRACKS,  // Building prerequisite.
                                         false,            // Has ability to detect adjacent cloaked objects?
                                         false,            // Animation rate is regulated for constant speed?
                                         false,            // Requires a bib dirt patch?
@@ -822,9 +801,7 @@ static BuildingTypeClass const ClassSAM(STRUCT_SAM,
                                         5,                // SCENARIO:	Starting availability scenario.
                                         300,
                                         40, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NIKE,
                                         WEAPON_NONE,
                                         ARMOR_STEEL,           // ARMOR:		Armor type
@@ -843,7 +820,7 @@ static BuildingTypeClass const ClassAirStrip(STRUCT_AIRSTRIP,
                                              "AFLD",           // NAME:			Short name of the structure.
                                              XYP_COORD(0, 0),  // Exit point for produced units.
                                              2,                // Build level.
-                                             STRUCT_REFINERY, // Building prerequisite.
+                                             STRUCT_REFINERY,  // Building prerequisite.
                                              false,            // Has ability to detect adjacent cloaked objects?
                                              true,             // Animation rate is regulated for constant speed?
                                              true,             // Requires a bib dirt patch?
@@ -873,9 +850,7 @@ static BuildingTypeClass const ClassAirStrip(STRUCT_AIRSTRIP,
                                              5,                // SCENARIO:	Starting availability scenario.
                                              300,
                                              86, // RISK/RWRD:	Risk/reward rating values.
-                                             HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                 | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP
-                                                 | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                             { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                              WEAPON_NONE,
                                              WEAPON_NONE,
                                              ARMOR_STEEL,          // ARMOR:		Armor type
@@ -894,7 +869,7 @@ static BuildingTypeClass const ClassPower(STRUCT_POWER,
                                           "NUKE",          // NAME:			Short name of the structure.
                                           XYP_COORD(0, 0), // Exit point for produced units.
                                           0,               // Build level.
-                                          STRUCT_NONE,    // Building prerequisite.
+                                          STRUCT_NONE,     // Building prerequisite.
                                           false,           // Has ability to detect adjacent cloaked objects?
                                           true,            // Animation rate is regulated for constant speed?
                                           true,            // Requires a bib dirt patch?
@@ -924,9 +899,7 @@ static BuildingTypeClass const ClassPower(STRUCT_POWER,
                                           1,               // SCENARIO:	Starting availability scenario.
                                           0,
                                           50, // RISK/RWRD:	Risk/reward rating values.
-                                          HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                              | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                              | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                          { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                           WEAPON_NONE,
                                           WEAPON_NONE,
                                           ARMOR_WOOD,             // ARMOR:		Armor type
@@ -976,8 +949,7 @@ static BuildingTypeClass const
                        13,                 // SCENARIO:	Starting availability scenario.
                        0,
                        75, // RISK/RWRD:	Risk/reward rating values.
-                       HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5 | HOUSEF_MULTI6
-                           | HOUSEF_JP | HOUSEF_BAD | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                       { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                        WEAPON_NONE,
                        WEAPON_NONE,
                        ARMOR_WOOD,             // ARMOR:		Armor type
@@ -1026,9 +998,7 @@ static BuildingTypeClass const ClassHospital(STRUCT_HOSPITAL,
                                              99,               // SCENARIO:	Starting availability scenario.
                                              0,
                                              20, // RISK/RWRD:	Risk/reward rating values.
-                                             HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                 | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                                 | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                             { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                              WEAPON_NONE,
                                              WEAPON_NONE,
                                              ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1078,9 +1048,7 @@ static BuildingTypeClass const ClassBioLab(STRUCT_BIO_LAB,
                                            99,               // SCENARIO:	Starting availability scenario.
                                            0,
                                            1, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP
-                                               | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_NONE,
                                            WEAPON_NONE,
                                            ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1100,7 +1068,7 @@ static BuildingTypeClass const
                   "PYLE",            // NAME:			Short name of the structure.
                   XYP_COORD(30, 33), // Exit point for produced units.
                   0,                 // Build level.
-                  STRUCT_POWER,     // Building prerequisite.
+                  STRUCT_POWER,      // Building prerequisite.
                   false,             // Has ability to detect adjacent cloaked objects?
                   true,              // Animation rate is regulated for constant speed?
                   true,              // Requires a bib dirt patch?
@@ -1130,8 +1098,7 @@ static BuildingTypeClass const
                   1,                 // SCENARIO:	Starting availability scenario.
                   0,
                   60, // RISK/RWRD:	Risk/reward rating values.
-                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5 | HOUSEF_MULTI6
-                      | HOUSEF_JP | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                   WEAPON_NONE,
                   WEAPON_NONE,
                   ARMOR_WOOD,                // ARMOR:		Armor type
@@ -1150,7 +1117,7 @@ static BuildingTypeClass const ClassHand(STRUCT_HAND,
                                          "HAND",            // NAME:			Short name of the structure.
                                          XYP_COORD(36, 63), // Exit point for produced units.
                                          0,                 // Build level.
-                                         STRUCT_POWER,     // Building prerequisite.
+                                         STRUCT_POWER,      // Building prerequisite.
                                          false,             // Has ability to detect adjacent cloaked objects?
                                          true,              // Animation rate is regulated for constant speed?
                                          true,              // Requires a bib dirt patch?
@@ -1180,9 +1147,7 @@ static BuildingTypeClass const ClassHand(STRUCT_HAND,
                                          2,                 // SCENARIO:	Starting availability scenario.
                                          0,
                                          61, // RISK/RWRD:	Risk/reward rating values.
-                                         HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                             | HOUSEF_MULTI6 | HOUSEF_JP
-                                             | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                         { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                          WEAPON_NONE,
                                          WEAPON_NONE,
                                          ARMOR_WOOD,             // ARMOR:		Armor type
@@ -1231,9 +1196,7 @@ static BuildingTypeClass const ClassTanker(STRUCT_TANKER,
                                            0,               // SCENARIO:	Starting availability scenario.
                                            0,
                                            1, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP
-                                               | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_NONE,
                                            WEAPON_NONE,
                                            ARMOR_WOOD,           // ARMOR:		Armor type
@@ -1282,9 +1245,7 @@ static BuildingTypeClass const ClassRepair(STRUCT_REPAIR,
                                            8,               // SCENARIO:	Starting availability scenario.
                                            0,
                                            46, // RISK/RWRD:	Risk/reward rating values.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                               | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                            WEAPON_NONE,
                                            WEAPON_NONE,
                                            ARMOR_WOOD,            // ARMOR:		Armor type
@@ -1305,7 +1266,7 @@ static BuildingTypeClass const ClassRoad(STRUCT_ROAD,
                                          STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
                                          XYP_COORD(0, 0), // Exit point for produced units.
                                          99,              // Build level.
-                                         0,               // Building prerequisite.
+                                         0,                // Building prerequisite.
                                          false,           // Has ability to detect adjacent cloaked objects?
                                          false,           // Animation rate is regulated for constant speed?
                                          false,           // Requires a bib dirt patch?
@@ -1335,9 +1296,7 @@ static BuildingTypeClass const ClassRoad(STRUCT_ROAD,
                                          99,              // SCENARIO:	Starting availability scenario.
                                          0,
                                          0, // RISK/RWRD:	Risk/reward rating values.
-                                         HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                             | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                             | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                         { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                          WEAPON_NONE,
                                          WEAPON_NONE,
                                          ARMOR_NONE,          // ARMOR:		Armor type
@@ -1387,9 +1346,7 @@ static BuildingTypeClass const ClassV01(STRUCT_V01,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -1438,9 +1395,7 @@ static BuildingTypeClass const ClassV02(STRUCT_V02,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -1489,9 +1444,7 @@ static BuildingTypeClass const ClassV03(STRUCT_V03,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -1540,9 +1493,7 @@ static BuildingTypeClass const ClassV04(STRUCT_V04,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -1591,9 +1542,7 @@ static BuildingTypeClass const ClassV05(STRUCT_V05,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -1642,9 +1591,7 @@ static BuildingTypeClass const ClassV06(STRUCT_V06,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -1693,9 +1640,7 @@ static BuildingTypeClass const ClassV07(STRUCT_V07,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -1744,9 +1689,7 @@ static BuildingTypeClass const ClassV08(STRUCT_V08,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1795,9 +1738,7 @@ static BuildingTypeClass const ClassV09(STRUCT_V09,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1846,9 +1787,7 @@ static BuildingTypeClass const ClassV10(STRUCT_V10,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1897,9 +1836,7 @@ static BuildingTypeClass const ClassV11(STRUCT_V11,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1948,9 +1885,7 @@ static BuildingTypeClass const ClassV12(STRUCT_V12,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -1999,9 +1934,7 @@ static BuildingTypeClass const ClassV13(STRUCT_V13,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2050,9 +1983,7 @@ static BuildingTypeClass const ClassV14(STRUCT_V14,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2101,9 +2032,7 @@ static BuildingTypeClass const ClassV15(STRUCT_V15,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2152,9 +2081,7 @@ static BuildingTypeClass const ClassV16(STRUCT_V16,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2203,9 +2130,7 @@ static BuildingTypeClass const ClassV17(STRUCT_V17,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2254,9 +2179,7 @@ static BuildingTypeClass const ClassV18(STRUCT_V18,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_NEUTRAL, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2305,9 +2228,7 @@ static BuildingTypeClass const ClassV19(STRUCT_PUMP,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2356,9 +2277,7 @@ static BuildingTypeClass const ClassV20(STRUCT_V20,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -2407,9 +2326,7 @@ static BuildingTypeClass const ClassV21(STRUCT_V21,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -2458,9 +2375,7 @@ static BuildingTypeClass const ClassV22(STRUCT_V22,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -2509,9 +2424,7 @@ static BuildingTypeClass const ClassV23(STRUCT_V23,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2560,9 +2473,7 @@ static BuildingTypeClass const ClassV24(STRUCT_V24,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -2611,9 +2522,7 @@ static BuildingTypeClass const ClassV25(STRUCT_V25,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,             // ARMOR:		Armor type
@@ -2662,9 +2571,7 @@ static BuildingTypeClass const ClassV26(STRUCT_V26,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -2713,9 +2620,7 @@ static BuildingTypeClass const ClassV27(STRUCT_V27,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2764,9 +2669,7 @@ static BuildingTypeClass const ClassV28(STRUCT_V28,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2815,9 +2718,7 @@ static BuildingTypeClass const ClassV29(STRUCT_V29,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -2866,9 +2767,7 @@ static BuildingTypeClass const ClassV30(STRUCT_V30,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -2917,9 +2816,7 @@ static BuildingTypeClass const ClassV31(STRUCT_V31,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -2968,9 +2865,7 @@ static BuildingTypeClass const ClassV32(STRUCT_V32,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -3019,9 +2914,7 @@ static BuildingTypeClass const ClassV33(STRUCT_V33,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,           // ARMOR:		Armor type
@@ -3070,9 +2963,7 @@ static BuildingTypeClass const ClassV34(STRUCT_V34,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -3121,9 +3012,7 @@ static BuildingTypeClass const ClassV35(STRUCT_V35,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -3172,9 +3061,7 @@ static BuildingTypeClass const ClassV36(STRUCT_V36,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,          // ARMOR:		Armor type
@@ -3222,9 +3109,7 @@ static BuildingTypeClass const ClassV37(STRUCT_V37,
                                         0,               // SCENARIO:	Starting availability scenario.
                                         0,
                                         2, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_WOOD,                 // ARMOR:		Armor type
@@ -3272,10 +3157,7 @@ static BuildingTypeClass const ClassMission(STRUCT_MISSION,
                                             0,               // SCENARIO:	Starting availability scenario.
                                             0,
                                             2, // RISK/RWRD:	Risk/reward rating values.
-                                            HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                                | HOUSEF_NEUTRAL
-                                                | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                            { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                             WEAPON_NONE,
                                             WEAPON_NONE,
                                             ARMOR_WOOD,           // ARMOR:		Armor type
@@ -3325,9 +3207,7 @@ static BuildingTypeClass const Sandbag(STRUCT_SANDBAG_WALL,
                                        5,                // SCENARIO:	Starting availability scenario.
                                        0,
                                        0, // RISK/RWRD:	Risk/reward rating values.
-                                       HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                           | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                           | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                       { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                        WEAPON_NONE,
                                        WEAPON_NONE,
                                        ARMOR_ALUMINUM,      // ARMOR:		Armor type
@@ -3376,9 +3256,7 @@ static BuildingTypeClass const Cyclone(STRUCT_CYCLONE_WALL,
                                        9,                // SCENARIO:	Starting availability scenario.
                                        0,
                                        0, // RISK/RWRD:	Risk/reward rating values.
-                                       HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                           | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                           | HOUSEF_BAD, // OWNABLE:		Ownable by house (bit field).
+                                       { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // OWNABLE:		Ownable by house (bit field).
                                        WEAPON_NONE,
                                        WEAPON_NONE,
                                        ARMOR_ALUMINUM,      // ARMOR:		Armor type
@@ -3427,9 +3305,7 @@ static BuildingTypeClass const Brick(STRUCT_BRICK_WALL,
                                      13,              // SCENARIO:	Starting availability scenario.
                                      0,
                                      0, // RISK/RWRD:	Risk/reward rating values.
-                                     HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                         | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                         | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                     { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                      WEAPON_NONE,
                                      WEAPON_NONE,
                                      ARMOR_ALUMINUM,      // ARMOR:		Armor type
@@ -3478,9 +3354,7 @@ static BuildingTypeClass const Barbwire(STRUCT_BARBWIRE_WALL,
                                         98,                // SCENARIO:	Starting availability scenario.
                                         0,
                                         0, // RISK/RWRD:	Risk/reward rating values.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_BAD | HOUSEF_JP | HOUSEF_NEUTRAL
-                                            | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_BAD, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                         WEAPON_NONE,
                                         WEAPON_NONE,
                                         ARMOR_ALUMINUM,      // ARMOR:		Armor type
@@ -3529,9 +3403,7 @@ static BuildingTypeClass const Wood(STRUCT_WOOD_WALL,
                                     98,              // SCENARIO:	Starting availability scenario.
                                     0,
                                     0, // RISK/RWRD:	Risk/reward rating values.
-                                    HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                        | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_NEUTRAL
-                                        | HOUSEF_GOOD, // OWNABLE:		Ownable by house (bit field).
+                                    { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_NEUTRAL, HOUSE_GOOD }, // OWNABLE:		Ownable by house (bit field).
                                     WEAPON_NONE,
                                     WEAPON_NONE,
                                     ARMOR_ALUMINUM,      // ARMOR:		Armor type
@@ -3638,7 +3510,7 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                                      char const* ininame,
                                      COORDINATE exitpoint,
                                      unsigned char level,
-                                     int pre,
+                                     StructType prereq,
                                      bool is_scanner,
                                      bool is_regulated,
                                      bool is_bibbed,
@@ -3668,7 +3540,7 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                                      int scenario,
                                      int risk,
                                      int reward,
-                                     int ownable,
+                                     std::vector<HousesType> ownableBy,
                                      WeaponType primary,
                                      WeaponType secondary,
                                      ArmorType armor,
@@ -3684,7 +3556,7 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
     : TechnoTypeClass(name,
                       ininame,
                       level,
-                      pre,
+                      prereq,
                       false,
                       is_scanner,
                       is_nominal,
@@ -3710,7 +3582,7 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                       scenario,
                       risk,
                       reward,
-                      ownable,
+                      std::move(ownableBy),
                       primary,
                       secondary,
                       armor)

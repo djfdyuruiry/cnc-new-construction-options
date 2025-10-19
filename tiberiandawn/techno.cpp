@@ -226,20 +226,35 @@ TechnoTypeClass::TechnoTypeClass(int name,
  */
 void TechnoTypeClass::Calc_Risk()
 {
-    Risk = 0;
-    if (Primary != WEAPON_NONE) {
-        Risk = (Weapons[Primary].Attack * (Weapons[Primary].Range >> 4)) / Weapons[Primary].ROF;
-    }
+    Risk = Primary != WEAPON_NONE
+        ? (Weapons[Primary].Attack * (Weapons[Primary].Range >> 4)) / Weapons[Primary].ROF
+        : 0;
 }
 
+/**
+ * Pre is set to a bitmask value for the STRUCT_X type in Prerequisite.
+ *
+ * (Replacement for old STRUCTF_X constants)
+ */
 void TechnoTypeClass::Set_Pre()
 {
-    Pre = (1L << Prerequisite);
+    Pre = 1L << Prerequisite;
 }
 
+/**
+ * Ownable is set to a bitmask value for the HOUSE_X types in OwnableBy.
+ *
+ * (Replacement for old HOUSEF_X constants)
+ */
 void TechnoTypeClass::Set_Ownable()
 {
-    Ownable = std::accumulate(OwnableBy.begin(), OwnableBy.end(), 0, std::bit_or());
+    unsigned short ownable = 0L;
+
+    for (const auto& house : OwnableBy) {
+        ownable = ownable | 1L << house;
+    }
+
+    Ownable = ownable;
 }
 
 /***********************************************************************************************
@@ -4934,6 +4949,7 @@ const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Int_Var(MaxAmmo)
         .Load_Csv_With_TdConverter(HousesType, OwnableBy);
 
+    // reload computed fields
     Set_Pre();
     Set_Ownable();
     Calc_Risk();

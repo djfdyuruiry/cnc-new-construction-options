@@ -56,7 +56,7 @@ static AircraftTypeClass const AttackPlane(AIRCRAFT_A10, // What kind of aircraf
                                            TXT_A10,      // Translated text number for aircraft.
                                            "A10",        // INI name of aircraft.
                                            99,           // Build level.
-                                           STRUCT_NONE, // Building prerequisite.
+                                           STRUCT_NONE,  // Building prerequisite.
                                            false,        // Is a leader type?
                                            false,        // Does it fire a pair of shots in quick succession?
                                            false,        //	Is this a typical transport vehicle?
@@ -81,9 +81,7 @@ static AircraftTypeClass const AttackPlane(AIRCRAFT_A10, // What kind of aircraf
                                            0,            // The scenario this becomes available.
                                            10,
                                            1, // Risk, reward when calculating AI.
-                                           HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                               | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                               | HOUSEF_BAD, // Who can own this aircraft type.
+                                           { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // Who can own this aircraft type.
                                            WEAPON_NAPALM,
                                            WEAPON_NONE,
                                            ARMOR_ALUMINUM, // Armor type of this aircraft.
@@ -97,7 +95,7 @@ static AircraftTypeClass const TransportHeli(AIRCRAFT_TRANSPORT, // What kind of
                                              TXT_TRANS,          // Translated text number for aircraft.
                                              "TRAN",             // INI name of aircraft.
                                              6,                  // Build level.
-                                             STRUCT_HELIPAD,    // Building prerequisite.
+                                             STRUCT_HELIPAD,     // Building prerequisite.
                                              false,              // Is a leader type?
                                              false,              // Does it fire a pair of shots in quick succession?
                                              true,               //	Is this a typical transport vehicle?
@@ -122,9 +120,7 @@ static AircraftTypeClass const TransportHeli(AIRCRAFT_TRANSPORT, // What kind of
                                              98,                 // The scenario this becomes available.
                                              10,
                                              80, // Risk, reward when calculating AI.
-                                             HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4
-                                                 | HOUSEF_MULTI5 | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                                 | HOUSEF_GOOD, // Who can own this aircraft type.
+                                             { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // Who can own this aircraft type.
                                              WEAPON_NONE,
                                              WEAPON_NONE,
                                              ARMOR_ALUMINUM,  // Armor type of this aircraft.
@@ -138,7 +134,7 @@ static AircraftTypeClass const AttackHeli(AIRCRAFT_HELICOPTER, // What kind of a
                                           TXT_HELI,            // Translated text number for aircraft.
                                           "HELI",              // INI name of aircraft.
                                           6,                   // Build level.
-                                          STRUCT_HELIPAD,     // Building prerequisite.
+                                          STRUCT_HELIPAD,      // Building prerequisite.
                                           true,                // Is a leader type?
                                           true,                // Does it fire a pair of shots in quick succession?
                                           false,               //	Is this a typical transport vehicle?
@@ -163,9 +159,7 @@ static AircraftTypeClass const AttackHeli(AIRCRAFT_HELICOPTER, // What kind of a
                                           10,                  // The scenario this becomes available.
                                           10,
                                           80, // Risk, reward when calculating AI.
-                                          HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                              | HOUSEF_MULTI6 | HOUSEF_JP
-                                              | HOUSEF_BAD, // Who can own this aircraft type.
+                                          { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // Who can own this aircraft type.
                                           WEAPON_CHAIN_GUN,
                                           WEAPON_NONE,
                                           ARMOR_STEEL, // Armor type of this aircraft.
@@ -179,7 +173,7 @@ static AircraftTypeClass const OrcaHeli(AIRCRAFT_ORCA,   // What kind of aircraf
                                         TXT_ORCA,        // Translated text number for aircraft.
                                         "ORCA",          // INI name of aircraft.
                                         6,               // Build level.
-                                        STRUCT_HELIPAD, // Building prerequisite.
+                                        STRUCT_HELIPAD,  // Building prerequisite.
                                         true,            // Is a leader type?
                                         true,            // Does it fire a pair of shots in quick succession?
                                         false,           //	Is this a typical transport vehicle?
@@ -204,9 +198,7 @@ static AircraftTypeClass const OrcaHeli(AIRCRAFT_ORCA,   // What kind of aircraf
                                         10,              // The scenario this becomes available.
                                         10,
                                         80, // Risk, reward when calculating AI.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP
-                                            | HOUSEF_GOOD, // Who can own this aircraft type.
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // Who can own this aircraft type.
                                         WEAPON_DRAGON,
                                         WEAPON_NONE,
                                         ARMOR_STEEL, // Armor type of this aircraft.
@@ -220,7 +212,7 @@ static AircraftTypeClass const CargoPlane(AIRCRAFT_CARGO, // What kind of aircra
                                           TXT_C17,        // Translated text number for aircraft.
                                           "C17",          // INI name of aircraft.
                                           99,             // Build level.
-                                          STRUCT_NONE,   // Building prerequisite.
+                                          STRUCT_NONE,    // Building prerequisite.
                                           false,          // Is a leader type?
                                           false,          // Does it fire a pair of shots in quick succession?
                                           true,           //	Is this a typical transport vehicle?
@@ -245,9 +237,7 @@ static AircraftTypeClass const CargoPlane(AIRCRAFT_CARGO, // What kind of aircra
                                           0,              // The scenario this becomes available.
                                           10,
                                           1, // Risk, reward when calculating AI.
-                                          HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                              | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                              | HOUSEF_BAD, // Who can own this aircraft type.
+                                          { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // Who can own this aircraft type.
                                           WEAPON_NONE,
                                           WEAPON_NONE,
                                           ARMOR_ALUMINUM, // Armor type of this aircraft.
@@ -282,7 +272,7 @@ AircraftTypeClass::AircraftTypeClass(AircraftType airtype,
                                      int name,
                                      char const* ininame,
                                      unsigned char level,
-                                     int pre,
+                                     StructType prereq,
                                      bool is_leader,
                                      bool is_twoshooter,
                                      bool is_transporter,
@@ -307,7 +297,7 @@ AircraftTypeClass::AircraftTypeClass(AircraftType airtype,
                                      int scenario,
                                      int risk,
                                      int reward,
-                                     int ownable,
+                                     std::vector<HousesType> ownableBy,
                                      WeaponType primary,
                                      WeaponType secondary,
                                      ArmorType armor,
@@ -317,7 +307,7 @@ AircraftTypeClass::AircraftTypeClass(AircraftType airtype,
     : TechnoTypeClass(name,
                       ininame,
                       level,
-                      pre,
+                      prereq,
                       is_leader,
                       false,
                       false,
@@ -343,7 +333,7 @@ AircraftTypeClass::AircraftTypeClass(AircraftType airtype,
                       scenario,
                       risk,
                       reward,
-                      ownable,
+                      std::move(ownableBy),
                       primary,
                       secondary,
                       armor)
