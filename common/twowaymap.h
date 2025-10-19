@@ -17,6 +17,7 @@ private:
 public:
     TwoWayMap(std::initializer_list<std::pair<A, B>> pairs)
     {
+        // TODO: Include duplicate value in exception message
         for (const auto& pair : pairs) {
             // Check for duplicate forward mapping
             if (ForwardMap.find(pair.first) != ForwardMap.end()) {

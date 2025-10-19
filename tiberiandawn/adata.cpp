@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 // Dinosaur death animations
 static AnimTypeClass const TricDie(ANIM_TRIC_DIE, // Animation number.
@@ -2374,4 +2375,32 @@ void AnimTypeClass::One_Time(void)
 
     // Set up beacon image data manually since they're new animations only available in the virtual renderer
     ((void const*&)As_Reference(ANIM_BEACON_VIRTUAL).ImageData) = As_Reference(ANIM_BEACON).ImageData;
+}
+
+const IniRuleContext& AnimTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return ObjectTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsNormalized)
+        .Load_Bool_Var(IsGroundLayer)
+        .Load_Bool_Var(IsTranslucent)
+        .Load_Bool_Var(IsWhiteTrans)
+        .Load_Bool_Var(IsFlameThrower)
+        .Load_Bool_Var(IsScorcher)
+        .Load_Bool_Var(IsCraterForming)
+        .Load_Bool_Var(IsSticky)
+        .Load_With_TdConverter(AnimType, Type)
+        .Load_Int_Var(Size)
+        .Load_Int_Var(Biggest)
+        .Load_UInt_Var(Damage)
+        .Load_UChar_Var(Delay)
+        .Load_Int_Var(Start)
+        .Load_Int_Var(LoopStart)
+        .Load_Int_Var(LoopEnd)
+        .Load_Int_Var(Stages)
+        .Load_Char_Var(Loops)
+        .Load_With_TdConverter(VocType, Sound)
+        .Load_With_TdConverter(AnimType, ChainTo)
+        .Load_Int_Var(VirtualStages)
+        .Load_Int_Var(VirtualScale)
+        .Load_With_TdConverter(AnimType, VirtualAnim);
 }

@@ -36,6 +36,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /***************************************************************************
 **	Detailed information about each class of bullet (projectile) in the game.
@@ -581,4 +582,29 @@ void BulletTypeClass::One_Time(void)
             }
         }
     }
+}
+
+const IniRuleContext& BulletTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return ObjectTypeClass::Read_INI(ini)
+        .Load_Bool_Var(IsHigh)
+        .Load_Bool_Var(IsHigh)
+        .Load_Bool_Var(IsArcing)
+        .Load_Bool_Var(IsHoming)
+        .Load_Bool_Var(IsDropping)
+        .Load_Bool_Var(IsInvisible)
+        .Load_Bool_Var(IsProximityArmed)
+        .Load_Bool_Var(IsFlameEquipped)
+        .Load_Bool_Var(IsFueled)
+        .Load_Bool_Var(IsFaceless)
+        .Load_Bool_Var(IsInaccurate)
+        .Load_Bool_Var(IsTranslucent)
+        .Load_Bool_Var(IsAntiAircraft)
+        .Load_With_TdConverter(BulletType, Type)
+        .Load_With_TdConverter(MPHType, MaxSpeed)
+        .Load_With_TdConverter(WarheadType, Warhead)
+        .Load_With_TdConverter(AnimType, Explosion)
+        .Load_UChar_Var(ROT)
+        .Load_Int_Var(Arming)
+        .Load_Int_Var(Range);
 }

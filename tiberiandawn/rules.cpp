@@ -506,15 +506,11 @@ static void Process_Type_Instances(CCINIClass& ini, RuleSections& sections, U fi
 // TODO: Read each type from a separate rules file (maybe a rules directory of files)
 bool RulesClass::Process_Types(CCINIClass& ini)
 {
-    // TODO: Add other entities (house, overlay, terrain etc.)
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    // TODO: Add non ObjectTypeClass classes: Weapon, Warhead and House
 
+    Process_Type_Instances<AnimTypeClass, AnimType>(ini, Animations, ANIM_FIRST, ANIM_COUNT);
     Process_Type_Instances<BulletTypeClass, BulletType>(ini, Bullets, BULLET_FIRST, BULLET_COUNT);
-    // TODO: impl INI routines separately
-    // (they do not derive from ObjectTypeClass, make a abstract base class of ObjectTypeClass like 'RulesTypeClass' OR
-    // interface via concept)
-    //Process_Type_Instances<WarheadTypeClass, WarheadType>(ini, Warheads, WARHEAD_FIRST, WARHEAD_COUNT);
-    //Process_Type_Instances<WeaponTypeClass, WeaponType>(ini, Weapons, WEAPON_FIRST, WEAPON_COUNT);
-
     Process_Type_Instances<AircraftTypeClass, AircraftType>(ini, Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
     Process_Type_Instances<BuildingTypeClass, StructType>(ini, Buildings, STRUCT_FIRST, STRUCT_COUNT);
     Process_Type_Instances<InfantryTypeClass, InfantryType>(ini, Infantry, INFANTRY_FIRST, INFANTRY_COUNT);
@@ -557,15 +553,11 @@ bool RulesClass::Export_Sections(CCINIClass& ini)
 // TODO: Write each type to a separate rules file (maybe a rules directory of files)
 bool RulesClass::Export_Types(CCINIClass& ini)
 {
-    // TODO: Add other entities (house, overlay, terrain etc.)
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    // TODO: Add non ObjectTypeClass classes: Weapon, Warhead and House
 
+    Animations.Save_All_To_Ini(ini);
     Bullets.Save_All_To_Ini(ini);
-    // TODO: impl INI routines separately
-    // (they do not derive from ObjectTypeClass, make a abstract base class of ObjectTypeClass like 'RulesTypeClass' OR
-    // interface via concept)
-    //Warheads.Save_All_To_Ini(ini);
-    //Weapons.Save_All_To_Ini(ini);
-
     Aircraft.Save_All_To_Ini(ini);
     Buildings.Save_All_To_Ini(ini);
     Infantry.Save_All_To_Ini(ini);

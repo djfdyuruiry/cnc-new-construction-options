@@ -1806,7 +1806,8 @@ const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_With_TdConverter(UnitType, Type)
         .Load_With_TdConverter(SpeedType, Speed)
         .Load_UChar_Var(ROT)
-        .Load_With_TdConverter(MissionType, Mission) // TODO: TurretOffset (char)
+        .Load_Char_Var(TurretOffset)
+        .Load_With_TdConverter(MissionType, Mission)
         .Load_With_TdConverter(AnimType, Explosion)
         .Load_Int_Var(MaxSize);
 }

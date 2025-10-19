@@ -293,9 +293,10 @@ public:
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
     // TODO: Load below from separate INI files
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    // TODO: Add non ObjectTypeClass classes: Weapon, Warhead and House
+    RuleSections Animations;
     RuleSections Bullets;
-    RuleSections Warheads; // TODO: process/export
-    RuleSections Weapons; // TODO: process/export
     RuleSections Aircraft;
     RuleSections Buildings;
     RuleSections Infantry;

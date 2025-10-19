@@ -25,7 +25,10 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, AnimType> ||
     std::is_same_v<T, InfantryType> ||
     std::is_same_v<T, UnitType> ||
-    std::is_same_v<T, SpeedType>
+    std::is_same_v<T, SpeedType> ||
+    std::is_same_v<T, BulletType> ||
+    std::is_same_v<T, WarheadType> ||
+    std::is_same_v<T, VocType>
 );
 
 #define ARMOR_PAIR(ARMOR_NAME) { ARMOR_##ARMOR_NAME, #ARMOR_NAME }
@@ -42,6 +45,9 @@ concept SupportedByTdTypeConverter = (
 #define INFANTRY_PAIR(INFANTRY_NAME) { INFANTRY_##INFANTRY_NAME, #INFANTRY_NAME }
 #define UNIT_PAIR(UNIT_NAME) { UNIT_##UNIT_NAME, #UNIT_NAME }
 #define SPEED_PAIR(SPEED_NAME) { SPEED_##SPEED_NAME, #SPEED_NAME }
+#define BULLET_PAIR(BULLET_NAME) { BULLET_##BULLET_NAME, #BULLET_NAME }
+#define WARHEAD_PAIR(WARHEAD_NAME) { WARHEAD_##WARHEAD_NAME, #WARHEAD_NAME }
+#define VOC_PAIR(VOC_NAME) { VOC_##VOC_NAME, #VOC_NAME }
 
 class TdTypeConverter final
 {
@@ -387,6 +393,156 @@ public:
         SPEED_PAIR(HOVER),
         SPEED_PAIR(FLOAT)
     };
+    inline static const TwoWayMap<BulletType, std::string> Bullet_Types {
+        BULLET_PAIR(NONE),
+        BULLET_PAIR(SNIPER),
+        BULLET_PAIR(BULLET),
+        BULLET_PAIR(APDS),
+        BULLET_PAIR(HE),
+        BULLET_PAIR(SSM),
+        BULLET_PAIR(SSM2),
+        BULLET_PAIR(SAM),
+        BULLET_PAIR(TOW),
+        BULLET_PAIR(FLAME),
+        BULLET_PAIR(CHEMSPRAY),
+        BULLET_PAIR(NAPALM),
+        BULLET_PAIR(GRENADE),
+        BULLET_PAIR(LASER),
+        BULLET_PAIR(NUKE_UP),
+        BULLET_PAIR(NUKE_DOWN),
+        BULLET_PAIR(HONEST_JOHN),
+        BULLET_PAIR(SPREADFIRE),
+        BULLET_PAIR(HEADBUTT),
+        BULLET_PAIR(TREXBITE)
+    };
+    inline static const TwoWayMap<WarheadType, std::string> Warhead_Types {
+        WARHEAD_PAIR(NONE),
+        WARHEAD_PAIR(SA),
+        WARHEAD_PAIR(HE),
+        WARHEAD_PAIR(AP),
+        WARHEAD_PAIR(FIRE),
+        WARHEAD_PAIR(LASER),
+        WARHEAD_PAIR(PB),
+        WARHEAD_PAIR(FIST),
+        WARHEAD_PAIR(FOOT),
+        WARHEAD_PAIR(HOLLOW_POINT),
+        WARHEAD_PAIR(SPORE),
+        WARHEAD_PAIR(HEADBUTT),
+        WARHEAD_PAIR(FEEDME)
+    };
+    // VOC_BUILD_SELECT is omitted as it appears unused an is a pointer to another VOC (non-unique)
+    inline static const TwoWayMap<VocType, std::string> Voc_Types {
+        VOC_PAIR(NONE),
+        VOC_PAIR(RAMBO_PRESENT),
+        VOC_PAIR(RAMBO_CMON),
+        VOC_PAIR(RAMBO_UGOTIT),
+        VOC_PAIR(RAMBO_COMIN),
+        VOC_PAIR(RAMBO_LAUGH),
+        VOC_PAIR(RAMBO_LEFTY),
+        VOC_PAIR(RAMBO_NOPROB),
+        VOC_PAIR(RAMBO_ONIT),
+        VOC_PAIR(RAMBO_YELL),
+        VOC_PAIR(RAMBO_ROCK),
+        VOC_PAIR(RAMBO_TUFF),
+        VOC_PAIR(RAMBO_YEA),
+        VOC_PAIR(RAMBO_YES),
+        VOC_PAIR(RAMBO_YO),
+        VOC_PAIR(GIRL_OKAY),
+        VOC_PAIR(GIRL_YEAH),
+        VOC_PAIR(GUY_OKAY),
+        VOC_PAIR(GUY_YEAH),
+        VOC_PAIR(2DANGER),
+        VOC_PAIR(ACKNOWL),
+        VOC_PAIR(AFFIRM),
+        VOC_PAIR(AWAIT),
+        VOC_PAIR(MOVEOUT),
+        VOC_PAIR(NEGATIVE),
+        VOC_PAIR(NO_PROB),
+        VOC_PAIR(READY),
+        VOC_PAIR(REPORT),
+        VOC_PAIR(RIGHT_AWAY),
+        VOC_PAIR(ROGER),
+        VOC_PAIR(UGOTIT),
+        VOC_PAIR(UNIT),
+        VOC_PAIR(VEHIC),
+        VOC_PAIR(YESSIR),
+        VOC_PAIR(BAZOOKA),
+        VOC_PAIR(BLEEP),
+        VOC_PAIR(BOMB1),
+        VOC_PAIR(BUTTON),
+        VOC_PAIR(RADAR_ON),
+        VOC_PAIR(CONSTRUCTION),
+        VOC_PAIR(CRUMBLE),
+        VOC_PAIR(FLAMER1),
+        VOC_PAIR(RIFLE),
+        VOC_PAIR(M60),
+        VOC_PAIR(GUN20),
+        VOC_PAIR(M60A),
+        VOC_PAIR(MINI),
+        VOC_PAIR(RELOAD),
+        VOC_PAIR(SLAM),
+        VOC_PAIR(HVYGUN10),
+        VOC_PAIR(ION_CANNON),
+        VOC_PAIR(MGUN11),
+        VOC_PAIR(MGUN2),
+        VOC_PAIR(NUKE_FIRE),
+        VOC_PAIR(NUKE_EXPLODE),
+        VOC_PAIR(LASER),
+        VOC_PAIR(LASER_POWER),
+        VOC_PAIR(RADAR_OFF),
+        VOC_PAIR(SNIPER),
+        VOC_PAIR(ROCKET1),
+        VOC_PAIR(ROCKET2),
+        VOC_PAIR(MOTOR),
+        VOC_PAIR(SCOLD),
+        VOC_PAIR(SIDEBAR_OPEN),
+        VOC_PAIR(SIDEBAR_CLOSE),
+        VOC_PAIR(SQUISH2),
+        VOC_PAIR(TANK1),
+        VOC_PAIR(TANK2),
+        VOC_PAIR(TANK3),
+        VOC_PAIR(TANK4),
+        VOC_PAIR(UP),
+        VOC_PAIR(DOWN),
+        VOC_PAIR(TARGET),
+        VOC_PAIR(SONAR),
+        VOC_PAIR(TOSS),
+        VOC_PAIR(CLOAK),
+        VOC_PAIR(BURN),
+        VOC_PAIR(TURRET),
+        VOC_PAIR(XPLOBIG4),
+        VOC_PAIR(XPLOBIG6),
+        VOC_PAIR(XPLOBIG7),
+        VOC_PAIR(XPLODE),
+        VOC_PAIR(XPLOS),
+        VOC_PAIR(XPLOSML2),
+        VOC_PAIR(SCREAM1),
+        VOC_PAIR(SCREAM3),
+        VOC_PAIR(SCREAM4),
+        VOC_PAIR(SCREAM5),
+        VOC_PAIR(SCREAM6),
+        VOC_PAIR(SCREAM7),
+        VOC_PAIR(SCREAM10),
+        VOC_PAIR(SCREAM11),
+        VOC_PAIR(SCREAM12),
+        VOC_PAIR(YELL1),
+        VOC_PAIR(YES),
+        VOC_PAIR(COMMANDER),
+        VOC_PAIR(HELLO),
+        VOC_PAIR(HMMM),
+        VOC_PAIR(EXCELLENT3),
+        VOC_PAIR(OF_COURSE),
+        VOC_PAIR(YESYES),
+        VOC_PAIR(QUIP1),
+        VOC_PAIR(THANKS),
+        VOC_PAIR(CASHTURN),
+        VOC_PAIR(BLEEPY3),
+        VOC_PAIR(DINOMOUT),
+        VOC_PAIR(DINOYES),
+        VOC_PAIR(DINOATK1),
+        VOC_PAIR(DINODIE1),
+        VOC_PAIR(BEACON)
+    };
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -447,6 +603,18 @@ public:
         } else if constexpr (std::is_same_v<T, SpeedType>) {
             return Speed_Types[instance].value_or(
                 Speed_Types[SPEED_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, BulletType>) {
+            return Bullet_Types[instance].value_or(
+                Bullet_Types[BULLET_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, WarheadType>) {
+            return Warhead_Types[instance].value_or(
+                Warhead_Types[WARHEAD_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, VocType>) {
+            return Voc_Types[instance].value_or(
+                Voc_Types[VOC_NONE].value()
             );
         }
 
@@ -509,6 +677,12 @@ public:
             return Unit_Types[str];
         } else if constexpr (std::is_same_v<T, SpeedType>) {
             return Speed_Types[str];
+        } else if constexpr (std::is_same_v<T, BulletType>) {
+            return Bullet_Types[str];
+        } else if constexpr (std::is_same_v<T, WarheadType>) {
+            return Warhead_Types[str];
+        } else if constexpr (std::is_same_v<T, VocType>) {
+            return Voc_Types[str];
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");

@@ -1459,6 +1459,7 @@ public:
         return 0;
     };
 
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
 private:
     static BulletTypeClass const* const Pointers[BULLET_COUNT];
 };
@@ -1839,6 +1840,12 @@ public:
     {
         return *Pointers[type];
     };
+
+    static AnimTypeClass& As_Mutable_Reference(AnimType type)
+    {
+        return const_cast<AnimTypeClass&>(*Pointers[type]);
+    }
+
     static void Init(TheaterType){};
     static void One_Time(void);
 
@@ -1850,6 +1857,8 @@ public:
     {
         return 0;
     };
+
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
 
 private:
     static AnimTypeClass const* const Pointers[ANIM_COUNT];
