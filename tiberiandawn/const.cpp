@@ -96,7 +96,7 @@ WeaponTypeClass Weapons[WEAPON_COUNT] = {
 
 WeaponTypeClass& WeaponTypeClass::As_Mutable_Reference(WeaponType type)
 {
-    return Weapons[type];
+    return *(Weapons + type);
 }
 
 /***************************************************************************
@@ -180,7 +180,7 @@ WarheadTypeClass Warheads[WARHEAD_COUNT] = {
 
 WarheadTypeClass& WarheadTypeClass::As_Mutable_Reference(WarheadType type)
 {
-    return Warheads[type];
+    return *(Warheads +type);
 }
 
 /***************************************************************************

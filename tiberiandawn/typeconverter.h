@@ -28,7 +28,9 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, SpeedType> ||
     std::is_same_v<T, BulletType> ||
     std::is_same_v<T, WarheadType> ||
-    std::is_same_v<T, VocType>
+    std::is_same_v<T, VocType> ||
+    std::is_same_v<T, PlayerColorType> ||
+    std::is_same_v<T, HouseColorType>
 );
 
 #define ARMOR_PAIR(ARMOR_NAME) { ARMOR_##ARMOR_NAME, #ARMOR_NAME }
@@ -48,6 +50,8 @@ concept SupportedByTdTypeConverter = (
 #define BULLET_PAIR(BULLET_NAME) { BULLET_##BULLET_NAME, #BULLET_NAME }
 #define WARHEAD_PAIR(WARHEAD_NAME) { WARHEAD_##WARHEAD_NAME, #WARHEAD_NAME }
 #define VOC_PAIR(VOC_NAME) { VOC_##VOC_NAME, #VOC_NAME }
+#define PLAYER_COLOR_PAIR(COLOR_NAME) { REMAP_##COLOR_NAME, #COLOR_NAME }
+#define HOUSE_COLOR_PAIR(COLOR_NAME) { HOUSE_COLOR_##COLOR_NAME, #COLOR_NAME }
 
 class TdTypeConverter final
 {
@@ -543,6 +547,23 @@ public:
         VOC_PAIR(DINODIE1),
         VOC_PAIR(BEACON)
     };
+    static inline const TwoWayMap<PlayerColorType, std::string> Player_Color_Types {
+        PLAYER_COLOR_PAIR(NONE),
+        PLAYER_COLOR_PAIR(GOLD),
+        PLAYER_COLOR_PAIR(LTBLUE),
+        PLAYER_COLOR_PAIR(RED),
+        PLAYER_COLOR_PAIR(GREEN),
+        PLAYER_COLOR_PAIR(ORANGE),
+        PLAYER_COLOR_PAIR(BLUE)
+    };
+    static inline const TwoWayMap<HouseColorType, std::string> House_Color_Types {
+        HOUSE_COLOR_PAIR(GOOD),
+        HOUSE_COLOR_PAIR(BRIGHT_GOOD),
+        HOUSE_COLOR_PAIR(BAD),
+        HOUSE_COLOR_PAIR(BRIGHT_BAD),
+        HOUSE_COLOR_PAIR(NEUTRAL),
+        HOUSE_COLOR_PAIR(BRIGHT_NEUTRAL)
+    };
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -616,6 +637,14 @@ public:
             return Voc_Types[instance].value_or(
                 Voc_Types[VOC_NONE].value()
             );
+        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
+            return Player_Color_Types[instance].value_or(
+                Player_Color_Types[REMAP_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, HouseColorType>) {
+            return House_Color_Types[instance].value_or(
+                House_Color_Types[HOUSE_COLOR_GOOD].value()
+            );
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -683,6 +712,10 @@ public:
             return Warhead_Types[str];
         } else if constexpr (std::is_same_v<T, VocType>) {
             return Voc_Types[str];
+        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
+            return Player_Color_Types[str];
+        } else if constexpr (std::is_same_v<T, HouseColorType>) {
+            return House_Color_Types[str];
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");

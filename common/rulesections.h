@@ -61,7 +61,7 @@ concept TypeConverter = requires(std::string str, const std::string& str_ref, co
 class RuleSection
 {
 public:
-    const std::string_view SectionName;
+    const std::string SectionName;
 
     static bool Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
     {
@@ -133,7 +133,7 @@ public:
     }
 
     RuleSection(
-        std::string_view section_name,
+        std::string section_name,
         std::function<void(void)> on_rules_changed
     ) : SectionName(section_name), OnRulesChanged(on_rules_changed) {}
 
@@ -149,7 +149,7 @@ public:
 
     bool Has_Key(std::string_view name)
     {
-        return Rules.find(name) != Rules.end();
+        return Rules.find(std::string(name)) != Rules.end();
     }
 
     std::vector<std::string_view> Rule_Names() const
@@ -166,7 +166,7 @@ public:
 
     const RuleValueVariant Get_Variant(std::string_view name) const
     {
-        auto it = Rules.find(name);
+        auto it = Rules.find(std::string(name));
 
         if (it != Rules.end()) {
             return it->second;
@@ -177,7 +177,7 @@ public:
 
     const std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const
     {
-        auto it = Rules.find(name);
+        auto it = Rules.find(std::string(name));
 
         if (it != Rules.end()) {
             return it->second;
@@ -188,7 +188,7 @@ public:
 
     const std::string_view Get_Type(std::string_view name) const
     {
-        auto it = Rules.find(name);
+        auto it = Rules.find(std::string(name));
 
         if (it != Rules.end()) {
             auto value_variant = it->second;
@@ -215,7 +215,7 @@ public:
                 SectionName
             );
 
-            Rules[name] = default_value;
+            Rules[std::string(name)] = default_value;
             return *this;
         }
 
@@ -237,35 +237,41 @@ public:
                 ini.Get_String(SectionName.data(), name.data(), default_value_str)
             );
         } else if constexpr (std::is_same_v<T, ushort>) {
-            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
+            auto default_value_str = std::format("{}", default_value);
+            auto ul_value = std::stoul(
+                ini.Get_String(SectionName.data(), name.data(), default_value_str)
+            );
 
-            if (ini_value < 0 || ini_value > std::numeric_limits<ushort>::max()) {
+            if (ul_value < std::numeric_limits<ushort>::min() || ul_value > std::numeric_limits<ushort>::max()) {
                 CNC_LOGGER_FATAL(
                     "Invalid INI value - number '{}' is out of expected range: {} - {}",
-                    ini_value,
+                    ul_value,
                     0,
                     std::numeric_limits<ushort>::max()
                 );
             }
 
-            value = static_cast<ushort>(ini_value);
+            value = static_cast<ushort>(ul_value);
         } else if constexpr (std::is_same_v<T, uint>) {
-            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
+            auto default_value_str = std::format("{}", default_value);
+            auto ul_value = std::stoul(
+                ini.Get_String(SectionName.data(), name.data(), default_value_str)
+            );
 
-            if (ini_value < 0 || ini_value > std::numeric_limits<uint>::max()) {
+            if (ul_value < std::numeric_limits<uint>::min() || ul_value > std::numeric_limits<uint>::max()) {
                 CNC_LOGGER_FATAL(
                     "Invalid INI value - number '{}' is out of expected range: {} - {}",
-                    ini_value,
+                    ul_value,
                     0,
                     std::numeric_limits<uint>::max()
                 );
             }
 
-            value = static_cast<uint>(ini_value);
+            value = static_cast<uint>(ul_value);
         } else if constexpr (std::is_same_v<T, char>) {
             auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
 
-            if (ini_value < 0 || ini_value > std::numeric_limits<char>::max()) {
+            if (ini_value < std::numeric_limits<char>::min() || ini_value > std::numeric_limits<char>::max()) {
                 CNC_LOGGER_FATAL(
                     "Invalid INI value - number '{}' is out of expected range: {} - {}",
                     ini_value,
@@ -278,7 +284,7 @@ public:
         } else if constexpr (std::is_same_v<T, uchar>) {
             auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
 
-            if (ini_value < 0 || ini_value > std::numeric_limits<uchar>::max()) {
+            if (ini_value < std::numeric_limits<uchar>::min() || ini_value > std::numeric_limits<uchar>::max()) {
                 CNC_LOGGER_FATAL(
                     "Invalid INI value - number '{}' is out of expected range: {} - {}",
                     ini_value,
@@ -305,7 +311,7 @@ public:
             Variant_To_String(value)
         );
 
-        Rules[name] = value;
+        Rules[std::string(name)] = value;
 
         return *this;
     }
@@ -326,12 +332,14 @@ public:
         } else if (const auto value = std::get_if<bool>(&value_variant)) {
             ini.Put_Bool(SectionName.data(), name.data(), *value);
         } else if (const auto value = std::get_if<float>(&value_variant)) {
-            auto value_str = std::format("{}", *value);
+            const auto value_str = std::format("{}", *value);
             ini.Put_String(SectionName.data(), name.data(), value_str);
         } else if (const auto value = std::get_if<ushort>(&value_variant)) {
-            ini.Put_Int(SectionName.data(), name.data(), *value);
+            const auto value_str = std::format("{}", *value);
+            ini.Put_String(SectionName.data(), name.data(), value_str);
         } else if (const auto value = std::get_if<uint>(&value_variant)) {
-            ini.Put_Int(SectionName.data(), name.data(), *value);
+            const auto value_str = std::format("{}", *value);
+            ini.Put_String(SectionName.data(), name.data(), value_str);
         } else if (const auto value = std::get_if<char>(&value_variant)) {
             ini.Put_Int(SectionName.data(), name.data(), *value);
         } else if (const auto value = std::get_if<uchar>(&value_variant)) {
@@ -426,7 +434,7 @@ public:
             }
         }
 
-        Rules[name] = value;
+        Rules[std::string(name)] = value;
 
         CNC_LOGGER_WARN("Running OnRulesChanged() handler");
         OnRulesChanged();
@@ -449,7 +457,7 @@ public:
 private:
     inline static CncLogger Logger = CncLogger("RuleSection");
 
-    std::map<std::string_view, RuleValueVariant> Rules;
+    std::map<std::string, RuleValueVariant> Rules;
     std::function<void(void)> OnRulesChanged;
 };
 
@@ -483,7 +491,11 @@ public:
     }
 
     template<RuleValueVariantCompatible T>
-    const IniRuleContext& Load_With_Callback(std::string_view name, T default_value, std::function<void(T)> callback) const
+    const IniRuleContext& Load_With_Callback(
+        std::string_view name,
+        T default_value,
+        std::function<void(T)> callback
+    ) const
     {
         Load(name, default_value);
 
@@ -553,14 +565,14 @@ private:
 
     RuleSection& Section;
     INIClass& Context;
-    std::optional<std::string_view> NameInStream;
+    std::optional<std::string> NameInStream;
 };
 
 // IniRuleContext macro 'methods' - useful for setting variables and class members from rules
 
 // Load a variable/member by its C++ name (with a specific type) from an INI context and set its value
 // to equal the INI value
-#define Load_Var_With_Type(VAR, T) Load_With_Callback<T>(#VAR, VAR, [&](const auto v) { VAR = v; })
+#define Load_Var_With_Type(VAR, T) Load_With_Callback<T>(#VAR, (T)VAR, [&](const auto v) { VAR = v; })
 
 // Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
 #define Load_Var(VAR) Load_With_Callback(#VAR, VAR, [&](const auto v) { VAR = v; })
@@ -593,7 +605,7 @@ public:
 
     bool Has_Section(std::string_view name)
     {
-        return Sections.find(name) != Sections.end();
+        return Sections.find(std::string(name)) != Sections.end();
     }
 
     void Save_All_To_Ini(INIClass& ini) const
@@ -605,7 +617,8 @@ public:
 
     RuleSection& operator[](std::string_view name)
     {
-        auto it = Sections.find(name);
+        auto name_str = std::string(name);
+        auto it = Sections.find(name_str);
 
         if (it != Sections.end()) {
             return *(it->second);
@@ -613,8 +626,8 @@ public:
 
         CNC_LOGGER_DEBUG("Adding new rules section '{}'", name);
 
-        Sections[name] = std::make_unique<RuleSection>(
-            name,
+        Sections[name_str] = std::make_unique<RuleSection>(
+            name_str,
             [&]() {
                 if (OnRulesChanged.has_value()) {
                     OnRulesChanged.value()();
@@ -622,12 +635,12 @@ public:
             }
         );
 
-        return *Sections[name];
+        return *Sections[name_str];
     }
 
 private:
     inline static CncLogger Logger = CncLogger("RuleSections");
 
-    std::map<std::string_view, std::unique_ptr<RuleSection>> Sections;
+    std::map<std::string, std::unique_ptr<RuleSection>> Sections;
     std::optional<std::function<void()>> OnRulesChanged;
 };

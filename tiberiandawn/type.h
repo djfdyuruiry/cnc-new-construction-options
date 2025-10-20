@@ -221,15 +221,16 @@ public:
     **	Each house is assigned a unique identification color to be used on the
     **	radar map and other color significant areas.
     */
-    unsigned char Color;
+    HouseColorType Color;
 
-    unsigned char BrightColor;
+    HouseColorType BrightColor;
 
     /*
     **	This points to the default remap table for this house.
     */
     unsigned char const* RemapTable;
     PlayerColorType RemapColor;
+    bool RemapColorEnabled;
 
     /*
     **	This is a unique ASCII character used when constructing filenames. It
@@ -256,23 +257,29 @@ public:
                    int fullname,
                    char const* ext,
                    int lemon,
-                   int color,
-                   int bright_color,
+                   HouseColorType color,
+                   HouseColorType bright_color,
                    PlayerColorType remapcolor,
-                   unsigned char const* remap,
-                   char prefix);
+                   char prefix,
+                   bool remap_color_disabled = false);
     HouseTypeClass(NoInitClass const&)
     {
     }
 
     static HousesType From_Name(char const* name);
     static HouseTypeClass const& As_Reference(HousesType house);
+    static HouseTypeClass& As_Mutable_Reference(HousesType house);
     static void One_Time(void);
     char const* Name() const
     {
         return IniName;
     }
 
+    void Set_Remap_Color_Table();
+    void Set_Suffix(const std::string& str);
+    void Set_Prefix(const std::string& str);
+
+    const IniRuleContext& Read_INI(const IniRuleContext& ini);
 private:
     static HouseTypeClass const* const Pointers[HOUSE_COUNT];
 };
@@ -1493,7 +1500,7 @@ public:
         return *Pointers[type];
     };
 
-    static BulletTypeClass & As_Mutable_Reference(BulletType type)
+    static BulletTypeClass& As_Mutable_Reference(BulletType type)
     {
         return *const_cast<BulletTypeClass*>(Pointers[type]);
     }
@@ -1511,6 +1518,7 @@ public:
     };
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    std::string ToString() const;
 private:
     static BulletTypeClass const* const Pointers[BULLET_COUNT];
 };
@@ -1894,7 +1902,7 @@ public:
 
     static AnimTypeClass& As_Mutable_Reference(AnimType type)
     {
-        return const_cast<AnimTypeClass&>(*Pointers[type]);
+        return *const_cast<AnimTypeClass*>(Pointers[type]);
     }
 
     static void Init(TheaterType){};

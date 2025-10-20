@@ -294,7 +294,6 @@ public:
     RuleSections Sections;
     // TODO: Load below from separate INI files
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    // TODO: Add non ObjectTypeClass classes: House
     RuleSections Animations;
     RuleSections Warheads;
     RuleSections Bullets;
@@ -303,6 +302,7 @@ public:
     RuleSections Buildings;
     RuleSections Infantry;
     RuleSections Units;
+    RuleSections Houses;
 
 private:
     void Apply_Special_Properties();

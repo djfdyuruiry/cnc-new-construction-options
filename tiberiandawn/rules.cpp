@@ -483,7 +483,6 @@ bool RulesClass::Difficulty(CCINIClass& ini)
     return (true);
 }
 
-
 template<typename C, typename E>
 concept RulesTypeClass = requires(C instance, E enum_instance)
 {
@@ -495,11 +494,21 @@ template<typename T>
 concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
 
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static void Process_Type_Instances(CCINIClass& ini, RuleSections& sections, U first, U count)
+static void Process_Type_Instances(CCINIClass& ini, std::string_view prefix, RuleSections& sections, U first, U count)
 {
     for (auto i = first; i < count; ++i) {
         auto& typeInstance = T::As_Mutable_Reference(i);
-        auto name = typeInstance.Name();
+        auto name = std::format("{}.{}", prefix, typeInstance.Name());
+
+        if (sections.Has_Section(name)) {
+            throw std::invalid_argument(
+                std::format(
+                    "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
+                    "more than once for instances of a given class - this will mess up rules on re-read. Name: {}",
+                name
+                )
+            );
+        }
 
         sections[name].template With<IniRuleContext>(ini, [&](auto& c) {
             typeInstance.Read_INI(c);
@@ -511,16 +520,16 @@ static void Process_Type_Instances(CCINIClass& ini, RuleSections& sections, U fi
 bool RulesClass::Process_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    // TODO: Add non ObjectTypeClass classes: House
 
-    Process_Type_Instances<AnimType, AnimTypeClass>(ini, Animations, ANIM_FIRST, ANIM_COUNT);
-    Process_Type_Instances<WarheadType, WarheadTypeClass>(ini, Warheads, WARHEAD_FIRST, WARHEAD_COUNT);
-    Process_Type_Instances<BulletType, BulletTypeClass>(ini, Bullets, BULLET_FIRST, BULLET_COUNT);
-    Process_Type_Instances<WeaponType, WeaponTypeClass>(ini, Weapons, WEAPON_FIRST, WEAPON_COUNT);
-    Process_Type_Instances<AircraftType, AircraftTypeClass>(ini, Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
-    Process_Type_Instances<StructType, BuildingTypeClass>(ini, Buildings, STRUCT_FIRST, STRUCT_COUNT);
-    Process_Type_Instances<InfantryType, InfantryTypeClass>(ini, Infantry, INFANTRY_FIRST, INFANTRY_COUNT);
-    Process_Type_Instances<UnitType, UnitTypeClass>(ini, Units, UNIT_FIRST, UNIT_COUNT);
+    Process_Type_Instances<AnimType, AnimTypeClass>(ini, "Anims", Animations, ANIM_FIRST, ANIM_COUNT);
+    Process_Type_Instances<WarheadType, WarheadTypeClass>(ini, "Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT);
+    Process_Type_Instances<BulletType, BulletTypeClass>(ini, "Bullets", Bullets, BULLET_FIRST, BULLET_COUNT);
+    Process_Type_Instances<WeaponType, WeaponTypeClass>(ini, "Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT);
+    Process_Type_Instances<AircraftType, AircraftTypeClass>(ini, "Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
+    Process_Type_Instances<StructType, BuildingTypeClass>(ini, "Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT);
+    Process_Type_Instances<InfantryType, InfantryTypeClass>(ini, "Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT);
+    Process_Type_Instances<UnitType, UnitTypeClass>(ini, "Units", Units, UNIT_FIRST, UNIT_COUNT);
+    Process_Type_Instances<HousesType, HouseTypeClass>(ini, "Houses", Houses, HOUSE_FIRST, HOUSE_COUNT);
 
     return true;
 }
@@ -570,6 +579,7 @@ bool RulesClass::Export_Types(CCINIClass& ini)
     Buildings.Save_All_To_Ini(ini);
     Infantry.Save_All_To_Ini(ini);
     Units.Save_All_To_Ini(ini);
+    Houses.Save_All_To_Ini(ini);
 
     return true;
 }

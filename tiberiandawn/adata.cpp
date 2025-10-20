@@ -127,7 +127,7 @@ static AnimTypeClass const RaptDie(ANIM_RAPT_DIE, // Animation number.
                                    ANIM_NONE);
 
 static AnimTypeClass const SAMN(ANIM_SAM_N, // Animation number.
-                                "SAMFIRE",  // Data name of animation.
+                                "SFIRE-N",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 4,          // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -148,7 +148,7 @@ static AnimTypeClass const SAMN(ANIM_SAM_N, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const SAMNW(ANIM_SAM_NW, // Animation number.
-                                 "SAMFIRE",   // Data name of animation.
+                                 "SFIRE-NW",  // Data name of animation.
                                  55,          // Maximum dimension of animation.
                                  22,          // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -169,7 +169,7 @@ static AnimTypeClass const SAMNW(ANIM_SAM_NW, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const SAMW(ANIM_SAM_W, // Animation number.
-                                "SAMFIRE",  // Data name of animation.
+                                "SFIRE-W",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 40,         // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -190,7 +190,7 @@ static AnimTypeClass const SAMW(ANIM_SAM_W, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const SAMSW(ANIM_SAM_SW, // Animation number.
-                                 "SAMFIRE",   // Data name of animation.
+                                 "SFIRE-SW",  // Data name of animation.
                                  55,          // Maximum dimension of animation.
                                  58,          // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -211,7 +211,7 @@ static AnimTypeClass const SAMSW(ANIM_SAM_SW, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const SAMS(ANIM_SAM_S, // Animation number.
-                                "SAMFIRE",  // Data name of animation.
+                                "SFIRE-S",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 76,         // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -232,7 +232,7 @@ static AnimTypeClass const SAMS(ANIM_SAM_S, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const SAMSE(ANIM_SAM_SE, // Animation number.
-                                 "SAMFIRE",   // Data name of animation.
+                                 "SFIRE-SE",  // Data name of animation.
                                  55,          // Maximum dimension of animation.
                                  94,          // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -253,7 +253,7 @@ static AnimTypeClass const SAMSE(ANIM_SAM_SE, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const SAME(ANIM_SAM_E, // Animation number.
-                                "SAMFIRE",  // Data name of animation.
+                                "SFIRE-E",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 112,        // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -274,7 +274,7 @@ static AnimTypeClass const SAME(ANIM_SAM_E, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const SAMNE(ANIM_SAM_NE, // Animation number.
-                                 "SAMFIRE",   // Data name of animation.
+                                 "SFIRE-NE",  // Data name of animation.
                                  55,          // Maximum dimension of animation.
                                  130,         // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -389,7 +389,7 @@ static AnimTypeClass const BurnBig(ANIM_BURN_BIG, // Animation number.
 **	buildings and the gunboat.
 */
 static AnimTypeClass const OnFireSmall(ANIM_ON_FIRE_SMALL, // Animation number.
-                                       "BURN-S",           // Data name of animation.
+                                       "ONFIRE-S",         // Data name of animation.
                                        11,                 // Maximum dimension of animation.
                                        13,                 // Biggest animation stage.
                                        false,              // Normalized animation rate?
@@ -410,7 +410,7 @@ static AnimTypeClass const OnFireSmall(ANIM_ON_FIRE_SMALL, // Animation number.
                                        VOC_NONE,           // Sound effect to play.
                                        ANIM_SMOKE_M);
 static AnimTypeClass const OnFireMed(ANIM_ON_FIRE_MED, // Animation number.
-                                     "BURN-M",         // Data name of animation.
+                                     "ONFIRE-M",       // Data name of animation.
                                      14,               // Maximum dimension of animation.
                                      13,               // Biggest animation stage.
                                      false,            // Normalized animation rate?
@@ -431,7 +431,7 @@ static AnimTypeClass const OnFireMed(ANIM_ON_FIRE_MED, // Animation number.
                                      VOC_NONE,         // Sound effect to play.
                                      ANIM_ON_FIRE_SMALL);
 static AnimTypeClass const OnFireBig(ANIM_ON_FIRE_BIG, // Animation number.
-                                     "BURN-L",         // Data name of animation.
+                                     "ONFIRE-L",       // Data name of animation.
                                      23,               // Maximum dimension of animation.
                                      13,               // Biggest animation stage.
                                      false,            // Normalized animation rate?
@@ -797,7 +797,7 @@ static AnimTypeClass const ChemNE(ANIM_CHEM_NE, // Animation number.
                                   ANIM_NONE);
 
 static AnimTypeClass const Grenade(ANIM_GRENADE, // Animation number.
-                                   "VEH-HIT2",   // Data name of animation.
+                                   "GRENADE",    // Data name of animation.
                                    21,           // Maximum dimension of animation.
                                    1,            // Biggest animation stage.
                                    true,         // Normalized animation rate?
@@ -1109,7 +1109,7 @@ static AnimTypeClass const PiffPiff(ANIM_PIFFPIFF, // Animation number.
                                     ANIM_NONE);
 
 static AnimTypeClass const Fire3(ANIM_FIRE_SMALL, // Animation number.
-                                 "FIRE3",         // Data name of animation.
+                                 "FIRE-S",         // Data name of animation.
                                  23,              // Maximum dimension of animation.
                                  0,               // Biggest animation stage.
                                  false,           // Normalized animation rate?
@@ -1135,7 +1135,7 @@ static AnimTypeClass const Fire3(ANIM_FIRE_SMALL, // Animation number.
 );
 
 static AnimTypeClass const Fire3Virtual(ANIM_FIRE_SMALL_VIRTUAL, // Animation number.
-                                        "FIRE3",                 // Data name of animation.
+                                        "FIRE-S-V",              // Data name of animation.
                                         23,                      // Maximum dimension of animation.
                                         0,                       // Biggest animation stage.
                                         false,                   // Normalized animation rate?
@@ -1157,7 +1157,7 @@ static AnimTypeClass const Fire3Virtual(ANIM_FIRE_SMALL_VIRTUAL, // Animation nu
                                         ANIM_NONE);
 
 static AnimTypeClass const Fire1(ANIM_FIRE_MED2, // Animation number.
-                                 "FIRE1",        // Data name of animation.
+                                 "FIRE-ME",      // Data name of animation.
                                  23,             // Maximum dimension of animation.
                                  0,              // Biggest animation stage.
                                  false,          // Normalized animation rate?
@@ -1183,7 +1183,7 @@ static AnimTypeClass const Fire1(ANIM_FIRE_MED2, // Animation number.
 );
 
 static AnimTypeClass const Fire1Virtual(ANIM_FIRE_MED2_VIRTUAL, // Animation number.
-                                        "FIRE1",                // Data name of animation.
+                                        "FIR2-M-V",             // Data name of animation.
                                         23,                     // Maximum dimension of animation.
                                         0,                      // Biggest animation stage.
                                         false,                  // Normalized animation rate?
@@ -1205,7 +1205,7 @@ static AnimTypeClass const Fire1Virtual(ANIM_FIRE_MED2_VIRTUAL, // Animation num
                                         ANIM_NONE);
 
 static AnimTypeClass const Fire4(ANIM_FIRE_TINY, // Animation number.
-                                 "FIRE4",        // Data name of animation.
+                                 "FIRE-T",       // Data name of animation.
                                  7,              // Maximum dimension of animation.
                                  0,              // Biggest animation stage.
                                  false,          // Normalized animation rate?
@@ -1231,7 +1231,7 @@ static AnimTypeClass const Fire4(ANIM_FIRE_TINY, // Animation number.
 );
 
 static AnimTypeClass const Fire4Virtual(ANIM_FIRE_TINY_VIRTUAL, // Animation number.
-                                        "FIRE4",                // Data name of animation.
+                                        "FIRE-T-V",             // Data name of animation.
                                         7,                      // Maximum dimension of animation.
                                         0,                      // Biggest animation stage.
                                         false,                  // Normalized animation rate?
@@ -1255,7 +1255,7 @@ static AnimTypeClass const Fire4Virtual(ANIM_FIRE_TINY_VIRTUAL, // Animation num
 );
 
 static AnimTypeClass const Fire2(ANIM_FIRE_MED, // Animation number.
-                                 "FIRE2",       // Data name of animation.
+                                 "FIRE-M",      // Data name of animation.
                                  23,            // Maximum dimension of animation.
                                  0,             // Biggest animation stage.
                                  false,         // Normalized animation rate?
@@ -1281,7 +1281,7 @@ static AnimTypeClass const Fire2(ANIM_FIRE_MED, // Animation number.
 );
 
 static AnimTypeClass const Fire2Virtual(ANIM_FIRE_MED_VIRTUAL, // Animation number.
-                                        "FIRE2",               // Data name of animation.
+                                        "FIRE-M-V",            // Data name of animation.
                                         23,                    // Maximum dimension of animation.
                                         0,                     // Biggest animation stage.
                                         false,                 // Normalized animation rate?
@@ -1678,7 +1678,7 @@ static AnimTypeClass const E4RotExp(ANIM_E4_ROT_EXP, // Animation number.
 #endif
 
 static AnimTypeClass const SmokeM(ANIM_SMOKE_M, // Animation number.
-                                  "SMOKE_M",    // Data name of animation.
+                                  "SMOKE-M",    // Data name of animation.
                                   28,           // Maximum dimension of animation.
                                   30,           // Biggest animation stage.
                                   true,         // Normalized animation rate?
@@ -1705,7 +1705,7 @@ static AnimTypeClass const SmokeM(ANIM_SMOKE_M, // Animation number.
 **	Mini-gun fire effect -- used by guard towers.
 */
 static AnimTypeClass const GUNN(ANIM_GUN_N, // Animation number.
-                                "MINIGUN",  // Data name of animation.
+                                "MGUN-N",   // Data name of animation.
                                 18,         // Maximum dimension of animation.
                                 0,          // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -1726,7 +1726,7 @@ static AnimTypeClass const GUNN(ANIM_GUN_N, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const GUNNW(ANIM_GUN_NW, // Animation number.
-                                 "MINIGUN",   // Data name of animation.
+                                 "MGUN-NW",   // Data name of animation.
                                  18,          // Maximum dimension of animation.
                                  0,           // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -1747,7 +1747,7 @@ static AnimTypeClass const GUNNW(ANIM_GUN_NW, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const GUNW(ANIM_GUN_W, // Animation number.
-                                "MINIGUN",  // Data name of animation.
+                                "MGUN-W",   // Data name of animation.
                                 18,         // Maximum dimension of animation.
                                 0,          // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -1768,7 +1768,7 @@ static AnimTypeClass const GUNW(ANIM_GUN_W, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const GUNSW(ANIM_GUN_SW, // Animation number.
-                                 "MINIGUN",   // Data name of animation.
+                                 "MGUN-SW",   // Data name of animation.
                                  18,          // Maximum dimension of animation.
                                  0,           // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -1789,7 +1789,7 @@ static AnimTypeClass const GUNSW(ANIM_GUN_SW, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const GUNS(ANIM_GUN_S, // Animation number.
-                                "MINIGUN",  // Data name of animation.
+                                "MGUN-S",   // Data name of animation.
                                 18,         // Maximum dimension of animation.
                                 0,          // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -1810,7 +1810,7 @@ static AnimTypeClass const GUNS(ANIM_GUN_S, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const GUNSE(ANIM_GUN_SE, // Animation number.
-                                 "MINIGUN",   // Data name of animation.
+                                 "MGUN-SE",   // Data name of animation.
                                  18,          // Maximum dimension of animation.
                                  0,           // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -1831,7 +1831,7 @@ static AnimTypeClass const GUNSE(ANIM_GUN_SE, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const GUNE(ANIM_GUN_E, // Animation number.
-                                "MINIGUN",  // Data name of animation.
+                                "MGUN-E",   // Data name of animation.
                                 18,         // Maximum dimension of animation.
                                 0,          // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -1852,7 +1852,7 @@ static AnimTypeClass const GUNE(ANIM_GUN_E, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const GUNNE(ANIM_GUN_NE, // Animation number.
-                                 "MINIGUN",   // Data name of animation.
+                                 "MGUN-NE",   // Data name of animation.
                                  18,          // Maximum dimension of animation.
                                  0,           // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -2210,7 +2210,7 @@ static AnimTypeClass const Flag(ANIM_FLAG, // Animation number.
                                 ANIM_NONE);
 
 static AnimTypeClass const Beacon(ANIM_BEACON, // Animation number.
-                                  "MOVEFLSH",  // Data name of animation.
+                                  "BEACON",    // Data name of animation.
                                   21,          // Maximum dimension of animation.
                                   0,           // Biggest animation stage.
                                   false,       // Normalized animation rate?
@@ -2236,7 +2236,7 @@ static AnimTypeClass const Beacon(ANIM_BEACON, // Animation number.
 );
 
 static AnimTypeClass const BeaconVirtual(ANIM_BEACON_VIRTUAL, // Animation number.
-                                         "BEACON",            // Data name of animation.
+                                         "BEACON-VIRTUAL",    // Data name of animation.
                                          21,                  // Maximum dimension of animation.
                                          0,                   // Biggest animation stage.
                                          false,               // Normalized animation rate?
