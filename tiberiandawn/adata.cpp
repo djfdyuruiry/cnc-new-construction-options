@@ -2379,6 +2379,8 @@ void AnimTypeClass::One_Time(void)
 
 const IniRuleContext& AnimTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    // TODO: Consider removing ObjectTypeClass::Read_INI as those values are the same for all instances
+    // (or move to dedicated section in main rules file)
     return ObjectTypeClass::Read_INI(ini)
         .Load_Bool_Var(IsNormalized)
         .Load_Bool_Var(IsGroundLayer)

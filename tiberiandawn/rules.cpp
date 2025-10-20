@@ -507,7 +507,7 @@ static void Process_Type_Instances(CCINIClass& ini, RuleSections& sections, U fi
     }
 }
 
-// TODO: Read each type from a separate rules file (maybe a rules directory of files)
+// TODO: Need to read each type from a separate rules file - there are clases in INI names (maybe a rules directory of files)
 bool RulesClass::Process_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain

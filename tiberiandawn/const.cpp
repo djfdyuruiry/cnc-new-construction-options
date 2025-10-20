@@ -66,7 +66,7 @@ COORDINATE const StoppingCoordAbs[5] = {
 **
 **	bullet type				dmg,	rof,	range,	sound
 */
-WeaponTypeClass const Weapons[WEAPON_COUNT] = {
+WeaponTypeClass Weapons[WEAPON_COUNT] = {
     {WEAPON_RIFLE, "RIFLE", BULLET_SNIPER, 125, 40, 0x0580, VOC_SNIPER, ANIM_NONE},
     {WEAPON_CHAIN_GUN, "CHAIN_GUN", BULLET_SPREADFIRE, 25, 50, 0x0400, VOC_MINI, ANIM_GUN_N},
     {WEAPON_PISTOL, "PISTOL", BULLET_BULLET, 1, 7, 0x01C0, VOC_RIFLE, ANIM_NONE},
@@ -92,11 +92,11 @@ WeaponTypeClass const Weapons[WEAPON_COUNT] = {
     {WEAPON_HONEST_JOHN, "HONEST_JOHN", BULLET_HONEST_JOHN, 100, 200, 0x0A00, VOC_ROCKET1, ANIM_NONE},
     {WEAPON_STEG, "STEG", BULLET_HEADBUTT, 100, 30, 0x0180, VOC_DINOATK1, ANIM_NONE},
     {WEAPON_TREX, "TREX", BULLET_TREXBITE, 155, 30, 0x0180, VOC_DINOATK1, ANIM_NONE},
-};
+}; // TODO: refactor to prevent modification of instances (add const-ness back)
 
 WeaponTypeClass& WeaponTypeClass::As_Mutable_Reference(WeaponType type)
 {
-    return const_cast<WeaponTypeClass&>(Weapons[type]);
+    return Weapons[type];
 }
 
 /***************************************************************************
@@ -105,7 +105,7 @@ WeaponTypeClass& WeaponTypeClass::As_Mutable_Reference(WeaponType type)
 ** spread factor, destroys walls, destroys wood, destroys Tiberium, {armor defense table}
 **           -vs- {none, wood, aluminum, steel, concrete}
 */
-WarheadTypeClass const Warheads[WARHEAD_COUNT] = {
+WarheadTypeClass Warheads[WARHEAD_COUNT] = {
     {WARHEAD_SA,
         "SA",
         2,
@@ -176,11 +176,11 @@ WarheadTypeClass const Warheads[WARHEAD_COUNT] = {
     {WARHEAD_FEEDME,
         "FEEDME",
         1, true, true, false, {0x100, 0xC0, 0x80, 0x20, 0x08}},     //	WARHEAD_FEEDME
-};
+}; // TODO: refactor to prevent modification of instances (add const-ness back)
 
 WarheadTypeClass& WarheadTypeClass::As_Mutable_Reference(WarheadType type)
 {
-    return const_cast<WarheadTypeClass&>(Warheads[type]);
+    return Warheads[type];
 }
 
 /***************************************************************************
