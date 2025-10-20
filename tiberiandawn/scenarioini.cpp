@@ -296,6 +296,12 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     ini.Get_String("Basic", "Lose", "x", LoseMovie, sizeof(LoseMovie));
     ini.Get_String("Basic", "Action", "x", ActionMovie, sizeof(ActionMovie));
 
+    /**
+     * Load any rule sections embedded in the scenario file.
+     */
+    Rule.Init(ini);
+    Rule.Init_Types(ini);
+
     /*
     **	For single-player scenarios, 'BuildLevel' is the scenario number.
     **	This must be set before any buildings are created (if a factory is created,
@@ -306,7 +312,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
         if (Scen.Scenario <= 15) {
             BuildLevel = Scen.Scenario;
         } else if (_stricmp(Scen.ScenarioName, "scg30ea") == 0 || _stricmp(Scen.ScenarioName, "scg90ea") == 0
-                   || _stricmp(Scen.ScenarioName, "scb22ea") == 0) {
+                   || _stricmp(Scen.ScenarioName, "scb22ea") == 0) { // TODO: Check matches patched mix file scenario numbers
             // N64 missions require build level 15
             BuildLevel = 15;
         } else {

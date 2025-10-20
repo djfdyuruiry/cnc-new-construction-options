@@ -65,22 +65,6 @@ class RuleSections;
 class RulesClass
 {
 public:
-    RulesClass(void);
-
-    bool Process(CCINIClass& file);
-    bool AI(CCINIClass& ini);
-    bool IQ(CCINIClass& ini);
-    bool Difficulty(CCINIClass& ini);
-    bool Process_Sections(CCINIClass& ini);
-    bool Process_Types(CCINIClass& ini);
-
-    bool Export(CCINIClass& file);
-    bool Export_AI(CCINIClass& ini);
-    bool Export_IQ(CCINIClass& ini);
-    bool Export_Difficulty(CCINIClass& ini);
-    bool Export_Sections(CCINIClass& ini);
-    bool Export_Types(CCINIClass& ini);
-
     /*
     **	This specifies the average number of minutes between each computer attack.
     */
@@ -292,7 +276,6 @@ public:
 
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
-    // TODO: Load below from separate INI files
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
     RuleSections Animations;
     RuleSections Warheads;
@@ -304,9 +287,27 @@ public:
     RuleSections Units;
     RuleSections Houses;
 
+    RulesClass(void);
+
+    void Init();
+    void Init(CCINIClass& ini);
+
+    void Init_Types();
+    void Init_Types(CCINIClass& ini);
+
 private:
+    void AI(CCINIClass& ini);
+    void IQ(CCINIClass& ini);
+    void Difficulty(CCINIClass& ini);
+    void Init_Sections(CCINIClass& ini);
     void Apply_Special_Properties();
     void Apply_Static_And_Global_Values();
+
+    void Export_AI(CCINIClass& ini) const;
+    void Export_IQ(CCINIClass& ini) const;
+    void Export_Difficulty(CCINIClass& ini) const;
+
+    void Export(CCINIClass& ini) const;
 };
 
 #define Get_Rule_Value(section, rule, value_type) Rule.Sections[section].Get<value_type>(rule)

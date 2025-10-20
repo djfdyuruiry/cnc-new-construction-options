@@ -156,7 +156,6 @@ extern MFCD* MoviesMix;
 extern MFCD* GeneralMix;
 extern ThemeClass Theme;
 extern SpecialClass Special;
-extern CCINIClass RuleINI;
 extern RulesClass Rule;
 extern WWKeyboardClass* Keyboard;
 

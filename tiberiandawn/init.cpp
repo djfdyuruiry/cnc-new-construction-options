@@ -455,10 +455,7 @@ bool Init_Game(int, char*[])
     /*
     **	Find and process any rules for this game.
     */
-    CCFileClass rulesIniFile("RULES.INI");
-    if (RuleINI.Load(rulesIniFile, false)) {
-        Rule.Process(RuleINI);
-    }
+    Rule.Init();
 
     /* Initialize the Interpolation Table.  */
     if (Get_Resolution_Factor()) {
@@ -620,16 +617,6 @@ bool Init_Game(int, char*[])
     if (!Is_Demo() && SampleType != 0 && !Debug_Quiet && Special.IsJuvenile) {
         new MFCD("ZOUNDS.MIX");
         MFCD::Cache("ZOUNDS.MIX");
-    }
-
-    /*
-    **	Dump a default copy of rules.ini.
-    */
-    if (!rulesIniFile.Is_Available()) {
-        Rule.Process(RuleINI); // ensure defaults loaded in Rule instance before export
-        Rule.Export(RuleINI);
-        CDFileClass ini_export("RULES.INI");
-        RuleINI.Save(ini_export, false);
     }
 
     return (true);
