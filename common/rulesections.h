@@ -582,6 +582,7 @@ private:
 #define Load_UInt_Var(VAR) Load_Var_With_Type(VAR, uint)
 #define Load_Char_Var(VAR) Load_Var_With_Type(VAR, char)
 #define Load_UChar_Var(VAR) Load_Var_With_Type(VAR, uchar)
+#define Load_String_Var(VAR) Load_Var_With_Type(VAR, std::string)
 
 class RuleSections
 {
