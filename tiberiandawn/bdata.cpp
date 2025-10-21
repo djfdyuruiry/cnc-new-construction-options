@@ -4504,7 +4504,7 @@ const IniRuleContext& BuildingTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Bool_Var(IsCaptureable)
         .Load_With_TdConverter(FactoryType, ToBuild)
         .Load_With_TdConverter(StructType, Type)
-        .Load_With_TdConverter(DirType, StartFace) // TODO: CanEnter logic
+        .Load_With_TdConverter(DirType, StartFace)
         .Load_UInt_Var(Capacity)
         .Load_Int_Var(Power)
         .Load_Int_Var(Drain)

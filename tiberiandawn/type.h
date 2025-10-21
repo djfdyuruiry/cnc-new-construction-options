@@ -778,7 +778,7 @@ public:
     **	left by the unit type ID. If the corresponding bit is set, then that
     **	unit type can enter this building.
     */
-    unsigned int CanEnter;
+    unsigned int CanEnter; // TODO: Investigate and restore CanEnter logic
 
     /*
     **	This is the starting facing to give this building when it first
