@@ -1474,19 +1474,18 @@ void UnitTypeClass::One_Time(void)
         void const* ptr = NULL; // Shape pointer and set pointer.
 
         largest = 0;
-        if (uclass.IsBuildable) {
 
-            /*
-            **	Fetch the supporting data files for the unit.
-            */
-            if (Get_Resolution_Factor()) {
-                sprintf(buffer, "%sICNH", uclass.IniName);
-            } else {
-                sprintf(buffer, "%sICON", uclass.IniName);
-            }
-            _makepath(fullname, NULL, NULL, buffer, ".SHP");
-            ((void const*&)uclass.CameoData) = MFCD::Retrieve(fullname);
+
+        /*
+        **	Fetch the supporting data files for the unit.
+        */
+        if (Get_Resolution_Factor()) {
+            sprintf(buffer, "%sICNH", uclass.IniName);
+        } else {
+            sprintf(buffer, "%sICON", uclass.IniName);
         }
+        _makepath(fullname, NULL, NULL, buffer, ".SHP");
+        ((void const*&)uclass.CameoData) = MFCD::Retrieve(fullname);
 
         /*
         **	Fetch a pointer to the unit's shape data.
@@ -1790,46 +1789,6 @@ int UnitTypeClass::Max_Pips(void) const
 
 const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
 {
-    auto before = std::format(
-        "  IsCrateGoodie: {},\n"
-        "  IsPieceOfEight: {},\n"
-        "  IsCrusher: {},\n"
-        "  IsToHarvest: {},\n"
-        "  IsChunkyShape: {},\n"
-        "  IsRadarEquipped: {},\n"
-        "  IsFireAnim: {},\n"
-        "  IsLockTurret: {},\n"
-        "  IsTracked: {},\n"
-        "  IsGigundo: {},\n"
-        "  IsCloakable: {},\n"
-        "  IsAnimating: {},\n"
-        "  Type: {},\n"
-        "  Speed: {},\n"
-        "  ROT: {},\n"
-        "  TurretOffset: {},\n"
-        "  Mission: {},\n"
-        "  Explosion: {},\n"
-        "  MaxSize: {}\n",
-        (bool)IsCrateGoodie,
-        (bool)IsPieceOfEight,
-        (bool)IsCrusher,
-        (bool)IsToHarvest,
-        (bool)IsChunkyShape,
-        (bool)IsRadarEquipped,
-        (bool)IsFireAnim,
-        (bool)IsLockTurret,
-        (bool)IsTracked,
-        (bool)IsGigundo,
-        (bool)IsCloakable,
-        (bool)IsAnimating,
-        (unsigned char)Type,
-        (unsigned char)Speed,
-        ROT,
-        TurretOffset,
-        (unsigned char)Mission,
-        (unsigned char)Explosion,
-        MaxSize
-    );
     TechnoTypeClass::Read_INI(ini)
         .Load_Bool_Var(IsCrateGoodie)
         .Load_Bool_Var(IsPieceOfEight)
@@ -1848,54 +1807,7 @@ const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_UChar_Var(ROT)
         .Load_Char_Var(TurretOffset)
         .Load_With_TdConverter(MissionType, Mission)
-        .Load_With_TdConverter(AnimType, Explosion)
-        .Load_Int_Var(MaxSize);
-
-    auto after = std::format(
-        "  IsCrateGoodie: {},\n"
-        "  IsPieceOfEight: {},\n"
-        "  IsCrusher: {},\n"
-        "  IsToHarvest: {},\n"
-        "  IsChunkyShape: {},\n"
-        "  IsRadarEquipped: {},\n"
-        "  IsFireAnim: {},\n"
-        "  IsLockTurret: {},\n"
-        "  IsTracked: {},\n"
-        "  IsGigundo: {},\n"
-        "  IsCloakable: {},\n"
-        "  IsAnimating: {},\n"
-        "  Type: {},\n"
-        "  Speed: {},\n"
-        "  ROT: {},\n"
-        "  TurretOffset: {},\n"
-        "  Mission: {},\n"
-        "  Explosion: {},\n"
-        "  MaxSize: {}\n",
-        (bool)IsCrateGoodie,
-        (bool)IsPieceOfEight,
-        (bool)IsCrusher,
-        (bool)IsToHarvest,
-        (bool)IsChunkyShape,
-        (bool)IsRadarEquipped,
-        (bool)IsFireAnim,
-        (bool)IsLockTurret,
-        (bool)IsTracked,
-        (bool)IsGigundo,
-        (bool)IsCloakable,
-        (bool)IsAnimating,
-        (unsigned char)Type,
-        (unsigned char)Speed,
-        ROT,
-        TurretOffset,
-        (unsigned char)Mission,
-        (unsigned char)Explosion,
-        MaxSize
-    );
-
-    if (after != before) {
-        // BUG: Why is MaxSize wrong?
-        CNC_LOG_ERROR("PANIK");
-    }
+        .Load_With_TdConverter(AnimType, Explosion);
 
     return ini;
 }

@@ -3696,15 +3696,13 @@ void BuildingTypeClass::One_Time(void)
         /*
         **	Fetch the sidebar cameo image for this building.
         */
-        if (building.IsBuildable) {
-            if (Get_Resolution_Factor()) {
-                sprintf(buffer, "%sICNH", building.IniName);
-            } else {
-                sprintf(buffer, "%sICON", building.IniName);
-            }
-            _makepath(fullname, NULL, NULL, buffer, ".SHP");
-            ((void const*&)building.CameoData) = MFCD::Retrieve(fullname);
+        if (Get_Resolution_Factor()) {
+            sprintf(buffer, "%sICNH", building.IniName);
+        } else {
+            sprintf(buffer, "%sICON", building.IniName);
         }
+        _makepath(fullname, NULL, NULL, buffer, ".SHP");
+        ((void const*&)building.CameoData) = MFCD::Retrieve(fullname);
 
         /*
         **	Fetch the construction animation for this building.
