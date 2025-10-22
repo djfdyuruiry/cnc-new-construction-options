@@ -13,6 +13,7 @@
 #include "../common/lua/rules_luaapi.h"
 #include "../common/lua/system_luaapi.h"
 #include "../common/atomicqueue.h"
+#include "../common/stringutils.h"
 #include "../common/logger.h"
 
 #include "../externs.h"
@@ -23,6 +24,23 @@
 #include "messages_luaapi.h"
 #include "scenario_luaapi.h"
 #include "ui_luaapi.h"
+
+/**
+ * Adapter for Lua API to pull in static RulesClass variable.
+ *
+ * See: concept `RuleSectionsProviderConcept` in @file{common/lua/rules_luaapi.h}
+ */
+class TdRuleSectionsProvider final
+{
+public:
+    static RuleSections& Sections()
+    {
+        return Rule.Sections;
+    }
+
+private:
+    TdRuleSectionsProvider() = delete;
+};
 
 /**
  * Used to manage Lua runtime from game engine
@@ -55,7 +73,7 @@ public:
           std::string faction = player->ActLike == HOUSE_GOOD ? "gdi" : "nod";
           auto house_name = std::string(player->Class->IniName);
 
-          std::transform(scenario_name.begin(), scenario_name.end(), scenario_name.begin(), ::tolower);
+          CncStringUtils::To_Lower(scenario_name);
 
           CNC_LOG_INFO("Initializing Lua for scenario: {}", scenario_name);
 
@@ -67,7 +85,7 @@ public:
           );
 
           // ensure house_name is lowercase for filename use
-          std::transform(house_name.begin(), house_name.end(), house_name.begin(), ::tolower);
+          CncStringUtils::To_Lower(house_name);
 
           Exec_Scenario_Lua_Scripts(ini, scenario, scenario_name, faction, house_name);
 
@@ -150,7 +168,7 @@ public:
      #pragma endregion
 
 private:
-        static inline const auto& Logger = CncLogger::For(ScenarioLua);
+    static inline const auto& Logger = CncLogger::For(ScenarioLua);
      static inline std::optional<UniqueLuaEngine> Engine;
 
      /**
@@ -167,7 +185,7 @@ private:
           Engine = LuaEngineBuilder<UniqueLuaEngine>()
                .With_Api<SystemLuaApi>()
                .With_Api<LoggingLuaApi>()
-               .With_Api<RulesLuaApi<RuleSectionsProvider>>()
+               .With_Api<RulesLuaApi<TdRuleSectionsProvider>>()
                .With_Api<EventLuaApi>()
                .With_Api<GameLuaApi>()
                .With_Api<MessagesLuaApi>()
@@ -208,16 +226,12 @@ private:
           auto ini_script_path = ini.Get_String("Basic", "LuaScript", std::string_view("__NOT_FOUND__"));
 
           if (ini_script_path != "__NOT_FOUND__") {
-               // is not blank
-               if (!std::all_of(
-                    ini_script_path.begin(), ini_script_path.end(), [](unsigned char c){ return std::isspace(c); }
-               )) {
-                    CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", ini_script_path);
+               if (!CncStringUtils::Is_Blank(ini_script_path)) {
+                   CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", ini_script_path);
 
-                    // to lower
-                    std::transform(ini_script_path.begin(), ini_script_path.end(), ini_script_path.begin(), ::tolower);
+                   CncStringUtils::To_Lower(ini_script_path);
 
-                    lua_scripts_to_load.emplace_back(ini_script_path);
+                   lua_scripts_to_load.emplace_back(ini_script_path);
                }
           } else {
                CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");

@@ -159,20 +159,6 @@ extern SpecialClass Special;
 extern RulesClass Rule;
 extern WWKeyboardClass* Keyboard;
 
-/**
- * Adapter for Lua API to pull in static RulesClass variable.
- * 
- * See: concept `RuleSectionsProviderConcept` in @file{common/lua/rules_luaapi.h}
- */
-class RuleSectionsProvider final
-{
-public:
-    static inline RuleSections& Sections = Rule.Sections;
-
-private:
-    RuleSectionsProvider() = delete;
-};
-
 /*
 **	Game object allocation and tracking classes.
 */

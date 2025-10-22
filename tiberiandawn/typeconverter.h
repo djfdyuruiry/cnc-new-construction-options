@@ -780,7 +780,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::optional<T> Try_Parse(std::string str)
     {
-        if (str.empty() || std::all_of(str.begin(), str.end(), [](auto c) { return std::isspace(c); }))
+        if (CncStringUtils::Is_Blank(str))
         {
             return std::nullopt;
         }
@@ -864,8 +864,82 @@ public:
         return std::make_optional(instances);
     }
 
+    void Register_Rule_Type(std::string section, std::string rule, ConverterTypeVariant variant)
+    {
+        RegisteredRuleTypes[std::format("{}:{}", section, rule)] = variant;
+    }
+
+    bool Rule_Requires_Converter(std::string section, std::string rule)
+    {
+        return RegisteredRuleTypes.contains(std::format("{}:{}", section, rule));
+    }
+
+    void Set_Rule_Variant(RuleSection& section, std::string rule, std::string value, const ConverterTypeVariant variant)
+    {
+        if (std::get_if<ArmorType>(&variant)) {
+            section.Set_With_Converter<ArmorType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<MPHType>(&variant)) {
+            section.Set_With_Converter<MPHType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<WeaponType>(&variant)) {
+            section.Set_With_Converter<WeaponType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<HousesType>(&variant)) {
+            section.Set_With_Converter<HousesType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<StructType>(&variant)) {
+            section.Set_With_Converter<StructType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<FactoryType>(&variant)) {
+            section.Set_With_Converter<FactoryType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<DirType>(&variant)) {
+            section.Set_With_Converter<DirType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<BSizeType>(&variant)) {
+            section.Set_With_Converter<BSizeType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<AircraftType>(&variant)) {
+            section.Set_With_Converter<AircraftType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<MissionType>(&variant)) {
+            section.Set_With_Converter<MissionType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<AnimType>(&variant)) {
+            section.Set_With_Converter<AnimType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<InfantryType>(&variant)) {
+            section.Set_With_Converter<InfantryType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<UnitType>(&variant)) {
+            section.Set_With_Converter<UnitType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<SpeedType>(&variant)) {
+            section.Set_With_Converter<SpeedType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<BulletType>(&variant)) {
+            section.Set_With_Converter<BulletType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<WarheadType>(&variant)) {
+            section.Set_With_Converter<WarheadType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<VocType>(&variant)) {
+            section.Set_With_Converter<VocType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<PlayerColorType>(&variant)) {
+            section.Set_With_Converter<PlayerColorType, TdTypeConverter>(rule, value);
+        }
+        else if (std::get_if<HouseColorType>(&variant)) {
+            section.Set_With_Converter<HouseColorType, TdTypeConverter>(rule, value);
+        } else {
+            throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
+        }
+    }
+
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
+    static inline std::map<std::string, ConverterTypeVariant> RegisteredRuleTypes;
 
     TdTypeConverter() = delete;
 

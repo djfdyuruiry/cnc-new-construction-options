@@ -51,7 +51,11 @@ concept LuaPushType = (
     std::is_same_v<T, double> ||
     std::is_same_v<T, float> ||
     std::is_same_v<T, int> ||
-    std::is_same_v<T, bool>
+    std::is_same_v<T, uint> ||
+    std::is_same_v<T, bool> ||
+    std::is_same_v<T, char> ||
+    std::is_same_v<T, uchar> ||
+    std::is_same_v<T, ushort>
 );
 
 /**
@@ -629,9 +633,15 @@ public:
             } else if constexpr (std::is_same_v<T, double>) {
                 lua_pushnumber(L, value);
             } else if constexpr (std::is_same_v<T, float>) {
-                lua_pushnumber(L, (double)value);
-            } else if constexpr (std::is_same_v<T, int>) {
-                lua_pushinteger(L, value);
+                lua_pushnumber(L, static_cast<double>(value));
+            } else if constexpr (
+                std::is_same_v<T, int> ||
+                std::is_same_v<T, uint> ||
+                std::is_same_v<T, char> ||
+                std::is_same_v<T, uchar>||
+                std::is_same_v<T, ushort>
+            ) {
+                lua_pushinteger(L, static_cast<lua_Integer>(value));
             } else if constexpr (std::is_same_v<T, bool>) {
                 lua_pushboolean(L, value);
             }

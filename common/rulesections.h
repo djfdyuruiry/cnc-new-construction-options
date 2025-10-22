@@ -45,10 +45,10 @@ concept RuleValueVariantCompatible = (
     std::is_same_v<T, bool> ||
     std::is_same_v<T, float> ||
     std::is_same_v<T, ushort> ||
-    std::is_same_v<T, std::string> ||
     std::is_same_v<T, uint> ||
     std::is_same_v<T, char>||
-    std::is_same_v<T, uchar>
+    std::is_same_v<T, uchar> ||
+    std::is_same_v<T, std::string>
 );
 
 template<typename C, typename T>
@@ -272,13 +272,10 @@ public:
                 ParseFloat
             );
         } else if constexpr (std::is_same_v<T, ushort>) {
-            auto default_value_str = std::format("{}", default_value);
-
-            Safe_Parse<ushort, ulong>(
+            Safe_Parse_Int<ushort>(
                 name,
-                ini.Get_String(SectionName.data(), name.data(), default_value_str),
+                ini.Get_Int(SectionName.data(), name.data(), default_value),
                 value,
-                ParseULong,
                 ValidateUShort
             );
         } else if constexpr (std::is_same_v<T, uint>) {
@@ -536,7 +533,7 @@ private:
     static inline const std::function<float(const std::string&)> ParseFloat = [](const auto& s) { return std::stof(s); };
     static inline const std::function<ulong(const std::string&)> ParseULong = [](const auto& s) { return std::stoul(s); };
 
-    static inline const std::function<bool(ulong)> ValidateUShort = [](auto v) { return v <= std::numeric_limits<ushort>::max(); };
+    static inline const std::function<bool(int)> ValidateUShort = [](auto v) { return v <= std::numeric_limits<ushort>::max(); };
     static inline const std::function<bool(ulong)> ValidateUInt = [](auto v) { return v <= std::numeric_limits<uint>::max(); };
     static inline const std::function<bool(int)> ValidateChar = [](auto v) { return v >= std::numeric_limits<char>::min() && v <= std::numeric_limits<char>::max(); };
     static inline const std::function<bool(int)> ValidateUChar = [](auto v) { return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max(); };

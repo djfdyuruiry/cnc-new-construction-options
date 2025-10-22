@@ -7,6 +7,7 @@
 #include "luaapi.h"
 #include "luaarguments.h"
 #include "luatablebuilder.h"
+#include "rulesluaadapter.h"
 
 /**
  * Describes a static class which has public static member
@@ -16,7 +17,7 @@
 template <typename T>
 concept RuleSectionsProviderConcept = requires()
 {
-    { T::Sections } -> std::same_as<RuleSections&>;
+    { T::Sections() } -> std::same_as<RuleSections&>;
 };
 
 // TODO: Update to support new rule variant types
@@ -29,13 +30,13 @@ class RulesLuaApi : public LuaApi
 public:
     RulesLuaApi() : LuaApi("Rules", true) {}
 
-    virtual void Register_Functions(LuaEngine& engine) const override
+    void Register_Functions(LuaEngine& engine) const override
     {
         With_Api_Namespace(engine, [](auto& n) {
             n.addCFunction("getSectionNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 
-                auto section_names = R::Sections.Section_Names();
+                auto section_names = R::Sections().Section_Names();
                 auto table_builder = LuaTableBuilder(engine);
 
                 for (const auto& name : section_names) {
@@ -53,7 +54,7 @@ public:
 
                 auto section = arguments.Read_First<std::string>().Unpack();
 
-                if (!R::Sections.Has_Section(section)) {
+                if (!R::Sections().Has_Section(section)) {
                     engine.Raise_Error(
                         std::format(
                             "Rule section does not exist: {}",
@@ -62,7 +63,7 @@ public:
                     );
                 }
 
-                auto rule_names = R::Sections[section].Rule_Names();
+                auto rule_names = R::Sections()[section].Rule_Names();
                 auto table_builder = LuaTableBuilder(engine);
 
                 for (const auto& name : rule_names) {
@@ -82,24 +83,7 @@ public:
                 auto section = arguments.Read_First<std::string>().Unpack();
                 auto key = arguments.Read_Next<std::string>().Unpack();
 
-                Assert_Rule_Exists<R>(engine, section, key);
-
-                // unpack variant to call corresponding engine Push_Value template
-                const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
-
-                if (const auto value = std::get_if<int>(&rule_value_variant)) {
-                    engine.Push_Value(
-                        LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
-                    );
-                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
-                    engine.Push_Value(
-                        LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
-                    );
-                }else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
-                    engine.Push_Value(
-                        LuaEngine::LuaTypeMap[LUA_TBOOLEAN].value()
-                    );
-                }
+                RulesLuaAdapter::Push_Rule_Type(engine, R::Sections(), section, key);
 
                 return 1;
             }).addCFunction("getRuleValue", [](auto L) {
@@ -114,18 +98,7 @@ public:
                 auto section = arguments.Read_First<std::string>().Unpack();
                 auto key = arguments.Read_Next<std::string>().Unpack();
 
-                Assert_Rule_Exists<R>(engine, section, key);
-
-                // unpack variant to call corresponding engine Push_Value template
-                const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
-
-                if (const auto value = std::get_if<int>(&rule_value_variant)) {
-                    engine.Push_Value(*value);
-                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
-                    engine.Push_Value(*value);
-                } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
-                    engine.Push_Value(*value);
-                }
+                RulesLuaAdapter::Push_Rule_Value(engine, R::Sections(), section, key);
 
                 return 1;
             }).addCFunction("setRuleValue", [](auto L) {
@@ -141,61 +114,7 @@ public:
                 auto section = arguments.Read_First<std::string>().Unpack();
                 auto key = arguments.Read_Next<std::string>().Unpack();
 
-                Assert_Rule_Exists<R>(engine, section, key);
-
-                // unpack variant to call corresponding section Set template
-                const auto& rule_value_variant = R::Sections[section].Get_Variant(key);
-                auto rule_type_error = true;
-                auto expected_type = LUA_TNONE;
-
-                if (const auto value = std::get_if<int>(&rule_value_variant)) {
-                    expected_type = LUA_TNUMBER;
-    
-                    if (arguments.template Next_Read_Is<int>()) {
-                        R::Sections[section].Set(
-                            key,
-                            arguments.Read_Next<int>().Unpack()
-                        );
-                        rule_type_error = false;
-                    } 
-                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
-                    expected_type = LUA_TNUMBER;
-
-                    if (arguments.template Next_Read_Is<float>()) {
-                        R::Sections[section].Set(
-                            key,
-                            arguments.Read_Next<float>().Unpack()
-                        );
-                        rule_type_error = false;
-                    }
-                } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
-                    expected_type = LUA_TBOOLEAN;
-
-                    if (arguments.template Next_Read_Is<bool>()) {
-                        R::Sections[section].Set(
-                            key,
-                            arguments.Read_Next<bool>().Unpack()
-                        );
-                        rule_type_error = false;
-                    }
-                }
-
-                if (rule_type_error) {
-                    engine.Raise_Error_Format(
-                        "Incorrect type passed for rule value, expected '{}' but got: {}",
-                        LuaEngine::LuaTypeMap[expected_type].value(),
-                        arguments.Get_Next_Read_Type()
-                    );
-                }
-
-                // return old rule value
-                if (const auto value = std::get_if<int>(&rule_value_variant)) {
-                    engine.Push_Value(*value);
-                } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
-                    engine.Push_Value(*value);
-                } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
-                    engine.Push_Value(*value);
-                }
+                RulesLuaAdapter::Set_Rule_Value(engine, arguments, R::Sections(), section, key);
 
                 return 1;
             });
@@ -203,26 +122,7 @@ public:
     }
 
 protected:
-    template<RuleSectionsProviderConcept SR>
-    static void Assert_Rule_Exists(const LuaEngine& engine, const std::string& section, const std::string& key)
-    {
-        if (!SR::Sections.Has_Section(section)) {
-            engine.Raise_Error_Format(
-                "Rule section does not exist: {}", 
-                section
-            );
-        }
-
-        if (!SR::Sections[section].Has_Key(key)) {
-            engine.Raise_Error_Format(
-                "Rule key does not exist in section '{}': {}", 
-                section,
-                key
-            );
-        }
-    }
-
-    virtual const char* Get_Cpp_Source() const override
+    const char* Get_Cpp_Source() const override
     {
         return __FILE__;
     }

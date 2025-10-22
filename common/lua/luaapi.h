@@ -41,6 +41,8 @@ public:
     LuaApi(const std::string_view name, const bool has_native_module, const std::vector<std::filesystem::path> scripts)
         : Name(name), Scripts(scripts), Has_Native_Module(has_native_module) {}
 
+    virtual ~LuaApi() = default;
+
     void With_Api_Namespace(LuaEngine& engine, std::function<void(luabridge::Namespace&)> action) const
     {
         engine.With_Api_Namespace(Name, action);
