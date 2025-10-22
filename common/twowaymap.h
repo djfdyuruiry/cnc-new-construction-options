@@ -59,4 +59,28 @@ public:
         auto it = BackwardMap.find(key);
         return (it != BackwardMap.end()) ? std::make_optional(it->second) : std::nullopt;
     }
+
+    std::vector<A> Get_Forward_Keys() const
+    {
+        std::vector<A> keys;
+        keys.reserve(ForwardMap.size());
+
+        for (const auto& key : ForwardMap | std::views::keys) {
+            keys.emplace_back(key);
+        }
+
+        return keys;
+    }
+
+    std::vector<B> Get_Backward_Keys() const
+    {
+        std::vector<B> keys;
+        keys.reserve(BackwardMap.size());
+
+        for (const auto& key : BackwardMap | std::views::keys) {
+            keys.emplace_back(key);
+        }
+
+        return keys;
+    }
 };

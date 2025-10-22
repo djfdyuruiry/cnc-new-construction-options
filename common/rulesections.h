@@ -31,6 +31,7 @@
 #include "fixed.h"
 #include "ini.h"
 #include "logger.h"
+#include "stringutils.h"
 
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -52,8 +53,10 @@ concept RuleValueVariantCompatible = (
 
 template<typename C, typename T>
 concept TypeConverter = requires(std::string str, const std::string& str_ref, const std::vector<T>& instances, const char c, T instance) {
+    { C::template Get_Valid_Strings<T>() } -> std::same_as<std::vector<std::string>>;
+    { C::template Get_Valid_Instances<T>() } -> std::same_as<std::vector<T>>;
     { C::template Try_Parse<T>(str) } -> std::same_as<std::optional<T>>;
-    { C::template Try_Parse_Csv<T>(str_ref, c) } -> std::same_as<std::vector<T>>;
+    { C::template Try_Parse_Csv<T>(str_ref, c) } -> std::same_as<std::optional<std::vector<T>>>;
     { C::template To_String<T>(instance) } -> std::same_as<std::string>;
     { C::template To_Csv_String<T>(instances) }  -> std::same_as<std::string>;
 };
@@ -95,15 +98,39 @@ public:
         } else if (const auto value = std::get_if<float>(&value_variant)) {
             return "float";
         } else if (const auto value = std::get_if<ushort>(&value_variant)) {
-            return "ushort";
+            return "unsigned short";
         } else if (const auto value = std::get_if<std::string>(&value_variant)) {
             return "string";
         } else if (const auto value = std::get_if<uint>(&value_variant)) {
-            return "uint";
+            return "unsigned int";
         } else if (const auto value = std::get_if<char>(&value_variant)) {
             return "char";
         } else if (const auto value = std::get_if<uchar>(&value_variant)) {
-            return "uchar";
+            return "unsigned char";
+        }
+
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
+    }
+
+
+    static std::string Get_Variant_Values(RuleValueVariant value_variant)
+    {
+        if (const auto value = std::get_if<int>(&value_variant)) {
+            return std::format("{}-{}", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+            return "true/false";
+        } else if (const auto value = std::get_if<float>(&value_variant)) {
+            return std::format("{}-{}", std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+            return std::format("{}-{}", std::numeric_limits<ushort>::min(), std::numeric_limits<ushort>::max());
+        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+            return "anything";
+        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+            return std::format("{}-{}", std::numeric_limits<uint>::min(), std::numeric_limits<uint>::max());
+        } else if (const auto value = std::get_if<char>(&value_variant)) {
+            return std::format("{}-{}", std::numeric_limits<char>::min(), std::numeric_limits<char>::max());
+        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
+            return std::format("{}-{}", std::numeric_limits<uchar>::min(), std::numeric_limits<uchar>::max());
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -205,7 +232,7 @@ public:
         INIClass& ini,
         std::string_view name,
         T default_value,
-        const std::optional<std::function<bool(RuleValueVariant)>>& str_validator = std::nullopt
+        const std::optional<std::function<bool(std::string)>>& str_validator = std::nullopt
     )
     {
         auto sectionIsInIni = ini.Section_Present(SectionName.data());
@@ -238,49 +265,45 @@ public:
         } else if constexpr (std::is_same_v<T, float>) {
             auto default_value_str = std::format("{}", default_value);
 
-            Safe_Parse<T>(
+            Safe_Parse<float>(
                 name,
                 ini.Get_String(SectionName.data(), name.data(), default_value_str),
                 value,
-                [](const auto& s) { return std::stof(s); }
+                ParseFloat
             );
         } else if constexpr (std::is_same_v<T, ushort>) {
             auto default_value_str = std::format("{}", default_value);
 
-            Safe_Parse<T, ulong>(
+            Safe_Parse<ushort, ulong>(
                 name,
                 ini.Get_String(SectionName.data(), name.data(), default_value_str),
                 value,
-                [](const auto& s) { return std::stoul(s); },
-                [](auto v) { return v <= std::numeric_limits<ushort>::max(); }
+                ParseULong,
+                ValidateUShort
             );
         } else if constexpr (std::is_same_v<T, uint>) {
             auto default_value_str = std::format("{}", default_value);
 
-            Safe_Parse<T, ulong>(
+            Safe_Parse<uint, ulong>(
                 name,
                 ini.Get_String(SectionName.data(), name.data(), default_value_str),
                 value,
-                [](const std::string& s) { return (ulong)std::stoul(s); },
-                [](auto v) { return v <= std::numeric_limits<uint>::max(); }
+                ParseULong,
+                ValidateUInt
             );
         } else if constexpr (std::is_same_v<T, char>) {
-            Safe_Parse_Int<T>(
+            Safe_Parse_Int<char>(
                 name,
                 ini.Get_Int(SectionName.data(), name.data(), default_value),
                 value,
-                [](auto v) {
-                    return v >= std::numeric_limits<char>::min() || v <= std::numeric_limits<char>::max();
-                }
+                ValidateChar
             );
         } else if constexpr (std::is_same_v<T, uchar>) {
-            Safe_Parse_Int<T>(
+            Safe_Parse_Int<uchar>(
                 name,
                 ini.Get_Int(SectionName.data(), name.data(), default_value),
                 value,
-                [](auto v) {
-                    return v >= std::numeric_limits<uchar>::min() || v <= std::numeric_limits<uchar>::max();
-                }
+                ValidateUChar
             );
         } else if constexpr (std::is_same_v<T, std::string>) {
             auto str_value = ini.Get_String(SectionName.data(), name.data(), default_value);
@@ -289,18 +312,9 @@ public:
             // forgive incorrect casing in rule values
             std::transform(str_value.begin(), str_value.end(), str_value.begin(), ::toupper);
 
-            if (str_validator.has_value() && ! str_validator.value()(value)) {
-                CNC_LOGGER_ERROR(
-                    "Invalid INI value '{}' for rule: [{}] -> {}",
-                    str_value,
-                    SectionName,
-                    name
-                );
-
-                return *this;
+            if (str_validator.has_value() && str_validator.value()(str_value)) {
+                value = str_value;
             }
-
-            value = str_value;
         }
 
         CNC_LOGGER_DEBUG(
@@ -388,7 +402,7 @@ public:
         auto value_optional = Try_Get<T>(name);
 
         if (!value_optional.has_value()) {
-            CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+            CNC_LOGGER_FATAL("Game requested a rule that has not been loaded: [{}] -> {} | Rules cache didn't load correctly (Rule loading code bug?)", SectionName, name);
         }
 
         return value_optional.value();
@@ -397,19 +411,39 @@ public:
     template<class T, TypeConverter<T> C>
     T Get_With_Converter(std::string_view name) const
     {
-        auto str_value = Get<std::string>(name);
+        auto rules_value = Get<std::string>(name);
+        auto converted_value = C::template Try_Parse<T>(rules_value);
 
-        // we validate all INI rules and refuse to set invalid rules at runtime, so stored
-        // value is always parsable
-        C::template Try_Parse<T>(str_value).value();
+        if (!converted_value.has_value()) {
+            CNC_LOGGER_FATAL(
+                "Value '{}' stored for rule '[{}] -> {}' was unable to be converted back to original type: {}. Rules cache has been corrupted, as an invalid value was somehow loaded (validation code bug?)",
+                rules_value,
+                SectionName,
+                name,
+                typeid(T).name()
+            );
+        }
+
+        return converted_value.value();
     }
 
     template<class T, TypeConverter<T> C>
     std::vector<T> Get_With_Csv_Converter(std::string_view name) const
     {
-        return C::template Try_Parse_Csv<T>(
-            Get<std::string>(name)
-        );
+        auto rules_value = Get<std::string>(name);
+        auto converted_value = C::template Try_Parse_Csv<T>(rules_value);
+
+        if (!converted_value.has_value()) {
+            CNC_LOGGER_FATAL(
+                "Value '{}' stored for rule '[{}] -> {}' was unable to be converted back to original type: list of {}. Rules cache has been corrupted, as an invalid value was somehow loaded (validation code bug?)",
+                rules_value,
+                SectionName,
+                name,
+                typeid(T).name()
+            );
+        }
+
+        return converted_value.value();
     }
 
     RuleSection& Set(std::string_view name, RuleValueVariant value)
@@ -444,37 +478,71 @@ public:
     }
 
     template<class T, TypeConverter<T> C>
-    RuleSection& Set_With_Converter(std::string_view name, T instance) const
+    RuleSection& Set_With_Converter(std::string_view name, T instance)
     {
         Set(name, C::To_String(instance));
     }
 
     template<class T, TypeConverter<T> C>
-    RuleSection& Set_With_Converter(std::string_view name, std::string instance_string) const
+    RuleSection& Set_With_Converter(std::string_view name, std::string instance_string)
     {
         auto parsed_instance = C::template Try_Parse<T>(instance_string);
 
-        return Set(name, C::To_String(parsed_instance.value()));
+        if (!parsed_instance.has_value()) {
+            auto type_strings = C::template Get_Valid_Strings<T>();
+
+            throw std::invalid_argument(
+                std::format(
+                    "Failed to parse instance string '{}' as type: {} | valid_values={}",
+                    instance_string,
+                    typeid(T).name(),
+                    CncStringUtils::To_Csv(type_strings)
+                )
+            );
+        }
+
+        return Set(name, instance_string);
     }
 
     template<class T, TypeConverter<T> C>
-    RuleSection& Set_With_Csv_Converter(std::string_view name, const std::vector<T>& instances) const
+    RuleSection& Set_With_Csv_Converter(std::string_view name, const std::vector<T>& instances)
     {
         return Set(name, C::To_Csv_String(instances));
     }
 
     template<class T, TypeConverter<T> C>
-    RuleSection& Set_With_Csv_Converter(std::string_view name, std::string instances_csv) const
+    RuleSection& Set_With_Csv_Converter(std::string_view name, std::string instances_csv)
     {
-        auto parsed_instance = C::template Try_Parse_Csv<T>(instances_csv);
+        auto parsed_instances = C::template Try_Parse_Csv<T>(instances_csv);
 
-        return Set(name, C::To_Csv_String(parsed_instance));
+        if (!parsed_instances.has_value()) {
+            auto type_strings = C::template Get_Valid_Strings<T>();
+
+            throw std::invalid_argument(
+                std::format(
+                    "Failed to parse instance string '{}' as csv list of type: {} | valid_values={}",
+                    instances_csv,
+                    typeid(T).name(),
+                    CncStringUtils::To_Csv(type_strings)
+                )
+            );
+        }
+
+        return Set(name, instances_csv);
     }
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 
+    static inline const std::function<float(const std::string&)> ParseFloat = [](const auto& s) { return std::stof(s); };
+    static inline const std::function<ulong(const std::string&)> ParseULong = [](const auto& s) { return std::stoul(s); };
+
+    static inline const std::function<bool(ulong)> ValidateUShort = [](auto v) { return v <= std::numeric_limits<ushort>::max(); };
+    static inline const std::function<bool(ulong)> ValidateUInt = [](auto v) { return v <= std::numeric_limits<uint>::max(); };
+    static inline const std::function<bool(int)> ValidateChar = [](auto v) { return v >= std::numeric_limits<char>::min() && v <= std::numeric_limits<char>::max(); };
+    static inline const std::function<bool(int)> ValidateUChar = [](auto v) { return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max(); };
+
     std::map<std::string, RuleValueVariant> Rules;
-    std::function<void(void)> OnRulesChanged;
+    std::function<void()> OnRulesChanged;
 
     template<class T, class U = T, class V = std::string>
     void Safe_Parse(
@@ -482,11 +550,11 @@ private:
         const V& source,
         T& target,
         std::function<U(const V&)> parse,
-        std::function<bool(U)> validate = [](auto _) { return true; }
+        std::function<bool(U)> validate = [](U _) { return true; }
     )
     {
-        std::optional<std::string> ex_type;
         std::optional<U> parsed_value;
+        std::string err;
 
         try {
             U result = parse(source);
@@ -496,14 +564,24 @@ private:
                 target = static_cast<T>(result);
                 return;
             }
+
+            err = "validation_failure";
         } catch (...) {
-            ex_type = std::current_exception().__cxa_exception_type()->name();
+            err = std::current_exception().__cxa_exception_type()->name();
         }
 
-        auto parse_msg = parsed_value.has_value() ? std::format(" parsed_value={}", parsed_value.value()) : "";
-        auto ex_msg = ex_type.has_value() ? std::format(" parsed_error={}", ex_type.value()) : "";
+        auto parse_msg = parsed_value.has_value() ? std::format(" | parsed_value={}", parsed_value.value()) : "";
 
-        CNC_LOGGER_ERROR("Invalid INI value '{}' for rule: [{}] -> {}{}{}", source, SectionName, name, parse_msg, ex_msg);
+        CNC_LOGGER_ERROR(
+            "Invalid INI value '{}' for rule: [{}] -> {} | rule_type={} | valid_values={} | parse_error={}{}",
+            source,
+            SectionName,
+            name,
+            Get_Variant_Type(target),
+            Get_Variant_Values(target),
+            err,
+            parse_msg
+        );
     }
 
     template<class T>
@@ -511,14 +589,14 @@ private:
         std::string_view name,
         const int& source,
         T& target,
-        std::function<bool(T)> validate
+        std::function<bool(int)> validate
     )
     {
         Safe_Parse<T, int, int>(
             name,
             source,
             target,
-            [](const auto& v) { return v; },
+            [](const int& v) { return v; },
             validate
         );
     }
@@ -540,7 +618,29 @@ public:
     template<class T, TypeConverter<T> C>
     const IniRuleContext& Load_With_Converter(std::string_view name, T default_value) const
     {
-        Section.Load_From_Ini<std::string>(Context, name, C::To_String(default_value));
+        Section.Load_From_Ini<std::string>(
+            Context,
+            name,
+            C::To_String(default_value),
+            [&](auto s) {
+                auto is_valid = C::template Try_Parse<T>(s).has_value();
+
+                if (!is_valid) {
+                    auto type_strings = C::template Get_Valid_Strings<T>();
+
+                    CNC_LOGGER_ERROR(
+                         "Invalid INI value '{}' for rule: [{}] -> {} | rule_type={} | valid_values={} | parse_error=invalid_argument",
+                         s,
+                         Section.SectionName,
+                         name,
+                         typeid(T).name(),
+                         CncStringUtils::To_Csv(type_strings)
+                    );
+                }
+
+                return is_valid;
+            }
+        );
 
         return *this;
     }
@@ -548,7 +648,26 @@ public:
     template<class T, TypeConverter<T> C>
     const IniRuleContext& Load_With_Csv_Converter(std::string_view name, const std::vector<T>& default_values) const
     {
-        Section.Load_From_Ini<std::string>(Context, name, C::To_Csv_String(default_values));
+        Section.Load_From_Ini<std::string>(
+            Context,
+            name,
+            C::To_Csv_String(default_values),
+            [&](auto csv) {
+                auto is_valid = C::template Try_Parse_Csv<T>(csv).has_value();
+
+                if (!is_valid) {
+                    CNC_LOGGER_ERROR(
+                         "Invalid INI value '{}' for rule: [{}] -> {} | type=list of {}",
+                         csv,
+                         Section.SectionName,
+                         name,
+                         typeid(T).name()
+                    );
+                }
+
+                return is_valid;
+            }
+        );
 
         return *this;
     }

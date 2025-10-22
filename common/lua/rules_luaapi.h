@@ -19,6 +19,7 @@ concept RuleSectionsProviderConcept = requires()
     { T::Sections } -> std::same_as<RuleSections&>;
 };
 
+// TODO: Update to support new rule variant types
 /**
  * Provides a Lua interface for RuleSections.
  */

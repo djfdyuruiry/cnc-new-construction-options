@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include "common/twowaymap.h"
+#include "common/stringutils.h"
 
 #include "defines.h"
 
@@ -589,6 +590,100 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
+    static std::vector<std::string> Get_Valid_Strings()
+    {
+        if constexpr (std::is_same_v<T, ArmorType>) {
+            return Armor_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, MPHType>) {
+            return Mph_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, WeaponType>) {
+            return Weapon_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, HousesType>) {
+            return House_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, StructType>) {
+            return Struct_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, FactoryType>) {
+            return Factory_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, DirType>) {
+            return Dir_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, BSizeType>) {
+            return BSize_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, AircraftType>) {
+            return Aircraft_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, MissionType>) {
+            return Mission_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, AnimType>) {
+            return Anim_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, InfantryType>) {
+            return Infantry_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, UnitType>) {
+            return Unit_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, SpeedType>) {
+            return Speed_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, BulletType>) {
+            return Bullet_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, WarheadType>) {
+            return Warhead_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, VocType>) {
+            return Voc_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
+            return Player_Color_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, HouseColorType>) {
+            return House_Color_Types.Get_Backward_Keys();
+        }
+
+        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static std::vector<T> Get_Valid_Instances()
+    {
+        if constexpr (std::is_same_v<T, ArmorType>) {
+            return Armor_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, MPHType>) {
+            return Mph_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, WeaponType>) {
+            return Weapon_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, HousesType>) {
+            return House_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, StructType>) {
+            return Struct_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, FactoryType>) {
+            return Factory_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, DirType>) {
+            return Dir_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, BSizeType>) {
+            return BSize_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, AircraftType>) {
+            return Aircraft_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, MissionType>) {
+            return Mission_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, AnimType>) {
+            return Anim_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, InfantryType>) {
+            return Infantry_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, UnitType>) {
+            return Unit_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, SpeedType>) {
+            return Speed_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, BulletType>) {
+            return Bullet_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, WarheadType>) {
+            return Warhead_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, VocType>) {
+            return Voc_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
+            return Player_Color_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, HouseColorType>) {
+            return House_Color_Types.Get_Forward_Keys();
+        }
+
+        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
     static std::string To_String(T instance)
     {
         if constexpr (std::is_same_v<T, ArmorType>) {
@@ -676,19 +771,9 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string To_Csv_String(const std::vector<T>& instances)
     {
-        std::ostringstream oss;
-        auto first = true;
+        std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
 
-        for (const auto& instance : instances) {
-            if (!first) {
-                oss << ",";
-            }
-
-            oss << To_String<T>(instance);
-            first = false;
-        }
-
-        return oss.str();
+        return CncStringUtils::To_Csv(instances, to_string);
     }
 
     template<class T>
@@ -745,29 +830,43 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static std::vector<T> Try_Parse_Csv(const std::string& csv_str, const char delimiter = ',')
+    static std::optional<std::vector<T>> Try_Parse_Csv(const std::string& csv_str, const char delimiter = ',')
     {
         std::vector<T> instances;
         size_t start = 0;
         size_t end = csv_str.find(delimiter);
 
         while (end != std::string::npos) {
-            if (auto instance = Try_Parse<T>(csv_str.substr(start, end - start)); instance.has_value()) {
-                instances.push_back(instance.value());
+            auto entry = csv_str.substr(start, end - start);
+            auto instance = Try_Parse<T>(entry);
+
+            if (!instance.has_value()) {
+                CNC_LOGGER_ERROR("Value '{}' could not be parsed as type: {}", entry, typeid(T).name());
+                return std::nullopt;
             }
+
+            instances.push_back(instance.value());
 
             start = end + 1;
             end = csv_str.find(delimiter, start);
         }
 
-        if (auto instance = Try_Parse<T>(csv_str.substr(start)); instance.has_value()) {
-            instances.push_back(instance.value());
+        auto entry = csv_str.substr(start);
+        auto instance = Try_Parse<T>(entry);
+
+        if (!instance.has_value()) {
+            CNC_LOGGER_ERROR("Value '{}' could not be parsed as type: {}", entry, typeid(T).name());
+            return std::nullopt;
         }
 
-        return instances;
+        instances.push_back(instance.value());
+
+        return std::make_optional(instances);
     }
 
 private:
+    static inline const auto& Logger = CncLogger::For(TdTypeConverter);
+
     TdTypeConverter() = delete;
 
 };
