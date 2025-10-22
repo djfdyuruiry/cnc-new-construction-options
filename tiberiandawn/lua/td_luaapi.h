@@ -9,7 +9,7 @@
 class TiberianDawnLuaApi : public LuaApi
 {
 public:
-    inline static const std::filesystem::path Td_Directory = "TiberianDawn";
+    static inline const std::filesystem::path Td_Directory = "TiberianDawn";
 
     TiberianDawnLuaApi(const std::string_view name) : LuaApi(name) {}
 

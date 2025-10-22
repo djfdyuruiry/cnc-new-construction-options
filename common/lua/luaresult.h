@@ -17,7 +17,7 @@
 class LuaResult
 {
 public:
-    inline static const TwoWayMap<int, std::string_view> LuaErrorMap {
+    static inline const TwoWayMap<int, std::string_view> LuaErrorMap {
         { LUA_OK, "OK" },
         { LUA_ERRRUN, "Runtime" },
         { LUA_ERRSYNTAX, "Syntax" },

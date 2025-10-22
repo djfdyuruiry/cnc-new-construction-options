@@ -244,7 +244,7 @@ public:
     virtual void Close() = 0;
 
 protected:
-    inline static const CncLogger Logger = CncLogger("Find_File_Data");
+    static inline const auto& Logger = CncLogger::For(Find_File_Data);
 };
 
 extern bool Find_First(const char* fname, unsigned int mode, Find_File_Data** ffblk);

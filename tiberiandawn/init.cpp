@@ -104,6 +104,23 @@ extern bool Client_Remote_Connect(void);
  *=============================================================================================*/
 bool Init_Game(int, char*[])
 {
+    /**
+     * Show a popup before bombing out on fatal error.
+     */
+    CncLogger::OnFatalError = [](const auto& err) {
+        Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
+        Show_Mouse();
+        WWMessageBox().Process(err.c_str());
+
+        // If a debugger is attached, trigger a breakpoint
+        TRIGGER_DEBUGGER;
+
+        Prog_End(err.c_str());
+        if (!RunningAsDLL) {
+            exit(1);
+        }
+    };
+
     void const* temp_mouse_shapes;
 
     CCDebugString("C&C95 - About to load reslib.dll\n");

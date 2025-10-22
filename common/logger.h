@@ -20,6 +20,17 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
+#ifdef _WIN32
+    #include <intrin.h>
+    #define TRIGGER_DEBUGGER __debugbreak()
+#elif defined(__GNUC__) && !defined(__clang__)
+    #define TRIGGER_DEBUGGER __builtin_trap()
+#elif defined(__GNUC__) && defined(__clang__)
+    #define TRIGGER_DEBUGGER __builtin_debugtrap()
+#else
+    #define TRIGGER_DEBUGGER assert(false)
+#endif
+
 /**
  * @brief Logger class using spdlog. For memory and thread safety, only assign instances
  *        of this class using static storage specifiers; use a static member or variable.
@@ -27,8 +38,12 @@
 class CncLogger
 {
 public:
-    inline static const std::string DefaultLoggerName = std::string("nco");
-    
+    static inline const auto DefaultLoggerName = std::string("nco");
+    static inline std::function<void(std::string)> OnFatalError = [](const auto& e) {
+        TRIGGER_DEBUGGER;
+        throw std::runtime_error(e);
+    };
+
     static const CncLogger& Default()
     {
         const static auto default_logger = CncLogger(DefaultLoggerName);
@@ -36,9 +51,22 @@ public:
         return default_logger;
     }
 
-    CncLogger(const std::string name) : Name(name)
+    static const CncLogger With_Name(const std::string name)
     {
-        Register(name);
+        return CncLogger(name);
+    }
+
+    template<class... Args>
+    static void On_Fatal_Error(std::format_string<Args...> fmt, Args&&... args)
+    {
+        OnFatalError(
+            std::format(fmt, std::forward<Args>(args)...)
+        );
+    }
+
+    static void On_Fatal_Error(std::string errorMessage)
+    {
+        OnFatalError(std::move(errorMessage));
     }
 
     // TODO: Add PII level/log method to require a special flag or runtime arg to force print them (paths containing usernames etc.)
@@ -54,9 +82,11 @@ public:
     }
 
 private:
-    inline static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> StdoutSink;
-    inline static std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> RotatingSink;
-    inline static std::vector<spdlog::sink_ptr> Sinks;
+    static inline std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> StdoutSink;
+    static inline std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> RotatingSink;
+    static inline std::vector<spdlog::sink_ptr> Sinks;
+
+    const std::string Name;
 
     static bool Load_Env_Log_Levels()
     {
@@ -64,9 +94,7 @@ private:
         static auto log_env_defined = false;
 
         std::call_once(onceFlag, []() {
-            auto log_env_var = std::getenv("NCO_LOG_LEVEL");
-
-            log_env_defined = log_env_var != nullptr;
+            log_env_defined = std::getenv("NCO_LOG_LEVEL") != nullptr;
         });
 
         if (log_env_defined) {
@@ -134,8 +162,14 @@ private:
         Load_Env_Log_Levels();
     }
 
-    const std::string Name;
+    CncLogger(const std::string name) : Name(name)
+    {
+        Register(name);
+    }
 };
+
+// 'virtual' static method to get build a logger with a symbol as it's name (class/function etc.)
+#define For(TYPE_OR_FUNCTION) With_Name(#TYPE_OR_FUNCTION)
 
 // alias SPD macros so we don't pollute code with SPD refs
 #define CNC_LOG(...) CncLogger::Default()()->log(__VA_ARGS__)
@@ -152,21 +186,9 @@ private:
 
 #define CNC_LOG_CRITICAL(...) SPDLOG_LOGGER_CALL(CncLogger::Default()(), spdlog::level::critical, __VA_ARGS__)
 
-#ifdef _WIN32
-    #include <intrin.h>
-    #define TRIGGER_DEBUGGER __debugbreak()
-#elif defined(__GNUC__) && !defined(__clang__)
-    #define TRIGGER_DEBUGGER __builtin_trap()
-#elif defined(__GNUC__) && defined(__clang__)
-    #define TRIGGER_DEBUGGER __builtin_debugtrap()
-#else
-    #define TRIGGER_DEBUGGER assert(false)
-#endif
-
 #define CNC_LOG_FATAL(...) \
     SPDLOG_LOGGER_CALL(CncLogger::Default()(), spdlog::level::critical, __VA_ARGS__); \
-    TRIGGER_DEBUGGER; \
-    exit(1)
+    CncLogger::On_Fatal_Error(__VA_ARGS__)
 
 #define CNC_LOGGER_TRACE(...) SPDLOG_LOGGER_CALL(Logger(), spdlog::level::trace, __VA_ARGS__)
 
@@ -182,5 +204,4 @@ private:
 
 #define CNC_LOGGER_FATAL(...) \
     SPDLOG_LOGGER_CALL(Logger(), spdlog::level::critical, __VA_ARGS__); \
-    TRIGGER_DEBUGGER; \
-    exit(1)
+    CncLogger::On_Fatal_Error(__VA_ARGS__)

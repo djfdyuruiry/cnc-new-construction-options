@@ -13,9 +13,9 @@
 class EventLuaApi : public LuaApi
 {
 public:
-    inline static const std::string EventGlobalTable = "Event";
-    inline static const std::string HandlersTable = "handlers";
-    inline static const std::string HandlersTablePath = std::format("{}.{}", EventGlobalTable, HandlersTable);
+    static inline const std::string EventGlobalTable = "Event";
+    static inline const std::string HandlersTable = "handlers";
+    static inline const std::string HandlersTablePath = std::format("{}.{}", EventGlobalTable, HandlersTable);
 
     template<LuaPushType... Args>
     static LuaResult Execute_Event(

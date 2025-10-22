@@ -150,7 +150,7 @@ public:
      #pragma endregion
 
 private:
-     static inline const CncLogger Logger = CncLogger("ScenarioLua");
+        static inline const auto& Logger = CncLogger::For(ScenarioLua);
      static inline std::optional<UniqueLuaEngine> Engine;
 
      /**

@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include "logger.h"
+
 /**
  * Map that enables mapping between two lists of values, in
  * either direction. Useful for converting between enums/constants
@@ -11,6 +13,8 @@ template<typename A, typename B>
 class TwoWayMap
 {
 private:
+    static inline const auto& Logger = CncLogger::For(TwoWayMap);
+
     std::map<A, B> ForwardMap;
     std::map<B, A> BackwardMap;
 
@@ -21,14 +25,14 @@ public:
         for (const auto& pair : pairs) {
             // Check for duplicate forward mapping
             if (ForwardMap.find(pair.first) != ForwardMap.end()) {
-                throw std::invalid_argument("Duplicate key in forward map");
+                CNC_LOGGER_FATAL("Duplicate key in forward map");
             }
 
             // Check for duplicate backward mapping
             if (BackwardMap.find(pair.second) != BackwardMap.end()) {
-                throw std::invalid_argument("Duplicate key in backward map");
+                CNC_LOGGER_FATAL("Duplicate key in backward map");
             }
-            
+
             ForwardMap[pair.first] = pair.second;
             BackwardMap[pair.second] = pair.first;
         }

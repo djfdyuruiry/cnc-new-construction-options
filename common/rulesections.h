@@ -129,7 +129,7 @@ public:
             return std::format("{}", static_cast<unsigned int>(*value));
         }
 
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code"); 
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
     }
 
     RuleSection(
@@ -199,16 +199,19 @@ public:
         CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
     }
 
-    // TODO: Type Validation (for non trival types, unsigned/float etc.)/value error handling
+    // TODO: Type Validation (for non trivial types, unsigned/float etc.)/value error handling
     template<RuleValueVariantCompatible T>
-    RuleSection& Load_From_Ini(INIClass& ini, std::string_view name, T default_value)
+    RuleSection& Load_From_Ini(
+        INIClass& ini,
+        std::string_view name,
+        T default_value,
+        const std::optional<std::function<bool(RuleValueVariant)>>& str_validator = std::nullopt
+    )
     {
-        T value;
-
         auto sectionIsInIni = ini.Section_Present(SectionName.data());
 
         if (!sectionIsInIni) {
-            CNC_LOGGER_INFO(
+            CNC_LOGGER_DEBUG(
                 "Loading default value '{}' for '{}', rule section not found in provided INI: [{}]",
                 Variant_To_String(default_value),
                 name,
@@ -226,6 +229,8 @@ public:
             Variant_To_String(default_value)
         );
 
+        auto value = default_value;
+
         if constexpr (std::is_same_v<T, int>) {
             value = ini.Get_Int(SectionName.data(), name.data(), default_value);
         } else if constexpr (std::is_same_v<T, bool>) {
@@ -233,73 +238,66 @@ public:
         } else if constexpr (std::is_same_v<T, float>) {
             auto default_value_str = std::format("{}", default_value);
 
-            value = std::stof(
-                ini.Get_String(SectionName.data(), name.data(), default_value_str)
+            Safe_Parse<float>(
+                ini.Get_String(SectionName.data(), name.data(), default_value_str),
+                value,
+                std::stof
             );
         } else if constexpr (std::is_same_v<T, ushort>) {
             auto default_value_str = std::format("{}", default_value);
-            auto ul_value = std::stoul(
-                ini.Get_String(SectionName.data(), name.data(), default_value_str)
+
+            Safe_Parse<ushort, ulong>(
+                ini.Get_String(SectionName.data(), name.data(), default_value_str),
+                value,
+                std::stoul,
+                [](auto v) {
+                    return v >= std::numeric_limits<ushort>::min() || v <= std::numeric_limits<ushort>::max();
+                }
             );
-
-            if (ul_value < std::numeric_limits<ushort>::min() || ul_value > std::numeric_limits<ushort>::max()) {
-                CNC_LOGGER_FATAL(
-                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
-                    ul_value,
-                    0,
-                    std::numeric_limits<ushort>::max()
-                );
-            }
-
-            value = static_cast<ushort>(ul_value);
         } else if constexpr (std::is_same_v<T, uint>) {
             auto default_value_str = std::format("{}", default_value);
-            auto ul_value = std::stoul(
-                ini.Get_String(SectionName.data(), name.data(), default_value_str)
+
+            Safe_Parse<uint, ulong>(
+                ini.Get_String(SectionName.data(), name.data(), default_value_str),
+                value,
+                std::stoul,
+                [](auto v) {
+                    return v >= std::numeric_limits<uint>::min() || v <= std::numeric_limits<uint>::max();
+                }
             );
-
-            if (ul_value < std::numeric_limits<uint>::min() || ul_value > std::numeric_limits<uint>::max()) {
-                CNC_LOGGER_FATAL(
-                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
-                    ul_value,
-                    0,
-                    std::numeric_limits<uint>::max()
-                );
-            }
-
-            value = static_cast<uint>(ul_value);
         } else if constexpr (std::is_same_v<T, char>) {
-            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
-
-            if (ini_value < std::numeric_limits<char>::min() || ini_value > std::numeric_limits<char>::max()) {
-                CNC_LOGGER_FATAL(
-                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
-                    ini_value,
-                    0,
-                    std::numeric_limits<char>::max()
-                );
-            }
-
-            value = static_cast<char>(ini_value);
+            Safe_Parse_Int<char>(
+                ini.Get_Int(SectionName.data(), name.data(), default_value),
+                value,
+                [](auto v) {
+                    return v >= std::numeric_limits<char>::min() || v <= std::numeric_limits<char>::max();
+                }
+            );
         } else if constexpr (std::is_same_v<T, uchar>) {
-            auto ini_value = ini.Get_Int(SectionName.data(), name.data(), default_value);
-
-            if (ini_value < std::numeric_limits<uchar>::min() || ini_value > std::numeric_limits<uchar>::max()) {
-                CNC_LOGGER_FATAL(
-                    "Invalid INI value - number '{}' is out of expected range: {} - {}",
-                    ini_value,
-                    0,
-                    std::numeric_limits<uchar>::max()
-                );
-            }
-
-            value = static_cast<uchar>(ini_value);
+            Safe_Parse_Int<uchar>(
+                ini.Get_Int(SectionName.data(), name.data(), default_value),
+                value,
+                [](auto v) {
+                    return v >= std::numeric_limits<uchar>::min() || v <= std::numeric_limits<uchar>::max();
+                }
+            );
         } else if constexpr (std::is_same_v<T, std::string>) {
             auto str_value = ini.Get_String(SectionName.data(), name.data(), default_value);
 
             // TODO: trim string to forgive spacing around rule string
             // forgive incorrect casing in rule values
             std::transform(str_value.begin(), str_value.end(), str_value.begin(), ::toupper);
+
+            if (str_validator.has_value() && ! str_validator.value()(value)) {
+                CNC_LOGGER_ERROR(
+                    "Invalid INI value '{}' for rule: [{}] -> {}",
+                    str_value,
+                    SectionName,
+                    name
+                );
+
+                return *this;
+            }
 
             value = str_value;
         }
@@ -396,11 +394,13 @@ public:
     }
 
     template<class T, TypeConverter<T> C>
-    std::optional<T> Get_With_Converter(std::string_view name) const
+    T Get_With_Converter(std::string_view name) const
     {
-        return C::template Try_Parse<T>(
-            Get<std::string>(name)
-        );
+        auto str_value = Get<std::string>(name);
+
+        // we validate all INI rules and refuse to set invalid rules at runtime, so stored
+        // value is always parsable
+        C::template Try_Parse<T>(str_value).value();
     }
 
     template<class T, TypeConverter<T> C>
@@ -445,7 +445,15 @@ public:
     template<class T, TypeConverter<T> C>
     RuleSection& Set_With_Converter(std::string_view name, T instance) const
     {
-        return Set(name, C::To_String(instance));
+        Set(name, C::To_String(instance));
+    }
+
+    template<class T, TypeConverter<T> C>
+    RuleSection& Set_With_Converter(std::string_view name, std::string instance_string) const
+    {
+        auto parsed_instance = C::template Try_Parse<T>(instance_string);
+
+        return Set(name, C::To_String(parsed_instance.value()));
     }
 
     template<class T, TypeConverter<T> C>
@@ -454,11 +462,67 @@ public:
         return Set(name, C::To_Csv_String(instances));
     }
 
+    template<class T, TypeConverter<T> C>
+    RuleSection& Set_With_Csv_Converter(std::string_view name, std::string instances_csv) const
+    {
+        auto parsed_instance = C::template Try_Parse_Csv<T>(instances_csv);
+
+        return Set(name, C::To_Csv_String(parsed_instance));
+    }
 private:
-    inline static CncLogger Logger = CncLogger("RuleSection");
+    static inline const auto& Logger = CncLogger::For(RuleSection);
 
     std::map<std::string, RuleValueVariant> Rules;
     std::function<void(void)> OnRulesChanged;
+
+    template<class T, class U = T, class V = std::string>
+    void Safe_Parse(
+        V source,
+        T& target,
+        std::function<U(const V&)> parse,
+        std::function<bool(U)> validate = [](auto _) { return true; }
+    )
+    {
+        std::optional<std::string> ex_type;
+        std::optional<T> parsed_value;
+
+        try {
+            parsed_value = parse(source);
+
+            if (validate(parsed_value)) {
+                target = static_cast<T>(parsed_value);
+                return;
+            }
+        } catch (...) {
+            ex_type = std::current_exception().__cxa_exception_type()->name();
+        }
+
+        CNC_LOGGER_ERROR(
+            std::vformat(
+                "Invalid INI value '{}' for rule: [{}] -> {}{}{}",
+                std::make_format_args(
+                    source,
+                    parsed_value.has_value() ? std::format(" parsed_value={}", parsed_value.value()) : "",
+                    ex_type.has_value() ? std::format(" parsed_error={}", ex_type.value()) : ""
+                )
+           )
+        );
+    }
+
+    template<class T>
+    void Safe_Parse_Int(
+        int source,
+        T& target,
+        std::function<bool(T)> validate
+    )
+    {
+        Safe_Parse<T, T, int>(
+            source,
+            target,
+            [](const auto& v) { return static_cast<T>(v); },
+            validate
+        );
+    }
 };
 
 class IniRuleContext
@@ -513,7 +577,7 @@ public:
     {
         Load_With_Converter<T, C>(name, default_value);
 
-        callback(Section.Get_With_Converter<T, C>(name).value_or(default_value));
+        callback(Section.Get_With_Converter<T, C>(name));
 
         return *this;
     }
@@ -561,7 +625,7 @@ public:
     }
 
 private:
-    inline static CncLogger Logger = CncLogger("IniRuleContext");
+    static inline const auto& Logger = CncLogger::For(IniRuleContext);
 
     RuleSection& Section;
     INIClass& Context;
@@ -640,7 +704,7 @@ public:
     }
 
 private:
-    inline static CncLogger Logger = CncLogger("RuleSections");
+    static inline const auto& Logger = CncLogger::For(RuleSections);
 
     std::map<std::string, std::unique_ptr<RuleSection>> Sections;
     std::optional<std::function<void()>> OnRulesChanged;

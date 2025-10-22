@@ -296,6 +296,8 @@ public:
     void Init_Types(CCINIClass& ini);
 
 private:
+    static inline const auto& Logger = CncLogger::For(RulesClass);
+
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);
     void Difficulty(CCINIClass& ini);

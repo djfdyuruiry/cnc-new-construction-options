@@ -274,7 +274,7 @@ public:
     std::optional<std::string> StringData;
 
 private:
-    inline static const CncLogger& Logger = CncLogger("TriggerClass");
+    static inline const auto& Logger = CncLogger::For(TriggerClass);
 
     /*
     **	Triggers can be referred to by their name, which can be up to 4

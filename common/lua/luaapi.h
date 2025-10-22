@@ -26,8 +26,8 @@
 class LuaApi
 {
 public:
-    inline static const std::filesystem::path Nco_Directory = "nco";
-    inline static const std::string_view Require_Global = "require";
+    static inline const std::filesystem::path Nco_Directory = "nco";
+    static inline const std::string_view Require_Global = "require";
 
     const std::string_view Name;
     const bool Has_Native_Module;
@@ -132,7 +132,7 @@ public:
     }
 
 protected:
-    inline static const CncLogger Logger = CncLogger("LuaApi");
+    static inline const auto& Logger = CncLogger::For(LuaApi);
 
     std::vector<std::filesystem::path> Scripts;
 

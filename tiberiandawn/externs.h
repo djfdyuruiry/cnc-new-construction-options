@@ -167,7 +167,7 @@ extern WWKeyboardClass* Keyboard;
 class RuleSectionsProvider final
 {
 public:
-    inline static RuleSections& Sections = Rule.Sections;
+    static inline RuleSections& Sections = Rule.Sections;
 
 private:
     RuleSectionsProvider() = delete;

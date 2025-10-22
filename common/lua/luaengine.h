@@ -72,8 +72,8 @@ class LuaEngine
 {
 public:
     // all APIs will be available from this global Lua table
-    inline static const std::string_view RootApiNamespace = "__CNC_API";
-    inline static const TwoWayMap<int, std::string_view> LuaTypeMap {
+    static inline const std::string_view RootApiNamespace = "__CNC_API";
+    static inline const TwoWayMap<int, std::string_view> LuaTypeMap {
         {LUA_TNONE, "none"},
         {LUA_TNIL, "nil"},
         {LUA_TBOOLEAN, "boolean"},
@@ -722,7 +722,7 @@ public:
         return luabridge::getGlobalNamespace(Get_State());
     }
 protected:
-    inline static const CncLogger Logger = CncLogger("LuaEngine");
+    static inline const auto& Logger = CncLogger::For(LuaEngine);
 
     std::vector<std::string_view> RegisteredApis;
 

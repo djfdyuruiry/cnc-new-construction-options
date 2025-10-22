@@ -92,8 +92,8 @@ public:
     }
 
 protected:
-    inline static const CncLogger LuaLogger = CncLogger("Lua");
-    inline static spdlog::level::level_enum DefaultLogLevel = LuaLogger()->level();
+    static inline const auto& LuaLogger = CncLogger::With_Name("Lua");
+    static inline spdlog::level::level_enum DefaultLogLevel = LuaLogger()->level();
 
     static void Assert_Level_Value(const LuaEngine& engine, const std::string& level)
     {

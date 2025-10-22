@@ -10,6 +10,28 @@
 
 #include "defines.h"
 
+using ConverterTypeVariant = std::variant<
+    ArmorType,
+    MPHType,
+    WeaponType,
+    HousesType,
+    StructType,
+    FactoryType,
+    DirType,
+    BSizeType,
+    AircraftType,
+    MissionType,
+    AnimType,
+    InfantryType,
+    UnitType,
+    SpeedType,
+    BulletType,
+    WarheadType,
+    VocType,
+    PlayerColorType,
+    HouseColorType
+>;
+
 template<typename T>
 concept SupportedByTdTypeConverter = (
     std::is_same_v<T, ArmorType> ||
@@ -56,14 +78,14 @@ concept SupportedByTdTypeConverter = (
 class TdTypeConverter final
 {
 public:
-    inline static const TwoWayMap<ArmorType, std::string> Armor_Types {
+    static inline const TwoWayMap<ArmorType, std::string> Armor_Types {
         ARMOR_PAIR(NONE),
         ARMOR_PAIR(WOOD),
         ARMOR_PAIR(ALUMINUM),
         ARMOR_PAIR(STEEL),
         ARMOR_PAIR(CONCRETE)
     };
-    inline static const TwoWayMap<MPHType, std::string> Mph_Types {
+    static inline const TwoWayMap<MPHType, std::string> Mph_Types {
         MPH_PAIR(IMMOBILE),
         MPH_PAIR(VERY_SLOW),
         MPH_PAIR(KINDA_SLOW),
@@ -78,7 +100,7 @@ public:
         MPH_PAIR(VERY_FAST),
         MPH_PAIR(LIGHT_SPEED)
     };
-    inline static const TwoWayMap<WeaponType, std::string> Weapon_Types {
+    static inline const TwoWayMap<WeaponType, std::string> Weapon_Types {
         WEAPON_PAIR(NONE),
         WEAPON_PAIR(RIFLE),
         WEAPON_PAIR(CHAIN_GUN),
@@ -106,7 +128,7 @@ public:
         WEAPON_PAIR(STEG),
         WEAPON_PAIR(TREX)
     };
-    inline static const TwoWayMap<HousesType, std::string> House_Types {
+    static inline const TwoWayMap<HousesType, std::string> House_Types {
         HOUSE_PAIR(NONE),
         HOUSE_PAIR(GOOD),
         HOUSE_PAIR(BAD),
@@ -119,7 +141,7 @@ public:
         HOUSE_PAIR(MULTI5),
         HOUSE_PAIR(MULTI6)
     };
-    inline static const TwoWayMap<StructType, std::string> Struct_Types {
+    static inline const TwoWayMap<StructType, std::string> Struct_Types {
         STRUCT_PAIR(NONE),
         STRUCT_PAIR(WEAP),
         STRUCT_PAIR(GTOWER),
@@ -187,14 +209,14 @@ public:
         STRUCT_PAIR(BARBWIRE_WALL),
         STRUCT_PAIR(WOOD_WALL)
     };
-    inline static const TwoWayMap<FactoryType, std::string> Factory_Types {
+    static inline const TwoWayMap<FactoryType, std::string> Factory_Types {
         FACTORY_PAIR(NONE),
         FACTORY_PAIR(INFANTRY),
         FACTORY_PAIR(UNIT),
         FACTORY_PAIR(AIRCRAFT),
         FACTORY_PAIR(BUILDING)
     };
-    inline static const TwoWayMap<DirType, std::string> Dir_Types {
+    static inline const TwoWayMap<DirType, std::string> Dir_Types {
         DIR_PAIR(N),
         DIR_PAIR(NE),
         DIR_PAIR(E),
@@ -206,7 +228,7 @@ public:
         DIR_PAIR(W),
         DIR_PAIR(NW)
     };
-    inline static const TwoWayMap<BSizeType, std::string> BSize_Types {
+    static inline const TwoWayMap<BSizeType, std::string> BSize_Types {
         BSIZE_PAIR(NONE),
         BSIZE_PAIR(11),
         BSIZE_PAIR(21),
@@ -218,7 +240,7 @@ public:
         BSIZE_PAIR(42),
         BSIZE_PAIR(55)
     };
-    inline static const TwoWayMap<AircraftType, std::string> Aircraft_Types {
+    static inline const TwoWayMap<AircraftType, std::string> Aircraft_Types {
         AIRCRAFT_PAIR(NONE),
         AIRCRAFT_PAIR(TRANSPORT),
         AIRCRAFT_PAIR(A10),
@@ -226,7 +248,7 @@ public:
         AIRCRAFT_PAIR(CARGO),
         AIRCRAFT_PAIR(ORCA)
     };
-    inline static const TwoWayMap<MissionType, std::string> Mission_Types {
+    static inline const TwoWayMap<MissionType, std::string> Mission_Types {
         MISSION_PAIR(NONE),
         MISSION_PAIR(SLEEP),
         MISSION_PAIR(ATTACK),
@@ -251,7 +273,7 @@ public:
         MISSION_PAIR(RESCUE),
         MISSION_PAIR(MISSILE)
     };
-    inline static const TwoWayMap<AnimType, std::string> Anim_Types {
+    static inline const TwoWayMap<AnimType, std::string> Anim_Types {
         ANIM_PAIR(NONE),
         ANIM_PAIR(FBALL1),
         ANIM_PAIR(GRENADE),
@@ -339,7 +361,7 @@ public:
         ANIM_PAIR(FIRE_TINY_VIRTUAL),
         ANIM_PAIR(BEACON_VIRTUAL)
     };
-    inline static const TwoWayMap<InfantryType, std::string> Infantry_Types {
+    static inline const TwoWayMap<InfantryType, std::string> Infantry_Types {
         INFANTRY_PAIR(NONE),
         INFANTRY_PAIR(E1),
         INFANTRY_PAIR(E2),
@@ -362,7 +384,7 @@ public:
         INFANTRY_PAIR(DELPHI),
         INFANTRY_PAIR(CHAN)
     };
-    inline static const TwoWayMap<UnitType, std::string> Unit_Types {
+    static inline const TwoWayMap<UnitType, std::string> Unit_Types {
         UNIT_PAIR(NONE),
         UNIT_PAIR(HTANK),
         UNIT_PAIR(MTANK),
@@ -387,7 +409,7 @@ public:
         UNIT_PAIR(RAPT),
         UNIT_PAIR(STEG)
     };
-    inline static const TwoWayMap<SpeedType, std::string> Speed_Types {
+    static inline const TwoWayMap<SpeedType, std::string> Speed_Types {
         SPEED_PAIR(NONE),
         SPEED_PAIR(FOOT),
         SPEED_PAIR(TRACK),
@@ -397,7 +419,7 @@ public:
         SPEED_PAIR(HOVER),
         SPEED_PAIR(FLOAT)
     };
-    inline static const TwoWayMap<BulletType, std::string> Bullet_Types {
+    static inline const TwoWayMap<BulletType, std::string> Bullet_Types {
         BULLET_PAIR(NONE),
         BULLET_PAIR(SNIPER),
         BULLET_PAIR(BULLET),
@@ -419,7 +441,7 @@ public:
         BULLET_PAIR(HEADBUTT),
         BULLET_PAIR(TREXBITE)
     };
-    inline static const TwoWayMap<WarheadType, std::string> Warhead_Types {
+    static inline const TwoWayMap<WarheadType, std::string> Warhead_Types {
         WARHEAD_PAIR(NONE),
         WARHEAD_PAIR(SA),
         WARHEAD_PAIR(HE),
@@ -435,7 +457,7 @@ public:
         WARHEAD_PAIR(FEEDME)
     };
     // VOC_BUILD_SELECT is omitted as it appears unused an is a pointer to another VOC (non-unique)
-    inline static const TwoWayMap<VocType, std::string> Voc_Types {
+    static inline const TwoWayMap<VocType, std::string> Voc_Types {
         VOC_PAIR(NONE),
         VOC_PAIR(RAMBO_PRESENT),
         VOC_PAIR(RAMBO_CMON),

@@ -505,7 +505,14 @@ template<typename T>
 concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
 
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static void Init_Type(std::string_view prefix, RuleSections& sections, U first, U count, CCINIClass& ini)
+void Init_Type(
+    std::string_view prefix,
+    RuleSections& sections,
+    U first,
+    U count,
+    const CncLogger& Logger,
+    CCINIClass& ini
+)
 {
     sections = RuleSections();
 
@@ -514,12 +521,10 @@ static void Init_Type(std::string_view prefix, RuleSections& sections, U first, 
         auto name = std::format("{}.{}", prefix, typeInstance.Name());
 
         if (sections.Has_Section(name)) {
-            throw std::invalid_argument(
-                std::format(
-                    "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
-                    "more than once for instances of a given class - this will mess up rules on re-read. Name: {}",
+            CNC_LOGGER_FATAL(
+                "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
+                "more than once for instances of a given class - this will mess up rules on re-read. Name: {}",
                 name
-                )
             );
         }
 
@@ -530,7 +535,13 @@ static void Init_Type(std::string_view prefix, RuleSections& sections, U first, 
 }
 
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static void Init_Type(std::string_view prefix, RuleSections& sections, U first, U count)
+static void Init_Type(
+    std::string_view prefix,
+    RuleSections& sections,
+    U first,
+    U count,
+    const CncLogger& Logger
+)
 {
     const auto rules_filename = std::format("{}.INI", prefix);
 
@@ -542,7 +553,7 @@ static void Init_Type(std::string_view prefix, RuleSections& sections, U first, 
         ini.Load(ini_file, false);
     }
 
-    Init_Type<U, T>(prefix, sections, first, count, ini);
+    Init_Type<U, T>(prefix, sections, first, count, Logger, ini);
 
     // provide player with a default <PREFIX>.INI file
     if (!ini_file_exists) {
@@ -556,29 +567,29 @@ static void Init_Type(std::string_view prefix, RuleSections& sections, U first, 
 void RulesClass::Init_Types()
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>("Anims", Animations, ANIM_FIRST, ANIM_COUNT);
-    Init_Type<WarheadType, WarheadTypeClass>("Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT);
-    Init_Type<BulletType, BulletTypeClass>("Bullets", Bullets, BULLET_FIRST, BULLET_COUNT);
-    Init_Type<WeaponType, WeaponTypeClass>("Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT);
-    Init_Type<AircraftType, AircraftTypeClass>("Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
-    Init_Type<StructType, BuildingTypeClass>("Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT);
-    Init_Type<InfantryType, InfantryTypeClass>("Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT);
-    Init_Type<UnitType, UnitTypeClass>("Units", Units, UNIT_FIRST, UNIT_COUNT);
-    Init_Type<HousesType, HouseTypeClass>("Houses", Houses, HOUSE_FIRST, HOUSE_COUNT);
+    Init_Type<AnimType, AnimTypeClass>("Anims", Animations, ANIM_FIRST, ANIM_COUNT, Logger);
+    Init_Type<WarheadType, WarheadTypeClass>("Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT, Logger);
+    Init_Type<BulletType, BulletTypeClass>("Bullets", Bullets, BULLET_FIRST, BULLET_COUNT, Logger);
+    Init_Type<WeaponType, WeaponTypeClass>("Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT, Logger);
+    Init_Type<AircraftType, AircraftTypeClass>("Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger);
+    Init_Type<StructType, BuildingTypeClass>("Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT, Logger);
+    Init_Type<InfantryType, InfantryTypeClass>("Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT, Logger);
+    Init_Type<UnitType, UnitTypeClass>("Units", Units, UNIT_FIRST, UNIT_COUNT, Logger);
+    Init_Type<HousesType, HouseTypeClass>("Houses", Houses, HOUSE_FIRST, HOUSE_COUNT, Logger);
 }
 
 void RulesClass::Init_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>("Anims", Animations, ANIM_FIRST, ANIM_COUNT, ini);
-    Init_Type<WarheadType, WarheadTypeClass>("Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT, ini);
-    Init_Type<BulletType, BulletTypeClass>("Bullets", Bullets, BULLET_FIRST, BULLET_COUNT, ini);
-    Init_Type<WeaponType, WeaponTypeClass>("Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT, ini);
-    Init_Type<AircraftType, AircraftTypeClass>("Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini);
-    Init_Type<StructType, BuildingTypeClass>("Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT, ini);
-    Init_Type<InfantryType, InfantryTypeClass>("Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT, ini);
-    Init_Type<UnitType, UnitTypeClass>("Units", Units, UNIT_FIRST, UNIT_COUNT, ini);
-    Init_Type<HousesType, HouseTypeClass>("Houses", Houses, HOUSE_FIRST, HOUSE_COUNT, ini);
+    Init_Type<AnimType, AnimTypeClass>("Anims", Animations, ANIM_FIRST, ANIM_COUNT, Logger, ini);
+    Init_Type<WarheadType, WarheadTypeClass>("Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT, Logger, ini);
+    Init_Type<BulletType, BulletTypeClass>("Bullets", Bullets, BULLET_FIRST, BULLET_COUNT, Logger, ini);
+    Init_Type<WeaponType, WeaponTypeClass>("Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT, Logger, ini);
+    Init_Type<AircraftType, AircraftTypeClass>("Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger, ini);
+    Init_Type<StructType, BuildingTypeClass>("Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT, Logger, ini);
+    Init_Type<InfantryType, InfantryTypeClass>("Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT, Logger, ini);
+    Init_Type<UnitType, UnitTypeClass>("Units", Units, UNIT_FIRST, UNIT_COUNT, Logger, ini);
+    Init_Type<HousesType, HouseTypeClass>("Houses", Houses, HOUSE_FIRST, HOUSE_COUNT, Logger, ini);
 }
 
 /***********************************************************************************************
