@@ -60,6 +60,17 @@ public:
         }
     }
 
+    /**
+     * Pull a Lua value from the current parameters and use it to set the value of a given
+     * rule, with type checking. The old rule value is pushed onto the Lua stack if set was
+     * successful.
+     *
+     * @param engine Context of Lua call
+     * @param arguments Lua arguments passed, next argument in chain must be the rule value
+     * @param sections Rules root
+     * @param section Context of rule set
+     * @param key Rule key to set
+     */
     static void Set_Rule_Value(
         const SharedLuaEngine& engine,
         LuaArguments& arguments,
