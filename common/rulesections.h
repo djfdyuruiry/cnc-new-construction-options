@@ -238,35 +238,35 @@ public:
         } else if constexpr (std::is_same_v<T, float>) {
             auto default_value_str = std::format("{}", default_value);
 
-            Safe_Parse<float>(
+            Safe_Parse<T>(
+                name,
                 ini.Get_String(SectionName.data(), name.data(), default_value_str),
                 value,
-                std::stof
+                [](const auto& s) { return std::stof(s); }
             );
         } else if constexpr (std::is_same_v<T, ushort>) {
             auto default_value_str = std::format("{}", default_value);
 
-            Safe_Parse<ushort, ulong>(
+            Safe_Parse<T, ulong>(
+                name,
                 ini.Get_String(SectionName.data(), name.data(), default_value_str),
                 value,
-                std::stoul,
-                [](auto v) {
-                    return v >= std::numeric_limits<ushort>::min() || v <= std::numeric_limits<ushort>::max();
-                }
+                [](const auto& s) { return std::stoul(s); },
+                [](auto v) { return v <= std::numeric_limits<ushort>::max(); }
             );
         } else if constexpr (std::is_same_v<T, uint>) {
             auto default_value_str = std::format("{}", default_value);
 
-            Safe_Parse<uint, ulong>(
+            Safe_Parse<T, ulong>(
+                name,
                 ini.Get_String(SectionName.data(), name.data(), default_value_str),
                 value,
-                std::stoul,
-                [](auto v) {
-                    return v >= std::numeric_limits<uint>::min() || v <= std::numeric_limits<uint>::max();
-                }
+                [](const std::string& s) { return (ulong)std::stoul(s); },
+                [](auto v) { return v <= std::numeric_limits<uint>::max(); }
             );
         } else if constexpr (std::is_same_v<T, char>) {
-            Safe_Parse_Int<char>(
+            Safe_Parse_Int<T>(
+                name,
                 ini.Get_Int(SectionName.data(), name.data(), default_value),
                 value,
                 [](auto v) {
@@ -274,7 +274,8 @@ public:
                 }
             );
         } else if constexpr (std::is_same_v<T, uchar>) {
-            Safe_Parse_Int<uchar>(
+            Safe_Parse_Int<T>(
+                name,
                 ini.Get_Int(SectionName.data(), name.data(), default_value),
                 value,
                 [](auto v) {
@@ -477,49 +478,47 @@ private:
 
     template<class T, class U = T, class V = std::string>
     void Safe_Parse(
-        V source,
+        std::string_view name,
+        const V& source,
         T& target,
         std::function<U(const V&)> parse,
         std::function<bool(U)> validate = [](auto _) { return true; }
     )
     {
         std::optional<std::string> ex_type;
-        std::optional<T> parsed_value;
+        std::optional<U> parsed_value;
 
         try {
-            parsed_value = parse(source);
+            U result = parse(source);
+            parsed_value = result;
 
-            if (validate(parsed_value)) {
-                target = static_cast<T>(parsed_value);
+            if (validate(result)) {
+                target = static_cast<T>(result);
                 return;
             }
         } catch (...) {
             ex_type = std::current_exception().__cxa_exception_type()->name();
         }
 
-        CNC_LOGGER_ERROR(
-            std::vformat(
-                "Invalid INI value '{}' for rule: [{}] -> {}{}{}",
-                std::make_format_args(
-                    source,
-                    parsed_value.has_value() ? std::format(" parsed_value={}", parsed_value.value()) : "",
-                    ex_type.has_value() ? std::format(" parsed_error={}", ex_type.value()) : ""
-                )
-           )
-        );
+        auto parse_msg = parsed_value.has_value() ? std::format(" parsed_value={}", parsed_value.value()) : "";
+        auto ex_msg = ex_type.has_value() ? std::format(" parsed_error={}", ex_type.value()) : "";
+
+        CNC_LOGGER_ERROR("Invalid INI value '{}' for rule: [{}] -> {}{}{}", source, SectionName, name, parse_msg, ex_msg);
     }
 
     template<class T>
     void Safe_Parse_Int(
-        int source,
+        std::string_view name,
+        const int& source,
         T& target,
         std::function<bool(T)> validate
     )
     {
-        Safe_Parse<T, T, int>(
+        Safe_Parse<T, int, int>(
+            name,
             source,
             target,
-            [](const auto& v) { return static_cast<T>(v); },
+            [](const auto& v) { return v; },
             validate
         );
     }
