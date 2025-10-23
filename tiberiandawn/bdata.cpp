@@ -4510,3 +4510,23 @@ const IniRuleContext& BuildingTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Int_Var(Drain)
         .Load_With_TdConverter(BSizeType, Size);
 }
+
+const RuleSection& BuildingTypeClass::Read_Rules(const RuleSection& rules){
+    return TechnoTypeClass::Read_Rules(rules)
+        .Read_Bool_Var(IsBibbed)
+        .Read_Bool_Var(IsWall)
+        .Read_Bool_Var(IsFactory)
+        .Read_Bool_Var(IsSimpleDamage)
+        .Read_Bool_Var(IsSturdy)
+        .Read_Bool_Var(IsCaptureable)
+        .Read_Bool_Var(IsRegulated)
+        .Read_Bool_Var(IsUnsellable)
+        .Read_Bool_Var(IsCaptureable)
+        .Read_With_TdConverter(FactoryType, ToBuild)
+        .Read_With_TdConverter(StructType, Type)
+        .Read_With_TdConverter(DirType, StartFace)
+        .Read_UInt_Var(Capacity)
+        .Read_Int_Var(Power)
+        .Read_Int_Var(Drain)
+        .Read_With_TdConverter(BSizeType, Size);
+}

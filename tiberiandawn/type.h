@@ -116,6 +116,17 @@ public:
             .Load_With_TdConverter(VocType, Sound)
             .Load_With_TdConverter(AnimType, Anim);
     }
+
+    const RuleSection& Read_Rules(const RuleSection& rules)
+    {
+        return rules.Read_With_TdConverter(WeaponType, Type)
+            .Read_With_TdConverter(BulletType, Fires)
+            .Read_UChar_Var(Attack)
+            .Read_UChar_Var(ROF)
+            .Read_Int_Var(Range)
+            .Read_With_TdConverter(VocType, Sound)
+            .Read_With_TdConverter(AnimType, Anim);
+    }
 };
 
 /**********************************************************************
@@ -176,6 +187,15 @@ public:
             .Load_Bool_Var(IsWallDestroyer)
             .Load_Bool_Var(IsWoodDestroyer)
             .Load_Bool_Var(IsTiberiumDestroyer); // TODO: Modifier (uint array), maybe refactor into a lookup
+    }
+
+    const RuleSection& Read_Rules(const RuleSection& rules)
+    {
+        return rules.Read_With_TdConverter(WarheadType, Type)
+            .Read_Int_Var(SpreadFactor)
+            .Read_Bool_Var(IsWallDestroyer)
+            .Read_Bool_Var(IsWoodDestroyer)
+            .Read_Bool_Var(IsTiberiumDestroyer); // TODO: Modifier (uint array), maybe refactor into a lookup
     }
 };
 
@@ -282,6 +302,7 @@ public:
     void Set_Prefix(const std::string& str);
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    const RuleSection& Read_Rules(const RuleSection& ini);
 private:
     static HouseTypeClass const* const Pointers[HOUSE_COUNT];
 };
@@ -938,6 +959,7 @@ public:
 #endif
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
 private:
     /*
@@ -1185,6 +1207,7 @@ public:
 #endif
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
     /*
     **	This is a pointer to the wake shape (as needed by the gunboat).
@@ -1523,6 +1546,8 @@ public:
     };
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& ini) override;
+
     std::string ToString() const;
 private:
     static BulletTypeClass const* const Pointers[BULLET_COUNT];
@@ -1923,6 +1948,7 @@ public:
     };
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
 private:
     static AnimTypeClass const* const Pointers[ANIM_COUNT];
@@ -2037,6 +2063,7 @@ public:
 #endif
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
     static void const* LRotorData;
     static void const* RRotorData;

@@ -17,36 +17,41 @@ local isType = TypeValidator.Validators.isType
 ---@field getRule fun(ruleName: string): number|boolean
 ---@field setRule fun(ruleName: string, value: number|boolean): number|boolean
 
----@alias RulesSectionProxy RuleSectionApi | { [string]: number|boolean }
+---@alias TypeApiProxy RuleSectionApi | { [string]: number|boolean }
 
 ---@param api CppRulesApi
----@param sectionName string
----@return RulesSectionProxy
-local function RulesSectionProxy(api, sectionName)
-  TypeValidator.validateCall("RulesSectionProxy", {
+---@param typeName string
+---@return TypeApiProxy
+local function TypeApiProxy(api, typeName)
+  TypeValidator.validateCall("TypeApiProxy", {
     api = {api, isType("table")},
-    sectionName = {sectionName, isType("string"), isNotBlank}
+    typeName = {typeName, isType("string"), isNotBlank}
   })
 
-  local function getRuleType(...)
-    return api.getRuleType(sectionName, ...)
+  local getPropertyValueFunction = string.format("get%PropertyType", typeName)
+  local getPropertyValueFunction = string.format("get%PropertyValue", typeName)
+  local setPropertyValueFunction = string.format("set%PropertyValue", typeName)
+  local getPropertyNames = string.format("get%PropertyNames", typeName)
+
+  local function getPropertyType(...)
+    return api.getRuleType(...)
   end
 
-  local function getRule(...)
-    return api.getRuleValue(sectionName, ...)
+  local function getProperty(...)
+    return api.getPropertyValue(...)
   end
 
-  local function setRule(...)
-    return api.setRuleValue(sectionName, ...)
+  local function setProperty(...)
+    return api.setPropertyValue(...)
   end
 
-  local function getRuleNames()
-    return api.getRuleNamesForSection(sectionName)
+  local function getPropertyNames()
+    return api.getPropertyNames()
   end
 
   return setmetatable(
     {
-      __name = sectionName,
+      __name = typeName,
       getRuleNames = getRuleNames,
       getRuleType = getRuleType,
       getRule = getRule,
@@ -65,29 +70,25 @@ local function RulesSectionProxy(api, sectionName)
   )
 end
 
----@alias RulesApiProxy CppRulesApi | { [string]: RulesSectionProxy }
+---@alias TypesApiProxy CppRulesApi | { [string]: TypeApiProxy }
 
 ---@param api CppRulesApi
----@return RulesApiProxy
-local function RulesApiProxy(api)
+---@return TypesApiProxy
+local function TypesApiProxy(api)
   return setmetatable(
     {
-      getSectionNames = api.getSectionNames,
-      getRuleNamesForSection = api.getRuleNamesForSection,
-      getRuleType = api.getRuleType,
-      getRuleValue = api.getRuleValue,
-      setRuleValue = api.setRuleValue
+      getTypeNames = api.getTypeNames
     },
     {
-      __index = function(_, sectionName)
-        return RulesSectionProxy(api, sectionName)
+      __index = function(_, typeName)
+        return TypeApiProxy(api, typeName)
       end,
       -- make proxy read only
       __newindex = function()
-        error("Rule API is read only. Did you mean to set a rule and forgot to add the section?")
+        error("Type API is read only. Did you mean to set a property and forget to add the type name?")
       end
     }
   )
 end
 
-return RulesApiProxy
+return TypesApiProxy

@@ -1,10 +1,11 @@
 #pragma once
 
+#include "../../common/lua/rulesluaadapter.h"
+
 #include "externs.h"
-#include "td_luaapi.h"
 #include "rules.h"
+#include "td_luaapi.h"
 #include "typeconverter.h"
-#include "lua/rulesluaadapter.h"
 
 class TiberianDawnTypesLuaApi : public TiberianDawnLuaApi
 {
@@ -14,7 +15,15 @@ public:
     void Register_Functions(LuaEngine& engine) const override
     {
         With_Api_Namespace(engine, [&](auto& n) {
+            Register_Type_Functions<AnimType, AnimTypeClass>(n);
+            Register_Type_Functions<WarheadType, WarheadTypeClass>(n);
+            Register_Type_Functions<BulletType, BulletTypeClass>(n);
+            Register_Type_Functions<WeaponType, WeaponTypeClass>(n);
+            Register_Type_Functions<AircraftType, AircraftTypeClass>(n);
+            Register_Type_Functions<StructType, BuildingTypeClass>(n);
             Register_Type_Functions<InfantryType, InfantryTypeClass>(n);
+            Register_Type_Functions<UnitType, UnitTypeClass>(n);
+            Register_Type_Functions<HousesType, HouseTypeClass>(n);
         });
     }
 

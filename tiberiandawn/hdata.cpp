@@ -366,3 +366,24 @@ const IniRuleContext& HouseTypeClass::Read_INI(const IniRuleContext& ini)
 
     return ini;
 }
+
+const RuleSection& HouseTypeClass::Read_Rules(const RuleSection& rules)
+{
+    auto set_suffix = std::bind(&HouseTypeClass::Set_Suffix, this, std::placeholders::_1);
+    auto set_prefix = std::bind(&HouseTypeClass::Set_Prefix, this, std::placeholders::_1);
+
+    // TODO: investigate where properties of type 'fixed' are set
+    auto& rule_section = rules.Read_With_TdConverter(HousesType, House)
+        .Get_With_Callback<std::string>("Suffix", set_suffix)
+        .Read_UInt_Var(Lemon)
+        .Read_With_TdConverter(HouseColorType, Color)
+        .Read_With_TdConverter(HouseColorType, BrightColor)
+        .Read_Bool_Var(RemapColorEnabled)
+        .Read_With_TdConverter(PlayerColorType, RemapColor)
+        .Get_With_Callback<std::string>("Prefix", set_prefix);
+
+    Set_Remap_Color_Table();
+
+    return rule_section;
+}
+

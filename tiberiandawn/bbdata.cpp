@@ -655,3 +655,27 @@ const IniRuleContext& BulletTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Int_Var(Arming)
         .Load_Int_Var(Range);
 }
+
+const RuleSection& BulletTypeClass::Read_Rules(const RuleSection& rules)
+{
+    return ObjectTypeClass::Read_Rules(rules)
+        .Read_Bool_Var(IsHigh)
+        .Read_Bool_Var(IsArcing)
+        .Read_Bool_Var(IsHoming)
+        .Read_Bool_Var(IsDropping)
+        .Read_Bool_Var(IsInvisible)
+        .Read_Bool_Var(IsProximityArmed)
+        .Read_Bool_Var(IsFlameEquipped)
+        .Read_Bool_Var(IsFueled)
+        .Read_Bool_Var(IsFaceless)
+        .Read_Bool_Var(IsInaccurate)
+        .Read_Bool_Var(IsTranslucent)
+        .Read_Bool_Var(IsAntiAircraft)
+        .Read_With_TdConverter(BulletType, Type)
+        .Read_With_TdConverter(MPHType, MaxSpeed)
+        .Read_With_TdConverter(WarheadType, Warhead)
+        .Read_With_TdConverter(AnimType, Explosion)
+        .Read_UChar_Var(ROT)
+        .Read_Int_Var(Arming)
+        .Read_Int_Var(Range);
+}

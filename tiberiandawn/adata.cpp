@@ -2406,3 +2406,31 @@ const IniRuleContext& AnimTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Int_Var(VirtualScale)
         .Load_With_TdConverter(AnimType, VirtualAnim);
 }
+
+const RuleSection& AnimTypeClass::Read_Rules(const RuleSection& rules)
+{
+    return ObjectTypeClass::Read_Rules(rules)
+        .Read_Bool_Var(IsNormalized)
+        .Read_Bool_Var(IsGroundLayer)
+        .Read_Bool_Var(IsTranslucent)
+        .Read_Bool_Var(IsWhiteTrans)
+        .Read_Bool_Var(IsFlameThrower)
+        .Read_Bool_Var(IsScorcher)
+        .Read_Bool_Var(IsCraterForming)
+        .Read_Bool_Var(IsSticky)
+        .Read_With_TdConverter(AnimType, Type)
+        .Read_Int_Var(Size)
+        .Read_Int_Var(Biggest)
+        .Read_UInt_Var(Damage)
+        .Read_UChar_Var(Delay)
+        .Read_Int_Var(Start)
+        .Read_Int_Var(LoopStart)
+        .Read_Int_Var(LoopEnd)
+        .Read_Int_Var(Stages)
+        .Read_Char_Var(Loops)
+        .Read_With_TdConverter(VocType, Sound)
+        .Read_With_TdConverter(AnimType, ChainTo)
+        .Read_Int_Var(VirtualStages)
+        .Read_Int_Var(VirtualScale)
+        .Read_With_TdConverter(AnimType, VirtualAnim);
+}

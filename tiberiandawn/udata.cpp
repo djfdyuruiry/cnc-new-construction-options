@@ -1789,7 +1789,7 @@ int UnitTypeClass::Max_Pips(void) const
 
 const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
 {
-    TechnoTypeClass::Read_INI(ini)
+    return TechnoTypeClass::Read_INI(ini)
         .Load_Bool_Var(IsCrateGoodie)
         .Load_Bool_Var(IsPieceOfEight)
         .Load_Bool_Var(IsCrusher)
@@ -1808,6 +1808,27 @@ const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
         .Load_Char_Var(TurretOffset)
         .Load_With_TdConverter(MissionType, Mission)
         .Load_With_TdConverter(AnimType, Explosion);
-
-    return ini;
 }
+
+const RuleSection& UnitTypeClass::Read_Rules(const RuleSection& rules){
+    return TechnoTypeClass::Read_Rules(rules)
+        .Read_Bool_Var(IsCrateGoodie)
+        .Read_Bool_Var(IsPieceOfEight)
+        .Read_Bool_Var(IsCrusher)
+        .Read_Bool_Var(IsToHarvest)
+        .Read_Bool_Var(IsChunkyShape)
+        .Read_Bool_Var(IsRadarEquipped)
+        .Read_Bool_Var(IsFireAnim)
+        .Read_Bool_Var(IsLockTurret)
+        .Read_Bool_Var(IsTracked)
+        .Read_Bool_Var(IsGigundo)
+        .Read_Bool_Var(IsCloakable)
+        .Read_Bool_Var(IsAnimating)
+        .Read_With_TdConverter(UnitType, Type)
+        .Read_With_TdConverter(SpeedType, Speed)
+        .Read_UChar_Var(ROT)
+        .Read_Char_Var(TurretOffset)
+        .Read_With_TdConverter(MissionType, Mission)
+        .Read_With_TdConverter(AnimType, Explosion);
+}
+
