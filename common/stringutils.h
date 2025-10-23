@@ -20,6 +20,11 @@ public:
         std::transform(subject.begin(), subject.end(), subject.begin(), ::tolower);
     }
 
+    static void To_Upper(std::string& subject)
+    {
+        std::transform(subject.begin(), subject.end(), subject.begin(), ::toupper);
+    }
+
     template<class T = std::string>
     static std::string To_Csv(std::vector<T> items, std::function<std::string(T)> to_string = [](auto s) { return s; })
     {

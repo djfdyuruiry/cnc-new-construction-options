@@ -98,6 +98,7 @@ public:
     */
     AnimType Anim;
 
+    static const WeaponTypeClass& As_Reference(WeaponType type);
     static WeaponTypeClass& As_Mutable_Reference(WeaponType type);
 
     const char* Name() const
@@ -160,6 +161,7 @@ public:
     */
     unsigned Modifier[ARMOR_COUNT];
 
+    static const WarheadTypeClass& As_Reference(WarheadType type);
     static WarheadTypeClass& As_Mutable_Reference(WarheadType type);
 
     const char* Name() const
@@ -462,6 +464,7 @@ public:
 #endif
 
     virtual const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    virtual const RuleSection& Read_Rules(const RuleSection& rules);
 
     static void const* SelectShapes;
     static void const* PipShapes;
@@ -670,6 +673,7 @@ public:
 #endif                                   // USE_RA_AI
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 };
 
 /***************************************************************************
@@ -1335,6 +1339,7 @@ public:
 #endif
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection&) override;
 };
 
 /***************************************************************************

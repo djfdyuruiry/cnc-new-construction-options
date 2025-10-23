@@ -4957,3 +4957,37 @@ const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
 
     return ini;
 }
+
+const RuleSection& TechnoTypeClass::Read_Rules(const RuleSection& rules)
+{
+    ObjectTypeClass::Read_Rules(rules)
+        .Read_Bool_Var(IsLeader)
+        .Read_Bool_Var(IsScanner)
+        .Read_Bool_Var(IsNominal)
+        .Read_Bool_Var(IsTheater)
+        .Read_Bool_Var(IsTurretEquipped)
+        .Read_Bool_Var(IsTwoShooter)
+        .Read_Bool_Var(IsRepairable)
+        .Read_Bool_Var(IsBuildable)
+        .Read_Bool_Var(IsCrew)
+        .Read_Bool_Var(IsTransporter)
+        .Read_Int_Var(SightRange)
+        .Read_Int_Var(Cost)
+        .Read_UChar_Var(Scenario)
+        .Read_UChar_Var(Level)
+        .Read_Int_Var(Risk)
+        .Read_With_TdConverter(StructType, Prerequisite)
+        .Read_With_TdConverter(MPHType, MaxSpeed)
+        .Read_Int_Var(Reward)
+        .Read_With_TdConverter(WeaponType, Primary)
+        .Read_With_TdConverter(WeaponType, Secondary)
+        .Read_Int_Var(MaxAmmo)
+        .Read_Csv_With_TdConverter(HousesType, OwnableBy);
+
+    // reload computed fields
+    Set_Pre();
+    Set_Ownable();
+    Calc_Risk();
+
+    return rules;
+}

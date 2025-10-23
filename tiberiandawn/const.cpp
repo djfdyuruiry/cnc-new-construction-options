@@ -94,6 +94,11 @@ WeaponTypeClass Weapons[WEAPON_COUNT] = {
     {WEAPON_TREX, "TREX", BULLET_TREXBITE, 155, 30, 0x0180, VOC_DINOATK1, ANIM_NONE},
 }; // TODO: refactor to prevent modification of instances (add const-ness back)
 
+const WeaponTypeClass& WeaponTypeClass::As_Reference(WeaponType type)
+{
+    return *(Weapons + type);
+}
+
 WeaponTypeClass& WeaponTypeClass::As_Mutable_Reference(WeaponType type)
 {
     return *(Weapons + type);
@@ -178,9 +183,14 @@ WarheadTypeClass Warheads[WARHEAD_COUNT] = {
         1, true, true, false, {0x100, 0xC0, 0x80, 0x20, 0x08}},     //	WARHEAD_FEEDME
 }; // TODO: refactor to prevent modification of instances (add const-ness back)
 
+const WarheadTypeClass& WarheadTypeClass::As_Reference(WarheadType type)
+{
+    return *(Warheads + type);
+}
+
 WarheadTypeClass& WarheadTypeClass::As_Mutable_Reference(WarheadType type)
 {
-    return *(Warheads +type);
+    return *(Warheads + type);
 }
 
 /***************************************************************************

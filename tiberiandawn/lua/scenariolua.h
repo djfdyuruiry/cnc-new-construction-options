@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <format>
 #include <optional>
 #include <string>
@@ -23,6 +22,7 @@
 #include "game_luaapi.h"
 #include "messages_luaapi.h"
 #include "scenario_luaapi.h"
+#include "tdtypes_luaapi.h"
 #include "ui_luaapi.h"
 
 /**
@@ -187,6 +187,7 @@ private:
                .With_Api<LoggingLuaApi>()
                .With_Api<RulesLuaApi<TdRuleSectionsProvider>>()
                .With_Api<EventLuaApi>()
+               .With_Api<TiberianDawnTypesLuaApi>()
                .With_Api<GameLuaApi>()
                .With_Api<MessagesLuaApi>()
                .With_Api<UiLuaApi>()

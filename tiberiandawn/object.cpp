@@ -276,6 +276,21 @@ const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
        .Load_UShort_Var(MaxStrength);
 }
 
+const RuleSection& ObjectTypeClass::Read_Rules(const RuleSection& rules)
+{
+    return rules.Read_Bool_Var(IsCrushable)
+       .Read_Bool_Var(IsStealthy)
+       .Read_Bool_Var(IsStealthy)
+       .Read_Bool_Var(IsSelectable)
+       .Read_Bool_Var(IsLegalTarget)
+       .Read_Bool_Var(IsInsignificant)
+       .Read_Bool_Var(IsImmune)
+       .Read_Bool_Var(IsFlammable)
+       .Read_Bool_Var(IsSentient)
+       .Read_With_TdConverter(ArmorType, Armor)
+       .Read_UShort_Var(MaxStrength);;
+}
+
 /***********************************************************************************************
  * ObjectClass::ObjectClass -- Default constructor for objects.                                *
  *                                                                                             *

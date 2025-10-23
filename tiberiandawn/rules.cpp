@@ -494,33 +494,29 @@ void RulesClass::Difficulty(CCINIClass& ini)
 #endif
 }
 
-template<typename C, typename E>
-concept RulesTypeClass = requires(C instance, E enum_instance)
-{
-    { C::As_Mutable_Reference(enum_instance) } -> std::same_as<C&>;
-    { instance.Name() } -> std::same_as<const char*>;
-};
-
-template<typename T>
-concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
-
+/**
+ * Load type instance rules from a given INI context, falling back to hardcoded
+ * defaults from C++ code. The rules section for the given type is completely
+ * reset by this call; existing changes to C++ instances or rules are lost.
+ *
+ * This function also sets up an event handler to update instance properties if
+ * the corresponding rules change at runtime. This is primarily used to allow the
+ * Lua APIs to interact with the classes indirectly via the Rules section.
+ */
 template<EnumSignedChar U, RulesTypeClass<U> T>
-void Init_Type(
-    std::string_view prefix,
-    RuleSections& sections,
-    U first,
-    U count,
-    const CncLogger& Logger,
-    CCINIClass& ini
-)
+RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
 {
-    sections = RuleSections();
+    auto type_name = TdTypeConverter::Get_Type_Name<U>();
+
+    rules.TypeRules[type_name] = std::make_unique<RuleSections>();
+    auto& sections = *rules.TypeRules[type_name];
 
     for (auto i = first; i < count; ++i) {
         auto& typeInstance = T::As_Mutable_Reference(i);
-        auto name = std::format("{}.{}", prefix, typeInstance.Name());
+        auto name = std::string(typeInstance.Name());
 
         if (sections.Has_Section(name)) {
+            const auto& Logger = RulesClass::Logger;
             CNC_LOGGER_FATAL(
                 "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
                 "more than once for instances of a given class - this will mess up rules on re-read. Name: {}",
@@ -528,21 +524,22 @@ void Init_Type(
             );
         }
 
-        sections[name].template With<IniRuleContext>(ini, [&](auto& c) {
+        sections.Add_Section(name, [&](auto& section, auto rule, const auto& value) {
+            // trigger type instance properties update if rules cache is updated
+            typeInstance.Read_Rules(section); // TODO: consider optimising this to only update the affected property
+        }).template With<IniRuleContext>(ini, [&](auto& c) {
+            // load initial values from INI, falling back to type instance hardcoded values
             typeInstance.Read_INI(c);
         });
     }
+
+    return sections;
 }
 
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static void Init_Type(
-    std::string_view prefix,
-    RuleSections& sections,
-    U first,
-    U count,
-    const CncLogger& Logger
-)
+static void Init_Type(RulesClass& rules, U first, U count)
 {
+    auto prefix = TdTypeConverter::Get_Type_Name<U>();
     const auto rules_filename = std::format("{}.INI", prefix);
 
     CCFileClass ini_file(rules_filename.c_str());
@@ -553,7 +550,7 @@ static void Init_Type(
         ini.Load(ini_file, false);
     }
 
-    Init_Type<U, T>(prefix, sections, first, count, Logger, ini);
+    auto& sections = Init_Type<U, T>(rules, first, count, ini);
 
     // provide player with a default <PREFIX>.INI file
     if (!ini_file_exists) {
@@ -564,32 +561,34 @@ static void Init_Type(
     ini_file.Close();
 }
 
+// TODO: Impl Read_Rules for commented-out classes
 void RulesClass::Init_Types()
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>("Anims", Animations, ANIM_FIRST, ANIM_COUNT, Logger);
-    Init_Type<WarheadType, WarheadTypeClass>("Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT, Logger);
-    Init_Type<BulletType, BulletTypeClass>("Bullets", Bullets, BULLET_FIRST, BULLET_COUNT, Logger);
-    Init_Type<WeaponType, WeaponTypeClass>("Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT, Logger);
-    Init_Type<AircraftType, AircraftTypeClass>("Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger);
-    Init_Type<StructType, BuildingTypeClass>("Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT, Logger);
-    Init_Type<InfantryType, InfantryTypeClass>("Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT, Logger);
-    Init_Type<UnitType, UnitTypeClass>("Units", Units, UNIT_FIRST, UNIT_COUNT, Logger);
-    Init_Type<HousesType, HouseTypeClass>("Houses", Houses, HOUSE_FIRST, HOUSE_COUNT, Logger);
+    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT);
+    //Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT);
+    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT);
+    //Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT);
+    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
+    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT);
+    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT);
+    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT);
+    //Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT);
 }
 
+// TODO: Impl Read_Rules for commented-out classes
 void RulesClass::Init_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>("Anims", Animations, ANIM_FIRST, ANIM_COUNT, Logger, ini);
-    Init_Type<WarheadType, WarheadTypeClass>("Warheads", Warheads, WARHEAD_FIRST, WARHEAD_COUNT, Logger, ini);
-    Init_Type<BulletType, BulletTypeClass>("Bullets", Bullets, BULLET_FIRST, BULLET_COUNT, Logger, ini);
-    Init_Type<WeaponType, WeaponTypeClass>("Weapons", Weapons, WEAPON_FIRST, WEAPON_COUNT, Logger, ini);
-    Init_Type<AircraftType, AircraftTypeClass>("Aircraft", Aircraft, AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger, ini);
-    Init_Type<StructType, BuildingTypeClass>("Buildings", Buildings, STRUCT_FIRST, STRUCT_COUNT, Logger, ini);
-    Init_Type<InfantryType, InfantryTypeClass>("Infantry", Infantry, INFANTRY_FIRST, INFANTRY_COUNT, Logger, ini);
-    Init_Type<UnitType, UnitTypeClass>("Units", Units, UNIT_FIRST, UNIT_COUNT, Logger, ini);
-    Init_Type<HousesType, HouseTypeClass>("Houses", Houses, HOUSE_FIRST, HOUSE_COUNT, Logger, ini);
+    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, ini);
+    //Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, ini);
+    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, ini);
+    //Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, ini);
+    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini);
+    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, ini);
+    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, ini);
+    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, ini);
+    //Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, ini);
 }
 
 /***********************************************************************************************

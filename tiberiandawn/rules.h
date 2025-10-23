@@ -37,7 +37,24 @@
 
 #include "common/fixed.h"
 
+#include "typeconverter.h"
+
 class CCINIClass;
+
+// InfantryType, UnitType etc.
+template<typename T>
+concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
+
+// InfantryTypeClass, UnitTypeClass etc.
+template<typename C, typename E>
+concept RulesTypeClass = requires(C instance, E enum_instance, const IniRuleContext& ini, const RuleSection& section)
+{
+    { C::As_Reference(enum_instance) } -> std::same_as<const C&>;
+    { C::As_Mutable_Reference(enum_instance) } -> std::same_as<C&>;
+    { instance.Name() } -> std::same_as<const char*>;
+    { instance.Read_INI(ini) } -> std::same_as<const IniRuleContext&>;
+    { instance.Read_Rules(section) } -> std::same_as<const RuleSection&>;
+};
 
 class DifficultyClass
 {
@@ -65,6 +82,8 @@ class RuleSections;
 class RulesClass
 {
 public:
+    static inline const auto& Logger = CncLogger::For(RulesClass);
+
     /*
     **	This specifies the average number of minutes between each computer attack.
     */
@@ -277,15 +296,7 @@ public:
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    RuleSections Animations;
-    RuleSections Warheads;
-    RuleSections Bullets;
-    RuleSections Weapons;
-    RuleSections Aircraft;
-    RuleSections Buildings;
-    RuleSections Infantry;
-    RuleSections Units;
-    RuleSections Houses;
+    std::map<std::string_view, std::unique_ptr<RuleSections>> TypeRules;
 
     RulesClass(void);
 
@@ -295,9 +306,13 @@ public:
     void Init_Types();
     void Init_Types(CCINIClass& ini);
 
-private:
-    static inline const auto& Logger = CncLogger::For(RulesClass);
+    template<EnumSignedChar T>
+    RuleSections& Get_Rule_Sections_For_Type()
+    {
+        return *TypeRules[TdTypeConverter::Get_Type_Name<T>()].get();
+    }
 
+private:
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);
     void Difficulty(CCINIClass& ini);

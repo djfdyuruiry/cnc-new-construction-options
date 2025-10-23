@@ -33,31 +33,56 @@ public:
             engine.Push_Value(
                 LuaEngine::LuaTypeMap[LUA_TSTRING].value()
             );
+        } else {
+            throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
+        }
+    }
+
+    /**
+     * Unpack variant to call corresponding engine Push_Value template.
+     */
+    static void Push_Rule_Variant(const LuaEngine& engine, const RuleValueVariant& variant)
+    {
+        if (const auto value = std::get_if<int>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<uint>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<char>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<uchar>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<ushort>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<float>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<bool>(&variant)) {
+            engine.Push_Value(*value);
+        } else if (const auto value = std::get_if<std::string>(&variant)) {
+            engine.Push_Value(*value);
+        } else {
+            throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
         }
     }
 
     static void Push_Rule_Value(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
     {
         Assert_Rule_Exists(engine, sections, section, key);
+        Push_Rule_Variant(engine, sections[section].Get_Variant(key));
+    }
 
-        // unpack variant to call corresponding engine Push_Value template
-        const auto& rule_value_variant = sections[section].Get_Variant(key);
-
-        if (const auto value = std::get_if<int>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<uint>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<char>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<uchar>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<ushort>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
-            engine.Push_Value(*value);
+    template<LuaVariantCompatible T, RuleValueVariantCompatible U>
+    static bool Set_Rule_Value_For_Section(LuaArguments& args, RuleSection& section, const std::string& key)
+    {
+        if (!args.template Next_Read_Is<T>()) {
+            return false;
         }
+
+        section.Set(
+            key,
+            static_cast<U>(args.Read_Next<int>().Unpack())
+        );
+
+        return true;
     }
 
     /**
@@ -86,16 +111,26 @@ public:
         auto rule_type_error = true;
         auto expected_type = LUA_TNONE;
 
-        if (const auto value = std::get_if<int>(&rule_value_variant)) {
+        if (
+            std::get_if<int>(&rule_value_variant) ||
+            std::get_if<uint>(&rule_value_variant) ||
+            std::get_if<ushort>(&rule_value_variant) ||
+            std::get_if<char>(&rule_value_variant) ||
+            std::get_if<uchar>(&rule_value_variant)
+        ) {
             expected_type = LUA_TNUMBER;
+        }
 
-            if (arguments.template Next_Read_Is<int>()) {
-                sections[section].Set(
-                    key,
-                    arguments.Read_Next<int>().Unpack()
-                );
-                rule_type_error = false;
-            }
+        if (std::get_if<int>(&rule_value_variant)) {
+            rule_type_error = !Set_Rule_Value_For_Section<int, int>(arguments, sections[section], key);
+        } else if (std::get_if<uint>(&rule_value_variant)) {
+            rule_type_error = !Set_Rule_Value_For_Section<int, uint>(arguments, sections[section], key);
+        } else if (std::get_if<ushort>(&rule_value_variant)) {
+            rule_type_error = !Set_Rule_Value_For_Section<int, ushort>(arguments, sections[section], key);
+        } else if (std::get_if<char>(&rule_value_variant)) {
+            rule_type_error = !Set_Rule_Value_For_Section<int, char>(arguments, sections[section], key);
+        } else if (std::get_if<uchar>(&rule_value_variant)) {
+            rule_type_error = !Set_Rule_Value_For_Section<int, uchar>(arguments, sections[section], key);
         } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
             expected_type = LUA_TNUMBER;
 
@@ -116,6 +151,18 @@ public:
                 );
                 rule_type_error = false;
             }
+        } else if (const auto value = std::get_if<std::string>(&rule_value_variant)) {
+            expected_type = LUA_TSTRING;
+
+            if (arguments.template Next_Read_Is<std::string>()) {
+                sections[section].Set(
+                    key,
+                    arguments.Read_Next<std::string>().Unpack()
+                );
+                rule_type_error = false;
+            }
+        } else {
+            throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
         }
 
         if (rule_type_error) {
@@ -126,14 +173,8 @@ public:
             );
         }
 
-        // return old rule value
-        if (const auto value = std::get_if<int>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        } else if (const auto value = std::get_if<bool>(&rule_value_variant)) {
-            engine.Push_Value(*value);
-        }
+        // return old rule value to lua caller
+        Push_Rule_Variant(engine, rule_value_variant);
     }
 
     static void Assert_Rule_Exists(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)

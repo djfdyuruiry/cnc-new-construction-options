@@ -785,6 +785,9 @@ public:
             return std::nullopt;
         }
 
+        // forgive bad casing for type instance
+        CncStringUtils::To_Upper(str);
+
         if constexpr (std::is_same_v<T, ArmorType>) {
             return Armor_Types[str];
         } else if constexpr (std::is_same_v<T, MPHType>) {
@@ -864,17 +867,28 @@ public:
         return std::make_optional(instances);
     }
 
-    void Register_Rule_Type(std::string section, std::string rule, ConverterTypeVariant variant)
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static void Register_Rule_Value(std::string_view type_name, std::string_view rule, T value)
     {
-        RegisteredRuleTypes[std::format("{}:{}", section, rule)] = variant;
+        if (!RegisteredRuleTypes.contains(type_name)) {
+            RegisteredRuleTypes[type_name] = {};
+        }
+
+        RegisteredRuleTypes[type_name][rule] = value;
     }
 
-    bool Rule_Requires_Converter(std::string section, std::string rule)
+    static bool Rule_Requires_Converter(std::string_view type_name, std::string_view rule)
     {
-        return RegisteredRuleTypes.contains(std::format("{}:{}", section, rule));
+        return RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule);
     }
 
-    void Set_Rule_Variant(RuleSection& section, std::string rule, std::string value, const ConverterTypeVariant variant)
+    static ConverterTypeVariant Get_Rule_Variant(std::string_view type_name, std::string_view rule)
+    {
+        return RegisteredRuleTypes[type_name][rule];
+    }
+
+    static void Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant)
     {
         if (std::get_if<ArmorType>(&variant)) {
             section.Set_With_Converter<ArmorType, TdTypeConverter>(rule, value);
@@ -937,13 +951,72 @@ public:
         }
     }
 
+
+    /**
+     * Return a human-readable name for a given converter type; note all types will be pluralised.
+     */
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static std::string_view Get_Type_Name()
+    {
+        if constexpr (std::is_same_v<T, ArmorType>) {
+            return "Armor";
+        } else if constexpr (std::is_same_v<T, MPHType>) {
+            return "Mph";
+        } else if constexpr (std::is_same_v<T, WeaponType>) {
+            return "Weapons";
+        } else if constexpr (std::is_same_v<T, HousesType>) {
+            return "Houses";
+        } else if constexpr (std::is_same_v<T, StructType>) {
+            return "Buildings";
+        } else if constexpr (std::is_same_v<T, FactoryType>) {
+            return "Factories";
+        } else if constexpr (std::is_same_v<T, DirType>) {
+            return "Dirs";
+        } else if constexpr (std::is_same_v<T, BSizeType>) {
+            return "BSizes";
+        } else if constexpr (std::is_same_v<T, AircraftType>) {
+            return "Aircraft";
+        } else if constexpr (std::is_same_v<T, MissionType>) {
+            return "Missions";
+        } else if constexpr (std::is_same_v<T, AnimType>) {
+            return "Anims";
+        } else if constexpr (std::is_same_v<T, InfantryType>) {
+            return "Infantry";
+        } else if constexpr (std::is_same_v<T, UnitType>) {
+            return "Units";
+        } else if constexpr (std::is_same_v<T, SpeedType>) {
+            return "Speeds";
+        } else if constexpr (std::is_same_v<T, BulletType>) {
+            return "Bullets";
+        } else if constexpr (std::is_same_v<T, WarheadType>) {
+            return "Warheads";
+        } else if constexpr (std::is_same_v<T, VocType>) {
+            return "Voc";
+        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
+            return "PlayerColors";
+        } else if constexpr (std::is_same_v<T, HouseColorType>) {
+            return "HouseColors";
+        }
+
+        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+    }
+
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
-    static inline std::map<std::string, ConverterTypeVariant> RegisteredRuleTypes;
+    static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
 
     TdTypeConverter() = delete;
 
 };
+
+// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
+#define Read_With_TdConverter(TYPE, VAR) \
+    Get_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](auto v) { VAR = v; })
+
+// IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
+#define Read_Csv_With_TdConverter(TYPE, VAR) \
+    Get_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](auto v) { VAR = std::move(v); })
 
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
 #define Load_With_TdConverter(TYPE, VAR) \

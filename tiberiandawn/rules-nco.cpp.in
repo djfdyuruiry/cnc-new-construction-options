@@ -16,7 +16,7 @@ void RulesClass::Init_Sections(CCINIClass& ini)
 
     // generated code END
 
-    Sections.On_Rules_Changed([&]() {
+    Sections.Default_Rules_Changed_Handler([&](auto& s, auto r, const auto& v) {
         Apply_Static_And_Global_Values();
     });
 }

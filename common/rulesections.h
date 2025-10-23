@@ -52,13 +52,15 @@ concept RuleValueVariantCompatible = (
 );
 
 template<typename C, typename T>
-concept TypeConverter = requires(std::string str, const std::string& str_ref, const std::vector<T>& instances, const char c, T instance) {
+concept TypeConverter = requires(std::string str, const std::string& str_ref, std::string_view str_view, const std::vector<T>& instances, const char c, T instance) {
     { C::template Get_Valid_Strings<T>() } -> std::same_as<std::vector<std::string>>;
     { C::template Get_Valid_Instances<T>() } -> std::same_as<std::vector<T>>;
     { C::template Try_Parse<T>(str) } -> std::same_as<std::optional<T>>;
     { C::template Try_Parse_Csv<T>(str_ref, c) } -> std::same_as<std::optional<std::vector<T>>>;
     { C::template To_String<T>(instance) } -> std::same_as<std::string>;
     { C::template To_Csv_String<T>(instances) }  -> std::same_as<std::string>;
+    { C::template Get_Type_Name<T>() }  -> std::same_as<std::string_view>;
+    { C::template Register_Rule_Value<T>(str_view, str, instance) };
 };
 
 class RuleSection
@@ -112,7 +114,6 @@ public:
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
     }
 
-
     static std::string Get_Variant_Values(RuleValueVariant value_variant)
     {
         if (const auto value = std::get_if<int>(&value_variant)) {
@@ -161,7 +162,7 @@ public:
 
     RuleSection(
         std::string section_name,
-        std::function<void(void)> on_rules_changed
+        std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed
     ) : SectionName(section_name), OnRulesChanged(on_rules_changed) {}
 
     template<typename T>
@@ -176,7 +177,7 @@ public:
 
     bool Has_Key(std::string_view name)
     {
-        return Rules.find(std::string(name)) != Rules.end();
+        return Rules.find(name.data()) != Rules.end();
     }
 
     std::vector<std::string_view> Rule_Names() const
@@ -193,7 +194,7 @@ public:
 
     const RuleValueVariant Get_Variant(std::string_view name) const
     {
-        auto it = Rules.find(std::string(name));
+        auto it = Rules.find(name.data());
 
         if (it != Rules.end()) {
             return it->second;
@@ -204,7 +205,7 @@ public:
 
     const std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const
     {
-        auto it = Rules.find(std::string(name));
+        auto it = Rules.find(name.data());
 
         if (it != Rules.end()) {
             return it->second;
@@ -215,7 +216,7 @@ public:
 
     const std::string_view Get_Type(std::string_view name) const
     {
-        auto it = Rules.find(std::string(name));
+        auto it = Rules.find(name.data());
 
         if (it != Rules.end()) {
             auto value_variant = it->second;
@@ -245,7 +246,7 @@ public:
                 SectionName
             );
 
-            Rules[std::string(name)] = default_value;
+            Rules[name.data()] = default_value;
             return *this;
         }
 
@@ -321,7 +322,7 @@ public:
             Variant_To_String(value)
         );
 
-        Rules[std::string(name)] = value;
+        Rules[name.data()] = value;
 
         return *this;
     }
@@ -405,6 +406,14 @@ public:
         return value_optional.value();
     }
 
+    template<RuleValueVariantCompatible T>
+    const RuleSection& Get_With_Callback(std::string_view name, std::function<void(T)> callback) const
+    {
+        callback(Get<T>(name));
+
+        return *this;
+    }
+
     template<class T, TypeConverter<T> C>
     T Get_With_Converter(std::string_view name) const
     {
@@ -425,6 +434,14 @@ public:
     }
 
     template<class T, TypeConverter<T> C>
+    const RuleSection& Get_With_Converter_Callback(std::string_view name, std::function<void(T)> callback) const
+    {
+        callback(Get_With_Converter<T, C>(name));
+
+        return *this;
+    }
+
+    template<class T, TypeConverter<T> C>
     std::vector<T> Get_With_Csv_Converter(std::string_view name) const
     {
         auto rules_value = Get<std::string>(name);
@@ -441,6 +458,17 @@ public:
         }
 
         return converted_value.value();
+    }
+
+    template<class T, TypeConverter<T> C>
+    const RuleSection& Get_With_Csv_Converter_Callback(
+        std::string_view name,
+        std::function<void(std::vector<T>)> callback
+    ) const
+    {
+        callback(Get_With_Csv_Converter<T, C>(name));
+
+        return *this;
     }
 
     RuleSection& Set(std::string_view name, RuleValueVariant value)
@@ -466,10 +494,10 @@ public:
             }
         }
 
-        Rules[std::string(name)] = value;
+        Rules[name.data()] = value;
 
         CNC_LOGGER_WARN("Running OnRulesChanged() handler");
-        OnRulesChanged();
+        OnRulesChanged(*this, name, value);
 
         return *this;
     }
@@ -539,7 +567,7 @@ private:
     static inline const std::function<bool(int)> ValidateUChar = [](auto v) { return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max(); };
 
     std::map<std::string, RuleValueVariant> Rules;
-    std::function<void()> OnRulesChanged;
+    std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
 
     template<class T, class U = T, class V = std::string>
     void Safe_Parse(
@@ -599,6 +627,18 @@ private:
     }
 };
 
+#define Read_Var_With_Type(VAR, T) Get_With_Callback<T>(#VAR, [&](const auto v) { VAR = v; })
+
+// Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
+#define Read_Var(VAR) Read_Var_With_Type(#VAR, VAR, [&](const auto v) { VAR = v; })
+#define Read_Bool_Var(VAR) Read_Var_With_Type(VAR, bool)
+#define Read_UShort_Var(VAR) Read_Var_With_Type(VAR, ushort)
+#define Read_Int_Var(VAR) Read_Var_With_Type(VAR, int)
+#define Read_UInt_Var(VAR) Read_Var_With_Type(VAR, uint)
+#define Read_Char_Var(VAR) Read_Var_With_Type(VAR, char)
+#define Read_UChar_Var(VAR) Read_Var_With_Type(VAR, uchar)
+#define Read_String_Var(VAR) Read_Var_With_Type(VAR, std::string)
+
 class IniRuleContext
 {
 public:
@@ -615,6 +655,10 @@ public:
     template<class T, TypeConverter<T> C>
     const IniRuleContext& Load_With_Converter(std::string_view name, T default_value) const
     {
+        auto type_name = C::template Get_Type_Name<T>();
+
+        C::Register_Rule_Value(type_name, name, default_value);
+
         Section.Load_From_Ini<std::string>(
             Context,
             name,
@@ -766,9 +810,9 @@ private:
 class RuleSections
 {
 public:
-    void On_Rules_Changed(std::function<void(void)> on_rules_changed)
+    void Default_Rules_Changed_Handler(std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed)
     {
-        OnRulesChanged = on_rules_changed;
+        OnRulesChangedDefault = on_rules_changed;
     }
 
     std::vector<std::string_view> Section_Names() const
@@ -785,7 +829,7 @@ public:
 
     bool Has_Section(std::string_view name)
     {
-        return Sections.find(std::string(name)) != Sections.end();
+        return Sections.contains(name.data());
     }
 
     void Save_All_To_Ini(INIClass& ini) const
@@ -795,32 +839,41 @@ public:
         }
     }
 
+    RuleSection& Add_Section(std::string_view name, std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed)
+    {
+        CNC_LOGGER_DEBUG("Adding new rules section '{}'", name);
+
+        Sections[name.data()] = std::make_unique<RuleSection>(
+            name.data(),
+            on_rules_changed
+        );
+
+        return *Sections[name.data()];
+    }
+
+    RuleSection& Add_Section(std::string_view name)
+    {
+        return Add_Section(name, [&](auto& s, auto r, const auto& v) {
+            if (OnRulesChangedDefault.has_value()) {
+                OnRulesChangedDefault.value()(s, r, v);
+            }
+        });
+    }
+
     RuleSection& operator[](std::string_view name)
     {
-        auto name_str = std::string(name);
-        auto it = Sections.find(name_str);
+        auto it = Sections.find(name.data());
 
         if (it != Sections.end()) {
             return *(it->second);
         }
 
-        CNC_LOGGER_DEBUG("Adding new rules section '{}'", name);
-
-        Sections[name_str] = std::make_unique<RuleSection>(
-            name_str,
-            [&]() {
-                if (OnRulesChanged.has_value()) {
-                    OnRulesChanged.value()();
-                }
-            }
-        );
-
-        return *Sections[name_str];
+        return Add_Section(name.data());
     }
 
 private:
     static inline const auto& Logger = CncLogger::For(RuleSections);
 
     std::map<std::string, std::unique_ptr<RuleSection>> Sections;
-    std::optional<std::function<void()>> OnRulesChanged;
+    std::optional<std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)>> OnRulesChangedDefault;
 };
