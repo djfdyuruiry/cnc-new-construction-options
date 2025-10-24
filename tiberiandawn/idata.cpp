@@ -1975,7 +1975,6 @@ int InfantryTypeClass::Full_Name(void) const
 const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
 {
     return TechnoTypeClass::Read_INI(ini)
-        .Load<std::string>("_", std::string(Text_String(Full_Name()))) // TODO: figure how to use as comment for section (roll out to other types with text strings)
         .Load_Bool_Var(IsFemale)
         .Load_Bool_Var(IsCrawling)
         .Load_Bool_Var(IsCapture)

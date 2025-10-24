@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.House",
+  "ini_comment": "House (GDI/NOD) specific behavior, mainly used to hide units/super powers from certain sides",
   "comment": "House (GDI/NOD) specific behavior, mainly used to hide units/super powers from certain sides.",
   "rules": [
     {

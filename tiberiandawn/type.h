@@ -106,6 +106,12 @@ public:
         return IniName;
     }
 
+    // TODO: Add human readable names for weapons
+    int Full_Name() const
+    {
+        return TXT_NONE;
+    }
+
     const IniRuleContext& Read_INI(const IniRuleContext& ini)
     {
         return ini.Load_With_TdConverter(WeaponType, Type)
@@ -178,6 +184,11 @@ public:
     const char* Name() const
     {
         return IniName;
+    }
+
+    int Full_Name() const
+    {
+        return TXT_NONE;
     }
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini)
@@ -295,6 +306,11 @@ public:
     char const* Name() const
     {
         return IniName;
+    }
+
+    int Full_Name() const
+    {
+        return FullName;
     }
 
     void Set_Remap_Color_Table();

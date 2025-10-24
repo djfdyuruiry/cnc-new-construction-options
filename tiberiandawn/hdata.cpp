@@ -85,7 +85,7 @@ static HouseTypeClass const HouseJP(HOUSE_JP,
 
 static HouseTypeClass const HouseMulti1(HOUSE_MULTI1,
                                         "Multi1",             //	NAME:			House name.
-                                        TXT_CIVILIAN,         // FULLNAME:	Translated house name.
+                                        TXT_MULTIPLAYER_GAME, // FULLNAME:	Translated house name.
                                         "MP1",                // SUFFIX:		House file suffix.
                                         0,                    // LEMON:		Lemon vehicle frequency.
                                         HOUSE_COLOR_NEUTRAL,        // COLOR:		Radar map color.
@@ -96,7 +96,7 @@ static HouseTypeClass const HouseMulti1(HOUSE_MULTI1,
 
 static HouseTypeClass const HouseMulti2(HOUSE_MULTI2,
                                         "Multi2",             //	NAME:			House name.
-                                        TXT_CIVILIAN,         // FULLNAME:	Translated house name.
+                                        TXT_MULTIPLAYER_GAME, // FULLNAME:	Translated house name.
                                         "MP2",                // SUFFIX:		House file suffix.
                                         0,                    // LEMON:		Lemon vehicle frequency.
                                         HOUSE_COLOR_NEUTRAL,        // COLOR:		Radar map color.
@@ -107,7 +107,7 @@ static HouseTypeClass const HouseMulti2(HOUSE_MULTI2,
 
 static HouseTypeClass const HouseMulti3(HOUSE_MULTI3,
                                         "Multi3",             //	NAME:			House name.
-                                        TXT_CIVILIAN,         // FULLNAME:	Translated house name.
+                                        TXT_MULTIPLAYER_GAME, // FULLNAME:	Translated house name.
                                         "MP3",                // SUFFIX:		House file suffix.
                                         0,                    // LEMON:		Lemon vehicle frequency.
                                         HOUSE_COLOR_NEUTRAL,        // COLOR:		Radar map color.
@@ -118,7 +118,7 @@ static HouseTypeClass const HouseMulti3(HOUSE_MULTI3,
 
 static HouseTypeClass const HouseMulti4(HOUSE_MULTI4,
                                         "Multi4",             //	NAME:			House name.
-                                        TXT_CIVILIAN,         // FULLNAME:	Translated house name.
+                                        TXT_MULTIPLAYER_GAME, // FULLNAME:	Translated house name.
                                         "MP4",                // SUFFIX:		House file suffix.
                                         0,                    // LEMON:		Lemon vehicle frequency.
                                         HOUSE_COLOR_NEUTRAL,        // COLOR:		Radar map color.
@@ -129,7 +129,7 @@ static HouseTypeClass const HouseMulti4(HOUSE_MULTI4,
 
 static HouseTypeClass const HouseMulti5(HOUSE_MULTI5,
                                         "Multi5",             //	NAME:			House name.
-                                        TXT_CIVILIAN,         // FULLNAME:	Translated house name.
+                                        TXT_MULTIPLAYER_GAME, // FULLNAME:	Translated house name.
                                         "MP5",                // SUFFIX:		House file suffix.
                                         0,                    // LEMON:		Lemon vehicle frequency.
                                         HOUSE_COLOR_NEUTRAL,        // COLOR:		Radar map color.
@@ -140,7 +140,7 @@ static HouseTypeClass const HouseMulti5(HOUSE_MULTI5,
 
 static HouseTypeClass const HouseMulti6(HOUSE_MULTI6,
                                         "Multi6",             //	NAME:			House name.
-                                        TXT_CIVILIAN,         // FULLNAME:	Translated house name.
+                                        TXT_MULTIPLAYER_GAME, // FULLNAME:	Translated house name.
                                         "MP6",                // SUFFIX:		House file suffix.
                                         0,                    // LEMON:		Lemon vehicle frequency.
                                         HOUSE_COLOR_NEUTRAL,        // COLOR:		Radar map color.

@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Misc",
+  "ini_comment": "Miscellaneous rules for game engine behavior",
   "comment": "Rules that don't really fit into one category, covers a wide range of behavior.\n\n- Beta Features (Bibs, 3 point turns)\n- Allow using Skirmish/Multiplayer options in single player\n- Building behaviors",
   "rules": [
     {
@@ -40,10 +41,10 @@
       "comment": "Show little dirt bibs on buildings (if turned off, overrides any rules for individual buildings)"
     },
     {
-      "name": "ShowCivilianBuildingNames",
+      "name": "ShowCivilianNames",
       "type": "bool",
       "default": false,
-      "comment": "- (C&C remastered seems to show the names regardless of this switch)"
+      "comment": "Show names of civilian structures and infantry - (C&C remastered seems to show the names regardless of this switch)"
     },
     {
       "name": "OnlyAllowNukeIfAllPartsHaveBeenCollected",

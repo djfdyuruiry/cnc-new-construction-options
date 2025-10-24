@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Map",
+  "ini_comment": "Building placement rules and tiberium behavior",
   "comment": "Building placement rules and tiberium behavior.",
   "rules": [
     {

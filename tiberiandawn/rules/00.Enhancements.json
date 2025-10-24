@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Enhancements",
+  "ini_comment": "Enhancements unique to NCO (not found in original game)",
   "comment": "Toggles for new features and enhancements to the game engine.",
   "rules": [
     {

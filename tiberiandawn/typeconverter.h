@@ -867,6 +867,9 @@ public:
         return std::make_optional(instances);
     }
 
+    /**
+     * Record that a rule for the given type name requires a converter to read/write from.
+     */
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static void Register_Rule_Value(std::string_view type_name, std::string_view rule, T value)
@@ -878,73 +881,97 @@ public:
         RegisteredRuleTypes[type_name][rule] = value;
     }
 
-    static bool Rule_Requires_Converter(std::string_view type_name, std::string_view rule)
+    /**
+     * Record that a rule for the given type name requires a CSV converter to read/write from.
+     */
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static void Register_Csv_Rule_Value(std::string_view type_name, std::string_view rule, T value)
     {
-        return RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule);
+        if (!RegisteredCsvRuleTypes.contains(type_name)) {
+            RegisteredCsvRuleTypes[type_name] = {};
+        }
+
+        RegisteredCsvRuleTypes[type_name][rule] = value;
     }
 
+    /**
+     * Does the given type name rule require a converter to read/write from?
+     */
+    static bool Rule_Requires_Converter(std::string_view type_name, std::string_view rule)
+    {
+        return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
+            || Rule_Requires_Csv_Converter(type_name, rule);
+    }
+
+    /**
+     * Does the given type name rule require a CSV converter to read/write from?
+     */
+    static bool Rule_Requires_Csv_Converter(std::string_view type_name, std::string_view rule)
+    {
+        return RegisteredCsvRuleTypes.contains(type_name) && RegisteredCsvRuleTypes[type_name].contains(rule);
+    }
+
+    /**
+     * Get the corresponding variant for a given type rule, it must have been registered by calling
+     * Rule_Requires_Converter first.
+     */
     static ConverterTypeVariant Get_Rule_Variant(std::string_view type_name, std::string_view rule)
     {
         return RegisteredRuleTypes[type_name][rule];
     }
 
+    /**
+     * Get the corresponding variant for a given type csv rule, it must have been registered by calling
+     * Rule_Requires_Csv_Converter first.
+     */
+    static ConverterTypeVariant Get_Csv_Rule_Variant(std::string_view type_name, std::string_view rule)
+    {
+        return RegisteredCsvRuleTypes[type_name][rule];
+    }
+
+    /**
+     * Using a given type rule variant, call RuleSection::Set_With_Converter with appropriate type arguments.
+     */
     static void Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant)
     {
         if (std::get_if<ArmorType>(&variant)) {
             section.Set_With_Converter<ArmorType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<MPHType>(&variant)) {
+        } else if (std::get_if<MPHType>(&variant)) {
             section.Set_With_Converter<MPHType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<WeaponType>(&variant)) {
+        } else if (std::get_if<WeaponType>(&variant)) {
             section.Set_With_Converter<WeaponType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<HousesType>(&variant)) {
+        } else if (std::get_if<HousesType>(&variant)) {
             section.Set_With_Converter<HousesType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<StructType>(&variant)) {
+        } else if (std::get_if<StructType>(&variant)) {
             section.Set_With_Converter<StructType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<FactoryType>(&variant)) {
+        } else if (std::get_if<FactoryType>(&variant)) {
             section.Set_With_Converter<FactoryType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<DirType>(&variant)) {
+        } else if (std::get_if<DirType>(&variant)) {
             section.Set_With_Converter<DirType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<BSizeType>(&variant)) {
+        } else if (std::get_if<BSizeType>(&variant)) {
             section.Set_With_Converter<BSizeType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<AircraftType>(&variant)) {
+        } else if (std::get_if<AircraftType>(&variant)) {
             section.Set_With_Converter<AircraftType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<MissionType>(&variant)) {
+        } else if (std::get_if<MissionType>(&variant)) {
             section.Set_With_Converter<MissionType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<AnimType>(&variant)) {
+        } else if (std::get_if<AnimType>(&variant)) {
             section.Set_With_Converter<AnimType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<InfantryType>(&variant)) {
+        } else if (std::get_if<InfantryType>(&variant)) {
             section.Set_With_Converter<InfantryType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<UnitType>(&variant)) {
+        } else if (std::get_if<UnitType>(&variant)) {
             section.Set_With_Converter<UnitType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<SpeedType>(&variant)) {
+        } else if (std::get_if<SpeedType>(&variant)) {
             section.Set_With_Converter<SpeedType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<BulletType>(&variant)) {
+        } else if (std::get_if<BulletType>(&variant)) {
             section.Set_With_Converter<BulletType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<WarheadType>(&variant)) {
+        } else if (std::get_if<WarheadType>(&variant)) {
             section.Set_With_Converter<WarheadType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<VocType>(&variant)) {
+        } else if (std::get_if<VocType>(&variant)) {
             section.Set_With_Converter<VocType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<PlayerColorType>(&variant)) {
+        } else if (std::get_if<PlayerColorType>(&variant)) {
             section.Set_With_Converter<PlayerColorType, TdTypeConverter>(rule, value);
-        }
-        else if (std::get_if<HouseColorType>(&variant)) {
+        } else if (std::get_if<HouseColorType>(&variant)) {
             section.Set_With_Converter<HouseColorType, TdTypeConverter>(rule, value);
         } else {
             throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
@@ -952,7 +979,55 @@ public:
     }
 
     /**
-     * Return a human-readable name for a given converter type; note all types will be pluralized.
+     * Using a given type rule variant, call RuleSection::Set_With_Csv_Converter with appropriate type arguments.
+     */
+    static void Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant)
+    {
+        if (std::get_if<ArmorType>(&variant)) {
+            section.Set_With_Csv_Converter<ArmorType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<MPHType>(&variant)) {
+            section.Set_With_Csv_Converter<MPHType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<WeaponType>(&variant)) {
+            section.Set_With_Csv_Converter<WeaponType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<HousesType>(&variant)) {
+            section.Set_With_Csv_Converter<HousesType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<StructType>(&variant)) {
+            section.Set_With_Csv_Converter<StructType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<FactoryType>(&variant)) {
+            section.Set_With_Csv_Converter<FactoryType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<DirType>(&variant)) {
+            section.Set_With_Csv_Converter<DirType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<BSizeType>(&variant)) {
+            section.Set_With_Csv_Converter<BSizeType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<AircraftType>(&variant)) {
+            section.Set_With_Csv_Converter<AircraftType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<MissionType>(&variant)) {
+            section.Set_With_Csv_Converter<MissionType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<AnimType>(&variant)) {
+            section.Set_With_Csv_Converter<AnimType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<InfantryType>(&variant)) {
+            section.Set_With_Csv_Converter<InfantryType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<UnitType>(&variant)) {
+            section.Set_With_Csv_Converter<UnitType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<SpeedType>(&variant)) {
+            section.Set_With_Csv_Converter<SpeedType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<BulletType>(&variant)) {
+            section.Set_With_Csv_Converter<BulletType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<WarheadType>(&variant)) {
+            section.Set_With_Csv_Converter<WarheadType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<VocType>(&variant)) {
+            section.Set_With_Csv_Converter<VocType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<PlayerColorType>(&variant)) {
+            section.Set_With_Csv_Converter<PlayerColorType, TdTypeConverter>(rule, csv_value);
+        } else if (std::get_if<HouseColorType>(&variant)) {
+            section.Set_With_Csv_Converter<HouseColorType, TdTypeConverter>(rule, csv_value);
+        } else {
+            throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
+        }
+    }
+
+    /**
+     * Return a human-readable name for a given converter type.
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -961,89 +1036,107 @@ public:
         if constexpr (std::is_same_v<T, ArmorType>) {
             return "Armor";
         } else if constexpr (std::is_same_v<T, MPHType>) {
-            return "MphSpeeds";
+            return "MphSpeed";
         } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return "Weapons";
+            return "Weapon";
         } else if constexpr (std::is_same_v<T, HousesType>) {
-            return "Houses";
+            return "House";
         } else if constexpr (std::is_same_v<T, StructType>) {
-            return "Buildings";
+            return "Building";
         } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return "Factories";
+            return "Factory";
         } else if constexpr (std::is_same_v<T, DirType>) {
-            return "Directions";
+            return "Direction";
         } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return "BuildingSizes";
+            return "BuildingSize";
         } else if constexpr (std::is_same_v<T, AircraftType>) {
             return "Aircraft";
         } else if constexpr (std::is_same_v<T, MissionType>) {
-            return "Missions";
+            return "Mission";
         } else if constexpr (std::is_same_v<T, AnimType>) {
-            return "Animations";
+            return "Animation";
         } else if constexpr (std::is_same_v<T, InfantryType>) {
             return "Infantry";
         } else if constexpr (std::is_same_v<T, UnitType>) {
-            return "Units";
+            return "Unit";
         } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return "Speeds";
+            return "Speed";
         } else if constexpr (std::is_same_v<T, BulletType>) {
-            return "Bullets";
+            return "Bullet";
         } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return "Warheads";
+            return "Warhead";
         } else if constexpr (std::is_same_v<T, VocType>) {
-            return "SoundsEffects";
+            return "SoundEffect";
         } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return "PlayerColors";
+            return "PlayerColor";
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return "HouseColors";
+            return "HouseColor";
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
     }
 
     /**
-     * Return a human-readable name for a given converter variant type; note all types will be singular.
+     * Return a human-readable name for a given type rule variant type.
      */
-    std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant)
+    static std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant)
     {
-       if (std::get_if<ArmorType>(&variant)) {
-            return "Armor";
-        } else if (std::get_if<MPHType>(&variant)) {
-            return "MphSpeed";
-        } else if (std::get_if<WeaponType>(&variant)) {
-            return "Weapon";
-        } else if (std::get_if<HousesType>(&variant)) {
-            return "House";
-        } else if (std::get_if<StructType>(&variant)) {
-            return "Building";
-        } else if (std::get_if<FactoryType>(&variant)) {
-            return "Factory";
-        } else if (std::get_if<DirType>(&variant)) {
-            return "Direction";
-        } else if (std::get_if<BSizeType>(&variant)) {
-            return "BuildingSize";
-        } else if (std::get_if<AircraftType>(&variant)) {
-            return "Aircraft";
-        } else if (std::get_if<MissionType>(&variant)) {
-            return "Mission";
-        } else if (std::get_if<AnimType>(&variant)) {
-            return "Animation";
-        } else if (std::get_if<InfantryType>(&variant)) {
-            return "Infantry";
-        } else if (std::get_if<UnitType>(&variant)) {
-            return "Unit";
-        } else if (std::get_if<SpeedType>(&variant)) {
-            return "Speed";
-        } else if (std::get_if<BulletType>(&variant)) {
-            return "Bullet";
-        } else if (std::get_if<WarheadType>(&variant)) {
-            return "Warhead";
-        } else if (std::get_if<VocType>(&variant)) {
-            return "SoundEffect";
-        } else if (std::get_if<PlayerColorType>(&variant)) {
-            return "PlayerColor";
-        } else if (std::get_if<HouseColorType>(&variant)) {
-            return "HouseColor";
+        if (std::get_if<ArmorType>(&variant)) {
+            return Get_Type_Name<ArmorType>();
+        }
+        if (std::get_if<MPHType>(&variant)) {
+            return Get_Type_Name<MPHType>();
+        }
+        if (std::get_if<WeaponType>(&variant)) {
+            return Get_Type_Name<WeaponType>();
+        }
+        if (std::get_if<HousesType>(&variant)) {
+            return Get_Type_Name<HousesType>();
+        }
+        if (std::get_if<StructType>(&variant)) {
+            return Get_Type_Name<StructType>();
+        }
+        if (std::get_if<FactoryType>(&variant)) {
+            return Get_Type_Name<FactoryType>();
+        }
+        if (std::get_if<DirType>(&variant)) {
+            return Get_Type_Name<DirType>();
+        }
+        if (std::get_if<BSizeType>(&variant)) {
+            return Get_Type_Name<BSizeType>();
+        }
+        if (std::get_if<AircraftType>(&variant)) {
+            return Get_Type_Name<AircraftType>();
+        }
+        if (std::get_if<MissionType>(&variant)) {
+            return Get_Type_Name<MissionType>();
+        }
+        if (std::get_if<AnimType>(&variant)) {
+            return Get_Type_Name<AnimType>();
+        }
+        if (std::get_if<InfantryType>(&variant)) {
+            return Get_Type_Name<InfantryType>();
+        }
+        if (std::get_if<UnitType>(&variant)) {
+            return Get_Type_Name<UnitType>();
+        }
+        if (std::get_if<SpeedType>(&variant)) {
+            return Get_Type_Name<SpeedType>();
+        }
+        if (std::get_if<BulletType>(&variant)) {
+            return Get_Type_Name<BulletType>();
+        }
+        if (std::get_if<WarheadType>(&variant)) {
+            return Get_Type_Name<WarheadType>();
+        }
+        if (std::get_if<VocType>(&variant)) {
+            return Get_Type_Name<VocType>();
+        }
+        if (std::get_if<PlayerColorType>(&variant)) {
+            return Get_Type_Name<PlayerColorType>();
+        }
+        if (std::get_if<HouseColorType>(&variant)) {
+            return Get_Type_Name<HouseColorType>();
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -1052,6 +1145,7 @@ public:
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
     static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
+    static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
 
     TdTypeConverter() = delete;
 

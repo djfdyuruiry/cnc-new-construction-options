@@ -8,6 +8,10 @@
       "type": "string",
       "description": "INI identifier for the section"
     },
+    "ini_comment": {
+      "type": "string",
+      "description": "Description of the section to be displayed above it in the INI file"
+    },
     "comment": {
       "type": "string",
       "description": "Description of the section as markdown"
@@ -53,6 +57,7 @@
   },
   "required": [
     "section",
+    "ini_comment",
     "comment",
     "rules"
   ]

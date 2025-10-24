@@ -52,6 +52,7 @@ concept RulesTypeClass = requires(C instance, E enum_instance, const IniRuleCont
     { C::As_Reference(enum_instance) } -> std::same_as<const C&>;
     { C::As_Mutable_Reference(enum_instance) } -> std::same_as<C&>;
     { instance.Name() } -> std::same_as<const char*>;
+    { instance.Full_Name() } -> std::same_as<int>;
     { instance.Read_INI(ini) } -> std::same_as<const IniRuleContext&>;
     { instance.Read_Rules(section) } -> std::same_as<const RuleSection&>;
 };

@@ -24,12 +24,12 @@ public:
         // TODO: Include duplicate value in exception message
         for (const auto& pair : pairs) {
             // Check for duplicate forward mapping
-            if (ForwardMap.find(pair.first) != ForwardMap.end()) {
+            if (ForwardMap.contains(pair.first)) {
                 CNC_LOGGER_FATAL("Duplicate key in forward map");
             }
 
             // Check for duplicate backward mapping
-            if (BackwardMap.find(pair.second) != BackwardMap.end()) {
+            if (BackwardMap.contains(pair.second)) {
                 CNC_LOGGER_FATAL("Duplicate key in backward map");
             }
 
@@ -40,24 +40,30 @@ public:
 
     bool Has_Key(const A& key) const
     {
-        return ForwardMap.find(key) != ForwardMap.end();
+        return ForwardMap.contains(key);
     }
 
     bool Has_Key(const B& key) const
     {
-        return BackwardMap.find(key) != BackwardMap.end();
+        return BackwardMap.contains(key);
     }
 
     std::optional<B> operator[](const A& key) const
     {
-        auto it = ForwardMap.find(key);
-        return (it != ForwardMap.end()) ? std::make_optional(it->second) : std::nullopt;
+        if (!ForwardMap.contains(key)) {
+            return std::nullopt;
+        }
+
+        return ForwardMap.at(key);
     }
 
     std::optional<A> operator[](const B& key) const
     {
-        auto it = BackwardMap.find(key);
-        return (it != BackwardMap.end()) ? std::make_optional(it->second) : std::nullopt;
+        if (!BackwardMap.contains(key)) {
+            return std::nullopt;
+        }
+
+        return BackwardMap.at(key);
     }
 
     std::vector<A> Get_Forward_Keys() const

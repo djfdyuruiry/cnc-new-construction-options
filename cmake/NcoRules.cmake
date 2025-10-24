@@ -97,6 +97,12 @@ function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_
   set(IS_IMPLEMENTED ${IS_IMPLEMENTED} PARENT_SCOPE)
 endfunction()
 
+function (ExtractSectionIniCommentFromJson _RULES_JSON _INI_COMMENT)
+  string(JSON INI_COMMENT GET "${_RULES_JSON}" ini_comment)
+
+  set("${_INI_COMMENT}" ${INI_COMMENT} PARENT_SCOPE)
+endfunction()
+
 function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPPER)
   string(JSON SECTION_NAME GET "${_RULES_JSON}" section)
 
@@ -107,6 +113,7 @@ function (ExtractSectionNameFromJson _RULES_JSON _SECTION_NAME _SECTION_NAME_UPP
   set("${_SECTION_NAME}" ${SECTION_NAME} PARENT_SCOPE)
   set("${_SECTION_NAME_UPPER}" ${SECTION_NAME_UPPER} PARENT_SCOPE)
 endfunction()
+
 
 function(ParseRuleFilePath _RULE_FILE _RELATIVE_RULE_FILE)
   file(RELATIVE_PATH RELATIVE_RULE_FILE "${RULES_PATH}" "${_RULE_FILE}")
@@ -227,6 +234,7 @@ function(Main)
     file(READ ${RULE_FILE} RULES_JSON)
 
     ExtractSectionNameFromJson("${RULES_JSON}" SECTION_NAME SECTION_NAME_UPPER)
+    ExtractSectionIniCommentFromJson("${RULES_JSON}" INI_COMMENT)
 
     message(STATUS "[NcoRules] Generating code for rule section: [${SECTION_NAME}]")
   
@@ -244,8 +252,10 @@ function(Main)
     # rules-nco.cpp
     string(CONCAT SECTION_LEAD_IN "\n    CNC_LOG_INFO(\"Processing rule section: [{}]\", ${SECTION_DEFINE});\n"
                                  "\n"
-                                 "    Sections[${SECTION_DEFINE}].With<IniRuleContext>(ini, [](auto& c) {\n"
-                                 "        c")
+                                 "    Sections[${SECTION_DEFINE}]\n"
+                                 "        .Set_Ini_Comment(ini, \"${INI_COMMENT}\")\n"
+                                 "        .With<IniRuleContext>(ini, [](auto& c) {\n"
+                                 "            c")
     string(APPEND RULE_PROCESS_CODE "${SECTION_LEAD_IN}")
 
     string(JSON RULE_COUNT LENGTH "${RULES_JSON}" rules)
@@ -255,7 +265,7 @@ function(Main)
     foreach(RULE_INDEX RANGE ${RULE_COUNT})
       if(${RULE_INDEX} GREATER 0)
         # rules-nco.cpp
-        string(APPEND RULE_PROCESS_CODE "\n         ")
+        string(APPEND RULE_PROCESS_CODE "\n             ")
       endif()
 
       LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_DEFAULT)

@@ -511,6 +511,10 @@ RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
     rules.TypeRules[type_name] = std::make_unique<RuleSections>();
     auto& sections = *rules.TypeRules[type_name];
 
+    // override rules to ensure INI comments for all types reveal real names
+    const auto old_is_named = Special.IsNamed;
+    Special.IsNamed = true;
+
     for (auto i = first; i < count; ++i) {
         auto& typeInstance = T::As_Mutable_Reference(i);
         auto name = std::string(typeInstance.Name());
@@ -527,11 +531,17 @@ RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
         sections.Add_Section(name, [&](auto& section, auto rule, const auto& value) {
             // trigger type instance properties update if rules cache is updated
             typeInstance.Read_Rules(section); // TODO: consider optimising this to only update the affected property
-        }).template With<IniRuleContext>(ini, [&](auto& c) {
+        })
+        .Set_Ini_Comment(ini, std::string(Text_String(typeInstance.Full_Name())))
+        .template Set_Converter_Section_Type<U, TdTypeConverter>()
+        .template With<IniRuleContext>(ini, [&](auto& c) {
             // load initial values from INI, falling back to type instance hardcoded values
             typeInstance.Read_INI(c);
         });
     }
+
+    // reset temporary rules override
+    Special.IsNamed = old_is_named;
 
     return sections;
 }
@@ -551,6 +561,9 @@ static void Init_Type(RulesClass& rules, U first, U count)
     }
 
     auto& sections = Init_Type<U, T>(rules, first, count, ini);
+
+    // TODO: Load new types instances for ini sections with names not found in game engine
+    //       (needs type ptr/reference rework and enums refactoring - to allow types to grow rather than be static)
 
     // provide player with a default <PREFIX>.INI file
     if (!ini_file_exists) {

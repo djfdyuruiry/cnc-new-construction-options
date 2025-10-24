@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Harvesting",
+  "ini_comment": "Harvester unit and harvesting behavior",
   "comment": "Harvester unit and harvesting behavior.",
   "rules": [
     {

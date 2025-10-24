@@ -7,17 +7,17 @@ local isType = TypeValidator.Validators.isType
 ---@field getSectionNames fun(): string[]
 ---@field getRuleNamesForSection fun(section: string): string[]
 ---@field getRuleType fun(section: string, ruleName: string): type
----@field getRuleValue fun(section: string, ruleName: string): number|boolean
----@field setRuleValue fun(section: string, ruleName: string, value: number|boolean): number|boolean
+---@field getRuleValue fun(section: string, ruleName: string): number|boolean|string
+---@field setRuleValue fun(section: string, ruleName: string, value: number|boolean): number|boolean|string
 
 ---@class RuleSectionApi
 ---@field __name string
 ---@field getRuleNames fun(): string[]
 ---@field getRuleType fun(ruleName: string): type
----@field getRule fun(ruleName: string): number|boolean
----@field setRule fun(ruleName: string, value: number|boolean): number|boolean
+---@field getRule fun(ruleName: string): number|boolean|string
+---@field setRule fun(ruleName: string, value: number|boolean): number|boolean|string
 
----@alias RulesSectionProxy RuleSectionApi | { [string]: number|boolean }
+---@alias RulesSectionProxy RuleSectionApi | { [string]: number|boolean|string }
 
 ---@param api CppRulesApi
 ---@param sectionName string

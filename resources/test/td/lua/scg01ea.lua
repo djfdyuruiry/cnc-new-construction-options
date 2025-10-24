@@ -1,6 +1,19 @@
 -- house goodguy scenario 1-east load test script
 local Utils = require("nco.lib.Utils")
 
+local function editTypes()
+  Logger.debug("Infantry Types: %s", Utils.arrayToCsv(Types.Infantry.getInstanceNames()))
+
+  Types.Infantry.E1.Primary = "CHEMSPRAY";
+
+  Logger.debug("Unit Types: %s", Utils.arrayToCsv(Types.Unit.getInstanceNames()))
+
+  Logger.info("Power plant Power: %s", Types.Building.NUKE.Power)
+  Logger.info("Mammoth Tank MaxSpeed: %s", Types.Unit.HTNK.MaxSpeed)
+
+  Types.Unit.HTNK.MaxSpeed = "FAST";
+end
+
 local function editRules()
   Rules["Game.Misc"].McvRedeployable = true
 end
@@ -56,17 +69,6 @@ local function main()
   Logger.setLevel("debug")
   Logger.info("Someone called scg01ea.lua")
 
-    for _, p in pairs(Types.getInfantryPropertyNames()) do
-        Logger.info("BEFORE E1.%s = %s", p, tostring(Types.getInfantryPropertyValue("E1", p)));
-
-        Types.setInfantryPropertyValue("E1", p, Types.getInfantryPropertyValue("E1", p));
-
-        Logger.info("AFTER E1.%s = %s", p, tostring(Types.getInfantryPropertyValue("E1", p)));
-    end
-
-  -- Types.Infatry.E1.Primary = "chemspray"
-  Types.setInfantryPropertyValue("E1", "Primary", "chemspray");
-
   triggerLookups()
   editingTriggers()
   timerTriggerSetup()
@@ -74,6 +76,7 @@ local function main()
   addingNewTrigger()
   addingNewTeam()
   editRules()
+  editTypes()
 end
 
 local status, error = pcall(main)

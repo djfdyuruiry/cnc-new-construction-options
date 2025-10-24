@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Cheats",
+  "ini_comment": "Just for fun",
   "comment": "Rules that break the game in some way, often to the advantage of the player.",
   "rules": [
     {

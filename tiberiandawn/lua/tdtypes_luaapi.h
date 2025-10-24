@@ -51,16 +51,68 @@ protected:
     }
 
 private:
+
+    template<SupportedByTdTypeConverter T>
+    static T Resolve_Instance_By_Name(
+        const LuaEngine& engine,
+        RuleSections& sections,
+        std::string_view type_name,
+        std::string instance_name
+    )
+    {
+        std::optional<T> instance;
+
+        // lookup instance type using INI name (first)
+        if (sections.Has_Section(instance_name)) {
+            const auto type_rule = sections[instance_name].template Try_Get<std::string>("Type");
+
+            if (!sections.Has_Section(instance_name)) {
+                engine.Raise_Error_Format(
+                    "Failed to find type by INI name, {} type {} does not have required 'Type' rule",
+                    type_name,
+                    instance_name
+                );
+            }
+
+            instance = TdTypeConverter::Try_Parse<T>(type_rule.value());
+        } else {
+            // lookup instance type using enum name (fallback)
+            instance = TdTypeConverter::Try_Parse<T>(instance_name);
+        }
+
+        if (!instance.has_value()) {
+            engine.Raise_Error_Format("Unable to parse string as a type of {}: {}", type_name, instance_name);
+        }
+
+        return instance.value();
+    }
+
     template<EnumSignedChar T, RulesTypeClass<T> U>
     void Register_Type_Functions(luabridge::Namespace& n) const
     {
         auto type_name = TdTypeConverter::Get_Type_Name<T>();
+        auto get_instances_function = std::format("get{}InstanceNames", type_name);
+        auto get_properties_function = std::format("get{}PropertyNames", type_name);
         auto get_property_type_function = std::format("get{}PropertyType", type_name);
         auto get_property_value_function = std::format("get{}PropertyValue", type_name);
         auto set_property_value_function = std::format("set{}PropertyValue", type_name);
-        auto get_properties_function = std::format("get{}PropertyNames", type_name);
 
-        n.addCFunction(get_properties_function.c_str(), [](auto L) {
+        n.addCFunction(get_instances_function.c_str(), [](auto L) {
+            const auto engine = SharedLuaEngine(L);
+
+            auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            auto valid_instances = sections.Section_Names();
+
+            // push instance names table to caller
+            auto properties_table = LuaTableBuilder(engine);
+
+            for (const auto& name : valid_instances) {
+                properties_table.With_Index_Value(name);
+            }
+
+            return 1;
+        })
+        .addCFunction(get_properties_function.c_str(), [](auto L) {
             const auto engine = SharedLuaEngine(L);
             auto type_name = TdTypeConverter::Get_Type_Name<T>();
 
@@ -104,17 +156,27 @@ private:
                 engine.Raise_Error_Format("Empty rules cache detected for type: {}", type_name);
             }
 
+            auto section_name = std::string(section_names.front());
+
             if (TdTypeConverter::Rule_Requires_Converter(type_name, property_name)) {
                 // rule is of special type, look up type name using converter
-                RulesLuaAdapter::Assert_Rule_Exists(engine, sections, section_names.front(), property_name);
+                RulesLuaAdapter::Assert_Rule_Exists(engine, sections, section_name, property_name);
 
-                auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
+                if (TdTypeConverter::Rule_Requires_Csv_Converter(type_name, property_name)) {
+                    auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(type_name, property_name);
 
-                engine.Push_Value(
-                    TdTypeConverter::Get_Type_Name_Variant(converter_variant)
-                );
+                    engine.Push_Value(
+                        std::format("{}[]", TdTypeConverter::Get_Type_Name_Variant(converter_variant))
+                    );
+                } else {
+                    auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
+
+                    engine.Push_Value(
+                        TdTypeConverter::Get_Type_Name_Variant(converter_variant)
+                    );
+                }
             } else {
-                RulesLuaAdapter::Push_Rule_Type(engine, sections, section_names.front(), property_name);
+                RulesLuaAdapter::Push_Rule_Type(engine, sections, section_name, property_name);
             }
 
             return 1;
@@ -136,16 +198,10 @@ private:
             const auto instance_name = arguments.Read_First<std::string>().Unpack();
             const auto property_name = arguments.Read_Next<std::string>().Unpack();
 
-            // validate arg
-            auto instance = TdTypeConverter::Try_Parse<T>(instance_name);
-
-            if (!instance.has_value()) {
-                engine.Raise_Error_Format("Unable to parse string as a type of {}: {}", "Infantry", instance_name);
-            }
-
             // fetch type instance and type rules
             auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
-            const auto& class_instance = U::As_Reference(instance.value());
+            auto instance = Resolve_Instance_By_Name<T>(engine, sections, type_name, instance_name);
+            const auto& class_instance = U::As_Reference(instance);
 
             // push C++ primitive rule type as lua type (no conversion required, all rule cache types are primitives)
             RulesLuaAdapter::Push_Rule_Value(
@@ -176,15 +232,11 @@ private:
             const auto property_name = arguments.Read_Next<std::string>().Unpack();
 
             // validate arg
-            const auto instance = TdTypeConverter::Try_Parse<T>(instance_name);
-
-            if (!instance.has_value()) {
-                engine.Raise_Error_Format("Unable to parse string as a type of {}: {}", type_name, instance_name);
-            }
+            auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            const auto instance = Resolve_Instance_By_Name<T>(engine, sections, type_name, instance_name);
 
             // fetch type rules and instance name
-            auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
-            auto section_name = U::As_Reference(instance.value()).Name();
+            auto section_name = U::As_Reference(instance).Name();
 
             if (TdTypeConverter::Rule_Requires_Converter(type_name, property_name)) {
                 // rule is of special type that needs conversion from a string value
@@ -196,19 +248,37 @@ private:
 
                 // get current rule value and type
                 auto current_value = section.template Get<std::string>(property_name);
-                auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
 
-                try {
-                    // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
-                    TdTypeConverter::Set_Rule_With_Variant(
-                        section,
-                        property_name,
-                        property_value,
-                        converter_variant
-                    );
-                } catch (const std::invalid_argument& ex) {
-                    // catch conversion errors and throw back to lua caller
-                    engine.Raise_Error(ex.what());
+                if (TdTypeConverter::Rule_Requires_Csv_Converter(type_name, property_name)) {
+                    auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(type_name, property_name);
+
+                    try {
+                        // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
+                        TdTypeConverter::Set_Csv_Rule_With_Variant(
+                            section,
+                            property_name,
+                            property_value,
+                            converter_variant
+                        );
+                    } catch (const std::invalid_argument& ex) {
+                        // catch conversion errors and throw back to lua caller
+                        engine.Raise_Error(ex.what());
+                    }
+                } else {
+                    auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
+
+                    try {
+                        // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
+                        TdTypeConverter::Set_Rule_With_Variant(
+                            section,
+                            property_name,
+                            property_value,
+                            converter_variant
+                        );
+                    } catch (const std::invalid_argument& ex) {
+                        // catch conversion errors and throw back to lua caller
+                        engine.Raise_Error(ex.what());
+                    }
                 }
 
                 // return old value to caller

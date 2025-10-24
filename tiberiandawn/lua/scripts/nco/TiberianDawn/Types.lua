@@ -1,18 +1,24 @@
 local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 local TypeApiProxy = require("nco.TiberianDawn.lib.TypeApiProxy")
 
+---@class Types : ApiModule
+---@field getTypeNames fun(): string[]
+
+---@return Types
 local function builder(cppApi)
-  local api = {
-    getTypeNames = cppApi.getTypeNames
-  }
-
-  for _, t in ipairs(cppApi.getTypeNames()) do
-    api[t] = TypeApiProxy(cppApi, t)
-  end
-
-  return api
+  return setmetatable(
+    {
+      getTypeNames = cppApi.getTypeNames
+    },
+    {
+      __index = function(_, typeName)
+        return TypeApiProxy(cppApi, typeName)
+      end
+    }
+  )
 end
 
+---@type Types | { [string]: TypeApiProxy }
 _G.Types = TdApiModule({
   name = "Types",
   cppSource = "tiberiandawn/lua/tdtypes_luaapi.h",

@@ -74,6 +74,7 @@
 #include "b64straw.h"
 #include "miscasm.h"
 #include "debugstring.h"
+#include "stringutils.h"
 #include "wwstd.h" // For linux version of strupr.
 
 #ifdef FIXIT_FAST_LOAD
@@ -350,6 +351,16 @@ int INIClass::Save(Pipe& pipe) const
 
     INISection* secptr = SectionList.First();
     while (secptr && secptr->Is_Valid()) {
+        /*
+        **	Output the section comment (if present).
+        */
+        if (secptr->comment.has_value()) {
+            const auto comment = secptr->comment->c_str();
+
+            total += pipe.Put("; ", 2);
+            total += pipe.Put(comment, (int)strlen(comment));
+            total += pipe.Put("\r\n", (int)strlen("\r\n"));
+        }
 
         /*
         **	Output the section identifier.
@@ -1281,6 +1292,24 @@ fixed INIClass::Get_Fixed(char const* section, char const* entry, fixed defvalue
 bool INIClass::Put_Fixed(char const* section, char const* entry, fixed value)
 {
     return (Put_String(section, entry, value.As_ASCII()));
+}
+
+void INIClass::Put_Comment(char const* section, const std::string& comment)
+{
+    if (section == NULL)
+        return;
+
+    INISection* secptr = Find_Section(section);
+
+    if (secptr == NULL) {
+        secptr = new INISection(strdup(section));
+        if (secptr == NULL)
+            return;
+        SectionList.Add_Tail(secptr);
+        SectionIndex.Add_Index(secptr->Index_ID(), secptr);
+    }
+
+    secptr->comment = comment;
 }
 
 /***********************************************************************************************

@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Repair",
+  "ini_comment": "Repair behavior (Units and Aircraft)",
   "comment": "Repair behavior (Units and Aircraft).",
   "rules": [
     {
