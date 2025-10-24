@@ -3,68 +3,62 @@ local TypeValidator = require("nco.lib.TypeValidator")
 local isNotBlank = TypeValidator.Validators.isNotBlank
 local isType = TypeValidator.Validators.isType
 
----@class CppRulesApi : CppApi
----@field getSectionNames fun(): string[]
----@field getRuleNamesForSection fun(section: string): string[]
----@field getRuleType fun(section: string, ruleName: string): type
----@field getRuleValue fun(section: string, ruleName: string): number|boolean
----@field setRuleValue fun(section: string, ruleName: string, value: number|boolean): number|boolean
-
 ---@class RuleSectionApi
 ---@field __name string
----@field getRuleNames fun(): string[]
----@field getRuleType fun(ruleName: string): type
----@field getRule fun(ruleName: string): number|boolean
----@field setRule fun(ruleName: string, value: number|boolean): number|boolean
+---@field getPropertyNames fun(): string[]
+---@field getPropertyType fun(propertyName: string): type
+---@field getProperty fun(propertyName: string): number|boolean|string
+---@field setProperty fun(propertyName: string, value: number|boolean|string): number|boolean|string
 
 ---@alias TypeApiProxy RuleSectionApi | { [string]: number|boolean }
 
----@param api CppRulesApi
+---@param api CppApi
 ---@param typeName string
+---@param getPropertyNamesFunc string
+---@param instanceName string
 ---@return TypeApiProxy
-local function TypeApiProxy(api, typeName)
+local function TypeApiProxy(api, typeName, getPropertyNamesFunc, instanceName)
   TypeValidator.validateCall("TypeApiProxy", {
     api = {api, isType("table")},
     typeName = {typeName, isType("string"), isNotBlank}
   })
 
-  local getPropertyValueFunction = string.format("get%PropertyType", typeName)
-  local getPropertyValueFunction = string.format("get%PropertyValue", typeName)
-  local setPropertyValueFunction = string.format("set%PropertyValue", typeName)
-  local getPropertyNames = string.format("get%PropertyNames", typeName)
+  local getPropertyTypeFunc = string.format("get%PropertyType", typeName)
+  local getPropertyValueFunc = string.format("get%PropertyValue", typeName)
+  local setPropertyValueFunc = string.format("set%PropertyValue", typeName)
 
   local function getPropertyType(...)
-    return api.getRuleType(...)
+    return api[getPropertyTypeFunc](instanceName, ...)
   end
 
   local function getProperty(...)
-    return api.getPropertyValue(...)
+    return api[getPropertyValueFunc](instanceName, ...)
   end
 
   local function setProperty(...)
-    return api.setPropertyValue(...)
+    return api[setPropertyValueFunc](instanceName, ...)
   end
 
   local function getPropertyNames()
-    return api.getPropertyNames()
+    return api[getPropertyNamesFunc]()
   end
 
   return setmetatable(
     {
       __name = typeName,
-      getRuleNames = getRuleNames,
-      getRuleType = getRuleType,
-      getRule = getRule,
-      setRule = setRule,
+      getPropertyType = getPropertyType,
+      getProperty = getProperty,
+      setProperty = setProperty,
+      getPropertyNames = getPropertyNames,
     },
     {
       -- get value
       __index = function(_, ...)
-        return getRule(...)
+        return getProperty(...)
       end,
       -- set value
       __newindex = function(_, ...)
-        return setRule(...)
+        return setProperty(...)
       end
     }
   )
@@ -73,15 +67,20 @@ end
 ---@alias TypesApiProxy CppRulesApi | { [string]: TypeApiProxy }
 
 ---@param api CppRulesApi
+---@param typeName string
 ---@return TypesApiProxy
-local function TypesApiProxy(api)
+local function TypesApiProxy(api, typeName)
+  local getInstanceNamesFunc = string.format("get%InstanceNames", typeName)
+  local getPropertyNamesFunc = string.format("get%PropertyNames", typeName)
+
   return setmetatable(
     {
-      getTypeNames = api.getTypeNames
+      getInstanceNames = api[getInstanceNamesFunc],
+      getPropertyNames = api[getPropertyNamesFunc]
     },
     {
-      __index = function(_, typeName)
-        return TypeApiProxy(api, typeName)
+      __index = function(_, instanceName)
+        return TypeApiProxy(api, typeName, getPropertyNamesFunc, instanceName)
       end,
       -- make proxy read only
       __newindex = function()

@@ -15,6 +15,23 @@ public:
     void Register_Functions(LuaEngine& engine) const override
     {
         With_Api_Namespace(engine, [&](auto& n) {
+            n.addCFunction("getTypeNames", [](auto L) {
+                const auto engine = SharedLuaEngine(L);
+
+                LuaTableBuilder(engine)
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<AnimType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<WarheadType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<BulletType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<WeaponType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<AircraftType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<StructType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<InfantryType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<UnitType>())
+                    .With_Index_Value(TdTypeConverter::Get_Type_Name<HousesType>());
+
+                return 1;
+            });
+
             Register_Type_Functions<AnimType, AnimTypeClass>(n);
             Register_Type_Functions<WarheadType, WarheadTypeClass>(n);
             Register_Type_Functions<BulletType, BulletTypeClass>(n);
@@ -38,6 +55,7 @@ private:
     void Register_Type_Functions(luabridge::Namespace& n) const
     {
         auto type_name = TdTypeConverter::Get_Type_Name<T>();
+        auto get_property_type_function = std::format("get{}PropertyType", type_name);
         auto get_property_value_function = std::format("get{}PropertyValue", type_name);
         auto set_property_value_function = std::format("set{}PropertyValue", type_name);
         auto get_properties_function = std::format("get{}PropertyNames", type_name);
@@ -54,13 +72,49 @@ private:
                 engine.Raise_Error_Format("Empty rules cache detected for type: {}", type_name);
             }
 
-            auto rule_names = sections[section_names.front()].Rule_Names();
-
             // push property names table to caller
             auto properties_table = LuaTableBuilder(engine);
 
+            auto rule_names = sections[section_names.front()].Rule_Names();
+
             for (const auto& name : rule_names) {
                 properties_table.With_Index_Value(name);
+            }
+
+            return 1;
+        })
+        .addCFunction(get_property_type_function.c_str(), [](auto L) {
+            const auto engine = SharedLuaEngine(L);
+            auto type_name = TdTypeConverter::Get_Type_Name<T>();
+            auto arguments = LuaArguments(
+                engine,
+                std::format("get{}PropertyType(<string: propertyName>)", type_name)
+            );
+
+            // process args
+            arguments.Count_Is(1).First_Argument_Is<std::string>().Assert();
+
+            auto property_name = arguments.Read_Next<std::string>().Unpack();
+
+            // fetch property type using first instance in rule cache
+            auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            auto section_names = sections.Section_Names();
+
+            if (section_names.empty()) {
+                engine.Raise_Error_Format("Empty rules cache detected for type: {}", type_name);
+            }
+
+            if (TdTypeConverter::Rule_Requires_Converter(type_name, property_name)) {
+                // rule is of special type, look up type name using converter
+                RulesLuaAdapter::Assert_Rule_Exists(engine, sections, section_names.front(), property_name);
+
+                auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
+
+                engine.Push_Value(
+                    TdTypeConverter::Get_Type_Name_Variant(converter_variant)
+                );
+            } else {
+                RulesLuaAdapter::Push_Rule_Type(engine, sections, section_names.front(), property_name);
             }
 
             return 1;

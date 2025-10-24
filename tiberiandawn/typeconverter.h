@@ -951,9 +951,8 @@ public:
         }
     }
 
-
     /**
-     * Return a human-readable name for a given converter type; note all types will be pluralised.
+     * Return a human-readable name for a given converter type; note all types will be pluralized.
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -962,7 +961,7 @@ public:
         if constexpr (std::is_same_v<T, ArmorType>) {
             return "Armor";
         } else if constexpr (std::is_same_v<T, MPHType>) {
-            return "Mph";
+            return "MphSpeeds";
         } else if constexpr (std::is_same_v<T, WeaponType>) {
             return "Weapons";
         } else if constexpr (std::is_same_v<T, HousesType>) {
@@ -972,15 +971,15 @@ public:
         } else if constexpr (std::is_same_v<T, FactoryType>) {
             return "Factories";
         } else if constexpr (std::is_same_v<T, DirType>) {
-            return "Dirs";
+            return "Directions";
         } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return "BSizes";
+            return "BuildingSizes";
         } else if constexpr (std::is_same_v<T, AircraftType>) {
             return "Aircraft";
         } else if constexpr (std::is_same_v<T, MissionType>) {
             return "Missions";
         } else if constexpr (std::is_same_v<T, AnimType>) {
-            return "Anims";
+            return "Animations";
         } else if constexpr (std::is_same_v<T, InfantryType>) {
             return "Infantry";
         } else if constexpr (std::is_same_v<T, UnitType>) {
@@ -992,11 +991,59 @@ public:
         } else if constexpr (std::is_same_v<T, WarheadType>) {
             return "Warheads";
         } else if constexpr (std::is_same_v<T, VocType>) {
-            return "Voc";
+            return "SoundsEffects";
         } else if constexpr (std::is_same_v<T, PlayerColorType>) {
             return "PlayerColors";
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
             return "HouseColors";
+        }
+
+        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+    }
+
+    /**
+     * Return a human-readable name for a given converter variant type; note all types will be singular.
+     */
+    std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant)
+    {
+       if (std::get_if<ArmorType>(&variant)) {
+            return "Armor";
+        } else if (std::get_if<MPHType>(&variant)) {
+            return "MphSpeed";
+        } else if (std::get_if<WeaponType>(&variant)) {
+            return "Weapon";
+        } else if (std::get_if<HousesType>(&variant)) {
+            return "House";
+        } else if (std::get_if<StructType>(&variant)) {
+            return "Building";
+        } else if (std::get_if<FactoryType>(&variant)) {
+            return "Factory";
+        } else if (std::get_if<DirType>(&variant)) {
+            return "Direction";
+        } else if (std::get_if<BSizeType>(&variant)) {
+            return "BuildingSize";
+        } else if (std::get_if<AircraftType>(&variant)) {
+            return "Aircraft";
+        } else if (std::get_if<MissionType>(&variant)) {
+            return "Mission";
+        } else if (std::get_if<AnimType>(&variant)) {
+            return "Animation";
+        } else if (std::get_if<InfantryType>(&variant)) {
+            return "Infantry";
+        } else if (std::get_if<UnitType>(&variant)) {
+            return "Unit";
+        } else if (std::get_if<SpeedType>(&variant)) {
+            return "Speed";
+        } else if (std::get_if<BulletType>(&variant)) {
+            return "Bullet";
+        } else if (std::get_if<WarheadType>(&variant)) {
+            return "Warhead";
+        } else if (std::get_if<VocType>(&variant)) {
+            return "SoundEffect";
+        } else if (std::get_if<PlayerColorType>(&variant)) {
+            return "PlayerColor";
+        } else if (std::get_if<HouseColorType>(&variant)) {
+            return "HouseColor";
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");

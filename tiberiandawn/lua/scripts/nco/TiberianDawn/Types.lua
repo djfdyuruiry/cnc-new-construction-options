@@ -1,17 +1,16 @@
 local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
+local TypeApiProxy = require("nco.TiberianDawn.lib.TypeApiProxy")
 
 local function builder(cppApi)
+  local api = {
+    getTypeNames = cppApi.getTypeNames
+  }
 
-  return setmetatable(
-    {
-      getTypes = cppApi.getTypes
-    },
-    {
-      __index = function (_, typeName)
-        return cppApi.getTeamType(teamName)
-      end
-    }
-  )
+  for _, t in ipairs(cppApi.getTypeNames()) do
+    api[t] = TypeApiProxy(cppApi, t)
+  end
+
+  return api
 end
 
 _G.Types = TdApiModule({
