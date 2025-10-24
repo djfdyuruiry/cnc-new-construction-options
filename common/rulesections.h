@@ -240,7 +240,6 @@ public:
         return *this;
     }
 
-    // TODO: Type Validation (for non trivial types, unsigned/float etc.)/value error handling
     template<RuleValueVariantCompatible T>
     RuleSection& Load_From_Ini(
         INIClass& ini,
