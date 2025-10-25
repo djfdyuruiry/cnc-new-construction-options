@@ -74,7 +74,6 @@
 #include "b64straw.h"
 #include "miscasm.h"
 #include "debugstring.h"
-#include "stringutils.h"
 #include "wwstd.h" // For linux version of strupr.
 
 #ifdef FIXIT_FAST_LOAD

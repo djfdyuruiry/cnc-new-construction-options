@@ -584,54 +584,6 @@ void BulletTypeClass::One_Time(void)
     }
 }
 
-std::string BulletTypeClass::ToString() const
-{
-    return std::format(
-        "BulletType: {}\n"
-        "IniName: {}\n"
-        "IsHigh: {}\n"
-        "IsAntiAircraft: {}\n"
-        "IsTranslucent: {}\n"
-        "IsArcing: {}\n"
-        "IsHoming: {}\n"
-        "IsDropping: {}\n"
-        "IsInvisible: {}\n"
-        "IsProximityArmed: {}\n"
-        "IsFlameEquipped: {}\n"
-        "IsFueled: {}\n"
-        "IsFaceless: {}\n"
-        "IsInaccurate: {}\n"
-        "Type: {}\n"
-        "Warhead: {}\n"
-        "MaxSpeed: {}\n"
-        "ROT: {}\n"
-        "Arming: {}\n"
-        "Range: {}\n"
-        "Explosion: {}",
-        static_cast<signed char>(Type),
-        IniName,
-        IsHigh,
-        IsAntiAircraft,
-        IsTranslucent,
-        IsArcing,
-        IsHoming,
-        IsDropping,
-        IsInvisible,
-        IsProximityArmed,
-        IsFlameEquipped,
-        IsFueled,
-        IsFaceless,
-        IsInaccurate,
-        static_cast<signed char>(Type),
-        static_cast<signed char>(Warhead),
-        static_cast<signed char>(MaxSpeed),
-        ROT,
-        Arming,
-        Range,
-        static_cast<signed char>(Explosion)
-    );
-}
-
 const IniRuleContext& BulletTypeClass::Read_INI(const IniRuleContext& ini)
 {
     return ObjectTypeClass::Read_INI(ini)

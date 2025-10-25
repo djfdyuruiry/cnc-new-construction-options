@@ -110,6 +110,8 @@ bool Init_Game(int, char*[])
     CncLogger::OnFatalError = [](const auto& err) {
         Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
         Show_Mouse();
+
+        // TODO: Play commando death sound before this or mission failure message :D
         WWMessageBox().Process(err.c_str());
 
         // If a debugger is attached, trigger a breakpoint

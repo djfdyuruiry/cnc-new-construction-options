@@ -186,6 +186,7 @@ public:
         return IniName;
     }
 
+    // TODO: Add human readable names for weapons
     int Full_Name() const
     {
         return TXT_NONE;
@@ -1563,8 +1564,6 @@ public:
 
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& ini) override;
-
-    std::string ToString() const;
 private:
     static BulletTypeClass const* const Pointers[BULLET_COUNT];
 };

@@ -14,6 +14,7 @@ Rule Sections:
 {% for rule in section.rules %}| `{{ rule.name }}` | {{ rule.comment }} |
 {% endfor %}
 ```ini
+; {{ section.ini_comment }}
 [{{ section.section }}]
 {% for rule in section.rules %}{{ rule.name }}={{ rule.default }}
 {% endfor %}```

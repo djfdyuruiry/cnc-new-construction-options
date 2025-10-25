@@ -574,7 +574,6 @@ static void Init_Type(RulesClass& rules, U first, U count)
     ini_file.Close();
 }
 
-// TODO: Impl Read_Rules for commented-out classes
 void RulesClass::Init_Types()
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
@@ -589,7 +588,6 @@ void RulesClass::Init_Types()
     Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT);
 }
 
-// TODO: Impl Read_Rules for commented-out classes
 void RulesClass::Init_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain

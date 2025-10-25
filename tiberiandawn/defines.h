@@ -716,10 +716,10 @@ typedef enum HouseColorType : unsigned char
 {
     HOUSE_COLOR_GOOD = 180,           // GOLD
     HOUSE_COLOR_BRIGHT_GOOD = 176,    // GOLD
-    HOUSE_COLOR_BAD = 123,            // RED;
-    HOUSE_COLOR_BRIGHT_BAD = 127,     // RED;
-    HOUSE_COLOR_NEUTRAL = 205,        // WHITE;
-    HOUSE_COLOR_BRIGHT_NEUTRAL = 202  // WHITE;
+    HOUSE_COLOR_BAD = 123,            // RED
+    HOUSE_COLOR_BRIGHT_BAD = 127,     // RED
+    HOUSE_COLOR_NEUTRAL = 205,        // WHITE
+    HOUSE_COLOR_BRIGHT_NEUTRAL = 202  // WHITE
 } HouseColorType;
 
 /**********************************************************************

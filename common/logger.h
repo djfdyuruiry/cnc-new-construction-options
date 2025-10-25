@@ -168,7 +168,7 @@ private:
     }
 };
 
-// 'virtual' static method to get build a logger with a symbol as it's name (class/function etc.)
+// 'virtual' static method to build a logger with a symbol as it's name (class/function etc.)
 #define For(TYPE_OR_FUNCTION) With_Name(#TYPE_OR_FUNCTION)
 
 // alias SPD macros so we don't pollute code with SPD refs

@@ -300,6 +300,8 @@ bool Read_Scenario_Ini(char* root, bool fresh)
      * Load any rule sections embedded in the scenario file.
      */
     Rule.Init(ini);
+    // TODO: look for type rules in ini with [<prefix>.<rule>] where <prefix> matches INI file name (how to handle lua lookups??)
+    //       - maybe scrape rules out for given type prefix into a separate INI context so type names stay the same
     Rule.Init_Types(ini);
 
     /*
