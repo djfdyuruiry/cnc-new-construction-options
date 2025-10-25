@@ -72,22 +72,29 @@ public:
 
     static bool Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
     {
-        if (const auto value = std::get_if<int>(&value_variant_a)) {
-            return std::get_if<int>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<bool>(&value_variant_a)) {
-            return std::get_if<bool>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<float>(&value_variant_a)) {
-            return std::get_if<float>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<ushort>(&value_variant_a)) {
-            return std::get_if<ushort>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<std::string>(&value_variant_a)) {
-            return std::get_if<std::string>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<uint>(&value_variant_a)) {
-            return std::get_if<uint>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<char>(&value_variant_a)) {
-            return std::get_if<char>(&value_variant_b) != nullptr;
-        } else if (const auto value = std::get_if<uchar>(&value_variant_a)) {
-            return std::get_if<uchar>(&value_variant_b) != nullptr;
+        if (std::get_if<int>(&value_variant_a)) {
+            return std::get_if<int>(&value_variant_b);
+        }
+        if (std::get_if<bool>(&value_variant_a)) {
+            return std::get_if<bool>(&value_variant_b);
+        }
+        if (std::get_if<float>(&value_variant_a)) {
+            return std::get_if<float>(&value_variant_b);
+        }
+        if (std::get_if<ushort>(&value_variant_a)) {
+            return std::get_if<ushort>(&value_variant_b);
+        }
+        if (std::get_if<std::string>(&value_variant_a)) {
+            return std::get_if<std::string>(&value_variant_b);
+        }
+        if (std::get_if<uint>(&value_variant_a)) {
+            return std::get_if<uint>(&value_variant_b);
+        }
+        if (std::get_if<char>(&value_variant_a)) {
+            return std::get_if<char>(&value_variant_b);
+        }
+        if (std::get_if<uchar>(&value_variant_a)) {
+            return std::get_if<uchar>(&value_variant_b);
         }
 
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
@@ -95,21 +102,28 @@ public:
 
     static std::string_view Get_Variant_Type(RuleValueVariant value_variant)
     {
-        if (const auto value = std::get_if<int>(&value_variant)) {
+        if (std::get_if<int>(&value_variant)) {
             return "int";
-        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+        }
+        if (std::get_if<bool>(&value_variant)) {
             return "bool";
-        } else if (const auto value = std::get_if<float>(&value_variant)) {
+        }
+        if (std::get_if<float>(&value_variant)) {
             return "float";
-        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+        }
+        if (std::get_if<ushort>(&value_variant)) {
             return "unsigned short";
-        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+        }
+        if (std::get_if<std::string>(&value_variant)) {
             return "string";
-        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+        }
+        if (std::get_if<uint>(&value_variant)) {
             return "unsigned int";
-        } else if (const auto value = std::get_if<char>(&value_variant)) {
+        }
+        if (std::get_if<char>(&value_variant)) {
             return "char";
-        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
+        }
+        if (std::get_if<uchar>(&value_variant)) {
             return "unsigned char";
         }
 
@@ -118,21 +132,28 @@ public:
 
     static std::string Get_Variant_Values(RuleValueVariant value_variant)
     {
-        if (const auto value = std::get_if<int>(&value_variant)) {
+        if (std::get_if<int>(&value_variant)) {
             return std::format("{}-{}", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+        }
+        if (std::get_if<bool>(&value_variant)) {
             return "true/false";
-        } else if (const auto value = std::get_if<float>(&value_variant)) {
+        }
+        if (std::get_if<float>(&value_variant)) {
             return std::format("{}-{}", std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
-        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+        }
+        if (std::get_if<ushort>(&value_variant)) {
             return std::format("{}-{}", std::numeric_limits<ushort>::min(), std::numeric_limits<ushort>::max());
-        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+        }
+        if (std::get_if<std::string>(&value_variant)) {
             return "anything";
-        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+        }
+        if (std::get_if<uint>(&value_variant)) {
             return std::format("{}-{}", std::numeric_limits<uint>::min(), std::numeric_limits<uint>::max());
-        } else if (const auto value = std::get_if<char>(&value_variant)) {
+        }
+        if (std::get_if<char>(&value_variant)) {
             return std::format("{}-{}", std::numeric_limits<char>::min(), std::numeric_limits<char>::max());
-        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
+        }
+        if (std::get_if<uchar>(&value_variant)) {
             return std::format("{}-{}", std::numeric_limits<uchar>::min(), std::numeric_limits<uchar>::max());
         }
 
@@ -143,19 +164,26 @@ public:
     {
         if (const auto value = std::get_if<int>(&value_variant)) {
             return std::format("{}", *value);
-        } else if (const auto value = std::get_if<bool>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<bool>(&value_variant)) {
             return std::format("{}", *value);
-        } else if (const auto value = std::get_if<float>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<float>(&value_variant)) {
             return std::format("{}", *value);
-        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<ushort>(&value_variant)) {
             return std::format("{}", *value);
-        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<std::string>(&value_variant)) {
             return *value;
-        } else if (const auto value = std::get_if<uint>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<uint>(&value_variant)) {
             return std::format("{}", *value);
-        } else if (const auto value = std::get_if<char>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<char>(&value_variant)) {
             return std::format("{}", static_cast<int>(*value));
-        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
+        }
+        if (const auto value = std::get_if<uchar>(&value_variant)) {
             return std::format("{}", static_cast<unsigned int>(*value));
         }
 
@@ -368,6 +396,8 @@ public:
             ini.Put_Int(SectionName.data(), name.data(), *value);
         } else if (const auto value = std::get_if<std::string>(&value_variant)) {
             ini.Put_String(SectionName.data(), name.data(), *value);
+        } else {
+            throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
         }
 
         return *this;
