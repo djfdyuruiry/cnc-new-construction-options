@@ -36,6 +36,7 @@
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned char uchar;
+typedef unsigned long ulong;
 
 using RuleValueVariant = std::variant<int, bool, float, ushort, std::string, uint, char, uchar>;
 
