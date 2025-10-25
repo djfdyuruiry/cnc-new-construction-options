@@ -620,8 +620,10 @@ private:
             }
 
             err = "validation_failure";
-        } catch (...) {
-            err = std::current_exception().__cxa_exception_type()->name();
+        } catch (const std::invalid_argument& _) {
+            err = "invalid_argument";
+        } catch (const std::out_of_range& _) {
+            err = "out_of_range";
         }
 
         auto parse_msg = parsed_value.has_value() ? std::format(" | parsed_value={}", parsed_value.value()) : "";
