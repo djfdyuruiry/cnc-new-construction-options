@@ -196,18 +196,18 @@ public:
 
     const RuleValueVariant Get_Variant(std::string_view name) const
     {
-        auto it = Rules.find(name.data());
+        const auto& it = Rules.find(name.data());
 
-        if (it != Rules.end()) {
-            return it->second;
+        if (it == Rules.end()) {
+            CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
         }
 
-        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+        return it->second;
     }
 
     const std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const
     {
-        auto it = Rules.find(name.data());
+        const auto&  it = Rules.find(name.data());
 
         if (it != Rules.end()) {
             return it->second;
@@ -218,15 +218,13 @@ public:
 
     const std::string_view Get_Type(std::string_view name) const
     {
-        auto it = Rules.find(name.data());
+        const auto& it = Rules.find(name.data());
 
-        if (it != Rules.end()) {
-            auto value_variant = it->second;
-
-            return Get_Variant_Type(value_variant);
+        if (it == Rules.end()) {
+            CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
         }
 
-        CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
+        return Get_Variant_Type(it->second);
     }
 
     RuleSection& Set_Ini_Comment(INIClass& ini, const std::string& comment)
@@ -394,17 +392,17 @@ public:
 
         auto value_variant = value_variant_optional.value();
 
-        if (const auto value = std::get_if<T>(&value_variant)) {
-            return *value;
+        if (!std::get_if<T>(&value_variant)) {
+            CNC_LOGGER_FATAL(
+                "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
+                typeid(T).name(),
+                Get_Type(name),
+                SectionName,
+                name
+            );
         }
 
-        CNC_LOGGER_FATAL(
-            "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
-            typeid(T).name(),
-            Get_Type(name),
-            SectionName,
-            name
-        );
+        return *std::get_if<T>(&value_variant);
     }
 
     template<RuleValueVariantCompatible T>
