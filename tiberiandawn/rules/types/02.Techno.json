@@ -1,0 +1,140 @@
+{
+  "name": "Object",
+  "has_enum": false,
+  "class": "TechnoTypeClass",
+  "template": "techno-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsLeader",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsScanner",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsNominal",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsTheater",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsTurretEquipped",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsTwoShooter",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsRepairable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsBuildable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsCrew",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsTransporter",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "SightRange",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Cost",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Scenario",
+      "type": "UChar",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Level",
+      "type": "UChar",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Risk",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Prerequisite",
+      "type": "StructType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "MaxSpeed",
+      "type": "MPHType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Reward",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Primary",
+      "type": "WeaponType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Secondary",
+      "type": "WeaponType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "MaxAmmo",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "OwnableBy",
+      "type": "HousesType",
+      "requires_converter": false,
+      "requires_csv_converter": true
+    }
+  ]
+}

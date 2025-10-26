@@ -1,0 +1,68 @@
+{
+  "name": "Object",
+  "has_enum": false,
+  "class": "InfantryTypeClass",
+  "template": "object-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsCrushable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsStealthy",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsSelectable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsLegalTarget",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsInsignificant",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsImmune",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsFlammable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsSentient",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Armor",
+      "type": "ArmorType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "MaxStrength",
+      "type": "UShort",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    }
+  ]
+}

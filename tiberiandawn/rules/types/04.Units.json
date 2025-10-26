@@ -1,0 +1,117 @@
+{
+  "name": "Unit",
+  "has_enum": true,
+  "enum": "UnitType",
+  "class": "UnitTypeClass",
+  "template": "udata-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsCrateGoodie",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsPieceOfEight",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsCrusher",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsToHarvest",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsChunkyShape",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsRadarEquipped",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsFireAnim",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsLockTurret",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsTracked",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsGigundo",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsCloakable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsAnimating",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Type",
+      "type": "UnitType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Speed",
+      "type": "SpeedType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "ROT",
+      "type": "UChar",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "TurretOffset",
+      "type": "Char",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Mission",
+      "type": "MissionType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Explosion",
+      "type": "AnimType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    }
+  ]
+}

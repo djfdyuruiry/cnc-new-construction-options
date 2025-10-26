@@ -1,0 +1,99 @@
+{
+  "name": "Building",
+  "has_enum": true,
+  "enum": "StructType",
+  "class": "BuildingTypeClass",
+  "template": "bdata-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsBibbed",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsWall",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsFactory",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsSimpleDamage",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsSturdy",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsCaptureable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsRegulated",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsUnsellable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "ToBuild",
+      "type": "FactoryType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Type",
+      "type": "StructType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "StartFace",
+      "type": "DirType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Capacity",
+      "type": "UInt",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Power",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Drain",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Size",
+      "type": "BSizeType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    }
+  ]
+}
