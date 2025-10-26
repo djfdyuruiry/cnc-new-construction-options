@@ -18,13 +18,19 @@ local RulesApiProxy = require("nco.lib.RulesApiProxy")
   - You can access this by:
     ```lua
       -- get a rule value
-      auto buildDistance = Rules["Game.Map"].MaxBuildDistance
+      local buildDistance = Rules["Game.Map"].MaxBuildDistance -- 1
 
       -- set a rule value
       Rules["Game.Map"].PreventBuildingInShroud = false
 
-      -- you can capture the old value when setting it
-      local oldValue = Rules["Game.Map"].PreventBuildingInShroud = false
+      -- get the lua type for a given rule
+      local ruleType = Rules["Game.Map"].getRuleType("PreventBuildingInShroud") -- 'boolean'
+
+      -- get a list of rules in a section
+      local ruleType = Rules["Game.Map"].getRuleNames() -- { 'MaxBuildDistance', 'PreventBuildingInShroud', ... }
+
+      -- get the names of all sections in rules.ini
+      local sectionNames = Rules.getSectionNames() -- { 'Enhancements', ... }
     ```
 
   See: nco.lib.Path
