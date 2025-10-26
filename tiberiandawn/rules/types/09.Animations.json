@@ -1,0 +1,147 @@
+{
+  "name": "Animation",
+  "has_enum": true,
+  "enum": "AnimType",
+  "class": "AnimTypeClass",
+  "template": "adata-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsNormalized",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsGroundLayer",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsTranslucent",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsWhiteTrans",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsFlameThrower",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsScorcher",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsCraterForming",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsSticky",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Type",
+      "type": "AnimType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Size",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Biggest",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Damage",
+      "type": "UInt",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Delay",
+      "type": "UChar",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Start",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "LoopStart",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "LoopEnd",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Stages",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Loops",
+      "type": "Char",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Sound",
+      "type": "VocType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "ChainTo",
+      "type": "AnimType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "VirtualStages",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "VirtualScale",
+      "type": "Int",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "VirtualAnim",
+      "type": "AnimType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    }
+  ]
+}

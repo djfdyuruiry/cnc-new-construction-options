@@ -1,0 +1,51 @@
+{
+  "name": "Aircraft",
+  "has_enum": true,
+  "enum": "AircraftType",
+  "class": "AircraftTypeClass",
+  "template": "aadata-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsFixedWing",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsLandable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsRotorEquipped",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "IsRotorCustom",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Type",
+      "type": "AircraftType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "ROT",
+      "type": "UChar",
+      "requires_converter": false,
+      "requires_csv_converter": false
+    },
+    {
+      "name": "Mission",
+      "type": "MissionType",
+      "requires_converter": true,
+      "requires_csv_converter": false
+    }
+  ]
+}
