@@ -1,0 +1,15 @@
+{
+  "name": "Infantry",
+  "enum": "InfantryType",
+  "class": "InfantryTypeClass",
+
+  "properties": [
+    {
+      "name": "IsCrushable",
+      "type": "Bool",
+      "requires_converter": false,
+      "requires_csv_converter": false,
+      "custom_load_call":
+    }
+  ]
+}

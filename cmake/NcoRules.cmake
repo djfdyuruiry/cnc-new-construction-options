@@ -157,7 +157,7 @@ function(SetupRuleCheckBeforeBuild)
 endfunction()
 
 function(WatchFileForChanges _FILE)
-  # ensures the file is seen as a depencency of the configure phase
+  # ensures the file is seen as a dependency of the configure phase
   set_property(
     DIRECTORY
     APPEND
@@ -168,7 +168,7 @@ endfunction()
 function(ScanForRuleFiles _RULES_STATE_FILE _RULES_FILES _RULES_HASH _FILES_HAVE_CHANGED)
   message(STATUS "[NcoRules] Scanning rule files...")
 
-  file(GLOB_RECURSE RULES_FILES "${RULES_PATH}/*.json")
+  file(GLOB RULES_FILES LIST_DIRECTORIES false "${RULES_PATH}/*.json")
 
   set(RULES_HASH "")
 
