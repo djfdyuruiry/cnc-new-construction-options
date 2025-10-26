@@ -235,7 +235,7 @@ public:
 
     const std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const
     {
-        const auto&  it = Rules.find(name.data());
+        const auto& it = Rules.find(name.data());
 
         if (it != Rules.end()) {
             return it->second;
