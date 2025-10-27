@@ -1,0 +1,47 @@
+{
+  "name": "Aircraft",
+  "enum": "AircraftType",
+  "class": "AircraftTypeClass",
+  "base_class": "TechnoTypeClass",
+  "template": "aadata-nco.cpp.in",
+  "example_instance": "TRAN",
+  "example_instance_comment": "Transport Helicopter",
+  "properties": [
+    {
+      "name": "IsFixedWing",
+      "type": "Bool",
+      "comment": "Fixed wing aircraft (ones that cannot hover) have this flag set to true. Such aircraft will not vary speed while it is flying."
+    },
+    {
+      "name": "IsLandable",
+      "type": "Bool",
+      "comment": "Can this aircraft land? If it can land it is presumed to be controllable by the player."
+    },
+    {
+      "name": "IsRotorEquipped",
+      "type": "Bool",
+      "comment": "Does this aircraft have a rotor blade (helicopter) type propulsion?"
+    },
+    {
+      "name": "IsRotorCustom",
+      "type": "Bool",
+      "comment": "Is there a custom rotor animation stage set for each facing of the aircraft?"
+    },
+    {
+      "name": "Type",
+      "type": "AircraftType",
+      "requires_converter": true,
+      "valid_values": "NONE\nTRANSPORT\nA10\nHELICOPTER\nCARGO\nORCA"
+    },
+    {
+      "name": "ROT",
+      "type": "UChar"
+    },
+    {
+      "name": "Mission",
+      "type": "MissionType",
+      "requires_converter": true,
+      "valid_values": "NONE\nSLEEP\nATTACK\nMOVE\nRETREAT\nGUARD\nSTICKY\nENTER\nCAPTURE\nHARVEST\nGUARD_AREA\nRETURN\nSTOP\nAMBUSH\nHUNT\nTIMED_HUNT\nUNLOAD\nSABOTAGE\nCONSTRUCTION\nDECONSTRUCTION\nREPAIR\nRESCUE\nMISSILE"
+    }
+  ]
+}

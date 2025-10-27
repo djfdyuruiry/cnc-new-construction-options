@@ -37,7 +37,7 @@ endmacro()
 CHECK_REQUIRED_VARIABLE(TYPES_PATH)
 CHECK_REQUIRED_VARIABLE(TYPES_TEMPLATE_PATH)
 
-function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CONVERTER _REQ_CSV_CONVERTER)
+function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CONVERTER _REQ_CSV_CONVERTER _TEMPLATE_IGNORE)
   string(JSON TYPE_OBJECT_JSON GET "${_TYPE_JSON}" properties "${_PROP_INDEX}")
 
   string(JSON PROP_NAME GET "${TYPE_OBJECT_JSON}" name)
@@ -57,10 +57,18 @@ function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CO
     set(REQ_CSV_CONVERTER "OFF")
   endif()
 
+  string(JSON TEMPLATE_IGNORE ERROR_VARIABLE JSON_ERROR GET "${TYPE_OBJECT_JSON}" template_ignore)
+
+  if(NOT ${TEMPLATE_IGNORE} STREQUAL "ON")
+    # default template ignore flag to false
+    set(TEMPLATE_IGNORE "OFF")
+  endif()
+
   set("${_PROP_NAME}" ${PROP_NAME} PARENT_SCOPE)
   set("${_PROP_TYPE}" ${PROP_TYPE} PARENT_SCOPE)
   set("${_REQ_CONVERTER}" ${REQ_CONVERTER} PARENT_SCOPE)
   set("${_REQ_CSV_CONVERTER}" ${REQ_CSV_CONVERTER} PARENT_SCOPE)
+  set("${_TEMPLATE_IGNORE}" ${TEMPLATE_IGNORE} PARENT_SCOPE)
 endfunction()
 
 function (ExtractTypeInfoFromJson _TYPE_JSON _TYPE_NAME _TEMPLATE_FILE _PROP_COUNT)
@@ -101,7 +109,7 @@ function(SetupTypesCheckBeforeBuild)
   add_custom_target(
     td_types
     ALL
-    BYPRODUCTS # TODO: rendered templates
+    BYPRODUCTS # TODO: watch templates
       ${TYPES_STATE_FILE}
     COMMENT "[NcoTypeRules] Checking type files for changes..."
     COMMAND
@@ -185,12 +193,16 @@ function(Main)
     SET(READ_RULES_CODE "")
 
     foreach(PROP_INDEX RANGE ${PROP_COUNT})
+      LoadTypeProperties("${TYPE_JSON}" "${PROP_INDEX}" PROP_NAME PROP_TYPE REQ_CONVERTER REQ_CSV_CONVERTER TEMPLATE_IGNORE)
+
+      if(${TEMPLATE_IGNORE} STREQUAL "ON")
+        continue()
+      endif()
+
       if(${PROP_INDEX} GREATER 0)
         string(APPEND LOAD_RULES_CODE "\n        ")
         string(APPEND READ_RULES_CODE "\n        ")
       endif()
-
-      LoadTypeProperties("${TYPE_JSON}" "${PROP_INDEX}" PROP_NAME PROP_TYPE REQ_CONVERTER REQ_CSV_CONVERTER)
 
       message(STATUS "[NcoTypeRules] Processing property #${PROP_INDEX}: ${PROP_NAME} (type=${PROP_TYPE})")
 

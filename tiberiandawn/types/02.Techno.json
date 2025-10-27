@@ -1,0 +1,130 @@
+{
+  "name": "Techno",
+  "has_enum": false,
+  "class": "TechnoTypeClass",
+  "is_base_class": true,
+  "base_class": "ObjectTypeClass",
+  "template": "techno-nco.cpp.in",
+  "properties": [
+    {
+      "name": "IsLeader",
+      "type": "Bool",
+      "comment": "If this object can serve as a good leader for a group selected series of objects, then this flag will be true. Unarmed or ability challenged units do not make good leaders."
+    },
+    {
+      "name": "IsScanner",
+      "type": "Bool",
+      "comment": "Does this object have the ability to detect the presence of a nearby cloaked object?"
+    },
+    {
+      "name": "IsNominal",
+      "type": "Bool",
+      "comment": "If this object is always given its proper name rather than a generic name, then this flag will be true. Typically, civilians and Dr. Mobius fall under this category."
+    },
+    {
+      "name": "IsTheater",
+      "type": "Bool",
+      "comment": "If the artwork for this object (only for generics) is theater specific, then this flag will be true. Civilian buildings are a good example of this."
+    },
+    {
+      "name": "IsTurretEquipped",
+      "type": "Bool",
+      "comment": "Does this object type contain a rotating turret? Gun emplacements, SAM launchers, and many vehicles contain a turret. If a turret is present, special rendering and combat logic must be performed."
+    },
+    {
+      "name": "IsTwoShooter",
+      "type": "Bool",
+      "comment": "Certain units and buildings fire two shots in quick succession. If this is the case, then this flag is true."
+    },
+    {
+      "name": "IsRepairable",
+      "type": "Bool",
+      "comment": "Certain objects can be repaired. For buildings, they repair 'in place'. For units, they must travel to a repair center to be repaired. If this flag is true, then allow the player or computer AI to repair the object."
+    },
+    {
+      "name": "IsBuildable",
+      "type": "Bool",
+      "comment": "Is this object possible to be constructed? Certain buildings and units cannot be constructed using normal means. They are either initially placed in the scenario or can only arrive by pre arranged reinforcement scheduling. Civilian buildings and vehicles are typical examples of this type of object. They would set this flag to false."
+    },
+    {
+      "name": "IsCrew",
+      "type": "Bool",
+      "comment": "Does this object contain a crew? If it does, then when the object is destroyed, there is a distinct possibility that infantry will 'pop out'. Only units with crews can become 'heros'."
+    },
+    {
+      "name": "IsTransporter",
+      "type": "Bool",
+      "comment": "Is this object typically used to transport reinforcements or other cargo? Transport aircraft, helicopters, and hovercraft are typically examples of this."
+    },
+    {
+      "name": "SightRange",
+      "type": "Int",
+      "comment": "Most objects have the ability to reveal the terrain around themselves. This sight range (expressed in cell distance) is specified here. If this value is 0, then this unit never reveals terrain. Bullets are typically of this nature."
+    },
+    {
+      "name": "Cost",
+      "type": "Int",
+      "comment": "These values control the cost to produce, the time to produce, and the scenario when production can first start."
+    },
+    {
+      "name": "Scenario",
+      "type": "UChar",
+      "comment": "The minimum single-player scenario number required for this object to be buildable."
+    },
+    {
+      "name": "Level",
+      "type": "UChar",
+      "comment": "Multi-player tech level required for this object to be buildable."
+    },
+    {
+      "name": "Risk",
+      "type": "Int",
+      "comment": "The risk and reward values are used to determine targets and paths toward targets. When heading toward a target, a path of least risk will be followed. When picking a target, the object of greatest reward will be selected. The values assigned are arbitrary."
+    },
+    {
+      "name": "Reward",
+      "type": "Int",
+      "comment": "The risk and reward values are used to determine targets and paths toward targets. When heading toward a target, a path of least risk will be followed. When picking a target, the object of greatest reward will be selected. The values assigned are arbitrary."
+    },
+    {
+      "name": "Prerequisite",
+      "type": "StructType",
+      "requires_converter": true,
+      "comment": "Type of structure required to allow the player to build this object.",
+      "valid_values": "NONE\nWEAP\nGTOWER\nATOWER\nOBELISK\nRADAR\nTURRET\nCONST\nREFINERY\nSTORAGE\nHELIPAD\nSAM\nAIRSTRIP\nPOWER\nADVANCED_POWER\nHOSPITAL\nBARRACKS\nTANKER\nREPAIR\nBIO_LAB\nHAND\nTEMPLE\nEYE\nMISSION\nV01\nV02\nV03\nV04\nV05\nV06\nV07\nV08\nV09\nV10\nV11\nV12\nV13\nV14\nV15\nV16\nV17\nV18\nPUMP\nV20\nV21\nV22\nV23\nV24\nV25\nV26\nV27\nV28\nV29\nV30\nV31\nV32\nV33\nV34\nV35\nV36\nV37\nSANDBAG_WALL\nCYCLONE_WALL\nBRICK_WALL\nBARBWIRE_WALL\nWOOD_WALL\n\nSee: [building.ini](#buildingini)"
+    },
+    {
+      "name": "MaxSpeed",
+      "type": "MPHType",
+      "requires_converter": true,
+      "comment": "This value indicates the maximum speed that this object can achieve.",
+      "valid_values": "IMMOBILE\nVERY_SLOW\nKINDA_SLOW\nSLOW\nSLOW_ISH\nMEDIUM_SLOW\nMEDIUM\nMEDIUM_FAST\nMEDIUM_FASTER\nFAST\nROCKET\nVERY_FAST\nLIGHT_SPEED"
+    },
+    {
+      "name": "Primary",
+      "type": "WeaponType",
+      "requires_converter": true,
+      "comment": "Weapon that this object is armed with.",
+      "valid_values": "NONE\nRIFLE\nCHAIN_GUN\nPISTOL\nM16\nDRAGON\nFLAMETHROWER\nFLAME_TONGUE\nCHEMSPRAY\nGRENADE\n75MM\n105MM\n120MM\nTURRET_GUN\nMAMMOTH_TUSK\nMLRS\n155MM\nM60MG\nTOMAHAWK\nTOW_TWO\nNAPALM\nOBELISK_LASER\nNIKE\nHONEST_JOHN\nSTEG\nTREX\n\nSee: [weapon.ini](#weaponini)"
+    },
+    {
+      "name": "Secondary",
+      "type": "WeaponType",
+      "requires_converter": true,
+      "comment": "Additional weapon that this object is armed with.",
+      "valid_values": "See: Primary (above)"
+    },
+    {
+      "name": "MaxAmmo",
+      "type": "Int",
+      "comment": "This is the maximum number of ammo shots this object can hold. If this number is -1, then this indicates unlimited ammo."
+    },
+    {
+      "name": "OwnableBy",
+      "type": "HousesType",
+      "requires_csv_converter": true,
+      "comment": "Comma seperated list of houses that are allowed to own (by normal means) this particular object type. This value is typically used in production contexts. It is possible for a side to take possession of an object type otherwise not normally allowed. This event usually occurs as a result of capture.",
+      "valid_values": "NONE\nGOOD\nBAD\nNEUTRAL\nJP\nMULTI1\nMULTI2\nMULTI3\nMULTI4\nMULTI5\nMULTI6\n\nSee: [house.ini](#houseini)"
+    }
+  ]
+}

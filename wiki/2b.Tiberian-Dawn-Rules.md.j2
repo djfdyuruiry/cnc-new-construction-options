@@ -1,11 +1,25 @@
-`rules.ini` is a simple text file that controls how different units, buildings and infantry behave in-game. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
+Rules files:
 
-The `rules.ini` file is created for you when you first run the game, and can be found where you installed `vanillatd` and the required game files.
+- [rules.ini](#rulesini)
+{% for type in concrete_types %}- [{{ type.name | lower }}.ini](#{{ type.name | lower }}ini)
+{% endfor %}
+
+<!-- TODO: Expand guidance and correct default location in code -->
+All rules files are created for you when you first run the game, and can be found where you installed `vanillatd` and the required game files.
+
+---
+
+## rules.ini
+
+`rules.ini` is a simple text file that controls game engine behaviour. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
+
+> **NOTE**: Unlike Red Alert, the `rules.ini` for NCO Tiberian Dawn does not contain units, infantry etc. - these can be found in [Types](#Types)
 
 Rule Sections:
+
 {% for section in sections %}- [{{ section.section }}](2b.Tiberian-Dawn-Rules.md#{{ section.section | lower | replace(".", "") }})
 {% endfor %}{% for section in sections %}
-## [{{ section.section }}]
+### [{{ section.section }}]
 
 {{ section.comment }}
 
@@ -17,5 +31,21 @@ Rule Sections:
 ; {{ section.ini_comment }}
 [{{ section.section }}]
 {% for rule in section.rules %}{{ rule.name }}={{ rule.default }}
+{% endfor %}```
+{% endfor %}
+
+{% for type in concrete_types %}
+### {{ type.name | lower }}.ini
+{{ type.comment }}
+| Property | Comment | Example |
+|--------|-------------|-------------|
+{% if type.has_base_type %}{% for prop in type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} (Type={{prop.type}}) | {{ prop.example_value }} |
+{% endfor %}{% if type.base_type.has_base_type %}{% for prop in type.base_type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} (Type={{prop.type}}) | {{ prop.example_value }} |
+{% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}| `{{ prop.name }}` | {{ prop.comment }} (Type={{prop.type}}) | {{ prop.example_value }} |
+{% endfor %}
+```ini
+; {{ type.example_instance_comment }}
+[{{ type.example_instance }}]
+{% for prop in type.properties %}{{ prop.name }}={{ prop.example_value }}
 {% endfor %}```
 {% endfor %}

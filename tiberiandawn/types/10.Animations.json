@@ -1,0 +1,133 @@
+{
+  "name": "Animation",
+  "enum": "AnimType",
+  "class": "AnimTypeClass",
+  "base_class": "ObjectTypeClass",
+  "template": "adata-nco.cpp.in",
+  "example_instance": "BEACON",
+  "properties": [
+    {
+      "name": "IsNormalized",
+      "type": "Bool",
+      "description": "If this animation should run at a constant apparent rate regardless of game speed setting, then this flag will be set to true."
+    },
+    {
+      "name": "IsGroundLayer",
+      "type": "Bool",
+      "description": "If this animation should be rendered and sorted with the other ground units, then this flag is true. Typical of this would be fire and other low altitude animation effects."
+    },
+    {
+      "name": "IsTranslucent",
+      "type": "Bool",
+      "description": "If this animation should be rendered in a translucent fashion, this flag will be true. Translucent colors are some of the reds and some of the greys. Typically, smoke and some fire effects have this flag set."
+    },
+    {
+      "name": "IsWhiteTrans",
+      "type": "Bool",
+      "description": "If this animation uses the white translucent table, then this flag will be true."
+    },
+    {
+      "name": "IsFlameThrower",
+      "type": "Bool",
+      "description": "If this is the special flame thrower animation, then custom affects occur as it is playing. Specifically, scorch marks and little fire pieces appear as the flame jets forth."
+    },
+    {
+      "name": "IsScorcher",
+      "type": "Bool",
+      "description": "Some animations leave a scorch mark behind. Napalm and other flame type explosions are typical of this type."
+    },
+    {
+      "name": "IsCraterForming",
+      "type": "Bool",
+      "description": "Some explosions are of such violence that they leave craters behind. This flag will be true for those types."
+    },
+    {
+      "name": "IsSticky",
+      "type": "Bool",
+      "description": "If this animation should attach itself to any unit that is in the same location as itself, then this flag will be true. Most vehicle impact explosions are of this type."
+    },
+    {
+      "name": "Type",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "NONE\nFBALL1\nGRENADE\nFRAG1\nFRAG2\nVEH_HIT1\nVEH_HIT2\nVEH_HIT3\nART_EXP1\nNAPALM1\nNAPALM2\nNAPALM3\nSMOKE_PUFF\nPIFF\nPIFFPIFF\nFLAME_N\nFLAME_NE\nFLAME_E\nFLAME_SE\nFLAME_S\nFLAME_SW\nFLAME_W\nFLAME_NW\nCHEM_N\nCHEM_NE\nCHEM_E\nCHEM_SE\nCHEM_S\nCHEM_SW\nCHEM_W\nCHEM_NW\nFIRE_SMALL\nFIRE_MED\nFIRE_MED2\nFIRE_TINY\nMUZZLE_FLASH\nSMOKE_M\nBURN_SMALL\nBURN_MED\nBURN_BIG\nON_FIRE_SMALL\nON_FIRE_MED\nON_FIRE_BIG\nSAM_N\nSAM_NE\nSAM_E\nSAM_SE\nSAM_S\nSAM_SW\nSAM_W\nSAM_NW\nGUN_N\nGUN_NE\nGUN_E\nGUN_SE\nGUN_S\nGUN_SW\nGUN_W\nGUN_NW\nLZ_SMOKE\nION_CATOR\nATOM_BLAST\nCRATE_DEVIATOR\nCRATE_DOLLAR\nCRATE_EARTH\nCRATE_EMPULSE\nCRATE_INVUN\nCRATE_MINE\nCRATE_RAPID\nCRATE_STEALTH\nCRATE_MISSILE\nATOM_DOOR\nMOVE_FLASH\nOILFIELD_BURN\nTRIC_DIE\nTREX_DIE\nSTEG_DIE\nRAPT_DIE\nCHEM_BALL\nFLAG\nBEACON\nFIRE_SMALL_VIRTUAL\nFIRE_MED_VIRTUAL\nFIRE_MED2_VIRTUAL\nFIRE_TINY_VIRTUAL\nBEACON_VIRTUAL",
+      "description": "This is the type number for this animation kind. It can be used as a unique identifier for animation types."
+    },
+    {
+      "name": "ChainTo",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "See: Type (above)",
+      "description": "If the animation is to launch into another animation, then the secondary animation will be defined here."
+    },
+    {
+      "name": "VirtualAnim",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "See: Type (above)",
+      "description": "Animation data to use specifically for virtual rendering (implies this animation only for legacy)."
+    },
+    {
+      "name": "Size",
+      "type": "Int",
+      "description": "This is the frame that the animation is biggest. The biggest frame of animation will hide any changes to underlying ground (e.g., craters) that the animation causes, so these effects are delayed until this frame is reached. The end result is to prevent the player from seeing craters \"pop\" into existence."
+    },
+    {
+      "name": "Biggest",
+      "type": "Int",
+      "description": "This is the frame that the animation is biggest. The biggest frame of animation will hide any changes to underlying ground (e.g., craters) that the animation causes, so these effects are delayed until this frame is reached. The end result is to prevent the player from seeing craters \"pop\" into existence."
+    },
+    {
+      "name": "Damage",
+      "type": "UInt",
+      "description": "Some animations (when attached to another object) damage the object it is in contact with. Fire is a good example of this. This value is a fixed point number of the damage that is applied to the attached object every game tick."
+    },
+    {
+      "name": "Delay",
+      "type": "UChar",
+      "description": "Simple animation delay value between advancing of frames. This can be overridden by the control list."
+    },
+    {
+      "name": "Start",
+      "type": "Int",
+      "description": "The starting frame number for each animation sequence. Usually this is zero, but can sometimes be different if this animation is a sub sequence of a larger animation file."
+    },
+    {
+      "name": "LoopStart",
+      "type": "Int",
+      "description": "Looping animations might start at a different frame than the initial one. This is true for smoke effects that have a startup sequence followed by a continuous looping sequence."
+    },
+    {
+      "name": "LoopEnd",
+      "type": "Int",
+      "description": "For looping animations, this is the frame that will end all the middle loops of the animation. The last loop of the animation will proceed until the Stages has been fully completed."
+    },
+    {
+      "name": "Stages",
+      "type": "Int",
+      "description": "The number of stages that this animation sequence will progress through before it loops or ends."
+    },
+    {
+      "name": "Loops",
+      "type": "Char",
+      "description": "This is the normal loop count for this animation. Usually this is one, but for some animations, it may be larger."
+    },
+    {
+      "name": "Sound",
+      "type": "VocType",
+      "requires_converter": true,
+      "valid_values": "NONE\nRAMBO_PRESENT\nRAMBO_CMON\nRAMBO_UGOTIT\nRAMBO_COMIN\nRAMBO_LAUGH\nRAMBO_LEFTY\nRAMBO_NOPROB\nRAMBO_ONIT\nRAMBO_YELL\nRAMBO_ROCK\nRAMBO_TUFF\nRAMBO_YEA\nRAMBO_YES\nRAMBO_YO\nGIRL_OKAY\nGIRL_YEAH\nGUY_OKAY\nGUY_YEAH\n2DANGER\nACKNOWL\nAFFIRM\nAWAIT\nMOVEOUT\nNEGATIVE\nNO_PROB\nREADY\nREPORT\nRIGHT_AWAY\nROGER\nUGOTIT\nUNIT\nVEHIC\nYESSIR\nBAZOOKA\nBLEEP\nBOMB1\nBUTTON\nRADAR_ON\nCONSTRUCTION\nCRUMBLE\nFLAMER1\nRIFLE\nM60\nGUN20\nM60A\nMINI\nRELOAD\nSLAM\nHVYGUN10\nION_CANNON\nMGUN11\nMGUN2\nNUKE_FIRE\nNUKE_EXPLODE\nLASER\nLASER_POWER\nRADAR_OFF\nSNIPER\nROCKET1\nROCKET2\nMOTOR\nSCOLD\nSIDEBAR_OPEN\nSIDEBAR_CLOSE\nSQUISH2\nTANK1\nTANK2\nTANK3\nTANK4\nUP\nDOWN\nTARGET\nSONAR\nTOSS\nCLOAK\nBURN\nTURRET\nXPLOBIG4\nXPLOBIG6\nXPLOBIG7\nXPLODE\nXPLOS\nXPLOSML2\nSCREAM1\nSCREAM3\nSCREAM4\nSCREAM5\nSCREAM6\nSCREAM7\nSCREAM10\nSCREAM11\nSCREAM12\nYELL1\nYES\nCOMMANDER\nHELLO\nHMMM\nEXCELLENT3\nOF_COURSE\nYESYES\nQUIP1\nTHANKS\nCASHTURN\nBLEEPY3\nDINOMOUT\nDINOYES\nDINOATK1\nDINODIE1\nBEACON",
+      "description": "This is the sound effect to play when this animation starts. Usually, this applies to explosion animations."
+    },
+    {
+      "name": "VirtualStages",
+      "type": "Int",
+      "description": "The number of virtual animation stages. Keeps the animation alive longer for the purpose of 4K rendering, but is ignored by legacy rendering."
+    },
+    {
+      "name": "VirtualScale",
+      "type": "Int",
+      "description": "The scale of the virtual animation. Allows for higher-resolution art to appear larger."
+    }
+  ]
+}

@@ -506,6 +506,7 @@ void RulesClass::Difficulty(CCINIClass& ini)
 template<EnumSignedChar U, RulesTypeClass<U> T>
 RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
 {
+    // get name for type and rules section
     auto type_name = TdTypeConverter::Get_Type_Name<U>();
 
     rules.TypeRules[type_name] = std::make_unique<RuleSections>();
@@ -528,6 +529,7 @@ RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
             );
         }
 
+        // load type instance properties using INI
         sections.Add_Section(name, [&](auto& section, auto rule, const auto& value) {
             // trigger type instance properties update if rules cache is updated
             typeInstance.Read_Rules(section); // TODO: consider optimising this to only update the affected property

@@ -1,0 +1,114 @@
+{
+  "name": "Bullet",
+  "enum": "BulletType",
+  "class": "BulletTypeClass",
+  "base_class": "ObjectTypeClass",
+  "template": "bbdata-nco.cpp.in",
+  "example_instance": "SNIPER",
+  "properties": [
+    {
+      "name": "IsHigh",
+      "type": "Bool",
+      "comment": "Does this bullet type fly over walls?"
+    },
+    {
+      "name": "IsArcing",
+      "type": "Bool",
+      "comment": "If this projectile is one that balistically arcs from ground level, up into the air and then back to the ground, where it explodes. Typical uses of this are for grenades and artillery shells."
+    },
+    {
+      "name": "IsHoming",
+      "type": "Bool",
+      "comment": "If the projectile changes course as it flies in order to home in on the projectile's target, then this flag is true. Missiles are typically ones that do this."
+    },
+    {
+      "name": "IsDropping",
+      "type": "Bool",
+      "comment": "Certain projectiles do not travel horizontally, but rather, vertically -- they drop from a height. Bombs fall into this category and will have this value set to true. Dropping projectiles do not calculate collision with terrain (such as walls)."
+    },
+    {
+      "name": "IsInvisible",
+      "type": "Bool",
+      "comment": "Is this projectile invisible? Some bullets and weapon effects are not directly rendered. Small caliber bullets and flame thrower flames are treated like normal projectiles for damage purposes, but are displayed using custom rules."
+    },
+    {
+      "name": "IsProximityArmed",
+      "type": "Bool",
+      "comment": "Does this bullet explode when near the target? Some bullets only explode if it actually hits the target. Some explode even if nearby."
+    },
+    {
+      "name": "IsFlameEquipped",
+      "type": "Bool",
+      "comment": "Does this projectile spew puffs of smoke out its tail while it travels? Missiles are prime examples of this projectile type."
+    },
+    {
+      "name": "IsFueled",
+      "type": "Bool",
+      "comment": "Should fuel consumption be tracked for this projectile? Rockets are the primary projectile with this characteristic, but even for bullets it should be checked so that bullets don't travel too far."
+    },
+    {
+      "name": "IsFaceless",
+      "type": "Bool",
+      "comment": "Is this projectile without different facing visuals? Most plain bullets do not change visual imagery if their facing changes. Rockets, on the other hand, are equipped with the full 32 facing imagery."
+    },
+    {
+      "name": "IsInaccurate",
+      "type": "Bool",
+      "comment": "If this is a typically inaccurate projectile, then this flag will be true. Artillery is a prime example of this type."
+    },
+    {
+      "name": "IsTranslucent",
+      "type": "Bool",
+
+      "comment": "If the bullet contains translucent pixels, then this flag will be true. These translucent pixels really are \"shadow\" pixels in the same style as the shadow cast by regular ground units."
+    },
+    {
+      "name": "IsAntiAircraft",
+      "type": "Bool",
+      "comment": "If this bullet can be fired on aircraft, then this flag will be true."
+    },
+    {
+      "name": "Type",
+      "type": "BulletType",
+      "requires_converter": true,
+      "valid_values": "NONE\nSNIPER\nBULLET\nAPDS\nHE\nSSM\nSSM2\nSAM\nTOW\nFLAME\nCHEMSPRAY\nNAPALM\nGRENADE\nLASER\nNUKE_UP\nNUKE_DOWN\nHONEST_JOHN\nSPREADFIRE\nHEADBUTT\nTREXBITE",
+      "comment": "This element is a unique identification number for the bullet type."
+    },
+    {
+      "name": "MaxSpeed",
+      "type": "MPHType",
+      "requires_converter": true,
+      "valid_values": "IMMOBILE\nVERY_SLOW\nKINDA_SLOW\nSLOW\nSLOW_ISH\nMEDIUM_SLOW\nMEDIUM\nMEDIUM_FAST\nMEDIUM_FASTER\nFAST\nROCKET\nVERY_FAST\nLIGHT_SPEED",
+      "comment": "Maximum speed for this bullet type."
+    },
+    {
+      "name": "Warhead",
+      "type": "WarheadType",
+      "requires_converter": true,
+      "valid_values": "NONE\nSA\nHE\nAP\nFIRE\nLASER\nPB\nFIST\nFOOT\nHOLLOW_POINT\nSPORE\nHEADBUTT\nFEEDME\n\nSee: [warhead.ini](#warheadini)",
+      "comment": "This projectile has a certain style of warhead. This value specifies what that warhead type is."
+    },
+    {
+      "name": "Explosion",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "NONE\nFBALL1\nGRENADE\nFRAG1\nFRAG2\nVEH_HIT1\nVEH_HIT2\nVEH_HIT3\nART_EXP1\nNAPALM1\nNAPALM2\nNAPALM3\nSMOKE_PUFF\nPIFF\nPIFFPIFF\nFLAME_N\nFLAME_NE\nFLAME_E\nFLAME_SE\nFLAME_S\nFLAME_SW\nFLAME_W\nFLAME_NW\nCHEM_N\nCHEM_NE\nCHEM_E\nCHEM_SE\nCHEM_S\nCHEM_SW\nCHEM_W\nCHEM_NW\nFIRE_SMALL\nFIRE_MED\nFIRE_MED2\nFIRE_TINY\nMUZZLE_FLASH\nSMOKE_M\nBURN_SMALL\nBURN_MED\nBURN_BIG\nON_FIRE_SMALL\nON_FIRE_MED\nON_FIRE_BIG\nSAM_N\nSAM_NE\nSAM_E\nSAM_SE\nSAM_S\nSAM_SW\nSAM_W\nSAM_NW\nGUN_N\nGUN_NE\nGUN_E\nGUN_SE\nGUN_S\nGUN_SW\nGUN_W\nGUN_NW\nLZ_SMOKE\nION_CANNON\nATOM_BLAST\nCRATE_DEVIATOR\nCRATE_DOLLAR\nCRATE_EARTH\nCRATE_EMPULSE\nCRATE_INVUN\nCRATE_MINE\nCRATE_RAPID\nCRATE_STEALTH\nCRATE_MISSILE\nATOM_DOOR\nMOVE_FLASH\nOILFIELD_BURN\nTRIC_DIE\nTREX_DIE\nSTEG_DIE\nRAPT_DIE\nCHEM_BALL\nFLAG\nBEACON\nFIRE_SMALL_VIRTUAL\nFIRE_MED_VIRTUAL\nFIRE_MED2_VIRTUAL\nFIRE_TINY_VIRTUAL\nBEACON_VIRTUAL\n\nSee: [animation.ini](#animationini)",
+      "comment": "This is the \"explosion\" effect to use when this projectile impacts."
+    },
+    {
+      "name": "ROT",
+      "type": "UChar",
+      "comment": "This is the rotation speed of the bullet. It only has practical value for those projectiles that performing homing action during flight -- such as with rockets."
+    },
+    {
+      "name": "Arming",
+      "type": "Int",
+      "comment": "Some projectiles have a built in arming distance that must elapse before the projectile may explode. If this value is non-zero, then this override is applied."
+    },
+    {
+      "name": "Range",
+      "type": "Int",
+      "comment": "Some projectiles have a built in override for distance travelled before it automatically explodes. This value, if non-zero, specifies this distance."
+    }
+  ]
+}

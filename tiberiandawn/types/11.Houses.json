@@ -1,0 +1,62 @@
+{
+  "name": "House",
+  "enum": "HousesType",
+  "class": "HouseTypeClass",
+  "template": "hdata-nco.cpp.in",
+  "example_instance": "BadGuy",
+  "example_instance_comment": "Brotherhood of Nod",
+  "properties": [
+    {
+      "name": "House",
+      "type": "HousesType",
+      "requires_converter": true,
+      "valid_values": "NONE\nGOOD\nBAD\nNEUTRAL\nJP\nMULTI1\nMULTI2\nMULTI3\nMULTI4\nMULTI5\nMULTI6",
+      "comment": "This is the house number (enum). This is a unique identification number for the house."
+    },
+    {
+      "name": "Color",
+      "type": "HouseColorType",
+      "requires_converter": true,
+      "valid_values": "GOOD\nBRIGHT_GOOD\nBAD\nBRIGHT_BAD\nNEUTRAL\nBRIGHT_NEUTRAL",
+      "comment": "Each house is assigned a unique identification color to be used on the radar map and other color significant areas."
+    },
+    {
+      "name": "BrightColor",
+      "type": "HouseColorType",
+      "requires_converter": true,
+      "valid_values": "See: Color (above)",
+      "comment": "The bright color for the house."
+    },
+    {
+      "name": "RemapColorEnabled",
+      "type": "Bool",
+      "comment": "Flag indicating whether remap color is enabled."
+    },
+    {
+      "name": "RemapColor",
+      "type": "PlayerColorType",
+      "requires_converter": true,
+      "valid_values": "NONE\nGOLD\nLTBLUE\nRED\nGREEN\nORANGE\nBLUE",
+      "comment": "This points to the default remap table for this house."
+    },
+    {
+      "name": "RemapColor",
+      "type": "PlayerColorType",
+      "requires_converter": true,
+      "valid_values": "NONE\nGOLD\nLTBLUE\nRED\nGREEN\nORANGE\nBLUE",
+      "comment": "This points to the default remap table for this house."
+    },
+    {
+      "name": "Prefix",
+      "type": "String",
+      "template_ignore": true,
+      "comment": "This is a unique ASCII character used when constructing filenames. It serves a similar purpose as the \"Suffix\" element, but is only one character long."
+    },
+    {
+      "name": "Suffix",
+      "type": "String",
+      "template_ignore": true,
+      "comment": "This is the filename suffix to use when creating a house specific file name. It is three characters long."
+    }
+  ]
+}

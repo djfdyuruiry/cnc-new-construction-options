@@ -317,6 +317,8 @@ private:
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);
     void Difficulty(CCINIClass& ini);
+
+    // see rules-nco.cpp
     void Init_Sections(CCINIClass& ini);
     void Apply_Special_Properties();
     void Apply_Static_And_Global_Values();

@@ -1,0 +1,94 @@
+{
+  "name": "Building",
+  "enum": "StructType",
+  "class": "BuildingTypeClass",
+  "base_class": "TechnoTypeClass",
+  "template": "bdata-nco.cpp.in",
+  "example_instance": "GTWR",
+  "example_instance_comment": "Guard Tower",
+  "properties": [
+    {
+      "name": "IsBibbed",
+      "type": "Bool",
+      "comment": "This flag controls whether the building is equipped with a dirt bib or not. A building with a bib has a dirt patch automatically attached to the structure when it is placed."
+    },
+    {
+      "name": "IsWall",
+      "type": "Bool",
+      "comment": "If this building is a special wall type, such that it exists as a building for purposes of construction but transforms into an overlay wall object when it is placed on the map, then this flag will be true."
+    },
+    {
+      "name": "IsFactory",
+      "type": "Bool",
+      "comment": "Some buildings are producers. This flag will be true in that case. Producer, or factory, type buildings have special logic performed."
+    },
+    {
+      "name": "IsSimpleDamage",
+      "type": "Bool",
+      "comment": "Buildings can have either simple or complex damage stages. If simple, then the second to the last frame is the half damage stage, and the last frame is the complete damage stage. For non-simple damage, buildings have a complete animation set for damaged as well as undamaged condition. Turrets, oil pumps, and repair facilities are a few examples."
+    },
+    {
+      "name": "IsSturdy",
+      "type": "Bool",
+      "comment": "Some buildings can be placed directly on raw ground. Such buildings don't require and are not affected by concrete or lack thereof. Typically, concrete itself is considered sturdy. The same goes for walls and similar generic type structures. The more sophisticated buildings are greatly affected by lack of concrete and thus would have this flag set to false."
+    },
+    {
+      "name": "IsCaptureable",
+      "type": "Bool",
+      "comment": "Certain building types can be captured by enemy infantry. For those building types, this flag will be true. Typically, military or hardened structures such as turrets cannot be captured."
+    },
+    {
+      "name": "IsRegulated",
+      "type": "Bool",
+      "comment": "If this building really only has cosmetic idle animation, then this flag will be true if this animation should run at a relatively constant rate regardless of game speed setting."
+    },
+    {
+      "name": "IsUnsellable",
+      "type": "Bool",
+      "comment": "If this flag is true, then the building cannot be sold even if it could have been built. This is especially useful for mines which can be built but cannot be sold."
+    },
+    {
+      "name": "ToBuild",
+      "type": "FactoryType",
+      "requires_converter": true,
+      "valid_values": "NONE\nINFANTRY\nUNIT\nAIRCRAFT\nBUILDING",
+      "comment": "This flag specifies the type of object this factory building can \"produce\". For non factory buildings, this value will be RTTI_NONE."
+    },
+    {
+      "name": "Type",
+      "type": "StructType",
+      "requires_converter": true,
+      "valid_values": "NONE\nWEAP\nGTOWER\nATOWER\nOBELISK\nRADAR\nTURRET\nCONST\nREFINERY\nSTORAGE\nHELIPAD\nSAM\nAIRSTRIP\nPOWER\nADVANCED_POWER\nHOSPITAL\nBARRACKS\nTANKER\nREPAIR\nBIO_LAB\nHAND\nTEMPLE\nEYE\nMISSION\nV01\nV02\nV03\nV04\nV05\nV06\nV07\nV08\nV09\nV10\nV11\nV12\nV13\nV14\nV15\nV16\nV17\nV18\nPUMP\nV20\nV21\nV22\nV23\nV24\nV25\nV26\nV27\nV28\nV29\nV30\nV31\nV32\nV33\nV34\nV35\nV36\nV37\nSANDBAG_WALL\nCYCLONE_WALL\nBRICK_WALL\nBARBWIRE_WALL\nWOOD_WALL",
+      "comment": "This is the structure type identifier. It can serve as a unique identification number for building types."
+    },
+    {
+      "name": "StartFace",
+      "type": "DirType",
+      "requires_converter": true,
+      "valid_values": "N\nNE\nE\nSE\nS\nSW\nSW_X1\nSW_X2\nW\nNW",
+      "comment": "This is the starting facing to give this building when it first gets constructed. The facing matches the final stage of the construction animation."
+    },
+    {
+      "name": "Capacity",
+      "type": "UInt",
+      "comment": "This is the Tiberium storage capacity of the building. The sum of all building's storage capacity is used to determine how much Tiberium can be accumulated."
+    },
+    {
+      "name": "Power",
+      "type": "Int",
+      "comment": "Each building type produces and consumes power. These values tell how much."
+    },
+    {
+      "name": "Drain",
+      "type": "Int",
+      "comment": "Each building type produces and consumes power. These values tell how much."
+    },
+    {
+      "name": "Size",
+      "type": "BSizeType",
+      "requires_converter": true,
+      "valid_values": "NONE\n11\n21\n12\n22\n23\n32\n33\n42\n55",
+      "comment": "This is the size of the building. This size value is a rough indication of the building's \"footprint\"."
+    }
+  ]
+}

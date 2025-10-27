@@ -1,0 +1,48 @@
+{
+  "name": "Infantry",
+  "enum": "InfantryType",
+  "class": "InfantryTypeClass",
+  "base_class": "TechnoTypeClass",
+  "template": "idata-nco.cpp.in",
+  "example_instance": "E1",
+  "example_instance_comment": "Minigunner",
+  "properties": [
+    {
+      "name": "IsFemale",
+      "type": "Bool",
+      "comment": "If this civilian infantry type is female, then this flag will be true. This information is used to get the correct voice response."
+    },
+    {
+      "name": "IsCrawling",
+      "type": "Bool",
+      "comment": "Does this infantry unit have crawling animation? If not, then this means that the \"crawling\" frames are actually running animation frames."
+    },
+    {
+      "name": "IsCapture",
+      "type": "Bool",
+      "comment": "For those infantry types that can capture buildings, this flag will be set to true."
+    },
+    {
+      "name": "IsFraidyCat",
+      "type": "Bool",
+      "comment": "For infantry types that will run away from any damage causing events, this flag will be true. Typically, this is so for all civilians as well as the flame thrower guys."
+    },
+    {
+      "name": "IsCivilian",
+      "type": "Bool",
+      "comment": "This flags whether this infantry is actually a civilian. A civilian uses different voice responses, has less ammunition, and runs from danger more often."
+    },
+    {
+      "name": "IsAvoidingTiberium",
+      "type": "Bool",
+      "comment": "For \"fraidycat\" infantry types that will run away from any damage causing events, this controls whether they avoid wandering into Tiberium."
+    },
+    {
+      "name": "Type",
+      "type": "InfantryType",
+      "requires_converter": true,
+      "valid_values": "NONE\nE1\nE2\nE3\nE4\nE5\nE7\nRAMBO\nC1\nC2\nC3\nC4\nC5\nC6\nC7\nC8\nC9\nC10\nMOEBIUS\nDELPHI\nCHAN",
+      "comment": "This value represents the infantry class. It can serve as unique identification for this infantry class."
+    }
+  ]
+}
