@@ -39,7 +39,7 @@
 
 // Dinosaur death animations
 static AnimTypeClass const TricDie(ANIM_TRIC_DIE, // Animation number.
-                                   "TRIC",        // Data name of animation.
+                                   "TRIC_DIE",        // Data name of animation.
                                    32,            // Maximum dimension of animation.
                                    4,             // Biggest animation stage.
                                    true,          // Normalized animation rate?
@@ -61,7 +61,7 @@ static AnimTypeClass const TricDie(ANIM_TRIC_DIE, // Animation number.
                                    ANIM_NONE);
 
 static AnimTypeClass const TRexDie(ANIM_TREX_DIE, // Animation number.
-                                   "TREX",        // Data name of animation.
+                                   "TREX_DIE",        // Data name of animation.
                                    48,            // Maximum dimension of animation.
                                    4,             // Biggest animation stage.
                                    true,          // Normalized animation rate?
@@ -83,7 +83,7 @@ static AnimTypeClass const TRexDie(ANIM_TREX_DIE, // Animation number.
                                    ANIM_NONE);
 
 static AnimTypeClass const StegDie(ANIM_STEG_DIE, // Animation number.
-                                   "STEG",        // Data name of animation.
+                                   "STEG_DIE",        // Data name of animation.
                                    33,            // Maximum dimension of animation.
                                    4,             // Biggest animation stage.
                                    true,          // Normalized animation rate?
@@ -105,7 +105,7 @@ static AnimTypeClass const StegDie(ANIM_STEG_DIE, // Animation number.
                                    ANIM_NONE);
 
 static AnimTypeClass const RaptDie(ANIM_RAPT_DIE, // Animation number.
-                                   "RAPT",        // Data name of animation.
+                                   "RAPT_DIE",        // Data name of animation.
                                    24,            // Maximum dimension of animation.
                                    4,             // Biggest animation stage.
                                    true,          // Normalized animation rate?
@@ -797,7 +797,7 @@ static AnimTypeClass const ChemNE(ANIM_CHEM_NE, // Animation number.
                                   ANIM_NONE);
 
 static AnimTypeClass const Grenade(ANIM_GRENADE, // Animation number.
-                                   "GRENADE",    // Data name of animation.
+                                   "GRENADEA",    // Data name of animation.
                                    21,           // Maximum dimension of animation.
                                    1,            // Biggest animation stage.
                                    true,         // Normalized animation rate?

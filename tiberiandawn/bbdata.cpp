@@ -196,7 +196,7 @@ static BulletTypeClass const ClassMissile2(BULLET_SSM2,
 );
 
 static BulletTypeClass const ClassPatriot(BULLET_SAM,
-                                          "SAM",         // NAME:			Text name of this unit type.
+                                          "SAM_BULT",         // NAME:			Text name of this unit type.
                                           true,          // Flies over tall walls?
                                           true,          // Homes in on target?
                                           false,         // Projectile arcs to the target?
