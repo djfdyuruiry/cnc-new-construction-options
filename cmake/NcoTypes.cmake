@@ -5,6 +5,7 @@
 #
 #   * TYPES_PATH - Path to a directory that contains .json files, each describing a <type>.ini section (unit.ini, infantry.ini etc)
 #   * TYPES_TEMPLATE_PATH - Directory where templates can be found, and will be rendered to (.in files mentioned in .json file template field)
+#   * SRC_LIST - List of source files for current target
 #
 # This script reads all JSON files in ${TYPES_PATH}, one JSON file per <type>.ini file. The properties in each file
 # are used to generate C++ code for the Read_INI and Read_Rules methods of the target type.
@@ -57,10 +58,10 @@ function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CO
     set(REQ_CSV_CONVERTER "OFF")
   endif()
 
-  set(_PROP_NAME ${PROP_NAME} PARENT_SCOPE)
-  set(_PROP_TYPE ${PROP_TYPE} PARENT_SCOPE)
-  set(_REQ_CONVERTER ${REQ_CONVERTER} PARENT_SCOPE)
-  set(_REQ_CSV_CONVERTER ${REQ_CSV_CONVERTER} PARENT_SCOPE)
+  set("${_PROP_NAME}" ${PROP_NAME} PARENT_SCOPE)
+  set("${_PROP_TYPE}" ${PROP_TYPE} PARENT_SCOPE)
+  set("${_REQ_CONVERTER}" ${REQ_CONVERTER} PARENT_SCOPE)
+  set("${_REQ_CSV_CONVERTER}" ${REQ_CSV_CONVERTER} PARENT_SCOPE)
 endfunction()
 
 function (ExtractTypeInfoFromJson _TYPE_JSON _TYPE_NAME _TEMPLATE_FILE _PROP_COUNT)
@@ -109,6 +110,7 @@ function(SetupTypesCheckBeforeBuild)
       -DTYPES_PATH=${TYPES_PATH}
       -DTYPES_TEMPLATE_PATH=${TYPES_TEMPLATE_PATH}
       -DTYPES_STATE_FILE=${TYPES_STATE_FILE}
+      -DSRC_LIST=${SRC_LIST}
       -D_BUILD_TIME_TYPES=TRUE
       -P "${CMAKE_CURRENT_LIST_FILE}"
   )
@@ -151,8 +153,8 @@ function(ScanForTypeFiles _TYPE_STATE_FILE _TYPES_FILES _TYPES_HASH _FILES_HAVE_
     endif()
   endif()
 
-  set("${_TYPES_FILES}" ${RULES_FILES} PARENT_SCOPE)
-  set("${_TYPES_HASH}" ${RULES_HASH} PARENT_SCOPE)
+  set("${_TYPES_FILES}" ${TYPES_FILES} PARENT_SCOPE)
+  set("${_TYPES_HASH}" ${TYPES_FILES} PARENT_SCOPE)
   set("${_FILES_HAVE_CHANGED}" ${FILES_HAVE_CHANGED} PARENT_SCOPE)
 endfunction()
 
@@ -178,41 +180,47 @@ function(Main)
     # load properties from JSON file
     file(READ ${TYPE_FILE} TYPE_JSON)
 
-    ExtractTypeInfoFromJson("${TYPE_JSON}" TYPE_NAME TEMPLATE_FILE)
+    ExtractTypeInfoFromJson("${TYPE_JSON}" TYPE_NAME TEMPLATE_FILE PROP_COUNT)
 
     message(STATUS "[NcoTypeRules] Generating code for type: ${TYPE_NAME}")
 
     foreach(PROP_INDEX RANGE ${PROP_COUNT})
       if(${PROP_INDEX} GREATER 0)
-        string(APPEND LOAD_RULES_CODE "\n             ")
-        string(APPEND READ_RULES_CODE "\n             ")
+        string(APPEND LOAD_RULES_CODE "\n        ")
+        string(APPEND READ_RULES_CODE "\n        ")
       endif()
 
       LoadTypeProperties("${TYPE_JSON}" "${PROP_INDEX}" PROP_NAME PROP_TYPE REQ_CONVERTER REQ_CSV_CONVERTER)
 
+      message(STATUS "[NcoTypeRules] Processing property #${PROP_INDEX}: ${PROP_NAME} (type=${PROP_TYPE})")
+
       if(${REQ_CONVERTER} STREQUAL "OFF" AND ${REQ_CSV_CONVERTER} STREQUAL "OFF")
-        string(APPEND LOAD_RULES_CODE ".Load_${RULE_TYPE}_Var(${PROP_NAME})")
-        string(APPEND READ_RULES_CODE ".Read_${RULE_TYPE}_Var(${PROP_NAME})")
+        string(APPEND LOAD_RULES_CODE ".Load_${PROP_TYPE}_Var(${PROP_NAME})")
+        string(APPEND READ_RULES_CODE ".Read_${PROP_TYPE}_Var(${PROP_NAME})")
       endif()
 
       if(${REQ_CONVERTER} STREQUAL "ON")
-        string(APPEND LOAD_RULES_CODE ".Load_With_TdConverter(${RULE_TYPE}, ${PROP_NAME})")
-        string(APPEND READ_RULES_CODE ".Read_With_TdConverter(${RULE_TYPE}, ${PROP_NAME})")
+        string(APPEND LOAD_RULES_CODE ".Load_With_TdConverter(${PROP_TYPE}, ${PROP_NAME})")
+        string(APPEND READ_RULES_CODE ".Read_With_TdConverter(${PROP_TYPE}, ${PROP_NAME})")
       endif()
 
       if(${REQ_CSV_CONVERTER} STREQUAL "ON")
-        string(APPEND LOAD_RULES_CODE ".Load_Csv_With_TdConverter(${RULE_TYPE}, ${PROP_NAME})")
-        string(APPEND READ_RULES_CODE ".Read_Csv_With_TdConverter(${RULE_TYPE}, ${PROP_NAME})")
+        string(APPEND LOAD_RULES_CODE ".Load_Csv_With_TdConverter(${PROP_TYPE}, ${PROP_NAME})")
+        string(APPEND READ_RULES_CODE ".Read_Csv_With_TdConverter(${PROP_TYPE}, ${PROP_NAME})")
       endif()
     endforeach()
 
-    cmake_path(APPEND TYPES_TEMPLATE_PATH TEMPLATE_FILE OUTPUT_VARIABLE TEMPLATE_PATH)
-    SET(TEMPLATE_OUTPUT_PATH TEMPLATE_PATH)
+    cmake_path(APPEND TYPES_TEMPLATE_PATH ${TEMPLATE_FILE} OUTPUT_VARIABLE TEMPLATE_PATH)
+    SET(TEMPLATE_OUTPUT_PATH ${TEMPLATE_PATH})
     cmake_path(REMOVE_EXTENSION TEMPLATE_OUTPUT_PATH LAST_ONLY)
 
     message(STATUS "[NcoTypeRules] Rendering template: ${TEMPLATE_PATH} -> ${TEMPLATE_OUTPUT_PATH}")
 
     configure_file(${TEMPLATE_PATH} ${TEMPLATE_OUTPUT_PATH} @ONLY)
+
+    list(APPEND ${SRC_LIST} ${TEMPLATE_OUTPUT_PATH})
+    set("${SRC_LIST}" ${SRC_LIST} PARENT_SCOPE)
+
     WatchFileForChanges(${TEMPLATE_PATH})
   endforeach()
 

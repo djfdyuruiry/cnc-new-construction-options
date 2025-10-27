@@ -1,27 +1,14 @@
+#include "type.h"
+#include "typeconverter.h"
+
 const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
 {
     return TechnoTypeClass::Read_INI(ini)
-        @LOAD_METHOD_CALLS@
-        // Should generate:
-        // .Load_Bool_Var(IsFemale)
-        // .Load_Bool_Var(IsCrawling)
-        // .Load_Bool_Var(IsCapture)
-        // .Load_Bool_Var(IsFraidyCat)
-        // .Load_Bool_Var(IsCivilian)
-        // .Load_Bool_Var(IsAvoidingTiberium)
-        // .Load_With_TdConverter(InfantryType, Type);
+        @LOAD_RULES_CODE@;
 }
 
 const RuleSection& InfantryTypeClass::Read_Rules(const RuleSection& rules)
 {
     return TechnoTypeClass::Read_Rules(rules)
-        @READ_METHOD_CALLS@
-        // Should generate:
-        // .Read_Bool_Var(IsFemale)
-        // .Read_Bool_Var(IsCrawling)
-        // .Read_Bool_Var(IsCapture)
-        // .Read_Bool_Var(IsFraidyCat)
-        // .Read_Bool_Var(IsCivilian)
-        // .Read_Bool_Var(IsAvoidingTiberium)
-        // .Read_With_TdConverter(InfantryType, Type);
+        @READ_RULES_CODE@;
 }
