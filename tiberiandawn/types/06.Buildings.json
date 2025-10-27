@@ -6,6 +6,7 @@
   "template": "bdata-nco.cpp.in",
   "example_instance": "GTWR",
   "example_instance_comment": "Guard Tower",
+  "comment": "Types of Buildings that can be found in the game - e.g. Power Plant, Temple of Nod etc.",
   "properties": [
     {
       "name": "IsBibbed",
@@ -21,6 +22,13 @@
       "name": "IsFactory",
       "type": "Bool",
       "comment": "Some buildings are producers. This flag will be true in that case. Producer, or factory, type buildings have special logic performed."
+    },
+    {
+      "name": "ToBuild",
+      "type": "FactoryType",
+      "requires_converter": true,
+      "valid_values": "NONE, INFANTRY, UNIT, AIRCRAFT, BUILDING",
+      "comment": "This flag specifies the type of object this factory building can \"produce\". For non factory buildings, this value will be RTTI_NONE."
     },
     {
       "name": "IsSimpleDamage",
@@ -48,24 +56,17 @@
       "comment": "If this flag is true, then the building cannot be sold even if it could have been built. This is especially useful for mines which can be built but cannot be sold."
     },
     {
-      "name": "ToBuild",
-      "type": "FactoryType",
-      "requires_converter": true,
-      "valid_values": "NONE\nINFANTRY\nUNIT\nAIRCRAFT\nBUILDING",
-      "comment": "This flag specifies the type of object this factory building can \"produce\". For non factory buildings, this value will be RTTI_NONE."
-    },
-    {
       "name": "Type",
       "type": "StructType",
       "requires_converter": true,
-      "valid_values": "NONE\nWEAP\nGTOWER\nATOWER\nOBELISK\nRADAR\nTURRET\nCONST\nREFINERY\nSTORAGE\nHELIPAD\nSAM\nAIRSTRIP\nPOWER\nADVANCED_POWER\nHOSPITAL\nBARRACKS\nTANKER\nREPAIR\nBIO_LAB\nHAND\nTEMPLE\nEYE\nMISSION\nV01\nV02\nV03\nV04\nV05\nV06\nV07\nV08\nV09\nV10\nV11\nV12\nV13\nV14\nV15\nV16\nV17\nV18\nPUMP\nV20\nV21\nV22\nV23\nV24\nV25\nV26\nV27\nV28\nV29\nV30\nV31\nV32\nV33\nV34\nV35\nV36\nV37\nSANDBAG_WALL\nCYCLONE_WALL\nBRICK_WALL\nBARBWIRE_WALL\nWOOD_WALL",
+      "valid_values": "NONE, WEAP, GTOWER, ATOWER, OBELISK, RADAR, TURRET, CONST, REFINERY, STORAGE, HELIPAD, SAM, AIRSTRIP, POWER, ADVANCED_POWER, HOSPITAL, BARRACKS, TANKER, REPAIR, BIO_LAB, HAND, TEMPLE, EYE, MISSION, V01, V02, V03, V04, V05, V06, V07, V08, V09, V10, V11, V12, V13, V14, V15, V16, V17, V18, PUMP, V20, V21, V22, V23, V24, V25, V26, V27, V28, V29, V30, V31, V32, V33, V34, V35, V36, V37, SANDBAG_WALL, CYCLONE_WALL, BRICK_WALL, BARBWIRE_WALL, WOOD_WALL",
       "comment": "This is the structure type identifier. It can serve as a unique identification number for building types."
     },
     {
       "name": "StartFace",
       "type": "DirType",
       "requires_converter": true,
-      "valid_values": "N\nNE\nE\nSE\nS\nSW\nSW_X1\nSW_X2\nW\nNW",
+      "valid_values": "N, NE, E, SE, S, SW, SW_X1, SW_X2, W, NW",
       "comment": "This is the starting facing to give this building when it first gets constructed. The facing matches the final stage of the construction animation."
     },
     {
@@ -87,7 +88,7 @@
       "name": "Size",
       "type": "BSizeType",
       "requires_converter": true,
-      "valid_values": "NONE\n11\n21\n12\n22\n23\n32\n33\n42\n55",
+      "valid_values": "NONE, 11, 21, 12, 22, 23, 32, 33, 42, 55",
       "comment": "This is the size of the building. This size value is a rough indication of the building's \"footprint\"."
     }
   ]

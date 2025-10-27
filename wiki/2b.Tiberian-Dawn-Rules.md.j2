@@ -37,15 +37,18 @@ Rule Sections:
 {% for type in concrete_types %}
 ### {{ type.name | lower }}.ini
 {{ type.comment }}
-| Property | Comment | Example |
-|--------|-------------|-------------|
-{% if type.has_base_type %}{% for prop in type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} (Type={{prop.type}}) | {{ prop.example_value }} |
-{% endfor %}{% if type.base_type.has_base_type %}{% for prop in type.base_type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} (Type={{prop.type}}) | {{ prop.example_value }} |
-{% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}| `{{ prop.name }}` | {{ prop.comment }} (Type={{prop.type}}) | {{ prop.example_value }} |
+
+| Property | Comment | Example | Valid Values |
+|--------|-------------|-------------|-------------|
+{% if type.has_base_type %}{% for prop in type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} | {{ prop.example_value }} | {{ prop.valid_values }}
+{% endfor %}{% if type.base_type.has_base_type %}{% for prop in type.base_type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} | {{ prop.example_value }} | {{ prop.valid_values }}
+{% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}| `{{ prop.name }}` | {{ prop.comment }} | {{ prop.example_value }} | {{ prop.valid_values }}
 {% endfor %}
 ```ini
 ; {{ type.example_instance_comment }}
 [{{ type.example_instance }}]
-{% for prop in type.properties %}{{ prop.name }}={{ prop.example_value }}
+{% if type.has_base_type %}{% for prop in type.base_type.properties %}{{ prop.name }}={{ prop.example_value }}
+{% endfor %}{% if type.base_type.has_base_type %}{% for prop in type.base_type.base_type.properties %}{{ prop.name }}={{ prop.example_value }}
+{% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}{{ prop.name }}={{ prop.example_value }}
 {% endfor %}```
 {% endfor %}

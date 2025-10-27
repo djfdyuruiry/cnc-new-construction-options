@@ -51,7 +51,7 @@
       "requires_converter": true,
       "comment": "The defense of this object is greatly affected by the type of armor it possesses. This value specifies the type of armor.",
       "example_value": "STEEL",
-      "valid_values": "NONE\nWOOD\nALUMINUM\nSTEEL\nCONCRETE"
+      "valid_values": "NONE, WOOD, ALUMINUM, STEEL, CONCRETE"
     },
     {
       "name": "MaxStrength",

@@ -6,6 +6,7 @@
   "template": "idata-nco.cpp.in",
   "example_instance": "E1",
   "example_instance_comment": "Minigunner",
+  "comment": "Types of Infantry that can be found in the game - e.g. Minigunner, Engineer etc.",
   "properties": [
     {
       "name": "IsFemale",
@@ -41,7 +42,7 @@
       "name": "Type",
       "type": "InfantryType",
       "requires_converter": true,
-      "valid_values": "NONE\nE1\nE2\nE3\nE4\nE5\nE7\nRAMBO\nC1\nC2\nC3\nC4\nC5\nC6\nC7\nC8\nC9\nC10\nMOEBIUS\nDELPHI\nCHAN",
+      "valid_values": "NONE, E1, E2, E3, E4, E5, E7, RAMBO, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, MOEBIUS, DELPHI, CHAN",
       "comment": "This value represents the infantry class. It can serve as unique identification for this infantry class."
     }
   ]

@@ -6,6 +6,7 @@
   "template": "aadata-nco.cpp.in",
   "example_instance": "TRAN",
   "example_instance_comment": "Transport Helicopter",
+  "comment": "Types of Aircraft in the game - e.g. ORCA, A10 Warthog etc.",
   "properties": [
     {
       "name": "IsFixedWing",
@@ -31,7 +32,7 @@
       "name": "Type",
       "type": "AircraftType",
       "requires_converter": true,
-      "valid_values": "NONE\nTRANSPORT\nA10\nHELICOPTER\nCARGO\nORCA"
+      "valid_values": "NONE, TRANSPORT, A10, HELICOPTER, CARGO, ORCA"
     },
     {
       "name": "ROT",
@@ -41,7 +42,7 @@
       "name": "Mission",
       "type": "MissionType",
       "requires_converter": true,
-      "valid_values": "NONE\nSLEEP\nATTACK\nMOVE\nRETREAT\nGUARD\nSTICKY\nENTER\nCAPTURE\nHARVEST\nGUARD_AREA\nRETURN\nSTOP\nAMBUSH\nHUNT\nTIMED_HUNT\nUNLOAD\nSABOTAGE\nCONSTRUCTION\nDECONSTRUCTION\nREPAIR\nRESCUE\nMISSILE"
+      "valid_values": "NONE, SLEEP, ATTACK, MOVE, RETREAT, GUARD, STICKY, ENTER, CAPTURE, HARVEST, GUARD_AREA, RETURN, STOP, AMBUSH, HUNT, TIMED_HUNT, UNLOAD, SABOTAGE, CONSTRUCTION, DECONSTRUCTION, REPAIR, RESCUE, MISSILE"
     }
   ]
 }

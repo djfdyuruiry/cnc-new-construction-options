@@ -5,26 +5,27 @@
   "template": "hdata-nco.cpp.in",
   "example_instance": "BadGuy",
   "example_instance_comment": "Brotherhood of Nod",
+  "comment": "Houses are various sides in a given scenario - e.g. GDI, NOD etc. (Includes the players in a multiplayer match)",
   "properties": [
     {
       "name": "House",
       "type": "HousesType",
       "requires_converter": true,
-      "valid_values": "NONE\nGOOD\nBAD\nNEUTRAL\nJP\nMULTI1\nMULTI2\nMULTI3\nMULTI4\nMULTI5\nMULTI6",
+      "valid_values": "NONE, GOOD, BAD, NEUTRAL, JP, MULTI1, MULTI2, MULTI3, MULTI4, MULTI5, MULTI6",
       "comment": "This is the house number (enum). This is a unique identification number for the house."
     },
     {
       "name": "Color",
       "type": "HouseColorType",
       "requires_converter": true,
-      "valid_values": "GOOD\nBRIGHT_GOOD\nBAD\nBRIGHT_BAD\nNEUTRAL\nBRIGHT_NEUTRAL",
+      "valid_values": "GOOD, BRIGHT_GOOD, BAD, BRIGHT_BAD, NEUTRAL, BRIGHT_NEUTRAL",
       "comment": "Each house is assigned a unique identification color to be used on the radar map and other color significant areas."
     },
     {
       "name": "BrightColor",
       "type": "HouseColorType",
       "requires_converter": true,
-      "valid_values": "See: Color (above)",
+      "valid_values": "See: `Color` (above)",
       "comment": "The bright color for the house."
     },
     {
@@ -36,27 +37,31 @@
       "name": "RemapColor",
       "type": "PlayerColorType",
       "requires_converter": true,
-      "valid_values": "NONE\nGOLD\nLTBLUE\nRED\nGREEN\nORANGE\nBLUE",
+      "valid_values": "NONE, GOLD, LTBLUE, RED, GREEN, ORANGE, BLUE",
       "comment": "This points to the default remap table for this house."
     },
     {
       "name": "RemapColor",
       "type": "PlayerColorType",
       "requires_converter": true,
-      "valid_values": "NONE\nGOLD\nLTBLUE\nRED\nGREEN\nORANGE\nBLUE",
+      "valid_values": "NONE, GOLD, LTBLUE, RED, GREEN, ORANGE, BLUE",
       "comment": "This points to the default remap table for this house."
     },
     {
       "name": "Prefix",
       "type": "String",
       "template_ignore": true,
-      "comment": "This is a unique ASCII character used when constructing filenames. It serves a similar purpose as the \"Suffix\" element, but is only one character long."
+      "comment": "This is a unique ASCII character used when constructing filenames. It serves a similar purpose as the \"Suffix\" element, but is only one character long.",
+      "example_value": "G",
+      "valid_values": "One character maximum, in uppercase"
     },
     {
       "name": "Suffix",
       "type": "String",
       "template_ignore": true,
-      "comment": "This is the filename suffix to use when creating a house specific file name. It is three characters long."
+      "comment": "This is the filename suffix to use when creating a house specific file name. It is three characters long.",
+      "example_value": "NOD",
+      "valid_values": "Exactly three characters, in uppercase"
     }
   ]
 }

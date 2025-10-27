@@ -6,6 +6,7 @@
   "template": "udata-nco.cpp.in",
   "example_instance": "JEEP",
   "example_instance_comment": "Hum-Vee",
+  "comment": "Types of Units that can be found in the game - e.g. APC, Light Tank etc.",
   "properties": [
     {
       "name": "IsCrateGoodie",
@@ -71,14 +72,14 @@
       "name": "Type",
       "type": "UnitType",
       "requires_converter": true,
-      "valid_values": "NONE\nHTANK\nMTANK\nLTANK\nSTANK\nFTANK\nVICE\nAPC\nMLRS\nJEEP\nBUGGY\nHARVESTER\nARTY\nMSAM\nHOVER\nMHQ\nGUNBOAT\nMCV\nBIKE\nTRIC\nTREX\nRAPT\nSTEG",
+      "valid_values": "NONE, HTANK, MTANK, LTANK, STANK, FTANK, VICE, APC, MLRS, JEEP, BUGGY, HARVESTER, ARTY, MSAM, HOVER, MHQ, GUNBOAT, MCV, BIKE, TRIC, TREX, RAPT, STEG",
       "comment": "This value represents the unit class. It can serve as a unique identification number for this unit class."
     },
     {
       "name": "Speed",
       "type": "SpeedType",
       "requires_converter": true,
-      "valid_values": "NONE\nFOOT\nTRACK\nHARVESTER\nWHEEL\nWINGED\nHOVER\nFLOAT",
+      "valid_values": "NONE, FOOT, TRACK, HARVESTER, WHEEL, WINGED, HOVER, FLOAT",
       "comment": "This indicates the speed (locomotion) type for this unit. Through this value the movement capabilities are deduced."
     },
     {
@@ -95,14 +96,14 @@
       "name": "Mission",
       "type": "MissionType",
       "requires_converter": true,
-      "valid_values": "NONE\nSLEEP\nATTACK\nMOVE\nRETREAT\nGUARD\nSTICKY\nENTER\nCAPTURE\nHARVEST\nGUARD_AREA\nRETURN\nSTOP\nAMBUSH\nHUNT\nTIMED_HUNT\nUNLOAD\nSABOTAGE\nCONSTRUCTION\nDECONSTRUCTION\nREPAIR\nRESCUE\nMISSILE",
+      "valid_values": "NONE, SLEEP, ATTACK, MOVE, RETREAT, GUARD, STICKY, ENTER, CAPTURE, HARVEST, GUARD_AREA, RETURN, STOP, AMBUSH, HUNT, TIMED_HUNT, UNLOAD, SABOTAGE, CONSTRUCTION, DECONSTRUCTION, REPAIR, RESCUE, MISSILE",
       "comment": "This value is used to provide the unit with a default mission order when first created. Usually, this is a resting or idle type of order."
     },
     {
       "name": "Explosion",
       "type": "AnimType",
       "requires_converter": true,
-      "valid_values": "NONE\nFBALL1\nGRENADE\nFRAG1\nFRAG2\nVEH_HIT1\nVEH_HIT2\nVEH_HIT3\nART_EXP1\nNAPALM1\nNAPALM2\nNAPALM3\nSMOKE_PUFF\nPIFF\nPIFFPIFF\nFLAME_N\nFLAME_NE\nFLAME_E\nFLAME_SE\nFLAME_S\nFLAME_SW\nFLAME_W\nFLAME_NW\nCHEM_N\nCHEM_NE\nCHEM_E\nCHEM_SE\nCHEM_S\nCHEM_SW\nCHEM_W\nCHEM_NW\nFIRE_SMALL\nFIRE_MED\nFIRE_MED2\nFIRE_TINY\nMUZZLE_FLASH\nSMOKE_M\nBURN_SMALL\nBURN_MED\nBURN_BIG\nON_FIRE_SMALL\nON_FIRE_MED\nON_FIRE_BIG\nSAM_N\nSAM_NE\nSAM_E\nSAM_SE\nSAM_S\nSAM_SW\nSAM_W\nSAM_NW\nGUN_N\nGUN_NE\nGUN_E\nGUN_SE\nGUN_S\nGUN_SW\nGUN_W\nGUN_NW\nLZ_SMOKE\nION_CANNON\nATOM_BLAST\nCRATE_DEVIATOR\nCRATE_DOLLAR\nCRATE_EARTH\nCRATE_EMPULSE\nCRATE_INVUN\nCRATE_MINE\nCRATE_RAPID\nCRATE_STEALTH\nCRATE_MISSILE\nATOM_DOOR\nMOVE_FLASH\nOILFIELD_BURN\nTRIC_DIE\nTREX_DIE\nSTEG_DIE\nRAPT_DIE\nCHEM_BALL\nFLAG\nBEACON\nFIRE_SMALL_VIRTUAL\nFIRE_MED_VIRTUAL\nFIRE_MED2_VIRTUAL\nFIRE_TINY_VIRTUAL\nBEACON_VIRTUAL",
+      "valid_values": "NONE, FBALL1, GRENADE, FRAG1, FRAG2, VEH_HIT1, VEH_HIT2, VEH_HIT3, ART_EXP1, NAPALM1, NAPALM2, NAPALM3, SMOKE_PUFF, PIFF, PIFFPIFF, FLAME_N, FLAME_NE, FLAME_E, FLAME_SE, FLAME_S, FLAME_SW, FLAME_W, FLAME_NW, CHEM_N, CHEM_NE, CHEM_E, CHEM_SE, CHEM_S, CHEM_SW, CHEM_W, CHEM_NW, FIRE_SMALL, FIRE_MED, FIRE_MED2, FIRE_TINY, MUZZLE_FLASH, SMOKE_M, BURN_SMALL, BURN_MED, BURN_BIG, ON_FIRE_SMALL, ON_FIRE_MED, ON_FIRE_BIG, SAM_N, SAM_NE, SAM_E, SAM_SE, SAM_S, SAM_SW, SAM_W, SAM_NW, GUN_N, GUN_NE, GUN_E, GUN_SE, GUN_S, GUN_SW, GUN_W, GUN_NW, LZ_SMOKE, ION_CANNON, ATOM_BLAST, CRATE_DEVIATOR, CRATE_DOLLAR, CRATE_EARTH, CRATE_EMPULSE, CRATE_INVUN, CRATE_MINE, CRATE_RAPID, CRATE_STEALTH, CRATE_MISSILE, ATOM_DOOR, MOVE_FLASH, OILFIELD_BURN, TRIC_DIE, TREX_DIE, STEG_DIE, RAPT_DIE, CHEM_BALL, FLAG, BEACON, FIRE_SMALL_VIRTUAL, FIRE_MED_VIRTUAL, FIRE_MED2_VIRTUAL, FIRE_TINY_VIRTUAL, BEACON_VIRTUAL",
       "comment": "This is the default explosion to use when this vehicle is destroyed."
     }
   ]

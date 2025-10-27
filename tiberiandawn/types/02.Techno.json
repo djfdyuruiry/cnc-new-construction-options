@@ -91,21 +91,21 @@
       "type": "StructType",
       "requires_converter": true,
       "comment": "Type of structure required to allow the player to build this object.",
-      "valid_values": "NONE\nWEAP\nGTOWER\nATOWER\nOBELISK\nRADAR\nTURRET\nCONST\nREFINERY\nSTORAGE\nHELIPAD\nSAM\nAIRSTRIP\nPOWER\nADVANCED_POWER\nHOSPITAL\nBARRACKS\nTANKER\nREPAIR\nBIO_LAB\nHAND\nTEMPLE\nEYE\nMISSION\nV01\nV02\nV03\nV04\nV05\nV06\nV07\nV08\nV09\nV10\nV11\nV12\nV13\nV14\nV15\nV16\nV17\nV18\nPUMP\nV20\nV21\nV22\nV23\nV24\nV25\nV26\nV27\nV28\nV29\nV30\nV31\nV32\nV33\nV34\nV35\nV36\nV37\nSANDBAG_WALL\nCYCLONE_WALL\nBRICK_WALL\nBARBWIRE_WALL\nWOOD_WALL\n\nSee: [building.ini](#buildingini)"
+      "valid_values": "NONE, WEAP, GTOWER, ATOWER, OBELISK, RADAR, TURRET, CONST, REFINERY, STORAGE, HELIPAD, SAM, AIRSTRIP, POWER, ADVANCED_POWER, HOSPITAL, BARRACKS, TANKER, REPAIR, BIO_LAB, HAND, TEMPLE, EYE, MISSION, V01, V02, V03, V04, V05, V06, V07, V08, V09, V10, V11, V12, V13, V14, V15, V16, V17, V18, PUMP, V20, V21, V22, V23, V24, V25, V26, V27, V28, V29, V30, V31, V32, V33, V34, V35, V36, V37, SANDBAG_WALL, CYCLONE_WALL, BRICK_WALL, BARBWIRE_WALL, WOOD_WALL - See: [building.ini](#buildingini)"
     },
     {
       "name": "MaxSpeed",
       "type": "MPHType",
       "requires_converter": true,
       "comment": "This value indicates the maximum speed that this object can achieve.",
-      "valid_values": "IMMOBILE\nVERY_SLOW\nKINDA_SLOW\nSLOW\nSLOW_ISH\nMEDIUM_SLOW\nMEDIUM\nMEDIUM_FAST\nMEDIUM_FASTER\nFAST\nROCKET\nVERY_FAST\nLIGHT_SPEED"
+      "valid_values": "IMMOBILE, VERY_SLOW, KINDA_SLOW, SLOW, SLOW_ISH, MEDIUM_SLOW, MEDIUM, MEDIUM_FAST, MEDIUM_FASTER, FAST, ROCKET, VERY_FAST, LIGHT_SPEED"
     },
     {
       "name": "Primary",
       "type": "WeaponType",
       "requires_converter": true,
       "comment": "Weapon that this object is armed with.",
-      "valid_values": "NONE\nRIFLE\nCHAIN_GUN\nPISTOL\nM16\nDRAGON\nFLAMETHROWER\nFLAME_TONGUE\nCHEMSPRAY\nGRENADE\n75MM\n105MM\n120MM\nTURRET_GUN\nMAMMOTH_TUSK\nMLRS\n155MM\nM60MG\nTOMAHAWK\nTOW_TWO\nNAPALM\nOBELISK_LASER\nNIKE\nHONEST_JOHN\nSTEG\nTREX\n\nSee: [weapon.ini](#weaponini)"
+      "valid_values": "NONE, RIFLE, CHAIN_GUN, PISTOL, M16, DRAGON, FLAMETHROWER, FLAME_TONGUE, CHEMSPRAY, GRENADE, 75MM, 105MM, 120MM, TURRET_GUN, MAMMOTH_TUSK, MLRS, 155MM, M60MG, TOMAHAWK, TOW_TWO, NAPALM, OBELISK_LASER, NIKE, HONEST_JOHN, STEG, TREX - See: [weapon.ini](#weaponini)"
     },
     {
       "name": "Secondary",
@@ -124,7 +124,7 @@
       "type": "HousesType",
       "requires_csv_converter": true,
       "comment": "Comma seperated list of houses that are allowed to own (by normal means) this particular object type. This value is typically used in production contexts. It is possible for a side to take possession of an object type otherwise not normally allowed. This event usually occurs as a result of capture.",
-      "valid_values": "NONE\nGOOD\nBAD\nNEUTRAL\nJP\nMULTI1\nMULTI2\nMULTI3\nMULTI4\nMULTI5\nMULTI6\n\nSee: [house.ini](#houseini)"
+      "valid_values": "NONE, GOOD, BAD, NEUTRAL, JP, MULTI1, MULTI2, MULTI3, MULTI4, MULTI5, MULTI6 - See: [house.ini](#houseini)"
     }
   ]
 }
