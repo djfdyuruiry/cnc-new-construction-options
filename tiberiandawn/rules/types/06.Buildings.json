@@ -1,99 +1,72 @@
 {
   "name": "Building",
-  "has_enum": true,
   "enum": "StructType",
   "class": "BuildingTypeClass",
   "template": "bdata-nco.cpp.in",
   "properties": [
     {
       "name": "IsBibbed",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsWall",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsFactory",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsSimpleDamage",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsSturdy",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsCaptureable",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsRegulated",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsUnsellable",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "ToBuild",
       "type": "FactoryType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "Type",
       "type": "StructType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "StartFace",
       "type": "DirType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "Capacity",
-      "type": "UInt",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "UInt"
     },
     {
       "name": "Power",
-      "type": "Int",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Int"
     },
     {
       "name": "Drain",
-      "type": "Int",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Int"
     },
     {
       "name": "Size",
       "type": "BSizeType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     }
   ]
 }

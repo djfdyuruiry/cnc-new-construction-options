@@ -1,6 +1,5 @@
 {
   "name": "Warhead",
-  "has_enum": true,
   "enum": "WarheadType",
   "class": "WarheadTypeClass",
   "template": "whdata-nco.cpp.in",
@@ -8,32 +7,23 @@
     {
       "name": "Type",
       "type": "WarheadType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "SpreadFactor",
-      "type": "Int",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Int"
     },
     {
       "name": "IsWallDestroyer",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsWoodDestroyer",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsTiberiumDestroyer",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     }
   ]
 }

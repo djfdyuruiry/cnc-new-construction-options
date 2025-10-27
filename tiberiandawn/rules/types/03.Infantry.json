@@ -1,63 +1,45 @@
 {
   "name": "Infantry",
-  "has_enum": true,
   "enum": "InfantryType",
   "class": "InfantryTypeClass",
   "template": "idata-nco.cpp.in",
   "properties": [
     {
       "name": "IsFemale",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsCrawling",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsCapture",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsFraidyCat",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsCivilian",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsAvoidingTiberium",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsImmuneToTiberium",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "HasC4Charges",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "Type",
       "type": "InfantryType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     }
   ]
 }

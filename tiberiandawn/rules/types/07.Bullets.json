@@ -1,123 +1,88 @@
 {
   "name": "Bullet",
-  "has_enum": true,
   "enum": "BulletType",
   "class": "BulletTypeClass",
   "template": "bbdata-nco.cpp.in",
   "properties": [
     {
       "name": "IsHigh",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsArcing",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsHoming",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsDropping",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsInvisible",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsProximityArmed",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsFlameEquipped",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsFueled",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsFaceless",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsInaccurate",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsTranslucent",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "IsAntiAircraft",
-      "type": "Bool",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Bool"
     },
     {
       "name": "Type",
       "type": "BulletType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "MaxSpeed",
       "type": "MPHType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "Warhead",
       "type": "WarheadType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "Explosion",
       "type": "AnimType",
-      "requires_converter": true,
-      "requires_csv_converter": false
+      "requires_converter": true
     },
     {
       "name": "ROT",
-      "type": "UChar",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "UChar"
     },
     {
       "name": "Arming",
-      "type": "Int",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Int"
     },
     {
       "name": "Range",
-      "type": "Int",
-      "requires_converter": false,
-      "requires_csv_converter": false
+      "type": "Int"
     }
   ]
 }

@@ -5,6 +5,10 @@ set(RULE_KEYS_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rulekeys.h")
 set(RULES_NCO_TEMPLATE_PATH "${RULES_NCO_PATH}.in")
 set(RULE_KEYS_TEMPLATE_PATH "${RULE_KEYS_PATH}.in")
 
+# NcoTypes params
+set(TYPES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules/types")
+set(TYPES_TEMPLATE_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn")
+
 include(NcoRules)
 
 set(TIBDAWN_SRC
