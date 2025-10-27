@@ -3,13 +3,13 @@
 #include "type.h"
 #include "typeconverter.h"
 
-const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
+const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
 {
     return TechnoTypeClass::Read_INI(ini)
         @LOAD_RULES_CODE@; // TODO: IsImmuneToTiberium and HasC4Charges
 }
 
-const RuleSection& InfantryTypeClass::Read_Rules(const RuleSection& rules)
+const RuleSection& UnitTypeClass::Read_Rules(const RuleSection& rules)
 {
     return TechnoTypeClass::Read_Rules(rules)
         @READ_RULES_CODE@; // TODO: IsImmuneToTiberium and HasC4Charges

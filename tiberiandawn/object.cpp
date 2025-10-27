@@ -260,37 +260,6 @@ void const* ObjectTypeClass::Get_Cameo_Data(void) const
     return (NULL);
 }
 
-// TODO: Logic to allow selecting FullName by text file const name (or wait until lang file refactored into text format)
-const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
-{
-    return ini.Load_Bool_Var(IsCrushable)
-       .Load_Bool_Var(IsStealthy)
-       .Load_Bool_Var(IsStealthy)
-       .Load_Bool_Var(IsSelectable)
-       .Load_Bool_Var(IsLegalTarget)
-       .Load_Bool_Var(IsInsignificant)
-       .Load_Bool_Var(IsImmune)
-       .Load_Bool_Var(IsFlammable)
-       .Load_Bool_Var(IsSentient)
-       .Load_With_TdConverter(ArmorType, Armor)
-       .Load_UShort_Var(MaxStrength);
-}
-
-const RuleSection& ObjectTypeClass::Read_Rules(const RuleSection& rules)
-{
-    return rules.Read_Bool_Var(IsCrushable)
-       .Read_Bool_Var(IsStealthy)
-       .Read_Bool_Var(IsStealthy)
-       .Read_Bool_Var(IsSelectable)
-       .Read_Bool_Var(IsLegalTarget)
-       .Read_Bool_Var(IsInsignificant)
-       .Read_Bool_Var(IsImmune)
-       .Read_Bool_Var(IsFlammable)
-       .Read_Bool_Var(IsSentient)
-       .Read_With_TdConverter(ArmorType, Armor)
-       .Read_UShort_Var(MaxStrength);;
-}
-
 /***********************************************************************************************
  * ObjectClass::ObjectClass -- Default constructor for objects.                                *
  *                                                                                             *

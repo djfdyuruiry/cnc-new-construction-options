@@ -1,0 +1,16 @@
+#include "common/rulesections.h"
+
+#include "type.h"
+#include "typeconverter.h"
+
+const IniRuleContext& BulletTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return ObjectTypeClass::Read_INI(ini)
+        @LOAD_RULES_CODE@;
+}
+
+const RuleSection& BulletTypeClass::Read_Rules(const RuleSection& rules)
+{
+    return ObjectTypeClass::Read_Rules(rules)
+        @READ_RULES_CODE@;
+}

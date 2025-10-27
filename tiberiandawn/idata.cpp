@@ -1971,27 +1971,3 @@ int InfantryTypeClass::Full_Name(void) const
     }
     return (TXT_CIVILIAN);
 }
-
-const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
-{
-    return TechnoTypeClass::Read_INI(ini)
-        .Load_Bool_Var(IsFemale)
-        .Load_Bool_Var(IsCrawling)
-        .Load_Bool_Var(IsCapture)
-        .Load_Bool_Var(IsFraidyCat)
-        .Load_Bool_Var(IsCivilian)
-        .Load_Bool_Var(IsAvoidingTiberium)
-        .Load_With_TdConverter(InfantryType, Type); // TODO: IsImmuneToTiberium and HasC4Charges
-}
-
-const RuleSection& InfantryTypeClass::Read_Rules(const RuleSection& rules)
-{
-    return TechnoTypeClass::Read_Rules(rules)
-        .Read_Bool_Var(IsFemale)
-        .Read_Bool_Var(IsCrawling)
-        .Read_Bool_Var(IsCapture)
-        .Read_Bool_Var(IsFraidyCat)
-        .Read_Bool_Var(IsCivilian)
-        .Read_Bool_Var(IsAvoidingTiberium)
-        .Read_With_TdConverter(InfantryType, Type); // TODO: IsImmuneToTiberium and HasC4Charges
-}

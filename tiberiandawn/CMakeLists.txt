@@ -1,12 +1,29 @@
+# NcoRules params
+set(RULES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules")
+set(RULES_NCO_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules-nco.cpp")
+set(RULE_KEYS_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rulekeys.h")
+set(RULES_NCO_TEMPLATE_PATH "${RULES_NCO_PATH}.in")
+set(RULE_KEYS_TEMPLATE_PATH "${RULE_KEYS_PATH}.in")
+
+# NcoTypes params
+set(TYPES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules/types")
+set(TYPES_TEMPLATE_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn")
+
+include(NcoRules)
+include(NcoTypes)
+
 set(TIBDAWN_SRC
     aadata.cpp
+    aadata-nco.cpp
     abstract.cpp
     adata.cpp
+    adata-nco.cpp
     aircraft.cpp
     anim.cpp
     audio.cpp
     base.cpp
     bbdata.cpp
+    bbdata-nco.cpp
     bdata.cpp
     building.cpp
     bullet.cpp
@@ -52,6 +69,7 @@ set(TIBDAWN_SRC
     house.cpp
     iconset.cpp
     idata.cpp
+    idata-nco.cpp
     infantry.cpp
     init.cpp
     intro.cpp
@@ -80,6 +98,7 @@ set(TIBDAWN_SRC
     msglist.cpp
     nulldlg.cpp
     object.cpp
+    object-nco.cpp
     odata.cpp
     options.cpp
     overlay.cpp
@@ -90,6 +109,7 @@ set(TIBDAWN_SRC
     radio.cpp
     reinf.cpp
     rules.cpp
+    rules-nco.cpp
     saveload.cpp
     scenario.cpp
     scenarioini.cpp
@@ -110,6 +130,7 @@ set(TIBDAWN_SRC
     target.cpp
     tdata.cpp
     team.cpp
+    techno-nco.cpp
     teamtype.cpp
     techno.cpp
     template.cpp
@@ -120,25 +141,13 @@ set(TIBDAWN_SRC
     turret.cpp
     txtlabel.cpp
     udata.cpp
+    udata-nco.cpp
     unit.cpp
     visudlg.cpp
+    wdata-nco.cpp
+    whdata-nco.cpp
     winstub.cpp
 )
-# NcoRules params
-set(RULES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules")
-set(RULES_NCO_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules-nco.cpp")
-set(RULE_KEYS_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rulekeys.h")
-set(RULES_NCO_TEMPLATE_PATH "${RULES_NCO_PATH}.in")
-set(RULE_KEYS_TEMPLATE_PATH "${RULE_KEYS_PATH}.in")
-
-# NcoTypes params
-set(TYPES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/rules/types")
-set(TYPES_TEMPLATE_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn")
-
-set(SRC_LIST TIBDAWN_SRC)
-
-include(NcoRules)
-include(NcoTypes)
 
 if(NETWORKING)
     list(APPEND TIBDAWN_NET_SRC

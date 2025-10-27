@@ -5,7 +5,6 @@
 #
 #   * TYPES_PATH - Path to a directory that contains .json files, each describing a <type>.ini section (unit.ini, infantry.ini etc)
 #   * TYPES_TEMPLATE_PATH - Directory where templates can be found, and will be rendered to (.in files mentioned in .json file template field)
-#   * SRC_LIST - List of source files for current target
 #
 # This script reads all JSON files in ${TYPES_PATH}, one JSON file per <type>.ini file. The properties in each file
 # are used to generate C++ code for the Read_INI and Read_Rules methods of the target type.
@@ -110,7 +109,6 @@ function(SetupTypesCheckBeforeBuild)
       -DTYPES_PATH=${TYPES_PATH}
       -DTYPES_TEMPLATE_PATH=${TYPES_TEMPLATE_PATH}
       -DTYPES_STATE_FILE=${TYPES_STATE_FILE}
-      -DSRC_LIST=${SRC_LIST}
       -D_BUILD_TIME_TYPES=TRUE
       -P "${CMAKE_CURRENT_LIST_FILE}"
   )
@@ -183,6 +181,8 @@ function(Main)
     ExtractTypeInfoFromJson("${TYPE_JSON}" TYPE_NAME TEMPLATE_FILE PROP_COUNT)
 
     message(STATUS "[NcoTypeRules] Generating code for type: ${TYPE_NAME}")
+    SET(LOAD_RULES_CODE "")
+    SET(READ_RULES_CODE "")
 
     foreach(PROP_INDEX RANGE ${PROP_COUNT})
       if(${PROP_INDEX} GREATER 0)
@@ -218,8 +218,7 @@ function(Main)
 
     configure_file(${TEMPLATE_PATH} ${TEMPLATE_OUTPUT_PATH} @ONLY)
 
-    list(APPEND ${SRC_LIST} ${TEMPLATE_OUTPUT_PATH})
-    set("${SRC_LIST}" ${SRC_LIST} PARENT_SCOPE)
+    list(APPEND ${NCO_SRC_LIST} ${TEMPLATE_OUTPUT_PATH})
 
     WatchFileForChanges(${TEMPLATE_PATH})
   endforeach()

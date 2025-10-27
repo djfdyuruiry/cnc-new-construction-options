@@ -9,7 +9,6 @@
 #   * RULES_KEYS_PATH - Output path for rendered ${RULES_KEYS_TEMPLATE_PATH} template
 #   * RULES_NCO_TEMPLATE_PATH - Template for generated .cpp file that loads and exports rules
 #   * RULES_NCO_PATH - Output path for rendered ${RULES_NCO_TEMPLATE_PATH} template
-#   * SRC_LIST - Variable that holds the list of cpp files being built
 #
 # This script reads all JSON files in ${RULES_PATH}, one JSON file per rules.ini section. The rules in each file
 # are used to generate const strings, load from INI code and export to INI code using common/rulesections.h types.
@@ -47,7 +46,6 @@ CHECK_REQUIRED_VARIABLE(RULES_NCO_TEMPLATE_PATH)
 CHECK_REQUIRED_VARIABLE(RULES_NCO_PATH)
 CHECK_REQUIRED_VARIABLE(RULE_KEYS_TEMPLATE_PATH)
 CHECK_REQUIRED_VARIABLE(RULE_KEYS_PATH)
-CHECK_REQUIRED_VARIABLE(SRC_LIST)
 
 function(ResolveRuleValue _RULE_DEFAULT _RULE_VALUE)
   set(RULE_VALUE "${_RULE_DEFAULT}")
@@ -152,7 +150,6 @@ function(SetupRuleCheckBeforeBuild)
       -DRULES_NCO_PATH=${RULES_NCO_PATH}
       -DRULE_KEYS_TEMPLATE_PATH=${RULE_KEYS_TEMPLATE_PATH}
       -DRULE_KEYS_PATH=${RULE_KEYS_PATH}
-      -DSRC_LIST=${SRC_LIST}
       -DRULES_STATE_FILE=${RULES_STATE_FILE}
       -D_BUILD_TIME_TD_RULES=TRUE
       -P "${CMAKE_CURRENT_LIST_FILE}"
@@ -305,10 +302,6 @@ function(Main)
   # render templates
   configure_file(${RULES_NCO_TEMPLATE_PATH} ${RULES_NCO_PATH} @ONLY)
   configure_file(${RULE_KEYS_TEMPLATE_PATH} ${RULE_KEYS_PATH} @ONLY)
-
-  # add generated code to source files
-  list(APPEND ${SRC_LIST} ${RULES_NCO_PATH})
-  set("${SRC_LIST}" ${SRC_LIST} PARENT_SCOPE)
 
   # save rules hash to file, used in ScanForRuleFiles() to detect if changes happen
   message(STATUS "[NcoRules] Saving Rules state")

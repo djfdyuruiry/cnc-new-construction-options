@@ -1,0 +1,30 @@
+#include "common/rulesections.h"
+
+#include "type.h"
+#include "typeconverter.h"
+
+const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    ObjectTypeClass::Read_INI(ini)
+        @LOAD_RULES_CODE@;
+
+    // reload computed fields
+    Set_Pre();
+    Set_Ownable();
+    Calc_Risk();
+
+    return ini;
+}
+
+const RuleSection& TechnoTypeClass::Read_Rules(const RuleSection& rules)
+{
+    ObjectTypeClass::Read_Rules(rules)
+        @READ_RULES_CODE@;
+
+    // reload computed fields
+    Set_Pre();
+    Set_Ownable();
+    Calc_Risk();
+
+   return rules;
+}

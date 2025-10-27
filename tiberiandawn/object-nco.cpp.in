@@ -1,0 +1,15 @@
+#include "common/rulesections.h"
+
+#include "type.h"
+#include "typeconverter.h"
+
+// TODO: Logic to allow selecting FullName by text file const name (or wait until lang file refactored into text format)
+const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return ini@LOAD_RULES_CODE@; // TODO: IsImmuneToTiberium and HasC4Charges
+}
+
+const RuleSection& InfantryTypeClass::Read_Rules(const RuleSection& rules)
+{
+    return rules@READ_RULES_CODE@; // TODO: IsImmuneToTiberium and HasC4Charges
+}

@@ -112,27 +112,8 @@ public:
         return TXT_NONE;
     }
 
-    const IniRuleContext& Read_INI(const IniRuleContext& ini)
-    {
-        return ini.Load_With_TdConverter(WeaponType, Type)
-            .Load_With_TdConverter(BulletType, Fires)
-            .Load_UChar_Var(Attack)
-            .Load_UChar_Var(ROF)
-            .Load_Int_Var(Range)
-            .Load_With_TdConverter(VocType, Sound)
-            .Load_With_TdConverter(AnimType, Anim);
-    }
-
-    const RuleSection& Read_Rules(const RuleSection& rules)
-    {
-        return rules.Read_With_TdConverter(WeaponType, Type)
-            .Read_With_TdConverter(BulletType, Fires)
-            .Read_UChar_Var(Attack)
-            .Read_UChar_Var(ROF)
-            .Read_Int_Var(Range)
-            .Read_With_TdConverter(VocType, Sound)
-            .Read_With_TdConverter(AnimType, Anim);
-    }
+    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    const RuleSection& Read_Rules(const RuleSection& rules);
 };
 
 /**********************************************************************
@@ -192,23 +173,8 @@ public:
         return TXT_NONE;
     }
 
-    const IniRuleContext& Read_INI(const IniRuleContext& ini)
-    {
-        return ini.Load_With_TdConverter(WarheadType, Type)
-            .Load_Int_Var(SpreadFactor)
-            .Load_Bool_Var(IsWallDestroyer)
-            .Load_Bool_Var(IsWoodDestroyer)
-            .Load_Bool_Var(IsTiberiumDestroyer); // TODO: Modifier (uint array), maybe refactor into a lookup
-    }
-
-    const RuleSection& Read_Rules(const RuleSection& rules)
-    {
-        return rules.Read_With_TdConverter(WarheadType, Type)
-            .Read_Int_Var(SpreadFactor)
-            .Read_Bool_Var(IsWallDestroyer)
-            .Read_Bool_Var(IsWoodDestroyer)
-            .Read_Bool_Var(IsTiberiumDestroyer); // TODO: Modifier (uint array), maybe refactor into a lookup
-    }
+    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    const RuleSection& Read_Rules(const RuleSection& rules);
 };
 
 /**********************************************************************

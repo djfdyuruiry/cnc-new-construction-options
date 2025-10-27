@@ -1,0 +1,14 @@
+#include "common/rulesections.h"
+
+#include "type.h"
+#include "typeconverter.h"
+
+const IniRuleContext& WarheadTypeClass::Read_INI(const IniRuleContext& ini)
+{
+    return ini@LOAD_RULES_CODE@;
+}
+
+const RuleSection& WarheadTypeClass::Read_Rules(const RuleSection& rules)
+{
+    return rules@READ_RULES_CODE@;
+}

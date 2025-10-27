@@ -759,27 +759,3 @@ RTTIType AircraftTypeClass::What_Am_I(void) const
 {
     return RTTI_AIRCRAFTTYPE;
 };
-
-const IniRuleContext& AircraftTypeClass::Read_INI(const IniRuleContext& ini)
-{
-    return TechnoTypeClass::Read_INI(ini)
-        .Load_Bool_Var(IsFixedWing)
-        .Load_Bool_Var(IsLandable)
-        .Load_Bool_Var(IsRotorEquipped)
-        .Load_Bool_Var(IsRotorCustom)
-        .Load_With_TdConverter(AircraftType, Type)
-        .Load_UChar_Var(ROT)
-        .Load_With_TdConverter(MissionType, Mission);
-}
-
-const RuleSection& AircraftTypeClass::Read_Rules(const RuleSection& rules)
-{
-    return TechnoTypeClass::Read_Rules(rules)
-        .Read_Bool_Var(IsFixedWing)
-        .Read_Bool_Var(IsLandable)
-        .Read_Bool_Var(IsRotorEquipped)
-        .Read_Bool_Var(IsRotorCustom)
-        .Read_With_TdConverter(AircraftType, Type)
-        .Read_UChar_Var(ROT)
-        .Read_With_TdConverter(MissionType, Mission);
-}

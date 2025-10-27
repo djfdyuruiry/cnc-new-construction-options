@@ -1,0 +1,17 @@
+{
+  "name": "House",
+  "enum": "HousesType",
+  "class": "HouseTypeClass",
+  "template": "hdata-nco.cpp.in",
+  "properties": [
+    {
+      "name": "HousesType",
+      "type": "House",
+      "requires_converter": true
+    },
+    {
+      "name": "Lemon",
+      "type": "UInt"
+    }
+  ]
+}
