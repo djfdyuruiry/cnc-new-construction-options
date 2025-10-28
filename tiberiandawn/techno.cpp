@@ -254,7 +254,7 @@ void TechnoTypeClass::Set_Ownable()
     unsigned short ownable = (1L << OwnableBy.at(0));
 
     for (auto i = 1; i < OwnableBy.size(); i++) {
-        ownable = ownable | 1L << OwnableBy.at(1);
+        ownable = ownable | 1L << OwnableBy.at(i);
     }
 
     Ownable = ownable;
