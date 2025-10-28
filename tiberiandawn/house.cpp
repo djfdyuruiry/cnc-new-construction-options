@@ -551,8 +551,10 @@ HouseClass::HouseClass(HousesType house)
 bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
 {
     Validate();
-    if (!type || !type->IsBuildable || !((1L << house) & type->Ownable))
+    if (!type || !type->IsBuildable || !((1L << house) & type->Ownable)) {
+        CNC_LOG_INFO("!type || !type->IsBuildable || !((1L << house) & type->Ownable == false");
         return (false);
+    }
 
         /*
         **	The computer can always build everthing.
@@ -760,6 +762,8 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
         level = 98;
         pre = 0;
     }
+
+    CNC_LOG_INFO("(pre & flags) == pre -> {} | type->Scenario <= level -> {}", (pre & flags) == pre, type->Scenario <= level);
 
     if (Debug_Cheat)
         level = 98;
