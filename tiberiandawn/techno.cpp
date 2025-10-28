@@ -111,6 +111,8 @@
  *   TechnoClass::Refund_Amount -- Returns with the money to refund if this object is sold.    *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <numeric>
+
 #include "function.h"
 #include "typeconverter.h"
 
@@ -246,18 +248,12 @@ void TechnoTypeClass::Set_Pre()
  */
 void TechnoTypeClass::Set_Ownable()
 {
-    if (OwnableBy.empty()) {
-        Ownable = 0L;
-        return;
-    }
-
-    unsigned short ownable = (1L << OwnableBy.at(0));
-
-    for (auto i = 1; i < OwnableBy.size(); i++) {
-        ownable = ownable | 1L << OwnableBy.at(1);
-    }
-
-    Ownable = ownable;
+    Ownable = std::accumulate(
+        OwnableBy.begin(),
+        OwnableBy.end(),
+        0L,
+        [](auto ownable, const auto& house) { return ownable | 1L << house; }
+    );
 }
 
 /***********************************************************************************************
