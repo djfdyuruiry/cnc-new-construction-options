@@ -254,6 +254,11 @@ void TechnoTypeClass::Set_Ownable()
         0L,
         [](auto ownable, const auto& house) { return ownable | 1L << house; }
     );
+
+    std::function<std::string(HousesType)> to_string = [](HousesType h) { return TdTypeConverter::To_String(h); };
+    auto ownable_csv = CncStringUtils::To_Csv(OwnableBy, to_string);
+
+    CNC_LOG_INFO("{} -> Ownable={} OwnableBy={}", Name(), Ownable, ownable_csv);
 }
 
 /***********************************************************************************************

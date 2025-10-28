@@ -3,7 +3,6 @@
   "enum": "AircraftType",
   "class": "AircraftTypeClass",
   "base_class": "TechnoTypeClass",
-  "template": "aadata-nco.cpp.in",
   "example_instance": "TRAN",
   "example_instance_comment": "Transport Helicopter",
   "comment": "Types of Aircraft in the game - e.g. ORCA, A10 Warthog etc.",

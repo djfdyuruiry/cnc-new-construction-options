@@ -2,7 +2,6 @@
   "name": "House",
   "enum": "HousesType",
   "class": "HouseTypeClass",
-  "template": "hdata-nco.cpp.in",
   "example_instance": "BadGuy",
   "example_instance_comment": "Brotherhood of Nod",
   "comment": "Houses are various sides in a given scenario - e.g. GDI, NOD etc. (Includes the players in a multiplayer match)",

@@ -3,7 +3,6 @@
   "enum": "AnimType",
   "class": "AnimTypeClass",
   "base_class": "ObjectTypeClass",
-  "template": "adata-nco.cpp.in",
   "example_instance": "BEACON",
   "comment": "Various short lived animations for weapons and other map based objects (crate goodies, beacons etc.) - e.x. an Attack Helicopter has a CHAIN_GUN (weapon) that fires SPREADFIRE (bullet), which explodes with the PIFFPIFF animation",
   "properties": [

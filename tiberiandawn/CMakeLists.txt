@@ -7,7 +7,7 @@ set(RULE_KEYS_TEMPLATE_PATH "${RULE_KEYS_PATH}.in")
 
 # NcoTypes params
 set(TYPES_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/types")
-set(TYPES_TEMPLATE_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn")
+set(TYPES_TEMPLATE_PATH "${CMAKE_SOURCE_DIR}/tiberiandawn/types-nco.cpp.in")
 
 include(NcoRules)
 include(NcoTypes)
@@ -146,18 +146,7 @@ list(APPEND TIBDAWN_SRC
 
 # Generated code -see: ../cmake/NcoTypes.cmake and ./types
 list(APPEND TIBDAWN_SRC
-    aadata-nco.cpp # AircraftTypeClass
-    adata-nco.cpp  # AnimationTypeClass
-    bbdata-nco.cpp # BulletTypeClass
-    bdata-nco.cpp  # BuildingTypeClass
-    hdata-nco.cpp  # HouseTypeClass
-    idata-nco.cpp  # InfantryTypeClass
-    object-nco.cpp # ObjectTypeClass
-    rules-nco.cpp  # RulesClass
-    techno-nco.cpp # TechnoTypeClass
-    udata-nco.cpp  # UnitTypeClass
-    wdata-nco.cpp  # WeaponTypeClass
-    whdata-nco.cpp # WarheadTypeClass
+    types-nco.cpp
 )
 
 if(NETWORKING)

@@ -3,7 +3,6 @@
   "enum": "StructType",
   "class": "BuildingTypeClass",
   "base_class": "TechnoTypeClass",
-  "template": "bdata-nco.cpp.in",
   "example_instance": "GTWR",
   "example_instance_comment": "Guard Tower",
   "comment": "Types of Buildings that can be found in the game - e.g. Power Plant, Temple of Nod etc.",

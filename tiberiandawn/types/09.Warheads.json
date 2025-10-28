@@ -2,7 +2,6 @@
   "name": "Warhead",
   "enum": "WarheadType",
   "class": "WarheadTypeClass",
-  "template": "whdata-nco.cpp.in",
   "example_instance": "FIRE",
   "comment": "Warheads are payloads for bullets - e.x. Commando has a RIFLE (weapon) which fires SNIPER (bullet), this has a HOLLOW_POINT warhead",
   "properties": [

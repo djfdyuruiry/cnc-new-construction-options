@@ -3,7 +3,6 @@
   "enum": "BulletType",
   "class": "BulletTypeClass",
   "base_class": "ObjectTypeClass",
-  "template": "bbdata-nco.cpp.in",
   "example_instance": "SNIPER",
   "comment": "Bullets are fired by Weapons (bullet means any projectile in this context) - e.x. Commando has a RIFLE (weapon) which fires a SNIPER bullet",
   "properties": [

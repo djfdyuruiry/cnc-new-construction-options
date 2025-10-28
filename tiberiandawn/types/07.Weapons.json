@@ -2,7 +2,6 @@
   "name": "Weapon",
   "enum": "WeaponType",
   "class": "WeaponTypeClass",
-  "template": "wdata-nco.cpp.in",
   "example_instance": "FLAMETHROWER",
   "comment": "Types of Weapons that Infantry, Units, Aircraft and Buildings can have - e.g. Minigunner has an M16 rifle, Light Tank has a 75MM cannon etc.",
   "properties": [

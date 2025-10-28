@@ -3,7 +3,6 @@
   "enum": "InfantryType",
   "class": "InfantryTypeClass",
   "base_class": "TechnoTypeClass",
-  "template": "idata-nco.cpp.in",
   "example_instance": "E1",
   "example_instance_comment": "Minigunner",
   "comment": "Types of Infantry that can be found in the game - e.g. Minigunner, Engineer etc.",

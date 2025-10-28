@@ -4,7 +4,6 @@
   "class": "TechnoTypeClass",
   "is_base_class": true,
   "base_class": "ObjectTypeClass",
-  "template": "techno-nco.cpp.in",
   "properties": [
     {
       "name": "IsLeader",

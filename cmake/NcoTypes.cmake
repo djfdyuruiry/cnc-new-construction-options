@@ -4,7 +4,7 @@
 # Params (mandatory):
 #
 #   * TYPES_PATH - Path to a directory that contains .json files, each describing a <type>.ini section (unit.ini, infantry.ini etc)
-#   * TYPES_TEMPLATE_PATH - Directory where templates can be found, and will be rendered to (.in files mentioned in .json file template field)
+#   * TYPES_TEMPLATE_PATH - Template cpp file path, will be rendered to same directory
 #
 # This script reads all JSON files in ${TYPES_PATH}, one JSON file per <type>.ini file. The properties in each file
 # are used to generate C++ code for the Read_INI and Read_Rules methods of the target type.
@@ -19,10 +19,10 @@
 #   }
 #   ```
 #
-# Generates two separate blocks of C++ code per type and provides them as variables to the above templates:
+# Generates two separate blocks of C++ code per type and provides them as variables to the above template:
 #
-#   * LOAD_RULES_CODE - Methods calls that load the type properties from a INI file
-#   * READ_RULES_CODE - Method calls that read the type properties from the rules cache (used to update types by Lua API)
+#   * LOAD_<TYPE>_RULES_CODE - Methods calls that load the type properties from a INI file
+#   * READ_<TYPE>_RULES_CODE - Method calls that read the type properties from the rules cache (used to update types by Lua API)
 #
 # All JSON files are watched for changes, automatically regenerating code before build and on configure. Adding/deleting
 # JSON files is also detected automatically. The template files passed in as params are also watched.
@@ -71,9 +71,8 @@ function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CO
   set("${_TEMPLATE_IGNORE}" ${TEMPLATE_IGNORE} PARENT_SCOPE)
 endfunction()
 
-function (ExtractTypeInfoFromJson _TYPE_JSON _TYPE_NAME _TEMPLATE_FILE _PROP_COUNT)
+function (ExtractTypeInfoFromJson _TYPE_JSON _TYPE_NAME _PROP_COUNT)
   string(JSON TYPE_NAME GET "${_TYPE_JSON}" name)
-  string(JSON TEMPLATE_FILE GET "${_TYPE_JSON}" template)
   string(JSON PROP_COUNT LENGTH "${TYPE_JSON}" properties)
 
   MATH(EXPR PROP_COUNT "${PROP_COUNT}-1")
@@ -81,7 +80,6 @@ function (ExtractTypeInfoFromJson _TYPE_JSON _TYPE_NAME _TEMPLATE_FILE _PROP_COU
   message(STATUS "[NcoTypeRules] Type: ${TYPE_NAME}")
 
   set("${_TYPE_NAME}" ${TYPE_NAME} PARENT_SCOPE)
-  set("${_TEMPLATE_FILE}" ${TEMPLATE_FILE} PARENT_SCOPE)
   set("${_PROP_COUNT}" ${PROP_COUNT} PARENT_SCOPE)
 endfunction()
 
@@ -103,13 +101,17 @@ function(SetupTypesCheckBeforeBuild)
 
   message(STATUS "[NcoTypeRules] Setting up pre-build Types check")
 
+  SET(TEMPLATE_OUTPUT_PATH ${TYPES_TEMPLATE_PATH})
+  cmake_path(REMOVE_EXTENSION TEMPLATE_OUTPUT_PATH LAST_ONLY)
+
   # Custom target ensures any type files made after configure and before build
   # are detected and this cmake file is re-ran to regen code. Current variable
   # context is inherited.
   add_custom_target(
     td_types
     ALL
-    BYPRODUCTS # TODO: watch templates
+    BYPRODUCTS
+      ${TEMPLATE_OUTPUT_PATH}
       ${TYPES_STATE_FILE}
     COMMENT "[NcoTypeRules] Checking type files for changes..."
     COMMAND
@@ -146,7 +148,8 @@ function(ScanForTypeFiles _TYPE_STATE_FILE _TYPES_FILES _TYPES_HASH _FILES_HAVE_
     WatchFileForChanges("${TYPE_FILE}")
   endforeach()
 
-  # TODO: ensure templates are included in hash so code is generated if they change
+  file(SHA256 "${TYPES_TEMPLATE_PATH}" FILE_HASH)
+  string(SHA256 TYPES_HASH "${TYPES_HASH}${FILE_HASH}")
 
   # If a previous hash was calculated, and does not match the
   # hash we just calculated, then flag that files have changed.
@@ -180,13 +183,15 @@ function(Main)
 
   message(STATUS "[NcoTypeRules] Generating Rules code...")
 
+  SET(RELATIVE_TYPE_FILES "")
+
   foreach(TYPE_FILE ${TYPE_FILES})
     ParseTypesFilePath("${TYPE_FILE}" RELATIVE_TYPE_FILE)
 
     # load properties from JSON file
     file(READ ${TYPE_FILE} TYPE_JSON)
 
-    ExtractTypeInfoFromJson("${TYPE_JSON}" TYPE_NAME TEMPLATE_FILE PROP_COUNT)
+    ExtractTypeInfoFromJson("${TYPE_JSON}" TYPE_NAME PROP_COUNT)
 
     message(STATUS "[NcoTypeRules] Generating code for type: ${TYPE_NAME}")
     SET(LOAD_RULES_CODE "")
@@ -222,19 +227,21 @@ function(Main)
       endif()
     endforeach()
 
-    cmake_path(APPEND TYPES_TEMPLATE_PATH ${TEMPLATE_FILE} OUTPUT_VARIABLE TEMPLATE_PATH)
-    SET(TEMPLATE_OUTPUT_PATH ${TEMPLATE_PATH})
-    cmake_path(REMOVE_EXTENSION TEMPLATE_OUTPUT_PATH LAST_ONLY)
+    string(TOUPPER ${TYPE_NAME} TYPE_NAME)
 
-    message(STATUS "[NcoTypeRules] Rendering template: ${TEMPLATE_PATH} -> ${TEMPLATE_OUTPUT_PATH}")
-
-    configure_file(${TEMPLATE_PATH} ${TEMPLATE_OUTPUT_PATH} @ONLY)
-
-    list(APPEND ${NCO_SRC_LIST} ${TEMPLATE_OUTPUT_PATH})
-
-    WatchFileForChanges(${TEMPLATE_PATH})
+    SET("LOAD_${TYPE_NAME}_RULES_CODE" "${LOAD_RULES_CODE}")
+    SET("READ_${TYPE_NAME}_RULES_CODE" "${READ_RULES_CODE}")
+    SET(RELATIVE_TYPE_FILES "${RELATIVE_TYPE_FILES} ${RELATIVE_TYPE_FILE}")
   endforeach()
 
+  SET(TEMPLATE_OUTPUT_PATH ${TYPES_TEMPLATE_PATH})
+  cmake_path(REMOVE_EXTENSION TEMPLATE_OUTPUT_PATH LAST_ONLY)
+
+  message(STATUS "[NcoTypeRules] Rendering template: ${TYPES_TEMPLATE_PATH} -> ${TEMPLATE_OUTPUT_PATH}")
+
+  configure_file(${TYPES_TEMPLATE_PATH} ${TEMPLATE_OUTPUT_PATH} @ONLY)
+  WatchFileForChanges(${TYPES_TEMPLATE_PATH})
+  
   # save rules hash to file, used in ScanForTypeFiles() to detect if changes happen
   message(STATUS "[NcoTypeRules] Saving Types state")
   file(WRITE "${TYPES_STATE_FILE}" "${TYPES_HASH}")

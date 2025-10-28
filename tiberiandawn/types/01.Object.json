@@ -3,7 +3,6 @@
   "has_enum": false,
   "class": "InfantryTypeClass",
   "is_base_class": true,
-  "template": "object-nco.cpp.in",
   "properties": [
     {
       "name": "IsCrushable",
