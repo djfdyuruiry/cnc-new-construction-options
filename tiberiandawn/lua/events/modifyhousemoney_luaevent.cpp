@@ -2,12 +2,14 @@
 
 #include "modifyhousemoney_luaevent.h"
 
-ModifyHouseMoneyLuaEvent::ModifyHouseMoneyLuaEvent(HousesType house_type, int money_modifier): LuaEvent("ModifyHouseMoney") {
+ModifyHouseMoneyLuaEvent::ModifyHouseMoneyLuaEvent(HousesType house_type, int money_modifier): LuaEvent("ModifyHouseMoney")
+{
     HouseType = house_type;
     MoneyModifier = money_modifier;
 }
 
-void ModifyHouseMoneyLuaEvent::Execute() const {
+void ModifyHouseMoneyLuaEvent::Execute() const
+{
     LuaEvent::Execute();
 
     auto house = HouseClass::As_Pointer(HouseType);

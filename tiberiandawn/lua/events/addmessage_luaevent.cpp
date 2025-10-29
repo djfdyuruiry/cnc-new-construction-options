@@ -2,11 +2,13 @@
 
 #include "addmessage_luaevent.h"
 
-AddMessageLuaEvent::AddMessageLuaEvent(std::string message): LuaEvent("AddMessage") {
+AddMessageLuaEvent::AddMessageLuaEvent(std::string message): LuaEvent("AddMessage")
+{
     Message = std::move(message);
 }
 
-void AddMessageLuaEvent::Execute() const {
+void AddMessageLuaEvent::Execute() const
+{
     LuaEvent::Execute();
 
     // BUG: char* data() call to Message doesn't resolve even

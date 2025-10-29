@@ -2,12 +2,13 @@
 
 #include "system_luaapi.h"
 
-void SystemLuaApi::Register_Consts(LuaEngine& engine) const{
+void SystemLuaApi::Register_Consts(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [](auto& n) {
         n.addConstant("gamePath", Paths.Program_Path())
          .addConstant("luaPath", LuaEngine::Get_Lua_Path().string())
          .addConstant("userPath", Paths.User_Path())
-         .addConstant("pathSeparator", Paths.SEP)
+         .addConstant("pathSeparator", PathsClass::SEP)
          .addConstant("isWindows", IsWindows);
     });
 }

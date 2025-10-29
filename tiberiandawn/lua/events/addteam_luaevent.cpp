@@ -2,12 +2,14 @@
 
 #include "addteam_luaevent.h"
 
-AddTeamLuaEvent::AddTeamLuaEvent(std::string name, std::string definition): LuaEvent("AddTeam") {
+AddTeamLuaEvent::AddTeamLuaEvent(std::string name, std::string definition): LuaEvent("AddTeam")
+{
     Name = std::move(name);
     Definition = std::move(definition);
 }
 
-void AddTeamLuaEvent::Execute() const {
+void AddTeamLuaEvent::Execute() const
+{
     LuaEvent::Execute();
 
     CNC_LOGGER_DEBUG(

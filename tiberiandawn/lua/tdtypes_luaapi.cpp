@@ -4,7 +4,8 @@
 
 #include "tdtypes_luaapi.h"
 
-void TiberianDawnTypesLuaApi::Register_Functions(LuaEngine& engine) const {
+void TiberianDawnTypesLuaApi::Register_Functions(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [&](auto& n) {
         n.addCFunction("getTypeNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);

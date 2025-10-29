@@ -1,6 +1,7 @@
 #include "luaresult.h"
 
-LuaResult::LuaResult(lua_State* L, int code): LuaCode(code) {
+LuaResult::LuaResult(lua_State* L, int code): LuaCode(code)
+{
     if (code == LUA_ERRERR + 1) {
         // custom lua error provided
         return;
@@ -24,7 +25,8 @@ LuaResult::LuaResult(lua_State* L, int code): LuaCode(code) {
     }
 }
 
-LuaResult::LuaResult(std::string error): LuaCode(LUA_ERRERR + 1) {
+LuaResult::LuaResult(std::string error): LuaCode(LUA_ERRERR + 1)
+{
     Error = std::make_optional(error);
 }
 
@@ -32,15 +34,18 @@ bool LuaResult::Is_Ok() const{
     return LuaCode == LUA_OK;
 }
 
-std::string_view LuaResult::Code_As_String() const {
+std::string_view LuaResult::Code_As_String() const
+{
     return LuaErrorMap[LuaCode].value_or("Unknown");
 }
 
-std::string LuaResult::Error_Message() const {
+std::string LuaResult::Error_Message() const
+{
     return Error.value_or("unknown error");
 }
 
-const LuaResult& LuaResult::If_Ok(const std::function<void(const LuaResult&)>& action) const {
+const LuaResult& LuaResult::If_Ok(const std::function<void(const LuaResult&)>& action) const
+{
     if (Is_Ok()) {
         action(*this);
     }
@@ -48,7 +53,8 @@ const LuaResult& LuaResult::If_Ok(const std::function<void(const LuaResult&)>& a
     return *this;
 }
 
-const LuaResult& LuaResult::On_Error(const std::function<void(const LuaResult&)>& action) const {
+const LuaResult& LuaResult::On_Error(const std::function<void(const LuaResult&)>& action) const
+{
     if (!Is_Ok()) {
         action(*this);
     }
@@ -56,10 +62,12 @@ const LuaResult& LuaResult::On_Error(const std::function<void(const LuaResult&)>
     return *this;
 }
 
-bool LuaResult::Has_Debug_Info() const {
+bool LuaResult::Has_Debug_Info() const
+{
     return DebugInfo.has_value();
 }
 
-const std::optional<lua_Debug>& LuaResult::Debug_Info() const {
+const std::optional<lua_Debug>& LuaResult::Debug_Info() const
+{
     return DebugInfo;
 }

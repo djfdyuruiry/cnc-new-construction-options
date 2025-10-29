@@ -1,6 +1,7 @@
 #include "rulesluaadapter.h"
 
-void RulesLuaAdapter::Push_Rule_Type(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key){
+void RulesLuaAdapter::Push_Rule_Type(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
+{
     Assert_Rule_Exists(engine, sections, section, key);
 
     const auto& rule_value_variant = sections[section].Get_Variant(key);
@@ -29,7 +30,8 @@ void RulesLuaAdapter::Push_Rule_Type(const LuaEngine& engine, RuleSections& sect
     }
 }
 
-void RulesLuaAdapter::Push_Rule_Variant(const LuaEngine& engine, const RuleValueVariant& variant){
+void RulesLuaAdapter::Push_Rule_Variant(const LuaEngine& engine, const RuleValueVariant& variant)
+{
     if (const auto value = std::get_if<int>(&variant)) {
         engine.Push_Value(*value);
     } else if (const auto value = std::get_if<uint>(&variant)) {
@@ -51,12 +53,14 @@ void RulesLuaAdapter::Push_Rule_Variant(const LuaEngine& engine, const RuleValue
     }
 }
 
-void RulesLuaAdapter::Push_Rule_Value(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key){
+void RulesLuaAdapter::Push_Rule_Value(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
+{
     Assert_Rule_Exists(engine, sections, section, key);
     Push_Rule_Variant(engine, sections[section].Get_Variant(key));
 }
 
-void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments& arguments, RuleSections& sections, const std::string& section, const std::string& key){
+void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments& arguments, RuleSections& sections, const std::string& section, const std::string& key)
+{
     Assert_Rule_Exists(engine, sections, section, key);
 
     // unpack variant to call corresponding section Set template
@@ -130,7 +134,8 @@ void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments
     Push_Rule_Variant(engine, rule_value_variant);
 }
 
-void RulesLuaAdapter::Assert_Rule_Exists(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key){
+void RulesLuaAdapter::Assert_Rule_Exists(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
+{
     if (!sections.Has_Section(section)) {
         engine.Raise_Error_Format(
             "Rule section does not exist: {}",

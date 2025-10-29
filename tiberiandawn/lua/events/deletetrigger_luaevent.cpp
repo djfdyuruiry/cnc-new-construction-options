@@ -2,11 +2,13 @@
 
 #include "deletetrigger_luaevent.h"
 
-DeleteTriggerLuaEvent::DeleteTriggerLuaEvent(std::string name): LuaEvent("DeleteTrigger") {
+DeleteTriggerLuaEvent::DeleteTriggerLuaEvent(std::string name): LuaEvent("DeleteTrigger")
+{
     Name = std::move(name);
 }
 
-void DeleteTriggerLuaEvent::Execute() const {
+void DeleteTriggerLuaEvent::Execute() const
+{
     LuaEvent::Execute();
 
     auto trigger = TriggerClass::As_Pointer(Name.c_str());

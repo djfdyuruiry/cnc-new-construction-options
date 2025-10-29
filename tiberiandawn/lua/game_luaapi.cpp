@@ -2,7 +2,8 @@
 
 #include "game_luaapi.h"
 
-void GameLuaApi::Register_Functions(LuaEngine& engine) const {
+void GameLuaApi::Register_Functions(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [](auto& n) {
         n.addCFunction("win", [](auto L) {
             const auto engine = SharedLuaEngine(L);

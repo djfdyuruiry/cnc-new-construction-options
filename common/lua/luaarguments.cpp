@@ -5,7 +5,8 @@
 
 #include "luaarguments.h"
 
-std::size_t LuaArrayParameter::Get_Size() const {
+std::size_t LuaArrayParameter::Get_Size() const
+{
     return Data.size();
 }
 
@@ -185,7 +186,8 @@ LuaArrayParameter LuaArguments::Read_Next_Array(std::string_view parameter_name)
     return {Lua, FunctionSignature, parameter_name, table_array};
 }
 
-LuaArrayParameter LuaArguments::Read_First_Array(std::string_view parameter_name) {
+LuaArrayParameter LuaArguments::Read_First_Array(std::string_view parameter_name)
+{
     ReadStreamArgumentIndex = 1;
 
     return Read_Next_Array(parameter_name);

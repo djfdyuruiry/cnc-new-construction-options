@@ -10,14 +10,16 @@
 #include "events/modifyhousemoney_luaevent.h"
 #include "scenario_luaapi.h"
 
-ScenarioLuaApi::ScenarioLuaApi(std::string scenario_name, std::string scenario_type, std::string scenario_faction, std::string scenario_house): TiberianDawnLuaApi("Scenario", true) {
+ScenarioLuaApi::ScenarioLuaApi(std::string scenario_name, std::string scenario_type, std::string scenario_faction, std::string scenario_house): TiberianDawnLuaApi("Scenario", true)
+{
     ScenarioName = std::move(scenario_name);
     ScenarioType = std::move(scenario_type);
     ScenarioFaction = std::move(scenario_faction);
     ScenarioHouse = std::move(scenario_house);
 }
 
-void ScenarioLuaApi::Register_Consts(LuaEngine& engine) const {
+void ScenarioLuaApi::Register_Consts(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [&](auto& n) {
         n.addConstant("name", ScenarioName)
             .addConstant("type", ScenarioType)
@@ -26,7 +28,8 @@ void ScenarioLuaApi::Register_Consts(LuaEngine& engine) const {
     });
 }
 
-void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const {
+void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [](auto& n) {
         n.addCFunction("getHouseNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
@@ -216,7 +219,8 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const {
     });
 }
 
-HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, const std::string& name) {
+HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, const std::string& name)
+{
     const auto houseType = HouseTypeClass::From_Name(name.c_str());
 
     if (houseType == HOUSE_NONE) {

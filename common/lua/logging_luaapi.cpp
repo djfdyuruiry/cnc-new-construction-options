@@ -5,11 +5,13 @@
 #include "system_luaapi.h"
 
 // Method implementations
-void LoggingLuaApi::Register_Dependencies(LuaEngine& engine) const {
+void LoggingLuaApi::Register_Dependencies(LuaEngine& engine) const
+{
     engine.Register_Api<SystemLuaApi>();
 }
 
-void LoggingLuaApi::Register_Functions(LuaEngine& engine) const {
+void LoggingLuaApi::Register_Functions(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [](auto& n) {
         n.addCFunction("getLevel", [](auto L) {
             const auto engine = SharedLuaEngine(L);
@@ -67,7 +69,8 @@ void LoggingLuaApi::Register_Functions(LuaEngine& engine) const {
     });
 }
 
-void LoggingLuaApi::Register(LuaEngine& engine) const {
+void LoggingLuaApi::Register(LuaEngine& engine) const
+{
     // reset the logger level, it might have been changed by a Lua setLevel(..) call
     LuaLogger()->set_level(
         DefaultLogLevel
@@ -76,7 +79,8 @@ void LoggingLuaApi::Register(LuaEngine& engine) const {
     LuaApi::Register(engine);
 }
 
-void LoggingLuaApi::Assert_Level_Value(const LuaEngine& engine, const std::string& level) {
+void LoggingLuaApi::Assert_Level_Value(const LuaEngine& engine, const std::string& level)
+{
     static const std::vector valid_log_levels SPDLOG_LEVEL_NAMES;
 
     if (std::ranges::find(valid_log_levels, level) == valid_log_levels.end()) {

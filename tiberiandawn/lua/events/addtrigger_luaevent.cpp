@@ -2,12 +2,14 @@
 
 #include "addtrigger_luaevent.h"
 
-AddTriggerLuaEvent::AddTriggerLuaEvent(std::string name, std::string definition): LuaEvent("AddTrigger") {
+AddTriggerLuaEvent::AddTriggerLuaEvent(std::string name, std::string definition): LuaEvent("AddTrigger")
+{
     Name = std::move(name);
     Definition = std::move(definition);
 }
 
-void AddTriggerLuaEvent::Execute() const {
+void AddTriggerLuaEvent::Execute() const
+{
     LuaEvent::Execute();
     CNC_LOGGER_DEBUG(
         "Loading scenario trigger '{}' from Lua call, CSV definition: {}",

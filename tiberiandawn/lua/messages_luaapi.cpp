@@ -5,7 +5,8 @@
 #include "events/addmessage_luaevent.h"
 #include "messages_luaapi.h"
 
-void MessagesLuaApi::Register_Functions(LuaEngine& engine) const {
+void MessagesLuaApi::Register_Functions(LuaEngine& engine) const
+{
     With_Api_Namespace(engine, [](auto& n) {
         n.addCFunction("sendToPlayer", [](auto L) {
             const auto engine = SharedLuaEngine(L);
