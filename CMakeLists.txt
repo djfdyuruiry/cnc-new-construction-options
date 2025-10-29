@@ -161,6 +161,7 @@ endif()
 # lua
 find_package(Lua REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
+list(APPEND COMMON_LIBS ${LUA_LIBRARIES})
 list(APPEND VANILLA_LIBS ${LUA_LIBRARIES})
 
 # luabridge
@@ -169,7 +170,7 @@ include_directories(${LUABRIDGE_INCLUDE_DIRS})
 
 # spdlog
 find_package(spdlog CONFIG REQUIRED)
-list(APPEND COMMON_LIBS spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>) # TODO: determine why this is required
+list(APPEND COMMON_LIBS spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 list(APPEND VANILLA_LIBS spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 
 if(BUILD_TESTS)

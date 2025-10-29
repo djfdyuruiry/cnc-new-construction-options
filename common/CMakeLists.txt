@@ -101,6 +101,13 @@ set(COMMON_SRC
     rulesections.cpp
     lua/event_luaapi.cpp
     lua/logging_luaapi.cpp
+    lua/luaapi.cpp
+    lua/luaarguments.cpp
+    lua/luaengine.cpp
+    lua/luaresult.cpp
+    lua/luatablebuilder.cpp
+    lua/rulesluaadapter.cpp
+    lua/system_luaapi.cpp
 )
 
 if (WIN32)

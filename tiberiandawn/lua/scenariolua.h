@@ -217,7 +217,7 @@ private:
     )
     {
         auto lua_scripts_to_load = std::vector {
-              LuaScripts::On_Scenario_Load,
+              std::string(LuaScripts::On_Scenario_Load),
               std::format("{}.lua", scenario_name),
               std::format("{}.lua", scenario_name.substr(0, 5)),
               std::format("{}-scenario.lua", faction_name),

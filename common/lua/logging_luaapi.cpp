@@ -12,7 +12,7 @@ void LoggingLuaApi::Register_Dependencies(LuaEngine& engine) const {
 void LoggingLuaApi::Register_Functions(LuaEngine& engine) const {
     With_Api_Namespace(engine, [](auto& n) {
         n.addCFunction("getLevel", [](auto L) {
-            auto engine = SharedLuaEngine(L);
+            const auto engine = SharedLuaEngine(L);
 
             engine.Push_Value(
                 spdlog::level::to_string_view(
@@ -22,24 +22,24 @@ void LoggingLuaApi::Register_Functions(LuaEngine& engine) const {
 
             return 1;
         }).addCFunction("setLevel", [](auto L) {
-            auto engine = SharedLuaEngine(L);
+            const auto engine = SharedLuaEngine(L);
             auto arguments = LuaArguments(engine, "Logger.setLevel(<string: level>)");
 
             arguments.Count_Is(1)
                 .First_Argument_Is<std::string>()
                 .Assert();
 
-            auto level = arguments.Read_First<std::string>().Unpack();
+            const auto level = arguments.Read_First<std::string>().Unpack();
 
             Assert_Level_Value(engine, level);
 
-            auto log_level = spdlog::level::from_str(level.c_str());
+            const auto log_level = spdlog::level::from_str(level);
 
             LuaLogger()->set_level(log_level);
 
             return 0;
         }).addCFunction("log", [](auto L) {
-            auto engine = SharedLuaEngine(L);
+            const auto engine = SharedLuaEngine(L);
             auto arguments = LuaArguments(engine, "Logger.log(<string: sourceLocation>, <string: level>, <string: message>)");
 
             arguments.Count_Is(3)
@@ -48,14 +48,14 @@ void LoggingLuaApi::Register_Functions(LuaEngine& engine) const {
                 .Next_Argument_Is<std::string>()
                 .Assert();
 
-            auto location = arguments.Read_First<std::string>().Unpack();
-            auto level = arguments.Read_Next<std::string>().Unpack();
-            auto message = arguments.Read_Next<std::string>().Unpack();
+            const auto location = arguments.Read_First<std::string>().Unpack();
+            const auto level = arguments.Read_Next<std::string>().Unpack();
+            const auto message = arguments.Read_Next<std::string>().Unpack();
 
             arguments.Assert_String_Parameter_Is_Valid("location", location);
             Assert_Level_Value(engine, level);
 
-             auto log_level = spdlog::level::from_str(level.c_str());
+             const auto log_level = spdlog::level::from_str(level);
 
             LuaLogger()->log(
                 log_level,

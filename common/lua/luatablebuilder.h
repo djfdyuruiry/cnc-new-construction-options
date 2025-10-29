@@ -2,9 +2,8 @@
 
 #include <optional>
 
-#include <lua.hpp>
-
 #include "luaengine.h"
+#include "lualib.h"
 
 /**
  * Fluent builder for setting up Lua Tables on the stack.
@@ -20,14 +19,7 @@ class LuaTableBuilder
 public:
     LuaTableBuilder(const LuaEngine& engine) : Lua(engine) {}
 
-    LuaTableBuilder& New_Table()
-    {
-        Lua.With_State([](auto L) { lua_newtable(L); });
-
-        TableStreamIndex = 1;
-
-        return *this;
-    }
+    LuaTableBuilder& New_Table();
 
     template <LuaPushType T>
     LuaTableBuilder& With_Index_Value(T value)

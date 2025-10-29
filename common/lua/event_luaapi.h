@@ -3,9 +3,7 @@
 #include <format>
 #include <string>
 
-#include "logging_luaapi.h"
 #include "luaapi.h"
-#include "luaarguments.h"
 
 /**
  * API for calling Lua native event handlers.

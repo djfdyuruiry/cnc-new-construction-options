@@ -24,13 +24,10 @@
 #include <vector>
 #include <format>
 
-#include <lua.hpp> // LuaBridge requires lua to be included first
-#include <LuaBridge/LuaBridge.h>
-
 #include "../logger.h"
-#include "../paths.h"
 #include "../twowaymap.h"
 
+#include "lualib.h"
 #include "luaresult.h"
 
 typedef unsigned short ushort;
@@ -80,7 +77,7 @@ class LuaEngine
 {
 public:
     // all APIs will be available from this global Lua table
-    static inline const std::string_view RootApiNamespace = "__CNC_API";
+    static constexpr std::string_view RootApiNamespace = "__CNC_API";
     static inline const TwoWayMap<int, std::string_view> LuaTypeMap {
         {LUA_TNONE, "none"},
         {LUA_TNIL, "nil"},
@@ -103,16 +100,13 @@ public:
             return LuaTypeMap[LUA_TBOOLEAN].value();
         } else if constexpr (std::is_same_v<T, std::string>) {
             return LuaTypeMap[LUA_TSTRING].value();
+        } else {
+            throw std::invalid_argument("Unsupported LuaVariant type - this is normally caused by variant type list being updated without updating supporting code");
         }
     }
 
     // default path for lua script files - we ensure this is in the Lua 'package.path', see UniqueLuaEngine()
-    static const std::filesystem::path& Get_Lua_Path()
-    {
-        static const auto lua_path = std::filesystem::path(Paths.Program_Path()) / "lua";
-
-        return lua_path;
-    }
+    static const std::filesystem::path& Get_Lua_Path();
 
     virtual ~LuaEngine() = default;
 
@@ -136,33 +130,18 @@ public:
         RegisteredApis.emplace_back(api.Name);
     }
 
-    luabridge::Namespace Get_Api_Namespace(std::string_view name) const
-    {
-        return Bridge()
-          .beginNamespace(RootApiNamespace.data())
-          .beginNamespace(name.data());
-    }
+    luabridge::Namespace Get_Api_Namespace(const std::string_view name) const;
 
-    void With_Api_Namespace(std::string_view name, std::function<void(luabridge::Namespace&)> action) const
-    {
-        auto api_namespace = Get_Api_Namespace(name);
-
-        action(api_namespace);
-
-        api_namespace.endNamespace().endNamespace();
-    }
+    void With_Api_Namespace(const std::string_view name, const std::function<void(luabridge::Namespace&)>& action) const;
 
     #pragma endregion
 
     #pragma region State Access
 
-    void With_State(std::function<void(lua_State*)> actions) const
-    {
-        actions(Get_State());
-    }
+    void With_State(const std::function<void(lua_State*)>& actions) const;
 
     template<class T>
-    T Get_Value_From_State(std::function<T(lua_State*)> actions) const
+    T Get_Value_From_State(const std::function<T(lua_State*)>& actions) const
     {
         return actions(Get_State());
     }
@@ -171,13 +150,7 @@ public:
      * Note: Calling this will terminate execution of the source CFunction
      * context, so no need to return after calling this.
      */
-    void Raise_Error(const std::string& message) const
-    {
-        With_State([&](auto L) {
-            Push_Value(message);
-            lua_error(L);
-        });
-    }
+    void Raise_Error(const std::string& message) const;
 
     template<typename... Args>
     void Raise_Error_Format(const std::string& message, Args&&... args) const
@@ -191,162 +164,30 @@ public:
 
     #pragma region Code Exec
 
-    LuaResult Exec(const std::string& script) const
-    {
-        CNC_LOGGER_TRACE("Attempting to execute lua script: {}", script);
+    LuaResult Exec(const std::string& script) const;
 
-        return Get_Value_From_State<LuaResult>([&script](auto L)
-        {
-            auto status = luaL_loadstring(L, script.c_str());
+    std::future<LuaResult> Exec_Async(const std::string& script) const;
 
-            if (status != LUA_OK) {
-                auto result = LuaResult(L, status);
+    std::filesystem::path Resolve_Script_Path(const std::filesystem::path& script_path) const;
 
-                CNC_LOGGER_TRACE(
-                    "Error loading lua script due to '{}' error: {}",
-                    result.Code_As_String(),
-                    result.Error_Message()
-                );
-                return result;
-            }
+    LuaResult Exec_File(const std::filesystem::path& script_path) const;
 
-            return LuaResult(
-                L,
-                lua_pcall(L, 0, LUA_MULTRET, 0)
-            );
-        });
-    }
+    LuaResult Exec_File_If_Exists(const std::filesystem::path& script_path) const;
 
-    std::future<LuaResult> Exec_Async(const std::string& script) const
-    {
-        auto promise = std::make_shared<std::promise<LuaResult>>();
-        auto future = promise->get_future();
+    std::future<LuaResult> Exec_File_Async(const std::filesystem::path& script_path) const;
 
-        std::thread([=]() {
-            auto result = Exec(script);
-
-            // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend
-            //       , user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
-            if (!result.Is_Ok()) {
-                CNC_LOGGER_ERROR(
-                    "Error from background lua script: {} | script: {}",
-                    result.Error_Message(),
-                    script
-                );
-            }
-
-            promise->set_value(result);
-        }).detach();
-
-        return future;
-    }
-
-    std::filesystem::path Resolve_Script_Path(std::filesystem::path script_path) const
-    {
-        auto full_script_path = script_path;
-
-        if (script_path.is_relative()){
-            // assume relative paths are part of @var{Lua_Path} file tree
-            full_script_path = Get_Lua_Path() / script_path;
-        }
-
-        return full_script_path;
-    }
-
-    LuaResult Exec_File(std::filesystem::path script_path) const
-    {        
-        auto full_script_path = Resolve_Script_Path(script_path);
-
-        CNC_LOGGER_DEBUG("Attempting to execute lua file: {}", full_script_path.string());
-
-        return Get_Value_From_State<LuaResult>([&full_script_path](auto L) {
-            auto status = luaL_loadfile(L, full_script_path.string().c_str());
-
-            if (status != LUA_OK) {
-                return LuaResult(L, status);
-                auto result = LuaResult(L, status);
-
-                CNC_LOGGER_TRACE(
-                    "Error loading lua file '{}' due to error: {}",
-                    full_script_path.string(),
-                    result.Error_Message()
-                );
-                return result;
-            }
-
-            return LuaResult(
-                L,
-                lua_pcall(L, 0, LUA_MULTRET, 0)
-            );
-        });
-    }
-
-    LuaResult Exec_File_If_Exists(std::filesystem::path script_path) const
-    {
-        auto full_script_path = Resolve_Script_Path(script_path);
-
-        if (!std::filesystem::is_regular_file(full_script_path)) {
-            CNC_LOGGER_WARN("Skipping lua file execution as it does not exist: {}", full_script_path.string());
-            return LuaResult(LUA_OK);
-        }
-
-        return Exec_File(full_script_path);
-    }
-
-    std::future<LuaResult> Exec_File_Async(std::filesystem::path script_path) const
-    {
-        auto promise = std::make_shared<std::promise<LuaResult>>();
-        auto future = promise->get_future();
-
-        std::thread([=]() {
-            auto result = Exec_File(script_path);
-
-            // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend
-            //       , user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
-            if (!result.Is_Ok()) {
-                // TODO: output debug info - maybe have a method in LuaEvent that builds a standard error message for logging or logs directly
-                CNC_LOGGER_ERROR(
-                    "Error from background lua script file: {} | script_path: {}",
-                    result.Error_Message(),
-                    script_path.string()
-                );
-            }
-
-            promise->set_value(result);
-        }).detach();
-
-        return future;
-    }
-
-    LuaResult PCall(std::string_view expression) const
-    {
-        if (!Is_Function()) {
-            return LuaResult(
-                std::format(
-                    "Unable to call '{}' as it is either undefined or not a function",
-                    expression
-                )
-            );
-        }
-
-        return Get_Value_From_State<LuaResult>([](auto L) {
-            return LuaResult(
-                L,
-                lua_pcall(L, 0, LUA_MULTRET, 0)
-            );
-        });
-    }
+    LuaResult PCall(std::string_view expression) const;
 
     template<LuaPushType... Args>
     LuaResult PCall_With_Args(std::string_view expression, Args&&... args) const
     {
         if (!Is_Function()) {
-            return LuaResult(
+            return {
                 std::format(
                     "Unable to call '{}' as it is either undefined or not a function",
                     expression
                 )
-            );
+            };
         }
 
         Push_Values(std::forward<Args>(args)...);
@@ -363,10 +204,7 @@ public:
 
     #pragma region Stack
 
-    int Get_Stack_Count() const
-    {
-        return lua_gettop(Get_State());
-    }
+    int Get_Stack_Count() const;
 
     template<LuaVariantCompatible T>
     bool Is_Type(int stack_index = -1) const
@@ -380,120 +218,40 @@ public:
                 return lua_type(L, stack_index) == LUA_TBOOLEAN;
             } else if constexpr (std::is_same_v<T, std::string>) {
                 return lua_type(L, stack_index) == LUA_TSTRING;
+            } else {
+                throw std::invalid_argument("Unsupported LuaVariant type - this is normally caused by variant type list being updated without updating supporting code");
             }
         });
     }
 
-    int Get_Lua_Type_Code(int stack_index = -1) const
-    {
-        return Get_Value_From_State<bool>([&](auto L) {
-            return lua_type(L, stack_index);
-        });
-    }
+    int Get_Lua_Type_Code(int stack_index = -1) const;
 
-    const std::string_view Get_Lua_Type(int stack_index = -1) const
-    {
-        auto type_code = Get_Lua_Type_Code(stack_index);
+    std::string_view Get_Lua_Type(const int& stack_index = -1) const;
 
-        return LuaTypeMap[type_code].value();
-    }
+    bool Is_Nil(int stack_index = -1) const;
 
-    bool Is_Nil(int stack_index = -1) const
-    {
-        return Get_Value_From_State<bool>([&](auto L) {
-            return lua_type(L, stack_index) == LUA_TNIL;
-        });
-    }
+    bool Is_None(int stack_index = -1) const;
 
-    bool Is_None(int stack_index = -1) const
-    {
-        return Get_Value_From_State<bool>([&](auto L) {
-            return lua_type(L, stack_index) == LUA_TNONE;
-        });
-    }
+    bool Is_Table(int stack_index = -1) const;
 
-    bool Is_Table(int stack_index = -1) const
-    {
-        return Get_Value_From_State<bool>([&](auto L) {
-            return lua_istable(L, stack_index);
-        });
-    }
+    bool Is_Function(int stack_index = -1) const;
 
-    bool Is_Function(int stack_index = -1) const
-    {
-        return Get_Value_From_State<bool>([&](auto L) {
-            return lua_isfunction(L, stack_index);
-        });
-    }
-
-    int Load_Global(std::string_view name) const
-    {
-        return Get_Value_From_State<int>([&](auto L) {
-            return lua_getglobal(L, name.data());
-        });
-    }
+    int Load_Global(std::string_view name) const;
 
     LuaResult With_Global(
         std::string_view name,
-        int expected_lua_type,
-        std::function<LuaResult()> action
-    ) const
-    {
-        auto type = Load_Global(name);
+        const int& expected_lua_type,
+        const std::function<LuaResult()>& action
+    ) const;
 
-        if (type != expected_lua_type) {
-            Pop();
-            return LuaResult(
-                std::format(
-                    "Global '{}' was of unexpected type '{}', expected '{}'",
-                    name,
-                    LuaTypeMap[type].value(),
-                    LuaTypeMap[expected_lua_type].value()
-                )
-            );
-        }
-
-        auto result = action();
-
-        Pop();
-
-        return result;
-    }
-
-    int Load_Table_Field(std::string_view name, int stack_index = -1) const
-    {
-        return Get_Value_From_State<int>([&](auto L) {
-            return lua_getfield(L, stack_index, name.data());
-        });
-    }
+    int Load_Table_Field(std::string_view name, int stack_index = -1) const;
 
     LuaResult With_Table_Field(
         std::string_view parent_expression,
         std::string_view name,
-        int expected_lua_type,
-        std::function<LuaResult()> action
-    ) const
-    {
-        auto type = Load_Table_Field(name);
-
-        if (type != expected_lua_type) {
-            Pop();
-            return LuaResult(
-                std::format(
-                    "Table field '{}.{}' was of unexpected type '{}', expected '{}'",
-                    parent_expression,
-                    name,
-                    LuaTypeMap[type].value(),
-                    LuaTypeMap[expected_lua_type].value()
-                )
-            );
-        }
-
-        auto result = action();
-        Pop();
-
-        return result;
-    }
+        const int& expected_lua_type,
+        const std::function<LuaResult()>& action
+    ) const;
 
     /**
      * Read a value from the stack, with type checking.
@@ -534,48 +292,15 @@ public:
                 return LuaResultWithValue<T>(
                     std::string(lua_tostring(L, stack_index))
                 );
+            } else {
+                throw std::invalid_argument("Unsupported LuaVariant type - this is normally caused by variant type list being updated without updating supporting code");
             }
         });
     }
 
-    LuaResultWithValue<LuaVariant> Try_Read_Variant(int stack_index = -1) const
-    {
-        return Get_Value_From_State<LuaResultWithValue<LuaVariant>>([&](auto L) {
-            std::optional<LuaVariant> variant_value;
+    LuaResultWithValue<LuaVariant> Try_Read_Variant(const int& stack_index = -1) const;
 
-            if (Is_Type<int>(stack_index)) {
-                variant_value = Try_Read<int>(stack_index).Unpack();
-            } else if (Is_Type<double>(stack_index)) {
-                variant_value = Try_Read<double>(stack_index).Unpack();
-            } else if (Is_Type<std::string>(stack_index)) {
-                variant_value = Try_Read<std::string>(stack_index).Unpack();
-            }
-
-            if (variant_value.has_value()) {
-                return LuaResultWithValue<LuaVariant>(variant_value.value());
-            }
-
-            return LuaResultWithValue<LuaVariant>(
-                Get_State(),
-                std::format("Attempted to read Lua value as variant, but type not supported by variant: {}", Get_Lua_Type(stack_index))
-            );
-        });
-    }
-
-    const std::string_view Get_Variant_Type(const LuaVariant& lua_variant) const
-    {
-        if (const auto value = std::get_if<std::string>(&lua_variant)) {
-            return LuaTypeMap[LUA_TSTRING].value();
-        } else if (const auto value = std::get_if<int>(&lua_variant)) {
-            return LuaTypeMap[LUA_TNUMBER].value();
-        } else if (const auto value = std::get_if<double>(&lua_variant)) {
-            return LuaTypeMap[LUA_TNUMBER].value();
-        } else if (const auto value = std::get_if<bool>(&lua_variant)) {
-            return LuaTypeMap[LUA_TBOOLEAN].value();
-        } else {
-            CNC_LOG_FATAL("Attempted to get type for unsupported LuaVariant type");
-        }
-    }
+    const std::string_view Get_Variant_Type(const LuaVariant& lua_variant) const;
 
     template<LuaVariantCompatible T>
     LuaResultWithValue<T> Try_Read_Table_Field(
@@ -591,6 +316,8 @@ public:
             expected_type = LUA_TNUMBER;
         } else if constexpr (std::is_same_v<T, std::string>) {
             expected_type = LUA_TSTRING;
+        } else {
+            throw std::invalid_argument("Unsupported LuaVariant type - this is normally caused by variant type list being updated without updating supporting code");
         }
 
         LuaResultWithValue<T> value_result = LuaResult(LUA_OK);
@@ -608,21 +335,9 @@ public:
         return value_result;
     }
 
-    LuaResultWithValue<std::string> To_String(int stack_index = -1) const
-    {
-        return Get_Value_From_State<LuaResultWithValue<std::string>>([&](auto L) {
-            return LuaResultWithValue<std::string>(
-                std::string(lua_tostring(L, stack_index))
-            );
-        });
-    }
+    LuaResultWithValue<std::string> To_String(int stack_index = -1) const;
 
-    void Pop(int amount = 1) const
-    {
-        With_State([&](auto L) {
-            lua_pop(L, amount);
-        });
-    }
+    void Pop(const int& amount = 1) const;
 
     template<LuaPushType T>
     void Push_Value(T value) const
@@ -648,6 +363,8 @@ public:
                 lua_pushinteger(L, static_cast<lua_Integer>(value));
             } else if constexpr (std::is_same_v<T, bool>) {
                 lua_pushboolean(L, value);
+            } else {
+                throw std::invalid_argument("Unsupported LuaPushType type - this is normally caused by type list being updated without updating supporting code");
             }
         });
     }
@@ -658,41 +375,35 @@ public:
         ((Push_Value(args)), ...);
     }
 
-    void Push_Nil() const
-    {
-        With_State([](auto L){ lua_pushnil(L); });
-    }
+    void Push_Nil() const;
 
-    bool Iterate_Over_Table(int stack_index = -1) const
-    {
-       return Get_Value_From_State<bool>([&](auto L){ return lua_next(L, stack_index) != 0; });
-    }
+    bool Iterate_Over_Table(int stack_index = -1) const;
 
     template<LuaPushType T>
     LuaResult Set_Table_Field(
         std::string_view table_expression,
         std::string_view name,
         T value,
-        int table_stack_index = -1
+        const int& table_stack_index = -1
     ) const
     {
         if (!Is_Table(table_stack_index)) {
-            return LuaResult(
+            return {
                 std::format(
                     "Unable to set field '{}' as target '{}' is not a table",
                     name,
                     table_expression
                 )  
-            );
+            };
         }
 
-        Push_Value(value);
+        Push_Value(std::move(value));
 
         With_State([&](auto L) {
             lua_setfield(L, table_stack_index - 1, name.data());
         });
 
-        return LuaResult(LUA_OK);
+        return {LUA_OK};
     }
 
     #pragma endregion
@@ -702,12 +413,8 @@ public:
     template<LuaVariantCompatible T>
     LuaResultWithValue<T> Eval(const std::string& expression) const
     {
-        auto result = Exec(std::format("return {}", expression));
-    
-        if (!result.Is_Ok()) {
-            return LuaResultWithValue<T>(
-                result
-            );
+        if (const auto result = Exec(std::format("return {}", expression)); !result.Is_Ok()) {
+            return LuaResultWithValue<T>(result);
         }
 
         return Try_Read<T>();
@@ -719,7 +426,7 @@ public:
         auto promise = std::make_shared<std::promise<LuaResultWithValue<T>>>();
         auto future = promise->get_future();
 
-        std::thread([=]() {
+        std::thread([this, expression, promise]() {
             promise->set_value(
                 Eval<T>(expression)
             );
@@ -749,13 +456,7 @@ protected:
 class LuaStateDeleter
 {
 public:
-    void operator()(lua_State *L) const
-    {
-        if (L)
-        {
-            lua_close(L);
-        }
-    }
+    void operator()(lua_State *L) const;
 };
 
 /**
@@ -765,7 +466,7 @@ public:
  * 
  * Aligns with smart pointer unique logic.
  */
-class UniqueLuaEngine : public LuaEngine
+class UniqueLuaEngine final : public LuaEngine
 {
 public:
     /**
@@ -773,56 +474,17 @@ public:
      * 
      * Note: This state is NOT shared or accessible from instances of UniqueLuaEngine.
      */
-    static const UniqueLuaEngine& Global()
-    {
-        static UniqueLuaEngine global;
+    static const UniqueLuaEngine& Global();
 
-        return global;
-    };
-
-    UniqueLuaEngine() : State(Build_State(), LuaStateDeleter())
-    {
-        With_Global("package", LUA_TTABLE, [&]() {
-            auto read_result = Try_Read_Table_Field<std::string>("package", "path");
-
-            if (!read_result.Is_Ok() || !read_result.Has_Value()) {
-                return (LuaResult)read_result;
-            }
-
-            return read_result.Map<LuaResult>([&](auto base_package_path) {
-                auto package_path = std::format(
-                    "{};{}/?.lua;{}/?/init.lua",
-                    base_package_path,
-                    Get_Lua_Path().string(),
-                    Get_Lua_Path().string()
-                );
-
-                return Set_Table_Field("package", "path", package_path);
-            });
-        }).On_Error([](auto& r) {
-            CNC_LOGGER_FATAL(
-                "Failed to initialise Lua package paths: {}",
-                r.Error_Message()
-            );
-        });
-    }
+    UniqueLuaEngine() ;
 
 protected:
-    virtual lua_State* Get_State() const override
-    {
-        return State.get();
-    }
+    lua_State* Get_State() const override;
 
 private:
     std::unique_ptr<lua_State, LuaStateDeleter> State;
 
-    static lua_State* Build_State()
-    {
-        auto L = luaL_newstate();
-        luaL_openlibs(L);
-
-        return L;
-    };
+    static lua_State* Build_State();;
 };
 
 /**
@@ -832,16 +494,13 @@ private:
  * 
  * Aligns with smart pointer shared logic.
  */
-class SharedLuaEngine : public LuaEngine
+class SharedLuaEngine final : public LuaEngine
 {
 public:
     SharedLuaEngine(lua_State* L) : State(L) {}
 
 protected:
-    virtual lua_State* Get_State() const override
-    {
-        return State;
-    }
+    lua_State* Get_State() const override;
 
 private:
     lua_State* State;

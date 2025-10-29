@@ -11,19 +11,18 @@ class CncStringUtils final
 public:
     [[nodiscard]] static bool Is_Blank(const std::string& subject)
     {
-       return subject.empty() || std::all_of(
-           subject.begin(), subject.end(), [](const auto c){ return std::isspace(c); }
+       return subject.empty() || std::ranges::all_of(subject, [](const auto c){ return std::isspace(c); }
        );
     }
 
     static void To_Lower(std::string& subject)
     {
-        std::transform(subject.begin(), subject.end(), subject.begin(), ::tolower);
+        std::ranges::transform(subject, subject.begin(), ::tolower);
     }
 
     static void To_Upper(std::string& subject)
     {
-        std::transform(subject.begin(), subject.end(), subject.begin(), ::toupper);
+        std::ranges::transform(subject, subject.begin(), ::toupper);
     }
 
     template<class T = std::string>
