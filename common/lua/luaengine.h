@@ -24,10 +24,10 @@
 #include <vector>
 #include <format>
 
+#include "lualib.h"
+
 #include "../logger.h"
 #include "../twowaymap.h"
-
-#include "lualib.h"
 #include "luaresult.h"
 
 typedef unsigned short ushort;

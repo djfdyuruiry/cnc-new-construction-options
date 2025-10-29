@@ -1,9 +1,7 @@
 #pragma once
 
-#include <lua.h>
-
-#include "luaengine.h"
 #include "luaarguments.h"
+#include "luaengine.h"
 #include "rulesections.h"
 
 class RulesLuaAdapter final
