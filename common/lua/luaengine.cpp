@@ -1,9 +1,6 @@
-#include <lua.hpp>
-
 #include "../paths.h"
 
 #include "luaengine.h"
-#include "lualib.h"
 
 const std::filesystem::path& LuaEngine::Get_Lua_Path() {
     static const auto lua_path = std::filesystem::path(Paths.Program_Path()) / "lua";
