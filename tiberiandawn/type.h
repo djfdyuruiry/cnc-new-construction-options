@@ -112,7 +112,7 @@ public:
         return TXT_NONE;
     }
 
-    // see: wdata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& rules);
 };
@@ -174,7 +174,7 @@ public:
         return TXT_NONE;
     }
 
-    // see: whdata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& rules);
 };
@@ -286,7 +286,7 @@ public:
     void Set_Suffix(const std::string& str);
     void Set_Prefix(const std::string& str);
 
-    // see: hdata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& ini);
 private:
@@ -470,7 +470,7 @@ public:
     virtual void Display(int, int, WindowNumberType, HousesType) const {};
 #endif
 
-    // see: object-nco.cpp.in
+    // see: types-nco.cpp.in
     virtual const IniRuleContext& Read_INI(const IniRuleContext& ini);
     virtual const RuleSection& Read_Rules(const RuleSection& rules);
 
@@ -680,7 +680,7 @@ public:
     int Legal_Placement(CELL pos) const; // From RA for AI. ST - 7/24/2019 5:20PM
 #endif                                   // USE_RA_AI
 
-    // see: techno-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 };
@@ -946,7 +946,7 @@ public:
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
 
-    // see: bdata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
@@ -1195,7 +1195,7 @@ public:
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
 
-    // see: udata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
@@ -1351,7 +1351,7 @@ public:
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
 
-    // see: idata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection&) override;
 };
@@ -1536,7 +1536,7 @@ public:
         return 0;
     };
 
-    // see: bbdata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& ini) override;
 
@@ -1939,7 +1939,7 @@ public:
         return 0;
     };
 
-    // see: aadata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
@@ -2055,7 +2055,7 @@ public:
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
 
-    // see: aadata-nco.cpp.in
+    // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
