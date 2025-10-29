@@ -24,7 +24,7 @@
 #include <vector>
 #include <format>
 
-#include <lua.hpp>
+#include <lua.hpp> // LuaBridge requires lua to be included first
 #include <LuaBridge/LuaBridge.h>
 
 #include "../logger.h"
@@ -32,6 +32,10 @@
 #include "../twowaymap.h"
 
 #include "luaresult.h"
+
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned char uchar;
 
 using LuaVariant = std::variant<int, float, double, bool, std::string>;
 

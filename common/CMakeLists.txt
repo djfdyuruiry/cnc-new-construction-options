@@ -97,6 +97,10 @@ set(COMMON_SRC
     xordelta.cpp
     xpipe.cpp
     xstraw.cpp
+    # nco
+    rulesections.cpp
+    lua/event_luaapi.cpp
+    lua/logging_luaapi.cpp
 )
 
 if (WIN32)

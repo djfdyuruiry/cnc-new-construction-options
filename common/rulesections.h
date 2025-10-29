@@ -70,125 +70,13 @@ class RuleSection
 public:
     const std::string SectionName;
 
-    static bool Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
-    {
-        if (std::get_if<int>(&value_variant_a)) {
-            return std::get_if<int>(&value_variant_b);
-        }
-        if (std::get_if<bool>(&value_variant_a)) {
-            return std::get_if<bool>(&value_variant_b);
-        }
-        if (std::get_if<float>(&value_variant_a)) {
-            return std::get_if<float>(&value_variant_b);
-        }
-        if (std::get_if<ushort>(&value_variant_a)) {
-            return std::get_if<ushort>(&value_variant_b);
-        }
-        if (std::get_if<std::string>(&value_variant_a)) {
-            return std::get_if<std::string>(&value_variant_b);
-        }
-        if (std::get_if<uint>(&value_variant_a)) {
-            return std::get_if<uint>(&value_variant_b);
-        }
-        if (std::get_if<char>(&value_variant_a)) {
-            return std::get_if<char>(&value_variant_b);
-        }
-        if (std::get_if<uchar>(&value_variant_a)) {
-            return std::get_if<uchar>(&value_variant_b);
-        }
+    static bool Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b);
 
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-    }
+    static std::string_view Get_Variant_Type(RuleValueVariant value_variant);
 
-    static std::string_view Get_Variant_Type(RuleValueVariant value_variant)
-    {
-        if (std::get_if<int>(&value_variant)) {
-            return "int";
-        }
-        if (std::get_if<bool>(&value_variant)) {
-            return "bool";
-        }
-        if (std::get_if<float>(&value_variant)) {
-            return "float";
-        }
-        if (std::get_if<ushort>(&value_variant)) {
-            return "unsigned short";
-        }
-        if (std::get_if<std::string>(&value_variant)) {
-            return "string";
-        }
-        if (std::get_if<uint>(&value_variant)) {
-            return "unsigned int";
-        }
-        if (std::get_if<char>(&value_variant)) {
-            return "char";
-        }
-        if (std::get_if<uchar>(&value_variant)) {
-            return "unsigned char";
-        }
+    static std::string Get_Variant_Values(RuleValueVariant value_variant);
 
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-    }
-
-    static std::string Get_Variant_Values(RuleValueVariant value_variant)
-    {
-        if (std::get_if<int>(&value_variant)) {
-            return std::format("{}-{}", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-        }
-        if (std::get_if<bool>(&value_variant)) {
-            return "true/false";
-        }
-        if (std::get_if<float>(&value_variant)) {
-            return std::format("{}-{}", std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
-        }
-        if (std::get_if<ushort>(&value_variant)) {
-            return std::format("{}-{}", std::numeric_limits<ushort>::min(), std::numeric_limits<ushort>::max());
-        }
-        if (std::get_if<std::string>(&value_variant)) {
-            return "anything";
-        }
-        if (std::get_if<uint>(&value_variant)) {
-            return std::format("{}-{}", std::numeric_limits<uint>::min(), std::numeric_limits<uint>::max());
-        }
-        if (std::get_if<char>(&value_variant)) {
-            return std::format("{}-{}", std::numeric_limits<char>::min(), std::numeric_limits<char>::max());
-        }
-        if (std::get_if<uchar>(&value_variant)) {
-            return std::format("{}-{}", std::numeric_limits<uchar>::min(), std::numeric_limits<uchar>::max());
-        }
-
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-    }
-
-    static std::string Variant_To_String(RuleValueVariant value_variant)
-    {
-        if (const auto value = std::get_if<int>(&value_variant)) {
-            return std::format("{}", *value);
-        }
-        if (const auto value = std::get_if<bool>(&value_variant)) {
-            return std::format("{}", *value);
-        }
-        if (const auto value = std::get_if<float>(&value_variant)) {
-            return std::format("{}", *value);
-        }
-        if (const auto value = std::get_if<ushort>(&value_variant)) {
-            return std::format("{}", *value);
-        }
-        if (const auto value = std::get_if<std::string>(&value_variant)) {
-            return *value;
-        }
-        if (const auto value = std::get_if<uint>(&value_variant)) {
-            return std::format("{}", *value);
-        }
-        if (const auto value = std::get_if<char>(&value_variant)) {
-            return std::format("{}", static_cast<int>(*value));
-        }
-        if (const auto value = std::get_if<uchar>(&value_variant)) {
-            return std::format("{}", static_cast<unsigned int>(*value));
-        }
-
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-    }
+    static std::string Variant_To_String(RuleValueVariant value_variant);
 
     RuleSection(
         std::string section_name,
@@ -205,67 +93,17 @@ public:
         return *this;
     }
 
-    bool Has_Key(std::string_view name)
-    {
-        return Rules.find(name.data()) != Rules.end();
-    }
+    bool Has_Key(std::string_view name) const;
 
-    std::vector<std::string_view> Rule_Names() const
-    {
-        std::vector<std::string_view> keys;
-        keys.reserve(Rules.size());
+    std::vector<std::string_view> Rule_Names() const;
 
-        for (const auto& key : Rules | std::views::keys) {
-            keys.emplace_back(key);
-        }
+    RuleValueVariant Get_Variant(std::string_view name) const;
 
-        return keys;
-    }
+    std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const;
 
-    const RuleValueVariant Get_Variant(std::string_view name) const
-    {
-        const auto& it = Rules.find(name.data());
+    std::string_view Get_Type(std::string_view name) const;
 
-        if (it == Rules.end()) {
-            CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
-        }
-
-        return it->second;
-    }
-
-    const std::optional<RuleValueVariant> Try_Get_Variant(std::string_view name) const
-    {
-        const auto& it = Rules.find(name.data());
-
-        if (it != Rules.end()) {
-            return it->second;
-        }
-
-        return std::nullopt;
-    }
-
-    const std::string_view Get_Type(std::string_view name) const
-    {
-        const auto& it = Rules.find(name.data());
-
-        if (it == Rules.end()) {
-            CNC_LOGGER_FATAL("Rule not found in section: [{}] -> {}", SectionName, name);
-        }
-
-        return Get_Variant_Type(it->second);
-    }
-
-    RuleSection& Set_Ini_Comment(INIClass& ini, const std::string& comment)
-    {
-        if (CncStringUtils::Is_Blank(comment)) {
-            CNC_LOGGER_DEBUG("Skipping blank INI comment for section: {}", SectionName);
-            return *this;
-        }
-
-        ini.Put_Comment(SectionName.c_str(), comment);
-
-        return *this;
-    }
+    RuleSection& Set_Ini_Comment(INIClass& ini, const std::string& comment);
 
     template<RuleValueVariantCompatible T>
     RuleSection& Load_From_Ini(
@@ -366,49 +204,9 @@ public:
         return *this;
     }
 
-    const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const
-    {
-        auto value_variant = Get_Variant(name);
+    const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const;
 
-        CNC_LOGGER_DEBUG(
-            "Exporting rule to INI: [{}] -> {} = {}",
-            SectionName,
-            name,
-            Variant_To_String(value_variant)
-        );
-
-        if (const auto value = std::get_if<int>(&value_variant)) {
-            ini.Put_Int(SectionName.data(), name.data(), *value);
-        } else if (const auto value = std::get_if<bool>(&value_variant)) {
-            ini.Put_Bool(SectionName.data(), name.data(), *value);
-        } else if (const auto value = std::get_if<float>(&value_variant)) {
-            const auto value_str = std::format("{}", *value);
-            ini.Put_String(SectionName.data(), name.data(), value_str);
-        } else if (const auto value = std::get_if<ushort>(&value_variant)) {
-            const auto value_str = std::format("{}", *value);
-            ini.Put_String(SectionName.data(), name.data(), value_str);
-        } else if (const auto value = std::get_if<uint>(&value_variant)) {
-            const auto value_str = std::format("{}", *value);
-            ini.Put_String(SectionName.data(), name.data(), value_str);
-        } else if (const auto value = std::get_if<char>(&value_variant)) {
-            ini.Put_Int(SectionName.data(), name.data(), *value);
-        } else if (const auto value = std::get_if<uchar>(&value_variant)) {
-            ini.Put_Int(SectionName.data(), name.data(), *value);
-        } else if (const auto value = std::get_if<std::string>(&value_variant)) {
-            ini.Put_String(SectionName.data(), name.data(), *value);
-        } else {
-            throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-        }
-
-        return *this;
-    }
-
-    void Save_All_To_Ini(INIClass& ini) const
-    {
-        for (const auto& key : Rules | std::views::keys) {
-            Save_To_Ini(ini, key);
-        }
-    }
+    void Save_All_To_Ini(INIClass& ini) const;
 
     template<RuleValueVariantCompatible T>
     [[nodiscard]]
@@ -447,36 +245,7 @@ public:
         return value_optional.value();
     }
 
-    RuleSection& Set(std::string_view name, RuleValueVariant value)
-    {
-        CNC_LOGGER_WARN(
-            "Updating rule at runtime: [{}] -> {} = {}",
-            SectionName,
-            name,
-            Variant_To_String(value)
-        );
-
-        auto existing_rule = Try_Get_Variant(name);
-
-        if (existing_rule.has_value()) {
-            if (!Variants_Have_Same_Type(existing_rule.value(), value)) {
-                CNC_LOGGER_FATAL(
-                    "Attempted to set rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
-                    Get_Variant_Type(value),
-                    Get_Variant_Type(existing_rule.value()),
-                    SectionName,
-                    name
-                );
-            }
-        }
-
-        Rules[name.data()] = value;
-
-        CNC_LOGGER_WARN("Running OnRulesChanged() handler");
-        OnRulesChanged(*this, name, value);
-
-        return *this;
-    }
+    RuleSection& Set(std::string_view name, RuleValueVariant value);
 
     template<RuleValueVariantCompatible T>
     const RuleSection& Get_With_Callback(std::string_view name, std::function<void(T)> callback) const
@@ -494,10 +263,7 @@ public:
         return *this;
     }
 
-    std::optional<std::string_view>& Get_Converter_Section_Type_Name()
-    {
-        return ConverterSectionTypeName;
-    }
+    std::optional<std::string_view>& Get_Converter_Section_Type_Name();
 
     template<class T, TypeConverter<T> C>
     T Get_With_Converter(std::string_view name) const
@@ -819,19 +585,9 @@ public:
         return *this;
     }
 
-    const IniRuleContext& Save(std::string_view name) const
-    {
-        Section.Save_To_Ini(Context, name);
+    const IniRuleContext& Save(std::string_view name) const;
 
-        return *this;
-    }
-
-    IniRuleContext& Load(std::string_view name)
-    {
-        NameInStream = std::make_optional(name);
-
-        return *this;
-    }
+    IniRuleContext& Load(std::string_view name);
 
     template<RuleValueVariantCompatible T>
     IniRuleContext& With_Default(T default_value)
@@ -874,66 +630,19 @@ private:
 class RuleSections
 {
 public:
-    void Default_Rules_Changed_Handler(std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed)
-    {
-        OnRulesChangedDefault = on_rules_changed;
-    }
+    void Default_Rules_Changed_Handler(std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed);
 
-    std::vector<std::string_view> Section_Names() const
-    {
-        std::vector<std::string_view> keys;
-        keys.reserve(Sections.size());
+    std::vector<std::string_view> Section_Names() const;
 
-        for (const auto& pair : Sections) {
-            keys.emplace_back(pair.first);
-        }
+    bool Has_Section(std::string_view name) const;
 
-        return keys;
-    }
+    void Save_All_To_Ini(INIClass& ini) const;
 
-    bool Has_Section(std::string_view name) const
-    {
-        return Sections.contains(name.data());
-    }
+    RuleSection& Add_Section(std::string_view name, std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed);
 
-    void Save_All_To_Ini(INIClass& ini) const
-    {
-        for (const auto& section : Sections | std::views::values) {
-            section->Save_All_To_Ini(ini);
-        }
-    }
+    RuleSection& Add_Section(std::string_view name);
 
-    RuleSection& Add_Section(std::string_view name, std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed)
-    {
-        CNC_LOGGER_DEBUG("Adding new rules section '{}'", name);
-
-        Sections[name.data()] = std::make_unique<RuleSection>(
-            name.data(),
-            on_rules_changed
-        );
-
-        return *Sections[name.data()];
-    }
-
-    RuleSection& Add_Section(std::string_view name)
-    {
-        return Add_Section(name, [&](auto& s, auto r, const auto& v) {
-            if (OnRulesChangedDefault.has_value()) {
-                OnRulesChangedDefault.value()(s, r, v);
-            }
-        });
-    }
-
-    RuleSection& operator[](std::string_view name)
-    {
-        auto it = Sections.find(name.data());
-
-        if (it != Sections.end()) {
-            return *(it->second);
-        }
-
-        return Add_Section(name.data());
-    }
+    RuleSection& operator[](std::string_view name);
 
 private:
     static inline const auto& Logger = CncLogger::For(RuleSections);

@@ -38,8 +38,5 @@ public:
 
     EventLuaApi() : LuaApi("Event") {}
 
-    virtual void Register_Dependencies(LuaEngine& engine) const override
-    {
-        engine.Register_Api<LoggingLuaApi>();
-    }
+    void Register_Dependencies(LuaEngine& engine) const override;
 };
