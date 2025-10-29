@@ -76,7 +76,6 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
-#include "typeconverter.h"
 
 /*
 **	Selected objects have a special marking box around them. This is the shapes that are

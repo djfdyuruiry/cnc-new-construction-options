@@ -311,8 +311,8 @@ bool Read_Scenario_Ini(char* root, bool fresh)
 #ifdef NEWMENU
         if (Scen.Scenario <= 15) {
             BuildLevel = Scen.Scenario;
-        } else if (_stricmp(Scen.ScenarioName, "scg30ea") == 0 || _stricmp(Scen.ScenarioName, "scg90ea") == 0
-                   || _stricmp(Scen.ScenarioName, "scb22ea") == 0) { // TODO: Check matches patched mix file scenario numbers
+        } else if (_stricmp(Scen.ScenarioName, "scg55ea") == 0 || _stricmp(Scen.ScenarioName, "scg56ea") == 0
+                   || _stricmp(Scen.ScenarioName, "scb41ea") == 0) { // TODO: Check matches patched mix file scenario numbers
             // N64 missions require build level 15
             BuildLevel = 15;
         } else {

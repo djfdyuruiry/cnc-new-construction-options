@@ -45,7 +45,6 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
-#include "typeconverter.h"
 
 void const* UnitTypeClass::WakeShapes = 0;
 

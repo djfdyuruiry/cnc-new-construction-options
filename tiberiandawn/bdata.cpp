@@ -969,7 +969,7 @@ static BuildingTypeClass const ClassHospital(STRUCT_HOSPITAL,
                                              "HOSP",           // NAME:			Short name of the structure.
                                              XYP_COORD(0, 0),  // Exit point for produced units.
                                              99,               // Build level.
-                                             STRUCT_BARRACKS, // PREREQ:		Buildings that must exist first.
+                                             STRUCT_BARRACKS,  // PREREQ:		Buildings that must exist first.
                                              false,            // Has ability to detect adjacent cloaked objects?
                                              true,             // Animation rate is regulated for constant speed?
                                              true,             // Requires a bib dirt patch?
@@ -1019,7 +1019,7 @@ static BuildingTypeClass const ClassBioLab(STRUCT_BIO_LAB,
                                            "BIO",            // NAME:			Short name of the structure.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            99,               // Build level.
-                                           STRUCT_HOSPITAL, // PREREQ:		Buildings that must exist first.
+                                           STRUCT_HOSPITAL,  // PREREQ:		Buildings that must exist first.
                                            false,            // Has ability to detect adjacent cloaked objects?
                                            true,             // Animation rate is regulated for constant speed?
                                            true,             // Requires a bib dirt patch?

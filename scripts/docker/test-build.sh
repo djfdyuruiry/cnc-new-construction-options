@@ -20,9 +20,6 @@ function main() {
   if ! [ -d "${script_path}/src/.git" ]; then
     # fetch a clean repo
     git clone https://github.com/djfdyuruiry/cnc-new-construction-options.git "${script_path}/src"
-    pushd "${script_path}/src"
-    git checkout feature/td_type-rules-framework
-    popd
   fi
 
   # run the build

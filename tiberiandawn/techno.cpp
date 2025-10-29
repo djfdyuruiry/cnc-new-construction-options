@@ -114,7 +114,6 @@
 #include <numeric>
 
 #include "function.h"
-#include "typeconverter.h"
 
 /***************************************************************************
 **	Cloaking control values.

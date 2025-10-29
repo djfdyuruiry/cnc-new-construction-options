@@ -38,7 +38,6 @@
 #include "mission.h"
 #include "target.h"
 #include "noinit.h"
-#include "typeconverter.h"
 
 class MapEditClass;
 class HouseClass;

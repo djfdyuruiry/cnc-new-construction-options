@@ -138,20 +138,20 @@ set(TIBDAWN_SRC
     visudlg.cpp
     winstub.cpp
     # nco
+    lua/events/addmessage_luaevent.cpp
+    lua/events/addteam_luaevent.cpp
+    lua/events/addtrigger_luaevent.cpp
+    lua/events/deletetrigger_luaevent.cpp
+    lua/events/modifyhousemoney_luaevent.cpp
+    lua/events/popup_luaevent.cpp
+    lua/game_luaapi.cpp
+    lua/messages_luaapi.cpp
+    lua/scenario_luaapi.cpp
+    lua/scenariolua.cpp
+    lua/td_luaapi.cpp
+    lua/tdtypes_luaapi.cpp
+    lua/ui_luaapi.cpp
     typeconverter.cpp
-        lua/events/addmessage_luaevent.cpp
-        lua/events/addteam_luaevent.cpp
-        lua/events/addtrigger_luaevent.cpp
-        lua/events/deletetrigger_luaevent.cpp
-        lua/events/modifyhousemoney_luaevent.cpp
-        lua/events/popup_luaevent.cpp
-        lua/game_luaapi.cpp
-        lua/messages_luaapi.cpp
-        lua/scenario_luaapi.cpp
-        lua/scenariolua.cpp
-        lua/td_luaapi.cpp
-        lua/tdtypes_luaapi.cpp
-        lua/ui_luaapi.cpp
 )
 
 # Generated code - see: ../cmake/NcoRules.cmake and ./rules
@@ -161,7 +161,7 @@ list(APPEND TIBDAWN_SRC
 
 # Generated code -see: ../cmake/NcoTypes.cmake and ./types
 list(APPEND TIBDAWN_SRC
-    types-nco.cpp
+    types-nco.cpp # ObjectTypeClass, TechnoTypeClass etc.
 )
 
 if(NETWORKING)

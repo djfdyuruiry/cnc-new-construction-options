@@ -96,11 +96,23 @@ WeaponTypeClass Weapons[WEAPON_COUNT] = {
 
 const WeaponTypeClass& WeaponTypeClass::As_Reference(WeaponType type)
 {
+    if (type < WEAPON_FIRST || type >= WEAPON_COUNT) {
+        CNC_LOG_FATAL(
+            "Attempted to get WeaponTypeClass reference using invalid type id: {}", (signed char)type
+        );
+    }
+
     return *(Weapons + type);
 }
 
 WeaponTypeClass& WeaponTypeClass::As_Mutable_Reference(WeaponType type)
 {
+    if (type < WEAPON_FIRST || type >= WEAPON_COUNT) {
+        CNC_LOG_FATAL(
+            "Attempted to get mutable WeaponTypeClass reference using invalid type id: {}", (signed char)type
+        );
+    }
+
     return *(Weapons + type);
 }
 
@@ -185,11 +197,23 @@ WarheadTypeClass Warheads[WARHEAD_COUNT] = {
 
 const WarheadTypeClass& WarheadTypeClass::As_Reference(WarheadType type)
 {
+    if (type < WARHEAD_FIRST || type >= WARHEAD_COUNT) {
+        CNC_LOG_FATAL(
+            "Attempted to get mutable WarheadTypeClass reference using invalid type id: {}", (signed char)type
+        );
+    }
+
     return *(Warheads + type);
 }
 
 WarheadTypeClass& WarheadTypeClass::As_Mutable_Reference(WarheadType type)
 {
+    if (type < WARHEAD_FIRST || type >= WARHEAD_COUNT) {
+        CNC_LOG_FATAL(
+            "Attempted to get mutable WarheadTypeClass reference using invalid type id: {}", (signed char)type
+        );
+    }
+
     return *(Warheads + type);
 }
 
