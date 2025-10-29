@@ -4019,32 +4019,10 @@ BuildingClass* BuildingTypeClass::Who_Can_Build_Me(bool intheory, bool legal, Ho
     for (int index = Buildings.Count() - 1; index >= 0; index--) {
         BuildingClass* building = Buildings.Ptr(index);
 
-        bool building_exists = building;
-
-        if (!building_exists) {
-            CNC_LOG_INFO(
-                "intheory: {} legal: {} | Building exists: {}",
-                intheory, legal, building_exists
-            );
-
-            return 0;
-        }
-
-        auto inlimbo = !building->IsInLimbo;
-        auto housematches = building->House->Class->House == house;
-        auto isconyard = building->Class->ToBuild == RTTI_BUILDINGTYPE;
-        auto isnotselling = building->Mission != MISSION_DECONSTRUCTION;
-        auto isownable = ((1L << building->ActLike) & Ownable);
-        auto housecanbuild = !legal || building->House->Can_Build(Type, building->ActLike);
-        auto notinradio = (intheory || !building->In_Radio_Contact());
-
-        CNC_LOG_INFO("intheory: {} legal: {} | Building exists: {}, In limbo: {}, House matches: {}, Is conyard: {}, Is not selling: {}, Is ownable: {}, House can build: {}, Not in radio: {}",
-            intheory, legal, building_exists, inlimbo, housematches, isconyard, isnotselling, isownable, housecanbuild, notinradio);
-
-        if ( building_exists && inlimbo && housematches
-            && isconyard && isnotselling
-            && isownable && (housecanbuild)
-            && notinradio) {
+        if (building && !building->IsInLimbo && building->House->Class->House == house
+            && building->Class->ToBuild == RTTI_BUILDINGTYPE && building->Mission != MISSION_DECONSTRUCTION
+            && ((1L << building->ActLike) & Ownable) && (!legal || building->House->Can_Build(Type, building->ActLike))
+            && (intheory || !building->In_Radio_Contact())) {
             return (building);
         }
     }
