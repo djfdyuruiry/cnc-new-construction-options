@@ -9,7 +9,7 @@
 # This script reads all JSON files in ${TYPES_PATH}, one JSON file per <type>.ini file. The properties in each file
 # are used to generate C++ code for the Read_INI and Read_Rules methods of the target type.
 #
-# Expected structure of JSON files is defined in the schema file 'nco-type-json-schema.json', use this in your files
+# Expected structure of JSON files is defined in the schema file 'nco-types-json-schema.json', use this in your files
 # to validate them in VSCode etc.:
 #
 #   ```json
