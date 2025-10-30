@@ -88,7 +88,7 @@ def main():
                 if example_value == prop['valid_values']:
                     example_value = 'NONE'
 
-                prop['example_value'] = prop.get('example_value', example_value)
+                prop['example_value'] = prop.get('example_value', example_value).strip()
 
                 continue
 

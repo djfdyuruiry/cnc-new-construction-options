@@ -4,7 +4,7 @@ local Utils = require("nco.lib.Utils")
 local function editTypes()
   Logger.debug("Infantry Types: %s", Utils.arrayToCsv(Types.Infantry.getInstanceNames()))
 
-  Types.Infantry.E1.Primary = "CHEMSPRAY";
+  Types.Building.NUKE.Armor = "STEEL";
 
   Logger.debug("Unit Types: %s", Utils.arrayToCsv(Types.Unit.getInstanceNames()))
 

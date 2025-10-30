@@ -2,7 +2,7 @@ Rules files:
 
 - [rules.ini](#rulesini)
 {% for type in concrete_types %}- [{{ type.name | lower }}.ini](#{{ type.name | lower }}ini)
-{% endfor %}
+{% endfor %} - [Scenario INI](#scenario-ini)
 
 <!-- TODO: Expand guidance and correct default location in code -->
 All rules files are created for you when you first run the game, so run the game once before trying to edit the files.
@@ -66,3 +66,30 @@ Rule Sections:
 {% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}{{ prop.name }}={{ prop.example_value }}
 {% endfor %}```
 {% endfor %}
+
+## Scenario INI
+
+You can override any rule from `rules.ini` or from the type ini files (`infantry.ini`, `unit.ini` etc.) inside of the INI file for a given scenario. This is similar to the way Red Alert behaves, but not identical.
+
+For example, given the following entry in `unit.ini`:
+
+```ini
+; Gun Boat
+[BOAT]
+Armor=STEEL
+Cost=300
+Explosion=FBALL1
+IsAnimating=no
+; other rules
+```
+
+You could add the below to the end of `scg01ea.ini` to give the Gunboat an Obelisk Laser:
+
+```ini
+; rest of scg01ea.ini
+
+; Gun Boat
+[BOAT]
+Primary=OBELISK_LASER
+```
+
