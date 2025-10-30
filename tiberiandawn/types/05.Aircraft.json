@@ -31,7 +31,7 @@
       "name": "Type",
       "type": "AircraftType",
       "requires_converter": true,
-      "valid_values": "NONE, TRANSPORT, A10, HELICOPTER, CARGO, ORCA"
+      "valid_values": "NONE, TRAN, A10, HELI, C17, ORCA"
     },
     {
       "name": "ROT",

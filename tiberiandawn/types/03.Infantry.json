@@ -41,7 +41,7 @@
       "name": "Type",
       "type": "InfantryType",
       "requires_converter": true,
-      "valid_values": "NONE, E1, E2, E3, E4, E5, E7, RAMBO, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, MOEBIUS, DELPHI, CHAN",
+      "valid_values": "NONE, E1, E2, E3, E4, E5, E6, RAMBO, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, MOEBIUS, DELPHI, CHAN",
       "comment": "This value represents the infantry class. It can serve as unique identification for this infantry class."
     }
   ]

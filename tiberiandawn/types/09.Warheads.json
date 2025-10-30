@@ -9,7 +9,7 @@
       "name": "Type",
       "type": "WarheadType",
       "requires_converter": true,
-      "valid_values": "NONE, SA, HE, AP, FIRE, LASER, PB, FIST, FOOT, HOLLOW_POINT, SPORE, HEADBUTT, FEEDME"
+      "valid_values": "NONE, AP, FEEDME, FIRE, FIST, FOOT, HEADBUTT, HE_WARHEAD, HOLLOW_POINT, LASER_WARHEAD, PB, SA, SPORE"
     },
     {
       "name": "SpreadFactor",

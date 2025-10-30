@@ -58,7 +58,7 @@
       "name": "Type",
       "type": "StructType",
       "requires_converter": true,
-      "valid_values": "NONE, WEAP, GTOWER, ATOWER, OBELISK, RADAR, TURRET, CONST, REFINERY, STORAGE, HELIPAD, SAM, AIRSTRIP, POWER, ADVANCED_POWER, HOSPITAL, BARRACKS, TANKER, REPAIR, BIO_LAB, HAND, TEMPLE, EYE, MISSION, V01, V02, V03, V04, V05, V06, V07, V08, V09, V10, V11, V12, V13, V14, V15, V16, V17, V18, PUMP, V20, V21, V22, V23, V24, V25, V26, V27, V28, V29, V30, V31, V32, V33, V34, V35, V36, V37, SANDBAG_WALL, CYCLONE_WALL, BRICK_WALL, BARBWIRE_WALL, WOOD_WALL",
+      "valid_values": "NONE, AFLD, ARCO, ATWR, BARB, BIO, BRIK, CYCL, EYE, FACT, FIX, GTWR, GUN, HAND, HOSP, HPAD, HQ, MISS, NUK2, NUKE, OBLI, PROC, PYLE, SAM, SBAG, SILO, TMPL, V01, V02, V03, V04, V05, V06, V07, V08, V09, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, V21, V22, V23, V24, V25, V26, V27, V28, V29, V30, V31, V32, V33, V34, V35, V36, V37, WEAP, WOOD",
       "comment": "This is the structure type identifier. It can serve as a unique identification number for building types."
     },
     {

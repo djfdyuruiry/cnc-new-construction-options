@@ -35,6 +35,10 @@ local function onF5()
   -- should resolve to +100 money
   goodguy.giveMoney(200)
   goodguy.takeMoney(100)
+
+  for _, t in ipairs(Types.getTypeNames()) do
+    Logger.info("[%s] %s", t, Utils.arrayToCsv(Types[t].getInstanceNames()))
+  end
 end
 
 onF5()

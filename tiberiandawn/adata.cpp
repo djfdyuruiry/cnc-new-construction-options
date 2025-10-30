@@ -127,7 +127,7 @@ static AnimTypeClass const RaptDie(ANIM_RAPT_DIE, // Animation number.
                                    ANIM_NONE);
 
 static AnimTypeClass const SAMN(ANIM_SAM_N, // Animation number.
-                                "SFIRE-N",  // Data name of animation.
+                                "SFIRE_N",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 4,          // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -148,7 +148,7 @@ static AnimTypeClass const SAMN(ANIM_SAM_N, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const SAMNW(ANIM_SAM_NW, // Animation number.
-                                 "SFIRE-NW",  // Data name of animation.
+                                 "SFIRE_NW",  // Data name of animation.
                                  55,          // Maximum dimension of animation.
                                  22,          // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -169,7 +169,7 @@ static AnimTypeClass const SAMNW(ANIM_SAM_NW, // Animation number.
                                  VOC_NONE,    // Sound effect to play.
                                  ANIM_NONE);
 static AnimTypeClass const SAMW(ANIM_SAM_W, // Animation number.
-                                "SFIRE-W",  // Data name of animation.
+                                "SFIRE_W",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 40,         // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -190,7 +190,7 @@ static AnimTypeClass const SAMW(ANIM_SAM_W, // Animation number.
                                 VOC_NONE,   // Sound effect to play.
                                 ANIM_NONE);
 static AnimTypeClass const SAMSW(ANIM_SAM_SW, // Animation number.
-                                 "SFIRE-SW",  // Data name of animation.
+                                 "SFIRE_SW",  // Data name of animation.
                                  55,          // Maximum dimension of animation.
                                  58,          // Biggest animation stage.
                                  false,       // Normalized animation rate?
