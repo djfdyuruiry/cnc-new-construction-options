@@ -4,6 +4,9 @@
   "description": "Metadata for a section of a rules.ini file",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "section": {
       "type": "string",
       "description": "INI identifier for the section"

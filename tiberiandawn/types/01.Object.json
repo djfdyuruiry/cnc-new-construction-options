@@ -1,4 +1,5 @@
 {
+  "$schema": "../../cmake/nco-types-json-schema.json",
   "name": "Object",
   "has_enum": false,
   "class": "InfantryTypeClass",
