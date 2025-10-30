@@ -30,10 +30,11 @@ private:
         std::string instance_name
     )
     {
-        std::optional<T> instance;
+        // lookup instance type using enum name (first)
+        auto instance = TdTypeConverter::Try_Parse<T>(instance_name);
 
-        // lookup instance type using INI name (first)
-        if (sections.Has_Section(instance_name)) {
+        // lookup instance type using INI name (fallback)
+        if (!instance.has_value()) {
             const auto type_rule = sections[instance_name].template Try_Get<std::string>("Type");
 
             if (!sections.Has_Section(instance_name)) {
@@ -45,9 +46,6 @@ private:
             }
 
             instance = TdTypeConverter::Try_Parse<T>(type_rule.value());
-        } else {
-            // lookup instance type using enum name (fallback)
-            instance = TdTypeConverter::Try_Parse<T>(instance_name);
         }
 
         if (!instance.has_value()) {

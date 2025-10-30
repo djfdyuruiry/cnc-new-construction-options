@@ -394,7 +394,7 @@ static BulletTypeClass const ClassNukeDown(BULLET_NUKE_DOWN,
 );
 
 static BulletTypeClass const ClassHonestJohn(BULLET_HONEST_JOHN,
-                                             "HONEST_JOHN", // NAME:			Text name of this unit type.
+                                             "HONESTJB", // NAME:			Text name of this unit type.
                                              true,         // Flies over tall walls?
                                              false,        // Homes in on target?
                                              false,        // Projectile arcs to the target?
