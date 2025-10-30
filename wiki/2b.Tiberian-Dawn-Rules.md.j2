@@ -5,7 +5,21 @@ Rules files:
 {% endfor %}
 
 <!-- TODO: Expand guidance and correct default location in code -->
-All rules files are created for you when you first run the game, and can be found where you installed `vanillatd` and the required game files.
+All rules files are created for you when you first run the game, so run the game once before trying to edit the files.
+
+### Finding Rules Files
+
+To view the files in a file manager, follow the steps for your Operating System below:
+
+- **Windows**: Press Windows Key + R, type `%APPDATA%\Vanilla-Conquer\vanillatd` and hit enter
+- **macOS**: Open Finder, choose Go > Go to Folder and enter `~/Library/Application Support/Vanilla-Conquer/vanillatd`
+- **Linux**: In a terminal, run `xdg-open ~/.config/vanilla-conquer/vanillatd`
+
+Here are the full paths for reference (these are inside your user folder):
+
+- **Windows**: `AppData\Roaming\Vanilla-Conquer\vanillatd`
+- **macOS**: `Library/Application Support/Vanilla-Conquer/vanillatd`
+- **Linux**: `.config/vanilla-conquer/vanillatd`
 
 ---
 
@@ -13,7 +27,7 @@ All rules files are created for you when you first run the game, and can be foun
 
 `rules.ini` is a simple text file that controls game engine behaviour. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
 
-> **NOTE**: Unlike Red Alert, the `rules.ini` for NCO Tiberian Dawn does not contain units, infantry etc. - these can be found in [Types](#Types)
+> **NOTE**: Unlike Red Alert, the `rules.ini` for NCO Tiberian Dawn does not contain units, infantry etc. - see the top of this page for the individual files
 
 Rule Sections:
 
