@@ -81,7 +81,7 @@ public:
     RuleSection(
         std::string section_name,
         std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed
-    ) : SectionName(section_name), OnRulesChanged(on_rules_changed) {}
+    ) : SectionName(std::move(section_name)), OnRulesChanged(std::move(on_rules_changed)) {}
 
     template<typename T>
     RuleSection& With(INIClass& context, std::function<void(T&)> actions)

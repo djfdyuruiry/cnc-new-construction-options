@@ -201,7 +201,7 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
         const auto value_str = std::format("{}", *value);
         ini.Put_String(SectionName.data(), name.data(), value_str);
     } else if (const auto value = std::get_if<ushort>(&value_variant)) {
-        const auto value_str = std::format("{}", *value);
+        const auto value_str = std::format("{}", static_cast<int>(*value));
         ini.Put_String(SectionName.data(), name.data(), value_str);
     } else if (const auto value = std::get_if<uint>(&value_variant)) {
         const auto value_str = std::format("{}", *value);
