@@ -159,24 +159,29 @@ jobs:
       run: |
         mkdir artifact
 
-        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip build/nco/.ninja_log
+        # ninja build log (useful for profiling compilation)
+        7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/nco/.ninja_log
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
+          # debug symbols
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td*.pdb
+
+          rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
+
           # ra bundle
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra
-
-          # debug symbols
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillara.pdb
         fi
 
         # BUG: PDB files included in non debug zip
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-red-alert" ]; then
+          # debug symbols
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
+
+          rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb    
+
           # td bundle
           rm -f ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td
-
-          # debug symbols
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/vanillatd.pdb
         fi
 
     - name: Add internal tools to archive
