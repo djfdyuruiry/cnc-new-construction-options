@@ -80,6 +80,7 @@ ScenarioClass::ScenarioClass(void)
     strcpy(ScenarioName, "");
     strcpy(BriefingText, "");
     memset(Views, '\0', sizeof(Views));
+    strcpy(FileName, "");
 }
 
 /***********************************************************************************************

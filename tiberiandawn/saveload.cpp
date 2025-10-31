@@ -61,7 +61,7 @@ extern bool DLLLoad(FileClass& file);
         + sizeof(TeamClass) + sizeof(TeamTypeClass) + sizeof(TemplateClass) + sizeof(TemplateTypeClass)                \
         + sizeof(TerrainClass) + sizeof(TerrainTypeClass) + sizeof(UnitClass) + sizeof(UnitTypeClass)                  \
         + sizeof(MouseClass) + sizeof(CellClass) + sizeof(FactoryClass) + sizeof(BaseClass) + sizeof(LayerClass)       \
-        + sizeof(Scen.BriefingText) + sizeof(Scen.Waypoint)))
+        + sizeof(Scen.BriefingText) + sizeof(Scen.Waypoint) + sizeof(Scen.FileName)))
 
 /***************************************************************************
  * Save_Game -- saves a game to disk                                       *
@@ -116,7 +116,7 @@ bool Save_Game(int id, char* descr)
 /*
 ** Version that takes file name. ST - 9/9/2019 11:10AM
 */
-bool Save_Game(const char* file_name, const char* descr)
+bool  Save_Game(const char* file_name, const char* descr)
 {
     CDFileClass file;
     int i;
@@ -486,6 +486,27 @@ bool Load_Game(const char* file_name)
     }
 
     file.Close();
+
+    /*
+    ** Load rules from scenario INI filename stored in save game data
+    ** (if present and available)
+    */
+    if (strlen(Scen.FileName) > 0) {
+        if (CCFileClass ini_file(Scen.FileName); ini_file.Is_Available()) {
+            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
+                Rule.Init(ini);
+                Rule.Init_Types(ini);
+            } else {
+                CNC_LOG_ERROR(
+                    "Failed to load scenario INI filename stored in save game data: {}",
+                    Scen.FileName
+                );
+            }
+        }
+    } else {
+        CNC_LOG_DEBUG("No scenario INI filename found in save game data");
+    }
+
     Decode_All_Pointers();
     Map.Init_IO();
     Map.Flag_To_Redraw(true);
@@ -634,6 +655,7 @@ bool Save_Misc_Values(FileClass& file)
     file.Write(Scen.Views, sizeof(Scen.Views));
     file.Write(&EndCountDown, sizeof(EndCountDown));
     file.Write(Scen.BriefingText, sizeof(Scen.BriefingText));
+    file.Write(Scen.FileName, sizeof(Scen.FileName));
 
     // This is new...
     file.Write(ActionMovie, sizeof(ActionMovie));
@@ -744,6 +766,7 @@ bool Load_Misc_Values(FileClass& file)
     file.Read(Scen.Views, sizeof(Scen.Views));
     file.Read(&EndCountDown, sizeof(EndCountDown));
     file.Read(Scen.BriefingText, sizeof(Scen.BriefingText));
+    file.Read(Scen.FileName, sizeof(Scen.FileName));
 
     if (file.Seek(0, SEEK_CUR) < file.Size()) {
         file.Read(ActionMovie, sizeof(ActionMovie));

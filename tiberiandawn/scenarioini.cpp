@@ -280,6 +280,11 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     }
 
     /*
+    ** Store scenario INI filename so it can be referenced by save/load
+    */
+    strcpy(Scen.FileName, fname);
+
+    /*
     ** Init the Scenario CRC value
     */
     ScenarioCRC = ini.Get_Unique_ID();

@@ -115,6 +115,12 @@ public:
     **	This records the bookmark view locations the player has recorded.
     */
     CELL Views[4];
+
+    /*
+    ** If the current scenario was loaded from an INI file, this will hold
+    ** its name.
+    */
+    char FileName[_MAX_FNAME + _MAX_EXT];;
 };
 
 #endif
