@@ -164,7 +164,7 @@ jobs:
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td*.pdb
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
 
           rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
 
@@ -175,9 +175,9 @@ jobs:
         # BUG: PDB files included in non debug zip
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-red-alert" ]; then
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
+          7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra/*.pdb
 
-          rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb    
+          rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra/*.pdb    
 
           # td bundle
           rm -f ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
