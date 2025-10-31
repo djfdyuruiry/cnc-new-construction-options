@@ -90,4 +90,14 @@ public:
 
         return keys;
     }
+
+    A First_Forward() const
+    {
+        return ForwardMap.begin()->first;
+    }
+
+    B First_Backward() const
+    {
+        return BackwardMap.begin()->first;
+    }
 };

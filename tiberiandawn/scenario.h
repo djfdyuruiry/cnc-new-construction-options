@@ -120,7 +120,7 @@ public:
     ** If the current scenario was loaded from an INI file, this will hold
     ** its name.
     */
-    char FileName[_MAX_FNAME + _MAX_EXT];;
+    char FileName[_MAX_FNAME + _MAX_EXT];
 };
 
 #endif

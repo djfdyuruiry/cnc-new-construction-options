@@ -325,6 +325,53 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
+    static T Get_Default_Value()
+    {
+        if constexpr (std::is_same_v<T, ArmorType>) {
+            return Armor_Types.First_Forward();
+        } else if constexpr (std::is_same_v<T, MPHType>) {
+            return Mph_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, WeaponType>) {
+            return Weapon_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, HousesType>) {
+            return House_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, StructType>) {
+            return Struct_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, FactoryType>) {
+            return Factory_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, DirType>) {
+            return Dir_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, BSizeType>) {
+            return BSize_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, AircraftType>) {
+            return Aircraft_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, MissionType>) {
+            return Mission_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, AnimType>) {
+            return Anim_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, InfantryType>) {
+            return Infantry_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, UnitType>) {
+            return Unit_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, SpeedType>) {
+            return Speed_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, BulletType>) {
+            return Bullet_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, WarheadType>) {
+            return Warhead_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, VocType>) {
+            return Voc_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
+            return Player_Color_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, HouseColorType>) {
+            return House_Color_Types.First_Forward();;
+        }
+
+        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
     static std::optional<std::vector<T>> Try_Parse_Csv(const std::string& csv_str, const char delimiter = ',')
     {
         std::vector<T> instances;
@@ -364,13 +411,13 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Rule_Value(std::string_view type_name, std::string_view rule, T value)
+    static void Register_Rule_Type(std::string_view type_name, std::string_view rule)
     {
         if (!RegisteredRuleTypes.contains(type_name)) {
             RegisteredRuleTypes[type_name] = {};
         }
 
-        RegisteredRuleTypes[type_name][rule] = value;
+        RegisteredRuleTypes[type_name][rule] = Get_Default_Value<T>();
     }
 
     /**
@@ -378,13 +425,13 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Csv_Rule_Value(std::string_view type_name, std::string_view rule, T value)
+    static void Register_Csv_Rule_Type(std::string_view type_name, std::string_view rule)
     {
         if (!RegisteredCsvRuleTypes.contains(type_name)) {
             RegisteredCsvRuleTypes[type_name] = {};
         }
 
-        RegisteredCsvRuleTypes[type_name][rule] = value;
+        RegisteredCsvRuleTypes[type_name][rule] = Get_Default_Value<T>();
     }
 
     /**

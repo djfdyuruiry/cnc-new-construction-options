@@ -58,11 +58,12 @@ concept TypeConverter = requires(std::string str, const std::string& str_ref, st
     { C::template Get_Valid_Instances<T>() } -> std::same_as<std::vector<T>>;
     { C::template Try_Parse<T>(str) } -> std::same_as<std::optional<T>>;
     { C::template Try_Parse_Csv<T>(str_ref, c) } -> std::same_as<std::optional<std::vector<T>>>;
+    { C::template Get_Default_Value<T>() } -> std::same_as<T>;
     { C::To_String(instance) } -> std::same_as<std::string>;
     { C::To_Csv_String(instances) } -> std::same_as<std::string>;
     { C::template Get_Type_Name<T>() } -> std::same_as<std::string_view>;
-    { C::Register_Rule_Value(str_view, str_view, instance) } -> std::same_as<void>;
-    { C::Register_Csv_Rule_Value(str_view, str_view, instance) } -> std::same_as<void>;
+    { C::template Register_Rule_Type<T>(str_view, str_view) } -> std::same_as<void>;
+    { C::template Register_Csv_Rule_Type<T>(str_view, str_view) } -> std::same_as<void>;
 };
 
 class RuleSection
@@ -481,7 +482,7 @@ public:
     const IniRuleContext& Load_With_Converter(std::string_view name, T default_value) const
     {
         if (const auto type_name = Section.Get_Converter_Section_Type_Name(); type_name.has_value()) {
-            C::Register_Rule_Value(type_name.value(), name, default_value);
+            C::template Register_Rule_Type<T>(type_name.value(), name);
         }
 
         Section.Load_From_Ini<std::string>(
@@ -515,8 +516,7 @@ public:
     const IniRuleContext& Load_With_Csv_Converter(std::string_view name, const std::vector<T>& default_values) const
     {
         if (const auto type_name = Section.Get_Converter_Section_Type_Name(); type_name.has_value()) {
-            T default_value;
-            C::Register_Csv_Rule_Value(type_name.value(), name, default_value);
+            C::template Register_Csv_Rule_Type<T>(type_name.value(), name);
         }
 
         Section.Load_From_Ini<std::string>(
