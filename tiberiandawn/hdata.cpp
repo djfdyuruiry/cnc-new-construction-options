@@ -308,12 +308,7 @@ void HouseTypeClass::Set_Remap_Color_Table()
         { REMAP_BLUE, RemapBlue }
     };
 
-    if (!RemapColorEnabled) {
-        RemapTable = RemapNone;
-        return;
-    }
-
-    RemapTable = color_to_table[RemapColor];
+    RemapTable = RemapColorEnabled ? color_to_table[RemapColor] : RemapNone;
 }
 
 void HouseTypeClass::Set_Suffix(const std::string& str)

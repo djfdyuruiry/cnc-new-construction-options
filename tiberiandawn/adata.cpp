@@ -264,7 +264,7 @@ static AnimTypeClass const SAMSE(ANIM_SAM_SE, // Animation number.
                                  ANIM_NONE);
 static AnimTypeClass const SAME(ANIM_SAM_E, // Animation number.
                                 "SAM_E",    // INI name of animation.
-                                "SAMFIRE",   // Data name of animation.
+                                "SAMFIRE",  // Data name of animation.
                                 55,         // Maximum dimension of animation.
                                 112,        // Biggest animation stage.
                                 false,      // Normalized animation rate?
@@ -766,7 +766,7 @@ static AnimTypeClass const ChemS(ANIM_CHEM_S, // Animation number.
                                  ANIM_NONE);
 static AnimTypeClass const ChemSE(ANIM_CHEM_SE, // Animation number.
                                   "CHEM_SE",    // INI name of animation.
-                                  "CHEM-E",     // Data name of animation.
+                                  "CHEM-SE",    // Data name of animation.
                                   0,            // Maximum dimension of animation.
                                   9,            // Biggest animation stage.
                                   false,        // Normalized animation rate?
@@ -788,7 +788,7 @@ static AnimTypeClass const ChemSE(ANIM_CHEM_SE, // Animation number.
                                   ANIM_NONE);
 static AnimTypeClass const ChemE(ANIM_CHEM_E, // Animation number.
                                  "CHEM_E",    // INI name of animation.
-                                 "CHEM-NE",   // Data name of animation.
+                                 "CHEM-E",   // Data name of animation.
                                  0,           // Maximum dimension of animation.
                                  9,           // Biggest animation stage.
                                  false,       // Normalized animation rate?
@@ -810,7 +810,7 @@ static AnimTypeClass const ChemE(ANIM_CHEM_E, // Animation number.
                                  ANIM_NONE);
 static AnimTypeClass const ChemNE(ANIM_CHEM_NE, // Animation number.
                                   "CHEM_NE",    // INI name of animation.
-                                  "VEH-HIT2",   // Data name of animation.
+                                  "CHEM-NE",   // Data name of animation.
                                   0,            // Maximum dimension of animation.
                                   9,            // Biggest animation stage.
                                   false,        // Normalized animation rate?
@@ -1413,6 +1413,7 @@ static AnimTypeClass const
 #ifdef NEVER
 static AnimTypeClass const E1RotFire(ANIM_E1_ROT_FIRE, // Animation number.
                                      "E1ROT",          // INI name of animation.
+                                     "E1ROT",          // Data name of animation.
                                      false,            // Normalized animation rate?
                                      false,            // Uses white translucent table?
                                      false,            // Scorches the ground?
@@ -1433,6 +1434,7 @@ static AnimTypeClass const E1RotFire(ANIM_E1_ROT_FIRE, // Animation number.
                                      ANIM_NONE);
 static AnimTypeClass const E1RotGrenade(ANIM_E1_ROT_GRENADE, // Animation number.
                                         "E1ROT",             // INI name of animation.
+                                        "E1ROT",             // Data name of animation.
                                         false,               // Normalized animation rate?
                                         false,               // Uses white translucent table?
                                         false,               // Scorches the ground?
@@ -1453,6 +1455,7 @@ static AnimTypeClass const E1RotGrenade(ANIM_E1_ROT_GRENADE, // Animation number
                                         ANIM_NONE);
 static AnimTypeClass const E1RotGun(ANIM_E1_ROT_GUN, // Animation number.
                                     "E1ROT",         // INI name of animation.
+                                    "E1ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1473,6 +1476,7 @@ static AnimTypeClass const E1RotGun(ANIM_E1_ROT_GUN, // Animation number.
                                     ANIM_NONE);
 static AnimTypeClass const E1RotExp(ANIM_E1_ROT_EXP, // Animation number.
                                     "E1ROT",         // INI name of animation.
+                                    "E1ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1494,6 +1498,7 @@ static AnimTypeClass const E1RotExp(ANIM_E1_ROT_EXP, // Animation number.
 
 static AnimTypeClass const E2RotFire(ANIM_E2_ROT_FIRE, // Animation number.
                                      "E2ROT",          // INI name of animation.
+                                     "E2ROT",          // Data name of animation.
                                      false,            // Normalized animation rate?
                                      false,            // Uses white translucent table?
                                      false,            // Scorches the ground?
@@ -1514,6 +1519,7 @@ static AnimTypeClass const E2RotFire(ANIM_E2_ROT_FIRE, // Animation number.
                                      ANIM_NONE);
 static AnimTypeClass const E2RotGrenade(ANIM_E2_ROT_GRENADE, // Animation number.
                                         "E2ROT",             // INI name of animation.
+                                        "E2ROT",             // Data name of animation.
                                         false,               // Normalized animation rate?
                                         false,               // Uses white translucent table?
                                         false,               // Scorches the ground?
@@ -1534,6 +1540,7 @@ static AnimTypeClass const E2RotGrenade(ANIM_E2_ROT_GRENADE, // Animation number
                                         ANIM_NONE);
 static AnimTypeClass const E2RotGun(ANIM_E2_ROT_GUN, // Animation number.
                                     "E2ROT",         // INI name of animation.
+                                    "E2ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1554,6 +1561,7 @@ static AnimTypeClass const E2RotGun(ANIM_E2_ROT_GUN, // Animation number.
                                     ANIM_NONE);
 static AnimTypeClass const E2RotExp(ANIM_E2_ROT_EXP, // Animation number.
                                     "E2ROT",         // INI name of animation.
+                                    "E2ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1575,6 +1583,7 @@ static AnimTypeClass const E2RotExp(ANIM_E2_ROT_EXP, // Animation number.
 
 static AnimTypeClass const E3RotFire(ANIM_E3_ROT_FIRE, // Animation number.
                                      "E3ROT",          // INI name of animation.
+                                     "E3ROT",          // Data name of animation.
                                      false,            // Normalized animation rate?
                                      false,            // Uses white translucent table?
                                      false,            // Scorches the ground?
@@ -1595,6 +1604,7 @@ static AnimTypeClass const E3RotFire(ANIM_E3_ROT_FIRE, // Animation number.
                                      ANIM_NONE);
 static AnimTypeClass const E3RotGrenade(ANIM_E3_ROT_GRENADE, // Animation number.
                                         "E3ROT",             // INI name of animation.
+                                        "E3ROT",             // Data name of animation.
                                         false,               // Normalized animation rate?
                                         false,               // Uses white translucent table?
                                         false,               // Scorches the ground?
@@ -1615,6 +1625,7 @@ static AnimTypeClass const E3RotGrenade(ANIM_E3_ROT_GRENADE, // Animation number
                                         ANIM_NONE);
 static AnimTypeClass const E3RotGun(ANIM_E3_ROT_GUN, // Animation number.
                                     "E3ROT",         // INI name of animation.
+                                    "E3ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1635,6 +1646,7 @@ static AnimTypeClass const E3RotGun(ANIM_E3_ROT_GUN, // Animation number.
                                     ANIM_NONE);
 static AnimTypeClass const E3RotExp(ANIM_E3_ROT_EXP, // Animation number.
                                     "E3ROT",         // INI name of animation.
+                                    "E3ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1656,6 +1668,7 @@ static AnimTypeClass const E3RotExp(ANIM_E3_ROT_EXP, // Animation number.
 
 static AnimTypeClass const E4RotFire(ANIM_E4_ROT_FIRE, // Animation number.
                                      "E4ROT",          // INI name of animation.
+                                     "E4ROT",          // Data name of animation.
                                      false,            // Normalized animation rate?
                                      false,            // Uses white translucent table?
                                      false,            // Scorches the ground?
@@ -1676,6 +1689,7 @@ static AnimTypeClass const E4RotFire(ANIM_E4_ROT_FIRE, // Animation number.
                                      ANIM_NONE);
 static AnimTypeClass const E4RotGrenade(ANIM_E4_ROT_GRENADE, // Animation number.
                                         "E4ROT",             // INI name of animation.
+                                        "E4ROT",             // Data name of animation.
                                         false,               // Normalized animation rate?
                                         false,               // Uses white translucent table?
                                         false,               // Scorches the ground?
@@ -1696,6 +1710,7 @@ static AnimTypeClass const E4RotGrenade(ANIM_E4_ROT_GRENADE, // Animation number
                                         ANIM_NONE);
 static AnimTypeClass const E4RotGun(ANIM_E4_ROT_GUN, // Animation number.
                                     "E4ROT",         // INI name of animation.
+                                    "E4ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?
@@ -1716,6 +1731,7 @@ static AnimTypeClass const E4RotGun(ANIM_E4_ROT_GUN, // Animation number.
                                     ANIM_NONE);
 static AnimTypeClass const E4RotExp(ANIM_E4_ROT_EXP, // Animation number.
                                     "E4ROT",         // INI name of animation.
+                                    "E4ROT",         // Data name of animation.
                                     false,           // Normalized animation rate?
                                     false,           // Uses white translucent table?
                                     false,           // Scorches the ground?

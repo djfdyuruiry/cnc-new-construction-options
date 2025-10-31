@@ -411,7 +411,7 @@ static BulletTypeClass const ClassNukeDown(BULLET_NUKE_DOWN,
 
 static BulletTypeClass const ClassHonestJohn(BULLET_HONEST_JOHN,
                                              "HONESTJB",   // INI name of bullet.
-                                             "HONESTJB",   // Image name of bullet.
+                                             "MISSILE",    // Image name of bullet.
                                              true,         // Flies over tall walls?
                                              false,        // Homes in on target?
                                              false,        // Projectile arcs to the target?
