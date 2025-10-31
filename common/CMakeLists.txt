@@ -109,6 +109,7 @@ set(COMMON_SRC
     lua/system_luaapi.cpp
     logger.cpp
     rulesections.cpp
+    stringutils.cpp
 )
 
 if (WIN32)
