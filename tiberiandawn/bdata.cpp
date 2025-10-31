@@ -4191,7 +4191,7 @@ void BuildingTypeClass::Init(TheaterType theater)
             BuildingTypeClass const* classptr = &As_Reference(sindex);
 
             if (classptr->IsTheater) {
-                _makepath(fullname, NULL, NULL, classptr->IniName, Theaters[theater].Suffix);
+                _makepath(fullname, NULL, NULL, classptr->ImageName.c_str(), Theaters[theater].Suffix);
                 ((void const*&)classptr->ImageData) = MFCD::Retrieve(fullname);
             }
 
