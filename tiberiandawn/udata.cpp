@@ -51,7 +51,9 @@ void const* UnitTypeClass::WakeShapes = 0;
 // Visceroid
 static UnitTypeClass const UnitVisceroid(UNIT_VICE,
                                          TXT_VISCEROID, // NAME:			Text name of this unit type.
-                                         "VICE",        // NAME:			Text name of this unit type.
+                                         "VICE",        // INI name of unit.
+                                         "VICE",        // Cameo name of unit.
+                                         "VICE",        // Image name of unit.
                                          ANIM_NAPALM2,  // EXPLOSION:	Type of explosion when destroyed.
                                          99,            // Build level.
                                          STRUCT_NONE,   // Building prerequisite.
@@ -102,7 +104,9 @@ static UnitTypeClass const UnitVisceroid(UNIT_VICE,
 // Flame tank
 static UnitTypeClass const UnitFTank(UNIT_FTANK,
                                      TXT_FTANK,     // NAME:			Text name of this unit type.
-                                     "FTNK",        // NAME:			Text name of this unit type.
+                                     "FTNK",        // INI name of unit.
+                                     "FTNK",        // Cameo name of unit.
+                                     "FTNK",        // Image name of unit.
                                      ANIM_NAPALM3,  // EXPLOSION:	Type of explosion when destroyed.
                                      4,             // Build level.
                                      STRUCT_RADAR,  // Building prerequisite.
@@ -153,7 +157,9 @@ static UnitTypeClass const UnitFTank(UNIT_FTANK,
 // Stealth tank
 static UnitTypeClass const UnitSTank(UNIT_STANK,
                                      TXT_STANK,     // NAME:			Text name of this unit type.
-                                     "STNK",        // NAME:			Text name of this unit type.
+                                     "STNK",        // INI name of unit.
+                                     "STNK",        // Cameo name of unit.
+                                     "STNK",        // Image name of unit.
                                      ANIM_FRAG2,    // EXPLOSION:	Type of explosion when destroyed.
                                      5,             // Build level.
                                      STRUCT_RADAR,  // Building prerequisite.
@@ -204,7 +210,9 @@ static UnitTypeClass const UnitSTank(UNIT_STANK,
 // Light tank
 static UnitTypeClass const UnitLTank(UNIT_LTANK,
                                      TXT_LTANK,    // NAME:			Text name of this unit type.
-                                     "LTNK",       // NAME:			Text name of this unit type.
+                                     "LTNK",       // INI name of unit.
+                                     "LTNK",       // Cameo name of unit.
+                                     "LTNK",       // Image name of unit.
                                      ANIM_FRAG1,   // EXPLOSION:	Type of explosion when destroyed.
                                      3,            // Build level.
                                      STRUCT_NONE,  // Building prerequisite.
@@ -255,7 +263,9 @@ static UnitTypeClass const UnitLTank(UNIT_LTANK,
 // Medium tank
 static UnitTypeClass const UnitMTank(UNIT_MTANK,
                                      TXT_MTANK,    // NAME:			Text name of this unit type.
-                                     "MTNK",       // NAME:			Text name of this unit type.
+                                     "MTNK",       // INI name of unit.
+                                     "MTNK",       // Cameo name of unit.
+                                     "MTNK",       // Image name of unit.
                                      ANIM_FRAG2,   // EXPLOSION:	Type of explosion when destroyed.
                                      3,            // Build level.
                                      STRUCT_NONE,  // Building prerequisite.
@@ -306,7 +316,9 @@ static UnitTypeClass const UnitMTank(UNIT_MTANK,
 // Mastadon tank
 static UnitTypeClass const UnitHTank(UNIT_HTANK,
                                      TXT_HTANK,      // NAME:			Text name of this unit type.
-                                     "HTNK",         // NAME:			Text name of this unit type.
+                                     "HTNK",         // INI name of unit.
+                                     "HTNK",         // Cameo name of unit.
+                                     "HTNK",         // Image name of unit.
                                      ANIM_ART_EXP1,  // EXPLOSION:	Type of explosion when destroyed.
                                      5,              // Build level.
                                      STRUCT_REPAIR,  // Building prerequisite.
@@ -357,7 +369,9 @@ static UnitTypeClass const UnitHTank(UNIT_HTANK,
 // Mobile HQ
 static UnitTypeClass const UnitMHQ(UNIT_MHQ,
                                    TXT_MHQ,      // NAME:			Text name of this unit type.
-                                   "MHQ",        // NAME:			Text name of this unit type.
+                                   "MHQ",        // INI name of unit.
+                                   "MHQ",        // Cameo name of unit.
+                                   "MHQ",        // Image name of unit.
                                    ANIM_FRAG2,   // EXPLOSION:	Type of explosion when destroyed.
                                    99,           // Build level.
                                    STRUCT_NONE,  // Building prerequisite.
@@ -408,7 +422,9 @@ static UnitTypeClass const UnitMHQ(UNIT_MHQ,
 // Landing craft
 static UnitTypeClass const UnitHover(UNIT_HOVER,
                                      TXT_HOVER,    // NAME:			Text name of this unit type.
-                                     "LST",        // NAME:			Text name of this unit type.
+                                     "LST",        // INI name of unit.
+                                     "LST",        // Cameo name of unit.
+                                     "LST",        // Image name of unit.
                                      ANIM_FBALL1,  // EXPLOSION:	Type of explosion when destroyed.
                                      99,           // Build level.
                                      STRUCT_NONE,  // Building prerequisite.
@@ -460,7 +476,9 @@ static UnitTypeClass const UnitHover(UNIT_HOVER,
 // Mobile sam launcher
 static UnitTypeClass const UnitSAM(UNIT_MSAM,
                                    TXT_MSAM,       // NAME:			Text name of this unit type.
-                                   "MLRS",         // NAME:			Text name of this unit type.
+                                   "MLRS",         // INI name of unit.
+                                   "MLRS",         // Cameo name of unit.
+                                   "MLRS",         // Image name of unit.
                                    ANIM_FRAG2,     // EXPLOSION:	Type of explosion when destroyed.
                                    7,              // Build level.
                                    STRUCT_ATOWER,  // Building prerequisite.
@@ -512,7 +530,9 @@ static UnitTypeClass const UnitSAM(UNIT_MSAM,
 // Artillery
 static UnitTypeClass const UnitArty(UNIT_ARTY,
                                     TXT_ARTY,      // NAME:			Text name of this unit type.
-                                    "ARTY",        // NAME:			Text name of this unit type.
+                                    "ARTY",        // INI name of unit.
+                                    "ARTY",        // Cameo name of unit.
+                                    "ARTY",        // Image name of unit.
                                     ANIM_ART_EXP1, // EXPLOSION:	Type of explosion when destroyed.
                                     6,             // Build level.
                                     STRUCT_NONE,   // Building prerequisite.
@@ -564,7 +584,9 @@ static UnitTypeClass const UnitArty(UNIT_ARTY,
 static UnitTypeClass const
     UnitHarvester(UNIT_HARVESTER,
                   TXT_HARVESTER,    // NAME:			Text name of this unit type.
-                  "HARV",           // NAME:			Text name of this unit type.
+                  "HARV",           // INI name of unit.
+                  "HARV",           // Cameo name of unit.
+                  "HARV",           // Image name of unit.
                   ANIM_FBALL1,      // EXPLOSION:	Type of explosion when destroyed.
                   2,                // Build level.
                   STRUCT_REFINERY,  // Building prerequisite.
@@ -616,7 +638,9 @@ static UnitTypeClass const
 // Mobile construction vehicle
 static UnitTypeClass const UnitMCV(UNIT_MCV,
                                    TXT_MCV,     // NAME:			Text name of this unit type.
-                                   "MCV",       // NAME:			Text name of this unit type.
+                                   "MCV",       // INI name of unit.
+                                   "MCV",       // Cameo name of unit.
+                                   "MCV",       // Image name of unit.
                                    ANIM_FBALL1, // EXPLOSION:	Type of explosion when destroyed.
                                    7,           // Build level.
                                    STRUCT_EYE,  // Building prerequisite.
@@ -667,7 +691,9 @@ static UnitTypeClass const UnitMCV(UNIT_MCV,
 // Jeep (hummer)
 static UnitTypeClass const UnitJeep(UNIT_JEEP,
                                     TXT_JEEP,     // NAME:			Text name of this unit type.
-                                    "JEEP",       // NAME:			Text name of this unit type.
+                                    "JEEP",       // INI name of unit.
+                                    "JEEP",       // Cameo name of unit.
+                                    "JEEP",       // Image name of unit.
                                     ANIM_FRAG1,   // EXPLOSION:	Type of explosion when destroyed.
                                     2,            // Build level.
                                     STRUCT_NONE,  // Building prerequisite.
@@ -718,7 +744,9 @@ static UnitTypeClass const UnitJeep(UNIT_JEEP,
 // Buggy
 static UnitTypeClass const UnitBuggy(UNIT_BUGGY,
                                      TXT_DUNE_BUGGY, // NAME:			Text name of this unit type.
-                                     "BGGY",         // NAME:			Text name of this unit type.
+                                     "BGGY",         // INI name of unit.
+                                     "BGGY",         // Cameo name of unit.
+                                     "BGGY",         // Image name of unit.
                                      ANIM_FRAG1,     // EXPLOSION:	Type of explosion when destroyed.
                                      4,              // Build level.
                                      STRUCT_NONE,    // Building prerequisite.
@@ -769,7 +797,9 @@ static UnitTypeClass const UnitBuggy(UNIT_BUGGY,
 // Attack cycle
 static UnitTypeClass const UnitBike(UNIT_BIKE,
                                     TXT_BIKE,       // NAME:			Text name of this unit type.
-                                    "BIKE",         // NAME:			Text name of this unit type.
+                                    "BIKE",         // INI name of unit.
+                                    "BIKE",         // Cameo name of unit.
+                                    "BIKE",         // Image name of unit.
                                     ANIM_FRAG1,     // EXPLOSION:	Type of explosion when destroyed.
                                     2,              // Build level.
                                     STRUCT_NONE,    // Building prerequisite.
@@ -824,7 +854,9 @@ static UnitTypeClass const UnitBike(UNIT_BIKE,
 // Rocket launcher
 static UnitTypeClass const UnitMLRS(UNIT_MLRS,
                                     TXT_MLRS,      // NAME:			Text name of this unit type.
-                                    "MSAM",        // NAME:			Text name of this unit type.
+                                    "MSAM",        // INI name of unit.
+                                    "MSAM",        // Cameo name of unit.
+                                    "MSAM",        // Image name of unit.
                                     ANIM_ART_EXP1, // EXPLOSION:	Type of explosion when destroyed.
                                     7,             // Build level.
                                     STRUCT_EYE,    // Building prerequisite.
@@ -875,7 +907,9 @@ static UnitTypeClass const UnitMLRS(UNIT_MLRS,
 // Armored personnel carrier
 static UnitTypeClass const UnitAPC(UNIT_APC,
                                    TXT_APC,          // NAME:			Text name of this unit type.
-                                   "APC",            // NAME:			Text name of this unit type.
+                                   "APC",            // INI name of unit.
+                                   "APC",            // Cameo name of unit.
+                                   "APC",            // Image name of unit.
                                    ANIM_FRAG2,       // EXPLOSION:	Type of explosion when destroyed.
                                    4,                // Build level.
                                    STRUCT_BARRACKS,  // Building prerequisite.
@@ -926,7 +960,9 @@ static UnitTypeClass const UnitAPC(UNIT_APC,
 // Gunboat
 static UnitTypeClass const UnitGunBoat(UNIT_GUNBOAT,
                                        TXT_GUNBOAT,  // NAME:			Text name of this unit type.
-                                       "BOAT",       // NAME:			Text name of this unit type.
+                                       "BOAT",       // INI name of unit.
+                                       "BOAT",       // Cameo name of unit.
+                                       "BOAT",       // Image name of unit.
                                        ANIM_FBALL1,  // EXPLOSION:	Type of explosion when destroyed.
                                        99,           // Build level.
                                        STRUCT_NONE,  // Building prerequisite.
@@ -977,7 +1013,9 @@ static UnitTypeClass const UnitGunBoat(UNIT_GUNBOAT,
 // Triceratops
 static UnitTypeClass const UnitTric(UNIT_TRIC,
                                     TXT_TRIC,      // NAME:			Text name of this unit type.
-                                    "TRIC",        // NAME:			Text name of this unit type.
+                                    "TRIC",        // INI name of unit.
+                                    "TRIC",        // Cameo name of unit.
+                                    "TRIC",        // Image name of unit.
                                     ANIM_TRIC_DIE, // EXPLOSION:	Type of explosion when destroyed.
                                     99,            // Build level.
                                     STRUCT_NONE,   // Building prerequisite.
@@ -1028,7 +1066,9 @@ static UnitTypeClass const UnitTric(UNIT_TRIC,
 // Tyrannosaurus Rex
 static UnitTypeClass const UnitTrex(UNIT_TREX,
                                     TXT_TREX,      // NAME:			Text name of this unit type.
-                                    "TREX",        // NAME:			Text name of this unit type.
+                                    "TREX",        // INI name of unit.
+                                    "TREX",        // Cameo name of unit.
+                                    "TREX",        // Image name of unit.
                                     ANIM_TREX_DIE, // EXPLOSION:	Type of explosion when destroyed.
                                     99,            // Build level.
                                     STRUCT_NONE,   // Building prerequisite.
@@ -1079,7 +1119,9 @@ static UnitTypeClass const UnitTrex(UNIT_TREX,
 // Velociraptor
 static UnitTypeClass const UnitRapt(UNIT_RAPT,
                                     TXT_RAPT,       // NAME:			Text name of this unit type.
-                                    "RAPT",         // NAME:			Text name of this unit type.
+                                    "RAPT",         // INI name of unit.
+                                    "RAPT",         // Cameo name of unit.
+                                    "RAPT",         // Image name of unit.
                                     ANIM_RAPT_DIE,  // EXPLOSION:	Type of explosion when destroyed.
                                     99,             // Build level.
                                     STRUCT_NONE,    // Building prerequisite.
@@ -1130,7 +1172,9 @@ static UnitTypeClass const UnitRapt(UNIT_RAPT,
 // Stegosaurus
 static UnitTypeClass const UnitSteg(UNIT_STEG,
                                     TXT_STEG,      // NAME:			Text name of this unit type.
-                                    "STEG",        // NAME:			Text name of this unit type.
+                                    "STEG",        // INI name of unit.
+                                    "STEG",        // Cameo name of unit.
+                                    "STEG",        // Image name of unit.
                                     ANIM_STEG_DIE, // EXPLOSION:	Type of explosion when destroyed.
                                     99,            // Build level.
                                     STRUCT_NONE,   // Building prerequisite.
@@ -1227,6 +1271,8 @@ UnitTypeClass const* const UnitTypeClass::Pointers[UNIT_COUNT] = {
 UnitTypeClass::UnitTypeClass(UnitType type,
                              int name,
                              char const* ininame,
+                             std::string_view cameo_name,
+                             std::string_view image_name,
                              AnimType exp,
                              unsigned char level,
                              StructType prereq,
@@ -1324,6 +1370,8 @@ UnitTypeClass::UnitTypeClass(UnitType type,
     Speed = speed;
     TurretOffset = toffset;
     Type = type;
+    CameoName = cameo_name;
+    ImageName = image_name;
 }
 
 /***********************************************************************************************
@@ -1479,9 +1527,9 @@ void UnitTypeClass::One_Time(void)
         **	Fetch the supporting data files for the unit.
         */
         if (Get_Resolution_Factor()) {
-            sprintf(buffer, "%sICNH", uclass.IniName);
+            sprintf(buffer, "%sICNH", uclass.CameoName.c_str());
         } else {
-            sprintf(buffer, "%sICON", uclass.IniName);
+            sprintf(buffer, "%sICON", uclass.CameoName.c_str());
         }
         _makepath(fullname, NULL, NULL, buffer, ".SHP");
         ((void const*&)uclass.CameoData) = MFCD::Retrieve(fullname);
@@ -1491,7 +1539,7 @@ void UnitTypeClass::One_Time(void)
         */
         // Assume funpark mode might be required. ST - 10/14/2019 11:53AM
         // if (!uclass.IsPieceOfEight || (Special.IsJurassic && AreThingiesEnabled) ) {
-        _makepath(fullname, NULL, NULL, uclass.IniName, ".SHP");
+        _makepath(fullname, NULL, NULL, uclass.ImageName.c_str(), ".SHP");
         ptr = MFCD::Retrieve(fullname);
         //} else {
         //	ptr = NULL;
@@ -1552,7 +1600,7 @@ void UnitTypeClass::Init(TheaterType theater)
                 ((void const*&)uclass.CameoData) = NULL;
 
                 if (uclass.IsBuildable) {
-                    sprintf(buffer, "%sICNH", uclass.IniName);
+                    sprintf(buffer, "%sICNH", uclass.CameoName.c_str());
                     _makepath(fullname, NULL, NULL, buffer, Theaters[theater].Suffix);
                     cameo_ptr = MFCD::Retrieve(fullname);
                     if (cameo_ptr) {

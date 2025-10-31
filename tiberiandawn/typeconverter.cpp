@@ -258,7 +258,7 @@ const TwoWayMap<AnimType, std::string> TdTypeConverter::Anim_Types {
     ANIM_PAIR(CHEM_SW),
     ANIM_PAIR(CHEM_W),
     ANIM_PAIR(CHEM_NW),
-    { ANIM_FIRE_SMALL, "FIRE-S" },
+    { ANIM_FIRE_SMALL, "FIRE_S" },
     { ANIM_FIRE_MED, "FIRE_M" },
     { ANIM_FIRE_MED2, "FIRE_ME" },
     { ANIM_FIRE_TINY, "FIRE_T" },

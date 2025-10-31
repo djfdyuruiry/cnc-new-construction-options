@@ -105,6 +105,16 @@
       "requires_converter": true,
       "valid_values": "NONE, ART_EXP1, ATOMDOOR, ATOMSFX, BEACON, BEACON_V, BURN_L, BURN_M, BURN_S, CHEMBALL, CHEM_E, CHEM_N, CHEM_NE, CHEM_NW, CHEM_S, CHEM_SE, CHEM_SW, CHEM_W, DEVIATOR, DOLLAR, EARTH, EMPULSE, FBALL1, FIR2_M_V, FIRE_M, FIRE_ME, FIRE_M_V, FIRE_S, FIRE_S_V, FIRE_T, FIRE_T_V, FLAG, FLAME_E, FLAME_N, FLAME_NE, FLAME_NW, FLAME_S, FLAME_SE, FLAME_SW, FLAME_W, FLMSPT, FRAG1, FRAG2, GRENADEA, GUNFIRE, GUN_N, GUN_NW, GUN_SW, GUN_W, INVUN, IONSFX, LZ_SMOKE, MGUN_E, MGUN_NE, MGUN_S, MGUN_SE, MINE, MISSILE, MV_FLASH, NAPALM1, NAPALM2, NAPALM3, ONFIRE_L, ONFIRE_M, ONFIRE_S, PIFF, PIFFPIFF, RAPID, RAPT_DIE, SAM_E, SAM_NE, SAM_S, SAM_SE, SFIRE_N, SFIRE_NW, SFIRE_SW, SFIRE_W, SMOKEY, SMOKE_M, STEALTH, STEG_DIE, TREX_DIE, TRIC_DIE, VEH_HIT1, VEH_HIT2, VEH_HIT3 - See: [animation.ini](#animationini)",
       "comment": "This is the default explosion to use when this vehicle is destroyed."
+    },
+    {
+      "name": "CameoName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this unit. (not supported in Lua)"
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this unit. (not supported in Lua)"
     }
   ]
 }

@@ -841,6 +841,16 @@ public:
     */
     //		int Prerequisite;
 
+    /*
+    ** Name of the data file that holds sidebar image data for building.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for building.
+    */
+    std::string ImageName;
+
     /*---------------------------------------------------------------------------
     **	This is the building type explicit constructor.
     */
@@ -851,6 +861,8 @@ public:
     BuildingTypeClass(StructType type,
                       int name,
                       char const* ininame,
+                      std::string_view cameo_name,
+                      std::string_view image_name,
                       COORDINATE exitpoint,
                       unsigned char level,
                       StructType prereq,
@@ -1109,6 +1121,16 @@ public:
     int MaxSize;
 
     /*
+    ** Name of the data file that holds sidebar image data for aircraft.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for aircraft.
+    */
+    std::string ImageName;
+
+    /*
     **	This is the explicit unit class constructor.
     */
     UnitTypeClass(NoInitClass const& x)
@@ -1118,6 +1140,8 @@ public:
     UnitTypeClass(UnitType type,
                   int name,
                   char const* ininame,
+                  std::string_view cameo_name,
+                  std::string_view image_name,
                   AnimType exp,
                   unsigned char level,
                   StructType prereq,
@@ -1276,6 +1300,15 @@ public:
     char FireLaunch;
     char ProneLaunch;
 
+    /*
+    ** Name of the data file that holds sidebar image data for infantry.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for infantry.
+    */
+    std::string ImageName;
     
     // TODO: Implement NCO logic and new fields
     //bool IsImmuneToTiberium;
@@ -1291,6 +1324,8 @@ public:
     InfantryTypeClass(InfantryType type,
                       int name,
                       char const* ininame,
+                      std::string_view cameo_name,
+                      std::string_view image_name,
                       unsigned char level,
                       StructType prereq,
                       bool is_female,
@@ -1482,6 +1517,11 @@ public:
     */
     int Range;
 
+    /*
+    ** Name of the data file that holds image data of bullet.
+    */
+    std::string ImageName;
+
     //---------------------------------------------------------------------
     BulletTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -1489,6 +1529,7 @@ public:
     }
     BulletTypeClass(BulletType type,
                     char const* ininame,
+                    std::string_view image_name,
                     bool is_high,
                     bool is_homing,
                     bool is_arcing,
@@ -1882,6 +1923,11 @@ public:
     */
     AnimType VirtualAnim;
 
+    /*
+    ** Name of the data file that holds image data for this animation.
+    */
+    std::string ImageName;
+
     //---------------------------------------------------------------------------
     AnimTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -1889,6 +1935,7 @@ public:
     }
     AnimTypeClass(AnimType anim,
                   char const* name,
+                  std::string_view image_name,
                   int size,
                   int biggest,
                   bool isnormal,
@@ -1983,6 +2030,16 @@ public:
     unsigned char ROT;
     MissionType Mission;
 
+    /*
+    ** Name of the data file that holds sidebar image data for aircraft.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for aircraft.
+    */
+    std::string ImageName;
+
     AircraftTypeClass(NoInitClass const& x)
         : TechnoTypeClass(x)
     {
@@ -1990,6 +2047,8 @@ public:
     AircraftTypeClass(AircraftType airtype,
                       int name,
                       char const* ininame,
+                      std::string_view cameo_name,
+                      std::string_view image_name,
                       unsigned char level,
                       StructType prereq,
                       bool is_leader,

@@ -162,7 +162,9 @@ static short const OListTmpl[] = {0, 1, 2, REFRESH_EOL};
  */
 static BuildingTypeClass const ClassTemple(STRUCT_TEMPLE,
                                            TXT_TEMPLE,      // NAME:			Short name of the structure.
-                                           "TMPL",          // NAME:			Short name of the structure.
+                                           "TMPL",          // INI name of building.
+                                           "TMPL",          // Cameo name of building.
+                                           "TMPL",          // Image name of building.
                                            XYP_COORD(0, 0), // Exit point for produced units.
                                            7,               // Build level.
                                            STRUCT_RADAR,    // Building prerequisite.
@@ -211,7 +213,9 @@ static BuildingTypeClass const ClassTemple(STRUCT_TEMPLE,
 
 static BuildingTypeClass const ClassEye(STRUCT_EYE,
                                         TXT_EYE,         // NAME:			Short name of the structure.
-                                        "EYE",           // NAME:			Short name of the structure.
+                                        "EYE",           // INI name of building.
+                                        "EYE",           // Cameo name of building.
+                                        "EYE",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         7,               // Build level.
                                         STRUCT_RADAR,    // Building prerequisite.
@@ -261,7 +265,9 @@ static BuildingTypeClass const ClassEye(STRUCT_EYE,
 static BuildingTypeClass const
     ClassWeapon(STRUCT_WEAP,
                 TXT_WEAPON_FACTORY, // NAME:			Short name of the structure.
-                "WEAP",             // NAME:			Short name of the structure.
+                "WEAP",             // INI name of building.
+                "WEAP",             // Cameo name of building.
+                "WEAP",             // Image name of building.
                 XYP_COORD(10 + (CELL_PIXEL_W / 2),
                           ((CELL_PIXEL_H * 3) - (CELL_PIXEL_H / 2)) - 21), // Exit point for produced units.
                 2,                                                         // Build level.
@@ -315,7 +321,9 @@ static BuildingTypeClass const
 
 static BuildingTypeClass const ClassGTower(STRUCT_GTOWER,
                                            TXT_GUARD_TOWER,  // NAME:			Short name of the structure.
-                                           "GTWR",           // NAME:			Short name of the structure.
+                                           "GTWR",           // INI name of building.
+                                           "GTWR",           // Cameo name of building.
+                                           "GTWR",           // Image name of building.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            2,                // Build level.
                                            STRUCT_BARRACKS,  // Building prerequisite.
@@ -365,7 +373,9 @@ static BuildingTypeClass const ClassGTower(STRUCT_GTOWER,
 
 static BuildingTypeClass const ClassATower(STRUCT_ATOWER,
                                            TXT_AGUARD_TOWER, // NAME:			Short name of the structure.
-                                           "ATWR",           // NAME:			Short name of the structure.
+                                           "ATWR",           // INI name of building.
+                                           "ATWR",           // Cameo name of building.
+                                           "ATWR",           // Image name of building.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            4,                // Build level.
                                            STRUCT_RADAR,     // Building prerequisite.
@@ -415,7 +425,9 @@ static BuildingTypeClass const ClassATower(STRUCT_ATOWER,
 
 static BuildingTypeClass const ClassObelisk(STRUCT_OBELISK,
                                             TXT_OBELISK,     // NAME:			Short name of the structure.
-                                            "OBLI",          // NAME:			Short name of the structure.
+                                            "OBLI",          // INI name of building.
+                                            "OBLI",          // Cameo name of building.
+                                            "OBLI",          // Image name of building.
                                             XYP_COORD(0, 0), // Exit point for produced units.
                                             4,               // Build level.
                                             STRUCT_RADAR,    // Building prerequisite.
@@ -464,7 +476,9 @@ static BuildingTypeClass const ClassObelisk(STRUCT_OBELISK,
 
 static BuildingTypeClass const ClassTurret(STRUCT_TURRET,
                                            TXT_TURRET,       // NAME:			Short name of the structure.
-                                           "GUN",            // NAME:			Short name of the structure.
+                                           "GUN",            // INI name of building.
+                                           "GUN",            // Cameo name of building.
+                                           "GUN",            // Image name of building.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            2,                // Build level.
                                            STRUCT_BARRACKS,  // Building prerequisite.
@@ -521,7 +535,9 @@ static BuildingTypeClass const ClassTurret(STRUCT_TURRET,
 
 static BuildingTypeClass const ClassConst(STRUCT_CONST,
                                           TXT_CONST_YARD,    // NAME:			Short name of the structure.
-                                          "FACT",            // NAME:			Short name of the structure.
+                                          "FACT",            // INI name of building.
+                                          "FACT",            // Cameo name of building.
+                                          "FACT",            // Image name of building.
                                           XYP_COORD(0, 0),   // Exit point for produced units.
                                           99,                // Build level.
                                           STRUCT_NONE,       // Building prerequisite.
@@ -571,7 +587,9 @@ static BuildingTypeClass const ClassConst(STRUCT_CONST,
 static BuildingTypeClass const
     ClassRefinery(STRUCT_REFINERY,
                   TXT_REFINERY,    // NAME:			Short name of the structure.
-                  "PROC",          // NAME:			Short name of the structure.
+                  "PROC",          // INI name of building.
+                  "PROC",          // Cameo name of building.
+                  "PROC",          // Image name of building.
                   XYP_COORD(0, 0), // Exit point for produced units.
                   1,               // Build level.
                   STRUCT_POWER,    // Building prerequisite.
@@ -621,7 +639,9 @@ static BuildingTypeClass const
 static BuildingTypeClass const
     ClassStorage(STRUCT_STORAGE,
                  TXT_STORAGE,      // NAME:			Short name of the structure.
-                 "SILO",           // NAME:			Short name of the structure.
+                 "SILO",           // INI name of building.
+                 "SILO",           // Cameo name of building.
+                 "SILO",           // Image name of building.
                  XYP_COORD(0, 0),  // Exit point for produced units.
                  1,                // Build level.
                  STRUCT_REFINERY,  // Building prerequisite.
@@ -671,7 +691,9 @@ static BuildingTypeClass const
 
 static BuildingTypeClass const ClassHelipad(STRUCT_HELIPAD,
                                             TXT_HELIPAD,       // NAME:			Short name of the structure.
-                                            "HPAD",            // NAME:			Short name of the structure.
+                                            "HPAD",            // INI name of building.
+                                            "HPAD",            // Cameo name of building.
+                                            "HPAD",            // Image name of building.
                                             XYP_COORD(0, 0),   // Exit point for produced units.
                                             6,                 // Build level.
                                             STRUCT_BARRACKS,   // Building prerequisite.
@@ -720,7 +742,9 @@ static BuildingTypeClass const ClassHelipad(STRUCT_HELIPAD,
 
 static BuildingTypeClass const ClassCommand(STRUCT_RADAR,
                                             TXT_COMMAND,      // NAME:			Short name of the structure.
-                                            "HQ",             // NAME:			Short name of the structure.
+                                            "HQ",             // INI name of building.
+                                            "HQ",             // Cameo name of building.
+                                            "HQ",             // Image name of building.
                                             XYP_COORD(0, 0),  // Exit point for produced units.
                                             2,                // Build level.
                                             STRUCT_REFINERY,  // Building prerequisite.
@@ -769,7 +793,9 @@ static BuildingTypeClass const ClassCommand(STRUCT_RADAR,
 
 static BuildingTypeClass const ClassSAM(STRUCT_SAM,
                                         TXT_SAM,          // NAME:			Short name of the structure.
-                                        "SAM",            // NAME:			Short name of the structure.
+                                        "SAM",            // INI name of building.
+                                        "SAM",            // Cameo name of building.
+                                        "SAM",            // Image name of building.
                                         XYP_COORD(0, 0),  // Exit point for produced units.
                                         6,                // Build level.
                                         STRUCT_BARRACKS,  // Building prerequisite.
@@ -818,7 +844,9 @@ static BuildingTypeClass const ClassSAM(STRUCT_SAM,
 
 static BuildingTypeClass const ClassAirStrip(STRUCT_AIRSTRIP,
                                              TXT_AIRSTRIP,     // NAME:			Short name of the structure.
-                                             "AFLD",           // NAME:			Short name of the structure.
+                                             "AFLD",           // INI name of building.
+                                             "AFLD",           // Cameo name of building.
+                                             "AFLD",           // Image name of building.
                                              XYP_COORD(0, 0),  // Exit point for produced units.
                                              2,                // Build level.
                                              STRUCT_REFINERY,  // Building prerequisite.
@@ -867,7 +895,9 @@ static BuildingTypeClass const ClassAirStrip(STRUCT_AIRSTRIP,
 
 static BuildingTypeClass const ClassPower(STRUCT_POWER,
                                           TXT_POWER,       // NAME:			Short name of the structure.
-                                          "NUKE",          // NAME:			Short name of the structure.
+                                          "NUKE",          // INI name of building.
+                                          "NUKE",          // Cameo name of building.
+                                          "NUKE",          // Image name of building.
                                           XYP_COORD(0, 0), // Exit point for produced units.
                                           0,               // Build level.
                                           STRUCT_NONE,     // Building prerequisite.
@@ -917,7 +947,9 @@ static BuildingTypeClass const ClassPower(STRUCT_POWER,
 static BuildingTypeClass const
     ClassAdvancedPower(STRUCT_ADVANCED_POWER,
                        TXT_ADVANCED_POWER, // NAME:			Short name of the structure.
-                       "NUK2",             // NAME:			Short name of the structure.
+                       "NUK2",             // INI name of building.
+                       "NUK2",             // Cameo name of building.
+                       "NUK2",             // Image name of building.
                        XYP_COORD(0, 0),    // Exit point for produced units.
                        5,                  // Build level.
                        STRUCT_POWER,      // PREREQ:		Buildings that must exist first.
@@ -966,7 +998,9 @@ static BuildingTypeClass const
 
 static BuildingTypeClass const ClassHospital(STRUCT_HOSPITAL,
                                              TXT_HOSPITAL,     // NAME:			Short name of the structure.
-                                             "HOSP",           // NAME:			Short name of the structure.
+                                             "HOSP",           // INI name of building.
+                                             "HOSP",           // Cameo name of building.
+                                             "HOSP",           // Image name of building.
                                              XYP_COORD(0, 0),  // Exit point for produced units.
                                              99,               // Build level.
                                              STRUCT_BARRACKS,  // PREREQ:		Buildings that must exist first.
@@ -1016,7 +1050,9 @@ static BuildingTypeClass const ClassHospital(STRUCT_HOSPITAL,
 
 static BuildingTypeClass const ClassBioLab(STRUCT_BIO_LAB,
                                            TXT_BIO_LAB,      // NAME:			Short name of the structure.
-                                           "BIO",            // NAME:			Short name of the structure.
+                                           "BIO",            // INI name of building.
+                                           "BIO",            // Cameo name of building.
+                                           "BIO",            // Image name of building.
                                            XYP_COORD(0, 0),  // Exit point for produced units.
                                            99,               // Build level.
                                            STRUCT_HOSPITAL,  // PREREQ:		Buildings that must exist first.
@@ -1066,7 +1102,9 @@ static BuildingTypeClass const ClassBioLab(STRUCT_BIO_LAB,
 static BuildingTypeClass const
     ClassBarracks(STRUCT_BARRACKS,
                   TXT_BARRACKS,      // NAME:			Short name of the structure.
-                  "PYLE",            // NAME:			Short name of the structure.
+                  "PYLE",            // INI name of building.
+                  "PYLE",            // Cameo name of building.
+                  "PYLE",            // Image name of building.
                   XYP_COORD(30, 33), // Exit point for produced units.
                   0,                 // Build level.
                   STRUCT_POWER,      // Building prerequisite.
@@ -1115,7 +1153,9 @@ static BuildingTypeClass const
 
 static BuildingTypeClass const ClassHand(STRUCT_HAND,
                                          TXT_HAND,          // NAME:			Short name of the structure.
-                                         "HAND",            // NAME:			Short name of the structure.
+                                         "HAND",            // INI name of building.
+                                         "HAND",            // Cameo name of building.
+                                         "HAND",            // Image name of building.
                                          XYP_COORD(36, 63), // Exit point for produced units.
                                          0,                 // Build level.
                                          STRUCT_POWER,      // Building prerequisite.
@@ -1164,7 +1204,9 @@ static BuildingTypeClass const ClassHand(STRUCT_HAND,
 
 static BuildingTypeClass const ClassTanker(STRUCT_TANKER,
                                            TXT_TANKER,      // NAME:			Short name of the structure.
-                                           "ARCO",          // NAME:			Short name of the structure.
+                                           "ARCO",          // INI name of building.
+                                           "ARCO",          // Cameo name of building.
+                                           "ARCO",          // Image name of building.
                                            XYP_COORD(0, 0), // Exit point for produced units.
                                            99,              // Build level.
                                            STRUCT_POWER,   // PREREQ:		Buildings that must exist first.
@@ -1213,7 +1255,9 @@ static BuildingTypeClass const ClassTanker(STRUCT_TANKER,
 
 static BuildingTypeClass const ClassRepair(STRUCT_REPAIR,
                                            TXT_FIX_IT,      // NAME:			Short name of the structure.
-                                           "FIX",           // NAME:			Short name of the structure.
+                                           "FIX",           // INI name of building.
+                                           "FIX",           // Cameo name of building.
+                                           "FIX",           // Image name of building.
                                            XYP_COORD(0, 0), // Exit point for produced units.
                                            5,               // Build level.
                                            STRUCT_POWER,   // PREREQ:		Buildings that must exist first.
@@ -1263,7 +1307,9 @@ static BuildingTypeClass const ClassRepair(STRUCT_REPAIR,
 #ifdef OBSOLETE
 static BuildingTypeClass const ClassRoad(STRUCT_ROAD,
                                          TXT_ROAD,        // NAME:			Short name of the structure.
-                                         "ROAD",          // NAME:			Short name of the structure.
+                                         "ROAD",          // INI name of building.
+                                         "ROAD",          // Cameo name of building.
+                                         "ROAD",          // Image name of building.
                                          STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
                                          XYP_COORD(0, 0), // Exit point for produced units.
                                          99,              // Build level.
@@ -1314,7 +1360,9 @@ static BuildingTypeClass const ClassRoad(STRUCT_ROAD,
 
 static BuildingTypeClass const ClassV01(STRUCT_V01,
                                         TXT_CIV1,        // NAME:			Short name of the structure.
-                                        "V01",           // NAME:			Short name of the structure.
+                                        "V01",           // INI name of building.
+                                        "V01",           // Cameo name of building.
+                                        "V01",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1363,7 +1411,9 @@ static BuildingTypeClass const ClassV01(STRUCT_V01,
 
 static BuildingTypeClass const ClassV02(STRUCT_V02,
                                         TXT_CIV2,        // NAME:			Short name of the structure.
-                                        "V02",           // NAME:			Short name of the structure.
+                                        "V02",           // INI name of building.
+                                        "V02",           // Cameo name of building.
+                                        "V02",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1412,7 +1462,9 @@ static BuildingTypeClass const ClassV02(STRUCT_V02,
 
 static BuildingTypeClass const ClassV03(STRUCT_V03,
                                         TXT_CIV3,        // NAME:			Short name of the structure.
-                                        "V03",           // NAME:			Short name of the structure.
+                                        "V03",           // INI name of building.
+                                        "V03",           // Cameo name of building.
+                                        "V03",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1461,7 +1513,9 @@ static BuildingTypeClass const ClassV03(STRUCT_V03,
 
 static BuildingTypeClass const ClassV04(STRUCT_V04,
                                         TXT_CIV4,        // NAME:			Short name of the structure.
-                                        "V04",           // NAME:			Short name of the structure.
+                                        "V04",           // INI name of building.
+                                        "V04",           // Cameo name of building.
+                                        "V04",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1510,7 +1564,9 @@ static BuildingTypeClass const ClassV04(STRUCT_V04,
 
 static BuildingTypeClass const ClassV05(STRUCT_V05,
                                         TXT_CIV5,        // NAME:			Short name of the structure.
-                                        "V05",           // NAME:			Short name of the structure.
+                                        "V05",           // INI name of building.
+                                        "V05",           // Cameo name of building.
+                                        "V05",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1559,7 +1615,9 @@ static BuildingTypeClass const ClassV05(STRUCT_V05,
 
 static BuildingTypeClass const ClassV06(STRUCT_V06,
                                         TXT_CIV6,        // NAME:			Short name of the structure.
-                                        "V06",           // NAME:			Short name of the structure.
+                                        "V06",           // INI name of building.
+                                        "V06",           // Cameo name of building.
+                                        "V06",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1608,7 +1666,9 @@ static BuildingTypeClass const ClassV06(STRUCT_V06,
 
 static BuildingTypeClass const ClassV07(STRUCT_V07,
                                         TXT_CIV7,        // NAME:			Short name of the structure.
-                                        "V07",           // NAME:			Short name of the structure.
+                                        "V07",           // INI name of building.
+                                        "V07",           // Cameo name of building.
+                                        "V07",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1657,7 +1717,9 @@ static BuildingTypeClass const ClassV07(STRUCT_V07,
 
 static BuildingTypeClass const ClassV08(STRUCT_V08,
                                         TXT_CIV8,        // NAME:			Short name of the structure.
-                                        "V08",           // NAME:			Short name of the structure.
+                                        "V08",           // INI name of building.
+                                        "V08",           // Cameo name of building.
+                                        "V08",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1706,7 +1768,9 @@ static BuildingTypeClass const ClassV08(STRUCT_V08,
 
 static BuildingTypeClass const ClassV09(STRUCT_V09,
                                         TXT_CIV9,        // NAME:			Short name of the structure.
-                                        "V09",           // NAME:			Short name of the structure.
+                                        "V09",           // INI name of building.
+                                        "V09",           // Cameo name of building.
+                                        "V09",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1755,7 +1819,9 @@ static BuildingTypeClass const ClassV09(STRUCT_V09,
 
 static BuildingTypeClass const ClassV10(STRUCT_V10,
                                         TXT_CIV10,       // NAME:			Short name of the structure.
-                                        "V10",           // NAME:			Short name of the structure.
+                                        "V10",           // INI name of building.
+                                        "V10",           // Cameo name of building.
+                                        "V10",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1804,7 +1870,9 @@ static BuildingTypeClass const ClassV10(STRUCT_V10,
 
 static BuildingTypeClass const ClassV11(STRUCT_V11,
                                         TXT_CIV11,       // NAME:			Short name of the structure.
-                                        "V11",           // NAME:			Short name of the structure.
+                                        "V11",           // INI name of building.
+                                        "V11",           // Cameo name of building.
+                                        "V11",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1853,7 +1921,9 @@ static BuildingTypeClass const ClassV11(STRUCT_V11,
 
 static BuildingTypeClass const ClassV12(STRUCT_V12,
                                         TXT_CIV12,       // NAME:			Short name of the structure.
-                                        "V12",           // NAME:			Short name of the structure.
+                                        "V12",           // INI name of building.
+                                        "V12",           // Cameo name of building.
+                                        "V12",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1902,7 +1972,9 @@ static BuildingTypeClass const ClassV12(STRUCT_V12,
 
 static BuildingTypeClass const ClassV13(STRUCT_V13,
                                         TXT_CIV13,       // NAME:			Short name of the structure.
-                                        "V13",           // NAME:			Short name of the structure.
+                                        "V13",           // INI name of building.
+                                        "V13",           // Cameo name of building.
+                                        "V13",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -1951,7 +2023,9 @@ static BuildingTypeClass const ClassV13(STRUCT_V13,
 
 static BuildingTypeClass const ClassV14(STRUCT_V14,
                                         TXT_CIV14,       // NAME:			Short name of the structure.
-                                        "V14",           // NAME:			Short name of the structure.
+                                        "V14",           // INI name of building.
+                                        "V14",           // Cameo name of building.
+                                        "V14",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2000,7 +2074,9 @@ static BuildingTypeClass const ClassV14(STRUCT_V14,
 
 static BuildingTypeClass const ClassV15(STRUCT_V15,
                                         TXT_CIV15,       // NAME:			Short name of the structure.
-                                        "V15",           // NAME:			Short name of the structure.
+                                        "V15",           // INI name of building.
+                                        "V15",           // Cameo name of building.
+                                        "V15",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2049,7 +2125,9 @@ static BuildingTypeClass const ClassV15(STRUCT_V15,
 
 static BuildingTypeClass const ClassV16(STRUCT_V16,
                                         TXT_CIV16,       // NAME:			Short name of the structure.
-                                        "V16",           // NAME:			Short name of the structure.
+                                        "V16",           // INI name of building.
+                                        "V16",           // Cameo name of building.
+                                        "V16",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2098,7 +2176,9 @@ static BuildingTypeClass const ClassV16(STRUCT_V16,
 
 static BuildingTypeClass const ClassV17(STRUCT_V17,
                                         TXT_CIV17,       // NAME:			Short name of the structure.
-                                        "V17",           // NAME:			Short name of the structure.
+                                        "V17",           // INI name of building.
+                                        "V17",           // Cameo name of building.
+                                        "V17",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2147,7 +2227,9 @@ static BuildingTypeClass const ClassV17(STRUCT_V17,
 
 static BuildingTypeClass const ClassV18(STRUCT_V18,
                                         TXT_CIV18,       // NAME:			Short name of the structure.
-                                        "V18",           // NAME:			Short name of the structure.
+                                        "V18",           // INI name of building.
+                                        "V18",           // Cameo name of building.
+                                        "V18",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2196,7 +2278,9 @@ static BuildingTypeClass const ClassV18(STRUCT_V18,
 
 static BuildingTypeClass const ClassV19(STRUCT_PUMP,
                                         TXT_PUMP,        // NAME:			Short name of the structure.
-                                        "V19",           // NAME:			Short name of the structure.
+                                        "V19",           // INI name of building.
+                                        "V19",           // Cameo name of building.
+                                        "V19",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2245,7 +2329,9 @@ static BuildingTypeClass const ClassV19(STRUCT_PUMP,
 
 static BuildingTypeClass const ClassV20(STRUCT_V20,
                                         TXT_CIV20,       // NAME:			Short name of the structure.
-                                        "V20",           // NAME:			Short name of the structure.
+                                        "V20",           // INI name of building.
+                                        "V20",           // Cameo name of building.
+                                        "V20",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2294,7 +2380,9 @@ static BuildingTypeClass const ClassV20(STRUCT_V20,
 
 static BuildingTypeClass const ClassV21(STRUCT_V21,
                                         TXT_CIV21,       // NAME:			Short name of the structure.
-                                        "V21",           // NAME:			Short name of the structure.
+                                        "V21",           // INI name of building.
+                                        "V21",           // Cameo name of building.
+                                        "V21",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2343,7 +2431,9 @@ static BuildingTypeClass const ClassV21(STRUCT_V21,
 
 static BuildingTypeClass const ClassV22(STRUCT_V22,
                                         TXT_CIV22,       // NAME:			Short name of the structure.
-                                        "V22",           // NAME:			Short name of the structure.
+                                        "V22",           // INI name of building.
+                                        "V22",           // Cameo name of building.
+                                        "V22",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2392,7 +2482,9 @@ static BuildingTypeClass const ClassV22(STRUCT_V22,
 
 static BuildingTypeClass const ClassV23(STRUCT_V23,
                                         TXT_CIV23,       // NAME:			Short name of the structure.
-                                        "V23",           // NAME:			Short name of the structure.
+                                        "V23",           // INI name of building.
+                                        "V23",           // Cameo name of building.
+                                        "V23",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2441,7 +2533,9 @@ static BuildingTypeClass const ClassV23(STRUCT_V23,
 
 static BuildingTypeClass const ClassV24(STRUCT_V24,
                                         TXT_CIV24,       // NAME:			Short name of the structure.
-                                        "V24",           // NAME:			Short name of the structure.
+                                        "V24",           // INI name of building.
+                                        "V24",           // Cameo name of building.
+                                        "V24",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2490,7 +2584,9 @@ static BuildingTypeClass const ClassV24(STRUCT_V24,
 
 static BuildingTypeClass const ClassV25(STRUCT_V25,
                                         TXT_CIV25,       // NAME:			Short name of the structure.
-                                        "V25",           // NAME:			Short name of the structure.
+                                        "V25",           // INI name of building.
+                                        "V25",           // Cameo name of building.
+                                        "V25",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2539,7 +2635,9 @@ static BuildingTypeClass const ClassV25(STRUCT_V25,
 
 static BuildingTypeClass const ClassV26(STRUCT_V26,
                                         TXT_CIV26,       // NAME:			Short name of the structure.
-                                        "V26",           // NAME:			Short name of the structure.
+                                        "V26",           // INI name of building.
+                                        "V26",           // Cameo name of building.
+                                        "V26",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2588,7 +2686,9 @@ static BuildingTypeClass const ClassV26(STRUCT_V26,
 
 static BuildingTypeClass const ClassV27(STRUCT_V27,
                                         TXT_CIV27,       // NAME:			Short name of the structure.
-                                        "V27",           // NAME:			Short name of the structure.
+                                        "V27",           // INI name of building.
+                                        "V27",           // Cameo name of building.
+                                        "V27",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2637,7 +2737,9 @@ static BuildingTypeClass const ClassV27(STRUCT_V27,
 
 static BuildingTypeClass const ClassV28(STRUCT_V28,
                                         TXT_CIV28,       // NAME:			Short name of the structure.
-                                        "V28",           // NAME:			Short name of the structure.
+                                        "V28",           // INI name of building.
+                                        "V28",           // Cameo name of building.
+                                        "V28",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2686,7 +2788,9 @@ static BuildingTypeClass const ClassV28(STRUCT_V28,
 
 static BuildingTypeClass const ClassV29(STRUCT_V29,
                                         TXT_CIV29,       // NAME:			Short name of the structure.
-                                        "V29",           // NAME:			Short name of the structure.
+                                        "V29",           // INI name of building.
+                                        "V29",           // Cameo name of building.
+                                        "V29",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2735,7 +2839,9 @@ static BuildingTypeClass const ClassV29(STRUCT_V29,
 
 static BuildingTypeClass const ClassV30(STRUCT_V30,
                                         TXT_CIV30,       // NAME:			Short name of the structure.
-                                        "V30",           // NAME:			Short name of the structure.
+                                        "V30",           // INI name of building.
+                                        "V30",           // Cameo name of building.
+                                        "V30",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2784,7 +2890,9 @@ static BuildingTypeClass const ClassV30(STRUCT_V30,
 
 static BuildingTypeClass const ClassV31(STRUCT_V31,
                                         TXT_CIV31,       // NAME:			Short name of the structure.
-                                        "V31",           // NAME:			Short name of the structure.
+                                        "V31",           // INI name of building.
+                                        "V31",           // Cameo name of building.
+                                        "V31",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2833,7 +2941,9 @@ static BuildingTypeClass const ClassV31(STRUCT_V31,
 
 static BuildingTypeClass const ClassV32(STRUCT_V32,
                                         TXT_CIV32,       // NAME:			Short name of the structure.
-                                        "V32",           // NAME:			Short name of the structure.
+                                        "V32",           // INI name of building.
+                                        "V32",           // Cameo name of building.
+                                        "V32",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2882,7 +2992,9 @@ static BuildingTypeClass const ClassV32(STRUCT_V32,
 
 static BuildingTypeClass const ClassV33(STRUCT_V33,
                                         TXT_CIV33,       // NAME:			Short name of the structure.
-                                        "V33",           // NAME:			Short name of the structure.
+                                        "V33",           // INI name of building.
+                                        "V33",           // Cameo name of building.
+                                        "V33",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2931,7 +3043,9 @@ static BuildingTypeClass const ClassV33(STRUCT_V33,
 
 static BuildingTypeClass const ClassV34(STRUCT_V34,
                                         TXT_CIV34,       // NAME:			Short name of the structure.
-                                        "V34",           // NAME:			Short name of the structure.
+                                        "V34",           // INI name of building.
+                                        "V34",           // Cameo name of building.
+                                        "V34",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -2980,7 +3094,9 @@ static BuildingTypeClass const ClassV34(STRUCT_V34,
 
 static BuildingTypeClass const ClassV35(STRUCT_V35,
                                         TXT_CIV35,       // NAME:			Short name of the structure.
-                                        "V35",           // NAME:			Short name of the structure.
+                                        "V35",           // INI name of building.
+                                        "V35",           // Cameo name of building.
+                                        "V35",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -3029,7 +3145,9 @@ static BuildingTypeClass const ClassV35(STRUCT_V35,
 
 static BuildingTypeClass const ClassV36(STRUCT_V36,
                                         TXT_CIV36,       // NAME:			Short name of the structure.
-                                        "V36",           // NAME:			Short name of the structure.
+                                        "V36",           // INI name of building.
+                                        "V36",           // Cameo name of building.
+                                        "V36",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -3077,7 +3195,9 @@ static BuildingTypeClass const ClassV36(STRUCT_V36,
 );
 static BuildingTypeClass const ClassV37(STRUCT_V37,
                                         TXT_CIV37,       // NAME:			Short name of the structure.
-                                        "V37",           // NAME:			Short name of the structure.
+                                        "V37",           // INI name of building.
+                                        "V37",           // Cameo name of building.
+                                        "V37",           // Image name of building.
                                         XYP_COORD(0, 0), // Exit point for produced units.
                                         99,              // Build level.
                                         STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -3125,7 +3245,9 @@ static BuildingTypeClass const ClassV37(STRUCT_V37,
 );
 static BuildingTypeClass const ClassMission(STRUCT_MISSION,
                                             TXT_CIVMISS,     // NAME:			Short name of the structure.
-                                            "MISS",          // NAME:			Short name of the structure.
+                                            "MISS",          // INI name of building.
+                                            "MISS",          // Cameo name of building.
+                                            "MISS",          // Image name of building.
                                             XYP_COORD(0, 0), // Exit point for produced units.
                                             99,              // Build level.
                                             STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -3175,7 +3297,9 @@ static BuildingTypeClass const ClassMission(STRUCT_MISSION,
 // Sandbag wall
 static BuildingTypeClass const Sandbag(STRUCT_SANDBAG_WALL,
                                        TXT_SANDBAG_WALL, // NAME:			Short name of the structure.
-                                       "SBAG",           // NAME:			Short name of the structure.
+                                       "SBAG",           // INI name of building.
+                                       "SBAG",           // Cameo name of building.
+                                       "SBAG",           // Image name of building.
                                        XYP_COORD(0, 0),  // Exit point for produced units.
                                        2,                // Build level.
                                        STRUCT_NONE,     // PREREQ:		Buildings that must exist first.
@@ -3224,7 +3348,9 @@ static BuildingTypeClass const Sandbag(STRUCT_SANDBAG_WALL,
 // Cyclone fence
 static BuildingTypeClass const Cyclone(STRUCT_CYCLONE_WALL,
                                        TXT_CYCLONE_WALL, // NAME:			Short name of the structure.
-                                       "CYCL",           // NAME:			Short name of the structure.
+                                       "CYCL",           // INI name of building.
+                                       "CYCL",           // Cameo name of building.
+                                       "CYCL",           // Image name of building.
                                        XYP_COORD(0, 0),  // Exit point for produced units.
                                        5,                // Build level.
                                        STRUCT_NONE,     // PREREQ:		Buildings that must exist first.
@@ -3273,7 +3399,9 @@ static BuildingTypeClass const Cyclone(STRUCT_CYCLONE_WALL,
 // Brick wall
 static BuildingTypeClass const Brick(STRUCT_BRICK_WALL,
                                      TXT_BRICK_WALL,  // NAME:			Short name of the structure.
-                                     "BRIK",          // NAME:			Short name of the structure.
+                                     "BRIK",          // INI name of building.
+                                     "BRIK",          // Cameo name of building.
+                                     "BRIK",          // Image name of building.
                                      XYP_COORD(0, 0), // Exit point for produced units.
                                      7,               // Build level.
                                      STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -3322,7 +3450,9 @@ static BuildingTypeClass const Brick(STRUCT_BRICK_WALL,
 // Barbwire wall
 static BuildingTypeClass const Barbwire(STRUCT_BARBWIRE_WALL,
                                         TXT_BARBWIRE_WALL, // NAME:			Short name of the structure.
-                                        "BARB",            // NAME:			Short name of the structure.
+                                        "BARB",            // INI name of building.
+                                        "BARB",            // Cameo name of building.
+                                        "BARB",            // Image name of building.
                                         XYP_COORD(0, 0),   // Exit point for produced units.
                                         98,                // Build level.
                                         STRUCT_NONE,      // PREREQ:		Buildings that must exist first.
@@ -3371,7 +3501,9 @@ static BuildingTypeClass const Barbwire(STRUCT_BARBWIRE_WALL,
 // Wood wall
 static BuildingTypeClass const Wood(STRUCT_WOOD_WALL,
                                     TXT_WOOD_WALL,   // NAME:			Short name of the structure.
-                                    "WOOD",          // NAME:			Short name of the structure.
+                                    "WOOD",          // INI name of building.
+                                    "WOOD",          // Cameo name of building.
+                                    "WOOD",          // Image name of building.
                                     XYP_COORD(0, 0), // Exit point for produced units.
                                     99,              // Build level.
                                     STRUCT_NONE,    // PREREQ:		Buildings that must exist first.
@@ -3509,6 +3641,8 @@ void const* WarFactoryOverlay;
 BuildingTypeClass::BuildingTypeClass(StructType type,
                                      int name,
                                      char const* ininame,
+                                     std::string_view cameo_name,
+                                     std::string_view image_name,
                                      COORDINATE exitpoint,
                                      unsigned char level,
                                      StructType prereq,
@@ -3628,6 +3762,9 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
     Anims[BSTATE_AUX2].Start = 0;
     Anims[BSTATE_AUX2].Count = 1;
     Anims[BSTATE_AUX2].Rate = 0;
+
+    CameoName = cameo_name;
+    ImageName = image_name;
 }
 
 /***********************************************************************************************
@@ -3697,9 +3834,9 @@ void BuildingTypeClass::One_Time(void)
         **	Fetch the sidebar cameo image for this building.
         */
         if (Get_Resolution_Factor()) {
-            sprintf(buffer, "%sICNH", building.IniName);
+            sprintf(buffer, "%sICNH", building.CameoName.c_str());
         } else {
-            sprintf(buffer, "%sICON", building.IniName);
+            sprintf(buffer, "%sICON", building.CameoName.c_str());
         }
         _makepath(fullname, NULL, NULL, buffer, ".SHP");
         ((void const*&)building.CameoData) = MFCD::Retrieve(fullname);
@@ -3707,7 +3844,7 @@ void BuildingTypeClass::One_Time(void)
         /*
         **	Fetch the construction animation for this building.
         */
-        sprintf(buffer, "%sMAKE", building.IniName);
+        sprintf(buffer, "%sMAKE", building.ImageName.c_str());
         _makepath(fullname, NULL, NULL, buffer, ".SHP");
         void const* dataptr = MFCD::Retrieve(fullname);
         ((void const*&)building.BuildupData) = dataptr;
@@ -3723,7 +3860,7 @@ void BuildingTypeClass::One_Time(void)
         /*
         **	Fetch the normal game shape for this building.
         */
-        _makepath(fullname, NULL, NULL, building.IniName, ".SHP");
+        _makepath(fullname, NULL, NULL, building.ImageName.c_str(), ".SHP");
         ((void const*&)building.ImageData) = MFCD::Retrieve(fullname);
     }
 
@@ -4065,7 +4202,7 @@ void BuildingTypeClass::Init(TheaterType theater)
 
                 ((void const*&)classptr->CameoData) = NULL;
 
-                sprintf(buffer, "%.4sICNH", classptr->IniName);
+                sprintf(buffer, "%.4sICNH", classptr->CameoName.c_str());
                 _makepath(fullname, NULL, NULL, buffer, Theaters[theater].Suffix);
                 cameo_ptr = MFCD::Retrieve(fullname);
                 if (cameo_ptr) {

@@ -110,6 +110,11 @@
       "name": "Range",
       "type": "Int",
       "comment": "Some projectiles have a built in override for distance travelled before it automatically explodes. This value, if non-zero, specifies this distance."
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this bullet. (not supported in Lua)"
     }
   ]
 }

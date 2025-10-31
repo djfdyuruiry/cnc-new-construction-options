@@ -129,6 +129,11 @@
       "name": "VirtualScale",
       "type": "Int",
       "comment": "The scale of the virtual animation. Allows for higher-resolution art to appear larger."
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this animation. (not supported in Lua)"
     }
   ]
 }
