@@ -1,0 +1,61 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Aircraft",
+  "enum": "AircraftType",
+  "class": "AircraftTypeClass",
+  "base_class": "TechnoTypeClass",
+  "example_instance": "TRAN",
+  "example_instance_comment": "Transport Helicopter",
+  "comment": "Types of Aircraft in the game - e.g. ORCA, A10 Warthog etc.",
+  "properties": [
+    {
+      "name": "IsFixedWing",
+      "type": "Bool",
+      "comment": "Fixed wing aircraft (ones that cannot hover) have this flag set to true. Such aircraft will not vary speed while it is flying."
+    },
+    {
+      "name": "IsLandable",
+      "type": "Bool",
+      "comment": "Can this aircraft land? If it can land it is presumed to be controllable by the player."
+    },
+    {
+      "name": "IsRotorEquipped",
+      "type": "Bool",
+      "comment": "Does this aircraft have a rotor blade (helicopter) type propulsion?"
+    },
+    {
+      "name": "IsRotorCustom",
+      "type": "Bool",
+      "comment": "Is there a custom rotor animation stage set for each facing of the aircraft?"
+    },
+    {
+      "name": "Type",
+      "type": "AircraftType",
+      "comment": "-",
+      "requires_converter": true,
+      "valid_values": "NONE, TRAN, A10, HELI, C17, ORCA"
+    },
+    {
+      "name": "ROT",
+      "comment": "Rate of Turn (rotational speed)",
+      "type": "UChar"
+    },
+    {
+      "name": "Mission",
+      "type": "MissionType",
+      "comment": "This value is used to provide the aircraft with a default mission order when first created. Usually, this is a resting or idle type of order.",
+      "requires_converter": true,
+      "valid_values": "NONE, SLEEP, ATTACK, MOVE, RETREAT, GUARD, STICKY, ENTER, CAPTURE, HARVEST, GUARD_AREA, RETURN, STOP, AMBUSH, HUNT, TIMED_HUNT, UNLOAD, SABOTAGE, CONSTRUCTION, DECONSTRUCTION, REPAIR, RESCUE, MISSILE"
+    },
+    {
+      "name": "CameoName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this aircraft. (not supported in Lua)"
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this aircraft. (not supported in Lua)"
+    }
+  ]
+}

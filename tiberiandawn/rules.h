@@ -37,7 +37,25 @@
 
 #include "common/fixed.h"
 
+#include "typeconverter.h"
+
 class CCINIClass;
+
+// InfantryType, UnitType etc.
+template<typename T>
+concept EnumSignedChar = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, signed char>;
+
+// InfantryTypeClass, UnitTypeClass etc.
+template<typename C, typename E>
+concept RulesTypeClass = requires(C instance, E enum_instance, const IniRuleContext& ini, const RuleSection& section)
+{
+    { C::As_Reference(enum_instance) } -> std::same_as<const C&>;
+    { C::As_Mutable_Reference(enum_instance) } -> std::same_as<C&>;
+    { instance.Name() } -> std::same_as<const char*>;
+    { instance.Full_Name() } -> std::same_as<int>;
+    { instance.Read_INI(ini) } -> std::same_as<const IniRuleContext&>;
+    { instance.Read_Rules(section) } -> std::same_as<const RuleSection&>;
+};
 
 class DifficultyClass
 {
@@ -65,19 +83,7 @@ class RuleSections;
 class RulesClass
 {
 public:
-    RulesClass(void);
-
-    bool Process(CCINIClass& file);
-    bool AI(CCINIClass& ini);
-    bool IQ(CCINIClass& ini);
-    bool Difficulty(CCINIClass& ini);
-    bool Process_Sections(CCINIClass& ini);
-
-    bool Export(CCINIClass& file);
-    bool Export_AI(CCINIClass& ini);
-    bool Export_IQ(CCINIClass& ini);
-    bool Export_Difficulty(CCINIClass& ini);
-    bool Export_Sections(CCINIClass& ini);
+    static inline const auto& Logger = CncLogger::For(RulesClass);
 
     /*
     **	This specifies the average number of minutes between each computer attack.
@@ -290,10 +296,40 @@ public:
 
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    std::map<std::string_view, std::unique_ptr<RuleSections>> TypeRules;
+
+    RulesClass(void);
+
+    void Init();
+    void Init(CCINIClass& ini);
+
+    void Init_Types();
+    void Init_Types(CCINIClass& ini);
+
+    template<EnumSignedChar T>
+    RuleSections& Get_Rule_Sections_For_Type()
+    {
+        return *TypeRules[TdTypeConverter::Get_Type_Name<T>()].get();
+    }
+
+    void Assert_Section_Not_Present(std::string_view name);
 
 private:
+    void AI(CCINIClass& ini);
+    void IQ(CCINIClass& ini);
+    void Difficulty(CCINIClass& ini);
+
+    // see rules-nco.cpp
+    void Init_Sections(CCINIClass& ini);
     void Apply_Special_Properties();
     void Apply_Static_And_Global_Values();
+
+    void Export_AI(CCINIClass& ini) const;
+    void Export_IQ(CCINIClass& ini) const;
+    void Export_Difficulty(CCINIClass& ini) const;
+
+    void Export(CCINIClass& ini) const;
 };
 
 #define Get_Rule_Value(section, rule, value_type) Rule.Sections[section].Get<value_type>(rule)

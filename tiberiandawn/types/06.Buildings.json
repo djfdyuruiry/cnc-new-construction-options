@@ -1,0 +1,105 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Building",
+  "enum": "StructType",
+  "class": "BuildingTypeClass",
+  "base_class": "TechnoTypeClass",
+  "example_instance": "GTWR",
+  "example_instance_comment": "Guard Tower",
+  "comment": "Types of Buildings that can be found in the game - e.g. Power Plant, Temple of Nod etc.",
+  "properties": [
+    {
+      "name": "IsBibbed",
+      "type": "Bool",
+      "comment": "This flag controls whether the building is equipped with a dirt bib or not. A building with a bib has a dirt patch automatically attached to the structure when it is placed."
+    },
+    {
+      "name": "IsWall",
+      "type": "Bool",
+      "comment": "If this building is a special wall type, such that it exists as a building for purposes of construction but transforms into an overlay wall object when it is placed on the map, then this flag will be true."
+    },
+    {
+      "name": "IsFactory",
+      "type": "Bool",
+      "comment": "Some buildings are producers. This flag will be true in that case. Producer, or factory, type buildings have special logic performed."
+    },
+    {
+      "name": "ToBuild",
+      "type": "FactoryType",
+      "requires_converter": true,
+      "valid_values": "NONE, INFANTRY, UNIT, AIRCRAFT, BUILDING",
+      "comment": "This flag specifies the type of object this factory building can \"produce\". For non factory buildings, this value will be RTTI_NONE."
+    },
+    {
+      "name": "IsSimpleDamage",
+      "type": "Bool",
+      "comment": "Buildings can have either simple or complex damage stages. If simple, then the second to the last frame is the half damage stage, and the last frame is the complete damage stage. For non-simple damage, buildings have a complete animation set for damaged as well as undamaged condition. Turrets, oil pumps, and repair facilities are a few examples."
+    },
+    {
+      "name": "IsSturdy",
+      "type": "Bool",
+      "comment": "Some buildings can be placed directly on raw ground. Such buildings don't require and are not affected by concrete or lack thereof. Typically, concrete itself is considered sturdy. The same goes for walls and similar generic type structures. The more sophisticated buildings are greatly affected by lack of concrete and thus would have this flag set to false."
+    },
+    {
+      "name": "IsCaptureable",
+      "type": "Bool",
+      "comment": "Certain building types can be captured by enemy infantry. For those building types, this flag will be true. Typically, military or hardened structures such as turrets cannot be captured."
+    },
+    {
+      "name": "IsRegulated",
+      "type": "Bool",
+      "comment": "If this building really only has cosmetic idle animation, then this flag will be true if this animation should run at a relatively constant rate regardless of game speed setting."
+    },
+    {
+      "name": "IsUnsellable",
+      "type": "Bool",
+      "comment": "If this flag is true, then the building cannot be sold even if it could have been built. This is especially useful for mines which can be built but cannot be sold."
+    },
+    {
+      "name": "Type",
+      "type": "StructType",
+      "requires_converter": true,
+      "valid_values": "NONE, AFLD, ARCO, ATWR, BARB, BIO, BRIK, CYCL, EYE, FACT, FIX, GTWR, GUN, HAND, HOSP, HPAD, HQ, MISS, NUK2, NUKE, OBLI, PROC, PYLE, SAM, SBAG, SILO, TMPL, V01, V02, V03, V04, V05, V06, V07, V08, V09, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, V21, V22, V23, V24, V25, V26, V27, V28, V29, V30, V31, V32, V33, V34, V35, V36, V37, WEAP, WOOD",
+      "comment": "This is the structure type identifier. It can serve as a unique identification number for building types."
+    },
+    {
+      "name": "StartFace",
+      "type": "DirType",
+      "requires_converter": true,
+      "valid_values": "N, NE, E, SE, S, SW, SW_X1, SW_X2, W, NW",
+      "comment": "This is the starting facing to give this building when it first gets constructed. The facing matches the final stage of the construction animation."
+    },
+    {
+      "name": "Capacity",
+      "type": "UInt",
+      "comment": "This is the Tiberium storage capacity of the building. The sum of all building's storage capacity is used to determine how much Tiberium can be accumulated."
+    },
+    {
+      "name": "Power",
+      "type": "Int",
+      "comment": "Each building type produces and consumes power. These values tell how much."
+    },
+    {
+      "name": "Drain",
+      "type": "Int",
+      "comment": "Each building type produces and consumes power. These values tell how much."
+    },
+    {
+      "name": "Size",
+      "type": "BSizeType",
+      "requires_converter": true,
+      "valid_values": "NONE, 11, 21, 12, 22, 23, 32, 33, 42, 55",
+      "comment": "This is the size of the building. This size value is a rough indication of the building's \"footprint\"."
+    },
+    {
+      "name": "CameoName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this building. (not supported in Lua)"
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this building. (not supported in Lua)"
+    }
+  ]
+}

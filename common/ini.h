@@ -35,6 +35,7 @@
 #ifndef INI_H
 #define INI_H
 
+#include <optional>
 #include <string>
 #include <stdlib.h>
 #include <string.h>
@@ -43,6 +44,7 @@
 #include "fixed.h"
 #include "crc.h"
 #include "search.h"
+
 
 class FileClass;
 class Straw;
@@ -128,6 +130,7 @@ public:
     bool Put_TextBlock(char const* section, char const* text);
     bool Put_UUBlock(char const* section, void const* block, int len);
     bool Put_PKey(PKey const& key);
+    void Put_Comment(char const* section, const std::string& comment);
 
 protected:
     /*
@@ -180,6 +183,7 @@ protected:
         };
 
         char* Section;
+        std::optional<std::string> comment;
         VanillaList<INIEntry> EntryList;
         IndexClass<INIEntry*> EntryIndex;
     };

@@ -1,0 +1,37 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Warhead",
+  "enum": "WarheadType",
+  "class": "WarheadTypeClass",
+  "example_instance": "FIRE",
+  "comment": "Warheads are payloads for bullets - e.x. Commando has a RIFLE (weapon) which fires SNIPER (bullet), this has a HOLLOW_POINT warhead",
+  "properties": [
+    {
+      "name": "Type",
+      "type": "WarheadType",
+      "comment": "-",
+      "requires_converter": true,
+      "valid_values": "NONE, AP, FEEDME, FIRE, FIST, FOOT, HEADBUTT, HE_WARHEAD, HOLLOW_POINT, LASER_WARHEAD, PB, SA, SPORE"
+    },
+    {
+      "name": "SpreadFactor",
+      "type": "Int",
+      "comment": "This value controls how damage from this warhead type will reduce over distance. The larger the number, the less the damage is reduced the farther the distance from the source of the damage."
+    },
+    {
+      "name": "IsWallDestroyer",
+      "type": "Bool",
+      "comment": "If this warhead type can destroy walls, then this flag will be true."
+    },
+    {
+      "name": "IsWoodDestroyer",
+      "type": "Bool",
+      "comment": "If this warhead can destroy wooden walls, then this flag will be true."
+    },
+    {
+      "name": "IsTiberiumDestroyer",
+      "type": "Bool",
+      "comment": "Does this warhead damage tiberium?"
+    }
+  ]
+}

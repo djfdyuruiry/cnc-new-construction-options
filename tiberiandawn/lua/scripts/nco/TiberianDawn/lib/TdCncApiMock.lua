@@ -148,6 +148,39 @@ local function extendMockTable(getCalls, mock)
     }
   )
 
+  mock.Types = setmetatable(
+    {},
+    {
+      __index = function(_, k)
+        if k == "getTypeNames" then
+          return function(...)
+            return { "Type1", "Type2" }
+          end
+        elseif k:match([[get.+InstanceNames]]) then
+          return function(...)
+            return { "Instance1", "Instance2" }
+          end
+        elseif k:match([[get.+PropertyNames]]) then
+          return function(...)
+            return { "Property1", "Property2" }
+          end
+        elseif k:match([[get.+PropertyType]]) then
+          return function(...)
+            return "number"
+          end
+        elseif k:match([[get.+PropertyValue]]) then
+          return function(...)
+            return 33
+          end
+        elseif k:match([[set.+PropertyValue]]) then
+          return function(...)
+            return 44
+          end
+        end
+      end
+    }
+  )
+
   mock.UI = setmetatable(
     {},
     {

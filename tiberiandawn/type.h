@@ -50,6 +50,14 @@ class HouseClass;
 class WeaponTypeClass
 {
 public:
+    WeaponType Type;
+
+    /*
+    **	The INI name of the house is pointed to by this element. This is the
+    **	identification name used in the scenario INI file.
+    */
+    char const* IniName;
+
     /*
     **	This is the unit class of the projectile fired. A subset of the unit types
     **	represent projectiles. It is one of these classes that is specified here.
@@ -88,6 +96,24 @@ public:
     **	This is the animation to display at the firing coordinate.
     */
     AnimType Anim;
+
+    static const WeaponTypeClass& As_Reference(WeaponType type);
+    static WeaponTypeClass& As_Mutable_Reference(WeaponType type);
+
+    const char* Name() const
+    {
+        return IniName;
+    }
+
+    // TODO: Add human readable names for weapons
+    int Full_Name() const
+    {
+        return TXT_NONE;
+    }
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    const RuleSection& Read_Rules(const RuleSection& rules);
 };
 
 /**********************************************************************
@@ -97,6 +123,14 @@ public:
 class WarheadTypeClass
 {
 public:
+    WarheadType Type;
+
+    /*
+    **	The INI name of the house is pointed to by this element. This is the
+    **	identification name used in the scenario INI file.
+    */
+    char const* IniName;
+
     /*
     **	This value control how damage from this warhead type will reduce
     **	over distance. The larger the number, the less the damage is reduced
@@ -124,6 +158,24 @@ public:
     **	defender has. This table is what gives weapons their "character".
     */
     unsigned Modifier[ARMOR_COUNT];
+
+    static const WarheadTypeClass& As_Reference(WarheadType type);
+    static WarheadTypeClass& As_Mutable_Reference(WarheadType type);
+
+    const char* Name() const
+    {
+        return IniName;
+    }
+
+    // TODO: Add human readable names for weapons
+    int Full_Name() const
+    {
+        return TXT_NONE;
+    }
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    const RuleSection& Read_Rules(const RuleSection& rules);
 };
 
 /**********************************************************************
@@ -170,15 +222,16 @@ public:
     **	Each house is assigned a unique identification color to be used on the
     **	radar map and other color significant areas.
     */
-    unsigned char Color;
+    HouseColorType Color;
 
-    unsigned char BrightColor;
+    HouseColorType BrightColor;
 
     /*
     **	This points to the default remap table for this house.
     */
     unsigned char const* RemapTable;
     PlayerColorType RemapColor;
+    bool RemapColorEnabled;
 
     /*
     **	This is a unique ASCII character used when constructing filenames. It
@@ -205,23 +258,36 @@ public:
                    int fullname,
                    char const* ext,
                    int lemon,
-                   int color,
-                   int bright_color,
+                   HouseColorType color,
+                   HouseColorType bright_color,
                    PlayerColorType remapcolor,
-                   unsigned char const* remap,
-                   char prefix);
+                   char prefix,
+                   bool remap_color_disabled = false);
     HouseTypeClass(NoInitClass const&)
     {
     }
 
     static HousesType From_Name(char const* name);
     static HouseTypeClass const& As_Reference(HousesType house);
+    static HouseTypeClass& As_Mutable_Reference(HousesType house);
     static void One_Time(void);
     char const* Name() const
     {
         return IniName;
     }
 
+    int Full_Name() const
+    {
+        return FullName;
+    }
+
+    void Set_Remap_Color_Table();
+    void Set_Suffix(const std::string& str);
+    void Set_Prefix(const std::string& str);
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    const RuleSection& Read_Rules(const RuleSection& ini);
 private:
     static HouseTypeClass const* const Pointers[HOUSE_COUNT];
 };
@@ -403,6 +469,10 @@ public:
     virtual void Display(int, int, WindowNumberType, HousesType) const {};
 #endif
 
+    // see: types-nco.cpp.in
+    virtual const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    virtual const RuleSection& Read_Rules(const RuleSection& rules);
+
     static void const* SelectShapes;
     static void const* PipShapes;
 };
@@ -504,6 +574,8 @@ public:
     **	multi-player or special events.
     */
     unsigned char Level;
+
+    StructType Prerequisite;
     int Pre;
 
     /*
@@ -526,6 +598,7 @@ public:
     */
     int MaxAmmo;
 
+    std::vector<HousesType> OwnableBy;
     /*
     **	This is a bit field representing the houses that are allowed to
     **	own (by normal means) this particular object type. This value is
@@ -555,7 +628,7 @@ public:
     TechnoTypeClass(int name,
                     char const* ininame,
                     unsigned char level,
-                    int pre,
+                    StructType prereq,
                     bool is_leader,
                     bool is_scanner,
                     bool is_nominal,
@@ -581,13 +654,17 @@ public:
                     int scenario,
                     int risk,
                     int reward,
-                    int ownable,
+                    std::vector<HousesType> ownableBy,
                     WeaponType primary,
                     WeaponType secondary,
                     ArmorType armor);
     virtual ~TechnoTypeClass()
     {
     }
+
+    void Calc_Risk();
+    void Set_Pre();
+    void Set_Ownable();
 
     virtual int Raw_Cost(void) const;
     virtual int Max_Passengers(void) const;
@@ -601,6 +678,10 @@ public:
 #ifdef USE_RA_AI
     int Legal_Placement(CELL pos) const; // From RA for AI. ST - 7/24/2019 5:20PM
 #endif                                   // USE_RA_AI
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 };
 
 /***************************************************************************
@@ -709,7 +790,7 @@ public:
     **	left by the unit type ID. If the corresponding bit is set, then that
     **	unit type can enter this building.
     */
-    unsigned int CanEnter;
+    unsigned int CanEnter; // TODO: Investigate and restore CanEnter logic
 
     /*
     **	This is the starting facing to give this building when it first
@@ -760,6 +841,16 @@ public:
     */
     //		int Prerequisite;
 
+    /*
+    ** Name of the data file that holds sidebar image data for building.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for building.
+    */
+    std::string ImageName;
+
     /*---------------------------------------------------------------------------
     **	This is the building type explicit constructor.
     */
@@ -770,9 +861,11 @@ public:
     BuildingTypeClass(StructType type,
                       int name,
                       char const* ininame,
+                      std::string_view cameo_name,
+                      std::string_view image_name,
                       COORDINATE exitpoint,
                       unsigned char level,
-                      int pre,
+                      StructType prereq,
                       bool is_scanner,
                       bool is_regulated,
                       bool is_bibbed,
@@ -802,7 +895,7 @@ public:
                       int scenario,
                       int risk,
                       int reward,
-                      int ownable,
+                      std::vector<HousesType> ownableBy,
                       WeaponType primary,
                       WeaponType secondary,
                       ArmorType armor,
@@ -825,6 +918,12 @@ public:
     };
 
     static BuildingTypeClass const& As_Reference(StructType type);
+
+    static BuildingTypeClass & As_Mutable_Reference(StructType type)
+    {
+        return *const_cast<BuildingTypeClass*>(Pointers[type]);
+    }
+
     static StructType From_Name(char const* name);
     static void Init(TheaterType theater);
     static void One_Time(void);
@@ -857,6 +956,10 @@ public:
 #ifdef SCENARIO_EDITOR
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
 private:
     /*
@@ -1018,6 +1121,16 @@ public:
     int MaxSize;
 
     /*
+    ** Name of the data file that holds sidebar image data for aircraft.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for aircraft.
+    */
+    std::string ImageName;
+
+    /*
     **	This is the explicit unit class constructor.
     */
     UnitTypeClass(NoInitClass const& x)
@@ -1027,9 +1140,11 @@ public:
     UnitTypeClass(UnitType type,
                   int name,
                   char const* ininame,
+                  std::string_view cameo_name,
+                  std::string_view image_name,
                   AnimType exp,
                   unsigned char level,
-                  int pre,
+                  StructType prereq,
                   bool is_goodie,
                   bool is_leader,
                   bool is_eight,
@@ -1063,7 +1178,7 @@ public:
                   int scenario,
                   int risk,
                   int reward,
-                  int ownable,
+                  std::vector<HousesType> ownableBy,
                   WeaponType primary,
                   WeaponType secondary,
                   ArmorType armor,
@@ -1079,6 +1194,12 @@ public:
 
     static UnitType From_Name(char const* name);
     static UnitTypeClass const& As_Reference(UnitType type);
+
+    static UnitTypeClass & As_Mutable_Reference(UnitType type)
+    {
+        return *const_cast<UnitTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType);
     static void One_Time(void);
     static void Prep_For_Add(void);
@@ -1096,6 +1217,10 @@ public:
 #ifdef SCENARIO_EDITOR
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
     /*
     **	This is a pointer to the wake shape (as needed by the gunboat).
@@ -1175,6 +1300,15 @@ public:
     char FireLaunch;
     char ProneLaunch;
 
+    /*
+    ** Name of the data file that holds sidebar image data for infantry.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for infantry.
+    */
+    std::string ImageName;
     
     // TODO: Implement NCO logic and new fields
     //bool IsImmuneToTiberium;
@@ -1190,8 +1324,10 @@ public:
     InfantryTypeClass(InfantryType type,
                       int name,
                       char const* ininame,
+                      std::string_view cameo_name,
+                      std::string_view image_name,
                       unsigned char level,
-                      int pre,
+                      StructType prereq,
                       bool is_female,
                       bool is_leader,
                       bool is_crawling,
@@ -1210,10 +1346,10 @@ public:
                       int scenario,
                       int risk,
                       int reward,
-                      int ownable,
+                      std::vector<HousesType> ownableBy,
                       WeaponType primary,
                       WeaponType secondary,
-                      MPHType maxSpeed);
+                      MPHType maxspeed);
     virtual RTTIType What_Am_I(void) const
     {
         return RTTI_INFANTRYTYPE;
@@ -1224,6 +1360,12 @@ public:
     {
         return *Pointers[type];
     };
+
+    static InfantryTypeClass & As_Mutable_Reference(InfantryType type)
+    {
+        return *const_cast<InfantryTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType);
     static void One_Time(void);
     static void Prep_For_Add(void);
@@ -1242,6 +1384,10 @@ public:
 #ifdef SCENARIO_EDITOR
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection&) override;
 };
 
 /***************************************************************************
@@ -1371,6 +1517,11 @@ public:
     */
     int Range;
 
+    /*
+    ** Name of the data file that holds image data of bullet.
+    */
+    std::string ImageName;
+
     //---------------------------------------------------------------------
     BulletTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -1378,6 +1529,7 @@ public:
     }
     BulletTypeClass(BulletType type,
                     char const* ininame,
+                    std::string_view image_name,
                     bool is_high,
                     bool is_homing,
                     bool is_arcing,
@@ -1406,6 +1558,12 @@ public:
     {
         return *Pointers[type];
     };
+
+    static BulletTypeClass& As_Mutable_Reference(BulletType type)
+    {
+        return *const_cast<BulletTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType){};
     static void One_Time(void);
 
@@ -1418,8 +1576,13 @@ public:
         return 0;
     };
 
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& ini) override;
+
 private:
     static BulletTypeClass const* const Pointers[BULLET_COUNT];
+
 };
 
 /****************************************************************************
@@ -1760,6 +1923,11 @@ public:
     */
     AnimType VirtualAnim;
 
+    /*
+    ** Name of the data file that holds image data for this animation.
+    */
+    std::string ImageName;
+
     //---------------------------------------------------------------------------
     AnimTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -1767,6 +1935,7 @@ public:
     }
     AnimTypeClass(AnimType anim,
                   char const* name,
+                  std::string_view image_name,
                   int size,
                   int biggest,
                   bool isnormal,
@@ -1798,6 +1967,12 @@ public:
     {
         return *Pointers[type];
     };
+
+    static AnimTypeClass& As_Mutable_Reference(AnimType type)
+    {
+        return *const_cast<AnimTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType){};
     static void One_Time(void);
 
@@ -1809,6 +1984,10 @@ public:
     {
         return 0;
     };
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
 private:
     static AnimTypeClass const* const Pointers[ANIM_COUNT];
@@ -1851,6 +2030,16 @@ public:
     unsigned char ROT;
     MissionType Mission;
 
+    /*
+    ** Name of the data file that holds sidebar image data for aircraft.
+    */
+    std::string CameoName;
+
+    /*
+    ** Name of the data file that holds image data for aircraft.
+    */
+    std::string ImageName;
+
     AircraftTypeClass(NoInitClass const& x)
         : TechnoTypeClass(x)
     {
@@ -1858,8 +2047,10 @@ public:
     AircraftTypeClass(AircraftType airtype,
                       int name,
                       char const* ininame,
+                      std::string_view cameo_name,
+                      std::string_view image_name,
                       unsigned char level,
-                      int pre,
+                      StructType prereq,
                       bool is_leader,
                       bool is_twoshooter,
                       bool is_transporter,
@@ -1884,7 +2075,7 @@ public:
                       int scenario,
                       int risk,
                       int reward,
-                      int ownable,
+                      std::vector<HousesType> ownableBy,
                       WeaponType primary,
                       WeaponType secondary,
                       ArmorType armor,
@@ -1898,6 +2089,12 @@ public:
     {
         return *Pointers[a];
     };
+
+    static AircraftTypeClass & As_Mutable_Reference(AircraftType type)
+    {
+        return *const_cast<AircraftTypeClass*>(Pointers[type]);
+    }
+
     static void Init(TheaterType);
     static void One_Time(void);
     static void Prep_For_Add(void);
@@ -1915,6 +2112,10 @@ public:
 #ifdef SCENARIO_EDITOR
     virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
 #endif
+
+    // see: types-nco.cpp.in
+    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    const RuleSection& Read_Rules(const RuleSection& rules) override;
 
     static void const* LRotorData;
     static void const* RRotorData;

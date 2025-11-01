@@ -2,22 +2,12 @@
 
 #include "../../../common/lua/luaevent.h"
 
-#include "../../msgbox.h"
-
 class PopupLuaEvent : public LuaEvent
 {
 public:
-    PopupLuaEvent(std::string message) : LuaEvent("Popup")
-    {
-        Message = message;
-    }
+    PopupLuaEvent(std::string message) ;
 
-    virtual void Execute() const override
-    {
-        LuaEvent::Execute();
-
-        WWMessageBox().Process(Message.c_str());
-    }
+    void Execute() const override;
 
 private:
     std::string Message;

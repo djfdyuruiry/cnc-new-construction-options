@@ -1,11 +1,39 @@
-`rules.ini` is a simple text file that controls how different units, buildings and infantry behave in-game. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
+Rules files:
 
-The `rules.ini` file is created for you when you first run the game, and can be found where you installed `vanillatd` and the required game files.
+- [rules.ini](#rulesini)
+{% for type in concrete_types %}- [{{ type.name | lower }}.ini](#{{ type.name | lower }}ini)
+{% endfor %} - [Scenario INI](#scenario-ini)
+
+<!-- TODO: Expand guidance and correct default location in code -->
+All rules files are created for you when you first run the game, so run the game once before trying to edit the files.
+
+### Finding Rules Files
+
+To view the files in a file manager, follow the steps for your Operating System below:
+
+- **Windows**: Press Windows Key + R, type `%APPDATA%\Vanilla-Conquer\vanillatd` and hit enter
+- **macOS**: Open Finder, choose Go > Go to Folder and enter `~/Library/Application Support/Vanilla-Conquer/vanillatd`
+- **Linux**: In a terminal, run `xdg-open ~/.config/vanilla-conquer/vanillatd`
+
+Here are the full paths for reference (these are inside your user folder):
+
+- **Windows**: `AppData\Roaming\Vanilla-Conquer\vanillatd`
+- **macOS**: `Library/Application Support/Vanilla-Conquer/vanillatd`
+- **Linux**: `.config/vanilla-conquer/vanillatd`
+
+---
+
+## rules.ini
+
+`rules.ini` is a simple text file that controls game engine behaviour. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
+
+> **NOTE**: Unlike Red Alert, the `rules.ini` for NCO Tiberian Dawn does not contain units, infantry etc. - see the top of this page for the individual files
 
 Rule Sections:
+
 {% for section in sections %}- [{{ section.section }}](2b.Tiberian-Dawn-Rules.md#{{ section.section | lower | replace(".", "") }})
 {% endfor %}{% for section in sections %}
-## [{{ section.section }}]
+### [{{ section.section }}]
 
 {{ section.comment }}
 
@@ -14,7 +42,54 @@ Rule Sections:
 {% for rule in section.rules %}| `{{ rule.name }}` | {{ rule.comment }} |
 {% endfor %}
 ```ini
+; {{ section.ini_comment }}
 [{{ section.section }}]
 {% for rule in section.rules %}{{ rule.name }}={{ rule.default }}
 {% endfor %}```
 {% endfor %}
+
+{% for type in concrete_types %}
+### {{ type.name | lower }}.ini
+{{ type.comment }}
+
+| Property | Comment | Example | Valid Values |
+|--------|-------------|-------------|-------------|
+{% if type.has_base_type %}{% for prop in type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} | {{ prop.example_value }} | {{ prop.valid_values }}
+{% endfor %}{% if type.base_type.has_base_type %}{% for prop in type.base_type.base_type.properties %}| `{{ prop.name }}` | {{ prop.comment }} | {{ prop.example_value }} | {{ prop.valid_values }}
+{% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}| `{{ prop.name }}` | {{ prop.comment }} | {{ prop.example_value }} | {{ prop.valid_values }}
+{% endfor %}
+```ini
+; {{ type.example_instance_comment }}
+[{{ type.example_instance }}]
+{% if type.has_base_type %}{% for prop in type.base_type.properties %}{{ prop.name }}={{ prop.example_value }}
+{% endfor %}{% if type.base_type.has_base_type %}{% for prop in type.base_type.base_type.properties %}{{ prop.name }}={{ prop.example_value }}
+{% endfor %}{% endif %}{% endif %}{% for prop in type.properties %}{{ prop.name }}={{ prop.example_value }}
+{% endfor %}```
+{% endfor %}
+
+## Scenario INI
+
+You can override any rule from `rules.ini` or from the type ini files (`infantry.ini`, `unit.ini` etc.) inside of the INI file for a given scenario. This is similar to the way Red Alert behaves, but not identical.
+
+For example, given the following entry in `unit.ini`:
+
+```ini
+; Gun Boat
+[BOAT]
+Armor=STEEL
+Cost=300
+Explosion=FBALL1
+IsAnimating=no
+; other rules
+```
+
+You could add the below to the end of `scg01ea.ini` to give the Gunboat an Obelisk Laser:
+
+```ini
+; rest of scg01ea.ini
+
+; Gun Boat
+[BOAT]
+Primary=OBELISK_LASER
+```
+

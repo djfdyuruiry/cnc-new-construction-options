@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Scenarios",
+  "ini_comment": "Rules for specific scenarios, used to modify the tech tree (TODO: Embed in scenario INI)",
   "comment": "Change game rules for specific single player scenarios, mainly used to modify the player tech tree.",
   "rules": [
     {

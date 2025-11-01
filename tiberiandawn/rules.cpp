@@ -34,6 +34,8 @@
  *   RulesClass::RulesClass -- Default constructor for rules class object.                     *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <algorithm>
+
 #include "common/logger.h"
 #include "common/rulesections.h"
 
@@ -227,7 +229,7 @@ static void Difficulty_Get(CCINIClass& ini, DifficultyClass& diff, char const* s
  * HISTORY:                                                                                    *
  *   07/11/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-static void Difficulty_Put(CCINIClass& ini, DifficultyClass& diff, char const* section)
+static void Difficulty_Put(CCINIClass& ini, const DifficultyClass& diff, char const* section)
 {
     ini.Put_Fixed(section, "FirePower", diff.FirepowerBias);
     ini.Put_Fixed(section, "Groundspeed", diff.GroundspeedBias);
@@ -250,23 +252,48 @@ static void Difficulty_Put(CCINIClass& ini, DifficultyClass& diff, char const* s
  *                                                                                             *
  * INPUT:   file  -- Reference to the rule file to process.                                    *
  *                                                                                             *
- * OUTPUT:  bool; Was the rule file processed?                                                 *
- *                                                                                             *
  * WARNINGS:   none                                                                            *
  *                                                                                             *
  * HISTORY:                                                                                    *
  *   06/17/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::Process(CCINIClass& ini)
+void RulesClass::Init(CCINIClass& ini)
 {
     AI(ini);
     IQ(ini);
     Difficulty(ini);
-    Process_Sections(ini);
 
+    Init_Sections(ini);
     Apply_Static_And_Global_Values();
+}
 
-    return (true);
+/**
+ * Init rules from INI files, falls back to hardcoded values for any missing INI file.
+ *
+ * Also generates any missing INI file, using defaults from hardcoded values.
+ */
+void RulesClass::Init()
+{
+    CCFileClass ini_file("RULES.INI");
+    CCINIClass ini;
+    const auto ini_file_exists = ini_file.Is_Available();
+
+    if (ini_file_exists) {
+        ini.Load(ini_file, false);
+    }
+
+    Init(ini);
+    Init_Types();
+
+    // provide player with a default RULES.INI file
+    if (!ini_file_exists) {
+        Export(ini);
+        Sections.Save_All_To_Ini(ini);
+
+        ini.Save(ini_file, false);
+    }
+
+    ini_file.Close();
 }
 
 /***********************************************************************************************
@@ -276,21 +303,16 @@ bool RulesClass::Process(CCINIClass& ini)
  *                                                                                             *
  * INPUT:   file  -- Reference to the rule file to process.                                    *
  *                                                                                             *
- * OUTPUT:  bool; Was the rule file processed?                                                 *
- *                                                                                             *
  * WARNINGS:   none                                                                            *
  *                                                                                             *
  * HISTORY:                                                                                    *
  *   06/17/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::Export(CCINIClass& ini)
+void RulesClass::Export(CCINIClass& ini) const
 {
     Export_AI(ini);
     Export_IQ(ini);
     Export_Difficulty(ini);
-    Export_Sections(ini);
-
-    return (true);
 }
 
 /***********************************************************************************************
@@ -300,44 +322,42 @@ bool RulesClass::Export(CCINIClass& ini)
  *                                                                                             *
  * INPUT:   ini   -- Reference to the INI database that holds the AI overrides.                *
  *                                                                                             *
- * OUTPUT:  bool; Was the AI section found and processed?                                      *
- *                                                                                             *
  * WARNINGS:   none                                                                            *
  *                                                                                             *
  * HISTORY:                                                                                    *
  *   08/08/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::AI(CCINIClass& ini)
+void RulesClass::AI(CCINIClass& ini)
 {
-    static const char AI[] = "AI";
+    static constexpr char AI[] = "AI";
 
-    if (ini.Is_Present(AI)) {
-        AttackInterval = ini.Get_Fixed(AI, "AttackInterval", AttackInterval);
-        AttackDelay = ini.Get_Fixed(AI, "AttackDelay", AttackDelay);
-        InfantryReserve = ini.Get_Int(AI, "InfantryReserve", InfantryReserve);
-        InfantryBaseMult = ini.Get_Int(AI, "InfantryBaseMult", InfantryBaseMult);
-        PowerSurplus = ini.Get_Int(AI, "PowerSurplus", PowerSurplus);
-        BaseSizeAdd = ini.Get_Int(AI, "BaseSizeAdd", BaseSizeAdd);
-        RefineryRatio = ini.Get_Fixed(AI, "RefineryRatio", RefineryRatio);
-        RefineryLimit = ini.Get_Int(AI, "RefineryLimit", RefineryLimit);
-        BarracksRatio = ini.Get_Fixed(AI, "BarracksRatio", BarracksRatio);
-        BarracksLimit = ini.Get_Int(AI, "BarracksLimit", BarracksLimit);
-        WarRatio = ini.Get_Fixed(AI, "WarRatio", WarRatio);
-        WarLimit = ini.Get_Int(AI, "WarLimit", WarLimit);
-        DefenseRatio = ini.Get_Fixed(AI, "DefenseRatio", DefenseRatio);
-        DefenseLimit = ini.Get_Int(AI, "DefenseLimit", DefenseLimit);
-        AARatio = ini.Get_Fixed(AI, "AARatio", AARatio);
-        AALimit = ini.Get_Int(AI, "AALimit", AALimit);
-        TeslaRatio = ini.Get_Fixed(AI, "ObeliskRatio", TeslaRatio);
-        TeslaLimit = ini.Get_Int(AI, "ObeliskLimit", TeslaLimit);
-        HelipadRatio = ini.Get_Fixed(AI, "HelipadRatio", HelipadRatio);
-        HelipadLimit = ini.Get_Int(AI, "HelipadLimit", HelipadLimit);
-        IsCompEasyBonus = ini.Get_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
-        IsComputerParanoid = ini.Get_Bool(AI, "Paranoid", IsComputerParanoid);
-        PowerEmergencyFraction = ini.Get_Fixed(AI, "PowerEmergency", PowerEmergencyFraction);
-        return (true);
+    if (!ini.Is_Present(AI)) {
+        return;
     }
-    return (false);
+
+    AttackInterval = ini.Get_Fixed(AI, "AttackInterval", AttackInterval);
+    AttackDelay = ini.Get_Fixed(AI, "AttackDelay", AttackDelay);
+    InfantryReserve = ini.Get_Int(AI, "InfantryReserve", InfantryReserve);
+    InfantryBaseMult = ini.Get_Int(AI, "InfantryBaseMult", InfantryBaseMult);
+    PowerSurplus = ini.Get_Int(AI, "PowerSurplus", PowerSurplus);
+    BaseSizeAdd = ini.Get_Int(AI, "BaseSizeAdd", BaseSizeAdd);
+    RefineryRatio = ini.Get_Fixed(AI, "RefineryRatio", RefineryRatio);
+    RefineryLimit = ini.Get_Int(AI, "RefineryLimit", RefineryLimit);
+    BarracksRatio = ini.Get_Fixed(AI, "BarracksRatio", BarracksRatio);
+    BarracksLimit = ini.Get_Int(AI, "BarracksLimit", BarracksLimit);
+    WarRatio = ini.Get_Fixed(AI, "WarRatio", WarRatio);
+    WarLimit = ini.Get_Int(AI, "WarLimit", WarLimit);
+    DefenseRatio = ini.Get_Fixed(AI, "DefenseRatio", DefenseRatio);
+    DefenseLimit = ini.Get_Int(AI, "DefenseLimit", DefenseLimit);
+    AARatio = ini.Get_Fixed(AI, "AARatio", AARatio);
+    AALimit = ini.Get_Int(AI, "AALimit", AALimit);
+    TeslaRatio = ini.Get_Fixed(AI, "ObeliskRatio", TeslaRatio);
+    TeslaLimit = ini.Get_Int(AI, "ObeliskLimit", TeslaLimit);
+    HelipadRatio = ini.Get_Fixed(AI, "HelipadRatio", HelipadRatio);
+    HelipadLimit = ini.Get_Int(AI, "HelipadLimit", HelipadLimit);
+    IsCompEasyBonus = ini.Get_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
+    IsComputerParanoid = ini.Get_Bool(AI, "Paranoid", IsComputerParanoid);
+    PowerEmergencyFraction = ini.Get_Fixed(AI, "PowerEmergency", PowerEmergencyFraction);
 }
 
 /***********************************************************************************************
@@ -354,9 +374,9 @@ bool RulesClass::AI(CCINIClass& ini)
  * HISTORY:                                                                                    *
  *   08/08/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::Export_AI(CCINIClass& ini)
+void RulesClass::Export_AI(CCINIClass& ini) const
 {
-    static const char AI[] = "AI";
+    static constexpr char AI[] = "AI";
 
     ini.Put_Fixed(AI, "AttackInterval", AttackInterval);
     ini.Put_Fixed(AI, "AttackDelay", AttackDelay);
@@ -381,7 +401,6 @@ bool RulesClass::Export_AI(CCINIClass& ini)
     ini.Put_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
     ini.Put_Bool(AI, "Paranoid", IsComputerParanoid);
     ini.Put_Fixed(AI, "PowerEmergency", PowerEmergencyFraction);
-    return (true);
 }
 
 /***********************************************************************************************
@@ -400,26 +419,25 @@ bool RulesClass::Export_AI(CCINIClass& ini)
  * HISTORY:                                                                                    *
  *   08/11/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::IQ(CCINIClass& ini)
+void RulesClass::IQ(CCINIClass& ini)
 {
-    static const char IQCONTROL[] = "IQ";
+    static constexpr char IQCONTROL[] = "IQ";
 
-    if (ini.Is_Present(IQCONTROL)) {
-        MaxIQ = ini.Get_Int(IQCONTROL, "MaxIQLevels", MaxIQ);
-        IQSuperWeapons = ini.Get_Int(IQCONTROL, "SuperWeapons", IQSuperWeapons);
-        IQProduction = ini.Get_Int(IQCONTROL, "Production", IQProduction);
-        IQGuardArea = ini.Get_Int(IQCONTROL, "GuardArea", IQGuardArea);
-        IQRepairSell = ini.Get_Int(IQCONTROL, "RepairSell", IQRepairSell);
-        IQCrush = ini.Get_Int(IQCONTROL, "AutoCrush", IQCrush);
-        IQScatter = ini.Get_Int(IQCONTROL, "Scatter", IQScatter);
-        IQContentScan = ini.Get_Int(IQCONTROL, "ContentScan", IQContentScan);
-        IQAircraft = ini.Get_Int(IQCONTROL, "Aircraft", IQAircraft);
-        IQHarvester = ini.Get_Int(IQCONTROL, "Harvester", IQHarvester);
-        IQSellBack = ini.Get_Int(IQCONTROL, "SellBack", IQSellBack);
-
-        return (true);
+    if (!ini.Is_Present(IQCONTROL)) {
+        return;
     }
-    return (false);
+
+    MaxIQ = ini.Get_Int(IQCONTROL, "MaxIQLevels", MaxIQ);
+    IQSuperWeapons = ini.Get_Int(IQCONTROL, "SuperWeapons", IQSuperWeapons);
+    IQProduction = ini.Get_Int(IQCONTROL, "Production", IQProduction);
+    IQGuardArea = ini.Get_Int(IQCONTROL, "GuardArea", IQGuardArea);
+    IQRepairSell = ini.Get_Int(IQCONTROL, "RepairSell", IQRepairSell);
+    IQCrush = ini.Get_Int(IQCONTROL, "AutoCrush", IQCrush);
+    IQScatter = ini.Get_Int(IQCONTROL, "Scatter", IQScatter);
+    IQContentScan = ini.Get_Int(IQCONTROL, "ContentScan", IQContentScan);
+    IQAircraft = ini.Get_Int(IQCONTROL, "Aircraft", IQAircraft);
+    IQHarvester = ini.Get_Int(IQCONTROL, "Harvester", IQHarvester);
+    IQSellBack = ini.Get_Int(IQCONTROL, "SellBack", IQSellBack);
 }
 
 /***********************************************************************************************
@@ -438,9 +456,9 @@ bool RulesClass::IQ(CCINIClass& ini)
  * HISTORY:                                                                                    *
  *   08/11/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::Export_IQ(CCINIClass& ini)
+void RulesClass::Export_IQ(CCINIClass& ini) const
 {
-    static const char IQCONTROL[] = "IQ";
+    static constexpr char IQCONTROL[] = "IQ";
 
     ini.Put_Int(IQCONTROL, "MaxIQLevels", MaxIQ);
     ini.Put_Int(IQCONTROL, "SuperWeapons", IQSuperWeapons);
@@ -453,8 +471,6 @@ bool RulesClass::Export_IQ(CCINIClass& ini)
     ini.Put_Int(IQCONTROL, "Aircraft", IQAircraft);
     ini.Put_Int(IQCONTROL, "Harvester", IQHarvester);
     ini.Put_Int(IQCONTROL, "SellBack", IQSellBack);
-
-    return (true);
 }
 
 /***********************************************************************************************
@@ -471,14 +487,116 @@ bool RulesClass::Export_IQ(CCINIClass& ini)
  * HISTORY:                                                                                    *
  *   09/10/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::Difficulty(CCINIClass& ini)
+void RulesClass::Difficulty(CCINIClass& ini)
 {
 #ifndef REMASTER_BUILD
     Difficulty_Get(ini, Diff[DIFF_EASY], "Easy");
     Difficulty_Get(ini, Diff[DIFF_NORMAL], "Normal");
     Difficulty_Get(ini, Diff[DIFF_HARD], "Difficult");
 #endif
-    return (true);
+}
+
+/**
+ * Load type instance rules from a given INI context, falling back to hardcoded
+ * defaults from C++ code. The rules section for the given type is completely
+ * reset by this call; existing changes to C++ instances or rules are lost.
+ *
+ * This function also sets up an event handler to update instance properties if
+ * the corresponding rules change at runtime. This is primarily used to allow the
+ * Lua APIs to interact with the classes indirectly via the Rules section.
+ */
+template<EnumSignedChar U, RulesTypeClass<U> T>
+static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
+{
+    // get name for type and rules section
+    auto type_name = TdTypeConverter::Get_Type_Name<U>();
+
+    rules.TypeRules[type_name] = std::make_unique<RuleSections>();
+    auto& sections = *rules.TypeRules[type_name];
+
+    // override rules to ensure INI comments for all types reveal real names
+    const auto old_is_named = Special.IsNamed;
+    Special.IsNamed = true;
+
+    for (auto i = first; i < count; ++i) {
+        auto& typeInstance = T::As_Mutable_Reference(i);
+        auto name = std::string(typeInstance.Name());
+
+        rules.Assert_Section_Not_Present(name);
+
+        // load type instance properties using INI
+        sections.Add_Section(name, [&](auto& section, auto rule, const auto& value) {
+            // trigger type instance properties update if rules cache is updated
+            typeInstance.Read_Rules(section); // TODO: consider optimising this to only update the affected property
+        })
+        .Set_Ini_Comment(ini, std::string(Text_String(typeInstance.Full_Name())))
+        .template Set_Converter_Section_Type<U, TdTypeConverter>()
+        .template With<IniRuleContext>(ini, [&](auto& c) {
+            // load initial values from INI, falling back to type instance hardcoded values
+            typeInstance.Read_INI(c);
+        });
+    }
+
+    // reset temporary rules override
+    Special.IsNamed = old_is_named;
+
+    return sections;
+}
+
+template<EnumSignedChar U, RulesTypeClass<U> T>
+static void Init_Type(RulesClass& rules, U first, U count)
+{
+    auto prefix = TdTypeConverter::Get_Type_Name<U>();
+    const auto rules_filename = std::format("{}.INI", prefix);
+
+    CCFileClass ini_file(rules_filename.c_str());
+    CCINIClass ini;
+    const auto ini_file_exists = ini_file.Is_Available();
+
+    if (ini_file_exists) {
+        ini.Load(ini_file, false);
+    }
+
+    auto& sections = Init_Type<U, T>(rules, first, count, ini);
+
+    // TODO: Load new types instances for ini sections with names not found in game engine
+    //       (needs type ptr/reference rework and enums refactoring - to allow types to grow rather than be static)
+
+    // provide player with a default <PREFIX>.INI file
+    if (!ini_file_exists) {
+        sections.Save_All_To_Ini(ini);
+        ini.Save(ini_file, false);
+    }
+
+    ini_file.Close();
+}
+
+void RulesClass::Init_Types()
+{
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT);
+    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT);
+    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT);
+    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT);
+    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
+    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT);
+    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT);
+    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT);
+    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT);
+}
+
+void RulesClass::Init_Types(CCINIClass& ini)
+{
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, ini);
+    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, ini);
+    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, ini);
+    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, ini);
+    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini);
+    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, ini);
+    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, ini);
+    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, ini);
+    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, ini);
 }
 
 /***********************************************************************************************
@@ -495,12 +613,26 @@ bool RulesClass::Difficulty(CCINIClass& ini)
  * HISTORY:                                                                                    *
  *   09/10/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool RulesClass::Export_Difficulty(CCINIClass& ini)
+void RulesClass::Export_Difficulty(CCINIClass& ini) const
 {
 #ifndef REMASTER_BUILD
     Difficulty_Put(ini, Diff[DIFF_EASY], "Easy");
     Difficulty_Put(ini, Diff[DIFF_NORMAL], "Normal");
     Difficulty_Put(ini, Diff[DIFF_HARD], "Difficult");
 #endif
-    return (true);
+}
+
+void RulesClass::Assert_Section_Not_Present(std::string_view name)
+{
+    if (
+        Sections.Has_Section(name) ||
+        std::ranges::any_of(TypeRules, [&](const auto& s) { return s.second->Has_Section(name); })
+    ) {
+        CNC_LOGGER_FATAL(
+            "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
+            "more than once in rules.ini or for a type INI name (Infantry, Unit etc.). All INI names must be unique. "
+            "INI Name: {}",
+            name
+        );
+    }
 }

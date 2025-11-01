@@ -1,6 +1,7 @@
 {
   "$schema": "../../cmake/nco-rules-json-schema.json",
   "section": "Game.Factories",
+  "ini_comment": "Factory behavior (barracks, weapons factory etc.)",
   "comment": "Factory behavior (barracks, weapons factory etc.).",
   "rules": [
     {

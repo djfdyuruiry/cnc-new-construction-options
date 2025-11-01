@@ -111,6 +111,8 @@
  *   TechnoClass::Refund_Amount -- Returns with the money to refund if this object is sold.    *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <numeric>
+
 #include "function.h"
 
 /***************************************************************************
@@ -147,7 +149,7 @@ int const TechnoClass::BodyShape[32] = {0,  31, 30, 29, 28, 27, 26, 25, 24, 23, 
 TechnoTypeClass::TechnoTypeClass(int name,
                                  char const* ininame,
                                  unsigned char level,
-                                 int pre,
+                                 StructType prereq,
                                  bool is_leader,
                                  bool is_scanner,
                                  bool is_nominal,
@@ -173,7 +175,7 @@ TechnoTypeClass::TechnoTypeClass(int name,
                                  int scenario,
                                  int risk,
                                  int reward,
-                                 int ownable,
+                                 std::vector<HousesType> ownableBy,
                                  WeaponType primary,
                                  WeaponType secondary,
                                  ArmorType armor)
@@ -191,7 +193,6 @@ TechnoTypeClass::TechnoTypeClass(int name,
                       strength)
 {
     Level = level;
-    Pre = pre;
     MaxAmmo = ammo;
     MaxSpeed = maxspeed;
     CameoData = NULL;
@@ -206,20 +207,52 @@ TechnoTypeClass::TechnoTypeClass(int name,
     IsRepairable = is_repairable;
     IsTurretEquipped = is_turret_equipped;
     IsNominal = is_nominal;
-    Ownable = ownable;
     Reward = reward;
     Scenario = scenario;
     SightRange = sightrange;
 
-    /*
-    ** Units risk value is based on the type of weapon he has and the
-    ** rate of fire it shoots at.
-    */
-    risk = risk;
-    Risk = 0;
-    if (primary != WEAPON_NONE) {
-        Risk = (Weapons[primary].Attack * (Weapons[primary].Range >> 4)) / Weapons[primary].ROF;
-    }
+    Prerequisite = prereq;
+    OwnableBy = std::move(ownableBy);
+
+    Set_Pre();
+    Set_Ownable();
+    Calc_Risk();
+}
+
+/**
+ * Units risk value is based on the type of weapon he has and the
+ * rate of fire it shoots at.
+ */
+void TechnoTypeClass::Calc_Risk()
+{
+    Risk = Primary != WEAPON_NONE
+        ? (Weapons[Primary].Attack * (Weapons[Primary].Range >> 4)) / Weapons[Primary].ROF
+        : 0;
+}
+
+/**
+ * Pre is set to a bitmask value for the STRUCT_X type in Prerequisite.
+ *
+ * (Replacement for old STRUCTF_X constants)
+ */
+void TechnoTypeClass::Set_Pre()
+{
+    Pre = Prerequisite == STRUCT_NONE ? 0L : (1L << Prerequisite);
+}
+
+/**
+ * Ownable is set to a bitmask value for the HOUSE_X types in OwnableBy.
+ *
+ * (Replacement for old HOUSEF_X constants)
+ */
+void TechnoTypeClass::Set_Ownable()
+{
+    Ownable = std::accumulate(
+        OwnableBy.begin(),
+        OwnableBy.end(),
+        0L,
+        [](auto ownable, const auto& house) { return ownable | 1L << house; }
+    );
 }
 
 /***********************************************************************************************

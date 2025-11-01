@@ -709,6 +709,19 @@ typedef enum PlayerColorType : signed char
     REMAP_COUNT
 } PlayerColorType;
 
+/*
+**	These are the colors used to identify the various owners.
+*/
+typedef enum HouseColorType : unsigned char
+{
+    HOUSE_COLOR_GOOD = 180,           // GOLD
+    HOUSE_COLOR_BRIGHT_GOOD = 176,    // GOLD
+    HOUSE_COLOR_BAD = 123,            // RED
+    HOUSE_COLOR_BRIGHT_BAD = 127,     // RED
+    HOUSE_COLOR_NEUTRAL = 205,        // WHITE
+    HOUSE_COLOR_BRIGHT_NEUTRAL = 202  // WHITE
+} HouseColorType;
+
 /**********************************************************************
 ** These are the types of games that can be played.  GDI & NOD are the
 ** usual human-vs-computer games; 2-Player games are network or modem,
@@ -1873,7 +1886,8 @@ typedef enum WarheadType : signed char
     WARHEAD_HEADBUTT,     // Other dinosaurs butt into people
     WARHEAD_FEEDME,       // T-Rex eats people, hurts vehicles/buildings
 
-    WARHEAD_COUNT
+    WARHEAD_COUNT,
+    WARHEAD_FIRST = WARHEAD_SA
 } WarheadType;
 
 /**********************************************************************
@@ -1910,7 +1924,9 @@ typedef enum WeaponType : signed char
     WEAPON_HONEST_JOHN,
     WEAPON_STEG,
     WEAPON_TREX,
-    WEAPON_COUNT
+
+    WEAPON_COUNT,
+    WEAPON_FIRST = WEAPON_RIFLE
 } WeaponType;
 
 /**********************************************************************

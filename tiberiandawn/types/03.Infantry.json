@@ -1,0 +1,59 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Infantry",
+  "enum": "InfantryType",
+  "class": "InfantryTypeClass",
+  "base_class": "TechnoTypeClass",
+  "example_instance": "E1",
+  "example_instance_comment": "Minigunner",
+  "comment": "Types of Infantry that can be found in the game - e.g. Minigunner, Engineer etc.",
+  "properties": [
+    {
+      "name": "IsFemale",
+      "type": "Bool",
+      "comment": "If this civilian infantry type is female, then this flag will be true. This information is used to get the correct voice response."
+    },
+    {
+      "name": "IsCrawling",
+      "type": "Bool",
+      "comment": "Does this infantry unit have crawling animation? If not, then this means that the \"crawling\" frames are actually running animation frames."
+    },
+    {
+      "name": "IsCapture",
+      "type": "Bool",
+      "comment": "For those infantry types that can capture buildings, this flag will be set to true."
+    },
+    {
+      "name": "IsFraidyCat",
+      "type": "Bool",
+      "comment": "For infantry types that will run away from any damage causing events, this flag will be true. Typically, this is so for all civilians as well as the flame thrower guys."
+    },
+    {
+      "name": "IsCivilian",
+      "type": "Bool",
+      "comment": "This flags whether this infantry is actually a civilian. A civilian uses different voice responses, has less ammunition, and runs from danger more often."
+    },
+    {
+      "name": "IsAvoidingTiberium",
+      "type": "Bool",
+      "comment": "For \"fraidycat\" infantry types that will run away from any damage causing events, this controls whether they avoid wandering into Tiberium."
+    },
+    {
+      "name": "Type",
+      "type": "InfantryType",
+      "requires_converter": true,
+      "valid_values": "NONE, E1, E2, E3, E4, E5, E6, RAMBO, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, MOEBIUS, DELPHI, CHAN",
+      "comment": "This value represents the infantry class. It can serve as unique identification for this infantry class."
+    },
+    {
+      "name": "CameoName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this infantry. (not supported in Lua)"
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this infantry. (not supported in Lua)"
+    }
+  ]
+}

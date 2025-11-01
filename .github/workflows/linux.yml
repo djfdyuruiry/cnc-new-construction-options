@@ -192,6 +192,9 @@ jobs:
 
         mkdir artifact
 
+        # ninja build log (useful for profiling compilation)
+        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/nco/.ninja_log
+
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           # ra bundle
           7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra

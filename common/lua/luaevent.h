@@ -21,7 +21,7 @@ public:
     };
 
 protected:
-    inline static CncLogger Logger = CncLogger("LuaEvent");
+    static inline const auto& Logger = CncLogger::For(LuaEvent);
 
     const std::string_view EventType;
 };

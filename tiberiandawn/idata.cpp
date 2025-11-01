@@ -45,6 +45,7 @@
 
 #include "function.h"
 #include "type.h"
+#include "typeconverter.h"
 
 /*
  * There were too many parameters for the InfantryTypeClass constructor so I have
@@ -99,9 +100,11 @@ int MiniGunnerDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const E1(INFANTRY_E1,          // Infantry type number.
                                   TXT_E1,               // Translate name number for infantry type.
-                                  "E1",                 // INI name for infantry.
+                                  "E1",                 // INI name of infantry.
+                                  "E1",                 // Cameo name of infantry.
+                                  "E1",                 // Image name of infantry.
                                   1,                    // Build level.
-                                  STRUCTF_NONE,         // Building prerequisite.
+                                  STRUCT_NONE,          // Building prerequisite.
                                   false,                // Is this a female type?
                                   true,                 // Is a leader type?
                                   true,                 // Has crawling animation frames?
@@ -120,9 +123,7 @@ static InfantryTypeClass const E1(INFANTRY_E1,          // Infantry type number.
                                   1,                    // Scenario when they first appear.
                                   80,
                                   10, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                      | HOUSEF_BAD, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // Who can own this infantry unit.
                                   WEAPON_M16,
                                   WEAPON_NONE,
                                   MPH_SLOW // Maximum speed of infantry.
@@ -169,9 +170,11 @@ int GrenadierDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const E2(INFANTRY_E2,         // Infantry type number.
                                   TXT_E2,              // Translate name number for infantry type.
-                                  "E2",                // INI name for infantry.
+                                  "E2",                // INI name of infantry.
+                                  "E2",                // Cameo name of infantry.
+                                  "E2",                // Image name of infantry.
                                   1,                   // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   true,                // Is a leader type?
                                   true,                // Has crawling animation frames?
@@ -190,8 +193,7 @@ static InfantryTypeClass const E2(INFANTRY_E2,         // Infantry type number.
                                   3,                   // Scenario when they first appear.
                                   80,
                                   10, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD }, // Who can own this infantry unit.
                                   WEAPON_GRENADE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH // Maximum speed of infantry.
@@ -238,9 +240,11 @@ int BazookaDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const E3(INFANTRY_E3,       // Infantry type number.
                                   TXT_E3,            // Translate name number for infantry type.
-                                  "E3",              // INI name for infantry.
+                                  "E3",              // INI name of infantry.
+                                  "E3",              // Cameo name of infantry.
+                                  "E3",              // Image name of infantry.
                                   2,                 // Build level.
-                                  STRUCTF_NONE,      // Building prerequisite.
+                                  STRUCT_NONE,       // Building prerequisite.
                                   false,             // Is this a female type?
                                   true,              // Is a leader type?
                                   true,              // Has crawling animation frames?
@@ -259,9 +263,7 @@ static InfantryTypeClass const E3(INFANTRY_E3,       // Infantry type number.
                                   3,                 // Scenario when they first appear.
                                   80,
                                   10, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                      | HOUSEF_BAD, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // Who can own this infantry unit.
                                   WEAPON_DRAGON,
                                   WEAPON_NONE,
                                   MPH_KINDA_SLOW // Maximum speed of infantry.
@@ -308,9 +310,11 @@ int FlamethrowerDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const E4(INFANTRY_E4,            // Infantry type number.
                                   TXT_E4,                 // Translate name number for infantry type.
-                                  "E4",                   // INI name for infantry.
+                                  "E4",                   // INI name of infantry.
+                                  "E4",                   // Cameo name of infantry.
+                                  "E4",                   // Image name of infantry.
                                   1,                      // Build level.
-                                  STRUCTF_NONE,           // Building prerequisite.
+                                  STRUCT_NONE,            // Building prerequisite.
                                   false,                  // Is this a female type?
                                   true,                   // Is a leader type?
                                   true,                   // Has crawling animation frames?
@@ -329,8 +333,7 @@ static InfantryTypeClass const E4(INFANTRY_E4,            // Infantry type numbe
                                   5,                      // Scenario when they first appear.
                                   80,
                                   10, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD }, // Who can own this infantry unit.
                                   WEAPON_FLAMETHROWER,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -376,9 +379,11 @@ int ChemwarriorDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const E5(INFANTRY_E5,           // Infantry type number.
                                   TXT_E5,                // Translate name number for infantry type.
-                                  "E5",                  // INI name for infantry.
+                                  "E5",                  // INI name of infantry.
+                                  "E5",                  // Cameo name of infantry.
+                                  "E5",                  // Image name of infantry.
                                   7,                     // Build level.
-                                  STRUCTF_EYE,           // Building prerequisite.
+                                  STRUCT_EYE,            // Building prerequisite.
                                   false,                 // Is this a female type?
                                   true,                  // Is a leader type?
                                   true,                  // Has crawling animation frames?
@@ -397,10 +402,8 @@ static InfantryTypeClass const E5(INFANTRY_E5,           // Infantry type number
                                   98,                    // Scenario when they first appear.
                                   80,
                                   10, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP |
-                                      //	HOUSEF_GOOD|
-                                      HOUSEF_BAD, // Who can own this infantry unit.
+                                  //	HOUSEF_GOOD
+                                { HOUSE_BAD, HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP }, // Who can own this infantry unit.
                                   WEAPON_CHEMSPRAY,
                                   WEAPON_NONE,
                                   MPH_SLOW);
@@ -446,9 +449,11 @@ int EngineerDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const E7(INFANTRY_E7,        // Infantry type number.
                                   TXT_E7,             // Translate name number for infantry type.
-                                  "E6",               // INI name for infantry.
+                                  "E6",               // INI name of infantry.
+                                  "E6",               // Cameo name of infantry.
+                                  "E6",               // Image name of infantry.
                                   3,                  // Build level.
-                                  STRUCTF_NONE,       // Building prerequisite.
+                                  STRUCT_NONE,        // Building prerequisite.
                                   false,              // Is this a female type?
                                   false,              // Is a leader type?
                                   false,              // Has crawling animation frames?
@@ -467,9 +472,7 @@ static InfantryTypeClass const E7(INFANTRY_E7,        // Infantry type number.
                                   2,                  // Scenario when they first appear.
                                   80,
                                   75, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_BAD
-                                      | HOUSEF_GOOD, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_BAD, HOUSE_GOOD }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW // Maximum speed of infantry.
@@ -516,9 +519,11 @@ int CommandoDos[DO_COUNT][3] = {
 };
 static InfantryTypeClass const Commando(INFANTRY_RAMBO,     // Infantry type number.
                                         TXT_RAMBO,          // Translate name number for infantry type.
-                                        "RMBO",             // INI name for infantry.
+                                        "RMBO",             // INI name of infantry.
+                                        "RMBO",             // Cameo name of infantry.
+                                        "RMBO",             // Image name of infantry.
                                         7,                  // Build level.
-                                        STRUCTF_EYE,        // Building prerequisite.
+                                        STRUCT_EYE,         // Building prerequisite.
                                         false,              // Is this a female type?
                                         true,               // Is a leader type?
                                         true,               // Has crawling animation frames?
@@ -537,9 +542,7 @@ static InfantryTypeClass const Commando(INFANTRY_RAMBO,     // Infantry type num
                                         98,                 // Scenario when they first appear.
                                         80,
                                         75, // Risk/Reward of this infantry unit.
-                                        HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                            | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                            | HOUSEF_BAD, // Who can own this infantry unit.
+                                        { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD }, // Who can own this infantry unit.
                                         WEAPON_RIFLE,
                                         WEAPON_NONE,
                                         MPH_SLOW_ISH // Maximum speed of infantry.
@@ -586,9 +589,11 @@ int CivilianDos1[DO_COUNT][3] = {
 
 static InfantryTypeClass const C1(INFANTRY_C1,         // Infantry type number.
                                   TXT_C1,              // Translate name number for infantry type.
-                                  "C1",                // INI name for infantry.
+                                  "C1",                // INI name of infantry.
+                                  "C1",                // Cameo name of infantry.
+                                  "C1",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   true,                // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -607,9 +612,7 @@ static InfantryTypeClass const C1(INFANTRY_C1,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_PISTOL,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -653,9 +656,11 @@ int CivilianDos2[DO_COUNT][3] = {
 
 static InfantryTypeClass const C2(INFANTRY_C2,         // Infantry type number.
                                   TXT_C2,              // Translate name number for infantry type.
-                                  "C2",                // INI name for infantry.
+                                  "C2",                // INI name of infantry.
+                                  "C2",                // Cameo name of infantry.
+                                  "C2",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -674,9 +679,7 @@ static InfantryTypeClass const C2(INFANTRY_C2,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -721,9 +724,11 @@ int CivilianDos3[DO_COUNT][3] = {
 
 static InfantryTypeClass const C3(INFANTRY_C3,         // Infantry type number.
                                   TXT_C3,              // Translate name number for infantry type.
-                                  "C3",                // INI name for infantry.
+                                  "C3",                // INI name of infantry.
+                                  "C3",                // Cameo name of infantry.
+                                  "C3",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   true,                // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -742,9 +747,7 @@ static InfantryTypeClass const C3(INFANTRY_C3,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -788,9 +791,11 @@ int CivilianDos4[DO_COUNT][3] = {
 
 static InfantryTypeClass const C4(INFANTRY_C4,         // Infantry type number.
                                   TXT_C4,              // Translate name number for infantry type.
-                                  "C4",                // INI name for infantry.
+                                  "C4",                // INI name of infantry.
+                                  "C4",                // Cameo name of infantry.
+                                  "C4",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   true,                // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -809,9 +814,7 @@ static InfantryTypeClass const C4(INFANTRY_C4,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -855,9 +858,11 @@ int CivilianDos5[DO_COUNT][3] = {
 
 static InfantryTypeClass const C5(INFANTRY_C5,         // Infantry type number.
                                   TXT_C5,              // Translate name number for infantry type.
-                                  "C5",                // INI name for infantry.
+                                  "C5",                // INI name of infantry.
+                                  "C5",                // Cameo name of infantry.
+                                  "C5",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -876,9 +881,7 @@ static InfantryTypeClass const C5(INFANTRY_C5,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -922,9 +925,11 @@ int CivilianDos6[DO_COUNT][3] = {
 
 static InfantryTypeClass const C6(INFANTRY_C6,         // Infantry type number.
                                   TXT_C6,              // Translate name number for infantry type.
-                                  "C6",                // INI name for infantry.
+                                  "C6",                // INI name of infantry.
+                                  "C6",                // Cameo name of infantry.
+                                  "C6",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -943,9 +948,7 @@ static InfantryTypeClass const C6(INFANTRY_C6,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -989,9 +992,11 @@ int CivilianDos7[DO_COUNT][3] = {
 
 static InfantryTypeClass const C7(INFANTRY_C7,         // Infantry type number.
                                   TXT_C7,              // Translate name number for infantry type.
-                                  "C7",                // INI name for infantry.
+                                  "C7",                // INI name of infantry.
+                                  "C7",                // Cameo name of infantry.
+                                  "C7",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   true,                // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -1010,9 +1015,7 @@ static InfantryTypeClass const C7(INFANTRY_C7,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_PISTOL,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -1056,9 +1059,11 @@ int CivilianDos8[DO_COUNT][3] = {
 
 static InfantryTypeClass const C8(INFANTRY_C8,         // Infantry type number.
                                   TXT_C8,              // Translate name number for infantry type.
-                                  "C8",                // INI name for infantry.
+                                  "C8",                // INI name of infantry.
+                                  "C8",                // Cameo name of infantry.
+                                  "C8",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -1077,9 +1082,7 @@ static InfantryTypeClass const C8(INFANTRY_C8,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -1123,9 +1126,11 @@ int CivilianDos9[DO_COUNT][3] = {
 
 static InfantryTypeClass const C9(INFANTRY_C9,         // Infantry type number.
                                   TXT_C9,              // Translate name number for infantry type.
-                                  "C9",                // INI name for infantry.
+                                  "C9",                // INI name of infantry.
+                                  "C9",                // Cameo name of infantry.
+                                  "C9",                // Image name of infantry.
                                   99,                  // Build level.
-                                  STRUCTF_NONE,        // Building prerequisite.
+                                  STRUCT_NONE,         // Building prerequisite.
                                   false,               // Is this a female type?
                                   false,               // Is a leader type?
                                   false,               // Has crawling animation frames?
@@ -1144,9 +1149,7 @@ static InfantryTypeClass const C9(INFANTRY_C9,         // Infantry type number.
                                   99,                  // Scenario when they first appear.
                                   0,
                                   1, // Risk/Reward of this infantry unit.
-                                  HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                      | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                      | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                  { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                   WEAPON_NONE,
                                   WEAPON_NONE,
                                   MPH_SLOW_ISH);
@@ -1192,9 +1195,11 @@ int NikoombaDos[DO_COUNT][3] = {
 // Nikoomba
 static InfantryTypeClass const C10(INFANTRY_C10,       // Infantry type number.
                                    TXT_C10,            // Translate name number for infantry type.
-                                   "C10",              // INI name for infantry.
+                                   "C10",              // INI name of infantry.
+                                   "C10",              // Cameo name of infantry.
+                                   "C10",              // Image name of infantry.
                                    99,                 // Build level.
-                                   STRUCTF_NONE,       // Building prerequisite.
+                                   STRUCT_NONE,        // Building prerequisite.
                                    false,              // Is this a female type?
                                    false,              // Is a leader type?
                                    false,              // Has crawling animation frames?
@@ -1213,9 +1218,7 @@ static InfantryTypeClass const C10(INFANTRY_C10,       // Infantry type number.
                                    99,                 // Scenario when they first appear.
                                    0,
                                    1, // Risk/Reward of this infantry unit.
-                                   HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                       | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                       | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                   { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                    WEAPON_NONE,
                                    WEAPON_NONE,
                                    MPH_SLOW_ISH);
@@ -1259,9 +1262,11 @@ int MoebiusDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const Moebius(INFANTRY_MOEBIUS,  // Infantry type number.
                                        TXT_MOEBIUS,       // Translate name number for infantry type.
-                                       "MOEBIUS",         // INI name for infantry.
+                                       "MOEBIUS",         // INI name of infantry.
+                                       "MOEBIUS",         // Cameo name of infantry.
+                                       "MOEBIUS",         // Image name of infantry.
                                        99,                // Build level.
-                                       STRUCTF_NONE,      // Building prerequisite.
+                                       STRUCT_NONE,       // Building prerequisite.
                                        false,             // Is this a female type?
                                        false,             // Is a leader type?
                                        false,             // Has crawling animation frames?
@@ -1280,9 +1285,7 @@ static InfantryTypeClass const Moebius(INFANTRY_MOEBIUS,  // Infantry type numbe
                                        99,                // Scenario when they first appear.
                                        0,
                                        10, // Risk/Reward of this infantry unit.
-                                       HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                           | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD | HOUSEF_BAD
-                                           | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                       { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_BAD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                        WEAPON_NONE,
                                        WEAPON_NONE,
                                        MPH_SLOW_ISH);
@@ -1326,9 +1329,11 @@ int DelphiDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const Delphi(INFANTRY_DELPHI,  // Infantry type number.
                                       TXT_DELPHI,       // Translate name number for infantry type.
-                                      "DELPHI",         // INI name for infantry.
+                                      "DELPHI",         // INI name of infantry.
+                                      "DELPHI",         // Cameo name of infantry.
+                                      "DELPHI",         // Image name of infantry.
                                       99,               // Build level.
-                                      STRUCTF_NONE,     // Building prerequisite.
+                                      STRUCT_NONE,      // Building prerequisite.
                                       false,            // Is this a female type?
                                       false,            // Is a leader type?
                                       false,            // Has crawling animation frames?
@@ -1347,9 +1352,7 @@ static InfantryTypeClass const Delphi(INFANTRY_DELPHI,  // Infantry type number.
                                       99,               // Scenario when they first appear.
                                       0,
                                       0, // Risk/Reward of this infantry unit.
-                                      HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                          | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                          | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                      { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                       WEAPON_PISTOL,
                                       WEAPON_NONE,
                                       MPH_SLOW_ISH);
@@ -1393,9 +1396,11 @@ int DrChanDos[DO_COUNT][3] = {
 
 static InfantryTypeClass const DrChan(INFANTRY_CHAN,    // Infantry type number.
                                       TXT_CHAN,         // Translate name number for infantry type.
-                                      "CHAN",           // INI name for infantry.
+                                      "CHAN",           // INI name of infantry.
+                                      "CHAN",           // Cameo name of infantry.
+                                      "CHAN",           // Image name of infantry.
                                       99,               // Build level.
-                                      STRUCTF_NONE,     // Building prerequisite.
+                                      STRUCT_NONE,      // Building prerequisite.
                                       false,            // Is this a female type?
                                       false,            // Is a leader type?
                                       false,            // Has crawling animation frames?
@@ -1414,9 +1419,7 @@ static InfantryTypeClass const DrChan(INFANTRY_CHAN,    // Infantry type number.
                                       99,               // Scenario when they first appear.
                                       0,
                                       1, // Risk/Reward of this infantry unit.
-                                      HOUSEF_MULTI1 | HOUSEF_MULTI2 | HOUSEF_MULTI3 | HOUSEF_MULTI4 | HOUSEF_MULTI5
-                                          | HOUSEF_MULTI6 | HOUSEF_JP | HOUSEF_GOOD
-                                          | HOUSEF_NEUTRAL, // Who can own this infantry unit.
+                                      { HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP, HOUSE_GOOD, HOUSE_NEUTRAL }, // Who can own this infantry unit.
                                       WEAPON_NONE,
                                       WEAPON_NONE,
                                       MPH_SLOW_ISH);
@@ -1465,8 +1468,10 @@ InfantryTypeClass const* const InfantryTypeClass::Pointers[INFANTRY_COUNT] = {&E
 InfantryTypeClass::InfantryTypeClass(InfantryType type,
                                      int name,
                                      char const* ininame,
+                                     std::string_view cameo_name,
+                                     std::string_view image_name,
                                      unsigned char level,
-                                     int pre,
+                                     StructType prereq,
                                      bool is_female,
                                      bool is_leader,
                                      bool is_crawling,
@@ -1485,14 +1490,14 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
                                      int scenario,
                                      int risk,
                                      int reward,
-                                     int ownable,
+                                     std::vector<HousesType> ownableBy,
                                      WeaponType primary,
                                      WeaponType secondary,
                                      MPHType maxspeed)
     : TechnoTypeClass(name,
                       ininame,
                       level,
-                      pre,
+                      prereq,
                       is_leader,
                       true,
                       is_nominal,
@@ -1518,7 +1523,7 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
                       scenario,
                       risk,
                       reward,
-                      ownable,
+                      std::move(ownableBy),
                       primary,
                       secondary,
                       ARMOR_NONE)
@@ -1532,6 +1537,8 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
     Type = type;
     FireLaunch = firelaunch;
     ProneLaunch = pronelaunch;
+    CameoName = cameo_name;
+    ImageName = image_name;
 
     /*
     **	Set the animation sequence custom values.
@@ -1878,7 +1885,7 @@ void InfantryTypeClass::One_Time(void)
         /*
         **	Generic shape for all houses load method.
         */
-        _makepath(fullname, NULL, NULL, uclass->IniName, ".SHP");
+        _makepath(fullname, NULL, NULL, uclass->ImageName.c_str(), ".SHP");
         ((void const*&)uclass->ImageData) = MFCD::Retrieve(fullname);
 
         /*
@@ -1886,9 +1893,9 @@ void InfantryTypeClass::One_Time(void)
         */
         char buffer[_MAX_FNAME];
         if (Get_Resolution_Factor()) {
-            sprintf(buffer, "%.4sICNH", uclass->IniName);
+            sprintf(buffer, "%.4sICNH", uclass->CameoName.c_str());
         } else {
-            sprintf(buffer, "%.4sICON", uclass->IniName);
+            sprintf(buffer, "%.4sICON", uclass->CameoName.c_str());
         }
         _makepath(fullname, NULL, NULL, buffer, ".SHP");
         ((void const*&)uclass->CameoData) = MFCD::Retrieve(fullname);
@@ -1928,7 +1935,7 @@ void InfantryTypeClass::Init(TheaterType theater)
 
                 ((void const*&)uclass->CameoData) = NULL;
 
-                sprintf(buffer, "%.4sICNH", uclass->IniName);
+                sprintf(buffer, "%.4sICNH", uclass->CameoName.c_str());
                 _makepath(fullname, NULL, NULL, buffer, Theaters[theater].Suffix);
                 cameo_ptr = MFCD::Retrieve(fullname);
                 if (cameo_ptr) {

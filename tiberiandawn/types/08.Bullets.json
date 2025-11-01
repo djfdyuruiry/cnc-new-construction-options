@@ -1,0 +1,120 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Bullet",
+  "enum": "BulletType",
+  "class": "BulletTypeClass",
+  "base_class": "ObjectTypeClass",
+  "example_instance": "SNIPER",
+  "comment": "Bullets are fired by Weapons (bullet means any projectile in this context) - e.x. Commando has a RIFLE (weapon) which fires a SNIPER bullet",
+  "properties": [
+    {
+      "name": "IsHigh",
+      "type": "Bool",
+      "comment": "Does this bullet type fly over walls?"
+    },
+    {
+      "name": "IsArcing",
+      "type": "Bool",
+      "comment": "If this projectile is one that balistically arcs from ground level, up into the air and then back to the ground, where it explodes. Typical uses of this are for grenades and artillery shells."
+    },
+    {
+      "name": "IsHoming",
+      "type": "Bool",
+      "comment": "If the projectile changes course as it flies in order to home in on the projectile's target, then this flag is true. Missiles are typically ones that do this."
+    },
+    {
+      "name": "IsDropping",
+      "type": "Bool",
+      "comment": "Certain projectiles do not travel horizontally, but rather, vertically -- they drop from a height. Bombs fall into this category and will have this value set to true. Dropping projectiles do not calculate collision with terrain (such as walls)."
+    },
+    {
+      "name": "IsInvisible",
+      "type": "Bool",
+      "comment": "Is this projectile invisible? Some bullets and weapon effects are not directly rendered. Small caliber bullets and flame thrower flames are treated like normal projectiles for damage purposes, but are displayed using custom rules."
+    },
+    {
+      "name": "IsProximityArmed",
+      "type": "Bool",
+      "comment": "Does this bullet explode when near the target? Some bullets only explode if it actually hits the target. Some explode even if nearby."
+    },
+    {
+      "name": "IsFlameEquipped",
+      "type": "Bool",
+      "comment": "Does this projectile spew puffs of smoke out its tail while it travels? Missiles are prime examples of this projectile type."
+    },
+    {
+      "name": "IsFueled",
+      "type": "Bool",
+      "comment": "Should fuel consumption be tracked for this projectile? Rockets are the primary projectile with this characteristic, but even for bullets it should be checked so that bullets don't travel too far."
+    },
+    {
+      "name": "IsFaceless",
+      "type": "Bool",
+      "comment": "Is this projectile without different facing visuals? Most plain bullets do not change visual imagery if their facing changes. Rockets, on the other hand, are equipped with the full 32 facing imagery."
+    },
+    {
+      "name": "IsInaccurate",
+      "type": "Bool",
+      "comment": "If this is a typically inaccurate projectile, then this flag will be true. Artillery is a prime example of this type."
+    },
+    {
+      "name": "IsTranslucent",
+      "type": "Bool",
+
+      "comment": "If the bullet contains translucent pixels, then this flag will be true. These translucent pixels really are \"shadow\" pixels in the same style as the shadow cast by regular ground units."
+    },
+    {
+      "name": "IsAntiAircraft",
+      "type": "Bool",
+      "comment": "If this bullet can be fired on aircraft, then this flag will be true."
+    },
+    {
+      "name": "Type",
+      "type": "BulletType",
+      "requires_converter": true,
+      "valid_values": "NONE, APDS, ATOMICDN, ATOMICUP, BULLET, CHEMSPRA, CHEW, FLAME, GORE, GRENADE, HE, HONESTJB, LASER, NAPALM, SAM_BULT, SNIPER, SPRDFIRE, SSM, SSM2, TOW",
+      "comment": "This element is a unique identification number for the bullet type."
+    },
+    {
+      "name": "MaxSpeed",
+      "type": "MPHType",
+      "requires_converter": true,
+      "valid_values": "IMMOBILE, VERY_SLOW, KINDA_SLOW, SLOW, SLOW_ISH, MEDIUM_SLOW, MEDIUM, MEDIUM_FAST, MEDIUM_FASTER, FAST, ROCKET, VERY_FAST, LIGHT_SPEED",
+      "comment": "Maximum speed for this bullet type."
+    },
+    {
+      "name": "Warhead",
+      "type": "WarheadType",
+      "requires_converter": true,
+      "valid_values": "NONE, AP, FEEDME, FIRE, FIST, FOOT, HEADBUTT, HE_WARHEAD, HOLLOW_POINT, LASER_WARHEAD, PB, SA, SPORE - See: [warhead.ini](#warheadini)",
+      "comment": "This projectile has a certain style of warhead. This value specifies what that warhead type is."
+    },
+    {
+      "name": "Explosion",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "NONE, ART_EXP1, ATOMDOOR, ATOMSFX, BEACON, BEACON_V, BURN_L, BURN_M, BURN_S, CHEMBALL, CHEM_E, CHEM_N, CHEM_NE, CHEM_NW, CHEM_S, CHEM_SE, CHEM_SW, CHEM_W, DEVIATOR, DOLLAR, EARTH, EMPULSE, FBALL1, FIR2_M_V, FIRE_M, FIRE_ME, FIRE_M_V, FIRE_S, FIRE_S_V, FIRE_T, FIRE_T_V, FLAG, FLAME_E, FLAME_N, FLAME_NE, FLAME_NW, FLAME_S, FLAME_SE, FLAME_SW, FLAME_W, FLMSPT, FRAG1, FRAG2, GRENADEA, GUNFIRE, GUN_N, GUN_NW, GUN_SW, GUN_W, INVUN, IONSFX, LZ_SMOKE, MGUN_E, MGUN_NE, MGUN_S, MGUN_SE, MINE, MISSILE, MV_FLASH, NAPALM1, NAPALM2, NAPALM3, ONFIRE_L, ONFIRE_M, ONFIRE_S, PIFF, PIFFPIFF, RAPID, RAPT_DIE, SAM_E, SAM_NE, SAM_S, SAM_SE, SFIRE_N, SFIRE_NW, SFIRE_SW, SFIRE_W, SMOKEY, SMOKE_M, STEALTH, STEG_DIE, TREX_DIE, TRIC_DIE, VEH_HIT1, VEH_HIT2, VEH_HIT3 - See: [animation.ini](#animationini)",
+      "comment": "This is the \"explosion\" effect to use when this projectile impacts."
+    },
+    {
+      "name": "ROT",
+      "type": "UChar",
+      "comment": "This is the rotation speed of the bullet. It only has practical value for those projectiles that performing homing action during flight -- such as with rockets."
+    },
+    {
+      "name": "Arming",
+      "type": "Int",
+      "comment": "Some projectiles have a built in arming distance that must elapse before the projectile may explode. If this value is non-zero, then this override is applied."
+    },
+    {
+      "name": "Range",
+      "type": "Int",
+      "comment": "Some projectiles have a built in override for distance travelled before it automatically explodes. This value, if non-zero, specifies this distance."
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this bullet. (not supported in Lua)"
+    }
+  ]
+}

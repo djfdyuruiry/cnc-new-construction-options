@@ -36,12 +36,14 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /***************************************************************************
 **	Detailed information about each class of bullet (projectile) in the game.
 */
 static BulletTypeClass const ClassSniper(BULLET_SNIPER,
-                                         "50cal",         // NAME:			Text name of this unit type.
+                                         "SNIPER",        // INI name of bullet.
+                                         "50cal",         // Image name of bullet.
                                          false,           // Flies over tall walls?
                                          false,           // Homes in on target?
                                          false,           // Projectile arcs to the target?
@@ -63,7 +65,8 @@ static BulletTypeClass const ClassSniper(BULLET_SNIPER,
 );
 
 static BulletTypeClass const ClassBullet(BULLET_BULLET,
-                                         "50cal",         // NAME:			Text name of this unit type.
+                                         "BULLET",        // INI name of bullet.
+                                         "50cal",         // Image name of bullet.
                                          false,           // Flies over tall walls?
                                          false,           // Homes in on target?
                                          false,           // Projectile arcs to the target?
@@ -85,7 +88,8 @@ static BulletTypeClass const ClassBullet(BULLET_BULLET,
 );
 
 static BulletTypeClass const ClassSpreadfire(BULLET_SPREADFIRE,
-                                             "50cal", // NAME:			Text name of this unit type.
+                                             "SPRDFIRE", // INI name of bullet.
+                                             "50cal", // Image name of bullet.
                                              true,    // Flies over tall walls?
                                              false,   // Homes in on target?
                                              false,   // Projectile arcs to the target?
@@ -107,7 +111,8 @@ static BulletTypeClass const ClassSpreadfire(BULLET_SPREADFIRE,
 );
 
 static BulletTypeClass const ClassAPDS(BULLET_APDS,
-                                       "120mm",       // NAME:			Text name of this unit type.
+                                       "APDS",        // INI name of bullet.
+                                       "120mm",       // Image name of bullet.
                                        false,         // Flies over tall walls?
                                        false,         // Homes in on target?
                                        false,         // Projectile arcs to the target?
@@ -129,7 +134,8 @@ static BulletTypeClass const ClassAPDS(BULLET_APDS,
 );
 
 static BulletTypeClass const Class120mm(BULLET_HE,
-                                        "120mm",         // NAME:			Text name of this unit type.
+                                        "HE",            // INI name of bullet.
+                                        "120mm",         // Image name of bullet.
                                         true,            // Flies over tall walls?
                                         false,           // Homes in on target?
                                         true,            // Projectile arcs to the target?
@@ -151,7 +157,8 @@ static BulletTypeClass const Class120mm(BULLET_HE,
 );
 
 static BulletTypeClass const ClassMissile(BULLET_SSM,
-                                          "DRAGON",   // NAME:			Text name of this unit type.
+                                          "SSM",      // INI name of bullet.
+                                          "DRAGON",   // Image name of bullet.
                                           true,       // Flies over tall walls?
                                           true,       // Homes in on target?
                                           false,      // Projectile arcs to the target?
@@ -173,7 +180,8 @@ static BulletTypeClass const ClassMissile(BULLET_SSM,
 );
 
 static BulletTypeClass const ClassMissile2(BULLET_SSM2,
-                                           "DRAGON",   // NAME:			Text name of this unit type.
+                                           "SSM2",     // INI name of bullet.
+                                           "DRAGON",   // Image name of bullet.
                                            true,       // Flies over tall walls?
                                            true,       // Homes in on target?
                                            false,      // Projectile arcs to the target?
@@ -195,7 +203,8 @@ static BulletTypeClass const ClassMissile2(BULLET_SSM2,
 );
 
 static BulletTypeClass const ClassPatriot(BULLET_SAM,
-                                          "MISSILE",     // NAME:			Text name of this unit type.
+                                          "SAM_BULT",    // INI name of bullet.
+                                          "MISSILE",     // Image name of bullet.
                                           true,          // Flies over tall walls?
                                           true,          // Homes in on target?
                                           false,         // Projectile arcs to the target?
@@ -217,7 +226,8 @@ static BulletTypeClass const ClassPatriot(BULLET_SAM,
 );
 
 static BulletTypeClass const ClassDragon(BULLET_TOW,
-                                         "DRAGON",     // NAME:			Text name of this unit type.
+                                         "TOW",        // INI name of bullet.
+                                         "DRAGON",     // Image name of bullet.
                                          true,         // Flies over tall walls?
                                          true,         // Homes in on target?
                                          false,        // Projectile arcs to the target?
@@ -239,7 +249,8 @@ static BulletTypeClass const ClassDragon(BULLET_TOW,
 );
 
 static BulletTypeClass const ClassFlame(BULLET_FLAME,
-                                        "FLAME",      // NAME:			Text name of this unit type.
+                                        "FLAME",      // INI name of bullet.
+                                        "FLAME",      // Image name of bullet.
                                         false,        // Flies over tall walls?
                                         false,        // Homes in on target?
                                         false,        // Projectile arcs to the target?
@@ -261,7 +272,8 @@ static BulletTypeClass const ClassFlame(BULLET_FLAME,
 );
 
 static BulletTypeClass const ClassChem(BULLET_CHEMSPRAY,
-                                       "FLAME",    // NAME:			Text name of this unit type.
+                                       "CHEMSPRA", // INI name of bullet.,
+                                       "FLAME",    // Image name of bullet.
                                        false,      // Flies over tall walls?
                                        false,      // Homes in on target?
                                        false,      // Projectile arcs to the target?
@@ -283,7 +295,8 @@ static BulletTypeClass const ClassChem(BULLET_CHEMSPRAY,
 );
 
 static BulletTypeClass const ClassNapalm(BULLET_NAPALM,
-                                         "BOMBLET",       // NAME:			Text name of this unit type.
+                                         "NAPALM",        // INI name of bullet.
+                                         "BOMBLET",       // Image name of bullet.
                                          true,            // Flies over tall walls?
                                          false,           // Homes in on target?
                                          false,           // Projectile arcs to the target?
@@ -305,7 +318,8 @@ static BulletTypeClass const ClassNapalm(BULLET_NAPALM,
 );
 
 static BulletTypeClass const ClassGrenade(BULLET_GRENADE,
-                                          "BOMB",          // NAME:			Text name of this unit type.
+                                          "GRENADE",       // INI name of bullet.
+                                          "BOMB",          // Image name of bullet.
                                           true,            // Flies over tall walls?
                                           false,           // Homes in on target?
                                           true,            // Projectile arcs to the target?
@@ -327,7 +341,8 @@ static BulletTypeClass const ClassGrenade(BULLET_GRENADE,
 );
 
 static BulletTypeClass const ClassLaser(BULLET_LASER,
-                                        "Laser",         // NAME:			Text name of this unit type.
+                                        "LASER",         // INI name of bullet.
+                                        "Laser",         // Image name of bullet.
                                         true,            // Flies over tall walls?
                                         false,           // Homes in on target?
                                         false,           // Projectile arcs to the target?
@@ -349,7 +364,8 @@ static BulletTypeClass const ClassLaser(BULLET_LASER,
 );
 
 static BulletTypeClass const ClassNukeUp(BULLET_NUKE_UP,
-                                         "ATOMICUP",    // NAME:			Text name of this unit type.
+                                         "ATOMICUP",    // INI name of bullet.
+                                         "ATOMICUP",    // Image name of bullet.
                                          true,          // Flies over tall walls?
                                          false,         // Homes in on target?
                                          false,         // Projectile arcs to the target?
@@ -371,7 +387,8 @@ static BulletTypeClass const ClassNukeUp(BULLET_NUKE_UP,
 );
 
 static BulletTypeClass const ClassNukeDown(BULLET_NUKE_DOWN,
-                                           "ATOMICDN",     // NAME:			Text name of this unit type.
+                                           "ATOMICDN",     // INI name of bullet.
+                                           "ATOMICDN",     // Image name of bullet.
                                            true,           // Flies over tall walls?
                                            false,          // Homes in on target?
                                            false,          // Projectile arcs to the target?
@@ -393,7 +410,8 @@ static BulletTypeClass const ClassNukeDown(BULLET_NUKE_DOWN,
 );
 
 static BulletTypeClass const ClassHonestJohn(BULLET_HONEST_JOHN,
-                                             "MISSILE",    // NAME:			Text name of this unit type.
+                                             "HONESTJB",   // INI name of bullet.
+                                             "MISSILE",    // Image name of bullet.
                                              true,         // Flies over tall walls?
                                              false,        // Homes in on target?
                                              false,        // Projectile arcs to the target?
@@ -415,7 +433,8 @@ static BulletTypeClass const ClassHonestJohn(BULLET_HONEST_JOHN,
 );
 
 static BulletTypeClass const ClassHeadButt(BULLET_HEADBUTT,
-                                           "GORE",          // NAME:			Text name of this unit type.
+                                           "GORE",          // INI name of bullet.
+                                           "GORE",          // Image name of bullet.
                                            false,           // Flies over tall walls?
                                            false,           // Homes in on target?
                                            false,           // Projectile arcs to the target?
@@ -437,7 +456,8 @@ static BulletTypeClass const ClassHeadButt(BULLET_HEADBUTT,
 );
 
 static BulletTypeClass const ClassTRexBite(BULLET_TREXBITE,
-                                           "CHEW",          // NAME:			Text name of this unit type.
+                                           "CHEW",          // INI name of bullet.
+                                           "CHEW",          // Image name of bullet.
                                            false,           // Flies over tall walls?
                                            false,           // Homes in on target?
                                            false,           // Projectile arcs to the target?
@@ -501,6 +521,7 @@ BulletTypeClass const* const BulletTypeClass::Pointers[BULLET_COUNT] = {
  *=============================================================================================*/
 BulletTypeClass::BulletTypeClass(BulletType type,
                                  char const* ininame,
+                                 std::string_view image_name,
                                  bool is_high,
                                  bool is_homing,
                                  bool is_arcing,
@@ -540,6 +561,7 @@ BulletTypeClass::BulletTypeClass(BulletType type,
     ROT = rot;
     Arming = arming;
     Range = range;
+    ImageName = image_name;
 }
 
 /***********************************************************************************************
@@ -570,7 +592,7 @@ void BulletTypeClass::One_Time(void)
         char fullname[_MAX_FNAME + _MAX_EXT];
 
         if (!bullet.IsInvisible) {
-            _makepath(fullname, NULL, NULL, bullet.IniName, ".SHP");
+            _makepath(fullname, NULL, NULL, bullet.ImageName.c_str(), ".SHP");
 
             RawFileClass file(fullname);
 

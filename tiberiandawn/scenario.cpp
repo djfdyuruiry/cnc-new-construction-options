@@ -80,6 +80,7 @@ ScenarioClass::ScenarioClass(void)
     strcpy(ScenarioName, "");
     strcpy(BriefingText, "");
     memset(Views, '\0', sizeof(Views));
+    strcpy(FileName, "");
 }
 
 /***********************************************************************************************
@@ -384,6 +385,12 @@ void Clear_Scenario(void)
     Base.Init();
 
     CurrentObject.Clear_All();
+
+    /**
+     * Reset all rules to the default found in INI files, they might have been changed
+     * by a Lua script call or loaded from the scenario file.
+     */
+    Rule.Init();
 }
 
 /***********************************************************************************************

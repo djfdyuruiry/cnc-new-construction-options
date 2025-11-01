@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tiberian Dawn Types Schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "description": "The name of the type",
+      "type": "string"
+    },
+    "has_enum": {
+      "description": "Whether this type has an associated enum",
+      "type": ["boolean", "null"]
+    },
+    "enum": {
+      "description": "The name of the associated enum (if any)",
+      "type": ["string", "null"]
+    },
+    "class": {
+      "description": "The class name for this type",
+      "type": "string"
+    },
+    "is_base_class": {
+      "description": "Whether this is a base class",
+      "type": ["boolean", "null"]
+    },
+    "base_class": {
+      "description": "The parent class (if any)",
+      "type": ["string", "null"]
+    },
+    "example_instance": {
+      "description": "An example instance of this type (only provided if not a base class)",
+      "type": ["string", "null"]
+    },
+    "example_instance_comment": {
+      "description": "Comment about the example instance (only provided if not a base class)",
+      "type": ["string", "null"]
+    },
+    "comment": {
+      "description": "General comment describing this type (only provided if not a base class)",
+      "type": ["string", "null"]
+    },
+    "properties": {
+      "description": "List of properties for this type",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the property",
+            "type": "string"
+          },
+          "type": {
+            "description": "The data type of the property",
+            "type": "string"
+          },
+          "requires_converter": {
+            "description": "Whether this property requires a converter",
+            "type": ["boolean", "null"]
+          },
+          "requires_csv_converter": {
+            "description": "Whether this property requires a csv converter",
+            "type": ["boolean", "null"]
+          },
+          "comment": {
+            "description": "Comment describing this property",
+            "type": "string"
+          },
+          "example_value": {
+            "description": "An example value for this property (only relevant for converter types)",
+            "type": ["string", "number", "boolean", "null"]
+          },
+          "valid_values": {
+            "description": "Valid values for this property (comma-separated, only relevant for converter types)",
+            "type": ["string", "null"]
+          }
+        },
+        "required": ["name", "type", "comment"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "name",
+    "class",
+    "properties"
+  ],
+  "additionalProperties": false
+}

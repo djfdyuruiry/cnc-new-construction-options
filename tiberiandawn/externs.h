@@ -156,23 +156,8 @@ extern MFCD* MoviesMix;
 extern MFCD* GeneralMix;
 extern ThemeClass Theme;
 extern SpecialClass Special;
-extern CCINIClass RuleINI;
 extern RulesClass Rule;
 extern WWKeyboardClass* Keyboard;
-
-/**
- * Adapter for Lua API to pull in static RulesClass variable.
- * 
- * See: concept `RuleSectionsProviderConcept` in @file{common/lua/rules_luaapi.h}
- */
-class RuleSectionsProvider final
-{
-public:
-    inline static RuleSections& Sections = Rule.Sections;
-
-private:
-    RuleSectionsProvider() = delete;
-};
 
 /*
 **	Game object allocation and tracking classes.
@@ -384,8 +369,8 @@ extern unsigned char const RemapNone[256];
 extern unsigned char const RemapGold[256];
 extern unsigned char const RemapRed[256];
 extern unsigned char const RemapLtBlue[256];
-extern WeaponTypeClass const Weapons[WEAPON_COUNT];
-extern WarheadTypeClass const Warheads[WARHEAD_COUNT];
+extern WeaponTypeClass Weapons[WEAPON_COUNT];
+extern WarheadTypeClass Warheads[WARHEAD_COUNT];
 extern char const* SourceName[SOURCE_COUNT];
 extern GroundType const Ground[LAND_COUNT];
 extern TheaterDataType const Theaters[THEATER_COUNT];

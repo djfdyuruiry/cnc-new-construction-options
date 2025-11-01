@@ -78,26 +78,26 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@return Scenario
 local function builder(cppApi)
   local houses = setmetatable(
-      {
-        getNames = cppApi.getHouseNames
-      },
-      {
-        __index = function (_, houseName)
-          return {
-            name = houseName,
-            getMoney = function ()
-              return cppApi.getHouseMoney(houseName)
-            end,
-            giveMoney = function(amount)
-              cppApi.modifyHouseMoney(houseName, amount)
-            end,
-            takeMoney = function(amount)
-              cppApi.modifyHouseMoney(houseName, -amount)
-            end
-          }
-        end
-      }
-    )
+    {
+      getNames = cppApi.getHouseNames
+    },
+    {
+      __index = function (_, houseName)
+        return {
+          name = houseName,
+          getMoney = function ()
+            return cppApi.getHouseMoney(houseName)
+          end,
+          giveMoney = function(amount)
+            cppApi.modifyHouseMoney(houseName, amount)
+          end,
+          takeMoney = function(amount)
+            cppApi.modifyHouseMoney(houseName, -amount)
+          end
+        }
+      end
+    }
+  )
 
   return {
     name = cppApi.name,

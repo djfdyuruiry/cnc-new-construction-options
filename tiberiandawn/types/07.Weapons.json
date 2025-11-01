@@ -1,0 +1,53 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Weapon",
+  "enum": "WeaponType",
+  "class": "WeaponTypeClass",
+  "example_instance": "FLAMETHROWER",
+  "comment": "Types of Weapons that Infantry, Units, Aircraft and Buildings can have - e.g. Minigunner has an M16 rifle, Light Tank has a 75MM cannon etc.",
+  "properties": [
+    {
+      "name": "Type",
+      "type": "WeaponType",
+      "comment": "-",
+      "requires_converter": true,
+      "valid_values": "NONE, 105MM, 120MM, 155MM, 75MM, CHAIN_GUN, CHEMSPRAY, DRAGON, FLAMETHROWER, FLAME_TONGUE, GRENADE_WEAPON, HONEST_JOHN, M16, M60MG, MAMMOTH_TUSK, NAPALM_WEAPON, NIKE, OBELISK_LASER, PISTOL, RIFLE, STEG_WEAPON, TOMAHAWK, TOW_TWO, TREX_WEAPON, TURRET_GUN, WEAPON_MLRS"
+    },
+    {
+      "name": "Fires",
+      "type": "BulletType",
+      "requires_converter": true,
+      "valid_values": "NONE, APDS, ATOMICDN, ATOMICUP, BULLET, CHEMSPRA, CHEW, FLAME, GORE, GRENADE, HE, HONESTJB, LASER, NAPALM, SAM_BULT, SNIPER, SPRDFIRE, SSM, SSM2, TOW - See: [bullet.ini](#bulletini)",
+      "comment": "This is the unit class of the projectile fired. A subset of the unit types represent projectiles. It is one of these classes that is specified here. If this object does not fire anything, then this value will be UNIT_NONE."
+    },
+    {
+      "name": "Attack",
+      "type": "UChar",
+      "comment": "This is the damage (explosive load) to be assigned to the projectile that this object fires."
+    },
+    {
+      "name": "ROF",
+      "type": "UChar",
+      "comment": "Objects that fire (which can be buildings as well) will fire at a frequency controlled by this value. This value serves as a count down timer between shots. The smaller the value, the faster the rate of fire."
+    },
+    {
+      "name": "Range",
+      "type": "Int",
+      "comment": "When this object fires, the range at which it's projectiles travel is controlled by this value. The value represents the number of cells the projectile will travel. Objects outside of this range will not be fired upon (in normal circumstances)."
+    },
+    {
+      "name": "Sound",
+      "type": "VocType",
+      "requires_converter": true,
+      "valid_values": "NONE, RAMBO_PRESENT, RAMBO_CMON, RAMBO_UGOTIT, RAMBO_COMIN, RAMBO_LAUGH, RAMBO_LEFTY, RAMBO_NOPROB, RAMBO_ONIT, RAMBO_YELL, RAMBO_ROCK, RAMBO_TUFF, RAMBO_YEA, RAMBO_YES, RAMBO_YO, GIRL_OKAY, GIRL_YEAH, GUY_OKAY, GUY_YEAH, 2DANGER, ACKNOWL, AFFIRM, AWAIT, MOVEOUT, NEGATIVE, NO_PROB, READY, REPORT, RIGHT_AWAY, ROGER, UGOTIT, UNIT, VEHIC, YESSIR, BAZOOKA, BLEEP, BOMB1, BUTTON, RADAR_ON, CONSTRUCTION, CRUMBLE, FLAMER1, RIFLE, M60, GUN20, M60A, MINI, RELOAD, SLAM, HVYGUN10, ION_CANNON, MGUN11, MGUN2, NUKE_FIRE, NUKE_EXPLODE, LASER, LASER_POWER, RADAR_OFF, SNIPER, ROCKET1, ROCKET2, MOTOR, SCOLD, SIDEBAR_OPEN, SIDEBAR_CLOSE, SQUISH2, TANK1, TANK2, TANK3, TANK4, UP, DOWN, TARGET, SONAR, TOSS, CLOAK, BURN, TURRET, XPLOBIG4, XPLOBIG6, XPLOBIG7, XPLODE, XPLOS, XPLOSML2, SCREAM1, SCREAM3, SCREAM4, SCREAM5, SCREAM6, SCREAM7, SCREAM10, SCREAM11, SCREAM12, YELL1, YES, COMMANDER, HELLO, HMMM, EXCELLENT3, OF_COURSE, YESYES, QUIP1, THANKS, CASHTURN, BLEEPY3, DINOMOUT, DINOYES, DINOATK1, DINODIE1, BEACON",
+      "comment": "This is the typical sound generated when firing."
+    },
+    {
+      "name": "Anim",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "NONE, ART_EXP1, ATOMDOOR, ATOMSFX, BEACON, BEACON_V, BURN_L, BURN_M, BURN_S, CHEMBALL, CHEM_E, CHEM_N, CHEM_NE, CHEM_NW, CHEM_S, CHEM_SE, CHEM_SW, CHEM_W, DEVIATOR, DOLLAR, EARTH, EMPULSE, FBALL1, FIR2_M_V, FIRE_M, FIRE_ME, FIRE_M_V, FIRE_S, FIRE_S_V, FIRE_T, FIRE_T_V, FLAG, FLAME_E, FLAME_N, FLAME_NE, FLAME_NW, FLAME_S, FLAME_SE, FLAME_SW, FLAME_W, FLMSPT, FRAG1, FRAG2, GRENADEA, GUNFIRE, GUN_N, GUN_NW, GUN_SW, GUN_W, INVUN, IONSFX, LZ_SMOKE, MGUN_E, MGUN_NE, MGUN_S, MGUN_SE, MINE, MISSILE, MV_FLASH, NAPALM1, NAPALM2, NAPALM3, ONFIRE_L, ONFIRE_M, ONFIRE_S, PIFF, PIFFPIFF, RAPID, RAPT_DIE, SAM_E, SAM_NE, SAM_S, SAM_SE, SFIRE_N, SFIRE_NW, SFIRE_SW, SFIRE_W, SMOKEY, SMOKE_M, STEALTH, STEG_DIE, TREX_DIE, TRIC_DIE, VEH_HIT1, VEH_HIT2, VEH_HIT3 - See: [animation.ini](#animationini)",
+      "comment": "This is the animation to display at the firing coordinate."
+    }
+  ]
+}

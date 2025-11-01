@@ -3,9 +3,7 @@
 #include <format>
 #include <string>
 
-#include "logging_luaapi.h"
 #include "luaapi.h"
-#include "luaarguments.h"
 
 /**
  * API for calling Lua native event handlers.
@@ -13,9 +11,9 @@
 class EventLuaApi : public LuaApi
 {
 public:
-    inline static const std::string EventGlobalTable = "Event";
-    inline static const std::string HandlersTable = "handlers";
-    inline static const std::string HandlersTablePath = std::format("{}.{}", EventGlobalTable, HandlersTable);
+    static inline const std::string EventGlobalTable = "Event";
+    static inline const std::string HandlersTable = "handlers";
+    static inline const std::string HandlersTablePath = std::format("{}.{}", EventGlobalTable, HandlersTable);
 
     template<LuaPushType... Args>
     static LuaResult Execute_Event(
@@ -38,8 +36,5 @@ public:
 
     EventLuaApi() : LuaApi("Event") {}
 
-    virtual void Register_Dependencies(LuaEngine& engine) const override
-    {
-        engine.Register_Api<LoggingLuaApi>();
-    }
+    void Register_Dependencies(LuaEngine& engine) const override;
 };

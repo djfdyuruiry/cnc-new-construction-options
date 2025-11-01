@@ -1,0 +1,120 @@
+{
+  "$schema": "../../cmake/nco-types-json-schema.json",
+  "name": "Unit",
+  "enum": "UnitType",
+  "class": "UnitTypeClass",
+  "base_class": "TechnoTypeClass",
+  "example_instance": "JEEP",
+  "example_instance_comment": "Hum-Vee",
+  "comment": "Types of Units that can be found in the game - e.g. APC, Light Tank etc.",
+  "properties": [
+    {
+      "name": "IsCrateGoodie",
+      "type": "Bool",
+      "comment": "If this unit can appear out of a crate, then this flag will be true."
+    },
+    {
+      "name": "IsPieceOfEight",
+      "type": "Bool",
+      "comment": "Does this unit have only 8 facings? Special test units have limited facings."
+    },
+    {
+      "name": "IsCrusher",
+      "type": "Bool",
+      "comment": "Can this unit squash infantry? If it can then if the player selects an (enemy) infantry unit as the movement target, it will ride over and squish the infantry unit."
+    },
+    {
+      "name": "IsToHarvest",
+      "type": "Bool",
+      "comment": "Does this unit go into harvesting mode when it stops on a tiberium field? Typically, only one unit does this and that is the harvester."
+    },
+    {
+      "name": "IsChunkyShape",
+      "type": "Bool",
+      "comment": "Does this unit's shape data consist of \"chunky\" facings? This kind of unit art has the unit in only 4 facings (N, W, S, and E) and in each of those directions, the unit's turrets rotates 32 facings (counter clockwise from north). This will result in 32 x 4 = 128 unit shapes in the shape data file."
+    },
+    {
+      "name": "IsRadarEquipped",
+      "type": "Bool",
+      "comment": "Some units are equipped with a rotating radar dish. These units have special animation processing. The rotating radar dish is similar to a turret, but always rotates and does not affect combat."
+    },
+    {
+      "name": "IsFireAnim",
+      "type": "Bool",
+      "comment": "If this unit has a firing animation, this flag is true. Infantry and some special vehicles are the ones with firing animations."
+    },
+    {
+      "name": "IsLockTurret",
+      "type": "Bool",
+      "comment": "Many vehicles have a turret with restricted motion. These vehicles must move the turret into a locked down position while travelling. Rocket launchers and artillery are good examples of this kind of unit."
+    },
+    {
+      "name": "IsTracked",
+      "type": "Bool",
+      "comment": "Does this unit lay tracks when it travels? Most tracked vehicles and some wheeled vehicles have this ability."
+    },
+    {
+      "name": "IsGigundo",
+      "type": "Bool",
+      "comment": "Is this unit of the humongous size? Harvesters and mobile construction vehicles are of this size. If the vehicle is greater than 24 x 24 but less than 48 x 48, it is considered \"Gigundo\"."
+    },
+    {
+      "name": "IsCloakable",
+      "type": "Bool",
+      "comment": "Is the unit capable of cloaking? Only Stealth Tank can do so now."
+    },
+    {
+      "name": "IsAnimating",
+      "type": "Bool",
+      "comment": "Does this unit have a constant animation (like Visceroid?)"
+    },
+    {
+      "name": "Type",
+      "type": "UnitType",
+      "requires_converter": true,
+      "valid_values": "NONE, APC, ARTY, BGGY, BIKE, BOAT, FTNK, HARV, HTNK, JEEP, LST, LTNK, MCV, MHQ, MLRS, MSAM, MTNK, RAPT, STEG, STNK, TREX, TRIC, VICE",
+      "comment": "This value represents the unit class. It can serve as a unique identification number for this unit class."
+    },
+    {
+      "name": "Speed",
+      "type": "SpeedType",
+      "requires_converter": true,
+      "valid_values": "NONE, FOOT, TRACK, HARVESTER, WHEEL, WINGED, HOVER, FLOAT",
+      "comment": "This indicates the speed (locomotion) type for this unit. Through this value the movement capabilities are deduced."
+    },
+    {
+      "name": "ROT",
+      "type": "UChar",
+      "comment": "This is the rotational speed of the unit. This value represents the turret rotation speed."
+    },
+    {
+      "name": "TurretOffset",
+      "type": "Char",
+      "comment": "This is the distance along the centerline heading in the direction the body is facing used to reach the center point of the turret. This distance is in leptons."
+    },
+    {
+      "name": "Mission",
+      "type": "MissionType",
+      "requires_converter": true,
+      "valid_values": "NONE, SLEEP, ATTACK, MOVE, RETREAT, GUARD, STICKY, ENTER, CAPTURE, HARVEST, GUARD_AREA, RETURN, STOP, AMBUSH, HUNT, TIMED_HUNT, UNLOAD, SABOTAGE, CONSTRUCTION, DECONSTRUCTION, REPAIR, RESCUE, MISSILE",
+      "comment": "This value is used to provide the unit with a default mission order when first created. Usually, this is a resting or idle type of order."
+    },
+    {
+      "name": "Explosion",
+      "type": "AnimType",
+      "requires_converter": true,
+      "valid_values": "NONE, ART_EXP1, ATOMDOOR, ATOMSFX, BEACON, BEACON_V, BURN_L, BURN_M, BURN_S, CHEMBALL, CHEM_E, CHEM_N, CHEM_NE, CHEM_NW, CHEM_S, CHEM_SE, CHEM_SW, CHEM_W, DEVIATOR, DOLLAR, EARTH, EMPULSE, FBALL1, FIR2_M_V, FIRE_M, FIRE_ME, FIRE_M_V, FIRE_S, FIRE_S_V, FIRE_T, FIRE_T_V, FLAG, FLAME_E, FLAME_N, FLAME_NE, FLAME_NW, FLAME_S, FLAME_SE, FLAME_SW, FLAME_W, FLMSPT, FRAG1, FRAG2, GRENADEA, GUNFIRE, GUN_N, GUN_NW, GUN_SW, GUN_W, INVUN, IONSFX, LZ_SMOKE, MGUN_E, MGUN_NE, MGUN_S, MGUN_SE, MINE, MISSILE, MV_FLASH, NAPALM1, NAPALM2, NAPALM3, ONFIRE_L, ONFIRE_M, ONFIRE_S, PIFF, PIFFPIFF, RAPID, RAPT_DIE, SAM_E, SAM_NE, SAM_S, SAM_SE, SFIRE_N, SFIRE_NW, SFIRE_SW, SFIRE_W, SMOKEY, SMOKE_M, STEALTH, STEG_DIE, TREX_DIE, TRIC_DIE, VEH_HIT1, VEH_HIT2, VEH_HIT3 - See: [animation.ini](#animationini)",
+      "comment": "This is the default explosion to use when this vehicle is destroyed."
+    },
+    {
+      "name": "CameoName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this unit. (not supported in Lua)"
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this unit. (not supported in Lua)"
+    }
+  ]
+}

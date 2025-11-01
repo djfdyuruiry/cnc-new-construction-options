@@ -1,6 +1,19 @@
 -- house goodguy scenario 1-east load test script
 local Utils = require("nco.lib.Utils")
 
+local function editTypes()
+  Logger.debug("Infantry Types: %s", Utils.arrayToCsv(Types.Infantry.getInstanceNames()))
+
+  Types.Building.NUKE.Armor = "STEEL";
+
+  Logger.debug("Unit Types: %s", Utils.arrayToCsv(Types.Unit.getInstanceNames()))
+
+  Logger.info("Power plant Power: %s", Types.Building.NUKE.Power)
+  Logger.info("Mammoth Tank MaxSpeed: %s", Types.Unit.HTNK.MaxSpeed)
+
+  Types.Unit.HTNK.MaxSpeed = "FAST";
+end
+
 local function editRules()
   Rules["Game.Misc"].McvRedeployable = true
 end
@@ -63,6 +76,7 @@ local function main()
   addingNewTrigger()
   addingNewTeam()
   editRules()
+  editTypes()
 end
 
 local status, error = pcall(main)
