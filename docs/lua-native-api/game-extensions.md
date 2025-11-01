@@ -26,6 +26,13 @@ Provides scenario-specific functionality:
 - Team type management
 - Trigger system manipulation
 
+#### UI API (`Types`)
+Manage properties for game types (Units, Infantry etc.):
+- Look up names of a Types
+- Look up instance names for a given Type (e.x. E1, E2)
+- Look up property names for a given Type (same as those in the INI files)
+- Get/Set properties for a given Type instance
+
 #### UI API (`UI`)
 Provides user interface functions:
 - Popup dialogs
@@ -48,15 +55,17 @@ The extensions are implemented in:
 
 ```lua
 -- Access extended Tiberian Dawn APIs
-TdGame = Game       -- Tiberian Dawn game control
-Messages = Messages  -- Message system
-Scenario = Scenario   -- Scenario management
-UI = UI              -- User interface functions
+Game    -- Tiberian Dawn game control
+Messages  -- Message system
+Scenario  -- Scenario management
+Types     -- Game types property management
+UI        -- User interface functions
 
 -- Use extended functionality
 Game.win()                    -- Win the game
 Messages.sendToPlayer("Hello") -- Send message to player
 Scenario.modifyHouseMoney(1000) -- Modify house money
+Types.Unit.HTNK.Primary = "OBELISK_LASER" -- Give Mammoth Tank an Oblilisk Laser
 UI.popupOk("Message")           -- Show popup
 ```
 
