@@ -13,6 +13,15 @@ Provides access to game rules and configuration settings.
 - Allows reading and writing rule values
 - Supports accessing sections and rule keys from rules.ini
 - Enables dynamic modification of game behavior
+- Uses the `RuleSectionsProviderConcept` interface to allow providing a game engine type that resolves a `RuleSections` instance to read/write rules from (*it is expected a static class is implemented that matches this inside a game engine*)
+
+```cpp
+template <typename T>  
+concept RuleSectionsProviderConcept = requires()  
+{  
+    { T::Sections() } -> std::same_as<RuleSections&>;  
+};
+```
 
 ### System API (`System`)
 Provides access to system functionality and file operations.

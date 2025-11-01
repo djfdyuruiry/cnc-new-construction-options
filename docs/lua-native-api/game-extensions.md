@@ -26,7 +26,7 @@ Provides scenario-specific functionality:
 - Team type management
 - Trigger system manipulation
 
-#### UI API (`Types`)
+#### Types API (`Types`)
 Manage properties for game types (Units, Infantry etc.):
 - Look up names of a Types
 - Look up instance names for a given Type (e.x. E1, E2)
