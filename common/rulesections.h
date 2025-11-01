@@ -22,7 +22,6 @@
 #include <optional>
 #include <map>
 #include <memory>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
@@ -186,7 +185,7 @@ public:
 
             // TODO: trim string to forgive spacing around rule string
             // forgive incorrect casing in rule values
-            std::transform(str_value.begin(), str_value.end(), str_value.begin(), ::toupper);
+            CncStringUtils::To_Upper(str_value);
 
             if (!str_validator.has_value() || str_validator.value()(str_value)) {
                 value = str_value;

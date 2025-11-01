@@ -547,24 +547,24 @@ const TwoWayMap<HouseColorType, std::string> TdTypeConverter::House_Color_Types 
     HOUSE_COLOR_PAIR(BRIGHT_NEUTRAL)
 };
 
-bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule){
+bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
 return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
     || Rule_Requires_Csv_Converter(type_name, rule);
 }
 
-bool TdTypeConverter::Rule_Requires_Csv_Converter(std::string_view type_name, std::string_view rule){
+bool TdTypeConverter::Rule_Requires_Csv_Converter(std::string_view type_name, std::string_view rule ){
     return RegisteredCsvRuleTypes.contains(type_name) && RegisteredCsvRuleTypes[type_name].contains(rule);
 }
 
-ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(std::string_view type_name, std::string_view rule){
+ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(std::string_view type_name, std::string_view rule) {
     return RegisteredRuleTypes[type_name][rule];
 }
 
-ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(std::string_view type_name, std::string_view rule){
+ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(std::string_view type_name, std::string_view rule) {
     return RegisteredCsvRuleTypes[type_name][rule];
 }
 
-void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant){
+void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant) {
     if (std::get_if<ArmorType>(&variant)) {
         section.Set_With_Converter<ArmorType, TdTypeConverter>(rule, value);
     } else if (std::get_if<MPHType>(&variant)) {
@@ -608,7 +608,7 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     }
 }
 
-void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant){
+void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant) {
     if (std::get_if<ArmorType>(&variant)) {
         section.Set_With_Csv_Converter<ArmorType, TdTypeConverter>(rule, csv_value);
     } else if (std::get_if<MPHType>(&variant)) {
@@ -652,7 +652,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     }
 }
 
-std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant variant){
+std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant variant) {
     if (std::get_if<ArmorType>(&variant)) {
         return Get_Type_Name<ArmorType>();
     }

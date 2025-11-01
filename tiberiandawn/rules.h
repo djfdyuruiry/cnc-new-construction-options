@@ -313,6 +313,8 @@ public:
         return *TypeRules[TdTypeConverter::Get_Type_Name<T>()].get();
     }
 
+    void Assert_Section_Not_Present(std::string_view name);
+
 private:
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);

@@ -317,7 +317,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
         if (Scen.Scenario <= 15) {
             BuildLevel = Scen.Scenario;
         } else if (_stricmp(Scen.ScenarioName, "scg55ea") == 0 || _stricmp(Scen.ScenarioName, "scg56ea") == 0
-                   || _stricmp(Scen.ScenarioName, "scb41ea") == 0) { // TODO: Check matches patched mix file scenario numbers
+                   || _stricmp(Scen.ScenarioName, "scb41ea") == 0) {
             // N64 missions require build level 15
             BuildLevel = 15;
         } else {

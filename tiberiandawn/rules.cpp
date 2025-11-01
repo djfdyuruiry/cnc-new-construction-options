@@ -34,6 +34,8 @@
  *   RulesClass::RulesClass -- Default constructor for rules class object.                     *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <algorithm>
+
 #include "common/logger.h"
 #include "common/rulesections.h"
 
@@ -504,7 +506,7 @@ void RulesClass::Difficulty(CCINIClass& ini)
  * Lua APIs to interact with the classes indirectly via the Rules section.
  */
 template<EnumSignedChar U, RulesTypeClass<U> T>
-RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
+static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
 {
     // get name for type and rules section
     auto type_name = TdTypeConverter::Get_Type_Name<U>();
@@ -520,14 +522,7 @@ RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
         auto& typeInstance = T::As_Mutable_Reference(i);
         auto name = std::string(typeInstance.Name());
 
-        if (sections.Has_Section(name)) {
-            const auto& Logger = RulesClass::Logger;
-            CNC_LOGGER_FATAL(
-                "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
-                "more than once for instances of a given class - this will mess up rules on re-read. Name: {}",
-                name
-            );
-        }
+        rules.Assert_Section_Not_Present(name);
 
         // load type instance properties using INI
         sections.Add_Section(name, [&](auto& section, auto rule, const auto& value) {
@@ -627,3 +622,17 @@ void RulesClass::Export_Difficulty(CCINIClass& ini) const
 #endif
 }
 
+void RulesClass::Assert_Section_Not_Present(std::string_view name)
+{
+    if (
+        Sections.Has_Section(name) ||
+        std::ranges::any_of(TypeRules, [&](const auto& s) { return s.second->Has_Section(name); })
+    ) {
+        CNC_LOGGER_FATAL(
+            "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
+            "more than once in rules.ini or for a type INI name (Infantry, Unit etc.). All INI names must be unique. "
+            "INI Name: {}",
+            name
+        );
+    }
+}

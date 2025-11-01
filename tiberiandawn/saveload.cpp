@@ -116,7 +116,7 @@ bool Save_Game(int id, char* descr)
 /*
 ** Version that takes file name. ST - 9/9/2019 11:10AM
 */
-bool  Save_Game(const char* file_name, const char* descr)
+bool Save_Game(const char* file_name, const char* descr)
 {
     CDFileClass file;
     int i;

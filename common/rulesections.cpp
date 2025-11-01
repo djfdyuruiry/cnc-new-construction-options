@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include "rulesections.h"
 
 bool RuleSection::Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
