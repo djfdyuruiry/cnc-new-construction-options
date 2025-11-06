@@ -15,7 +15,7 @@ Provides access to game rules and configuration settings.
 - Enables dynamic modification of game behavior
 - Uses the `RuleSectionsProviderConcept` interface to allow providing a game engine type that resolves a `RuleSections` instance to read/write rules from (*it is expected a static class is implemented that matches this inside a game engine*)
 
-```cpp
+```c++
 template <typename T>  
 concept RuleSectionsProviderConcept = requires()  
 {  
