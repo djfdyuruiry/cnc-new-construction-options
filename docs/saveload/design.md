@@ -15,7 +15,7 @@ The existing system saves games as binary files that record pointer data directl
 
 ## Proposed JSON Format
 
-```json
+```json5
 {
   "header": {
     "version": 1,
@@ -31,10 +31,10 @@ The existing system saves games as binary files that record pointer data directl
     },
     "cells": [
       {
-        "x": 0, "y": 0, "terrain_type": "grass", "occupier_id": null, ...
+        "x": 0, "y": 0, "terrain_type": "grass", "occupier_id": null, // ...
       }
     ],
-    "layers": [ ... ]
+    "layers": [ /* ... */ ]
   },
   "houses": [
     {
@@ -69,15 +69,15 @@ The existing system saves games as binary files that record pointer data directl
     ]
   },
   "scenario_data": {
-    "waypoints": [ ... ],
+    "waypoints": [ /* ... */ ],
     "briefing_text": "...",
-    "rules": { ... },
+    "rules": { /* ... */ },
     "scenario_name": "Mission 1"
   },
   "game_state": {
     "selected_objects": [1, 2],
     "frame_count": 4567,
-    "score": { ... }
+    "score": { /* ... */ }
   }
 }
 ```
@@ -112,15 +112,11 @@ The existing system saves games as binary files that record pointer data directl
 - [ ] Implement version migration logic
 - [ ] Update Save_Game/Load_Game functions
 
-### Phase 4: Testing & Deployment
-
-- [ ] Test with existing game states
-- [ ] Validate migration from binary format
-- [ ] Gradual rollout (keep binary support for a version)
-
 ## JSON Serialization Example
 
 The nlohmann/json library provides excellent support for arbitrary types through its serialization features. Here's how we can implement JSON serialization for the `AircraftClass`:
+
+See: https://json.nlohmann.me/features/arbitrary_types/
 
 ```cpp
 #include <nlohmann/json.hpp>
