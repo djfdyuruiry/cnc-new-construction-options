@@ -36,11 +36,15 @@
 
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+
 #include "common/logger.h"
 #include "common/rulesections.h"
 
 #include "function.h"
 #include "ccini.h"
+
+using json = nlohmann::json;
 
 /***********************************************************************************************
  * DifficultyClass::DifficultyClass -- Default constructor for difficulty class object.        *
@@ -294,6 +298,10 @@ void RulesClass::Init()
     }
 
     ini_file.Close();
+
+    const json j = Sections[GAME_MISC_SECTION];
+
+    CNC_LOGGER_WARN(j.dump());
 }
 
 /***********************************************************************************************

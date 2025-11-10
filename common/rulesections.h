@@ -27,10 +27,14 @@
 #include <typeinfo>
 #include <variant>
 
+#include <nlohmann/json.hpp>
+
 #include "fixed.h"
 #include "ini.h"
 #include "logger.h"
 #include "stringutils.h"
+
+using json = nlohmann::json;
 
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -377,6 +381,9 @@ public:
 
         return Set(name, instances_csv);
     }
+
+    friend void to_json(json& j, const RuleSection& p);
+    friend void from_json(const json& j, RuleSection& p);
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 

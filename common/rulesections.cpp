@@ -264,6 +264,21 @@ std::optional<std::string_view>& RuleSection::Get_Converter_Section_Type_Name()
     return ConverterSectionTypeName;
 }
 
+#define NAMEOF(SYMBOL) #SYMBOL
+
+void to_json(json& j, const RuleSection& p)
+{
+    j = json{
+        { NAMEOF(SectionName), p.SectionName },
+        { NAMEOF(ConverterSectionTypeName), p.ConverterSectionTypeName }
+    };
+}
+
+void from_json(const json& j, RuleSection& p)
+{
+    j.at(NAMEOF(ConverterSectionTypeName)).get_to(p.ConverterSectionTypeName);
+}
+
 //IniRuleContext
 const IniRuleContext& IniRuleContext::Save(std::string_view name) const
 {

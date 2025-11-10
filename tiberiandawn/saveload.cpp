@@ -492,6 +492,7 @@ bool Load_Game(const char* file_name)
     ** (if present and available)
     */
     if (strlen(Scen.FileName) > 0) {
+        // TODO: Could change this to save the rules cache/RulesClass instance and rehydrate it (portable rules + preservation)
         if (CCFileClass ini_file(Scen.FileName); ini_file.Is_Available()) {
             if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
                 Rule.Init(ini);

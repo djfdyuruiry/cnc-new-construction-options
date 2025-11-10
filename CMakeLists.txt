@@ -168,6 +168,11 @@ list(APPEND VANILLA_LIBS ${LUA_LIBRARIES})
 find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/Array.h")
 include_directories(${LUABRIDGE_INCLUDE_DIRS})
 
+# json
+find_package(nlohmann_json CONFIG REQUIRED)
+list(APPEND COMMON_LIBS nlohmann_json::nlohmann_json)
+list(APPEND VANILLA_LIBS nlohmann_json::nlohmann_json)
+
 # spdlog
 find_package(spdlog CONFIG REQUIRED)
 list(APPEND COMMON_LIBS spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
