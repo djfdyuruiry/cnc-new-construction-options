@@ -8319,3 +8319,19 @@ unsigned HouseClass::Get_Ally_Flags()
 }
 
 #endif
+
+#define NAMEOF(SYMBOL) #SYMBOL
+
+void to_json(json& j, const HouseClass& p)
+{
+    j = json{
+        { NAMEOF(ActiveAScan), p.ActiveAScan },
+        { NAMEOF(ActiveBScan), p.ActiveBScan }
+    };
+}
+
+void from_json(const json& j, HouseClass& p)
+{
+    j.at(NAMEOF(ActiveAScan)).get_to(p.ActiveAScan);
+    j.at(NAMEOF(ActiveBScan)).get_to(p.ActiveBScan);
+}

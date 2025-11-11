@@ -35,12 +35,17 @@
 #ifndef HOUSE_H
 #define HOUSE_H
 
+
+#include <nlohmann/json.hpp>
+
 #include "type.h"
 #include "region.h"
 #include "vector.h"
 #include "credits.h"
 #include "common/miscasm.h"
 #include "common/fixed.h"
+
+using json = nlohmann::json;
 
 class TriggerClass;
 class CCINIClass;
@@ -732,6 +737,8 @@ public:
     */
     TCountDownTimerClass ScreenShakeTime;
 
+    friend void to_json(json& j, const HouseClass& p);
+    friend void from_json(const json& j, HouseClass& p);
 private:
     void Silo_Redraw_Check(int oldtib, int oldcap);
 

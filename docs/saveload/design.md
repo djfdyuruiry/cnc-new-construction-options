@@ -13,6 +13,21 @@ The existing system saves games as binary files that record pointer data directl
 - Game state variables
 - Pointer encoding/decoding for compatibility
 
+The game engine uses the concept of 'encoding' and 'decoding' pointers, essentially what this means is:
+
+- During encoding, any member of a class that is a pointer type is replaced with a special type: `TARGET_COMPOSITE`
+- It holds the type info as a union that allows mapping a target, mantissa and exponent
+- This target is intended to be cast to `TARGET` (an int), so compatible with the storage format for pointers (4 byte int pointing to a memory address)
+- The Exponent holds the RTTI type of the pointer (Building, Overlay etc.) and the Mantissa holds the instance ID (enum value)
+- When decoding this union is used to determine the type and fetch the current valid pointer address for the instance
+
+The implications of this are:
+
+- Type instance IDs must be present in the game engine for loading a saved game to work as expected (instance IDs are fixed)
+- The binary format of a save is directly coupled to the class structure of game types (class can't change)
+- `XTypeClass` structures can be different, these are not recorded in the save (but again coupled to enum ID)
+- Save games shared between platforms might not be compatible, if storage sizes for C++ types differ between those platforms (binary format is platform specific - x86 WIN32 MSVC for example)
+
 ## Proposed JSON Format
 
 ```json5
