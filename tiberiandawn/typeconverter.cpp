@@ -20,6 +20,9 @@
 #define VOC_PAIR(VOC_NAME) { VOC_##VOC_NAME, #VOC_NAME }
 #define PLAYER_COLOR_PAIR(COLOR_NAME) { REMAP_##COLOR_NAME, #COLOR_NAME }
 #define HOUSE_COLOR_PAIR(COLOR_NAME) { HOUSE_COLOR_##COLOR_NAME, #COLOR_NAME }
+#define DIFF_PAIR(DIFF_NAME) { DIFF_##DIFF_NAME, #DIFF_NAME }
+#define SCEN_DIR_PAIR(NAME) { SCEN_DIR_##NAME, #NAME }
+#define SCEN_VAR_PAIR(NAME) { SCEN_VAR_##NAME, #NAME }
 
 const TwoWayMap<ArmorType, std::string> TdTypeConverter::Armor_Types = {
     ARMOR_PAIR(NONE),
@@ -547,6 +550,26 @@ const TwoWayMap<HouseColorType, std::string> TdTypeConverter::House_Color_Types 
     HOUSE_COLOR_PAIR(BRIGHT_NEUTRAL)
 };
 
+const TwoWayMap<DiffType, std::string> TdTypeConverter::Diff_Types {
+    DIFF_PAIR(EASY),
+    DIFF_PAIR(NORMAL),
+    DIFF_PAIR(HARD)
+};
+
+const TwoWayMap<ScenarioDirType, std::string> TdTypeConverter::Scenario_Dir_Types {
+    SCEN_DIR_PAIR(NONE),
+    SCEN_DIR_PAIR(EAST),
+    SCEN_DIR_PAIR(WEST)
+};
+
+const TwoWayMap<ScenarioVarType, std::string> TdTypeConverter::Scenario_Var_Types {
+    SCEN_VAR_PAIR(NONE),
+    SCEN_VAR_PAIR(A),
+    SCEN_VAR_PAIR(B),
+    SCEN_VAR_PAIR(C),
+    SCEN_VAR_PAIR(D)
+};
+
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
 return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
     || Rule_Requires_Csv_Converter(type_name, rule);
@@ -603,6 +626,12 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
         section.Set_With_Converter<PlayerColorType, TdTypeConverter>(rule, value);
     } else if (std::get_if<HouseColorType>(&variant)) {
         section.Set_With_Converter<HouseColorType, TdTypeConverter>(rule, value);
+    } else if (std::get_if<DiffType>(&variant)) {
+        section.Set_With_Converter<DiffType, TdTypeConverter>(rule, value);
+    } else if (std::get_if<ScenarioDirType>(&variant)) {
+        section.Set_With_Converter<ScenarioDirType, TdTypeConverter>(rule, value);
+    } else if (std::get_if<ScenarioVarType>(&variant)) {
+        section.Set_With_Converter<ScenarioVarType, TdTypeConverter>(rule, value);
     } else {
         throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
     }
@@ -647,6 +676,12 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
         section.Set_With_Csv_Converter<PlayerColorType, TdTypeConverter>(rule, csv_value);
     } else if (std::get_if<HouseColorType>(&variant)) {
         section.Set_With_Csv_Converter<HouseColorType, TdTypeConverter>(rule, csv_value);
+    } else if (std::get_if<DiffType>(&variant)) {
+        section.Set_With_Csv_Converter<DiffType, TdTypeConverter>(rule, csv_value);
+    } else if (std::get_if<ScenarioDirType>(&variant)) {
+        section.Set_With_Csv_Converter<ScenarioDirType, TdTypeConverter>(rule, csv_value);
+    } else if (std::get_if<ScenarioVarType>(&variant)) {
+        section.Set_With_Csv_Converter<ScenarioVarType, TdTypeConverter>(rule, csv_value);
     } else {
         throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
     }
@@ -709,6 +744,15 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     }
     if (std::get_if<HouseColorType>(&variant)) {
         return Get_Type_Name<HouseColorType>();
+    }
+    if (std::get_if<DiffType>(&variant)) {
+        return Get_Type_Name<DiffType>();
+    }
+    if (std::get_if<ScenarioDirType>(&variant)) {
+        return Get_Type_Name<ScenarioDirType>();
+    }
+    if (std::get_if<ScenarioVarType>(&variant)) {
+        return Get_Type_Name<ScenarioVarType>();
     }
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");

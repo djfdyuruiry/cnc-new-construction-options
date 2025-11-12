@@ -45,6 +45,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "savegame.h"
 
 extern bool DLLSave(FileClass& file);
 extern bool DLLLoad(FileClass& file);
@@ -118,6 +119,20 @@ bool Save_Game(int id, char* descr)
 */
 bool Save_Game(const char* file_name, const char* descr)
 {
+    SaveGame save;
+
+    save.ReadGlobals();
+
+    save.Header.Version = "1.0";
+    static constexpr char ctrlZ = 26;
+    save.Header.Description = std::format("{}\r\n{}", descr, ctrlZ);
+
+    if (!save.WriteGlobals()) {
+        CNC_LOG_ERROR("SaveGame validation failed");
+    } else {
+        CNC_LOG_INFO("SaveGame JSON: {}", save.DumpJson());
+    }
+
     CDFileClass file;
     int i;
     unsigned int version;
@@ -767,7 +782,10 @@ bool Load_Misc_Values(FileClass& file)
     file.Read(Scen.Views, sizeof(Scen.Views));
     file.Read(&EndCountDown, sizeof(EndCountDown));
     file.Read(Scen.BriefingText, sizeof(Scen.BriefingText));
-    file.Read(Scen.FileName, sizeof(Scen.FileName));
+
+    if (file.Seek(0, SEEK_CUR) < file.Size()) {
+        file.Read(Scen.FileName, sizeof(Scen.FileName));
+    }
 
     if (file.Seek(0, SEEK_CUR) < file.Size()) {
         file.Read(ActionMovie, sizeof(ActionMovie));

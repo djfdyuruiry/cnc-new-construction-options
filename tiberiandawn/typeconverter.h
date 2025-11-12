@@ -30,7 +30,10 @@ using ConverterTypeVariant = std::variant<
     WarheadType,
     VocType,
     PlayerColorType,
-    HouseColorType
+    HouseColorType,
+    DiffType,
+    ScenarioDirType,
+    ScenarioVarType
 >;
 
 template<typename T>
@@ -53,7 +56,10 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, WarheadType> ||
     std::is_same_v<T, VocType> ||
     std::is_same_v<T, PlayerColorType> ||
-    std::is_same_v<T, HouseColorType>
+    std::is_same_v<T, HouseColorType> ||
+    std::is_same_v<T, DiffType> ||
+    std::is_same_v<T, ScenarioDirType> ||
+    std::is_same_v<T, ScenarioVarType>
 );
 
 class TdTypeConverter final
@@ -79,6 +85,9 @@ public:
     static const TwoWayMap<VocType, std::string> Voc_Types;
     static const TwoWayMap<PlayerColorType, std::string> Player_Color_Types;
     static const TwoWayMap<HouseColorType, std::string> House_Color_Types;
+    static const TwoWayMap<DiffType, std::string> Diff_Types;
+    static const TwoWayMap<ScenarioDirType, std::string> Scenario_Dir_Types;
+    static const TwoWayMap<ScenarioVarType, std::string> Scenario_Var_Types;
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -122,6 +131,12 @@ public:
             return Player_Color_Types.Get_Backward_Keys();
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
             return House_Color_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, DiffType>) {
+            return Diff_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
+            return Scenario_Dir_Types.Get_Backward_Keys();
+        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
+            return Scenario_Var_Types.Get_Backward_Keys();
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -169,6 +184,12 @@ public:
             return Player_Color_Types.Get_Forward_Keys();
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
             return House_Color_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, DiffType>) {
+            return Diff_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
+            return Scenario_Dir_Types.Get_Forward_Keys();
+        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
+            return Scenario_Var_Types.Get_Forward_Keys();
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -254,6 +275,18 @@ public:
             return House_Color_Types[instance].value_or(
                 House_Color_Types[HOUSE_COLOR_GOOD].value()
             );
+        } else if constexpr (std::is_same_v<T, DiffType>) {
+            return Diff_Types[instance].value_or(
+                Diff_Types[DIFF_NORMAL].value()
+            );
+        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
+            return Scenario_Dir_Types[instance].value_or(
+                Scenario_Dir_Types[SCEN_DIR_NONE].value()
+            );
+        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
+            return Scenario_Var_Types[instance].value_or(
+                Scenario_Var_Types[SCEN_VAR_NONE].value()
+            );
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -318,6 +351,12 @@ public:
             return Player_Color_Types[str];
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
             return House_Color_Types[str];
+        } else if constexpr (std::is_same_v<T, DiffType>) {
+            return Diff_Types[str];
+        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
+            return Scenario_Dir_Types[str];
+        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
+            return Scenario_Var_Types[str];
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -365,6 +404,12 @@ public:
             return Player_Color_Types.First_Forward();;
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
             return House_Color_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, DiffType>) {
+            return Diff_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
+            return Scenario_Dir_Types.First_Forward();;
+        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
+            return Scenario_Var_Types.First_Forward();;
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
@@ -511,6 +556,12 @@ public:
             return "PlayerColor";
         } else if constexpr (std::is_same_v<T, HouseColorType>) {
             return "HouseColor";
+        } else if constexpr (std::is_same_v<T, DiffType>) {
+            return "Difficulty";
+        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
+            return "ScenarioDirection";
+        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
+            return "ScenarioVariation";
         }
 
         throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
