@@ -807,8 +807,6 @@ public:
         int AirDefense;
         int ArmorDefense;
         int InfantryDefense;
-
-
     } ZoneInfo[ZONE_COUNT];
 
     /*
@@ -965,6 +963,8 @@ public:
         };
         void Code_Pointers(void){};
         void Decode_Pointers(void){};
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(BuildChoiceClass, Urgency, Structure);
     };
 
     static TFixedIHeapClass<BuildChoiceClass> BuildChoice;

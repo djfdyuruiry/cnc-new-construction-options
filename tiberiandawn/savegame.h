@@ -9,7 +9,6 @@
 #include "common/logger.h"
 
 #include "defines.h"
-#include "house.h"
 
 #define NAMEOF(SYMBOL) #SYMBOL
 
@@ -57,7 +56,7 @@ public:
 
     json PlayerHouse;
     // TODO: Implement (How to resolve back? need to reference objects not copy)
-    std::vector<std::vector<std::string>> SelectedObjects;
+    std::vector<std::vector<TARGET>> SelectedObjects;
     std::vector<CELL> Waypoints;
     std::vector<CELL> Views;
 

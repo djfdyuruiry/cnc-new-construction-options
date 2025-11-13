@@ -37,6 +37,8 @@
 
 #include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
+
 class HouseClass;
 extern HouseClass* PlayerPtr;
 

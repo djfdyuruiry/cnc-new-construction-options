@@ -110,6 +110,8 @@
 #include "ccini.h"
 #include "common/fixed.h"
 
+#include <bitset>
+
 /***********************************************************************************************
  * HouseClass::Validate -- validates house pointer															  *
  *                                                                                             *
@@ -8324,14 +8326,21 @@ unsigned HouseClass::Get_Ally_Flags()
 
 #define NAMEOF(SYMBOL) #SYMBOL
 #define FIELD_TO_JSON(FIELD) j.emplace(#FIELD, p.FIELD)
+#define FIELD_TO_JSON_WITH_TYPE(FIELD, TYPE) j.emplace(#FIELD, static_cast<TYPE>(p.FIELD))
 #define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(p.VALUE))
 #define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, FIELD)
 #define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
 #define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, FIELD)
+#define TRY_PARSE_TD_FIELD_FROM_JSON(FIELD, TYPE) TdTypeConverter::Try_Parse<TYPE>(j.at(#FIELD).get<std::string>())
+#define PARSE_TD_FIELD_FROM_JSON(FIELD, TYPE) TRY_PARSE_TD_FIELD_FROM_JSON(FIELD, TYPE).value()
 #define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
-#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
+#define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
 #define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
+#define TRY_PARSE_BITFIELD_FROM_JSON(FIELD, WIDTH) j.at(#FIELD).get<std::string>().length() == WIDTH \
+    ? std::optional(std::bitset<WIDTH>(j.at(#FIELD).get<std::string>())) \
+    : std::nullopt
 #define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
+#define BITFIELD_OF_WIDTH_TO_JSON(FIELD, WIDTH) j.emplace(#FIELD, std::bitset<WIDTH>(p.FIELD).to_string())
 
 void to_json(json& j, const HouseClass& p) {
     CONVERT_TD_FIELD_VALUE_TO_JSON(Class, Class->House);
@@ -8360,7 +8369,9 @@ void to_json(json& j, const HouseClass& p) {
     BITFIELD_TO_JSON(IsRecalcNeeded);
     BITFIELD_TO_JSON(IsVisionary);
     BITFIELD_TO_JSON(IsAirstrikePending);
-    j.emplace(NAMEOF(NukePieces), static_cast<int>(p.NukePieces));
+
+    BITFIELD_OF_WIDTH_TO_JSON(NukePieces, 3);
+
     BITFIELD_TO_JSON(IsFreeHarvester);
     FIELD_TO_JSON(IonCannon);
     FIELD_TO_JSON(AirStrike);
@@ -8433,7 +8444,7 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(FlagLocation);
     FIELD_TO_JSON(FlagHome);
     FIELD_TO_JSON(RemapColor);
-    FIELD_TO_JSON(Name);
+    j.emplace(NAMEOF(Name), std::string(p.Name));
     FIELD_TO_JSON(UnitsKilled);
     FIELD_TO_JSON(UnitsLost);
     FIELD_TO_JSON(BuildingsKilled);
@@ -8443,8 +8454,21 @@ void to_json(json& j, const HouseClass& p) {
 #ifdef USE_RA_AI
     FIELD_TO_JSON(Center);
     FIELD_TO_JSON(Radius);
-    // TODO: anon struct serialization
-    // FIELD_TO_JSON(ZoneInfo);
+
+    std::vector<json> zone_info;
+
+    for (const auto& zone : p.ZoneInfo) {
+        json zone_json;
+
+        zone_json.emplace(NAMEOF(AirDefense), zone.AirDefense);
+        zone_json.emplace(NAMEOF(ArmorDefense), zone.ArmorDefense);
+        zone_json.emplace(NAMEOF(InfantryDefense), zone.InfantryDefense);
+
+        zone_info.emplace_back(zone_json);
+    }
+
+    j.emplace(NAMEOF(ZoneInfo), zone_info);
+
     FIELD_TO_JSON(LATime);
     FIELD_TO_JSON(LAType);
     FIELD_TO_JSON(LAZone);
@@ -8515,8 +8539,18 @@ void from_json(const json& j, HouseClass& p)
     BITFIELD_FROM_JSON(IsVisionary);
     BITFIELD_FROM_JSON(IsAirstrikePending);
 
-    // TODO: Validate value is 0-7
-    p.NukePieces = j.at(NAMEOF(NukePieces)).get<int>();
+    const auto nuke_pieces = TRY_PARSE_BITFIELD_FROM_JSON(NukePieces, 3);
+
+    if (nuke_pieces.has_value()) {
+        p.NukePieces = nuke_pieces->to_ulong();
+    } else {
+        CNC_LOG_ERROR(
+            "Invalid {}.{} JSON value - expected 3 bit binary string, actual value: {}",
+            NAMEOF(HouseClass),
+            NAMEOF(NukePieces),
+            j.at(NAMEOF(NukePieces)).get<std::string>()
+        );
+    }
 
     BITFIELD_FROM_JSON(IsFreeHarvester);
     FIELD_FROM_JSON(IonCannon);
@@ -8590,8 +8624,11 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(FlagLocation);
     FIELD_FROM_JSON(FlagHome);
     FIELD_FROM_JSON(RemapColor);
-    // TODO: Handle strings
-    //FIELD_FROM_JSON(Name);
+
+    const auto name = j.at(NAMEOF(Name)).get<std::string>();
+
+    name.copy(p.Name, MPLAYER_NAME_MAX);
+
     FIELD_FROM_JSON(UnitsKilled);
     FIELD_FROM_JSON(UnitsLost);
     FIELD_FROM_JSON(BuildingsKilled);
@@ -8601,8 +8638,29 @@ void from_json(const json& j, HouseClass& p)
 #ifdef USE_RA_AI
     FIELD_FROM_JSON(Center);
     FIELD_FROM_JSON(Radius);
-    // TODO: anon struct serialization
-    // FIELD_FROM_JSON(ZoneInfo);
+
+    const auto zone_infos = j.at(NAMEOF(ZoneInfo)).get<std::vector<json>>();
+
+    if (zone_infos.size() == ZONE_COUNT) {
+        auto idx = ZONE_FIRST;
+
+        for (const auto& zone_json : zone_infos) {
+            zone_json.at(NAMEOF(AirDefense)).get_to(p.ZoneInfo[idx].AirDefense);
+            zone_json.at(NAMEOF(ArmorDefense)).get_to(p.ZoneInfo[idx].ArmorDefense);
+            zone_json.at(NAMEOF(InfantryDefense)).get_to(p.ZoneInfo[idx].InfantryDefense);
+
+            ++idx;
+        }
+    } else {
+        CNC_LOG_ERROR(
+            "Invalid {}.{} JSON value - expected an array of {} values, actual length: {}",
+            NAMEOF(HouseClass),
+            NAMEOF(ZoneInfo),
+            static_cast<int>(ZONE_COUNT),
+            zone_infos.size()
+        );
+    }
+
     FIELD_FROM_JSON(LATime);
     FIELD_FROM_JSON(LAType);
     FIELD_FROM_JSON(LAZone);
@@ -8644,9 +8702,18 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(VisibleCredits);
     FIELD_FROM_JSON(DebugUnlockBuildables);
 
-    const auto house_type_str = j.at(NAMEOF(Class)).get<std::string>();
-    const auto house_type = TdTypeConverter::Try_Parse<HousesType>(house_type_str).value();
-    const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(house_type);
+    const auto class_result = TRY_PARSE_TD_FIELD_FROM_JSON(Class, HousesType);
 
-    p.Init_Data(p.RemapColor, p.ActLike, p.Credits);
+    if (class_result.has_value()) {
+        const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(class_result.value());
+
+        p.Init_Data(p.RemapColor, p.ActLike, p.Credits);
+    } else {
+        CNC_LOG_ERROR(
+            "Invalid {}.{} JSON value - expected HousesType instance, actual value: {}",
+            NAMEOF(HouseClass),
+            NAMEOF(Class),
+            j.at(NAMEOF(Class)).get<std::string>()
+        );
+    }
 }

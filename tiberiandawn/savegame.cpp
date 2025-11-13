@@ -74,11 +74,10 @@ void SaveGameScenarioState::ReadGlobals()
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
         DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
         const auto count = selection.Count();
-        std::vector<std::string> selectedObjectsEntry;
+        std::vector<TARGET> selectedObjectsEntry;
 
         for (auto j = 0; j < count; j++) {
-            // TODO: Convert selected object to reference string
-            // selectedObjectsEntry.emplace_back(selection[j]);
+            selectedObjectsEntry.emplace_back(selection[j]->As_Target());
         }
 
         SelectedObjects.emplace_back(selectedObjectsEntry);
@@ -120,10 +119,7 @@ bool SaveGameScenarioState::Validate() const
             CNC_LOGGER_ERROR("Blank/missing ScenarioState.{} save game value", field);
 
             result = false;
-            continue;
-        }
-
-        if (bufferSize < value.length() + 1) {
+        } else if (bufferSize < value.length() + 1) {
             CNC_LOGGER_ERROR(
                 "Invalid ScenarioState.{} save game value '{}', value is longer than max allowed size: {}",
                 field,
@@ -146,9 +142,21 @@ bool SaveGameScenarioState::Validate() const
     }
 
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
+        auto j = 0;
+
         for (const auto& entry : SelectedObjects.at(i)) {
-            // TODO: validate reference in entry
-            // if (bad) { result = false; }
+            if (As_Object(TARGET_SAFE_CAST(entry), false) == nullptr) {
+                CNC_LOGGER_ERROR(
+                    "Unable to resolve object from ScenarioState.SelectedObjects[{}][{}] save game value: {}",
+                    i,
+                    j,
+                    entry
+                );
+
+                result = false;
+            }
+
+            ++j;
         }
     }
 
@@ -192,10 +200,7 @@ bool SaveGameScenarioState::WriteGlobals() const
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
         DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
         for (const auto& entry : SelectedObjects.at(i)) {
-            // TODO: de-reference entry string
-            // selection.Add(entry);
-
-            // TODO: error handling on invalid reference
+            selection.Add(As_Object(TARGET_SAFE_CAST(entry), false));
         }
     }
 

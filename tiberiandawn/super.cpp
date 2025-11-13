@@ -392,11 +392,10 @@ void to_json(json& j, const SuperClass& p)
     FIELD_TO_JSON(Control);
     FIELD_TO_JSON(OldStage);
     FIELD_TO_JSON(SuspendTime);
-    // TODO: Add VoxType to TdTypeConverter
-    // CONVERT_TD_FIELD_TO_JSON(VoxRecharge);
-    // CONVERT_TD_FIELD_TO_JSON(VoxCharging);
-    // CONVERT_TD_FIELD_TO_JSON(VoxImpatient);
-    // CONVERT_TD_FIELD_TO_JSON(VoxSuspend);
+    FIELD_TO_JSON(VoxRecharge);
+    FIELD_TO_JSON(VoxCharging);
+    FIELD_TO_JSON(VoxImpatient);
+    FIELD_TO_JSON(VoxSuspend);
     FIELD_TO_JSON(RechargeTime);
 }
 
@@ -409,10 +408,9 @@ void from_json(const json& j, SuperClass& p)
     FIELD_FROM_JSON(Control);
     FIELD_FROM_JSON(OldStage);
     FIELD_FROM_JSON(SuspendTime);
-    // TODO: Add VoxType to TdTypeConverter
-    // FIELD_FROM_JSON(VoxRecharge);
-    // FIELD_FROM_JSON(VoxCharging);
-    // FIELD_FROM_JSON(VoxImpatient);
-    // FIELD_FROM_JSON(VoxSuspend);
+    FIELD_FROM_JSON(VoxRecharge);
+    FIELD_FROM_JSON(VoxCharging);
+    FIELD_FROM_JSON(VoxImpatient);
+    FIELD_FROM_JSON(VoxSuspend);
     FIELD_FROM_JSON(RechargeTime);
 }
