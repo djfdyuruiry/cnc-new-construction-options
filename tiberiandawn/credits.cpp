@@ -35,9 +35,8 @@
  *   CreditClass::CreditClass -- Default constructor for the credit class object.              *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "credits.h"
 #include "function.h"
-
-using json = nlohmann::json;
 
 /***********************************************************************************************
  * CreditClass::CreditClass -- Default constructor for the credit class object.                *
@@ -194,11 +193,6 @@ void CreditClass::Init_Clear()
 {
     Current = 0;
 }
-
-#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
-#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
-#define FIELD_TO_JSON(FIELD) j.emplace(#FIELD, p.FIELD)
-#define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
 
 void to_json(json& j, const CreditClass& p)
 {

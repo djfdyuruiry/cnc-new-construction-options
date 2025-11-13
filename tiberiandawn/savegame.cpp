@@ -4,8 +4,6 @@
 #include "savegame.h"
 #include "typeconverter.h"
 
-using json = nlohmann::json;
-
 #pragma region SaveGameHeader
 void SaveGameHeader::ReadGlobals()
 {

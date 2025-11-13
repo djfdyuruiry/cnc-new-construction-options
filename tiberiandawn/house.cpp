@@ -97,8 +97,6 @@
  *   HouseClass::~HouseClass -- Default destructor for a house object.                         *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#include <nlohmann/json.hpp>
-
 #include "function.h"
 
 /*
@@ -108,7 +106,9 @@
 #include "defines.h"
 #include "common/irandom.h"
 #include "ccini.h"
+#include "typeconverter.h"
 #include "common/fixed.h"
+#include "common/json.h"
 
 #include <bitset>
 
@@ -8324,24 +8324,6 @@ unsigned HouseClass::Get_Ally_Flags()
 
 #endif
 
-#define NAMEOF(SYMBOL) #SYMBOL
-#define FIELD_TO_JSON(FIELD) j.emplace(#FIELD, p.FIELD)
-#define FIELD_TO_JSON_WITH_TYPE(FIELD, TYPE) j.emplace(#FIELD, static_cast<TYPE>(p.FIELD))
-#define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(p.VALUE))
-#define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, FIELD)
-#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
-#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, FIELD)
-#define TRY_PARSE_TD_FIELD_FROM_JSON(FIELD, TYPE) TdTypeConverter::Try_Parse<TYPE>(j.at(#FIELD).get<std::string>())
-#define PARSE_TD_FIELD_FROM_JSON(FIELD, TYPE) TRY_PARSE_TD_FIELD_FROM_JSON(FIELD, TYPE).value()
-#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
-#define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
-#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
-#define TRY_PARSE_BITFIELD_FROM_JSON(FIELD, WIDTH) j.at(#FIELD).get<std::string>().length() == WIDTH \
-    ? std::optional(std::bitset<WIDTH>(j.at(#FIELD).get<std::string>())) \
-    : std::nullopt
-#define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
-#define BITFIELD_OF_WIDTH_TO_JSON(FIELD, WIDTH) j.emplace(#FIELD, std::bitset<WIDTH>(p.FIELD).to_string())
-
 void to_json(json& j, const HouseClass& p) {
     CONVERT_TD_FIELD_VALUE_TO_JSON(Class, Class->House);
     FIELD_TO_JSON(FirepowerBias);
@@ -8353,7 +8335,7 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(BuildSpeedBias);
     FIELD_TO_JSON(RepairDelay);
     FIELD_TO_JSON(BuildDelay);
-    FIELD_TO_JSON(ActLike);
+    CONVERT_TD_FIELD_TO_JSON(ActLike);
     BITFIELD_TO_JSON(IsActive);
     BITFIELD_TO_JSON(IsHuman);
     BITFIELD_TO_JSON(WasHuman);
@@ -8376,7 +8358,7 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(IonCannon);
     FIELD_TO_JSON(AirStrike);
     FIELD_TO_JSON(NukeStrike);
-    FIELD_TO_JSON(JustBuilt);
+    CONVERT_TD_FIELD_TO_JSON(JustBuilt);
     FIELD_TO_JSON(Blockage);
     FIELD_TO_JSON(BScan);
     FIELD_TO_JSON(ActiveBScan);
@@ -8434,22 +8416,24 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(SpecialFactories);
     FIELD_TO_JSON(Power);
     FIELD_TO_JSON(Drain);
-    FIELD_TO_JSON(Edge);
+    // TODO: Support SourceType
+    // CONVERT_TD_FIELD_TO_JSON(Edge);
     FIELD_TO_JSON(AircraftFactory);
     FIELD_TO_JSON(InfantryFactory);
     FIELD_TO_JSON(UnitFactory);
     FIELD_TO_JSON(BuildingFactory);
     FIELD_TO_JSON(SpecialFactory);
-    FIELD_TO_JSON(Radar);
+    // TODO: Support RadarType
+    // CONVERT_TD_FIELD_TO_JSON(Radar);
     FIELD_TO_JSON(FlagLocation);
     FIELD_TO_JSON(FlagHome);
-    FIELD_TO_JSON(RemapColor);
+    CONVERT_TD_FIELD_TO_JSON(RemapColor);
     j.emplace(NAMEOF(Name), std::string(p.Name));
     FIELD_TO_JSON(UnitsKilled);
     FIELD_TO_JSON(UnitsLost);
     FIELD_TO_JSON(BuildingsKilled);
     FIELD_TO_JSON(BuildingsLost);
-    FIELD_TO_JSON(WhoLastHurtMe);
+    CONVERT_TD_FIELD_TO_JSON(WhoLastHurtMe);
     FIELD_TO_JSON(StartLocationOverride);
 #ifdef USE_RA_AI
     FIELD_TO_JSON(Center);
@@ -8470,9 +8454,11 @@ void to_json(json& j, const HouseClass& p) {
     j.emplace(NAMEOF(ZoneInfo), zone_info);
 
     FIELD_TO_JSON(LATime);
-    FIELD_TO_JSON(LAType);
-    FIELD_TO_JSON(LAZone);
-    FIELD_TO_JSON(LAEnemy);
+    // TODO: Support RTTIType
+    // CONVERT_TD_FIELD_TO_JSON(LAType);
+    // TODO: Support ZoneType
+    // CONVERT_TD_FIELD_TO_JSON(LAZone);
+    CONVERT_TD_FIELD_TO_JSON(LAEnemy);
     FIELD_TO_JSON(ToCapture);
     FIELD_TO_JSON(RadarSpied);
     FIELD_TO_JSON(PointTotal);
@@ -8480,17 +8466,18 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(UQuantity);
     FIELD_TO_JSON(IQuantity);
     FIELD_TO_JSON(AQuantity);
-    FIELD_TO_JSON(Enemy);
-    FIELD_TO_JSON(BuildStructure);
-    FIELD_TO_JSON(BuildUnit);
-    FIELD_TO_JSON(BuildInfantry);
-    FIELD_TO_JSON(BuildAircraft);
-    FIELD_TO_JSON(State);
+    CONVERT_TD_FIELD_TO_JSON(Enemy);
+    CONVERT_TD_FIELD_TO_JSON(BuildStructure);
+    CONVERT_TD_FIELD_TO_JSON(BuildUnit);
+    CONVERT_TD_FIELD_TO_JSON(BuildInfantry);
+    CONVERT_TD_FIELD_TO_JSON(BuildAircraft);
+    // TODO: Support StateType
+    // CONVERT_TD_FIELD_TO_JSON(State);
     BITFIELD_TO_JSON(IsBaseBuilding);
     BITFIELD_TO_JSON(IsTiberiumShort);
     BITFIELD_TO_JSON(IsParanoid);
     FIELD_TO_JSON(IQ);
-    FIELD_TO_JSON(Difficulty);
+    CONVERT_TD_FIELD_TO_JSON(Difficulty);
 #endif
     FIELD_TO_JSON(Allies);
     FIELD_TO_JSON(AlertTime);
@@ -8522,7 +8509,9 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(BuildSpeedBias);
     FIELD_FROM_JSON(RepairDelay);
     FIELD_FROM_JSON(BuildDelay);
-    FIELD_FROM_JSON(ActLike);
+
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, ActLike, HousesType);
+
     BITFIELD_FROM_JSON(IsActive);
     BITFIELD_FROM_JSON(IsHuman);
     BITFIELD_FROM_JSON(WasHuman);
@@ -8556,7 +8545,7 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(IonCannon);
     FIELD_FROM_JSON(AirStrike);
     FIELD_FROM_JSON(NukeStrike);
-    FIELD_FROM_JSON(JustBuilt);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, JustBuilt, StructType);
     FIELD_FROM_JSON(Blockage);
     FIELD_FROM_JSON(BScan);
     FIELD_FROM_JSON(ActiveBScan);
@@ -8614,26 +8603,38 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(SpecialFactories);
     FIELD_FROM_JSON(Power);
     FIELD_FROM_JSON(Drain);
-    FIELD_FROM_JSON(Edge);
+    // TODO: Support SourceType
+    // PARSE_TD_FIELD_FROM_JSON(HouseClass, Edge, SourceType);
     FIELD_FROM_JSON(AircraftFactory);
     FIELD_FROM_JSON(InfantryFactory);
     FIELD_FROM_JSON(UnitFactory);
     FIELD_FROM_JSON(BuildingFactory);
     FIELD_FROM_JSON(SpecialFactory);
-    FIELD_FROM_JSON(Radar);
+    // TODO: Support RadarType
+    // PARSE_TD_FIELD_FROM_JSON(HouseClass, Radar, RadarType);
     FIELD_FROM_JSON(FlagLocation);
     FIELD_FROM_JSON(FlagHome);
-    FIELD_FROM_JSON(RemapColor);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, RemapColor, PlayerColorType);
 
     const auto name = j.at(NAMEOF(Name)).get<std::string>();
 
-    name.copy(p.Name, MPLAYER_NAME_MAX);
+    if (!CncStringUtils::Is_Blank(name) && name.length() >= MPLAYER_NAME_MAX) {
+        name.copy(p.Name, MPLAYER_NAME_MAX);
+    } else {
+        CNC_LOG_ERROR(
+            "Invalid {}.{} JSON value - expected a non-blank string with 1-{} characters, actual value: {}",
+            NAMEOF(HouseClass),
+            NAMEOF(Name),
+            MPLAYER_NAME_MAX - 1,
+            name
+        );
+    }
 
     FIELD_FROM_JSON(UnitsKilled);
     FIELD_FROM_JSON(UnitsLost);
     FIELD_FROM_JSON(BuildingsKilled);
     FIELD_FROM_JSON(BuildingsLost);
-    FIELD_FROM_JSON(WhoLastHurtMe);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, WhoLastHurtMe, HousesType);
     FIELD_FROM_JSON(StartLocationOverride);
 #ifdef USE_RA_AI
     FIELD_FROM_JSON(Center);
@@ -8662,9 +8663,11 @@ void from_json(const json& j, HouseClass& p)
     }
 
     FIELD_FROM_JSON(LATime);
-    FIELD_FROM_JSON(LAType);
-    FIELD_FROM_JSON(LAZone);
-    FIELD_FROM_JSON(LAEnemy);
+    // TODO: Support RTTIType
+    // PARSE_TD_FIELD_FROM_JSON(HouseClass, LAType, RTTIType);
+    // TODO: Support ZoneType
+    // PARSE_TD_FIELD_FROM_JSON(HouseClass, LAZone, ZoneType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, LAEnemy, HousesType);
     FIELD_FROM_JSON(ToCapture);
     FIELD_FROM_JSON(RadarSpied);
     FIELD_FROM_JSON(PointTotal);
@@ -8672,17 +8675,20 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(UQuantity);
     FIELD_FROM_JSON(IQuantity);
     FIELD_FROM_JSON(AQuantity);
-    FIELD_FROM_JSON(Enemy);
-    FIELD_FROM_JSON(BuildStructure);
-    FIELD_FROM_JSON(BuildUnit);
-    FIELD_FROM_JSON(BuildInfantry);
-    FIELD_FROM_JSON(BuildAircraft);
-    FIELD_FROM_JSON(State);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Enemy, HousesType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildStructure, StructType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildUnit, UnitType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildInfantry, InfantryType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildAircraft, AircraftType);
+
+    // TODO: Support StateType
+    // PARSE_TD_FIELD_FROM_JSON(HouseClass, State, StateType);
+
     BITFIELD_FROM_JSON(IsBaseBuilding);
     BITFIELD_FROM_JSON(IsTiberiumShort);
     BITFIELD_FROM_JSON(IsParanoid);
     FIELD_FROM_JSON(IQ);
-    FIELD_FROM_JSON(Difficulty);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Difficulty, DiffType);
 #endif
     FIELD_FROM_JSON(Allies);
     FIELD_FROM_JSON(AlertTime);
@@ -8702,18 +8708,9 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(VisibleCredits);
     FIELD_FROM_JSON(DebugUnlockBuildables);
 
-    const auto class_result = TRY_PARSE_TD_FIELD_FROM_JSON(Class, HousesType);
-
-    if (class_result.has_value()) {
-        const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(class_result.value());
+    TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(HouseClass), NAMEOF(Class), [&](const auto h) {
+        const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(h);
 
         p.Init_Data(p.RemapColor, p.ActLike, p.Credits);
-    } else {
-        CNC_LOG_ERROR(
-            "Invalid {}.{} JSON value - expected HousesType instance, actual value: {}",
-            NAMEOF(HouseClass),
-            NAMEOF(Class),
-            j.at(NAMEOF(Class)).get<std::string>()
-        );
-    }
+    });
 }

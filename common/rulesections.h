@@ -27,14 +27,11 @@
 #include <typeinfo>
 #include <variant>
 
-#include <nlohmann/json.hpp>
-
 #include "fixed.h"
 #include "ini.h"
+#include "json.h"
 #include "logger.h"
 #include "stringutils.h"
-
-using json = nlohmann::json;
 
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -382,8 +379,8 @@ public:
         return Set(name, instances_csv);
     }
 
-    friend void to_json(json& j, const RuleSection& p);
-    friend void from_json(const json& j, RuleSection& p);
+    // TODO: Handle OnRulesChanged, if needed
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName);
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 
@@ -650,6 +647,7 @@ public:
 
     RuleSection& operator[](std::string_view name);
 
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSections, Sections)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSections);
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 
+#include "common/json.h"
 #include "common/twowaymap.h"
 #include "common/stringutils.h"
 
@@ -572,6 +573,46 @@ public:
      */
     static std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant);
 
+    // TODO: Ability to set default (if source doesn't contain the field)
+    template<SupportedByTdTypeConverter T>
+    static bool Load_Field_From_Json(
+        const json& source,
+        std::string_view json_path,
+        std::string_view field_name,
+        std::function<void(T)> with_valid_value
+    )
+    {
+        if (!source.contains(field_name)) {
+            // TODO: Log
+            return false;
+        }
+
+        auto const& json_value = source.at(field_name);
+
+        if (!json_value.is_string()) {
+            // TODO: Log
+            return false;
+        }
+
+        const auto json_string = json_value.get<std::string>();
+        const auto parse_result = Try_Parse<T>(json_string);
+
+        if (!parse_result.has_value()) {
+            CNC_LOGGER_ERROR(
+                "Invalid {} JSON value - expected {} instance, actual value: {}",
+                json_path,
+                field_name,
+                Get_Type_Name<T>(),
+                json_string
+            );
+
+            return false;
+        }
+
+        with_valid_value(*parse_result);
+
+        return true;
+    }
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
     static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
@@ -595,3 +636,8 @@ private:
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
 #define Load_Csv_With_TdConverter(TYPE, VAR) \
     Load_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = std::move(v); })
+
+// JSON macros
+#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
+#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, FIELD)
+#define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto v) { p.FIELD = v; })

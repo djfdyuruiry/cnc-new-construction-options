@@ -37,9 +37,9 @@
 #ifndef UTRACKER_H
 #define UTRACKER_H
 
-#include <nlohmann/json.hpp>
-
 #include <cstdlib>
+
+#include "common/json.h"
 
 /*
 ** UnitTracker Class

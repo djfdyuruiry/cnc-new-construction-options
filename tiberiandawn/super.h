@@ -35,11 +35,9 @@
 #ifndef SUPER_H
 #define SUPER_H
 
-#include <nlohmann/json.hpp>
+#include "common/json.h"
 
 #include "ftimer.h"
-
-using json = nlohmann::json;
 
 class SuperClass
 {
@@ -81,8 +79,7 @@ public:
         return (RechargeTime);
     };
 
-    friend void to_json(json& j, const SuperClass& p);
-    friend void from_json(const json& j, SuperClass& p);
+    JSON_FUNCTIONS(SuperClass)
 private:
     bool Recharge(bool player = false);
 

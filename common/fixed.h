@@ -35,12 +35,10 @@
 #ifndef FIXED_H
 #define FIXED_H
 
-#include <nlohmann/json.hpp>
 
 #include <stdint.h>
 #include "endianness.h"
-
-using json = nlohmann::json;
+#include "json.h"
 
 /*
 **	This is a very simple fixed point class that functions like a regular integral type. However

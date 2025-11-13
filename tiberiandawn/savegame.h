@@ -4,13 +4,10 @@
 #include <string>
 #include <vector>
 
-#include <nlohmann/json.hpp>
-
+#include "common/json.h"
 #include "common/logger.h"
 
 #include "defines.h"
-
-#define NAMEOF(SYMBOL) #SYMBOL
 
 class SaveGameHeader
 {
