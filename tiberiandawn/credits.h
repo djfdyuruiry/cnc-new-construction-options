@@ -35,6 +35,8 @@
 #ifndef CREDITS_H
 #define CREDITS_H
 
+#include <nlohmann/json.hpp>
+
 class HouseClass;
 extern HouseClass* PlayerPtr;
 
@@ -71,6 +73,8 @@ public:
     unsigned IsUp : 1;
     unsigned IsAudible : 1;
 
+    friend void to_json(json& j, const CreditClass& p);
+    friend void from_json(const json& j, CreditClass& p);
 private:
     int Countdown; // Delay between ticks.
 };

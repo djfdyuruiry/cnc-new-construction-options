@@ -35,8 +35,12 @@
 #ifndef FIXED_H
 #define FIXED_H
 
+#include <nlohmann/json.hpp>
+
 #include <stdint.h>
 #include "endianness.h"
+
+using json = nlohmann::json;
 
 /*
 **	This is a very simple fixed point class that functions like a regular integral type. However
@@ -444,6 +448,16 @@ public:
     static const fixed _3_4;
     static const fixed _2_3;
 
+    friend void to_json(json& j, const fixed& p)
+    {
+        j = p.As_ASCII();
+    }
+
+    friend void from_json(const json& j, fixed& p)
+    {
+        const auto fixed_str = j.get<std::string>();
+        p = fixed(fixed_str.c_str());
+    }
 private:
     union
     {

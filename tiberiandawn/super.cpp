@@ -372,3 +372,47 @@ void SuperClass::Forced_Charge(bool player)
         }
     }
 }
+
+#define NAMEOF(SYMBOL) #SYMBOL
+#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
+#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
+#define FIELD_TO_JSON(FIELD) j.emplace(#FIELD, p.FIELD)
+#define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
+#define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(p.VALUE))
+#define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, FIELD)
+#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
+#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, FIELD)
+
+void to_json(json& j, const SuperClass& p)
+{
+    BITFIELD_TO_JSON(IsPresent);
+    BITFIELD_TO_JSON(IsOneTime);
+    BITFIELD_TO_JSON(IsReady);
+    BITFIELD_TO_JSON(IsSuspended);
+    FIELD_TO_JSON(Control);
+    FIELD_TO_JSON(OldStage);
+    FIELD_TO_JSON(SuspendTime);
+    // TODO: Add VoxType to TdTypeConverter
+    // CONVERT_TD_FIELD_TO_JSON(VoxRecharge);
+    // CONVERT_TD_FIELD_TO_JSON(VoxCharging);
+    // CONVERT_TD_FIELD_TO_JSON(VoxImpatient);
+    // CONVERT_TD_FIELD_TO_JSON(VoxSuspend);
+    FIELD_TO_JSON(RechargeTime);
+}
+
+void from_json(const json& j, SuperClass& p)
+{
+    BITFIELD_FROM_JSON(IsPresent);
+    BITFIELD_FROM_JSON(IsOneTime);
+    BITFIELD_FROM_JSON(IsReady);
+    BITFIELD_FROM_JSON(IsSuspended);
+    FIELD_FROM_JSON(Control);
+    FIELD_FROM_JSON(OldStage);
+    FIELD_FROM_JSON(SuspendTime);
+    // TODO: Add VoxType to TdTypeConverter
+    // FIELD_FROM_JSON(VoxRecharge);
+    // FIELD_FROM_JSON(VoxCharging);
+    // FIELD_FROM_JSON(VoxImpatient);
+    // FIELD_FROM_JSON(VoxSuspend);
+    FIELD_FROM_JSON(RechargeTime);
+}

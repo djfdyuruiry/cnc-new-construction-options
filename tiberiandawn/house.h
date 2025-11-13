@@ -807,6 +807,8 @@ public:
         int AirDefense;
         int ArmorDefense;
         int InfantryDefense;
+
+
     } ZoneInfo[ZONE_COUNT];
 
     /*

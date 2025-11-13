@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "common/logger.h"
 
 #include "defines.h"
@@ -16,14 +18,14 @@ class SaveGameHeader
 public:
     std::string Version;
     int ScenarioID;
-    std::string PlayerHouse;
+    std::string PlayerHouseType;
     std::string Description;
 
     void ReadGlobals();
     bool Validate() const;
     bool WriteGlobals() const;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouse, Description)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, Description)
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameHeader);
 
@@ -53,7 +55,7 @@ public:
     bool HasTempleBeenHitWithIonCannon;
     int AreThingiesEnabledFlag;
 
-    HouseClass* PlayerHouse;
+    json PlayerHouse;
     // TODO: Implement (How to resolve back? need to reference objects not copy)
     std::vector<std::vector<std::string>> SelectedObjects;
     std::vector<CELL> Waypoints;
@@ -83,8 +85,7 @@ public:
         EndCountdownNumber,
         HasTempleBeenHitWithIonCannon,
         AreThingiesEnabledFlag,
-        // TODO: Implement
-        // PlayerHouse,
+        PlayerHouse,
         SelectedObjects,
         Waypoints,
         Views
@@ -106,14 +107,18 @@ class SaveGame
 {
 public:
     SaveGameHeader Header;
-    std::string MapJson;
-    std::string HousesJson;
-    std::map<std::string, std::vector<std::string>> ObjectsJson;
-    std::string LogicJson;
-    std::vector<std::string> LayersJson;
-    std::string ScoreJson;
-    std::string AiBaseJson;
     SaveGameScenarioState ScenarioState;
+
+    json Map;
+    std::vector<json> Layers;
+
+    json Houses;
+    json AiBase;
+
+    std::map<std::string, std::vector<json>> Objects;
+
+    json Logic;
+    json Score;
 
     void ReadGlobals();
     bool Validate() const;
@@ -123,13 +128,13 @@ public:
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame,
         Header,
-        MapJson,
-        HousesJson,
-        ObjectsJson,
-        LogicJson,
-        LayersJson,
-        ScoreJson,
-        AiBaseJson,
+        Map,
+        Houses,
+        Objects,
+        Logic,
+        Layers,
+        Score,
+        AiBase,
         ScenarioState
     )
 private:

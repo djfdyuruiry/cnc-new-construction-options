@@ -37,6 +37,8 @@
 
 #include "function.h"
 
+using json = nlohmann::json;
+
 /***********************************************************************************************
  * CreditClass::CreditClass -- Default constructor for the credit class object.                *
  *                                                                                             *
@@ -191,4 +193,27 @@ void CreditClass::AI(bool forced, HouseClass* player_ptr, bool logic_only)
 void CreditClass::Init_Clear()
 {
     Current = 0;
+}
+
+#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
+#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
+#define FIELD_TO_JSON(FIELD) j.emplace(#FIELD, p.FIELD)
+#define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
+
+void to_json(json& j, const CreditClass& p)
+{
+    FIELD_TO_JSON(Current);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsUp);
+    BITFIELD_TO_JSON(IsAudible);
+    FIELD_TO_JSON(Countdown);
+}
+
+void from_json(const json& j, CreditClass& p)
+{
+    FIELD_FROM_JSON(Current);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsUp);
+    BITFIELD_FROM_JSON(IsAudible);
+    FIELD_FROM_JSON(Countdown);
 }

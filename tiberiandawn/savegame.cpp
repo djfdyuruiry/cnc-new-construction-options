@@ -1,5 +1,3 @@
-#include <nlohmann/json.hpp>
-
 #include "common/stringutils.h"
 
 #include "function.h"
@@ -12,7 +10,7 @@ using json = nlohmann::json;
 void SaveGameHeader::ReadGlobals()
 {
     ScenarioID = Scen.Scenario;
-    PlayerHouse = TdTypeConverter::To_String(PlayerPtr->Class->House);
+    PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
 }
 
 bool SaveGameHeader::Validate() const
@@ -24,8 +22,8 @@ bool SaveGameHeader::Validate() const
         result = false;
     }
 
-    if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouse).has_value()) {
-        CNC_LOGGER_ERROR("Invalid PlayerHouse save game value: {}", PlayerHouse);
+    if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
+        CNC_LOGGER_ERROR("Invalid PlayerHouse save game value: {}", PlayerHouseType);
         result = false;
     }
 
@@ -69,8 +67,8 @@ void SaveGameScenarioState::ReadGlobals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
-    // TODO: add serialisation for HouseClass
-    // PlayerHouse = PlayerPtr;
+    PlayerHouse = *PlayerPtr;
+
     SelectedObjects = {};
 
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
@@ -187,6 +185,9 @@ bool SaveGameScenarioState::WriteGlobals() const
     EndCountDown = EndCountdownNumber;
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
+
+    // TODO: Delete and new before set?
+    from_json(PlayerHouse, *PlayerPtr);
 
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
         DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);

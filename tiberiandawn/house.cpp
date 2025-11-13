@@ -97,6 +97,8 @@
  *   HouseClass::~HouseClass -- Default destructor for a house object.                         *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <nlohmann/json.hpp>
+
 #include "function.h"
 
 /*
@@ -8321,17 +8323,330 @@ unsigned HouseClass::Get_Ally_Flags()
 #endif
 
 #define NAMEOF(SYMBOL) #SYMBOL
+#define FIELD_TO_JSON(FIELD) j.emplace(#FIELD, p.FIELD)
+#define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(p.VALUE))
+#define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, FIELD)
+#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
+#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, FIELD)
+#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
+#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
+#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
+#define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
 
-void to_json(json& j, const HouseClass& p)
-{
-    j = json{
-        { NAMEOF(ActiveAScan), p.ActiveAScan },
-        { NAMEOF(ActiveBScan), p.ActiveBScan }
-    };
+void to_json(json& j, const HouseClass& p) {
+    CONVERT_TD_FIELD_VALUE_TO_JSON(Class, Class->House);
+    FIELD_TO_JSON(FirepowerBias);
+    FIELD_TO_JSON(GroundspeedBias);
+    FIELD_TO_JSON(AirspeedBias);
+    FIELD_TO_JSON(ArmorBias);
+    FIELD_TO_JSON(ROFBias);
+    FIELD_TO_JSON(CostBias);
+    FIELD_TO_JSON(BuildSpeedBias);
+    FIELD_TO_JSON(RepairDelay);
+    FIELD_TO_JSON(BuildDelay);
+    FIELD_TO_JSON(ActLike);
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsHuman);
+    BITFIELD_TO_JSON(WasHuman);
+    BITFIELD_TO_JSON(IsStarted);
+    BITFIELD_TO_JSON(IsAlerted);
+    BITFIELD_TO_JSON(IsDiscovered);
+    BITFIELD_TO_JSON(IsMaxedOut);
+    BITFIELD_TO_JSON(IsDefeated);
+    BITFIELD_TO_JSON(IsToDie);
+    BITFIELD_TO_JSON(IsToWin);
+    BITFIELD_TO_JSON(IsToLose);
+    BITFIELD_TO_JSON(IsCivEvacuated);
+    BITFIELD_TO_JSON(IsRecalcNeeded);
+    BITFIELD_TO_JSON(IsVisionary);
+    BITFIELD_TO_JSON(IsAirstrikePending);
+    j.emplace(NAMEOF(NukePieces), static_cast<int>(p.NukePieces));
+    BITFIELD_TO_JSON(IsFreeHarvester);
+    FIELD_TO_JSON(IonCannon);
+    FIELD_TO_JSON(AirStrike);
+    FIELD_TO_JSON(NukeStrike);
+    FIELD_TO_JSON(JustBuilt);
+    FIELD_TO_JSON(Blockage);
+    FIELD_TO_JSON(BScan);
+    FIELD_TO_JSON(ActiveBScan);
+    FIELD_TO_JSON(NewBScan);
+    FIELD_TO_JSON(NewActiveBScan);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(OldBScan);
+#endif
+    FIELD_TO_JSON(UScan);
+    FIELD_TO_JSON(ActiveUScan);
+    FIELD_TO_JSON(NewUScan);
+    FIELD_TO_JSON(NewActiveUScan);
+    FIELD_TO_JSON(IScan);
+    FIELD_TO_JSON(ActiveIScan);
+    FIELD_TO_JSON(NewIScan);
+    FIELD_TO_JSON(NewActiveIScan);
+    FIELD_TO_JSON(AScan);
+    FIELD_TO_JSON(ActiveAScan);
+    FIELD_TO_JSON(NewAScan);
+    FIELD_TO_JSON(NewActiveAScan);
+    FIELD_TO_JSON(CreditsSpent);
+    FIELD_TO_JSON(HarvestedCredits);
+    FIELD_TO_JSON(CurUnits);
+    FIELD_TO_JSON(CurBuildings);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(CurInfantry);
+    FIELD_TO_JSON(CurAircraft);
+#endif
+    FIELD_TO_JSON(MaxUnit);
+    FIELD_TO_JSON(MaxBuilding);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(MaxInfantry);
+    FIELD_TO_JSON(MaxAircraft);
+#endif
+    FIELD_TO_JSON(Tiberium);
+    FIELD_TO_JSON(Credits);
+    FIELD_TO_JSON(InitialCredits);
+    FIELD_TO_JSON(Capacity);
+    BITFIELD_TO_JSON(Resigned);
+    BITFIELD_TO_JSON(IGaveUp);
+    FIELD_TO_JSON(AircraftTotals);
+    FIELD_TO_JSON(InfantryTotals);
+    FIELD_TO_JSON(UnitTotals);
+    FIELD_TO_JSON(BuildingTotals);
+    FIELD_TO_JSON(DestroyedAircraft);
+    FIELD_TO_JSON(DestroyedInfantry);
+    FIELD_TO_JSON(DestroyedUnits);
+    FIELD_TO_JSON(DestroyedBuildings);
+    FIELD_TO_JSON(CapturedBuildings);
+    FIELD_TO_JSON(TotalCrates);
+    FIELD_TO_JSON(AircraftFactories);
+    FIELD_TO_JSON(InfantryFactories);
+    FIELD_TO_JSON(UnitFactories);
+    FIELD_TO_JSON(BuildingFactories);
+    FIELD_TO_JSON(SpecialFactories);
+    FIELD_TO_JSON(Power);
+    FIELD_TO_JSON(Drain);
+    FIELD_TO_JSON(Edge);
+    FIELD_TO_JSON(AircraftFactory);
+    FIELD_TO_JSON(InfantryFactory);
+    FIELD_TO_JSON(UnitFactory);
+    FIELD_TO_JSON(BuildingFactory);
+    FIELD_TO_JSON(SpecialFactory);
+    FIELD_TO_JSON(Radar);
+    FIELD_TO_JSON(FlagLocation);
+    FIELD_TO_JSON(FlagHome);
+    FIELD_TO_JSON(RemapColor);
+    FIELD_TO_JSON(Name);
+    FIELD_TO_JSON(UnitsKilled);
+    FIELD_TO_JSON(UnitsLost);
+    FIELD_TO_JSON(BuildingsKilled);
+    FIELD_TO_JSON(BuildingsLost);
+    FIELD_TO_JSON(WhoLastHurtMe);
+    FIELD_TO_JSON(StartLocationOverride);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(Center);
+    FIELD_TO_JSON(Radius);
+    // TODO: anon struct serialization
+    // FIELD_TO_JSON(ZoneInfo);
+    FIELD_TO_JSON(LATime);
+    FIELD_TO_JSON(LAType);
+    FIELD_TO_JSON(LAZone);
+    FIELD_TO_JSON(LAEnemy);
+    FIELD_TO_JSON(ToCapture);
+    FIELD_TO_JSON(RadarSpied);
+    FIELD_TO_JSON(PointTotal);
+    FIELD_TO_JSON(BQuantity);
+    FIELD_TO_JSON(UQuantity);
+    FIELD_TO_JSON(IQuantity);
+    FIELD_TO_JSON(AQuantity);
+    FIELD_TO_JSON(Enemy);
+    FIELD_TO_JSON(BuildStructure);
+    FIELD_TO_JSON(BuildUnit);
+    FIELD_TO_JSON(BuildInfantry);
+    FIELD_TO_JSON(BuildAircraft);
+    FIELD_TO_JSON(State);
+    BITFIELD_TO_JSON(IsBaseBuilding);
+    BITFIELD_TO_JSON(IsTiberiumShort);
+    BITFIELD_TO_JSON(IsParanoid);
+    FIELD_TO_JSON(IQ);
+    FIELD_TO_JSON(Difficulty);
+#endif
+    FIELD_TO_JSON(Allies);
+    FIELD_TO_JSON(AlertTime);
+    FIELD_TO_JSON(BorrowedTime);
+    FIELD_TO_JSON(FreeHarvester);
+    FIELD_TO_JSON(Attack);
+    FIELD_TO_JSON(AITimer);
+    FIELD_TO_JSON(DamageTime);
+    FIELD_TO_JSON(TeamTime);
+    FIELD_TO_JSON(TriggerTime);
+    FIELD_TO_JSON(SpeakAttackDelay);
+    FIELD_TO_JSON(SpeakPowerDelay);
+    FIELD_TO_JSON(SpeakMoneyDelay);
+    FIELD_TO_JSON(SpeakMaxedDelay);
+    FIELD_TO_JSON(BlitzTime);
+    FIELD_TO_JSON(NukeDest);
+    FIELD_TO_JSON(VisibleCredits);
+    FIELD_TO_JSON(DebugUnlockBuildables);
 }
 
 void from_json(const json& j, HouseClass& p)
 {
-    j.at(NAMEOF(ActiveAScan)).get_to(p.ActiveAScan);
-    j.at(NAMEOF(ActiveBScan)).get_to(p.ActiveBScan);
+    FIELD_FROM_JSON(FirepowerBias);
+    FIELD_FROM_JSON(GroundspeedBias);
+    FIELD_FROM_JSON(AirspeedBias);
+    FIELD_FROM_JSON(ArmorBias);
+    FIELD_FROM_JSON(ROFBias);
+    FIELD_FROM_JSON(CostBias);
+    FIELD_FROM_JSON(BuildSpeedBias);
+    FIELD_FROM_JSON(RepairDelay);
+    FIELD_FROM_JSON(BuildDelay);
+    FIELD_FROM_JSON(ActLike);
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsHuman);
+    BITFIELD_FROM_JSON(WasHuman);
+    BITFIELD_FROM_JSON(IsStarted);
+    BITFIELD_FROM_JSON(IsAlerted);
+    BITFIELD_FROM_JSON(IsDiscovered);
+    BITFIELD_FROM_JSON(IsMaxedOut);
+    BITFIELD_FROM_JSON(IsDefeated);
+    BITFIELD_FROM_JSON(IsToDie);
+    BITFIELD_FROM_JSON(IsToWin);
+    BITFIELD_FROM_JSON(IsToLose);
+    BITFIELD_FROM_JSON(IsCivEvacuated);
+    BITFIELD_FROM_JSON(IsRecalcNeeded);
+    BITFIELD_FROM_JSON(IsVisionary);
+    BITFIELD_FROM_JSON(IsAirstrikePending);
+
+    // TODO: Validate value is 0-7
+    p.NukePieces = j.at(NAMEOF(NukePieces)).get<int>();
+
+    BITFIELD_FROM_JSON(IsFreeHarvester);
+    FIELD_FROM_JSON(IonCannon);
+    FIELD_FROM_JSON(AirStrike);
+    FIELD_FROM_JSON(NukeStrike);
+    FIELD_FROM_JSON(JustBuilt);
+    FIELD_FROM_JSON(Blockage);
+    FIELD_FROM_JSON(BScan);
+    FIELD_FROM_JSON(ActiveBScan);
+    FIELD_FROM_JSON(NewBScan);
+    FIELD_FROM_JSON(NewActiveBScan);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(OldBScan);
+#endif
+    FIELD_FROM_JSON(UScan);
+    FIELD_FROM_JSON(ActiveUScan);
+    FIELD_FROM_JSON(NewUScan);
+    FIELD_FROM_JSON(NewActiveUScan);
+    FIELD_FROM_JSON(IScan);
+    FIELD_FROM_JSON(ActiveIScan);
+    FIELD_FROM_JSON(NewIScan);
+    FIELD_FROM_JSON(NewActiveIScan);
+    FIELD_FROM_JSON(AScan);
+    FIELD_FROM_JSON(ActiveAScan);
+    FIELD_FROM_JSON(NewAScan);
+    FIELD_FROM_JSON(NewActiveAScan);
+    FIELD_FROM_JSON(CreditsSpent);
+    FIELD_FROM_JSON(HarvestedCredits);
+    FIELD_FROM_JSON(CurUnits);
+    FIELD_FROM_JSON(CurBuildings);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(CurInfantry);
+    FIELD_FROM_JSON(CurAircraft);
+#endif
+    FIELD_FROM_JSON(MaxUnit);
+    FIELD_FROM_JSON(MaxBuilding);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(MaxInfantry);
+    FIELD_FROM_JSON(MaxAircraft);
+#endif
+    FIELD_FROM_JSON(Tiberium);
+    FIELD_FROM_JSON(Credits);
+    FIELD_FROM_JSON(InitialCredits);
+    FIELD_FROM_JSON(Capacity);
+    BITFIELD_FROM_JSON(Resigned);
+    BITFIELD_FROM_JSON(IGaveUp);
+    FIELD_FROM_JSON(AircraftTotals);
+    FIELD_FROM_JSON(InfantryTotals);
+    FIELD_FROM_JSON(UnitTotals);
+    FIELD_FROM_JSON(BuildingTotals);
+    FIELD_FROM_JSON(DestroyedAircraft);
+    FIELD_FROM_JSON(DestroyedInfantry);
+    FIELD_FROM_JSON(DestroyedUnits);
+    FIELD_FROM_JSON(DestroyedBuildings);
+    FIELD_FROM_JSON(CapturedBuildings);
+    FIELD_FROM_JSON(TotalCrates);
+    FIELD_FROM_JSON(AircraftFactories);
+    FIELD_FROM_JSON(InfantryFactories);
+    FIELD_FROM_JSON(UnitFactories);
+    FIELD_FROM_JSON(BuildingFactories);
+    FIELD_FROM_JSON(SpecialFactories);
+    FIELD_FROM_JSON(Power);
+    FIELD_FROM_JSON(Drain);
+    FIELD_FROM_JSON(Edge);
+    FIELD_FROM_JSON(AircraftFactory);
+    FIELD_FROM_JSON(InfantryFactory);
+    FIELD_FROM_JSON(UnitFactory);
+    FIELD_FROM_JSON(BuildingFactory);
+    FIELD_FROM_JSON(SpecialFactory);
+    FIELD_FROM_JSON(Radar);
+    FIELD_FROM_JSON(FlagLocation);
+    FIELD_FROM_JSON(FlagHome);
+    FIELD_FROM_JSON(RemapColor);
+    // TODO: Handle strings
+    //FIELD_FROM_JSON(Name);
+    FIELD_FROM_JSON(UnitsKilled);
+    FIELD_FROM_JSON(UnitsLost);
+    FIELD_FROM_JSON(BuildingsKilled);
+    FIELD_FROM_JSON(BuildingsLost);
+    FIELD_FROM_JSON(WhoLastHurtMe);
+    FIELD_FROM_JSON(StartLocationOverride);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(Center);
+    FIELD_FROM_JSON(Radius);
+    // TODO: anon struct serialization
+    // FIELD_FROM_JSON(ZoneInfo);
+    FIELD_FROM_JSON(LATime);
+    FIELD_FROM_JSON(LAType);
+    FIELD_FROM_JSON(LAZone);
+    FIELD_FROM_JSON(LAEnemy);
+    FIELD_FROM_JSON(ToCapture);
+    FIELD_FROM_JSON(RadarSpied);
+    FIELD_FROM_JSON(PointTotal);
+    FIELD_FROM_JSON(BQuantity);
+    FIELD_FROM_JSON(UQuantity);
+    FIELD_FROM_JSON(IQuantity);
+    FIELD_FROM_JSON(AQuantity);
+    FIELD_FROM_JSON(Enemy);
+    FIELD_FROM_JSON(BuildStructure);
+    FIELD_FROM_JSON(BuildUnit);
+    FIELD_FROM_JSON(BuildInfantry);
+    FIELD_FROM_JSON(BuildAircraft);
+    FIELD_FROM_JSON(State);
+    BITFIELD_FROM_JSON(IsBaseBuilding);
+    BITFIELD_FROM_JSON(IsTiberiumShort);
+    BITFIELD_FROM_JSON(IsParanoid);
+    FIELD_FROM_JSON(IQ);
+    FIELD_FROM_JSON(Difficulty);
+#endif
+    FIELD_FROM_JSON(Allies);
+    FIELD_FROM_JSON(AlertTime);
+    FIELD_FROM_JSON(BorrowedTime);
+    FIELD_FROM_JSON(FreeHarvester);
+    FIELD_FROM_JSON(Attack);
+    FIELD_FROM_JSON(AITimer);
+    FIELD_FROM_JSON(DamageTime);
+    FIELD_FROM_JSON(TeamTime);
+    FIELD_FROM_JSON(TriggerTime);
+    FIELD_FROM_JSON(SpeakAttackDelay);
+    FIELD_FROM_JSON(SpeakPowerDelay);
+    FIELD_FROM_JSON(SpeakMoneyDelay);
+    FIELD_FROM_JSON(SpeakMaxedDelay);
+    FIELD_FROM_JSON(BlitzTime);
+    FIELD_FROM_JSON(NukeDest);
+    FIELD_FROM_JSON(VisibleCredits);
+    FIELD_FROM_JSON(DebugUnlockBuildables);
+
+    const auto house_type_str = j.at(NAMEOF(Class)).get<std::string>();
+    const auto house_type = TdTypeConverter::Try_Parse<HousesType>(house_type_str).value();
+    const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(house_type);
+
+    p.Init_Data(p.RemapColor, p.ActLike, p.Credits);
 }
