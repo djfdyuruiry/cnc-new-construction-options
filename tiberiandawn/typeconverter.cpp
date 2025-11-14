@@ -40,7 +40,7 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(SpeedType,       "SPEED_",       SPEED_NONE,        SPEED_LAST,                 {},                 {}),
     ENUM_TYPE_PAIR(BulletType,      "BULLET_",      BULLET_NONE,       BULLET_LAST,                BulletPatchTable,   {}),
     ENUM_TYPE_PAIR(WarheadType,     "WARHEAD_",     WARHEAD_NONE,      WARHEAD_LAST,               WarheadPatchTable,  {}),
-    ENUM_TYPE_PAIR(VocType,         "VOC_",         VOC_NONE,          VOC_BUILD_SELECT,           {},                 VocExcludes),
+    ENUM_TYPE_PAIR(VocType,         "VOC_",         VOC_NONE,          VOC_BEACON,                 {},                 VocExcludes),
     ENUM_TYPE_PAIR(PlayerColorType, "REMAP_",       REMAP_NONE,        REMAP_LAST,                 {},                 {}),
     ENUM_TYPE_PAIR(HouseColorType,  "HOUSE_COLOR_", HOUSE_COLOR_GOOD,  HOUSE_COLOR_BRIGHT_NEUTRAL, {},                 {}),
     ENUM_TYPE_PAIR(DiffType,        "DIFF_",        DIFF_FIRST,        DIFF_LAST,                  {},                 {}),

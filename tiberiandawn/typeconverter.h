@@ -163,13 +163,19 @@ class TdTypeConverter final
 public:
     static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
 
+    // TODO: Optimise with once static initialiser
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static EnumTypeInfo<T> Get_Info_For_Type()
     {
         const auto type_name = Get_Type_Name<T>();
+
+        if (!EnumTypes.contains(type_name)) {
+            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, this is normally caused by variant being updated without updating supporting code");
+        }
+
         const auto type_info_variant = EnumTypes.at(type_name);
-        EnumTypeInfo<T>* type_info = std::get_if<EnumTypeInfo<T>>(type_info_variant);
+        const auto type_info = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
 
         if (type_info == nullptr) {
             throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, this is normally caused by variant being updated without updating supporting code");
@@ -180,23 +186,30 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static TwoWayMap<T, std::string> Get_Type_Map()
+    static const TwoWayMap<T, std::string>& Get_Type_Map()
     {
-        const auto enum_info = Get_Info_For_Type<T>();
-        const auto instances = magic_enum::enum_values<T>();
-        std::vector<std::pair<T, std::string>> instance_pairs;
+        static std::shared_ptr<TwoWayMap<T, std::string>> type_map;
+        static std::once_flag onceFlag;
 
-        for (const auto& instance : instances) {
-            if (enum_info.Is_Excluded(instance)) {
-                continue;
+        std::call_once(onceFlag, [&] {
+            const auto enum_info = Get_Info_For_Type<T>();
+            const auto instances = magic_enum::enum_values<T>();
+            std::vector<std::pair<T, std::string>> instance_pairs;
+
+            for (const auto& instance : instances) {
+                if (enum_info.Is_Excluded(instance)) {
+                    continue;
+                }
+
+                std::pair<T, std::string> pair = { instance, To_String<T>(instance)};
+
+                instance_pairs.emplace_back(pair);
             }
 
-            std::pair<T, std::string> pair = { instance, To_String<T>(instance)};
+            type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
+        });
 
-            instance_pairs.emplace_back(pair);
-        }
-
-        return TwoWayMap<T, std::string>(instance_pairs);
+        return *type_map;
     }
 
     template<class T>
