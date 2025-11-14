@@ -114,9 +114,9 @@ public:
         const std::optional<std::function<bool(std::string)>>& str_validator = std::nullopt
     )
     {
-        auto sectionIsInIni = ini.Section_Present(SectionName.data());
+        const auto section_is_in_ini = ini.Section_Present(SectionName.data());
 
-        if (!sectionIsInIni) {
+        if (!section_is_in_ini) {
             CNC_LOGGER_DEBUG(
                 "Loading default value '{}' for '{}', rule section not found in provided INI: [{}]",
                 Variant_To_String(default_value),

@@ -101,6 +101,11 @@ public:
         return subject.substr(Prefix.size());
     }
 
+    std::string Strip_Prefix(const std::string_view& subject) const
+    {
+        return Strip_Prefix(std::string(subject));
+    }
+
     bool Is_Excluded(const T& instance) const
     {
         if (instance < MinimumToInclude || instance > MaximumToInclude) {
@@ -191,17 +196,23 @@ public:
         static std::shared_ptr<TwoWayMap<T, std::string>> type_map;
         static std::once_flag onceFlag;
 
+        // create type map once, the first time it's requested
         std::call_once(onceFlag, [&] {
             const auto enum_info = Get_Info_For_Type<T>();
-            const auto instances = magic_enum::enum_values<T>();
+            const auto instances = magic_enum::enum_entries<T>();
             std::vector<std::pair<T, std::string>> instance_pairs;
 
-            for (const auto& instance : instances) {
+            for (const auto& [instance, instance_string] : instances) {
                 if (enum_info.Is_Excluded(instance)) {
                     continue;
                 }
 
-                std::pair<T, std::string> pair = { instance, To_String<T>(instance)};
+                auto patch_string = enum_info.Get_Patch_String(instance);
+                auto ini_string = patch_string.has_value()
+                    ? *patch_string
+                    : enum_info.Strip_Prefix(instance_string);
+
+                std::pair<T, std::string> pair = { instance, ini_string };
 
                 instance_pairs.emplace_back(pair);
             }
@@ -230,12 +241,9 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string To_String(T instance)
     {
-        const auto enum_info = Get_Info_For_Type<T>();
-        const std::optional<std::string> patch_string = enum_info.Get_Patch_String(instance);
+        const auto type_map = Get_Type_Map<T>();
 
-        return patch_string.has_value()
-            ? *patch_string
-            : enum_info.Strip_Prefix(std::string(magic_enum::enum_name(instance)));
+        return type_map[instance].value();
     }
 
     template<class T>
@@ -259,7 +267,13 @@ public:
         // forgive bad casing for type instance
         CncStringUtils::To_Upper(str);
 
-        return Get_Type_Map<T>()[str];
+        auto result = Get_Type_Map<T>()[str];
+
+        if (!result.has_value()) {
+            CNC_LOGGER_INFO("REEEEEE");
+        }
+
+        return result;
     }
 
     template<class T>

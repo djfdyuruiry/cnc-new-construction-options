@@ -23,7 +23,7 @@ static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
 static const std::vector VocExcludes = { VOC_FIRST, VOC_COUNT };
 
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
-    //               [Typename]       [Prefix]        [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
+    //                [Typename]       [Prefix]        [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
     ENUM_TYPE_PAIR(ArmorType,       "ARMOR_",       ARMOR_NONE,        ARMOR_LAST,                 {},                 {}),
     ENUM_TYPE_PAIR(MPHType,         "MPH_",         MPH_IMMOBILE,      MPH_LIGHT_SPEED,            {},                 {}),
     ENUM_TYPE_PAIR(WeaponType,      "WEAPON_",      WEAPON_NONE,       WEAPON_LAST,                WeaponPatchTable,   {}),
