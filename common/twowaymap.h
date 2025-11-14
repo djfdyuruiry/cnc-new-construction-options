@@ -39,6 +39,25 @@ public:
         }
     }
 
+    TwoWayMap(const std::vector<std::pair<A, B>>& pairs)
+    {
+        // TODO: Include duplicate value in exception message
+        for (const auto& pair : pairs) {
+            // Check for duplicate forward mapping
+            if (ForwardMap.contains(pair.first)) {
+                CNC_LOGGER_FATAL("Duplicate key in forward map");
+            }
+
+            // Check for duplicate backward mapping
+            if (BackwardMap.contains(pair.second)) {
+                CNC_LOGGER_FATAL("Duplicate key in backward map");
+            }
+
+            ForwardMap[pair.first] = pair.second;
+            BackwardMap[pair.second] = pair.first;
+        }
+    }
+
     bool Has_Key(const A& key) const
     {
         return ForwardMap.contains(key);

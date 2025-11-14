@@ -168,6 +168,11 @@ list(APPEND VANILLA_LIBS ${LUA_LIBRARIES})
 find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/Array.h")
 include_directories(${LUABRIDGE_INCLUDE_DIRS})
 
+# magic-enum
+find_package(magic_enum CONFIG REQUIRED)
+list(APPEND COMMON_LIBS magic_enum::magic_enum)
+list(APPEND VANILLA_LIBS magic_enum::magic_enum)
+
 # json
 find_package(nlohmann_json CONFIG REQUIRED)
 list(APPEND COMMON_LIBS nlohmann_json::nlohmann_json)

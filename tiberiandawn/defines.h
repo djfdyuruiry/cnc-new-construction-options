@@ -226,7 +226,8 @@ typedef enum DiffType : unsigned char
     DIFF_HARD,
 
     DIFF_COUNT,
-    DIFF_FIRST = 0
+    DIFF_FIRST = 0,
+    DIFF_LAST = DIFF_HARD
 } DiffType;
 
 /**********************************************************************
@@ -522,7 +523,8 @@ typedef enum MissionType : signed char
     MISSION_MISSILE,
 
     MISSION_COUNT,
-    MISSION_FIRST = 0
+    MISSION_FIRST = 0,
+    MISSION_LAST = MISSION_MISSILE
 } MissionType;
 
 /**********************************************************************
@@ -676,8 +678,8 @@ typedef enum HousesType : signed char
     HOUSE_MULTI4,  // Multi-Player house #4
     HOUSE_MULTI5,  // Multi-Player house #5
     HOUSE_MULTI6,  // Multi-Player house #6
-
     HOUSE_COUNT,
+    HOUSE_LAST = HOUSE_MULTI6,
     HOUSE_FIRST = HOUSE_GOOD
 } HousesType;
 
@@ -704,9 +706,8 @@ typedef enum PlayerColorType : signed char
     REMAP_GREEN,
     REMAP_ORANGE,
     REMAP_BLUE, // Ingame dark green color
-    REMAP_LAST = REMAP_BLUE,
-
-    REMAP_COUNT
+    REMAP_COUNT,
+    REMAP_LAST = REMAP_BLUE
 } PlayerColorType;
 
 /*
@@ -751,6 +752,7 @@ typedef enum ScenarioDirEnum : signed char
     SCEN_DIR_WEST,
     SCEN_DIR_COUNT,
     SCEN_DIR_FIRST = 0,
+    SCEN_DIR_LAST = SCEN_DIR_WEST
 } ScenarioDirType;
 
 // inline ScenarioDirType operator++(ScenarioDirType &, int);
@@ -767,7 +769,7 @@ typedef enum ScenarioVarEnum : signed char
     SCEN_VAR_D,
     SCEN_VAR_COUNT, // comes before the Lose value!
     SCEN_VAR_LOSE,
-    SCEN_VAR_FIRST = 0,
+    SCEN_VAR_FIRST = 0
 } ScenarioVarType;
 
 // inline ScenarioVarType operator++(ScenarioVarType &, int);
@@ -817,7 +819,8 @@ typedef enum BulletType : signed char
     BULLET_HEADBUTT,    // Stegosaurus, Triceratops head butt
     BULLET_TREXBITE,    // Tyrannosaurus Rex's bite - especially bad for infantry
     BULLET_COUNT,
-    BULLET_FIRST = 0
+    BULLET_FIRST = 0,
+    BULLET_LAST = BULLET_TREXBITE
 } BulletType;
 
 // inline BulletType operator++(BulletType &, int);
@@ -905,6 +908,7 @@ typedef enum StructType : signed char
     STRUCT_WOOD_WALL,
 
     STRUCT_COUNT,
+    STRUCT_LAST = STRUCT_WOOD_WALL,
     STRUCT_FIRST = 0
 } StructType;
 
@@ -1013,7 +1017,8 @@ typedef enum InfantryType : signed char
     INFANTRY_CHAN,    // Dr. Chan
 
     INFANTRY_COUNT,
-    INFANTRY_FIRST = 0
+    INFANTRY_FIRST = 0,
+    INFANTRY_LAST = INFANTRY_CHAN
 } InfantryType;
 
 // inline InfantryType operator++(InfantryType &, int);
@@ -1048,7 +1053,8 @@ typedef enum UnitType : signed char
     UNIT_RAPT,      //	Velociraptor
     UNIT_STEG,      //	Stegasaurus
     UNIT_COUNT,
-    UNIT_FIRST = 0
+    UNIT_FIRST = 0,
+    UNIT_LAST = UNIT_STEG
 } UnitType;
 
 // inline UnitType operator++(UnitType &, int);
@@ -1090,7 +1096,8 @@ typedef enum AircraftType : signed char
 
     AIRCRAFT_COUNT,
     AIRCRAFT_NONE = -1,
-    AIRCRAFT_FIRST = 0
+    AIRCRAFT_FIRST = 0,
+    AIRCRAFT_LAST = AIRCRAFT_ORCA
 } AircraftType;
 
 #define AIRCRAFTF_TRANSPORT  (1L << AIRCRAFT_TRANSPORT)
@@ -1532,7 +1539,8 @@ typedef enum AnimType : signed char
     ANIM_BEACON_VIRTUAL,     // Beacon (virtual).
 
     ANIM_COUNT,
-    ANIM_FIRST = 0
+    ANIM_FIRST = 0,
+    ANIM_LAST = ANIM_BEACON_VIRTUAL
 } AnimType;
 
 // inline AnimType operator++(AnimType &, int);
@@ -1887,7 +1895,8 @@ typedef enum WarheadType : signed char
     WARHEAD_FEEDME,       // T-Rex eats people, hurts vehicles/buildings
 
     WARHEAD_COUNT,
-    WARHEAD_FIRST = WARHEAD_SA
+    WARHEAD_FIRST = WARHEAD_SA,
+    WARHEAD_LAST = WARHEAD_FEEDME
 } WarheadType;
 
 /**********************************************************************
@@ -1924,8 +1933,8 @@ typedef enum WeaponType : signed char
     WEAPON_HONEST_JOHN,
     WEAPON_STEG,
     WEAPON_TREX,
-
     WEAPON_COUNT,
+    WEAPON_LAST = WEAPON_TREX,
     WEAPON_FIRST = WEAPON_RIFLE
 } WeaponType;
 
@@ -1942,8 +1951,8 @@ typedef enum ArmorType : unsigned char
     ARMOR_ALUMINUM, // Vulnerable to AP and SA.
     ARMOR_STEEL,    // Vulnerable to AP.
     ARMOR_CONCRETE, // Vulnerable to HE and AP.
-
-    ARMOR_COUNT
+    ARMOR_COUNT,
+    ARMOR_LAST = ARMOR_CONCRETE,
 } ArmorType;
 
 /**********************************************************************
@@ -2125,7 +2134,8 @@ typedef enum BSizeType : signed char
     BSIZE_42,
     BSIZE_55,
 
-    BSIZE_COUNT
+    BSIZE_COUNT,
+    BSIZE_LAST = BSIZE_55
 } BSizeType;
 
 // inline BSizeType operator++(BSizeType &, int);
@@ -2270,7 +2280,8 @@ typedef enum SpeedType : signed char
     SPEED_FLOAT,     // Ships.
 
     SPEED_COUNT,
-    SPEED_FIRST = SPEED_FOOT
+    SPEED_FIRST = SPEED_FOOT,
+    SPEED_LAST = SPEED_FLOAT
 } SpeedType;
 
 /**********************************************************************

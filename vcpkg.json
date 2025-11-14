@@ -13,6 +13,10 @@
       "version>=": "2.8"
     },
     {
+      "name": "magic-enum",
+      "version>=": "0.9.3"
+    },
+    {
       "name" : "nlohmann-json",
       "version>=" : "3.12.0#1"
     },
@@ -60,6 +64,10 @@
     {
       "name": "luabridge",
       "version": "2.8"
+    },
+    {
+      "name" : "magic-enum",
+      "version" : "0.9.3"
     },
     {
       "name" : "nlohmann-json",
