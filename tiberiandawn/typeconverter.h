@@ -10,35 +10,10 @@
 
 #include "common/json.h"
 #include "common/twowaymap.h"
+#include "common/rulesections.h"
 #include "common/stringutils.h"
 
 #include "defines.h"
-#include "rulesections.h"
-
-using ConverterTypeVariant = std::variant<
-    ArmorType,
-    MPHType,
-    WeaponType,
-    HousesType,
-    StructType,
-    FactoryType,
-    DirType,
-    BSizeType,
-    AircraftType,
-    MissionType,
-    AnimType,
-    InfantryType,
-    UnitType,
-    SpeedType,
-    BulletType,
-    WarheadType,
-    VocType,
-    PlayerColorType,
-    HouseColorType,
-    DiffType,
-    ScenarioDirType,
-    ScenarioVarType
->;
 
 template<typename T>
 concept SupportedByTdTypeConverter = (
@@ -63,8 +38,46 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, HouseColorType> ||
     std::is_same_v<T, DiffType> ||
     std::is_same_v<T, ScenarioDirType> ||
-    std::is_same_v<T, ScenarioVarType>
+    std::is_same_v<T, ScenarioVarType> ||
+    std::is_same_v<T, SourceType> ||
+    std::is_same_v<T, RadarEnum> ||
+    std::is_same_v<T, RTTIType> ||
+    std::is_same_v<T, ZoneType> ||
+    std::is_same_v<T, StateType> ||
+    std::is_same_v<T, VoxType>
 );
+
+// Matches the SupportedByTdTypeConverter Concept types
+using ConverterTypeVariant = std::variant<
+    ArmorType,
+    MPHType,
+    WeaponType,
+    HousesType,
+    StructType,
+    FactoryType,
+    DirType,
+    BSizeType,
+    AircraftType,
+    MissionType,
+    AnimType,
+    InfantryType,
+    UnitType,
+    SpeedType,
+    BulletType,
+    WarheadType,
+    VocType,
+    PlayerColorType,
+    HouseColorType,
+    DiffType,
+    ScenarioDirType,
+    ScenarioVarType,
+    SourceType,
+    RadarEnum,
+    RTTIType,
+    ZoneType,
+    StateType,
+    VoxType
+>;
 
 /**
  * Stores metadata about an enum type in Tiberian Dawn. Used to filter which values are exposed
@@ -139,7 +152,7 @@ public:
     }
 };
 
-// allows template type EnumTypeInfo to be stored in stl container
+// Allows template type EnumTypeInfo to be stored in stl container
 using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<ArmorType>,
     EnumTypeInfo<MPHType>,
@@ -162,16 +175,38 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<HouseColorType>,
     EnumTypeInfo<DiffType>,
     EnumTypeInfo<ScenarioDirType>,
-    EnumTypeInfo<ScenarioVarType>
+    EnumTypeInfo<ScenarioVarType>,
+    EnumTypeInfo<SourceType>,
+    EnumTypeInfo<RadarEnum>,
+    EnumTypeInfo<RTTIType>,
+    EnumTypeInfo<ZoneType>,
+    EnumTypeInfo<StateType>,
+    EnumTypeInfo<VoxType>
 >;
 
+/**
+ * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.
+ *
+ * Uses magic_enum library for enum type reflection and TwoWayMap to convert between strings
+ * and enum values, matching INI names for strings. EnumTypeInfo is used to construct the TwoWayMap
+ * by excluding values and patching string representations that don't match INI strings.
+ *
+ * This provides reflection and conversion for all support enum types: to/from string, get instances,
+ * convert lists of values, get type names.
+ *
+ * Supports both compile-time access via templates and runtime access using ConverterTypeVariant.
+ *
+ * Has specific methods for working Getting/Setting INI values for class enum fields, and for converting class
+ * enum fields to/from JSON.
+ *
+ * Stores registry of rules that have been loaded into RuleSection instances which require conversion to/from
+ * string representations (values based on TD enum values, not plain numbers/strings/booleans).
+ */
 class TdTypeConverter final
 {
 public:
     static const inline std::string_view EnumPostfix = "Type";
-    /**
-     * Stored information about each enum type, indexed against it's typename.
-     */
+    // Info about each enum type, indexed against it's typename
     static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
 
     template<class T>
@@ -181,14 +216,18 @@ public:
         const auto type_name = Get_Type_Name<T>();
 
         if (!EnumTypes.contains(type_name)) {
-            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, this is normally caused by variant being updated without updating supporting code");
+            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
+                                        "this is normally caused by variant being updated without updating "
+                                        "supporting code");
         }
 
         const auto& type_info_variant = EnumTypes.at(type_name);
         const auto type_info = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
 
         if (type_info == nullptr) {
-            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, this is normally caused by variant being updated without updating supporting code");
+            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
+                                        "this is normally caused by variant being updated without updating "
+                                        "supporting code");
         }
 
         return *type_info;

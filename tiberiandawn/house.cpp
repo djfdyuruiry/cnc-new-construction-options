@@ -8416,15 +8416,13 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(SpecialFactories);
     FIELD_TO_JSON(Power);
     FIELD_TO_JSON(Drain);
-    // TODO: Support SourceType
-    // CONVERT_TD_FIELD_TO_JSON(Edge);
+    CONVERT_TD_FIELD_TO_JSON(Edge);
     FIELD_TO_JSON(AircraftFactory);
     FIELD_TO_JSON(InfantryFactory);
     FIELD_TO_JSON(UnitFactory);
     FIELD_TO_JSON(BuildingFactory);
     FIELD_TO_JSON(SpecialFactory);
-    // TODO: Support RadarType
-    // CONVERT_TD_FIELD_TO_JSON(Radar);
+    CONVERT_TD_FIELD_TO_JSON(Radar);
     FIELD_TO_JSON(FlagLocation);
     FIELD_TO_JSON(FlagHome);
     CONVERT_TD_FIELD_TO_JSON(RemapColor);
@@ -8454,10 +8452,8 @@ void to_json(json& j, const HouseClass& p) {
     j.emplace(NAMEOF(ZoneInfo), zone_info);
 
     FIELD_TO_JSON(LATime);
-    // TODO: Support RTTIType
-    // CONVERT_TD_FIELD_TO_JSON(LAType);
-    // TODO: Support ZoneType
-    // CONVERT_TD_FIELD_TO_JSON(LAZone);
+    CONVERT_TD_FIELD_TO_JSON(LAType);
+    CONVERT_TD_FIELD_TO_JSON(LAZone);
     CONVERT_TD_FIELD_TO_JSON(LAEnemy);
     FIELD_TO_JSON(ToCapture);
     FIELD_TO_JSON(RadarSpied);
@@ -8471,8 +8467,7 @@ void to_json(json& j, const HouseClass& p) {
     CONVERT_TD_FIELD_TO_JSON(BuildUnit);
     CONVERT_TD_FIELD_TO_JSON(BuildInfantry);
     CONVERT_TD_FIELD_TO_JSON(BuildAircraft);
-    // TODO: Support StateType
-    // CONVERT_TD_FIELD_TO_JSON(State);
+    CONVERT_TD_FIELD_TO_JSON(State);
     BITFIELD_TO_JSON(IsBaseBuilding);
     BITFIELD_TO_JSON(IsTiberiumShort);
     BITFIELD_TO_JSON(IsParanoid);
@@ -8603,22 +8598,20 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(SpecialFactories);
     FIELD_FROM_JSON(Power);
     FIELD_FROM_JSON(Drain);
-    // TODO: Support SourceType
-    // PARSE_TD_FIELD_FROM_JSON(HouseClass, Edge, SourceType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Edge, SourceType);
     FIELD_FROM_JSON(AircraftFactory);
     FIELD_FROM_JSON(InfantryFactory);
     FIELD_FROM_JSON(UnitFactory);
     FIELD_FROM_JSON(BuildingFactory);
     FIELD_FROM_JSON(SpecialFactory);
-    // TODO: Support RadarType
-    // PARSE_TD_FIELD_FROM_JSON(HouseClass, Radar, RadarType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Radar, RadarEnum);
     FIELD_FROM_JSON(FlagLocation);
     FIELD_FROM_JSON(FlagHome);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, RemapColor, PlayerColorType);
 
     const auto name = j.at(NAMEOF(Name)).get<std::string>();
 
-    if (!CncStringUtils::Is_Blank(name) && name.length() >= MPLAYER_NAME_MAX) {
+    if (!CncStringUtils::Is_Blank(name) && name.length() < MPLAYER_NAME_MAX) {
         name.copy(p.Name, MPLAYER_NAME_MAX);
     } else {
         CNC_LOG_ERROR(
@@ -8663,10 +8656,8 @@ void from_json(const json& j, HouseClass& p)
     }
 
     FIELD_FROM_JSON(LATime);
-    // TODO: Support RTTIType
-    // PARSE_TD_FIELD_FROM_JSON(HouseClass, LAType, RTTIType);
-    // TODO: Support ZoneType
-    // PARSE_TD_FIELD_FROM_JSON(HouseClass, LAZone, ZoneType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, LAType, RTTIType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, LAZone, ZoneType);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, LAEnemy, HousesType);
     FIELD_FROM_JSON(ToCapture);
     FIELD_FROM_JSON(RadarSpied);
@@ -8681,8 +8672,7 @@ void from_json(const json& j, HouseClass& p)
     PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildInfantry, InfantryType);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildAircraft, AircraftType);
 
-    // TODO: Support StateType
-    // PARSE_TD_FIELD_FROM_JSON(HouseClass, State, StateType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, State, StateType);
 
     BITFIELD_FROM_JSON(IsBaseBuilding);
     BITFIELD_FROM_JSON(IsTiberiumShort);

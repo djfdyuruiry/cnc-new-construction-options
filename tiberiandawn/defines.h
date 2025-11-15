@@ -205,7 +205,8 @@ typedef enum RTTIType : unsigned char
     RTTI_OBJECT,
     RTTI_SPECIAL,
 
-    RTTI_COUNT
+    RTTI_COUNT,
+    RTTI_LAST = RTTI_SPECIAL
 } RTTIType;
 
 typedef enum FactoryType : unsigned char {
@@ -2530,7 +2531,8 @@ typedef enum VoxType : signed char
     //	VOX_MULTI_LOST			= VOX_GOLD_LOST,
     //	VOX_MULTI_WON			= VOX_GOLD_WON,
 
-    VOX_FIRST = 0
+    VOX_FIRST = 0,
+    VOX_LAST = VOX_ENEMY_UNIT
 } VoxType;
 
 #define NUM_MULTI_VOICES 6
@@ -2991,7 +2993,8 @@ typedef enum ZoneType : signed char
 
     ZONE_COUNT,
     ZONE_FIRST = 0,
-    ZONE_NONE = -1
+    ZONE_NONE = -1,
+    ZONE_LAST = ZONE_WEST
 } ZoneType;
 
 /**********************************************************************

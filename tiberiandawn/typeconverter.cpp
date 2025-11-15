@@ -20,9 +20,11 @@ static const TwoWayMap<WeaponType, std::string> WeaponPatchTable = {{ WEAPON_GRE
  */
 static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
 static const std::vector VocExcludes = { VOC_FIRST, VOC_COUNT };
+static const std::vector SourceExcludes = { SOURCE_FIRST, SOURCE_COUNT };
 
 #define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
+// TODO: Determine if LAST/COUNT ETC values are actually excluded from TwoWayMaps (we use these as number boundaries, but don't want the actual enum value X_LAST to parse)
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
     //               [Typename]       [Prefix]        [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
     ENUM_TYPE_PAIR(ArmorType,       "ARMOR_",       ARMOR_NONE,        ARMOR_LAST,                 {},                 {}),
@@ -46,7 +48,13 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(HouseColorType,  "HOUSE_COLOR_", HOUSE_COLOR_GOOD,  HOUSE_COLOR_BRIGHT_NEUTRAL, {},                 {}),
     ENUM_TYPE_PAIR(DiffType,        "DIFF_",        DIFF_FIRST,        DIFF_LAST,                  {},                 {}),
     ENUM_TYPE_PAIR(ScenarioDirType, "SCEN_DIR_",    SCEN_DIR_NONE,     SCEN_DIR_LAST,              {},                 {}),
-    ENUM_TYPE_PAIR(ScenarioVarType, "SCEN_VAR_",    SCEN_VAR_NONE,     SCEN_VAR_LOSE,              {},                 ScenarioVarExcludes)
+    ENUM_TYPE_PAIR(ScenarioVarType, "SCEN_VAR_",    SCEN_VAR_NONE,     SCEN_VAR_LOSE,              {},                 ScenarioVarExcludes),
+    ENUM_TYPE_PAIR(SourceType,      "SOURCE_",      SOURCE_NONE,       SOURCE_OCEAN,               {},                 SourceExcludes),
+    ENUM_TYPE_PAIR(RadarEnum,       "RADAR_",       RADAR_NONE,        RADAR_OFF,                  {},                 {}),
+    ENUM_TYPE_PAIR(RTTIType,        "RTTITYPE_",    RTTI_NONE,         RTTI_LAST,                  {},                 {}),
+    ENUM_TYPE_PAIR(ZoneType,        "ZONE_",        ZONE_NONE,         ZONE_LAST,                  {},                 {}),
+    ENUM_TYPE_PAIR(StateType,       "STATE_",       STATE_BUILDUP,     STATE_ENDGAME,              {},                 {}),
+    ENUM_TYPE_PAIR(VoxType,         "VOX_",         VOX_FIRST,         VOX_LAST,                   {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -66,173 +74,115 @@ ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(std::string_view type
     return RegisteredCsvRuleTypes[type_name][rule];
 }
 
+#define RULE_VARIANT(TYPE) if (std::get_if<TYPE>(&variant)) { \
+    section.Set_With_Converter<TYPE, TdTypeConverter>(rule, value); \
+    return; \
+}
+
 void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant) {
-    if (std::get_if<ArmorType>(&variant)) {
-        section.Set_With_Converter<ArmorType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<MPHType>(&variant)) {
-        section.Set_With_Converter<MPHType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<WeaponType>(&variant)) {
-        section.Set_With_Converter<WeaponType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<HousesType>(&variant)) {
-        section.Set_With_Converter<HousesType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<StructType>(&variant)) {
-        section.Set_With_Converter<StructType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<FactoryType>(&variant)) {
-        section.Set_With_Converter<FactoryType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<DirType>(&variant)) {
-        section.Set_With_Converter<DirType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<BSizeType>(&variant)) {
-        section.Set_With_Converter<BSizeType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<AircraftType>(&variant)) {
-        section.Set_With_Converter<AircraftType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<MissionType>(&variant)) {
-        section.Set_With_Converter<MissionType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<AnimType>(&variant)) {
-        section.Set_With_Converter<AnimType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<InfantryType>(&variant)) {
-        section.Set_With_Converter<InfantryType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<UnitType>(&variant)) {
-        section.Set_With_Converter<UnitType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<SpeedType>(&variant)) {
-        section.Set_With_Converter<SpeedType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<BulletType>(&variant)) {
-        section.Set_With_Converter<BulletType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<WarheadType>(&variant)) {
-        section.Set_With_Converter<WarheadType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<VocType>(&variant)) {
-        section.Set_With_Converter<VocType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<PlayerColorType>(&variant)) {
-        section.Set_With_Converter<PlayerColorType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<HouseColorType>(&variant)) {
-        section.Set_With_Converter<HouseColorType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<DiffType>(&variant)) {
-        section.Set_With_Converter<DiffType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<ScenarioDirType>(&variant)) {
-        section.Set_With_Converter<ScenarioDirType, TdTypeConverter>(rule, value);
-    } else if (std::get_if<ScenarioVarType>(&variant)) {
-        section.Set_With_Converter<ScenarioVarType, TdTypeConverter>(rule, value);
-    } else {
-        throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
-    }
+    RULE_VARIANT(ArmorType)
+    RULE_VARIANT(MPHType)
+    RULE_VARIANT(WeaponType)
+    RULE_VARIANT(HousesType)
+    RULE_VARIANT(StructType)
+    RULE_VARIANT(FactoryType)
+    RULE_VARIANT(DirType)
+    RULE_VARIANT(BSizeType)
+    RULE_VARIANT(AircraftType)
+    RULE_VARIANT(MissionType)
+    RULE_VARIANT(AnimType)
+    RULE_VARIANT(InfantryType)
+    RULE_VARIANT(UnitType)
+    RULE_VARIANT(SpeedType)
+    RULE_VARIANT(BulletType)
+    RULE_VARIANT(WarheadType)
+    RULE_VARIANT(VocType)
+    RULE_VARIANT(PlayerColorType)
+    RULE_VARIANT(HouseColorType)
+    RULE_VARIANT(DiffType)
+    RULE_VARIANT(ScenarioDirType)
+    RULE_VARIANT(ScenarioVarType)
+    RULE_VARIANT(SourceType)
+    RULE_VARIANT(RadarEnum)
+    RULE_VARIANT(RTTIType)
+    RULE_VARIANT(ZoneType)
+    RULE_VARIANT(StateType)
+    RULE_VARIANT(VoxType)
+
+    throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
+}
+
+#define CSV_RULE_VARIANT(TYPE) if (std::get_if<TYPE>(&variant)) { \
+    section.Set_With_Csv_Converter<TYPE, TdTypeConverter>(rule, csv_value); \
+    return; \
 }
 
 void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant) {
-    if (std::get_if<ArmorType>(&variant)) {
-        section.Set_With_Csv_Converter<ArmorType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<MPHType>(&variant)) {
-        section.Set_With_Csv_Converter<MPHType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<WeaponType>(&variant)) {
-        section.Set_With_Csv_Converter<WeaponType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<HousesType>(&variant)) {
-        section.Set_With_Csv_Converter<HousesType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<StructType>(&variant)) {
-        section.Set_With_Csv_Converter<StructType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<FactoryType>(&variant)) {
-        section.Set_With_Csv_Converter<FactoryType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<DirType>(&variant)) {
-        section.Set_With_Csv_Converter<DirType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<BSizeType>(&variant)) {
-        section.Set_With_Csv_Converter<BSizeType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<AircraftType>(&variant)) {
-        section.Set_With_Csv_Converter<AircraftType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<MissionType>(&variant)) {
-        section.Set_With_Csv_Converter<MissionType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<AnimType>(&variant)) {
-        section.Set_With_Csv_Converter<AnimType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<InfantryType>(&variant)) {
-        section.Set_With_Csv_Converter<InfantryType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<UnitType>(&variant)) {
-        section.Set_With_Csv_Converter<UnitType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<SpeedType>(&variant)) {
-        section.Set_With_Csv_Converter<SpeedType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<BulletType>(&variant)) {
-        section.Set_With_Csv_Converter<BulletType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<WarheadType>(&variant)) {
-        section.Set_With_Csv_Converter<WarheadType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<VocType>(&variant)) {
-        section.Set_With_Csv_Converter<VocType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<PlayerColorType>(&variant)) {
-        section.Set_With_Csv_Converter<PlayerColorType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<HouseColorType>(&variant)) {
-        section.Set_With_Csv_Converter<HouseColorType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<DiffType>(&variant)) {
-        section.Set_With_Csv_Converter<DiffType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<ScenarioDirType>(&variant)) {
-        section.Set_With_Csv_Converter<ScenarioDirType, TdTypeConverter>(rule, csv_value);
-    } else if (std::get_if<ScenarioVarType>(&variant)) {
-        section.Set_With_Csv_Converter<ScenarioVarType, TdTypeConverter>(rule, csv_value);
-    } else {
-        throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
-    }
+    CSV_RULE_VARIANT(ArmorType)
+    CSV_RULE_VARIANT(MPHType)
+    CSV_RULE_VARIANT(WeaponType)
+    CSV_RULE_VARIANT(HousesType)
+    CSV_RULE_VARIANT(StructType)
+    CSV_RULE_VARIANT(FactoryType)
+    CSV_RULE_VARIANT(DirType)
+    CSV_RULE_VARIANT(BSizeType)
+    CSV_RULE_VARIANT(AircraftType)
+    CSV_RULE_VARIANT(MissionType)
+    CSV_RULE_VARIANT(AnimType)
+    CSV_RULE_VARIANT(InfantryType)
+    CSV_RULE_VARIANT(UnitType)
+    CSV_RULE_VARIANT(SpeedType)
+    CSV_RULE_VARIANT(BulletType)
+    CSV_RULE_VARIANT(WarheadType)
+    CSV_RULE_VARIANT(VocType)
+    CSV_RULE_VARIANT(PlayerColorType)
+    CSV_RULE_VARIANT(HouseColorType)
+    CSV_RULE_VARIANT(DiffType)
+    CSV_RULE_VARIANT(ScenarioDirType)
+    CSV_RULE_VARIANT(ScenarioVarType)
+    CSV_RULE_VARIANT(SourceType)
+    CSV_RULE_VARIANT(RadarEnum)
+    CSV_RULE_VARIANT(RTTIType)
+    CSV_RULE_VARIANT(ZoneType)
+    CSV_RULE_VARIANT(StateType)
+    CSV_RULE_VARIANT(VoxType)
+
+    throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
+}
+
+#define TYPE_NAME_VARIANT(TYPE) if (std::get_if<TYPE>(&variant)) { \
+    return Get_Type_Name<TYPE>(); \
 }
 
 std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant variant) {
-    if (std::get_if<ArmorType>(&variant)) {
-        return Get_Type_Name<ArmorType>();
-    }
-    if (std::get_if<MPHType>(&variant)) {
-        return Get_Type_Name<MPHType>();
-    }
-    if (std::get_if<WeaponType>(&variant)) {
-        return Get_Type_Name<WeaponType>();
-    }
-    if (std::get_if<HousesType>(&variant)) {
-        return Get_Type_Name<HousesType>();
-    }
-    if (std::get_if<StructType>(&variant)) {
-        return Get_Type_Name<StructType>();
-    }
-    if (std::get_if<FactoryType>(&variant)) {
-        return Get_Type_Name<FactoryType>();
-    }
-    if (std::get_if<DirType>(&variant)) {
-        return Get_Type_Name<DirType>();
-    }
-    if (std::get_if<BSizeType>(&variant)) {
-        return Get_Type_Name<BSizeType>();
-    }
-    if (std::get_if<AircraftType>(&variant)) {
-        return Get_Type_Name<AircraftType>();
-    }
-    if (std::get_if<MissionType>(&variant)) {
-        return Get_Type_Name<MissionType>();
-    }
-    if (std::get_if<AnimType>(&variant)) {
-        return Get_Type_Name<AnimType>();
-    }
-    if (std::get_if<InfantryType>(&variant)) {
-        return Get_Type_Name<InfantryType>();
-    }
-    if (std::get_if<UnitType>(&variant)) {
-        return Get_Type_Name<UnitType>();
-    }
-    if (std::get_if<SpeedType>(&variant)) {
-        return Get_Type_Name<SpeedType>();
-    }
-    if (std::get_if<BulletType>(&variant)) {
-        return Get_Type_Name<BulletType>();
-    }
-    if (std::get_if<WarheadType>(&variant)) {
-        return Get_Type_Name<WarheadType>();
-    }
-    if (std::get_if<VocType>(&variant)) {
-        return Get_Type_Name<VocType>();
-    }
-    if (std::get_if<PlayerColorType>(&variant)) {
-        return Get_Type_Name<PlayerColorType>();
-    }
-    if (std::get_if<HouseColorType>(&variant)) {
-        return Get_Type_Name<HouseColorType>();
-    }
-    if (std::get_if<DiffType>(&variant)) {
-        return Get_Type_Name<DiffType>();
-    }
-    if (std::get_if<ScenarioDirType>(&variant)) {
-        return Get_Type_Name<ScenarioDirType>();
-    }
-    if (std::get_if<ScenarioVarType>(&variant)) {
-        return Get_Type_Name<ScenarioVarType>();
-    }
+    TYPE_NAME_VARIANT(ArmorType)
+    TYPE_NAME_VARIANT(MPHType)
+    TYPE_NAME_VARIANT(WeaponType)
+    TYPE_NAME_VARIANT(HousesType)
+    TYPE_NAME_VARIANT(StructType)
+    TYPE_NAME_VARIANT(FactoryType)
+    TYPE_NAME_VARIANT(DirType)
+    TYPE_NAME_VARIANT(BSizeType)
+    TYPE_NAME_VARIANT(AircraftType)
+    TYPE_NAME_VARIANT(MissionType)
+    TYPE_NAME_VARIANT(AnimType)
+    TYPE_NAME_VARIANT(InfantryType)
+    TYPE_NAME_VARIANT(UnitType)
+    TYPE_NAME_VARIANT(SpeedType)
+    TYPE_NAME_VARIANT(BulletType)
+    TYPE_NAME_VARIANT(WarheadType)
+    TYPE_NAME_VARIANT(VocType)
+    TYPE_NAME_VARIANT(PlayerColorType)
+    TYPE_NAME_VARIANT(HouseColorType)
+    TYPE_NAME_VARIANT(DiffType)
+    TYPE_NAME_VARIANT(ScenarioDirType)
+    TYPE_NAME_VARIANT(ScenarioVarType)
+    TYPE_NAME_VARIANT(SourceType)
+    TYPE_NAME_VARIANT(RadarEnum)
+    TYPE_NAME_VARIANT(RTTIType)
+    TYPE_NAME_VARIANT(ZoneType)
+    TYPE_NAME_VARIANT(StateType)
+    TYPE_NAME_VARIANT(VoxType)
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
 }
