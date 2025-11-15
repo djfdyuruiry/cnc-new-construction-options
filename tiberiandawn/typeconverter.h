@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 
+#define MAGIC_ENUM_RANGE_MAX 256 // ensure all values for 'unsigned char' enums are detected
 #include <magic_enum.hpp>
 
 #include "common/json.h"
@@ -66,9 +67,9 @@ concept SupportedByTdTypeConverter = (
 );
 
 /**
- * Stores metadata about an enum type in Tiberian Dawn. Used to filter which
- * values are exposed in Lua scripts and INI files, and patch enum names that don't
- * match their INI names (e.x. a Guard Tower is STRUCT_GTOWER, but is "GTWR" in INI files)
+ * Stores metadata about an enum type in Tiberian Dawn. Used to filter which values are exposed
+ * in the Rule engine, Lua engine and INI rules. Patches enum names that don't match their INI
+ * names (e.x. a Guard Tower is STRUCT_GTOWER, but is "GTWR" in INI files)
  */
 template <SupportedByTdTypeConverter T>
 class EnumTypeInfo final
@@ -138,6 +139,7 @@ public:
     }
 };
 
+// allows template type EnumTypeInfo to be stored in stl container
 using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<ArmorType>,
     EnumTypeInfo<MPHType>,
@@ -166,12 +168,15 @@ using EnumTypeInfoVariant = std::variant<
 class TdTypeConverter final
 {
 public:
+    static const inline std::string_view EnumPostfix = "Type";
+    /**
+     * Stored information about each enum type, indexed against it's typename.
+     */
     static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
 
-    // TODO: Optimise with once static initialiser
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static EnumTypeInfo<T> Get_Info_For_Type()
+    static const EnumTypeInfo<T>& Get_Info_For_Type()
     {
         const auto type_name = Get_Type_Name<T>();
 
@@ -179,7 +184,7 @@ public:
             throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, this is normally caused by variant being updated without updating supporting code");
         }
 
-        const auto type_info_variant = EnumTypes.at(type_name);
+        const auto& type_info_variant = EnumTypes.at(type_name);
         const auto type_info = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
 
         if (type_info == nullptr) {
@@ -198,11 +203,12 @@ public:
 
         // create type map once, the first time it's requested
         std::call_once(onceFlag, [&] {
-            const auto enum_info = Get_Info_For_Type<T>();
-            const auto instances = magic_enum::enum_entries<T>();
+            const auto& enum_info = Get_Info_For_Type<T>();
+            const auto enum_pairs = magic_enum::enum_entries<T>();
+
             std::vector<std::pair<T, std::string>> instance_pairs;
 
-            for (const auto& [instance, instance_string] : instances) {
+            for (const auto& [instance, instance_string] : enum_pairs) {
                 if (enum_info.Is_Excluded(instance)) {
                     continue;
                 }
@@ -241,9 +247,21 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string To_String(T instance)
     {
-        const auto type_map = Get_Type_Map<T>();
+        const auto& type_map = Get_Type_Map<T>();
+        const auto instance_string = type_map[instance];
 
-        return type_map[instance].value();
+        if (!instance_string.has_value()) {
+            CNC_LOGGER_WARN(
+                "Attempt was made to convert an invalid {} value to string: {}",
+                Get_Type_Name<T>(),
+                static_cast<int>(instance)
+            );
+        }
+
+        // use first value as default (either X_NONE or first valid value)
+        return instance_string.value_or(
+            type_map.First_Backward()
+        );
     }
 
     template<class T>
@@ -268,10 +286,6 @@ public:
         CncStringUtils::To_Upper(str);
 
         auto result = Get_Type_Map<T>()[str];
-
-        if (!result.has_value()) {
-            CNC_LOGGER_INFO("REEEEEE");
-        }
 
         return result;
     }
@@ -386,53 +400,16 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string_view Get_Type_Name()
     {
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return "Armor";
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return "MphSpeed";
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return "Weapon";
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return "House";
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return "Building";
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return "Factory";
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return "Direction";
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return "BuildingSize";
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return "Aircraft";
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return "Mission";
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return "Animation";
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return "Infantry";
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return "Unit";
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return "Speed";
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return "Bullet";
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return "Warhead";
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return "SoundEffect";
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return "PlayerColor";
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return "HouseColor";
-        } else if constexpr (std::is_same_v<T, DiffType>) {
-            return "Difficulty";
-        } else if constexpr (std::is_same_v<T, ScenarioDirType>) {
-            return "ScenarioDirection";
-        } else if constexpr (std::is_same_v<T, ScenarioVarType>) {
-            return "ScenarioVariation";
-        }
+        // get enum type name and remove EnumPostfix
+        static const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
+        static const auto type_name_without_prefix = raw_type_name.substr(
+            0,
+            raw_type_name.length() - EnumPostfix.length()
+        );
 
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        CNC_LOG_INFO(type_name_without_prefix);
+
+        return type_name_without_prefix;
     }
 
     /**
