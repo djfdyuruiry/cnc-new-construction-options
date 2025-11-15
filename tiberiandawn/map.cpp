@@ -2082,6 +2082,8 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 // Field 'Array' omitted as it's reset after save load anyway.
 TO_JSON(MapClass)
 {
+    BASE_CLASS_TO_JSON(GScreenClass);
+
     FIELD_TO_JSON(MapCellX);
     FIELD_TO_JSON(MapCellY);
     FIELD_TO_JSON(MapCellWidth);
@@ -2103,6 +2105,8 @@ TO_JSON(MapClass)
 // Field 'Array' omitted as it's reset after save load anyway.
 FROM_JSON(MapClass)
 {
+    BASE_CLASS_FROM_JSON(GScreenClass);
+
     FIELD_FROM_JSON(MapCellX);
     FIELD_FROM_JSON(MapCellY);
     FIELD_FROM_JSON(MapCellWidth);

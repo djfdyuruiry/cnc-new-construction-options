@@ -8324,6 +8324,16 @@ unsigned HouseClass::Get_Ally_Flags()
 
 #endif
 
+TO_JSON(HouseClass::ZoneInfoStruct)
+{
+
+}
+
+FROM_JSON(HouseClass::ZoneInfoStruct)
+{
+
+}
+
 static void Zone_Info_From_Json(const json& j, HouseClass& p)
 {
     const auto zone_infos = j.at(NAMEOF(ZoneInfo)).get<std::vector<json>>();
@@ -8394,9 +8404,7 @@ void to_json(json& j, const HouseClass& p) {
     BITFIELD_TO_JSON(IsRecalcNeeded);
     BITFIELD_TO_JSON(IsVisionary);
     BITFIELD_TO_JSON(IsAirstrikePending);
-
     BITFIELD_OF_WIDTH_TO_JSON(NukePieces, 3);
-
     BITFIELD_TO_JSON(IsFreeHarvester);
     FIELD_TO_JSON(IonCannon);
     FIELD_TO_JSON(AirStrike);
@@ -8479,9 +8487,7 @@ void to_json(json& j, const HouseClass& p) {
 #ifdef USE_RA_AI
     FIELD_TO_JSON(Center);
     FIELD_TO_JSON(Radius);
-
     Zone_Info_To_Json(j, p);
-
     FIELD_TO_JSON(LATime);
     CONVERT_TD_FIELD_TO_JSON(LAType);
     CONVERT_TD_FIELD_TO_JSON(LAZone);
@@ -8535,9 +8541,7 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(BuildSpeedBias);
     FIELD_FROM_JSON(RepairDelay);
     FIELD_FROM_JSON(BuildDelay);
-
     PARSE_TD_FIELD_FROM_JSON(HouseClass, ActLike, HousesType);
-
     BITFIELD_FROM_JSON(IsActive);
     BITFIELD_FROM_JSON(IsHuman);
     BITFIELD_FROM_JSON(WasHuman);
@@ -8553,20 +8557,7 @@ void from_json(const json& j, HouseClass& p)
     BITFIELD_FROM_JSON(IsRecalcNeeded);
     BITFIELD_FROM_JSON(IsVisionary);
     BITFIELD_FROM_JSON(IsAirstrikePending);
-
-    const auto nuke_pieces = TRY_PARSE_BITFIELD_FROM_JSON(NukePieces, 3);
-
-    if (nuke_pieces.has_value()) {
-        p.NukePieces = nuke_pieces->to_ulong();
-    } else {
-        CNC_LOG_ERROR(
-            "Invalid {}.{} JSON value - expected 3 bit binary string, actual value: {}",
-            NAMEOF(HouseClass),
-            NAMEOF(NukePieces),
-            j.at(NAMEOF(NukePieces)).get<std::string>()
-        );
-    }
-
+    BITFIELD_OF_WIDTH_FROM_JSON(HouseClass, NukePieces, 3);
     BITFIELD_FROM_JSON(IsFreeHarvester);
     FIELD_FROM_JSON(IonCannon);
     FIELD_FROM_JSON(AirStrike);
@@ -8639,9 +8630,7 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(FlagLocation);
     FIELD_FROM_JSON(FlagHome);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, RemapColor, PlayerColorType);
-
     CSTR_FIELD_FROM_JSON(HouseClass, Name, MPLAYER_NAME_MAX);
-
     FIELD_FROM_JSON(UnitsKilled);
     FIELD_FROM_JSON(UnitsLost);
     FIELD_FROM_JSON(BuildingsKilled);
@@ -8651,9 +8640,7 @@ void from_json(const json& j, HouseClass& p)
 #ifdef USE_RA_AI
     FIELD_FROM_JSON(Center);
     FIELD_FROM_JSON(Radius);
-
     Zone_Info_From_Json(j, p);
-
     FIELD_FROM_JSON(LATime);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, LAType, RTTIType);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, LAZone, ZoneType);
@@ -8670,9 +8657,7 @@ void from_json(const json& j, HouseClass& p)
     PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildUnit, UnitType);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildInfantry, InfantryType);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildAircraft, AircraftType);
-
     PARSE_TD_FIELD_FROM_JSON(HouseClass, State, StateType);
-
     BITFIELD_FROM_JSON(IsBaseBuilding);
     BITFIELD_FROM_JSON(IsTiberiumShort);
     BITFIELD_FROM_JSON(IsParanoid);
@@ -8696,13 +8681,5 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(NukeDest);
     FIELD_FROM_JSON(VisibleCredits);
     FIELD_FROM_JSON(DebugUnlockBuildables);
-
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(HouseClass),
-        NAMEOF(Class),
-        [&](const auto h) {
-            const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(h);
-        }
-    );
+    TD_TYPE_POINTER_FROM_JSON(HouseClass, Class, HousesType, HouseTypeClass);
 }

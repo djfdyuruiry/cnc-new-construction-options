@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bitset>
+#include <functional>
 #include <optional>
 
 #define JSON_DISABLE_ENUM_SERIALIZATION 1
@@ -28,9 +30,6 @@ using json = nlohmann::json;
 #define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
 #define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
 #define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
-#define TRY_PARSE_BITFIELD_FROM_JSON(FIELD, WIDTH) j.at(#FIELD).get<std::string>().length() == WIDTH \
-    ? std::optional(std::bitset<WIDTH>(j.at(#FIELD).get<std::string>())) \
-    : std::nullopt
 #define RESOLVE_POINTER_FROM_TARGET_JSON(FIELD) p.FIELD = As_Object(j.at(#FIELD).get<TARGET>())
 
 // to_json/from_json shorthand
@@ -39,6 +38,9 @@ friend void from_json(const json& j, TYPE& p);
 
 #define TO_JSON(TYPE) void to_json(json& j, const TYPE& p)
 #define FROM_JSON(TYPE) void from_json(const json& j, TYPE& p)
+
+#define BASE_CLASS_TO_JSON(CLASS) to_json(j, static_cast<const CLASS&>(p))
+#define BASE_CLASS_FROM_JSON(CLASS) from_json(j, static_cast<CLASS&>(p))
 
 // static helper functions
 class CncJsonUtils final
@@ -52,6 +54,30 @@ public:
         const unsigned int& length
     );
 
+    template<int N>
+    static void Bitfield_Of_Width_From_Json(
+        const json& j,
+        const std::string_view& json_path,
+        const std::string_view& field_name,
+        const std::function<void(std::bitset<N>)>& on_valid_value
+    )
+    {
+        const auto value = j.at(field_name).get<std::string>();
+
+        try {
+            on_valid_value(std::bitset<N>(value));
+        } catch (const std::out_of_range& e) {
+            CNC_LOGGER_ERROR(
+                "Invalid {}{} JSON value - expected {} bit binary string, actual value: {} | parse error: {}",
+                json_path,
+                field_name,
+                N,
+                value,
+                e.what()
+            );
+        }
+    }
+
 private:
     static inline const auto& Logger = CncLogger::For(CncJsonUtils);
 
@@ -61,3 +87,6 @@ private:
 // Load the value for a c-string from JSON string (with validation)
 #define CSTR_FIELD_FROM_JSON(CLASS, FIELD, LENGTH) \
     CncJsonUtils::Cstr_Field_From_Json(j, #CLASS, #FIELD, p.FIELD, LENGTH)
+
+#define BITFIELD_OF_WIDTH_FROM_JSON(CLASS, FIELD, WIDTH) \
+    CncJsonUtils::Bitfield_Of_Width_From_Json<WIDTH>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v.to_ulong(); })

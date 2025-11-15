@@ -343,7 +343,9 @@ MouseClass::MouseStruct MouseClass::MouseControl[MOUSE_COUNT] = {
 
 TO_JSON(MouseClass)
 {
-    FIELD_TO_JSON(IsSmall);
+    //BASE_CLASS_TO_JSON(ScrollClass);
+
+    BITFIELD_TO_JSON(IsSmall);
     CONVERT_TD_FIELD_TO_JSON(CurrentMouseShape);
     CONVERT_TD_FIELD_TO_JSON(NormalMouseShape);
     FIELD_TO_JSON(Frame);
@@ -351,8 +353,10 @@ TO_JSON(MouseClass)
 
 FROM_JSON(MouseClass)
 {
-    FIELD_FROM_JSON(IsSmall);
+    //BASE_CLASS_FROM_JSON(ScrollClass);
+
+    BITFIELD_FROM_JSON(IsSmall);
     PARSE_TD_FIELD_FROM_JSON(MouseClass, CurrentMouseShape, MouseType);
     PARSE_TD_FIELD_FROM_JSON(MouseClass, NormalMouseShape, MouseType);
-    FIELD_TO_JSON(Frame);
+    FIELD_FROM_JSON(Frame);
 }

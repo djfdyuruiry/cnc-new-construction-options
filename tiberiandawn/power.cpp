@@ -483,3 +483,51 @@ int PowerClass::PowerButtonClass::Action(unsigned flags, KeyNumType& key)
     GadgetClass::Action(flags, key);
     return (true);
 }
+
+TO_JSON(PowerClass)
+{
+    BASE_CLASS_TO_JSON(RadarClass);
+
+    FIELD_TO_JSON(PowX);
+    FIELD_TO_JSON(PowY);
+    FIELD_TO_JSON(PowWidth);
+    FIELD_TO_JSON(PowHeight);
+    FIELD_TO_JSON(PowLineSpace);
+    FIELD_TO_JSON(PowLineWidth);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsActive);
+    FIELD_TO_JSON(RecordedDrain);
+    FIELD_TO_JSON(RecordedPower);
+    FIELD_TO_JSON(DesiredDrainHeight);
+    FIELD_TO_JSON(DesiredPowerHeight);
+    FIELD_TO_JSON(DrainHeight);
+    FIELD_TO_JSON(PowerHeight);
+    FIELD_TO_JSON(DrainBounce);
+    FIELD_TO_JSON(PowerBounce);
+    FIELD_TO_JSON(PowerDir);
+    FIELD_TO_JSON(DrainDir);
+}
+
+FROM_JSON(PowerClass)
+{
+    BASE_CLASS_FROM_JSON(RadarClass);
+
+    FIELD_FROM_JSON(PowX);
+    FIELD_FROM_JSON(PowY);
+    FIELD_FROM_JSON(PowWidth);
+    FIELD_FROM_JSON(PowHeight);
+    FIELD_FROM_JSON(PowLineSpace);
+    FIELD_FROM_JSON(PowLineWidth);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsActive);
+    FIELD_FROM_JSON(RecordedDrain);
+    FIELD_FROM_JSON(RecordedPower);
+    FIELD_FROM_JSON(DesiredDrainHeight);
+    FIELD_FROM_JSON(DesiredPowerHeight);
+    FIELD_FROM_JSON(DrainHeight);
+    FIELD_FROM_JSON(PowerHeight);
+    FIELD_FROM_JSON(DrainBounce);
+    FIELD_FROM_JSON(PowerBounce);
+    FIELD_FROM_JSON(PowerDir);
+    FIELD_FROM_JSON(DrainDir);
+}

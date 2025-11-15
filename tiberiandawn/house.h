@@ -733,7 +733,7 @@ public:
     */
     TCountDownTimerClass ScreenShakeTime;
 
-    JSON_FUNCTIONS(HouseClass);
+    JSON_FUNCTIONS(HouseClass)
 private:
     void Silo_Redraw_Check(int oldtib, int oldcap);
 
@@ -797,7 +797,7 @@ public:
     */
     COORDINATE Center; // Center of the base.
     int Radius;        // Average building distance from center (leptons).
-    struct
+    typedef struct ZoneInfoStruct
     {
         int AirDefense;
         int ArmorDefense;
@@ -838,6 +838,8 @@ public:
     **	special weapon.
     */
     // QuarryType PreferredTarget;
+
+    JSON_FUNCTIONS(HouseClass::ZoneInfoStruct)
 
 private:
     /*

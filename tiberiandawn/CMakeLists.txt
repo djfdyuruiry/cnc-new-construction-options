@@ -153,6 +153,7 @@ set(TIBDAWN_SRC
     lua/ui_luaapi.cpp
     savegame.cpp
     typeconverter.cpp
+        stage.cpp
 )
 
 # Generated code - see: ../cmake/NcoRules.cmake and ./rules

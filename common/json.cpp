@@ -1,5 +1,7 @@
 #include "json.h"
 
+#include <bitset>
+
 void CncJsonUtils::Cstr_Field_From_Json(
     const json& j,
     const std::string_view& json_path,
@@ -14,7 +16,7 @@ void CncJsonUtils::Cstr_Field_From_Json(
         CNC_LOGGER_ERROR(
             "Invalid {}{} JSON value - expected a non-blank string with 1-{} characters, actual value: {}",
             json_path,
-            field,
+            field_name,
             length - 1,
             value
         );

@@ -2664,3 +2664,33 @@ SidebarClass::~SidebarClass()
         Zoom = NULL;
     }
 }
+
+TO_JSON(SidebarClass::StripClass::BuildType)
+{
+}
+
+FROM_JSON(SidebarClass::StripClass::BuildType)
+{
+
+}
+
+TO_JSON(SidebarClass::StripClass)
+{
+    BASE_CLASS_TO_JSON(StageClass);
+}
+
+FROM_JSON(SidebarClass::StripClass)
+{
+    BASE_CLASS_FROM_JSON(StageClass);
+
+}
+
+TO_JSON(SidebarClass)
+{
+    BASE_CLASS_TO_JSON(PowerClass);
+}
+
+FROM_JSON(SidebarClass)
+{
+    BASE_CLASS_FROM_JSON(PowerClass);
+}

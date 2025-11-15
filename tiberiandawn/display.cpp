@@ -4551,6 +4551,8 @@ ActionType Best_Object_Action(CELL cell)
 
 TO_JSON(DisplayClass)
 {
+    BASE_CLASS_TO_JSON(MapClass);
+
     CONVERT_TD_FIELD_TO_JSON(Theater);
     FIELD_TO_JSON(TacticalCoord);
     FIELD_TO_JSON(TacLeptonWidth);
@@ -4559,10 +4561,8 @@ TO_JSON(DisplayClass)
     FIELD_TO_JSON(ZoneOffset);
     FIELD_TO_JSON(CursorShapeSave);
     FIELD_TO_JSON(ProximityCheck);
-
     TARGET_TO_JSON(PendingObjectPtr);
     CONVERT_TD_FIELD_TO_JSON(PendingHouse);
-
     FIELD_TO_JSON(TacPixelX);
     FIELD_TO_JSON(TacPixelY);
     FIELD_TO_JSON(DesiredTacticalCoord);
@@ -4581,6 +4581,8 @@ TO_JSON(DisplayClass)
 
 FROM_JSON(DisplayClass)
 {
+    BASE_CLASS_FROM_JSON(MapClass);
+
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, Theater, TheaterType);
     FIELD_FROM_JSON(TacticalCoord);
     FIELD_FROM_JSON(TacLeptonWidth);
@@ -4589,33 +4591,15 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(ZoneOffset);
     FIELD_FROM_JSON(CursorShapeSave);
     FIELD_FROM_JSON(ProximityCheck);
-
-    const auto pending_target = j.at(NAMEOF(PendingObjectPtr)).get<TARGET>();
-
     RESOLVE_POINTER_FROM_TARGET_JSON(PendingObjectPtr);
-
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
-
     FIELD_FROM_JSON(TacPixelX);
     FIELD_FROM_JSON(TacPixelY);
     FIELD_FROM_JSON(DesiredTacticalCoord);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsRepairMode);
     BITFIELD_FROM_JSON(IsSellMode);
-
-    const auto targetting_mode = TRY_PARSE_BITFIELD_FROM_JSON(IsTargettingMode, 2);
-
-    if (targetting_mode.has_value()) {
-        p.IsTargettingMode = targetting_mode->to_ulong();
-    } else {
-        CNC_LOG_ERROR(
-            "Invalid {}.{} JSON value - expected 2 bit binary string, actual value: {}",
-            NAMEOF(DisplayClass),
-            NAMEOF(IsTargettingMode),
-            j.at(NAMEOF(IsTargettingMode)).get<std::string>()
-        );
-    }
-
+    BITFIELD_OF_WIDTH_FROM_JSON(DisplayClass, IsTargettingMode, 2);
     BITFIELD_FROM_JSON(IsRubberBand);
     BITFIELD_FROM_JSON(IsTentative);
     BITFIELD_FROM_JSON(IsShadowPresent);

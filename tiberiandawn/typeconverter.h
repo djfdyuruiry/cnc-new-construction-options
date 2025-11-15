@@ -518,7 +518,7 @@ private:
 
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
 #define Read_With_TdConverter(TYPE, VAR) \
-    Get_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](auto v) { VAR = v; })
+    Get_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](const auto& v) { VAR = v; })
 
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
 #define Read_Csv_With_TdConverter(TYPE, VAR) \
@@ -526,7 +526,7 @@ private:
 
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
 #define Load_With_TdConverter(TYPE, VAR) \
-    Load_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = v; })
+    Load_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](const auto& v) { VAR = v; })
 
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
 #define Load_Csv_With_TdConverter(TYPE, VAR) \
@@ -535,10 +535,21 @@ private:
 // JSON macros
 
 // Convert TD type field to string and store in JSON object, actual field value can be any expression (e.g. fetch Type enum value from pointer object)
-#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
+#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) \
+    CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
 
 // Convert TD type field to string and store in JSON object
 #define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, FIELD)
 
 // Parse TD type field from JSON string
-#define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto v) { p.FIELD = v; })
+#define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
+    TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v; })
+
+#define TD_TYPE_POINTER_FROM_JSON(CLASS, FIELD, TYPE, TYPECLASS) TdTypeConverter::Load_Field_From_Json<TYPE>( \
+    j, \
+    #CLASS, \
+    #FIELD, \
+    [&](const auto& h) { \
+        const_cast<TYPECLASS const*&>(p.FIELD) = &TYPECLASS::As_Reference(h); \
+    } \
+)
