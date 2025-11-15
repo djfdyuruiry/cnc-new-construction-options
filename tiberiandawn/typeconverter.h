@@ -201,6 +201,12 @@ using EnumTypeInfoVariant = std::variant<
  *
  * Stores registry of rules that have been loaded into RuleSection instances which require conversion to/from
  * string representations (values based on TD enum values, not plain numbers/strings/booleans).
+ *
+ * To add a new type to the converter:
+ *
+ *   - Add type to SupportedByTdTypeConverter, ConverterTypeVariant and EnumTypeInfoVariant (above)
+ *   - Add entry to TdTypeConverter::EnumTypes with relevant values
+ *   - Update Variant method bodies in typeconverter.cpp to handle new types
  */
 class TdTypeConverter final
 {
