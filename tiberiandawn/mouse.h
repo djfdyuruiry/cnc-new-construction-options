@@ -35,6 +35,8 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
+#include "common/json.h"
+
 #include "stage.h"
 #include "scroll.h"
 
@@ -79,6 +81,7 @@ public:
     */
     friend class TacticalClass;
 
+    JSON_FUNCTIONS(MouseClass)
 private:
     /*
     **	This type is used to control the frames and rates of the mouse

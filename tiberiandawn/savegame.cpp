@@ -110,7 +110,7 @@ bool SaveGameScenarioState::Validate() const
         { NAMEOF(ActionMovieName), ActionMovieName }
     };
 
-    for (const auto [field, value] : stringFields) {
+    for (const auto& [field, value] : stringFields) {
         const auto bufferSize = GlobalBufferSizes.at(field);
 
         if (CncStringUtils::Is_Blank(value)) {
@@ -228,10 +228,8 @@ bool SaveGame::WriteGlobals() const
         return false;
     }
 
-    Header.WriteGlobals();
-    ScenarioState.WriteGlobals();
-
-    return true;
+    return Header.WriteGlobals() &&
+        ScenarioState.WriteGlobals();
 }
 
 std::string SaveGame::DumpJson() const

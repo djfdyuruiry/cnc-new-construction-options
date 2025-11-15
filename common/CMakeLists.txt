@@ -110,6 +110,7 @@ set(COMMON_SRC
     logger.cpp
     rulesections.cpp
     stringutils.cpp
+        json.cpp
 )
 
 if (WIN32)

@@ -35,6 +35,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include "common/json.h"
+
 #include "gscreen.h"
 
 class MapClass : public GScreenClass
@@ -179,6 +181,7 @@ protected:
     static int const RadiusCount[11];
     static int const RadiusOffset[];
 
+    JSON_FUNCTIONS(MapClass)
 private:
     friend class CellClass;
 

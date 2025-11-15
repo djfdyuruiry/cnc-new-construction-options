@@ -75,6 +75,8 @@
  *   DisplayClass::Center_Map -- Centers the map about the currently selected objects          *
  *   DisplayClass::Prev_Object -- Searches for the previous object on the map.                 *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+#include <bitset>
+
 #include "function.h"
 #include "common/fading.h"
 #include "ccini.h"
@@ -4545,4 +4547,80 @@ ActionType Best_Object_Action(ObjectClass* object)
 ActionType Best_Object_Action(CELL cell)
 {
     return Best_Object_Action(CurrentObject.Raw(), cell);
+}
+
+TO_JSON(DisplayClass)
+{
+    CONVERT_TD_FIELD_TO_JSON(Theater);
+    FIELD_TO_JSON(TacticalCoord);
+    FIELD_TO_JSON(TacLeptonWidth);
+    FIELD_TO_JSON(TacLeptonHeight);
+    FIELD_TO_JSON(ZoneCell);
+    FIELD_TO_JSON(ZoneOffset);
+    FIELD_TO_JSON(CursorShapeSave);
+    FIELD_TO_JSON(ProximityCheck);
+
+    TARGET_TO_JSON(PendingObjectPtr);
+    CONVERT_TD_FIELD_TO_JSON(PendingHouse);
+
+    FIELD_TO_JSON(TacPixelX);
+    FIELD_TO_JSON(TacPixelY);
+    FIELD_TO_JSON(DesiredTacticalCoord);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsRepairMode);
+    BITFIELD_TO_JSON(IsSellMode);
+    BITFIELD_OF_WIDTH_TO_JSON(IsTargettingMode, 2);
+    BITFIELD_TO_JSON(IsRubberBand);
+    BITFIELD_TO_JSON(IsTentative);
+    BITFIELD_TO_JSON(IsShadowPresent);
+    FIELD_TO_JSON(BandX);
+    FIELD_TO_JSON(BandY);
+    FIELD_TO_JSON(NewX);
+    FIELD_TO_JSON(NewY);
+}
+
+FROM_JSON(DisplayClass)
+{
+    PARSE_TD_FIELD_FROM_JSON(DisplayClass, Theater, TheaterType);
+    FIELD_FROM_JSON(TacticalCoord);
+    FIELD_FROM_JSON(TacLeptonWidth);
+    FIELD_FROM_JSON(TacLeptonHeight);
+    FIELD_FROM_JSON(ZoneCell);
+    FIELD_FROM_JSON(ZoneOffset);
+    FIELD_FROM_JSON(CursorShapeSave);
+    FIELD_FROM_JSON(ProximityCheck);
+
+    const auto pending_target = j.at(NAMEOF(PendingObjectPtr)).get<TARGET>();
+
+    RESOLVE_POINTER_FROM_TARGET_JSON(PendingObjectPtr);
+
+    PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
+
+    FIELD_FROM_JSON(TacPixelX);
+    FIELD_FROM_JSON(TacPixelY);
+    FIELD_FROM_JSON(DesiredTacticalCoord);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsRepairMode);
+    BITFIELD_FROM_JSON(IsSellMode);
+
+    const auto targetting_mode = TRY_PARSE_BITFIELD_FROM_JSON(IsTargettingMode, 2);
+
+    if (targetting_mode.has_value()) {
+        p.IsTargettingMode = targetting_mode->to_ulong();
+    } else {
+        CNC_LOG_ERROR(
+            "Invalid {}.{} JSON value - expected 2 bit binary string, actual value: {}",
+            NAMEOF(DisplayClass),
+            NAMEOF(IsTargettingMode),
+            j.at(NAMEOF(IsTargettingMode)).get<std::string>()
+        );
+    }
+
+    BITFIELD_FROM_JSON(IsRubberBand);
+    BITFIELD_FROM_JSON(IsTentative);
+    BITFIELD_FROM_JSON(IsShadowPresent);
+    FIELD_FROM_JSON(BandX);
+    FIELD_FROM_JSON(BandY);
+    FIELD_FROM_JSON(NewX);
+    FIELD_FROM_JSON(NewY);
 }

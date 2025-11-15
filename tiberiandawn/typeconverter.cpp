@@ -54,7 +54,9 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(RTTIType,        "RTTITYPE_",    RTTI_NONE,         RTTI_LAST,                  {},                 {}),
     ENUM_TYPE_PAIR(ZoneType,        "ZONE_",        ZONE_NONE,         ZONE_LAST,                  {},                 {}),
     ENUM_TYPE_PAIR(StateType,       "STATE_",       STATE_BUILDUP,     STATE_ENDGAME,              {},                 {}),
-    ENUM_TYPE_PAIR(VoxType,         "VOX_",         VOX_FIRST,         VOX_LAST,                   {},                 {})
+    ENUM_TYPE_PAIR(VoxType,         "VOX_",         VOX_FIRST,         VOX_LAST,                   {},                 {}),
+    ENUM_TYPE_PAIR(MouseType,       "MOUSE_",       MOUSE_NORMAL,      MOUSE_AREA_GUARD,           {},                 {}),
+    ENUM_TYPE_PAIR(TheaterType,     "THEATER_",     THEATER_FIRST,     THEATER_LAST,               {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -74,7 +76,7 @@ ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(std::string_view type
     return RegisteredCsvRuleTypes[type_name][rule];
 }
 
-#define RULE_VARIANT(TYPE) if (std::get_if<TYPE>(&variant)) { \
+#define RULE_VARIANT(TYPE) if (std::holds_alternative<TYPE>(variant)) { \
     section.Set_With_Converter<TYPE, TdTypeConverter>(rule, value); \
     return; \
 }
@@ -108,11 +110,13 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(ZoneType)
     RULE_VARIANT(StateType)
     RULE_VARIANT(VoxType)
+    RULE_VARIANT(MouseType)
+    RULE_VARIANT(TheaterType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
 
-#define CSV_RULE_VARIANT(TYPE) if (std::get_if<TYPE>(&variant)) { \
+#define CSV_RULE_VARIANT(TYPE) if (std::holds_alternative<TYPE>(variant)) { \
     section.Set_With_Csv_Converter<TYPE, TdTypeConverter>(rule, csv_value); \
     return; \
 }
@@ -146,11 +150,13 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(ZoneType)
     CSV_RULE_VARIANT(StateType)
     CSV_RULE_VARIANT(VoxType)
+    CSV_RULE_VARIANT(MouseType)
+    CSV_RULE_VARIANT(TheaterType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
 
-#define TYPE_NAME_VARIANT(TYPE) if (std::get_if<TYPE>(&variant)) { \
+#define TYPE_NAME_VARIANT(TYPE) if (std::holds_alternative<TYPE>(variant)) { \
     return Get_Type_Name<TYPE>(); \
 }
 
@@ -183,6 +189,8 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(ZoneType)
     TYPE_NAME_VARIANT(StateType)
     TYPE_NAME_VARIANT(VoxType)
+    TYPE_NAME_VARIANT(MouseType)
+    TYPE_NAME_VARIANT(TheaterType)
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
 }

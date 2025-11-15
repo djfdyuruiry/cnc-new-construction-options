@@ -44,7 +44,9 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, RTTIType> ||
     std::is_same_v<T, ZoneType> ||
     std::is_same_v<T, StateType> ||
-    std::is_same_v<T, VoxType>
+    std::is_same_v<T, VoxType> ||
+    std::is_same_v<T, MouseType> ||
+    std::is_same_v<T, TheaterType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -76,7 +78,9 @@ using ConverterTypeVariant = std::variant<
     RTTIType,
     ZoneType,
     StateType,
-    VoxType
+    VoxType,
+    MouseType,
+    TheaterType
 >;
 
 /**
@@ -181,7 +185,9 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<RTTIType>,
     EnumTypeInfo<ZoneType>,
     EnumTypeInfo<StateType>,
-    EnumTypeInfo<VoxType>
+    EnumTypeInfo<VoxType>,
+    EnumTypeInfo<MouseType>,
+    EnumTypeInfo<TheaterType>
 >;
 
 /**
@@ -527,6 +533,12 @@ private:
     Load_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = std::move(v); })
 
 // JSON macros
+
+// Convert TD type field to string and store in JSON object, actual field value can be any expression (e.g. fetch Type enum value from pointer object)
 #define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
+
+// Convert TD type field to string and store in JSON object
 #define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, FIELD)
+
+// Parse TD type field from JSON string
 #define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto v) { p.FIELD = v; })

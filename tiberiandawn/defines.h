@@ -2099,7 +2099,8 @@ typedef enum TheaterType : signed char
     THEATER_SNOW,
 
     THEATER_COUNT,
-    THEATER_FIRST = 0
+    THEATER_FIRST = 0,
+    THEATER_LAST = THEATER_SNOW
 } TheaterType;
 
 // inline TheaterType operator++(TheaterType &, int);

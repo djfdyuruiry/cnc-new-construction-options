@@ -2078,3 +2078,45 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 }
 
 #endif // USE_RA_AI
+
+// Field 'Array' omitted as it's reset after save load anyway.
+TO_JSON(MapClass)
+{
+    FIELD_TO_JSON(MapCellX);
+    FIELD_TO_JSON(MapCellY);
+    FIELD_TO_JSON(MapCellWidth);
+    FIELD_TO_JSON(MapCellHeight);
+    FIELD_TO_JSON(TotalValue);
+    FIELD_TO_JSON(MapBinaryVersion);
+
+    FIELD_TO_JSON(XSize);
+    FIELD_TO_JSON(YSize);
+    FIELD_TO_JSON(Size);
+    FIELD_TO_JSON(TiberiumGrowth);
+    FIELD_TO_JSON(TiberiumGrowthCount);
+    FIELD_TO_JSON(TiberiumSpread);
+    FIELD_TO_JSON(TiberiumSpreadCount);
+    FIELD_TO_JSON(TiberiumScan);
+    BITFIELD_TO_JSON(IsForwardScan);
+}
+
+// Field 'Array' omitted as it's reset after save load anyway.
+FROM_JSON(MapClass)
+{
+    FIELD_FROM_JSON(MapCellX);
+    FIELD_FROM_JSON(MapCellY);
+    FIELD_FROM_JSON(MapCellWidth);
+    FIELD_FROM_JSON(MapCellHeight);
+    FIELD_FROM_JSON(TotalValue);
+    FIELD_FROM_JSON(MapBinaryVersion);
+
+    FIELD_FROM_JSON(XSize);
+    FIELD_FROM_JSON(YSize);
+    FIELD_FROM_JSON(Size);
+    FIELD_FROM_JSON(TiberiumGrowth);
+    FIELD_FROM_JSON(TiberiumGrowthCount);
+    FIELD_FROM_JSON(TiberiumSpread);
+    FIELD_FROM_JSON(TiberiumSpreadCount);
+    FIELD_FROM_JSON(TiberiumScan);
+    BITFIELD_FROM_JSON(IsForwardScan);
+}

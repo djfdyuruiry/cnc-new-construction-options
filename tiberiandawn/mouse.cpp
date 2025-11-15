@@ -40,6 +40,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /*
 **	This points to the loaded mouse shapes.
@@ -339,3 +340,19 @@ MouseClass::MouseStruct MouseClass::MouseControl[MOUSE_COUNT] = {
     {122, 3, 4, 127, 15, 12}, //	MOUSE_DEMOLITIONS
     {153, 1, 0, 152, 15, 12}, //	MOUSE_AREA_GUARD
 };
+
+TO_JSON(MouseClass)
+{
+    FIELD_TO_JSON(IsSmall);
+    CONVERT_TD_FIELD_TO_JSON(CurrentMouseShape);
+    CONVERT_TD_FIELD_TO_JSON(NormalMouseShape);
+    FIELD_TO_JSON(Frame);
+}
+
+FROM_JSON(MouseClass)
+{
+    FIELD_FROM_JSON(IsSmall);
+    PARSE_TD_FIELD_FROM_JSON(MouseClass, CurrentMouseShape, MouseType);
+    PARSE_TD_FIELD_FROM_JSON(MouseClass, NormalMouseShape, MouseType);
+    FIELD_TO_JSON(Frame);
+}

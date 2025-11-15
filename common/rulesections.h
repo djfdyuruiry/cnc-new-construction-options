@@ -213,15 +213,15 @@ public:
     [[nodiscard]]
     std::optional<T> Try_Get(std::string_view name) const
     {
-        auto value_variant_optional = Try_Get_Variant(name);
+        const auto value_variant_optional = Try_Get_Variant(name);
 
         if (!value_variant_optional.has_value()) {
             return std::nullopt;
         }
 
-        auto value_variant = value_variant_optional.value();
+        const auto value = std::get_if<T>(&value_variant_optional.value());
 
-        if (!std::get_if<T>(&value_variant)) {
+        if (value == nullptr) {
             CNC_LOGGER_FATAL(
                 "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
                 typeid(T).name(),
@@ -231,7 +231,7 @@ public:
             );
         }
 
-        return *std::get_if<T>(&value_variant);
+        return *value;
     }
 
     template<RuleValueVariantCompatible T>

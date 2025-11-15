@@ -319,16 +319,16 @@ LuaResultWithValue<LuaVariant> LuaEngine::Try_Read_Variant(const int& stack_inde
 
 const std::string_view LuaEngine::Get_Variant_Type(const LuaVariant& lua_variant) const
 {
-    if (const auto value = std::get_if<std::string>(&lua_variant)) {
+    if (std::holds_alternative<std::string>(lua_variant)) {
         return LuaTypeMap[LUA_TSTRING].value();
     }
-    if (const auto value = std::get_if<int>(&lua_variant)) {
+    if (std::holds_alternative<int>(lua_variant)) {
         return LuaTypeMap[LUA_TNUMBER].value();
     }
-    if (const auto value = std::get_if<double>(&lua_variant)) {
+    if (std::holds_alternative<double>(lua_variant)) {
         return LuaTypeMap[LUA_TNUMBER].value();
     }
-    if (const auto value = std::get_if<bool>(&lua_variant)) {
+    if (std::holds_alternative<bool>(lua_variant)) {
         return LuaTypeMap[LUA_TBOOLEAN].value();
     }
 

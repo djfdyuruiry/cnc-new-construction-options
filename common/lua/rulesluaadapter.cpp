@@ -7,21 +7,21 @@ void RulesLuaAdapter::Push_Rule_Type(const LuaEngine& engine, RuleSections& sect
     const auto& rule_value_variant = sections[section].Get_Variant(key);
 
     if (
-        std::get_if<int>(&rule_value_variant) ||
-        std::get_if<uint>(&rule_value_variant) ||
-        std::get_if<float>(&rule_value_variant) ||
-        std::get_if<ushort>(&rule_value_variant) ||
-        std::get_if<char>(&rule_value_variant) ||
-        std::get_if<uchar>(&rule_value_variant)
+        std::holds_alternative<int>(rule_value_variant) ||
+        std::holds_alternative<uint>(rule_value_variant) ||
+        std::holds_alternative<float>(rule_value_variant) ||
+        std::holds_alternative<ushort>(rule_value_variant) ||
+        std::holds_alternative<char>(rule_value_variant) ||
+        std::holds_alternative<uchar>(rule_value_variant)
     ) {
         engine.Push_Value(
             LuaEngine::LuaTypeMap[LUA_TNUMBER].value()
         );
-    } else if (std::get_if<bool>(&rule_value_variant)) {
+    } else if (std::holds_alternative<bool>(rule_value_variant)) {
         engine.Push_Value(
             LuaEngine::LuaTypeMap[LUA_TBOOLEAN].value()
         );
-    } else if (std::get_if<std::string>(&rule_value_variant)) {
+    } else if (std::holds_alternative<std::string>(rule_value_variant)) {
         engine.Push_Value(
             LuaEngine::LuaTypeMap[LUA_TSTRING].value()
         );
@@ -69,26 +69,26 @@ void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments
     auto expected_type = LUA_TNONE;
 
     if (
-        std::get_if<int>(&rule_value_variant) ||
-        std::get_if<uint>(&rule_value_variant) ||
-        std::get_if<ushort>(&rule_value_variant) ||
-        std::get_if<char>(&rule_value_variant) ||
-        std::get_if<uchar>(&rule_value_variant)
+        std::holds_alternative<int>(rule_value_variant) ||
+        std::holds_alternative<uint>(rule_value_variant) ||
+        std::holds_alternative<ushort>(rule_value_variant) ||
+        std::holds_alternative<char>(rule_value_variant) ||
+        std::holds_alternative<uchar>(rule_value_variant)
     ) {
         expected_type = LUA_TNUMBER;
     }
 
-    if (std::get_if<int>(&rule_value_variant)) {
+    if (std::holds_alternative<int>(rule_value_variant)) {
         rule_type_error = !Set_Rule_Value_For_Section<int, int>(arguments, sections[section], key);
-    } else if (std::get_if<uint>(&rule_value_variant)) {
+    } else if (std::holds_alternative<uint>(rule_value_variant)) {
         rule_type_error = !Set_Rule_Value_For_Section<int, uint>(arguments, sections[section], key);
-    } else if (std::get_if<ushort>(&rule_value_variant)) {
+    } else if (std::holds_alternative<ushort>(rule_value_variant)) {
         rule_type_error = !Set_Rule_Value_For_Section<int, ushort>(arguments, sections[section], key);
-    } else if (std::get_if<char>(&rule_value_variant)) {
+    } else if (std::holds_alternative<char>(rule_value_variant)) {
         rule_type_error = !Set_Rule_Value_For_Section<int, char>(arguments, sections[section], key);
-    } else if (std::get_if<uchar>(&rule_value_variant)) {
+    } else if (std::holds_alternative<uchar>(rule_value_variant)) {
         rule_type_error = !Set_Rule_Value_For_Section<int, uchar>(arguments, sections[section], key);
-    } else if (const auto value = std::get_if<float>(&rule_value_variant)) {
+    } else if (std::holds_alternative<float>(rule_value_variant)) {
         expected_type = LUA_TNUMBER;
 
         if (arguments.Next_Read_Is<float>()) {
@@ -98,7 +98,7 @@ void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments
             );
             rule_type_error = false;
         }
-    } else if (std::get_if<bool>(&rule_value_variant)) {
+    } else if (std::holds_alternative<bool>(rule_value_variant)) {
         expected_type = LUA_TBOOLEAN;
 
         if (arguments.Next_Read_Is<bool>()) {
@@ -108,7 +108,7 @@ void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments
             );
             rule_type_error = false;
         }
-    } else if (std::get_if<std::string>(&rule_value_variant)) {
+    } else if (std::holds_alternative<std::string>(rule_value_variant)) {
         expected_type = LUA_TSTRING;
 
         if (arguments.Next_Read_Is<std::string>()) {
