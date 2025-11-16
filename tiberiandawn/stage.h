@@ -37,6 +37,8 @@
 
 #include "common/json.h"
 
+#include "noinit.h"
+
 class StageClass
 {
 

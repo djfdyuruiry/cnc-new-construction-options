@@ -35,6 +35,8 @@
 #ifndef TAB_H
 #define TAB_H
 
+#include "common/json.h"
+
 #include "sidebar.h"
 #include "credits.h"
 
@@ -75,6 +77,8 @@ public:
     };
 
     CreditClass Credits;
+
+    JSON_FUNCTIONS(TabClass);
 
 protected:
     /*

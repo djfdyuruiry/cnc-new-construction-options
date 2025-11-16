@@ -22,15 +22,15 @@ using json = nlohmann::json;
 #define FIELD_TO_JSON_WITH_TYPE(FIELD, TYPE) j.emplace(#FIELD, static_cast<TYPE>(p.FIELD))
 #define BITFIELD_TO_JSON(FIELD) j.emplace(#FIELD, (bool)p.FIELD)
 #define BITFIELD_OF_WIDTH_TO_JSON(FIELD, WIDTH) j.emplace(#FIELD, std::bitset<WIDTH>(p.FIELD).to_string())
-#define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(p.VALUE))
-#define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, FIELD)
+#define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(VALUE))
+#define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) j.emplace(#FIELD, CONVERTER(p.FIELD))
 #define TARGET_TO_JSON(FIELD) FIELD_VALUE_TO_JSON(FIELD, TARGET_SAFE_CAST(p.FIELD))
 
 // from_json macros
 #define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
 #define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
 #define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
-#define RESOLVE_POINTER_FROM_TARGET_JSON(FIELD) p.FIELD = As_Object(j.at(#FIELD).get<TARGET>())
+#define TARGET_FROM_JSON(FIELD, TYPE) p.FIELD = (TYPE*)(j.at(#FIELD).get<TARGET>())
 
 // to_json/from_json shorthand
 # define JSON_FUNCTIONS(TYPE) friend void to_json(json& j, const TYPE& p); \

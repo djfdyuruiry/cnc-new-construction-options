@@ -272,3 +272,23 @@ void TabClass::Init_Clear(void)
     SidebarClass::Init_Clear();
     Credits.Init_Clear();
 }
+
+TO_JSON(TabClass)
+{
+    BASE_CLASS_TO_JSON(SidebarClass);
+
+    FIELD_TO_JSON(Credits);
+    BITFIELD_TO_JSON(IsToRedraw);
+    FIELD_TO_JSON(Eva_Width);
+    FIELD_TO_JSON(Tab_Height);
+}
+
+FROM_JSON(TabClass)
+{
+    BASE_CLASS_FROM_JSON(SidebarClass);
+
+    FIELD_FROM_JSON(Credits);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    FIELD_FROM_JSON(Eva_Width);
+    FIELD_FROM_JSON(Tab_Height);
+}

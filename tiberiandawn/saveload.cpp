@@ -119,20 +119,6 @@ bool Save_Game(int id, char* descr)
 */
 bool Save_Game(const char* file_name, const char* descr)
 {
-    SaveGame save;
-
-    save.ReadGlobals();
-
-    save.Header.Version = "1.0";
-    static constexpr char ctrlZ = 26;
-    save.Header.Description = std::format("{}\r\n{}", descr, ctrlZ);
-
-    if (!save.WriteGlobals()) {
-        CNC_LOG_ERROR("SaveGame validation failed");
-    } else {
-        CNC_LOG_INFO("SaveGame JSON: {}", save.DumpJson());
-    }
-
     CDFileClass file;
     int i;
     unsigned int version;
@@ -142,6 +128,32 @@ bool Save_Game(const char* file_name, const char* descr)
 
     scenario = Scen.Scenario;        // get current scenario #
     house = PlayerPtr->Class->House; // get current house
+
+    // POC Test Save to JSON
+    SaveGame save;
+
+    save.Read_Globals();
+
+    save.Header.Version = "1.0";
+    static constexpr char ctrlZ = 26;
+    save.Header.Description = std::format("{}\r\n{}", descr, ctrlZ);
+
+    CNC_LOG_INFO("Serialized SaveGame JSON: {}", save.Dump_Json());
+
+    json parsed = save;
+
+    // POC Test Validation of JSON
+    SaveGame parsed_save = parsed;
+
+    CNC_LOG_INFO("Deserialized SaveGame JSON: {}", parsed_save.Dump_Json());
+
+    if (!parsed_save.Validate()) {
+        CNC_LOG_ERROR("Deserialized SaveGame validation failed");
+    } else {
+        CNC_LOG_INFO("Deserialized SaveGame validation passed");
+    }
+
+    // TODO: POC Test Load of JSON in Load_Game (Currently corrupts values when Write_Globals() is called on parsed SaveGame instance - needs elements of Clear_Scenario to reset objects)
 
     /*
     **	Code everybody's pointers

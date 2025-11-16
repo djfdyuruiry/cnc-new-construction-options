@@ -76,6 +76,7 @@
 
 #include "function.h"
 #include "settings.h"
+#include "typeconverter.h"
 
 /*
 **	Define "_RETRIEVE" if the palette morphing tables are part of the loaded data. If this
@@ -2667,30 +2668,108 @@ SidebarClass::~SidebarClass()
 
 TO_JSON(SidebarClass::StripClass::BuildType)
 {
+    FIELD_TO_JSON(BuildableID);
+    CONVERT_TD_FIELD_TO_JSON(BuildableType);
+    FIELD_TO_JSON(Factory);
+    FIELD_TO_JSON(BuildableViaCapture);
 }
 
 FROM_JSON(SidebarClass::StripClass::BuildType)
 {
-
+    FIELD_FROM_JSON(BuildableID);
+    PARSE_TD_FIELD_FROM_JSON(BuildType, BuildableType, RTTIType);
+    FIELD_FROM_JSON(Factory);
+    FIELD_FROM_JSON(BuildableViaCapture);
 }
 
 TO_JSON(SidebarClass::StripClass)
 {
     BASE_CLASS_TO_JSON(StageClass);
+
+    FIELD_TO_JSON(ObjectWidth);
+    FIELD_TO_JSON(ObjectHeight);
+    FIELD_TO_JSON(StripWidth);
+    FIELD_TO_JSON(LeftEdgeOffset);
+    FIELD_TO_JSON(ButtonSpacingOffset);
+    FIELD_TO_JSON(X);
+    FIELD_TO_JSON(Y);
+    FIELD_TO_JSON(ID);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsBuilding);
+    BITFIELD_TO_JSON(IsScrollingDown);
+    BITFIELD_TO_JSON(IsScrolling);
+    FIELD_TO_JSON(Flasher);
+    FIELD_TO_JSON(TopIndex);
+    FIELD_TO_JSON(Scroller);
+    FIELD_TO_JSON(Slid);
+    FIELD_TO_JSON(BuildableCount);
+    FIELD_TO_JSON(Buildables);
 }
 
 FROM_JSON(SidebarClass::StripClass)
 {
     BASE_CLASS_FROM_JSON(StageClass);
 
+    FIELD_FROM_JSON(ObjectWidth);
+    FIELD_FROM_JSON(ObjectHeight);
+    FIELD_FROM_JSON(StripWidth);
+    FIELD_FROM_JSON(LeftEdgeOffset);
+    FIELD_FROM_JSON(ButtonSpacingOffset);
+    FIELD_FROM_JSON(X);
+    FIELD_FROM_JSON(Y);
+    FIELD_FROM_JSON(ID);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsBuilding);
+    BITFIELD_FROM_JSON(IsScrollingDown);
+    BITFIELD_FROM_JSON(IsScrolling);
+    FIELD_FROM_JSON(Flasher);
+    FIELD_FROM_JSON(TopIndex);
+    FIELD_FROM_JSON(Scroller);
+    FIELD_FROM_JSON(Slid);
+    FIELD_FROM_JSON(BuildableCount);
+    FIELD_FROM_JSON(Buildables);
 }
 
 TO_JSON(SidebarClass)
 {
     BASE_CLASS_TO_JSON(PowerClass);
+
+    FIELD_TO_JSON(SideX);
+    FIELD_TO_JSON(SideY);
+    FIELD_TO_JSON(SideBarWidth);
+    FIELD_TO_JSON(SideWidth);
+    FIELD_TO_JSON(SideHeight);
+    FIELD_TO_JSON(TopHeight);
+    FIELD_TO_JSON(MaxVisible);
+    FIELD_TO_JSON(ButtonOneWidth);
+    FIELD_TO_JSON(ButtonTwoWidth);
+    FIELD_TO_JSON(ButtonThreeWidth);
+    FIELD_TO_JSON(ButtonHeight);
+    BITFIELD_TO_JSON(IsSidebarActive);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsRepairActive);
+    BITFIELD_TO_JSON(IsUpgradeActive);
+    BITFIELD_TO_JSON(IsDemolishActive);
 }
 
 FROM_JSON(SidebarClass)
 {
     BASE_CLASS_FROM_JSON(PowerClass);
+
+    FIELD_FROM_JSON(SideX);
+    FIELD_FROM_JSON(SideY);
+    FIELD_FROM_JSON(SideBarWidth);
+    FIELD_FROM_JSON(SideWidth);
+    FIELD_FROM_JSON(SideHeight);
+    FIELD_FROM_JSON(TopHeight);
+    FIELD_FROM_JSON(MaxVisible);
+    FIELD_FROM_JSON(ButtonOneWidth);
+    FIELD_FROM_JSON(ButtonTwoWidth);
+    FIELD_FROM_JSON(ButtonThreeWidth);
+    FIELD_FROM_JSON(ButtonHeight);
+    BITFIELD_FROM_JSON(IsSidebarActive);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsRepairActive);
+    BITFIELD_FROM_JSON(IsUpgradeActive);
+    BITFIELD_FROM_JSON(IsDemolishActive);
 }

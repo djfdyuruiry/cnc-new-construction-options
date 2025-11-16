@@ -5,7 +5,7 @@
 #include "typeconverter.h"
 
 #pragma region SaveGameHeader
-void SaveGameHeader::ReadGlobals()
+void SaveGameHeader::Read_Globals()
 {
     ScenarioID = Scen.Scenario;
     PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
@@ -33,7 +33,7 @@ bool SaveGameHeader::Validate() const
     return result;
 }
 
-bool SaveGameHeader::WriteGlobals() const
+bool SaveGameHeader::Write_Globals() const
 {
     Scen.Scenario = ScenarioID;
 
@@ -42,7 +42,7 @@ bool SaveGameHeader::WriteGlobals() const
 #pragma endregion
 
 #pragma region SaveGameScenarioState
-void SaveGameScenarioState::ReadGlobals()
+void SaveGameScenarioState::Read_Globals()
 {
     ScenarioNumber = Scen.Scenario;
     ScenarioFileName = Scen.FileName;
@@ -161,7 +161,7 @@ bool SaveGameScenarioState::Validate() const
     return result;
 }
 
-bool SaveGameScenarioState::WriteGlobals() const
+bool SaveGameScenarioState::Write_Globals() const
 {
     if (!Validate()) {
         return false;
@@ -192,7 +192,8 @@ bool SaveGameScenarioState::WriteGlobals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
-    // TODO: Delete and new before set?
+    // TODO: use elements of Clear_Scenario to reset heap(s) first
+    PlayerPtr = new HouseClass();
     from_json(PlayerHouse, *PlayerPtr);
 
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
@@ -210,10 +211,16 @@ bool SaveGameScenarioState::WriteGlobals() const
 #pragma endregion
 
 #pragma region SaveGame
-void SaveGame::ReadGlobals()
+void SaveGame::Read_Globals()
 {
-    Header.ReadGlobals();
-    ScenarioState.ReadGlobals();
+    // Code_All_Pointers();
+
+    Header.Read_Globals();
+    ScenarioState.Read_Globals();
+
+    GameMap = Map;
+
+    // Decode_All_Pointers();
 }
 
 bool SaveGame::Validate() const
@@ -222,17 +229,18 @@ bool SaveGame::Validate() const
     return Header.Validate() && ScenarioState.Validate();
 }
 
-bool SaveGame::WriteGlobals() const
+bool SaveGame::Write_Globals() const
 {
     if (!Validate()) {
         return false;
     }
 
-    return Header.WriteGlobals() &&
-        ScenarioState.WriteGlobals();
+    // TODO: Write Globals
+    return Header.Write_Globals() &&
+        ScenarioState.Write_Globals();
 }
 
-std::string SaveGame::DumpJson() const
+std::string SaveGame::Dump_Json() const
 {
     const json save_json = *this;
 

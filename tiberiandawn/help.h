@@ -35,6 +35,8 @@
 #ifndef HELP_H
 #define HELP_H
 
+#include "common/json.h"
+
 #include "tab.h"
 
 class HelpClass : public TabClass
@@ -68,6 +70,8 @@ public:
     */
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
+
+    JSON_FUNCTIONS(HelpClass)
 
 private:
     static char const* HelpText;

@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #include <optional>
 #include <stdexcept>
@@ -458,8 +459,6 @@ public:
             raw_type_name.length() - EnumPostfix.length()
         );
 
-        CNC_LOG_INFO(type_name_without_prefix);
-
         return type_name_without_prefix;
     }
 
@@ -539,7 +538,7 @@ private:
     CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
 
 // Convert TD type field to string and store in JSON object
-#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, FIELD)
+#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_FIELD_TO_JSON(FIELD, TdTypeConverter::To_String)
 
 // Parse TD type field from JSON string
 #define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \

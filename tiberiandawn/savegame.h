@@ -17,9 +17,9 @@ public:
     std::string PlayerHouseType;
     std::string Description;
 
-    void ReadGlobals();
+    void Read_Globals();
     bool Validate() const;
-    bool WriteGlobals() const;
+    bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, Description)
 private:
@@ -57,9 +57,9 @@ public:
     std::vector<CELL> Waypoints;
     std::vector<CELL> Views;
 
-    void ReadGlobals();
+    void Read_Globals();
     bool Validate() const;
-    bool WriteGlobals() const;
+    bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGameScenarioState,
@@ -105,7 +105,7 @@ public:
     SaveGameHeader Header;
     SaveGameScenarioState ScenarioState;
 
-    json Map;
+    json GameMap;
     std::vector<json> Layers;
 
     json Houses;
@@ -116,15 +116,15 @@ public:
     json Logic;
     json Score;
 
-    void ReadGlobals();
+    void Read_Globals();
     bool Validate() const;
-    bool WriteGlobals() const;
-    std::string DumpJson() const;
+    bool Write_Globals() const;
+    std::string Dump_Json() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame,
         Header,
-        Map,
+        GameMap,
         Houses,
         Objects,
         Logic,

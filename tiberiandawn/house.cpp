@@ -8326,59 +8326,20 @@ unsigned HouseClass::Get_Ally_Flags()
 
 TO_JSON(HouseClass::ZoneInfoStruct)
 {
-
+    FIELD_TO_JSON(AirDefense);
+    FIELD_TO_JSON(ArmorDefense);
+    FIELD_TO_JSON(InfantryDefense);
 }
 
 FROM_JSON(HouseClass::ZoneInfoStruct)
 {
-
-}
-
-static void Zone_Info_From_Json(const json& j, HouseClass& p)
-{
-    const auto zone_infos = j.at(NAMEOF(ZoneInfo)).get<std::vector<json>>();
-
-    if (zone_infos.size() != ZONE_COUNT) {
-        CNC_LOG_ERROR(
-            "Invalid {}.{} JSON value - expected an array of {} values, actual length: {}",
-            NAMEOF(HouseClass),
-            NAMEOF(ZoneInfo),
-            static_cast<int>(ZONE_COUNT),
-            zone_infos.size()
-        );
-        return;
-    }
-
-    auto idx = ZONE_FIRST;
-
-    for (const auto& zone_json : zone_infos) {
-        zone_json.at(NAMEOF(AirDefense)).get_to(p.ZoneInfo[idx].AirDefense);
-        zone_json.at(NAMEOF(ArmorDefense)).get_to(p.ZoneInfo[idx].ArmorDefense);
-        zone_json.at(NAMEOF(InfantryDefense)).get_to(p.ZoneInfo[idx].InfantryDefense);
-
-        ++idx;
-    }
-}
-
-static void Zone_Info_To_Json(json& j, const HouseClass& p)
-{
-    std::vector<json> zone_info;
-
-    for (const auto& [AirDefense, ArmorDefense, InfantryDefense] : p.ZoneInfo) {
-        json zone_json;
-
-        zone_json.emplace(NAMEOF(AirDefense), AirDefense);
-        zone_json.emplace(NAMEOF(ArmorDefense), ArmorDefense);
-        zone_json.emplace(NAMEOF(InfantryDefense), InfantryDefense);
-
-        zone_info.emplace_back(zone_json);
-    }
-
-    j.emplace(NAMEOF(ZoneInfo), zone_info);
+    FIELD_FROM_JSON(AirDefense);
+    FIELD_FROM_JSON(ArmorDefense);
+    FIELD_FROM_JSON(InfantryDefense);
 }
 
 void to_json(json& j, const HouseClass& p) {
-    CONVERT_TD_FIELD_VALUE_TO_JSON(Class, Class->House);
+    CONVERT_TD_FIELD_VALUE_TO_JSON(Class, static_cast<HousesType>(reinterpret_cast<uintptr_t>(&p.Class)));
     FIELD_TO_JSON(FirepowerBias);
     FIELD_TO_JSON(GroundspeedBias);
     FIELD_TO_JSON(AirspeedBias);
@@ -8487,7 +8448,7 @@ void to_json(json& j, const HouseClass& p) {
 #ifdef USE_RA_AI
     FIELD_TO_JSON(Center);
     FIELD_TO_JSON(Radius);
-    Zone_Info_To_Json(j, p);
+    FIELD_TO_JSON(ZoneInfo);
     FIELD_TO_JSON(LATime);
     CONVERT_TD_FIELD_TO_JSON(LAType);
     CONVERT_TD_FIELD_TO_JSON(LAZone);
@@ -8511,7 +8472,7 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(IQ);
     CONVERT_TD_FIELD_TO_JSON(Difficulty);
 #endif
-    FIELD_TO_JSON(Allies);
+    BITFIELD_OF_WIDTH_TO_JSON(Allies, 32);
     FIELD_TO_JSON(AlertTime);
     FIELD_TO_JSON(BorrowedTime);
     FIELD_TO_JSON(FreeHarvester);
@@ -8640,7 +8601,7 @@ void from_json(const json& j, HouseClass& p)
 #ifdef USE_RA_AI
     FIELD_FROM_JSON(Center);
     FIELD_FROM_JSON(Radius);
-    Zone_Info_From_Json(j, p);
+    FIELD_FROM_JSON(ZoneInfo);
     FIELD_FROM_JSON(LATime);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, LAType, RTTIType);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, LAZone, ZoneType);
@@ -8664,7 +8625,7 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(IQ);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, Difficulty, DiffType);
 #endif
-    FIELD_FROM_JSON(Allies);
+    BITFIELD_OF_WIDTH_FROM_JSON(HouseClass, Allies, 32);
     FIELD_FROM_JSON(AlertTime);
     FIELD_FROM_JSON(BorrowedTime);
     FIELD_FROM_JSON(FreeHarvester);
@@ -8681,5 +8642,13 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(NukeDest);
     FIELD_FROM_JSON(VisibleCredits);
     FIELD_FROM_JSON(DebugUnlockBuildables);
-    TD_TYPE_POINTER_FROM_JSON(HouseClass, Class, HousesType, HouseTypeClass);
+
+    TdTypeConverter::Load_Field_From_Json<HousesType>(
+        j,
+        NAMEOF(HouseClass),
+        NAMEOF(Class),
+        [&](const auto& h) {
+            const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(h);
+        }
+    );
 }

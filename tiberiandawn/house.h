@@ -802,7 +802,9 @@ public:
         int AirDefense;
         int ArmorDefense;
         int InfantryDefense;
-    } ZoneInfo[ZONE_COUNT];
+    } ZoneInfoStruct;
+
+    ZoneInfoStruct ZoneInfo[ZONE_COUNT];
 
     /*
     **	This records information about the last time a building of this

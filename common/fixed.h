@@ -448,16 +448,18 @@ public:
 
     friend void to_json(json& j, const fixed& p)
     {
-        j = p.As_ASCII();
+        j = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&p.Data));
     }
 
     friend void from_json(const json& j, fixed& p)
     {
-        const auto fixed_str = j.get<std::string>();
-        p = fixed(fixed_str.c_str());
+        FixedData data;
+        data.Raw = j.get<uint32_t>();
+
+        p.Data = data;
     }
 private:
-    union
+    union FixedData
     {
         struct
         {
@@ -470,7 +472,9 @@ private:
 #endif
         } Composite;
         uint32_t Raw;
-    } Data;
+    };
+
+    FixedData Data;
 };
 
 #endif
