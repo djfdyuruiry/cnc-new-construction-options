@@ -138,14 +138,21 @@ bool Save_Game(const char* file_name, const char* descr)
     static constexpr char ctrlZ = 26;
     save.Header.Description = std::format("{}\r\n{}", descr, ctrlZ);
 
-    CNC_LOG_INFO("Serialized SaveGame JSON: {}", save.Dump_Json());
+    if (CDFileClass savegame; savegame.Open("savegame.json", WRITE)) {
+        const auto save_json = save.Dump_Json();
 
-    json parsed = save;
+        savegame.Write(save_json.c_str(), save_json.length());
+        savegame.Close();
+
+        CNC_LOG_INFO("Serialized SaveGame JSON written to save.json");
+    } else {
+        CNC_LOG_ERROR("Unable to open file to write JSON SaveGame");
+    }
+
+    json parsed = save.Dump_Json();
 
     // POC Test Validation of JSON
     SaveGame parsed_save = parsed;
-
-    CNC_LOG_INFO("Deserialized SaveGame JSON: {}", parsed_save.Dump_Json());
 
     if (!parsed_save.Validate()) {
         CNC_LOG_ERROR("Deserialized SaveGame validation failed");
