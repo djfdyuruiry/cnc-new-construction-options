@@ -141,7 +141,7 @@ bool Save_Game(const char* file_name, const char* descr)
     if (CDFileClass savegame; savegame.Open("savegame.json", WRITE)) {
         const auto save_json = save.Dump_Json();
 
-        savegame.Write(save_json.c_str(), save_json.length());
+        savegame.Write(save_json.c_str(), static_cast<int>(save_json.length()));
         savegame.Close();
 
         CNC_LOG_INFO("Serialized SaveGame JSON written to save.json");
@@ -149,9 +149,8 @@ bool Save_Game(const char* file_name, const char* descr)
         CNC_LOG_ERROR("Unable to open file to write JSON SaveGame");
     }
 
-    json parsed = save.Dump_Json();
-
     // POC Test Validation of JSON
+    const json parsed = json::parse(save.Dump_Json());
     SaveGame parsed_save = parsed;
 
     if (!parsed_save.Validate()) {

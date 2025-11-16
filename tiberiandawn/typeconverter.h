@@ -316,7 +316,7 @@ public:
         const auto instance_string = type_map[instance];
 
         if (!instance_string.has_value()) {
-            CNC_LOGGER_WARN(
+            CNC_LOGGER_DEBUG(
                 "Attempt was made to convert an invalid {} value to string: {}",
                 Get_Type_Name<T>(),
                 static_cast<int>(instance)

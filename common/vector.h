@@ -58,6 +58,7 @@
 #include "miscasm.h"
 
 #include "noinit.h"
+#include "json.h"
 /**************************************************************************
 **	This is a general purpose vector class. A vector is defined by this
 **	class, as an array of arbitrary objects where the array can be dynamically
@@ -95,6 +96,19 @@ public:
     virtual int ID(T const* ptr); // Pointer based identification.
     virtual int ID(T const& ptr); // Value based identification.
 
+    friend void to_json(json& j, const VectorClass<T>& p)
+    {
+        for (auto i = 0U; i < p.Length(); i++) {
+            j[i] = p[i];
+        }
+    }
+
+    friend void from_json(const json& j, VectorClass<T>& p)
+    {
+        for (auto i = 0U; i < j.size(); i++) {
+            from_json(j[i], p[i]);
+        }
+    }
 protected:
     /*
     **	This is a pointer to the allocated vector array of elements.

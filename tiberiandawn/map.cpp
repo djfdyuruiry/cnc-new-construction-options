@@ -2084,21 +2084,14 @@ TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);
 
-    json cells;
-
-    for (auto i = 0U; i < p.Array.Length(); i++) {
-        cells[i] = p.Array[i];
-    }
-
-    FIELD_VALUE_TO_JSON(Array, cells);
-
+    // TODO: Array is very large (16K items+), consider optimisation techniques (dedup
+    FIELD_TO_JSON(Array);
     FIELD_TO_JSON(MapCellX);
     FIELD_TO_JSON(MapCellY);
     FIELD_TO_JSON(MapCellWidth);
     FIELD_TO_JSON(MapCellHeight);
     FIELD_TO_JSON(TotalValue);
     FIELD_TO_JSON(MapBinaryVersion);
-
     FIELD_TO_JSON(XSize);
     FIELD_TO_JSON(YSize);
     FIELD_TO_JSON(Size);
@@ -2115,19 +2108,13 @@ FROM_JSON(MapClass)
 {
     BASE_CLASS_FROM_JSON(GScreenClass);
 
-    auto cells = j.at(NAMEOF(Array));
-
-    for (auto i = 0U; i < cells.size(); i++) {
-        from_json(cells[i], p.Array[i]);
-    }
-
+    FIELD_FROM_JSON(Array);
     FIELD_FROM_JSON(MapCellX);
     FIELD_FROM_JSON(MapCellY);
     FIELD_FROM_JSON(MapCellWidth);
     FIELD_FROM_JSON(MapCellHeight);
     FIELD_FROM_JSON(TotalValue);
     FIELD_FROM_JSON(MapBinaryVersion);
-
     FIELD_FROM_JSON(XSize);
     FIELD_FROM_JSON(YSize);
     FIELD_FROM_JSON(Size);

@@ -4602,7 +4602,6 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(ProximityCheck);
     TARGET_PTR_FROM_JSON(PendingObjectPtr);
     //TARGET_FROM_JSON(PendingObject, ObjectTypeClass); //? Needed - Possible?
-
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
     FIELD_FROM_JSON(TacPixelX);
     FIELD_FROM_JSON(TacPixelY);
