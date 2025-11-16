@@ -4566,8 +4566,8 @@ TO_JSON(DisplayClass)
     const_cast<DisplayClass&>(p).Decode_Pointers();
 
     FIELD_TO_JSON(ProximityCheck);
-    TARGET_TO_JSON(PendingObjectPtr);
-    //TARGET_TO_JSON(PendingObject); //? Needed?
+    TARGET_PTR_TO_JSON(PendingObjectPtr);
+    //TARGET_TO_JSON(PendingObject);  //? Needed - Possible?
     CONVERT_TD_FIELD_TO_JSON(PendingHouse);
     FIELD_TO_JSON(TacPixelX);
     FIELD_TO_JSON(TacPixelY);
@@ -4595,10 +4595,14 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(TacLeptonHeight);
     FIELD_FROM_JSON(ZoneCell);
     FIELD_FROM_JSON(ZoneOffset);
+
     FIELD_FROM_JSON(CursorShapeSave);
+    p.CursorSize = p.CursorShapeSave;
+
     FIELD_FROM_JSON(ProximityCheck);
-    TARGET_FROM_JSON(PendingObjectPtr, ObjectClass);
-    //TARGET_FROM_JSON(PendingObject, ObjectTypeClass); //? Needed
+    TARGET_PTR_FROM_JSON(PendingObjectPtr);
+    //TARGET_FROM_JSON(PendingObject, ObjectTypeClass); //? Needed - Possible?
+
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
     FIELD_FROM_JSON(TacPixelX);
     FIELD_FROM_JSON(TacPixelY);

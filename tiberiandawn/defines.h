@@ -983,7 +983,8 @@ typedef enum OverlayType : signed char
     OVERLAY_STEEL_CRATE,   //	Steel goodie crate.
 
     OVERLAY_COUNT,
-    OVERLAY_FIRST = 0
+    OVERLAY_FIRST = 0,
+    OVERLAY_LAST = OVERLAY_STEEL_CRATE
 } OverlayType;
 
 // inline OverlayType operator++(OverlayType &, int);
@@ -1422,7 +1423,8 @@ typedef enum SmudgeType : signed char
     SMUDGE_BIB3,
 
     SMUDGE_COUNT,
-    SMUDGE_FIRST = 0
+    SMUDGE_FIRST = 0,
+    SMUDGE_LAST = SMUDGE_BIB3
 } SmudgeType;
 
 // inline SmudgeType operator++(SmudgeType &, int);

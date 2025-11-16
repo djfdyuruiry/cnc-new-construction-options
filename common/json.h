@@ -24,13 +24,16 @@ using json = nlohmann::json;
 #define BITFIELD_OF_WIDTH_TO_JSON(FIELD, WIDTH) j.emplace(#FIELD, std::bitset<WIDTH>(p.FIELD).to_string())
 #define CONVERT_FIELD_VALUE_TO_JSON(FIELD, CONVERTER, VALUE) j.emplace(#FIELD, CONVERTER(VALUE))
 #define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) j.emplace(#FIELD, CONVERTER(p.FIELD))
-#define TARGET_TO_JSON(FIELD) FIELD_VALUE_TO_JSON(FIELD, TARGET_SAFE_CAST(p.FIELD))
+#define TARGET_PTR_TO_JSON(FIELD) FIELD_VALUE_TO_JSON(FIELD, p.FIELD == nullptr ? 0 : p.FIELD->As_Target())
 
 // from_json macros
+#define FIELD_FROM_JSON_TO_VALUE(FIELD, VALUE) j.at(#FIELD).get_to(VALUE)
 #define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
 #define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
 #define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
-#define TARGET_FROM_JSON(FIELD, TYPE) p.FIELD = (TYPE*)(j.at(#FIELD).get<TARGET>())
+#define TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = (TYPE*)As_Object(j.at(#FIELD).get<TARGET>(), false); \
+    Check_Ptr((void*)p.FIELD, __FILE__, __LINE__)
+#define TARGET_PTR_FROM_JSON(FIELD) TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, ObjectClass)
 
 // to_json/from_json shorthand
 # define JSON_FUNCTIONS(TYPE) friend void to_json(json& j, const TYPE& p); \

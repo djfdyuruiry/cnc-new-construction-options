@@ -2084,6 +2084,14 @@ TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);
 
+    json cells;
+
+    for (auto i = 0U; i < p.Array.Length(); i++) {
+        cells[i] = p.Array[i];
+    }
+
+    FIELD_VALUE_TO_JSON(Array, cells);
+
     FIELD_TO_JSON(MapCellX);
     FIELD_TO_JSON(MapCellY);
     FIELD_TO_JSON(MapCellWidth);
@@ -2106,6 +2114,12 @@ TO_JSON(MapClass)
 FROM_JSON(MapClass)
 {
     BASE_CLASS_FROM_JSON(GScreenClass);
+
+    auto cells = j.at(NAMEOF(Array));
+
+    for (auto i = 0U; i < cells.size(); i++) {
+        from_json(cells[i], p.Array[i]);
+    }
 
     FIELD_FROM_JSON(MapCellX);
     FIELD_FROM_JSON(MapCellY);

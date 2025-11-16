@@ -47,7 +47,11 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, StateType> ||
     std::is_same_v<T, VoxType> ||
     std::is_same_v<T, MouseType> ||
-    std::is_same_v<T, TheaterType>
+    std::is_same_v<T, TheaterType> ||
+    std::is_same_v<T, TemplateType> ||
+    std::is_same_v<T, OverlayType> ||
+    std::is_same_v<T, SmudgeType> ||
+    std::is_same_v<T, LandType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -81,7 +85,11 @@ using ConverterTypeVariant = std::variant<
     StateType,
     VoxType,
     MouseType,
-    TheaterType
+    TheaterType,
+    TemplateType,
+    OverlayType,
+    SmudgeType,
+    LandType
 >;
 
 /**
@@ -188,7 +196,11 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<StateType>,
     EnumTypeInfo<VoxType>,
     EnumTypeInfo<MouseType>,
-    EnumTypeInfo<TheaterType>
+    EnumTypeInfo<TheaterType>,
+    EnumTypeInfo<TemplateType>,
+    EnumTypeInfo<OverlayType>,
+    EnumTypeInfo<SmudgeType>,
+    EnumTypeInfo<LandType>
 >;
 
 /**
@@ -219,6 +231,7 @@ class TdTypeConverter final
 {
 public:
     static const inline std::string_view EnumPostfix = "Type";
+    static const std::map<std::string, std::string_view> TypeNamePatchTable;
     // Info about each enum type, indexed against it's typename
     static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
 
@@ -454,6 +467,11 @@ public:
     {
         // get enum type name and remove EnumPostfix
         static const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
+
+        if (TypeNamePatchTable.contains(raw_type_name)) {
+            return TypeNamePatchTable.at(raw_type_name);
+        }
+
         static const auto type_name_without_prefix = raw_type_name.substr(
             0,
             raw_type_name.length() - EnumPostfix.length()

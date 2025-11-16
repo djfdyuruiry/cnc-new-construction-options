@@ -73,6 +73,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /*
 ** New sidebar for GlyphX multiplayer. ST - 3/26/2019 12:24PM
@@ -2806,3 +2807,63 @@ bool CellClass::Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const
 }
 
 #endif // USE_RA_AI
+
+TO_JSON(CellClass)
+{
+    BITFIELD_TO_JSON(IsPlot);
+    BITFIELD_TO_JSON(IsCursorHere);
+    BITFIELD_TO_JSON(IsMapped);
+    BITFIELD_TO_JSON(IsVisible);
+    BITFIELD_TO_JSON(IsTrigger);
+    BITFIELD_TO_JSON(IsWaypoint);
+    BITFIELD_TO_JSON(IsRadarCursor);
+    BITFIELD_TO_JSON(IsFlagged);
+    CONVERT_TD_FIELD_TO_JSON(TType);
+    FIELD_TO_JSON(TIcon);
+    CONVERT_TD_FIELD_TO_JSON(Overlay);
+    FIELD_TO_JSON(OverlayData);
+    CONVERT_TD_FIELD_TO_JSON(Smudge);
+    FIELD_TO_JSON(SmudgeData);
+    CONVERT_TD_FIELD_TO_JSON(Owner);
+    CONVERT_TD_FIELD_TO_JSON(InfType);
+    TARGET_PTR_TO_JSON(OccupierPtr);
+    TARGET_PTR_TO_JSON(Overlapper[0]);
+    TARGET_PTR_TO_JSON(Overlapper[1]);
+    TARGET_PTR_TO_JSON(Overlapper[2]);
+    FIELD_TO_JSON(IsMappedByPlayerMask);
+    FIELD_TO_JSON(IsVisibleByPlayerMask);
+    FIELD_VALUE_TO_JSON(Flag, p.Flag.Composite);
+    CONVERT_TD_FIELD_TO_JSON(Land);
+    CONVERT_TD_FIELD_TO_JSON(OverrideLand);
+    TARGET_PTR_TO_JSON(CTFFlag);
+}
+
+FROM_JSON(CellClass)
+{
+    BITFIELD_FROM_JSON(IsPlot);
+    BITFIELD_FROM_JSON(IsCursorHere);
+    BITFIELD_FROM_JSON(IsMapped);
+    BITFIELD_FROM_JSON(IsVisible);
+    BITFIELD_FROM_JSON(IsTrigger);
+    BITFIELD_FROM_JSON(IsWaypoint);
+    BITFIELD_FROM_JSON(IsRadarCursor);
+    BITFIELD_FROM_JSON(IsFlagged);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, TType, TemplateType);
+    FIELD_FROM_JSON(TIcon);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Overlay, OverlayType);
+    FIELD_FROM_JSON(OverlayData);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Smudge, SmudgeType);
+    FIELD_FROM_JSON(SmudgeData);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Owner, HousesType);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, InfType, HousesType);
+    TARGET_PTR_FROM_JSON(OccupierPtr);
+    TARGET_PTR_FROM_JSON(Overlapper[0]);
+    TARGET_PTR_FROM_JSON(Overlapper[1]);
+    TARGET_PTR_FROM_JSON(Overlapper[2]);
+    FIELD_FROM_JSON(IsMappedByPlayerMask);
+    FIELD_FROM_JSON(IsVisibleByPlayerMask);
+    FIELD_FROM_JSON_TO_VALUE(Flag, p.Flag.Composite);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Land, LandType);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, OverrideLand, LandType);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(CTFFlag, AnimClass);
+}

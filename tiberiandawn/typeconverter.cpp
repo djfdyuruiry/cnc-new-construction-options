@@ -2,6 +2,15 @@
 #include "typeconverter.h"
 
 /**
+ * Make some type names more human-readable or less confusing.
+ */
+const std::map<std::string, std::string_view> TdTypeConverter::TypeNamePatchTable = {
+    { NAMEOF(AnimType), "Animation" },
+    { NAMEOF(StructType), "Building" },
+    { NAMEOF(HousesType), "House" }
+};
+
+/**
  * Tables to allow mapping between INI strings and enum values, in both directions.
  * (only required for enum values that differ from INI string representation)
  */
@@ -21,12 +30,13 @@ static const TwoWayMap<WeaponType, std::string> WeaponPatchTable = {{ WEAPON_GRE
 static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
 static const std::vector VocExcludes = { VOC_FIRST, VOC_COUNT };
 static const std::vector SourceExcludes = { SOURCE_FIRST, SOURCE_COUNT };
+static const std::vector TemplateExcludes = { TEMPLATE_COUNT };
 
 #define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
 // TODO: Determine if LAST/COUNT ETC values are actually excluded from TwoWayMaps (we use these as number boundaries, but don't want the actual enum value X_LAST to parse)
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
-    //               [Typename]       [Prefix]        [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
+    //             [Typename]       [Prefix]        [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
     ENUM_TYPE_PAIR(ArmorType,       "ARMOR_",       ARMOR_NONE,        ARMOR_LAST,                 {},                 {}),
     ENUM_TYPE_PAIR(MPHType,         "MPH_",         MPH_IMMOBILE,      MPH_LIGHT_SPEED,            {},                 {}),
     ENUM_TYPE_PAIR(WeaponType,      "WEAPON_",      WEAPON_NONE,       WEAPON_LAST,                WeaponPatchTable,   {}),
@@ -54,9 +64,13 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(RTTIType,        "RTTITYPE_",    RTTI_NONE,         RTTI_LAST,                  {},                 {}),
     ENUM_TYPE_PAIR(ZoneType,        "ZONE_",        ZONE_NONE,         ZONE_LAST,                  {},                 {}),
     ENUM_TYPE_PAIR(StateType,       "STATE_",       STATE_BUILDUP,     STATE_ENDGAME,              {},                 {}),
-    ENUM_TYPE_PAIR(VoxType,         "VOX_",         VOX_FIRST,         VOX_LAST,                   {},                 {}),
+    ENUM_TYPE_PAIR(VoxType,         "VOX_",         VOX_NONE,          VOX_LAST,                   {},                 {}),
     ENUM_TYPE_PAIR(MouseType,       "MOUSE_",       MOUSE_NORMAL,      MOUSE_AREA_GUARD,           {},                 {}),
-    ENUM_TYPE_PAIR(TheaterType,     "THEATER_",     THEATER_FIRST,     THEATER_LAST,               {},                 {})
+    ENUM_TYPE_PAIR(TheaterType,     "THEATER_",     THEATER_NONE,      THEATER_LAST,               {},                 {}),
+    ENUM_TYPE_PAIR(TemplateType,    "TEMPLATE_",    TEMPLATE_FIRST,    TEMPLATE_NONE,              {},                 TemplateExcludes),
+    ENUM_TYPE_PAIR(OverlayType,     "OVERLAY_",     OVERLAY_NONE,      OVERLAY_LAST,               {},                 {}),
+    ENUM_TYPE_PAIR(SmudgeType,      "SMUDGE_",      SMUDGE_NONE,       SMUDGE_LAST,                {},                 {}),
+    ENUM_TYPE_PAIR(LandType,        "LAND_",        LAND_CLEAR,        LAND_BEACH,                 {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -112,6 +126,10 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(VoxType)
     RULE_VARIANT(MouseType)
     RULE_VARIANT(TheaterType)
+    RULE_VARIANT(TemplateType)
+    RULE_VARIANT(OverlayType)
+    RULE_VARIANT(SmudgeType)
+    RULE_VARIANT(LandType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -152,6 +170,10 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(VoxType)
     CSV_RULE_VARIANT(MouseType)
     CSV_RULE_VARIANT(TheaterType)
+    CSV_RULE_VARIANT(TemplateType)
+    CSV_RULE_VARIANT(OverlayType)
+    CSV_RULE_VARIANT(SmudgeType)
+    CSV_RULE_VARIANT(LandType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -191,6 +213,10 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(VoxType)
     TYPE_NAME_VARIANT(MouseType)
     TYPE_NAME_VARIANT(TheaterType)
+    TYPE_NAME_VARIANT(TemplateType)
+    TYPE_NAME_VARIANT(OverlayType)
+    TYPE_NAME_VARIANT(SmudgeType)
+    TYPE_NAME_VARIANT(LandType)
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
 }
