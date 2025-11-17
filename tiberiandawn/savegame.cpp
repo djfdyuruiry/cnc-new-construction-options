@@ -259,13 +259,13 @@ bool SaveGameObjectHeaps::Write_Globals() const
     //Bullets = BulletsHeap;
     //Buildings = BuildingsHeap;
     //Factories = FactoriesHeap;
-    Houses = HousesHeap;
+    from_json(HousesHeap, Houses);
     //Infantry = InfantryHeap;
     //Overlays = OverlaysHeap;
     //Smudges = SmudgesHeap;
     //Templates = TemplatesHeap;
     //Terrains = TerrainsHeap;
-    TeamTypes = TeamTypesHeap;
+    from_json(TeamTypesHeap, TeamTypes);
     //Teams = TeamsHeap;
     //Triggers = TriggersHeap;
     //Units = UnitsHeap;
@@ -280,7 +280,7 @@ void SaveGame::Read_Globals()
     Header.Read_Globals();
     ScenarioState.Read_Globals();
 
-    GameMap = Map;
+    from_json(GameMap, Map);
 
     // TODO: BaseClass
     // TODO: LogicClass
@@ -316,12 +316,9 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
-    auto result = true;
-
-    result = Header.Write_Globals() && ScenarioState.Write_Globals();
+    auto result = Header.Write_Globals() && ScenarioState.Write_Globals();
 
     Map = GameMap;
-
 
     // TODO: Write SaveGame Globals
 

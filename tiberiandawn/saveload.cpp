@@ -139,7 +139,8 @@ bool Save_Game(const char* file_name, const char* descr)
     save.Header.Description = std::format("{}\r\n{}", descr, ctrlZ);
 
     if (CDFileClass savegame; savegame.Open("savegame.json", WRITE)) {
-        const auto save_json = save.Dump_Json();
+        std::string save_json;
+        save.Dump_Json(save_json);
 
         savegame.Write(save_json.c_str(), static_cast<int>(save_json.length()));
         savegame.Close();
@@ -150,7 +151,10 @@ bool Save_Game(const char* file_name, const char* descr)
     }
 
     // POC Test Validation of JSON
-    const auto parsed = nlohmann::json::parse(save.Dump_Json());
+    std::string json_string;
+    save.Dump_Json(json_string);
+
+    const auto parsed = nlohmann::json::parse(json_string);
 
     if (const SaveGame parsed_save = parsed; !parsed_save.Validate()) {
         CNC_LOG_ERROR("Deserialized SaveGame validation failed");
