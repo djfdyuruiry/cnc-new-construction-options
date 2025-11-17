@@ -96,14 +96,14 @@ public:
     virtual int ID(T const* ptr); // Pointer based identification.
     virtual int ID(T const& ptr); // Value based identification.
 
-    friend void to_json(json& j, const VectorClass<T>& p)
+    friend void to_json(nlohmann::json& j, const VectorClass<T>& p)
     {
         for (auto i = 0U; i < p.Length(); i++) {
             j[i] = p[i];
         }
     }
 
-    friend void from_json(const json& j, VectorClass<T>& p)
+    friend void from_json(const nlohmann::json& j, VectorClass<T>& p)
     {
         for (auto i = 0U; i < j.size(); i++) {
             from_json(j[i], p[i]);

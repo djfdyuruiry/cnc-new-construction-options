@@ -142,3 +142,15 @@ void AbstractClass::Delete_This(void)
 
     *this_ptr = vtable_ptr;
 }
+
+TO_JSON(AbstractTypeClass)
+{
+    CSTR_FIELD_TO_JSON(IniName);
+    FIELD_TO_JSON(FullName);
+}
+
+FROM_JSON(AbstractTypeClass)
+{
+    CSTR_FIELD_FROM_JSON(AbstractTypeClass, IniName);
+    FIELD_FROM_JSON(FullName);
+}

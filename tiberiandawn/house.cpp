@@ -8338,7 +8338,8 @@ FROM_JSON(HouseClass::ZoneInfoStruct)
     FIELD_FROM_JSON(InfantryDefense);
 }
 
-void to_json(json& j, const HouseClass& p) {
+TO_JSON(HouseClass)
+{
     CONVERT_TD_FIELD_VALUE_TO_JSON(Class, static_cast<HousesType>(reinterpret_cast<uintptr_t>(&p.Class)));
     FIELD_TO_JSON(FirepowerBias);
     FIELD_TO_JSON(GroundspeedBias);
@@ -8491,7 +8492,7 @@ void to_json(json& j, const HouseClass& p) {
     FIELD_TO_JSON(DebugUnlockBuildables);
 }
 
-void from_json(const json& j, HouseClass& p)
+FROM_JSON(HouseClass)
 {
     FIELD_FROM_JSON(FirepowerBias);
     FIELD_FROM_JSON(GroundspeedBias);
@@ -8591,7 +8592,7 @@ void from_json(const json& j, HouseClass& p)
     FIELD_FROM_JSON(FlagLocation);
     FIELD_FROM_JSON(FlagHome);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, RemapColor, PlayerColorType);
-    CSTR_FIELD_FROM_JSON(HouseClass, Name, MPLAYER_NAME_MAX);
+    CSTR_FIELD_FROM_JSON(HouseClass, Name);
     FIELD_FROM_JSON(UnitsKilled);
     FIELD_FROM_JSON(UnitsLost);
     FIELD_FROM_JSON(BuildingsKilled);

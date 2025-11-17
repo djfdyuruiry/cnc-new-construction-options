@@ -35,6 +35,8 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include "common/json.h"
+
 #include "mission.h"
 #include "target.h"
 #include "noinit.h"
@@ -337,6 +339,8 @@ public:
         ((char&)IniName[sizeof(IniName) - 1]) = '\0';
     };
     virtual unsigned short Get_Ownable(void) const;
+
+    JSON_FUNCTIONS(AbstractTypeClass);
 };
 
 /***************************************************************************

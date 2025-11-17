@@ -15,6 +15,7 @@
 #include "common/stringutils.h"
 
 #include "defines.h"
+#include "teamtype.h"
 
 template<typename T>
 concept SupportedByTdTypeConverter = (
@@ -51,7 +52,8 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, TemplateType> ||
     std::is_same_v<T, OverlayType> ||
     std::is_same_v<T, SmudgeType> ||
-    std::is_same_v<T, LandType>
+    std::is_same_v<T, LandType> ||
+    std::is_same_v<T, TeamMissionType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -89,7 +91,8 @@ using ConverterTypeVariant = std::variant<
     TemplateType,
     OverlayType,
     SmudgeType,
-    LandType
+    LandType,
+    TeamMissionType
 >;
 
 /**
@@ -200,7 +203,8 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<TemplateType>,
     EnumTypeInfo<OverlayType>,
     EnumTypeInfo<SmudgeType>,
-    EnumTypeInfo<LandType>
+    EnumTypeInfo<LandType>,
+    EnumTypeInfo<TeamMissionType>
 >;
 
 /**
@@ -488,7 +492,7 @@ public:
     // TODO: Ability to set default (if source doesn't contain the field)
     template<SupportedByTdTypeConverter T>
     static bool Load_Field_From_Json(
-        const json& source,
+        const nlohmann::json& source,
         std::string_view json_path,
         std::string_view field_name,
         std::function<void(T)> with_valid_value

@@ -194,7 +194,7 @@ void CreditClass::Init_Clear()
     Current = 0;
 }
 
-void to_json(json& j, const CreditClass& p)
+TO_JSON(CreditClass)
 {
     FIELD_TO_JSON(Current);
     BITFIELD_TO_JSON(IsToRedraw);
@@ -203,7 +203,7 @@ void to_json(json& j, const CreditClass& p)
     FIELD_TO_JSON(Countdown);
 }
 
-void from_json(const json& j, CreditClass& p)
+FROM_JSON(CreditClass)
 {
     FIELD_FROM_JSON(Current);
     BITFIELD_FROM_JSON(IsToRedraw);

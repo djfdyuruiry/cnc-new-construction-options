@@ -48,6 +48,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 /*
 ********************************** Globals **********************************
@@ -907,4 +908,80 @@ TeamTypeClass const* TeamTypeClass::Suggested_New_Team(HouseClass* house, int ut
     }
 
     return (best);
+}
+
+TO_JSON(TeamMissionStruct)
+{
+    CONVERT_TD_FIELD_TO_JSON(Mission);
+    FIELD_TO_JSON(Argument);
+}
+
+FROM_JSON(TeamMissionStruct)
+{
+    PARSE_TD_FIELD_FROM_JSON(TeamMissionStruct, Mission, TeamMissionType);
+    FIELD_FROM_JSON(Argument);
+}
+
+TO_JSON(TeamTypeClass)
+{
+    BASE_CLASS_TO_JSON(AbstractTypeClass);
+
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsRoundAbout);
+    BITFIELD_TO_JSON(IsLearning);
+    BITFIELD_TO_JSON(IsSuicide);
+    BITFIELD_TO_JSON(IsAutocreate);
+    BITFIELD_TO_JSON(IsMercenary);
+    BITFIELD_TO_JSON(IsPrebuilt);
+    BITFIELD_TO_JSON(IsReinforcable);
+    BITFIELD_TO_JSON(IsTransient);
+    FIELD_TO_JSON(RecruitPriority);
+    FIELD_TO_JSON(InitNum);
+    FIELD_TO_JSON(MaxAllowed);
+    FIELD_TO_JSON(Fear);
+    CONVERT_TD_FIELD_TO_JSON(House);
+    FIELD_TO_JSON(MissionCount);
+    FIELD_TO_JSON(MissionList);
+    FIELD_TO_JSON(ClassCount);
+
+    nlohmann::json classes;
+
+    for (auto i = 0; i < std::size(p.Class); i++) {
+        const TARGET target = p.Class[i] == nullptr ? 0 : TechnoType_To_Target(p.Class[i]);
+        classes[i] = target;
+    }
+
+    FIELD_VALUE_TO_JSON(Class, classes);
+    FIELD_TO_JSON(DesiredNum);
+}
+
+FROM_JSON(TeamTypeClass)
+{
+    BASE_CLASS_FROM_JSON(AbstractTypeClass);
+
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsRoundAbout);
+    BITFIELD_FROM_JSON(IsLearning);
+    BITFIELD_FROM_JSON(IsSuicide);
+    BITFIELD_FROM_JSON(IsAutocreate);
+    BITFIELD_FROM_JSON(IsMercenary);
+    BITFIELD_FROM_JSON(IsPrebuilt);
+    BITFIELD_FROM_JSON(IsReinforcable);
+    BITFIELD_FROM_JSON(IsTransient);
+    FIELD_FROM_JSON(RecruitPriority);
+    FIELD_FROM_JSON(InitNum);
+    FIELD_FROM_JSON(MaxAllowed);
+    FIELD_FROM_JSON(Fear);
+    PARSE_TD_FIELD_FROM_JSON(TeamTypeClass, House, HousesType);
+    FIELD_FROM_JSON(MissionCount);
+    FIELD_FROM_JSON(MissionList);
+    FIELD_FROM_JSON(ClassCount);
+
+    const auto& classes = j.at(NAMEOF(Class));
+
+    for (auto i = 0; i < classes.size(); i++) {
+        p.Class[i] = (TechnoTypeClass*)(intptr_t)(classes[i].get<TARGET>());
+    }
+
+    FIELD_FROM_JSON(DesiredNum);
 }

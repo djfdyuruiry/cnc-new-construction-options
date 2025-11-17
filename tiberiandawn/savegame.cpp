@@ -65,8 +65,6 @@ void SaveGameScenarioState::Read_Globals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
-    PlayerHouse = *PlayerPtr;
-
     SelectedObjects = {};
 
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
@@ -139,25 +137,6 @@ bool SaveGameScenarioState::Validate() const
         result = false;
     }
 
-    for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
-        auto j = 0;
-
-        for (const auto& entry : SelectedObjects.at(i)) {
-            if (As_Object(TARGET_SAFE_CAST(entry), false) == nullptr) {
-                CNC_LOGGER_ERROR(
-                    "Unable to resolve object from ScenarioState.SelectedObjects[{}][{}] save game value: {}",
-                    i,
-                    j,
-                    entry
-                );
-
-                result = false;
-            }
-
-            ++j;
-        }
-    }
-
     return result;
 }
 
@@ -192,14 +171,10 @@ bool SaveGameScenarioState::Write_Globals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
-    // TODO: use elements of Clear_Scenario to reset heap(s) first
-    PlayerPtr = new HouseClass();
-    from_json(PlayerHouse, *PlayerPtr);
-
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
         DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
         for (const auto& entry : SelectedObjects.at(i)) {
-            selection.Add(As_Object(TARGET_SAFE_CAST(entry), false));
+            selection.Add((ObjectClass*)(intptr_t)(entry));
         }
     }
 
@@ -213,20 +188,47 @@ bool SaveGameScenarioState::Write_Globals() const
 #pragma region SaveGame
 void SaveGame::Read_Globals()
 {
-    // Code_All_Pointers();
-
     Header.Read_Globals();
     ScenarioState.Read_Globals();
 
     GameMap = Map;
 
-    // Decode_All_Pointers();
+    ObjectHeaps.Houses = Houses;
+    ObjectHeaps.TeamTypes = TeamTypes;
+    // TODO: remaining heaps
+
+    // TODO: BaseClass
+    // TODO: LogicClass
+    // TODO: LayerClass
+    // TODO: ScoreClass
 }
 
 bool SaveGame::Validate() const
 {
-    // TODO: Validate Json Fields
-    return Header.Validate() && ScenarioState.Validate();
+    auto result = true;
+
+    if (!Header.Validate() || !ScenarioState.Validate()) {
+        result = false;
+    }
+
+    if (!ObjectHeaps.Houses.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json object expected, actual type: {}",
+            NAMEOF(GameHouses),
+            ObjectHeaps.Houses.type_name()
+        );
+    } else if (ObjectHeaps.Houses.size() != HOUSE_COUNT) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - expected {} houses, actual house count: {}",
+            NAMEOF(GameHouses),
+            static_cast<int>(HOUSE_COUNT),
+            ObjectHeaps.Houses.size()
+        );
+    }
+
+    return result;
 }
 
 bool SaveGame::Write_Globals() const
@@ -235,14 +237,17 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
-    // TODO: Write Globals
-    return Header.Write_Globals() &&
-        ScenarioState.Write_Globals();
+    Header.Write_Globals() && ScenarioState.Write_Globals();
+
+    // TODO: Write SaveGame Globals
+
+    // TODO: Call Decode_Pointers after everything imported into Globals
+    // TODO: Set PlayerPtr by getting house pointer for Header.PlayerHouseType enum value
 }
 
 std::string SaveGame::Dump_Json() const
 {
-    const json save_json = *this;
+    const nlohmann::json save_json = *this;
 
     return save_json.dump();
 }

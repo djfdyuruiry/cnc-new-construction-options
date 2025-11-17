@@ -70,7 +70,8 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(TemplateType,    "TEMPLATE_",    TEMPLATE_FIRST,    TEMPLATE_NONE,              {},                 TemplateExcludes),
     ENUM_TYPE_PAIR(OverlayType,     "OVERLAY_",     OVERLAY_NONE,      OVERLAY_LAST,               {},                 {}),
     ENUM_TYPE_PAIR(SmudgeType,      "SMUDGE_",      SMUDGE_NONE,       SMUDGE_LAST,                {},                 {}),
-    ENUM_TYPE_PAIR(LandType,        "LAND_",        LAND_CLEAR,        LAND_BEACH,                 {},                 {})
+    ENUM_TYPE_PAIR(LandType,        "LAND_",        LAND_CLEAR,        LAND_BEACH,                 {},                 {}),
+    ENUM_TYPE_PAIR(TeamMissionType, "TMISSION_",    TMISSION_NONE,     TMISSION_LAST,              {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -130,6 +131,7 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(OverlayType)
     RULE_VARIANT(SmudgeType)
     RULE_VARIANT(LandType)
+    RULE_VARIANT(TeamMissionType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -174,6 +176,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(OverlayType)
     CSV_RULE_VARIANT(SmudgeType)
     CSV_RULE_VARIANT(LandType)
+    CSV_RULE_VARIANT(TeamMissionType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -217,6 +220,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(OverlayType)
     TYPE_NAME_VARIANT(SmudgeType)
     TYPE_NAME_VARIANT(LandType)
+    TYPE_NAME_VARIANT(TeamMissionType)
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
 }

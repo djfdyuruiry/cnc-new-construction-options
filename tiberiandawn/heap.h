@@ -35,6 +35,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
+#include "json.h"
 #include "vector.h"
 
 /**************************************************************************
@@ -223,6 +224,35 @@ public:
     {
         return (index >= 0 && index < Length()) ? (T*)((*this)[index]) : NULL;
     };
+
+    friend void to_json(nlohmann::json& j, const TFixedIHeapClass<T>& p)
+    {
+        auto& mutable_p = const_cast<TFixedIHeapClass<T>&>(p);
+
+        for (auto i = 0U; i < p.ActiveCount; i++) {
+            const auto ptr = mutable_p.Ptr(i);
+            const auto id = std::format("{}", mutable_p.ID(ptr));
+
+            to_json(j[id], *ptr);
+        }
+    }
+
+    friend void from_json(const nlohmann::json& j, TFixedIHeapClass<T>& p)
+    {
+        for (const auto& [key, val] : j.items()) {
+            const auto id = std::stoi(key);
+
+            auto ptr = static_cast<T*>(p[id]);
+            p.FreeFlag[id] = true;
+            ++p.ActiveCount;
+            p.ActivePointers.Add(ptr);
+
+            new (ptr) T(NoInitClass());
+
+            // TODO: Investigate if any further re-hydration required (code/decode logic)
+            from_json(val, *ptr);
+        }
+    }
 };
 
 /***********************************************************************************************

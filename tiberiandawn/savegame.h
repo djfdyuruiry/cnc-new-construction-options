@@ -51,8 +51,6 @@ public:
     bool HasTempleBeenHitWithIonCannon;
     int AreThingiesEnabledFlag;
 
-    json PlayerHouse;
-    // TODO: Implement (How to resolve back? need to reference objects not copy)
     std::vector<std::vector<TARGET>> SelectedObjects;
     std::vector<CELL> Waypoints;
     std::vector<CELL> Views;
@@ -81,7 +79,6 @@ public:
         EndCountdownNumber,
         HasTempleBeenHitWithIonCannon,
         AreThingiesEnabledFlag,
-        PlayerHouse,
         SelectedObjects,
         Waypoints,
         Views
@@ -99,22 +96,37 @@ private:
 
 };
 
+class SaveGameObjectHeaps
+{
+public:
+    nlohmann::json Houses;
+    nlohmann::json TeamTypes;
+    // TODO: remaining heaps
+
+    // TODO: methods for read/validate/write
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        SaveGameObjectHeaps,
+        Houses,
+        TeamTypes
+        // TODO: remaining heaps
+    );
+};
+
 class SaveGame
 {
 public:
     SaveGameHeader Header;
     SaveGameScenarioState ScenarioState;
 
-    json GameMap;
-    std::vector<json> Layers;
+    nlohmann::json GameMap;
+    std::vector<nlohmann::json> Layers;
 
-    json Houses;
-    json AiBase;
+    SaveGameObjectHeaps ObjectHeaps;
 
-    std::map<std::string, std::vector<json>> Objects;
-
-    json Logic;
-    json Score;
+    nlohmann::json AiBase;
+    nlohmann::json Logic;
+    nlohmann::json Score;
 
     void Read_Globals();
     bool Validate() const;
@@ -125,8 +137,7 @@ public:
         SaveGame,
         Header,
         GameMap,
-        Houses,
-        Objects,
+        ObjectHeaps,
         Logic,
         Layers,
         Score,

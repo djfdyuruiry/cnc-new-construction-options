@@ -374,7 +374,7 @@ void SuperClass::Forced_Charge(bool player)
     }
 }
 
-void to_json(json& j, const SuperClass& p)
+TO_JSON(SuperClass)
 {
     BITFIELD_TO_JSON(IsPresent);
     BITFIELD_TO_JSON(IsOneTime);
@@ -390,7 +390,7 @@ void to_json(json& j, const SuperClass& p)
     FIELD_TO_JSON(RechargeTime);
 }
 
-void from_json(const json& j, SuperClass& p)
+FROM_JSON(SuperClass)
 {
     BITFIELD_FROM_JSON(IsPresent);
     BITFIELD_FROM_JSON(IsOneTime);

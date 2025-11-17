@@ -150,10 +150,9 @@ bool Save_Game(const char* file_name, const char* descr)
     }
 
     // POC Test Validation of JSON
-    const json parsed = json::parse(save.Dump_Json());
-    SaveGame parsed_save = parsed;
+    const auto parsed = nlohmann::json::parse(save.Dump_Json());
 
-    if (!parsed_save.Validate()) {
+    if (const SaveGame parsed_save = parsed; !parsed_save.Validate()) {
         CNC_LOG_ERROR("Deserialized SaveGame validation failed");
     } else {
         CNC_LOG_INFO("Deserialized SaveGame validation passed");
