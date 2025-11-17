@@ -22,9 +22,9 @@ public:
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, Description)
+
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameHeader);
-
 };
 
 class SaveGameScenarioState
@@ -83,6 +83,7 @@ public:
         Waypoints,
         Views
     )
+
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameScenarioState);
     static inline const std::map<std::string, int> GlobalBufferSizes = {
@@ -93,24 +94,52 @@ private:
         { NAMEOF(LoseMovieName), std::size(LoseMovie) },
         { NAMEOF(ActionMovieName), std::size(ActionMovie) }
     };
-
 };
 
 class SaveGameObjectHeaps
 {
 public:
-    nlohmann::json Houses;
-    nlohmann::json TeamTypes;
-    // TODO: remaining heaps
+    nlohmann::json AnimsHeap;
+    nlohmann::json AircraftHeap;
+    nlohmann::json BulletsHeap;
+    nlohmann::json BuildingsHeap;
+    nlohmann::json FactoriesHeap;
+    nlohmann::json HousesHeap;
+    nlohmann::json InfantryHeap;
+    nlohmann::json OverlaysHeap;
+    nlohmann::json SmudgesHeap;
+    nlohmann::json TemplatesHeap;
+    nlohmann::json TerrainsHeap;
+    nlohmann::json TeamTypesHeap;
+    nlohmann::json TeamsHeap;
+    nlohmann::json TriggersHeap;
+    nlohmann::json UnitsHeap;
 
-    // TODO: methods for read/validate/write
+    void Read_Globals();
+    bool Validate() const;
+    bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGameObjectHeaps,
-        Houses,
-        TeamTypes
-        // TODO: remaining heaps
-    );
+        AnimsHeap,
+        AircraftHeap,
+        BulletsHeap,
+        BuildingsHeap,
+        FactoriesHeap,
+        HousesHeap,
+        InfantryHeap,
+        OverlaysHeap,
+        SmudgesHeap,
+        TemplatesHeap,
+        TerrainsHeap,
+        TeamTypesHeap,
+        TeamsHeap,
+        TriggersHeap,
+        UnitsHeap
+    )
+
+private:
+    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
 };
 
 class SaveGame
@@ -122,7 +151,7 @@ public:
     nlohmann::json GameMap;
     std::vector<nlohmann::json> Layers;
 
-    SaveGameObjectHeaps ObjectHeaps;
+    SaveGameObjectHeaps Objects;
 
     nlohmann::json AiBase;
     nlohmann::json Logic;
@@ -131,20 +160,20 @@ public:
     void Read_Globals();
     bool Validate() const;
     bool Write_Globals() const;
-    std::string Dump_Json() const;
+    void Dump_Json(std::string& output) const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame,
         Header,
         GameMap,
-        ObjectHeaps,
+        Objects,
         Logic,
         Layers,
         Score,
         AiBase,
         ScenarioState
     )
+
 private:
     static inline const auto& Logger = CncLogger::For(SaveGame);
-
 };

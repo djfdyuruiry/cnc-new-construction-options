@@ -185,6 +185,95 @@ bool SaveGameScenarioState::Write_Globals() const
 }
 #pragma endregion
 
+#pragma region SaveGameObjectHeaps
+void SaveGameObjectHeaps::Read_Globals()
+{
+    // TODO: remaining heaps
+
+    // see globals.cpp for heap declarations
+    //AnimsHeap = Anims;
+    //AircraftHeap = Aircraft;
+    //BulletsHeap = Bullets;
+    //BuildingsHeap = Buildings;
+    //FactoriesHeap = Factories;
+    HousesHeap = Houses;
+    //InfantryHeap = Infantry;
+    //OverlaysHeap = Overlays;
+    //SmudgesHeap = Smudges;
+    //TemplatesHeap = Templates;
+    //TerrainsHeap = Terrains;
+    TeamTypesHeap = TeamTypes;
+    //TeamsHeap = Teams;
+    //TriggersHeap = Triggers;
+    //UnitsHeap = Units;
+}
+
+bool SaveGameObjectHeaps::Validate() const
+{
+    auto result = true;
+
+    std::map<std::string_view, const nlohmann::json*> heaps = {
+        { NAMEOF(AnimsHeap), &AnimsHeap },
+        { NAMEOF(AircraftHeap), &AircraftHeap },
+        { NAMEOF(BulletsHeap), &BulletsHeap },
+        { NAMEOF(BuildingsHeap), &BuildingsHeap },
+        { NAMEOF(FactoriesHeap), &FactoriesHeap },
+        { NAMEOF(HousesHeap), &HousesHeap },
+        { NAMEOF(InfantryHeap), &InfantryHeap },
+        { NAMEOF(OverlaysHeap), &OverlaysHeap },
+        { NAMEOF(SmudgesHeap), &SmudgesHeap },
+        { NAMEOF(TemplatesHeap), &TemplatesHeap },
+        { NAMEOF(TerrainsHeap), &TerrainsHeap },
+        { NAMEOF(TeamTypesHeap), &TeamTypesHeap },
+        { NAMEOF(TeamsHeap), &TeamsHeap },
+        { NAMEOF(TriggersHeap), &TriggersHeap },
+        { NAMEOF(UnitsHeap), &UnitsHeap }
+    };
+
+    for (const auto& [name, heap_ptr] : heaps) {
+        const auto& heap = *heap_ptr;
+
+        if (!heap.is_object()) {
+            result = false;
+            CNC_LOGGER_ERROR(
+                "Invalid Objects.{} save game value - json object expected, actual type: {}",
+                name,
+                heap.type_name()
+            );
+        } else if (std::ranges::distance(heap.items()) < 1) {
+            CNC_LOGGER_WARN("Objects.{} save game value has no entries", name);
+        }
+    }
+
+    return result;
+}
+
+bool SaveGameObjectHeaps::Write_Globals() const
+{
+    if (!Validate()) {
+        return false;
+    }
+
+    //Anims = AnimsHeap;
+    //Aircraft = AircraftHeap;
+    //Bullets = BulletsHeap;
+    //Buildings = BuildingsHeap;
+    //Factories = FactoriesHeap;
+    Houses = HousesHeap;
+    //Infantry = InfantryHeap;
+    //Overlays = OverlaysHeap;
+    //Smudges = SmudgesHeap;
+    //Templates = TemplatesHeap;
+    //Terrains = TerrainsHeap;
+    TeamTypes = TeamTypesHeap;
+    //Teams = TeamsHeap;
+    //Triggers = TriggersHeap;
+    //Units = UnitsHeap;
+
+    return true;
+}
+#pragma endregion
+
 #pragma region SaveGame
 void SaveGame::Read_Globals()
 {
@@ -192,10 +281,6 @@ void SaveGame::Read_Globals()
     ScenarioState.Read_Globals();
 
     GameMap = Map;
-
-    ObjectHeaps.Houses = Houses;
-    ObjectHeaps.TeamTypes = TeamTypes;
-    // TODO: remaining heaps
 
     // TODO: BaseClass
     // TODO: LogicClass
@@ -207,26 +292,20 @@ bool SaveGame::Validate() const
 {
     auto result = true;
 
-    if (!Header.Validate() || !ScenarioState.Validate()) {
-        result = false;
-    }
+    result = Header.Validate() && result;
+    result = ScenarioState.Validate() && result;
+    result = Objects.Validate() && result;
 
-    if (!ObjectHeaps.Houses.is_object()) {
+    if (!GameMap.is_object()) {
         result = false;
         CNC_LOGGER_ERROR(
             "Invalid {} save game value - json object expected, actual type: {}",
-            NAMEOF(GameHouses),
-            ObjectHeaps.Houses.type_name()
-        );
-    } else if (ObjectHeaps.Houses.size() != HOUSE_COUNT) {
-        result = false;
-        CNC_LOGGER_ERROR(
-            "Invalid {} save game value - expected {} houses, actual house count: {}",
-            NAMEOF(GameHouses),
-            static_cast<int>(HOUSE_COUNT),
-            ObjectHeaps.Houses.size()
+            NAMEOF(GameMap),
+            GameMap.type_name()
         );
     }
+
+    // TODO: Validate Layers, AiBase, Logic, Score
 
     return result;
 }
@@ -237,18 +316,25 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
-    Header.Write_Globals() && ScenarioState.Write_Globals();
+    auto result = true;
+
+    result = Header.Write_Globals() && ScenarioState.Write_Globals();
+
+    Map = GameMap;
+
 
     // TODO: Write SaveGame Globals
 
     // TODO: Call Decode_Pointers after everything imported into Globals
     // TODO: Set PlayerPtr by getting house pointer for Header.PlayerHouseType enum value
+
+    return result;
 }
 
-std::string SaveGame::Dump_Json() const
+void SaveGame::Dump_Json(std::string& output) const
 {
     const nlohmann::json save_json = *this;
 
-    return save_json.dump();
+    output = save_json.dump();
 }
 #pragma endregion
