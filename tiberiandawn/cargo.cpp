@@ -174,3 +174,15 @@ FootClass* CargoClass::Attached_Object(void) const
     }
     return (NULL);
 }
+
+TO_JSON(CargoClass)
+{
+    FIELD_TO_JSON(Quantity);
+    OBJECT_TARGET_PTR_TO_JSON(CargoHold);
+}
+
+FROM_JSON(CargoClass)
+{
+    FIELD_FROM_JSON(Quantity);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(CargoHold, FootClass);
+}

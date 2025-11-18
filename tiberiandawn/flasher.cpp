@@ -121,3 +121,17 @@ unsigned int FlasherClass::Get_Flashing_Flags() const
 
     return flags;
 }
+
+TO_JSON(FlasherClass)
+{
+    BITFIELD_TO_JSON(FlashCount);
+    BITFIELD_TO_JSON(IsBlushing);
+    FIELD_TO_JSON(FlashCountPerPlayer);
+}
+
+FROM_JSON(FlasherClass)
+{
+    BITFIELD_FROM_JSON(FlashCount);
+    BITFIELD_FROM_JSON(IsBlushing);
+    FIELD_FROM_JSON(FlashCountPerPlayer);
+}

@@ -35,6 +35,8 @@
 #ifndef DRIVE_H
 #define DRIVE_H
 
+#include "common/json.h"
+
 #include "foot.h"
 
 /****************************************************************************
@@ -144,6 +146,7 @@ public:
         OUT_OF_WEAPON_FACTORY      // Track to leave weapons factory.
     };
 
+    JSON_FUNCTIONS(DriveClass)
 private:
     /****************************************************************************
     **	Smooth turning tracks are controlled by this structure and these

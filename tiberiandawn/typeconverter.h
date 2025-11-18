@@ -15,6 +15,7 @@
 #include "common/stringutils.h"
 
 #include "defines.h"
+#include "door.h"
 #include "teamtype.h"
 
 template<typename T>
@@ -54,7 +55,10 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, SmudgeType> ||
     std::is_same_v<T, LandType> ||
     std::is_same_v<T, TeamMissionType> ||
-    std::is_same_v<T, RadioMessageType>
+    std::is_same_v<T, RadioMessageType> ||
+    std::is_same_v<T, CloakType> ||
+    std::is_same_v<T, FacingType> ||
+    std::is_same_v<T, DoorStateType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -94,7 +98,10 @@ using ConverterTypeVariant = std::variant<
     SmudgeType,
     LandType,
     TeamMissionType,
-    RadioMessageType
+    RadioMessageType,
+    CloakType,
+    FacingType,
+    DoorStateType
 >;
 
 #pragma region Target<-Ptr->Target Macros
@@ -223,7 +230,10 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<SmudgeType>,
     EnumTypeInfo<LandType>,
     EnumTypeInfo<TeamMissionType>,
-    EnumTypeInfo<RadioMessageType>
+    EnumTypeInfo<RadioMessageType>,
+    EnumTypeInfo<CloakType>,
+    EnumTypeInfo<FacingType>,
+    EnumTypeInfo<DoorStateType>
 >;
 
 /**
@@ -359,6 +369,18 @@ public:
         std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
 
         return CncStringUtils::To_Csv(instances, to_string);
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static std::string To_Csv_String(const T* instances, const unsigned int& size)
+    {
+        std::vector<T> items;
+        items.assign(instances, instances + size);
+
+        std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
+
+        return CncStringUtils::To_Csv(items, to_string);
     }
 
     template<class T>
@@ -512,20 +534,27 @@ public:
     template<SupportedByTdTypeConverter T>
     static bool Load_Field_From_Json(
         const nlohmann::json& source,
-        std::string_view json_path,
+        std::string_view target,
         std::string_view field_name,
         const std::function<void(T)>& with_valid_value
     )
     {
+        const auto json_path = std::format("{}.{}", target, field_name);
+
         if (!source.contains(field_name)) {
-            // TODO: Log
+            CNC_LOGGER_ERROR("Mising {} JSON value - expected string", json_path);
             return false;
         }
 
         auto const& json_value = source.at(field_name);
 
         if (!json_value.is_string()) {
-            // TODO: Log
+            CNC_LOGGER_ERROR(
+                "Invalid {} JSON value - expected string, actual type: {}",
+                json_path,
+                json_value.type_name()
+            );
+
             return false;
         }
 
@@ -536,7 +565,6 @@ public:
             CNC_LOGGER_ERROR(
                 "Invalid {} JSON value - expected {} instance, actual value: {}",
                 json_path,
-                field_name,
                 Get_Type_Name<T>(),
                 json_string
             );
@@ -549,15 +577,77 @@ public:
         return true;
     }
 
-    static void Object_Target_Array_To_Json(
-        const ObjectClass* source,
-        nlohmann::json& target,
+    // TODO: Ability to set default (if source doesn't contain the field)
+    template<SupportedByTdTypeConverter T>
+    static bool Load_Csv_Field_From_Json(
+        const nlohmann::json& source,
+        std::string_view target,
+        std::string_view field_name,
+        const unsigned int& expected_length,
+        const std::function<void(std::vector<T>)>& with_valid_value
+    )
+    {
+        const auto json_path = std::format("{}.{}", target, field_name);
+
+        if (!source.contains(field_name)) {
+            CNC_LOGGER_ERROR(
+                "Mising {} JSON value - expected csv string",
+                json_path,
+                Get_Type_Name<T>()
+            );
+
+            return false;
+        }
+
+        auto const& json_value = source.at(field_name);
+
+        if (!json_value.is_string()) {
+            CNC_LOGGER_ERROR(
+                "Invalid {} JSON value - expected csv string, actual type: {}",
+                json_path,
+                json_value.type_name()
+            );
+
+            return false;
+        }
+
+        const auto json_string = json_value.get<std::string>();
+        const auto parse_result = Try_Parse_Csv<T>(json_string);
+
+        if (!parse_result.has_value()) {
+            CNC_LOGGER_ERROR(
+                "Invalid {} JSON value - expected csv of {} instances, actual value: {}",
+                json_path,
+                Get_Type_Name<T>(),
+                json_string
+            );
+
+            return false;
+        }
+
+        if (!parse_result->size() != expected_length) {
+            CNC_LOGGER_ERROR(
+                "Invalid {} JSON value - expected csv of {} {} instances, actual length: {}",
+                json_path,
+                expected_length,
+                Get_Type_Name<T>(),
+                parse_result->size()
+            );
+
+            return false;
+        }
+        with_valid_value(*parse_result);
+
+        return true;
+    }
+
+    static nlohmann::json Object_Target_Array_To_Json(
+        const ObjectClass* const* source,
         const unsigned int& length
     );
 
-    static void Techno_Type_Target_Array_To_Json(
-        const TechnoTypeClass* source,
-        nlohmann::json& target,
+    static nlohmann::json Techno_Type_Target_Array_To_Json(
+        const TechnoTypeClass* const* source,
         const unsigned int& length
     );
 
@@ -565,17 +655,18 @@ public:
     requires std::is_base_of_v<ObjectClass, T>
     static void Object_Target_Array_From_Json(
         const nlohmann::json& source,
-        std::string_view json_path,
+        std::string_view target_name,
         std::string_view field_name,
-        T* target,
+        T** target,
         const unsigned int& length
     )
     {
+        const auto json_path = std::format("{}.{}", target_name, field_name);
+
         if (!source.is_array()) {
             CNC_LOGGER_ERROR(
-                "Invalid {}.{} JSON value - expected array, actual type: {}",
+                "Invalid {} JSON value - expected array, actual type: {}",
                 json_path,
-                field_name,
                 source.type_name()
             );
 
@@ -583,9 +674,8 @@ public:
         }
         if (source.size() != length) {
             CNC_LOGGER_ERROR(
-                "Invalid {}.{} JSON value - expected array with {} elements, actual length: {}",
+                "Invalid {} JSON value - expected array with {} elements, actual length: {}",
                 json_path,
-                field_name,
                 length,
                 source.size()
             );
@@ -593,7 +683,7 @@ public:
         }
 
         for (auto i = 0; i < source.size(); i++) {
-            T* element = target + i;
+            auto element = *(target + i);
             element = OBJECT_TARGET_TO_PTR(source.at(i).get<TARGET>());
         }
     }
@@ -602,17 +692,18 @@ public:
     requires std::is_base_of_v<TechnoTypeClass, T>
     static void Techno_Type_Target_Array_From_Json(
         const nlohmann::json& source,
-        std::string_view json_path,
+        std::string_view target_name,
         std::string_view field_name,
-        T* target,
+        T** target,
         const unsigned int& length
     )
     {
+        const auto json_path = std::format("{}.{}", target_name, field_name);
+
         if (!source.is_array()) {
             CNC_LOGGER_ERROR(
-                "Invalid {}.{} JSON value - expected array, actual type: {}",
+                "Invalid {} JSON value - expected array, actual type: {}",
                 json_path,
-                field_name,
                 source.type_name()
             );
 
@@ -620,9 +711,8 @@ public:
         }
         if (source.size() != length) {
             CNC_LOGGER_ERROR(
-                "Invalid {}.{} JSON value - expected array with {} element, actual length: {}",
+                "Invalid {} JSON value - expected array with {} element, actual length: {}",
                 json_path,
-                field_name,
                 length,
                 source.size()
             );
@@ -630,7 +720,7 @@ public:
         }
 
         for (auto i = 0; i < source.size(); i++) {
-            T* element = target + i;
+            auto element = *(target + i);
             element = TECHNO_TYPE_TARGET_TO_PTR(source.at(i).get<TARGET>());
         }
     }
@@ -670,33 +760,49 @@ private:
 #define TECHNO_TYPE_TARGET_PTR_TO_JSON(FIELD) FIELD_VALUE_TO_JSON(FIELD, TECHNO_TYPE_PTR_TO_TARGET(p.FIELD))
 // Store target values for array of ObjectTypeClass pointer memory addresses in JSON array
 #define OBJECT_TARGET_PTR_ARRAY_TO_JSON(FIELD) \
-    TdTypeConverter::Object_Target_Array_To_Json(p.FIELD[0], j.at(#FIELD), std::size(p.FIELD))
+    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Object_Target_Array_To_Json(p.FIELD, std::size(p.FIELD)));
 // Store target values for array of TechnoTypeClass pointer memory addresses in JSON array
 #define TECHNO_TYPE_TARGET_PTR_ARRAY_TO_JSON(FIELD) \
-    TdTypeConverter::Techno_Type_Target_Array_To_Json(p.FIELD[0], j.at(#FIELD), std::size(p.FIELD))
+    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Techno_Type_Target_Array_To_Json(p.FIELD, std::size(p.FIELD)));
 
 // Load target value from JSON into pointer memory address
 #define TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = TARGET_TO_PTR_WITH_TYPE(j.at(#FIELD).get<TARGET>(), TYPE)
+// Load target value from JSON into pointer memory address
+#define TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) \
+    ((TYPE const*&)p.FIELD) = TARGET_TO_PTR_WITH_TYPE(j.at(#FIELD).get<TARGET>(), TYPE)
 // Load target value for ObjectTypeClass into pointer memory address
 #define OBJECT_TARGET_PTR_FROM_JSON(FIELD) TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, ObjectClass)
 // Load target value for TechnoTypeClass into pointer memory address
 #define TECHNO_TYPE_TARGET_PTR_FROM_JSON(FIELD) TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TechnoTypeClass)
 // Load target values for array of ObjectTypeClass pointer memory addresses
 #define OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Object_Target_Array_From_Json<TYPE>(j.at(#FIELD), #CLASS, #FIELD, p.FIELD[0], std::size(p.FIELD))
+    TdTypeConverter::Object_Target_Array_From_Json<TYPE>(j.at(#FIELD), #CLASS, #FIELD, p.FIELD, std::size(p.FIELD))
 // Load target values for array of TechnoTypeClass pointer memory addresses
 #define TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Techno_Type_Target_Array_From_Json<TYPE>(j.at(#FIELD), #CLASS, #FIELD, p.FIELD[0], std::size(p.FIELD))
+    TdTypeConverter::Techno_Type_Target_Array_From_Json<TYPE>( \
+        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, std::size(p.FIELD) \
+    )
 
-// Convert TD type field to string and store in JSON object, actual field value can be any expression (e.g. fetch Type enum value from pointer object)
+// Convert TD type field to string and store in JSON object, actual field value can be any expression
+// (e.g. fetch Type enum value from pointer object)
 #define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) \
     CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
 
 // Convert TD type field to string and store in JSON object
 #define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_FIELD_TO_JSON(FIELD, TdTypeConverter::To_String)
+// Convert TD type array to csv string and store in JSON object
+#define CONVERT_TD_ARRAY_FIELD_TO_JSON(FIELD, TYPE) \
+    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_Csv_String(p.FIELD, std::size(p.FIELD)))
 
 // Parse TD type field from JSON string
 #define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
     TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v; })
+// Parse TD type field from JSON string
+#define PARSE_TD_ARRAY_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
+    TdTypeConverter::Load_Csv_Field_From_Json<TYPE>(j, #CLASS, #FIELD, std::size(p.FIELD), [&](const auto& v) { \
+        for (auto i = 0; i < std::size(p.FIELD); i++) { \
+            p.FIELD[i] = v.at(i); \
+        } \
+    })
 
 #pragma endregion

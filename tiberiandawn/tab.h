@@ -78,7 +78,7 @@ public:
 
     CreditClass Credits;
 
-    JSON_FUNCTIONS(TabClass);
+    JSON_FUNCTIONS(TabClass)
 
 protected:
     /*

@@ -340,7 +340,7 @@ public:
     };
     virtual unsigned short Get_Ownable(void) const;
 
-    JSON_FUNCTIONS(AbstractTypeClass);
+    JSON_FUNCTIONS(AbstractTypeClass)
 };
 
 /***************************************************************************

@@ -174,3 +174,15 @@ int FacingClass::Rotation_Adjust(int rate)
     }
     return (false);
 }
+
+TO_JSON(FacingClass)
+{
+    CONVERT_TD_FIELD_TO_JSON(CurrentFacing);
+    CONVERT_TD_FIELD_TO_JSON(DesiredFacing);
+}
+
+FROM_JSON(FacingClass)
+{
+    PARSE_TD_FIELD_FROM_JSON(FacingClass, CurrentFacing, DirType);
+    PARSE_TD_FIELD_FROM_JSON(FacingClass, DesiredFacing, DirType);
+}

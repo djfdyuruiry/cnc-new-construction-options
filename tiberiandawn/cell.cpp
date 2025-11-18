@@ -2828,6 +2828,7 @@ TO_JSON(CellClass)
     CONVERT_TD_FIELD_TO_JSON(InfType);
     OBJECT_TARGET_PTR_TO_JSON(OccupierPtr);
     OBJECT_TARGET_PTR_ARRAY_TO_JSON(Overlapper);
+
     FIELD_TO_JSON(IsMappedByPlayerMask);
     FIELD_TO_JSON(IsVisibleByPlayerMask);
     FIELD_VALUE_TO_JSON(Flag, p.Flag.Composite);

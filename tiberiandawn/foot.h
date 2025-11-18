@@ -35,6 +35,8 @@
 #ifndef FOOT_H
 #define FOOT_H
 
+#include "common/json.h"
+
 #include "target.h"
 #include "type.h"
 #include "techno.h"
@@ -288,6 +290,7 @@ public:
     CELL Safety_Point(CELL src, CELL dst, int start, int max);
     int Rescue_Mission(TARGET tarcom);
 
+    JSON_FUNCTIONS(FootClass)
 private:
     int Passable_Cell(CELL cell, FacingType face, int threat, MoveType threshhold);
     CELL Find_Passable_Position_Near(const CELL target, const int maxRadius, const MoveType threshhold, const int threat);

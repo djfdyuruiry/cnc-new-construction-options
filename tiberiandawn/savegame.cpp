@@ -204,7 +204,7 @@ void SaveGameObjectHeaps::Read_Globals()
 
     // see globals.cpp for heap declarations
     //AnimsHeap = Anims;
-    //AircraftHeap = Aircraft;
+    AircraftHeap = Aircraft;
     //BulletsHeap = Bullets;
     //BuildingsHeap = Buildings;
     //FactoriesHeap = Factories;
@@ -225,21 +225,21 @@ bool SaveGameObjectHeaps::Validate() const
     auto result = true;
 
     std::map<std::string_view, const nlohmann::json*> heaps = {
-        { NAMEOF(AnimsHeap), &AnimsHeap },
+        // { NAMEOF(AnimsHeap), &AnimsHeap },
         { NAMEOF(AircraftHeap), &AircraftHeap },
-        { NAMEOF(BulletsHeap), &BulletsHeap },
-        { NAMEOF(BuildingsHeap), &BuildingsHeap },
-        { NAMEOF(FactoriesHeap), &FactoriesHeap },
+        // { NAMEOF(BulletsHeap), &BulletsHeap },
+        // { NAMEOF(BuildingsHeap), &BuildingsHeap },
+        // { NAMEOF(FactoriesHeap), &FactoriesHeap },
         { NAMEOF(HousesHeap), &HousesHeap },
-        { NAMEOF(InfantryHeap), &InfantryHeap },
-        { NAMEOF(OverlaysHeap), &OverlaysHeap },
-        { NAMEOF(SmudgesHeap), &SmudgesHeap },
-        { NAMEOF(TemplatesHeap), &TemplatesHeap },
-        { NAMEOF(TerrainsHeap), &TerrainsHeap },
+        // { NAMEOF(InfantryHeap), &InfantryHeap },
+        // { NAMEOF(OverlaysHeap), &OverlaysHeap },
+        // { NAMEOF(SmudgesHeap), &SmudgesHeap },
+        // { NAMEOF(TemplatesHeap), &TemplatesHeap },
+        // { NAMEOF(TerrainsHeap), &TerrainsHeap },
         { NAMEOF(TeamTypesHeap), &TeamTypesHeap },
-        { NAMEOF(TeamsHeap), &TeamsHeap },
-        { NAMEOF(TriggersHeap), &TriggersHeap },
-        { NAMEOF(UnitsHeap), &UnitsHeap }
+        // { NAMEOF(TeamsHeap), &TeamsHeap },
+        // { NAMEOF(TriggersHeap), &TriggersHeap },
+        // { NAMEOF(UnitsHeap), &UnitsHeap }
     };
 
     for (const auto& [name, heap_ptr] : heaps) {
@@ -267,7 +267,7 @@ bool SaveGameObjectHeaps::Write_Globals() const
     }
 
     //Anims = AnimsHeap;
-    //Aircraft = AircraftHeap;
+    from_json(AircraftHeap, Aircraft);
     //Bullets = BulletsHeap;
     //Buildings = BuildingsHeap;
     //Factories = FactoriesHeap;
@@ -292,7 +292,9 @@ void SaveGame::Read_Globals()
     Header.Read_Globals();
     ScenarioState.Read_Globals();
 
-    from_json(GameMap, Map);
+    GameMap = Map;
+
+    Objects.Read_Globals();
 
     // TODO: BaseClass
     // TODO: LogicClass

@@ -2195,7 +2195,8 @@ typedef enum FacingType : signed char
     FACING_NW, // North-West
 
     FACING_COUNT, // Total of 8 directions (0..7).
-    FACING_FIRST = 0
+    FACING_FIRST = 0,
+    FACING_LAST = FACING_NW
 } FacingType;
 
 // inline FacingType operator++(FacingType &, int);

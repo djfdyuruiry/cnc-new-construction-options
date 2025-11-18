@@ -125,3 +125,15 @@ void FlyClass::Fly_Speed(int speed, MPHType maximum)
 {
     SpeedAdd = (MPHType)Fixed_To_Cardinal((int)maximum, speed);
 }
+
+TO_JSON(FlyClass)
+{
+    FIELD_TO_JSON(SpeedAccum);
+    CONVERT_TD_FIELD_TO_JSON(SpeedAdd);
+}
+
+FROM_JSON(FlyClass)
+{
+    FIELD_FROM_JSON(SpeedAccum);
+    PARSE_TD_FIELD_FROM_JSON(FlyClass, SpeedAdd, MPHType);
+}

@@ -35,6 +35,9 @@
 #ifndef CREW_H
 #define CREW_H
 
+#include "json.h"
+#include "noinit.h"
+
 /****************************************************************************
 **	This class handles the basic crew logic. This includes hero tracking,
 **	crew bail-out, and attached object logic.
@@ -61,6 +64,8 @@ public:
         Kills++;
         return (Kills);
     };
+
+    JSON_FUNCTIONS(CrewClass)
 
 private:
 };

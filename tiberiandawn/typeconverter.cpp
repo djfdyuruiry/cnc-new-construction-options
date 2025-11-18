@@ -72,7 +72,10 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(SmudgeType,       "SMUDGE_",        SMUDGE_NONE,       SMUDGE_LAST,                {},                 {}),
     ENUM_TYPE_PAIR(LandType,         "LAND_",          LAND_CLEAR,        LAND_BEACH,                 {},                 {}),
     ENUM_TYPE_PAIR(TeamMissionType,  "TMISSION_",      TMISSION_NONE,     TMISSION_LAST,              {},                 {}),
-    ENUM_TYPE_PAIR(RadioMessageType, "RADIO_",         RADIO_STATIC,      RADIO_ON_DEPOT,             {},                 {})
+    ENUM_TYPE_PAIR(RadioMessageType, "RADIO_",         RADIO_STATIC,      RADIO_ON_DEPOT,             {},                 {}),
+    ENUM_TYPE_PAIR(CloakType,        "",               UNCLOAKED,         UNCLOAKING,                 {},                 {}),
+    ENUM_TYPE_PAIR(FacingType,       "FACING_",        FACING_FIRST,      FACING_LAST,                {},                 {}),
+    ENUM_TYPE_PAIR(DoorStateType,    "",               IS_CLOSED,         IS_CLOSING,                 {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -134,6 +137,9 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(LandType)
     RULE_VARIANT(TeamMissionType)
     RULE_VARIANT(RadioMessageType)
+    RULE_VARIANT(CloakType)
+    RULE_VARIANT(FacingType)
+    RULE_VARIANT(DoorStateType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -180,6 +186,9 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(LandType)
     CSV_RULE_VARIANT(TeamMissionType)
     CSV_RULE_VARIANT(RadioMessageType)
+    CSV_RULE_VARIANT(CloakType)
+    CSV_RULE_VARIANT(FacingType)
+    CSV_RULE_VARIANT(DoorStateType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -225,40 +234,43 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(LandType)
     TYPE_NAME_VARIANT(TeamMissionType)
     TYPE_NAME_VARIANT(RadioMessageType)
+    TYPE_NAME_VARIANT(CloakType)
+    TYPE_NAME_VARIANT(FacingType)
+    TYPE_NAME_VARIANT(DoorStateType)
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
 }
 
-void TdTypeConverter::Object_Target_Array_To_Json(
-    const ObjectClass* source,
-    nlohmann::json& target,
+nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(
+    const ObjectClass* const* source,
     const unsigned int& length
 )
 {
     std::vector<TARGET> elements;
 
     for (auto i = 0; i < length; i++) {
-        const auto element = source + i;
+        const auto element = *(source + i);
 
         elements.emplace_back(OBJECT_PTR_TO_TARGET(element));
     }
 
-    target = elements;
+    nlohmann::json target = elements;
+    return target;
 }
 
-void TdTypeConverter::Techno_Type_Target_Array_To_Json(
-    const TechnoTypeClass* source,
-    nlohmann::json& target,
+nlohmann::json TdTypeConverter::Techno_Type_Target_Array_To_Json(
+    const TechnoTypeClass* const* source,
     const unsigned int& length
 )
 {
     std::vector<TARGET> elements;
 
     for (auto i = 0; i < length; i++) {
-        const auto element = source + i;
+        const auto element = *(source + i);
 
         elements.emplace_back(TECHNO_TYPE_PTR_TO_TARGET(element));
     }
 
-    target = elements;
+    nlohmann::json target = elements;
+    return target;
 }

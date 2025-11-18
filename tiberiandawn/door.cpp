@@ -191,3 +191,21 @@ int DoorClass::Door_Stage(void) const
     }
     return (0);
 }
+
+TO_JSON(DoorClass)
+{
+    FIELD_TO_JSON(Control);
+    FIELD_TO_JSON(Stages);
+    CONVERT_TD_FIELD_TO_JSON(State);
+    BITFIELD_TO_JSON(IsToRedraw);
+}
+
+FROM_JSON(DoorClass)
+{
+    FIELD_FROM_JSON(Control);
+    FIELD_FROM_JSON(Stages);
+
+    PARSE_TD_FIELD_FROM_JSON(DoorClass, State, DoorStateType);
+
+    BITFIELD_FROM_JSON(IsToRedraw);
+}

@@ -35,6 +35,8 @@
 #ifndef AIRCRAFT_H
 #define AIRCRAFT_H
 
+#include "common/json.h"
+
 #include "radio.h"
 #include "fly.h"
 #include "target.h"
@@ -208,6 +210,7 @@ public:
     */
     FacingClass SecondaryFacing;
 
+    JSON_FUNCTIONS(AircraftClass)
 private:
     /*
     **	Aircraft can be in either state of landing, taking off, or in steady altitude.

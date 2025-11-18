@@ -3568,3 +3568,39 @@ void AircraftClass::Set_Reinforcement_Delay(int delay)
 {
     ReinforcementStart = Frame + delay;
 }
+
+TO_JSON(AircraftClass)
+{
+    BASE_CLASS_TO_JSON(FootClass);
+    BASE_CLASS_TO_JSON(FlyClass);
+
+    TECHNO_TYPE_TARGET_PTR_TO_JSON(Class);
+    FIELD_TO_JSON(SecondaryFacing);
+    BITFIELD_TO_JSON(IsLanding);
+    BITFIELD_TO_JSON(IsTakingOff);
+    BITFIELD_TO_JSON(IsHoming);
+    BITFIELD_TO_JSON(IsHovering);
+    FIELD_TO_JSON(Jitter);
+    FIELD_TO_JSON(Altitude);
+    FIELD_TO_JSON(SightTimer);
+    FIELD_TO_JSON(AttacksRemaining);
+    FIELD_TO_JSON(ReinforcementStart);
+}
+
+FROM_JSON(AircraftClass)
+{
+    BASE_CLASS_FROM_JSON(FootClass);
+    BASE_CLASS_FROM_JSON(FlyClass);
+
+    TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(Class, AircraftTypeClass);
+    FIELD_FROM_JSON(SecondaryFacing);
+    BITFIELD_FROM_JSON(IsLanding);
+    BITFIELD_FROM_JSON(IsTakingOff);
+    BITFIELD_FROM_JSON(IsHoming);
+    BITFIELD_FROM_JSON(IsHovering);
+    FIELD_FROM_JSON(Jitter);
+    FIELD_FROM_JSON(Altitude);
+    FIELD_FROM_JSON(SightTimer);
+    FIELD_FROM_JSON(AttacksRemaining);
+    FIELD_FROM_JSON(ReinforcementStart);
+}
