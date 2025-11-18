@@ -174,3 +174,13 @@ void TarComClass::AI(void)
         }
     }
 }
+
+TO_JSON(TarComClass)
+{
+    BASE_CLASS_TO_JSON(TurretClass);
+}
+
+FROM_JSON(TarComClass)
+{
+    BASE_CLASS_FROM_JSON(TurretClass);
+}

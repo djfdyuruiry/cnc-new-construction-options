@@ -217,7 +217,7 @@ void SaveGameObjectHeaps::Read_Globals()
     TeamTypesHeap = TeamTypes;
     //TeamsHeap = Teams;
     //TriggersHeap = Triggers;
-    //UnitsHeap = Units;
+    UnitsHeap = Units;
 }
 
 bool SaveGameObjectHeaps::Validate() const

@@ -581,13 +581,13 @@ public:
     template<SupportedByTdTypeConverter T>
     static bool Load_Csv_Field_From_Json(
         const nlohmann::json& source,
-        std::string_view target,
+        std::string_view target_name,
         std::string_view field_name,
         const unsigned int& expected_length,
-        const std::function<void(std::vector<T>)>& with_valid_value
+        T* target
     )
     {
-        const auto json_path = std::format("{}.{}", target, field_name);
+        const auto json_path = std::format("{}.{}", target_name, field_name);
 
         if (!source.contains(field_name)) {
             CNC_LOGGER_ERROR(
@@ -636,7 +636,8 @@ public:
 
             return false;
         }
-        with_valid_value(*parse_result);
+
+        std::ranges::copy(*parse_result, target);
 
         return true;
     }
@@ -799,10 +800,28 @@ private:
     TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v; })
 // Parse TD type field from JSON string
 #define PARSE_TD_ARRAY_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Load_Csv_Field_From_Json<TYPE>(j, #CLASS, #FIELD, std::size(p.FIELD), [&](const auto& v) { \
-        for (auto i = 0; i < std::size(p.FIELD); i++) { \
-            p.FIELD[i] = v.at(i); \
-        } \
-    })
+    TdTypeConverter::Load_Csv_Field_From_Json<TYPE>(j, #CLASS, #FIELD, std::size(p.FIELD), p.FIELD)
 
 #pragma endregion
+
+template<class T, class U>
+requires std::is_base_of_v<TechnoTypeClass, T> && SupportedByTdTypeConverter<U>
+class TechnoTypeClassReference
+{
+    RTTIType Type;
+    U Instance;
+
+
+
+    TO_JSON(TechnoTypeClassReference)
+    {
+        CONVERT_TD_FIELD_TO_JSON(Type);
+        CONVERT_TD_FIELD_TO_JSON(Instance);
+    }
+
+    FROM_JSON(TechnoTypeClassReference)
+    {
+        PARSE_TD_FIELD_FROM_JSON(TechnoTypeClassReference, Type, RTTIType);
+        PARSE_TD_FIELD_FROM_JSON(TechnoTypeClassReference, Instance, U);
+    }
+};

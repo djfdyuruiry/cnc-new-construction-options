@@ -53,6 +53,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 DriveClass::DriveClass(void)
     : Class(0)

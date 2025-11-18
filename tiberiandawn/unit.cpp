@@ -4393,3 +4393,21 @@ RTTIType UnitClass::What_Am_I(void) const
     Validate();
     return (RTTI_UNIT);
 }
+
+TO_JSON(UnitClass)
+{
+    BASE_CLASS_TO_JSON(TarComClass);
+
+    CONVERT_TD_FIELD_TO_JSON(Flagged);
+    FIELD_TO_JSON(HarvestTimer);
+    OBJECT_TARGET_PTR_TO_JSON(TiberiumUnloadRefinery);
+}
+
+FROM_JSON(UnitClass)
+{
+    BASE_CLASS_FROM_JSON(TarComClass);
+
+    PARSE_TD_FIELD_FROM_JSON(UnitClass, Flagged, HousesType);
+    FIELD_FROM_JSON(HarvestTimer);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(TiberiumUnloadRefinery, BuildingClass);
+}
