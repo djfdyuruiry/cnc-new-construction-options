@@ -1712,3 +1712,36 @@ int ObjectClass::Full_Name(void) const
 {
     return Class_Of().Full_Name();
 };
+
+TO_JSON(ObjectClass)
+{
+    BASE_CLASS_TO_JSON(AbstractClass);
+
+    BITFIELD_TO_JSON(IsDown);
+    BITFIELD_TO_JSON(IsToDamage);
+    BITFIELD_TO_JSON(IsToDisplay);
+    BITFIELD_TO_JSON(IsInLimbo);
+    BITFIELD_TO_JSON(IsSelected);
+    BITFIELD_OF_WIDTH_TO_JSON(IsSelectedMask, 16);
+    BITFIELD_TO_JSON(IsAnimAttached);
+    OBJECT_TARGET_PTR_TO_JSON(Next);
+    OBJECT_TARGET_PTR_TO_JSON(Trigger);
+    FIELD_TO_JSON(Strength);
+
+}
+
+FROM_JSON(ObjectClass)
+{
+    BASE_CLASS_FROM_JSON(AbstractClass);
+
+    BITFIELD_FROM_JSON(IsDown);
+    BITFIELD_FROM_JSON(IsToDamage);
+    BITFIELD_FROM_JSON(IsToDisplay);
+    BITFIELD_FROM_JSON(IsInLimbo);
+    BITFIELD_FROM_JSON(IsSelected);
+    BITFIELD_OF_WIDTH_FROM_JSON(ObjectClass, IsSelectedMask, 16);
+    BITFIELD_FROM_JSON(IsAnimAttached);
+    OBJECT_TARGET_PTR_FROM_JSON(Next);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Trigger, TriggerClass);
+    FIELD_FROM_JSON(Strength);
+}

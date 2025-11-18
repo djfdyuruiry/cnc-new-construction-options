@@ -16,17 +16,17 @@ bool SaveGameHeader::Validate() const
     auto result = true;
 
     if (CncStringUtils::Is_Blank(Version)) {
-        CNC_LOGGER_ERROR("Blank/missing Version save game value");
+        CNC_LOGGER_ERROR("Blank/missing Header.Version save game value");
         result = false;
     }
 
     if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
-        CNC_LOGGER_ERROR("Invalid PlayerHouse save game value: {}", PlayerHouseType);
+        CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
         result = false;
     }
 
     if (CncStringUtils::Is_Blank(Description)) {
-        CNC_LOGGER_ERROR("Blank/missing Description save game value");
+        CNC_LOGGER_ERROR("Blank/missing Header.Description save game value");
         result = false;
     }
 
@@ -39,6 +39,18 @@ bool SaveGameHeader::Write_Globals() const
 
     return true;
 }
+
+HousesType SaveGameHeader::Parse_Player_House_Type() const
+{
+    const auto house = TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType);
+
+    if (!house.has_value()) {
+        CNC_LOGGER_FATAL("Attempted to parse invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
+    }
+
+    return *house;
+}
+
 #pragma endregion
 
 #pragma region SaveGameScenarioState
@@ -174,7 +186,7 @@ bool SaveGameScenarioState::Write_Globals() const
     for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
         DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
         for (const auto& entry : SelectedObjects.at(i)) {
-            selection.Add((ObjectClass*)(intptr_t)(entry));
+            selection.Add(reinterpret_cast<ObjectClass*>(static_cast<intptr_t>(entry)));
         }
     }
 
@@ -316,14 +328,19 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
-    auto result = Header.Write_Globals() && ScenarioState.Write_Globals();
+    auto result = Header.Write_Globals() &&
+        ScenarioState.Write_Globals() &&
+        Objects.Write_Globals();
 
     Map = GameMap;
 
     // TODO: Write SaveGame Globals
 
     // TODO: Call Decode_Pointers after everything imported into Globals
-    // TODO: Set PlayerPtr by getting house pointer for Header.PlayerHouseType enum value
+
+    PlayerPtr = HouseClass::As_Pointer(
+        Header.Parse_Player_House_Type()
+    );
 
     return result;
 }

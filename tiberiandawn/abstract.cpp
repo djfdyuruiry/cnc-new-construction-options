@@ -154,3 +154,17 @@ FROM_JSON(AbstractTypeClass)
     CSTR_FIELD_FROM_JSON(AbstractTypeClass, IniName);
     FIELD_FROM_JSON(FullName);
 }
+
+TO_JSON(AbstractClass)
+{
+    FIELD_TO_JSON(Coord);
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsRecentlyCreated);
+}
+
+FROM_JSON(AbstractClass)
+{
+    FIELD_FROM_JSON(Coord);
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsRecentlyCreated);
+}

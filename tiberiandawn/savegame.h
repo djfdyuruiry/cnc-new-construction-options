@@ -21,6 +21,8 @@ public:
     bool Validate() const;
     bool Write_Globals() const;
 
+    HousesType Parse_Player_House_Type() const;
+
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, Description)
 
 private:

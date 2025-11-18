@@ -36,42 +36,43 @@ static const std::vector TemplateExcludes = { TEMPLATE_COUNT };
 
 // TODO: Determine if LAST/COUNT ETC values are actually excluded from TwoWayMaps (we use these as number boundaries, but don't want the actual enum value X_LAST to parse)
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
-    //             [Typename]       [Prefix]        [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
-    ENUM_TYPE_PAIR(ArmorType,       "ARMOR_",       ARMOR_NONE,        ARMOR_LAST,                 {},                 {}),
-    ENUM_TYPE_PAIR(MPHType,         "MPH_",         MPH_IMMOBILE,      MPH_LIGHT_SPEED,            {},                 {}),
-    ENUM_TYPE_PAIR(WeaponType,      "WEAPON_",      WEAPON_NONE,       WEAPON_LAST,                WeaponPatchTable,   {}),
-    ENUM_TYPE_PAIR(HousesType,      "HOUSE_",       HOUSE_NONE,        HOUSE_LAST,                 {},                 {}),
-    ENUM_TYPE_PAIR(StructType,      "STRUCT_",      STRUCT_NONE,       STRUCT_LAST,                StructPatchTable,   {}),
-    ENUM_TYPE_PAIR(FactoryType,     "FACTORY_",     FACTORY_TYPE_NONE, FACTORY_TYPE_BUILDING,      {},                 {}),
-    ENUM_TYPE_PAIR(DirType,         "DIR_",         DIR_MIN,           DIR_MAX,                    {},                 {}),
-    ENUM_TYPE_PAIR(BSizeType,       "BSIZE_",       BSIZE_NONE,        BSIZE_LAST,                 {},                 {}),
-    ENUM_TYPE_PAIR(AircraftType,    "AIRCRAFT_",    AIRCRAFT_NONE,     AIRCRAFT_LAST,              AircraftPatchTable, {}),
-    ENUM_TYPE_PAIR(MissionType,     "MISSION_",     MISSION_NONE,      MISSION_LAST,               {},                 {}),
-    ENUM_TYPE_PAIR(AnimType,        "ANIM_",        ANIM_NONE,         ANIM_LAST,                  AnimPatchTable,     {}),
-    ENUM_TYPE_PAIR(InfantryType,    "INFANTRY_",    INFANTRY_NONE,     INFANTRY_LAST,              InfantryPatchTable, {}),
-    ENUM_TYPE_PAIR(UnitType,        "UNIT_",        UNIT_NONE,         UNIT_LAST,                  UnitPatchTable,     {}),
-    ENUM_TYPE_PAIR(SpeedType,       "SPEED_",       SPEED_NONE,        SPEED_LAST,                 {},                 {}),
-    ENUM_TYPE_PAIR(BulletType,      "BULLET_",      BULLET_NONE,       BULLET_LAST,                BulletPatchTable,   {}),
-    ENUM_TYPE_PAIR(WarheadType,     "WARHEAD_",     WARHEAD_NONE,      WARHEAD_LAST,               WarheadPatchTable,  {}),
-    ENUM_TYPE_PAIR(VocType,         "VOC_",         VOC_NONE,          VOC_BEACON,                 {},                 VocExcludes),
-    ENUM_TYPE_PAIR(PlayerColorType, "REMAP_",       REMAP_NONE,        REMAP_LAST,                 {},                 {}),
-    ENUM_TYPE_PAIR(HouseColorType,  "HOUSE_COLOR_", HOUSE_COLOR_GOOD,  HOUSE_COLOR_BRIGHT_NEUTRAL, {},                 {}),
-    ENUM_TYPE_PAIR(DiffType,        "DIFF_",        DIFF_FIRST,        DIFF_LAST,                  {},                 {}),
-    ENUM_TYPE_PAIR(ScenarioDirType, "SCEN_DIR_",    SCEN_DIR_NONE,     SCEN_DIR_LAST,              {},                 {}),
-    ENUM_TYPE_PAIR(ScenarioVarType, "SCEN_VAR_",    SCEN_VAR_NONE,     SCEN_VAR_LOSE,              {},                 ScenarioVarExcludes),
-    ENUM_TYPE_PAIR(SourceType,      "SOURCE_",      SOURCE_NONE,       SOURCE_OCEAN,               {},                 SourceExcludes),
-    ENUM_TYPE_PAIR(RadarEnum,       "RADAR_",       RADAR_NONE,        RADAR_OFF,                  {},                 {}),
-    ENUM_TYPE_PAIR(RTTIType,        "RTTITYPE_",    RTTI_NONE,         RTTI_LAST,                  {},                 {}),
-    ENUM_TYPE_PAIR(ZoneType,        "ZONE_",        ZONE_NONE,         ZONE_LAST,                  {},                 {}),
-    ENUM_TYPE_PAIR(StateType,       "STATE_",       STATE_BUILDUP,     STATE_ENDGAME,              {},                 {}),
-    ENUM_TYPE_PAIR(VoxType,         "VOX_",         VOX_NONE,          VOX_LAST,                   {},                 {}),
-    ENUM_TYPE_PAIR(MouseType,       "MOUSE_",       MOUSE_NORMAL,      MOUSE_AREA_GUARD,           {},                 {}),
-    ENUM_TYPE_PAIR(TheaterType,     "THEATER_",     THEATER_NONE,      THEATER_LAST,               {},                 {}),
-    ENUM_TYPE_PAIR(TemplateType,    "TEMPLATE_",    TEMPLATE_FIRST,    TEMPLATE_NONE,              {},                 TemplateExcludes),
-    ENUM_TYPE_PAIR(OverlayType,     "OVERLAY_",     OVERLAY_NONE,      OVERLAY_LAST,               {},                 {}),
-    ENUM_TYPE_PAIR(SmudgeType,      "SMUDGE_",      SMUDGE_NONE,       SMUDGE_LAST,                {},                 {}),
-    ENUM_TYPE_PAIR(LandType,        "LAND_",        LAND_CLEAR,        LAND_BEACH,                 {},                 {}),
-    ENUM_TYPE_PAIR(TeamMissionType, "TMISSION_",    TMISSION_NONE,     TMISSION_LAST,              {},                 {})
+    //             [Typename]        [Prefix]          [Min Valid Val]    [Max Valid Val]             [INI Patch Table]   [Excluded Vals]
+    ENUM_TYPE_PAIR(ArmorType,        "ARMOR_",         ARMOR_NONE,        ARMOR_LAST,                 {},                 {}),
+    ENUM_TYPE_PAIR(MPHType,          "MPH_",           MPH_IMMOBILE,      MPH_LIGHT_SPEED,            {},                 {}),
+    ENUM_TYPE_PAIR(WeaponType,       "WEAPON_",        WEAPON_NONE,       WEAPON_LAST,                WeaponPatchTable,   {}),
+    ENUM_TYPE_PAIR(HousesType,       "HOUSE_",         HOUSE_NONE,        HOUSE_LAST,                 {},                 {}),
+    ENUM_TYPE_PAIR(StructType,       "STRUCT_",        STRUCT_NONE,       STRUCT_LAST,                StructPatchTable,   {}),
+    ENUM_TYPE_PAIR(FactoryType,      "FACTORY_",       FACTORY_TYPE_NONE, FACTORY_TYPE_BUILDING,      {},                 {}),
+    ENUM_TYPE_PAIR(DirType,          "DIR_",           DIR_MIN,           DIR_MAX,                    {},                 {}),
+    ENUM_TYPE_PAIR(BSizeType,        "BSIZE_",         BSIZE_NONE,        BSIZE_LAST,                 {},                 {}),
+    ENUM_TYPE_PAIR(AircraftType,     "AIRCRAFT_",      AIRCRAFT_NONE,     AIRCRAFT_LAST,              AircraftPatchTable, {}),
+    ENUM_TYPE_PAIR(MissionType,      "MISSION_",       MISSION_NONE,      MISSION_LAST,               {},                 {}),
+    ENUM_TYPE_PAIR(AnimType,         "ANIM_",          ANIM_NONE,         ANIM_LAST,                  AnimPatchTable,     {}),
+    ENUM_TYPE_PAIR(InfantryType,     "INFANTRY_",      INFANTRY_NONE,     INFANTRY_LAST,              InfantryPatchTable, {}),
+    ENUM_TYPE_PAIR(UnitType,         "UNIT_",          UNIT_NONE,         UNIT_LAST,                  UnitPatchTable,     {}),
+    ENUM_TYPE_PAIR(SpeedType,        "SPEED_",         SPEED_NONE,        SPEED_LAST,                 {},                 {}),
+    ENUM_TYPE_PAIR(BulletType,       "BULLET_",        BULLET_NONE,       BULLET_LAST,                BulletPatchTable,   {}),
+    ENUM_TYPE_PAIR(WarheadType,      "WARHEAD_",       WARHEAD_NONE,      WARHEAD_LAST,               WarheadPatchTable,  {}),
+    ENUM_TYPE_PAIR(VocType,          "VOC_",           VOC_NONE,          VOC_BEACON,                 {},                 VocExcludes),
+    ENUM_TYPE_PAIR(PlayerColorType,  "REMAP_",         REMAP_NONE,        REMAP_LAST,                 {},                 {}),
+    ENUM_TYPE_PAIR(HouseColorType,   "HOUSE_COLOR_",   HOUSE_COLOR_GOOD,  HOUSE_COLOR_BRIGHT_NEUTRAL, {},                 {}),
+    ENUM_TYPE_PAIR(DiffType,         "DIFF_",          DIFF_FIRST,        DIFF_LAST,                  {},                 {}),
+    ENUM_TYPE_PAIR(ScenarioDirType,  "SCEN_DIR_",      SCEN_DIR_NONE,     SCEN_DIR_LAST,              {},                 {}),
+    ENUM_TYPE_PAIR(ScenarioVarType,  "SCEN_VAR_",      SCEN_VAR_NONE,     SCEN_VAR_LOSE,              {},                 ScenarioVarExcludes),
+    ENUM_TYPE_PAIR(SourceType,       "SOURCE_",        SOURCE_NONE,       SOURCE_OCEAN,               {},                 SourceExcludes),
+    ENUM_TYPE_PAIR(RadarEnum,        "RADAR_",         RADAR_NONE,        RADAR_OFF,                  {},                 {}),
+    ENUM_TYPE_PAIR(RTTIType,         "RTTITYPE_",      RTTI_NONE,         RTTI_LAST,                  {},                 {}),
+    ENUM_TYPE_PAIR(ZoneType,         "ZONE_",          ZONE_NONE,         ZONE_LAST,                  {},                 {}),
+    ENUM_TYPE_PAIR(StateType,        "STATE_",         STATE_BUILDUP,     STATE_ENDGAME,              {},                 {}),
+    ENUM_TYPE_PAIR(VoxType,          "VOX_",           VOX_NONE,          VOX_LAST,                   {},                 {}),
+    ENUM_TYPE_PAIR(MouseType,        "MOUSE_",         MOUSE_NORMAL,      MOUSE_AREA_GUARD,           {},                 {}),
+    ENUM_TYPE_PAIR(TheaterType,      "THEATER_",       THEATER_NONE,      THEATER_LAST,               {},                 {}),
+    ENUM_TYPE_PAIR(TemplateType,     "TEMPLATE_",      TEMPLATE_FIRST,    TEMPLATE_NONE,              {},                 TemplateExcludes),
+    ENUM_TYPE_PAIR(OverlayType,      "OVERLAY_",       OVERLAY_NONE,      OVERLAY_LAST,               {},                 {}),
+    ENUM_TYPE_PAIR(SmudgeType,       "SMUDGE_",        SMUDGE_NONE,       SMUDGE_LAST,                {},                 {}),
+    ENUM_TYPE_PAIR(LandType,         "LAND_",          LAND_CLEAR,        LAND_BEACH,                 {},                 {}),
+    ENUM_TYPE_PAIR(TeamMissionType,  "TMISSION_",      TMISSION_NONE,     TMISSION_LAST,              {},                 {}),
+    ENUM_TYPE_PAIR(RadioMessageType, "RADIO_",         RADIO_STATIC,      RADIO_ON_DEPOT,             {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -132,6 +133,7 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(SmudgeType)
     RULE_VARIANT(LandType)
     RULE_VARIANT(TeamMissionType)
+    RULE_VARIANT(RadioMessageType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -177,6 +179,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(SmudgeType)
     CSV_RULE_VARIANT(LandType)
     CSV_RULE_VARIANT(TeamMissionType)
+    CSV_RULE_VARIANT(RadioMessageType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -221,6 +224,41 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(SmudgeType)
     TYPE_NAME_VARIANT(LandType)
     TYPE_NAME_VARIANT(TeamMissionType)
+    TYPE_NAME_VARIANT(RadioMessageType)
 
     throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+}
+
+void TdTypeConverter::Object_Target_Array_To_Json(
+    const ObjectClass* source,
+    nlohmann::json& target,
+    const unsigned int& length
+)
+{
+    std::vector<TARGET> elements;
+
+    for (auto i = 0; i < length; i++) {
+        const auto element = source + i;
+
+        elements.emplace_back(OBJECT_PTR_TO_TARGET(element));
+    }
+
+    target = elements;
+}
+
+void TdTypeConverter::Techno_Type_Target_Array_To_Json(
+    const TechnoTypeClass* source,
+    nlohmann::json& target,
+    const unsigned int& length
+)
+{
+    std::vector<TARGET> elements;
+
+    for (auto i = 0; i < length; i++) {
+        const auto element = source + i;
+
+        elements.emplace_back(TECHNO_TYPE_PTR_TO_TARGET(element));
+    }
+
+    target = elements;
 }

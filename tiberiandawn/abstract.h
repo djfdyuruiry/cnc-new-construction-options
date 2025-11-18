@@ -35,6 +35,8 @@
 #ifndef ABSTRACT_H
 #define ABSTRACT_H
 
+#include "common/json.h"
+
 DirType Direction(CELL cell1, CELL cell2);
 DirType Direction(COORDINATE coord1, COORDINATE coord2);
 int Distance(COORDINATE coord1, COORDINATE coord2);
@@ -163,6 +165,8 @@ public:
         IsActive = true;
         IsRecentlyCreated = true;
     }
+
+    JSON_FUNCTIONS(AbstractClass)
 };
 
 #endif

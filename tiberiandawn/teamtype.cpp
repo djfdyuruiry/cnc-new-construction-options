@@ -944,14 +944,8 @@ TO_JSON(TeamTypeClass)
     FIELD_TO_JSON(MissionList);
     FIELD_TO_JSON(ClassCount);
 
-    nlohmann::json classes;
+    TECHNO_TYPE_TARGET_PTR_ARRAY_TO_JSON(Class);
 
-    for (auto i = 0; i < std::size(p.Class); i++) {
-        const TARGET target = p.Class[i] == nullptr ? 0 : TechnoType_To_Target(p.Class[i]);
-        classes[i] = target;
-    }
-
-    FIELD_VALUE_TO_JSON(Class, classes);
     FIELD_TO_JSON(DesiredNum);
 }
 
@@ -977,11 +971,7 @@ FROM_JSON(TeamTypeClass)
     FIELD_FROM_JSON(MissionList);
     FIELD_FROM_JSON(ClassCount);
 
-    const auto& classes = j.at(NAMEOF(Class));
-
-    for (auto i = 0; i < classes.size(); i++) {
-        p.Class[i] = (TechnoTypeClass*)(intptr_t)(classes[i].get<TARGET>());
-    }
+    TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(TeamTypeClass, Class, TechnoTypeClass const);
 
     FIELD_FROM_JSON(DesiredNum);
 }

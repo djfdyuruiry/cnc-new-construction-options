@@ -35,6 +35,8 @@
 #ifndef RADIO_H
 #define RADIO_H
 
+#include "common/json.h"
+
 //#include "object.h"
 #include "mission.h"
 //#include	"flasher.h"
@@ -115,6 +117,8 @@ public:
     */
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
+
+    JSON_FUNCTIONS(RadioClass)
 };
 
 #endif

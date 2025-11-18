@@ -35,6 +35,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "common/json.h"
+
 #include "abstract.h"
 
 class ObjectClass;
@@ -259,6 +261,8 @@ public:
     virtual void Debug_Dump(MonoClass* mono) const;
 #endif
     virtual void Move(FacingType);
+
+    JSON_FUNCTIONS(ObjectClass)
 };
 
 #endif

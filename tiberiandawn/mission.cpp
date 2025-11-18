@@ -501,3 +501,25 @@ char const* MissionClass::Missions[MISSION_COUNT] = {
     "Harvest",  "Area Guard",   "Return",  "Stop",    "Ambush", "Hunt",    "Timed Hunt", "Unload",
     "Sabotage", "Construction", "Selling", "Repair",  "Rescue", "Missile",
 };
+
+TO_JSON(MissionClass)
+{
+    BASE_CLASS_TO_JSON(ObjectClass);
+
+    CONVERT_TD_FIELD_TO_JSON(Mission);
+    CONVERT_TD_FIELD_TO_JSON(SuspendedMission);
+    CONVERT_TD_FIELD_TO_JSON(MissionQueue);
+    FIELD_TO_JSON(Status);
+    FIELD_TO_JSON(Timer);
+}
+
+FROM_JSON(MissionClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+
+    PARSE_TD_FIELD_FROM_JSON(MissionClass, Mission, MissionType);
+    PARSE_TD_FIELD_FROM_JSON(MissionClass, SuspendedMission, MissionType);
+    PARSE_TD_FIELD_FROM_JSON(MissionClass, MissionQueue, MissionType);
+    FIELD_FROM_JSON(Status);
+    FIELD_FROM_JSON(Timer);
+}

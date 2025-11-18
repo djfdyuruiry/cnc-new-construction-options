@@ -245,3 +245,19 @@ RadioMessageType RadioClass::Transmit_Message(RadioMessageType message, RadioCla
 {
     return (Transmit_Message(message, LParam, to));
 };
+
+TO_JSON(RadioClass)
+{
+    BASE_CLASS_TO_JSON(MissionClass);
+
+    CONVERT_TD_FIELD_TO_JSON(LastMessage);
+    OBJECT_TARGET_PTR_TO_JSON(Radio);
+}
+
+FROM_JSON(RadioClass)
+{
+    BASE_CLASS_FROM_JSON(MissionClass);
+
+    PARSE_TD_FIELD_FROM_JSON(RadioClass, LastMessage, RadioMessageType);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Radio, RadioClass);
+}

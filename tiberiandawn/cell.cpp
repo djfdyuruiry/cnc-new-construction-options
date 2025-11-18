@@ -2826,16 +2826,14 @@ TO_JSON(CellClass)
     FIELD_TO_JSON(SmudgeData);
     CONVERT_TD_FIELD_TO_JSON(Owner);
     CONVERT_TD_FIELD_TO_JSON(InfType);
-    TARGET_PTR_TO_JSON(OccupierPtr);
-    TARGET_PTR_TO_JSON(Overlapper[0]);
-    TARGET_PTR_TO_JSON(Overlapper[1]);
-    TARGET_PTR_TO_JSON(Overlapper[2]);
+    OBJECT_TARGET_PTR_TO_JSON(OccupierPtr);
+    OBJECT_TARGET_PTR_ARRAY_TO_JSON(Overlapper);
     FIELD_TO_JSON(IsMappedByPlayerMask);
     FIELD_TO_JSON(IsVisibleByPlayerMask);
     FIELD_VALUE_TO_JSON(Flag, p.Flag.Composite);
     CONVERT_TD_FIELD_TO_JSON(Land);
     CONVERT_TD_FIELD_TO_JSON(OverrideLand);
-    TARGET_PTR_TO_JSON(CTFFlag);
+    OBJECT_TARGET_PTR_TO_JSON(CTFFlag);
 }
 
 FROM_JSON(CellClass)
@@ -2856,10 +2854,8 @@ FROM_JSON(CellClass)
     FIELD_FROM_JSON(SmudgeData);
     PARSE_TD_FIELD_FROM_JSON(CellClass, Owner, HousesType);
     PARSE_TD_FIELD_FROM_JSON(CellClass, InfType, HousesType);
-    TARGET_PTR_FROM_JSON(OccupierPtr);
-    TARGET_PTR_FROM_JSON(Overlapper[0]);
-    TARGET_PTR_FROM_JSON(Overlapper[1]);
-    TARGET_PTR_FROM_JSON(Overlapper[2]);
+    OBJECT_TARGET_PTR_FROM_JSON(OccupierPtr);
+    OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CellClass, Overlapper, ObjectClass);
     FIELD_FROM_JSON(IsMappedByPlayerMask);
     FIELD_FROM_JSON(IsVisibleByPlayerMask);
     FIELD_FROM_JSON_TO_VALUE(Flag, p.Flag.Composite);
