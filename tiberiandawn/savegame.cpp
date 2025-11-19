@@ -215,7 +215,7 @@ void SaveGameObjectHeaps::Read_Globals()
     //TemplatesHeap = Templates;
     //TerrainsHeap = Terrains;
     TeamTypesHeap = TeamTypes;
-    //TeamsHeap = Teams;
+    TeamsHeap = Teams;
     TriggersHeap = Triggers;
     UnitsHeap = Units;
 }
@@ -237,7 +237,7 @@ bool SaveGameObjectHeaps::Validate() const
         // { NAMEOF(TemplatesHeap), &TemplatesHeap },
         // { NAMEOF(TerrainsHeap), &TerrainsHeap },
         { NAMEOF(TeamTypesHeap), &TeamTypesHeap },
-        // { NAMEOF(TeamsHeap), &TeamsHeap },
+        { NAMEOF(TeamsHeap), &TeamsHeap },
         { NAMEOF(TriggersHeap), &TriggersHeap },
         { NAMEOF(UnitsHeap), &UnitsHeap }
     };

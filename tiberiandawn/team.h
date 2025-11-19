@@ -35,7 +35,9 @@
 #ifndef TEAM_H
 #define TEAM_H
 
+#include "common/json.h"
 #include "common/wwfile.h"
+
 #include "teamtype.h"
 #include "abstract.h"
 
@@ -102,6 +104,8 @@ public:
     ** units in its formation.
     */
     unsigned IsLagging : 1;
+
+    JSON_FUNCTIONS(TeamClass)
 
 private:
     /*
