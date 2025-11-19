@@ -35,6 +35,8 @@
 #ifndef FACTORY_H
 #define FACTORY_H
 
+#include "common/json.h"
+
 #include "stage.h"
 
 class FactoryClass : private StageClass
@@ -112,6 +114,8 @@ public:
     **	allocated.
     */
     unsigned IsActive : 1;
+
+    JSON_FUNCTIONS(FactoryClass)
 
 protected:
     int Cost_Per_Tick(void);

@@ -227,6 +227,8 @@ public:
 
     friend void to_json(nlohmann::json& j, const TFixedIHeapClass<T>& p)
     {
+        j = nlohmann::json::object();
+
         auto& mutable_p = const_cast<TFixedIHeapClass<T>&>(p);
 
         for (auto i = 0U; i < p.ActiveCount; i++) {

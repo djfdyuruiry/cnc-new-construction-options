@@ -207,7 +207,7 @@ void SaveGameObjectHeaps::Read_Globals()
     AircraftHeap = Aircraft;
     //BulletsHeap = Bullets;
     //BuildingsHeap = Buildings;
-    //FactoriesHeap = Factories;
+    FactoriesHeap = Factories;
     HousesHeap = Houses;
     //InfantryHeap = Infantry;
     //OverlaysHeap = Overlays;
@@ -229,7 +229,7 @@ bool SaveGameObjectHeaps::Validate() const
         { NAMEOF(AircraftHeap), &AircraftHeap },
         // { NAMEOF(BulletsHeap), &BulletsHeap },
         // { NAMEOF(BuildingsHeap), &BuildingsHeap },
-        // { NAMEOF(FactoriesHeap), &FactoriesHeap },
+        { NAMEOF(FactoriesHeap), &FactoriesHeap },
         { NAMEOF(HousesHeap), &HousesHeap },
         // { NAMEOF(InfantryHeap), &InfantryHeap },
         // { NAMEOF(OverlaysHeap), &OverlaysHeap },
@@ -239,7 +239,7 @@ bool SaveGameObjectHeaps::Validate() const
         { NAMEOF(TeamTypesHeap), &TeamTypesHeap },
         // { NAMEOF(TeamsHeap), &TeamsHeap },
         // { NAMEOF(TriggersHeap), &TriggersHeap },
-        // { NAMEOF(UnitsHeap), &UnitsHeap }
+        { NAMEOF(UnitsHeap), &UnitsHeap }
     };
 
     for (const auto& [name, heap_ptr] : heaps) {
@@ -270,7 +270,7 @@ bool SaveGameObjectHeaps::Write_Globals() const
     from_json(AircraftHeap, Aircraft);
     //Bullets = BulletsHeap;
     //Buildings = BuildingsHeap;
-    //Factories = FactoriesHeap;
+    from_json(FactoriesHeap, Factories);
     from_json(HousesHeap, Houses);
     //Infantry = InfantryHeap;
     //Overlays = OverlaysHeap;
@@ -280,7 +280,7 @@ bool SaveGameObjectHeaps::Write_Globals() const
     from_json(TeamTypesHeap, TeamTypes);
     //Teams = TeamsHeap;
     //Triggers = TriggersHeap;
-    //Units = UnitsHeap;
+    from_json(UnitsHeap, Units);
 
     return true;
 }
