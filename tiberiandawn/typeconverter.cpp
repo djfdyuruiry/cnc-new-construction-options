@@ -75,7 +75,8 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(RadioMessageType, "RADIO_",         RADIO_STATIC,      RADIO_ON_DEPOT,             {},                 {}),
     ENUM_TYPE_PAIR(CloakType,        "",               UNCLOAKED,         UNCLOAKING,                 {},                 {}),
     ENUM_TYPE_PAIR(FacingType,       "FACING_",        FACING_FIRST,      FACING_LAST,                {},                 {}),
-    ENUM_TYPE_PAIR(DoorStateType,    "",               IS_CLOSED,         IS_CLOSING,                 {},                 {})
+    ENUM_TYPE_PAIR(DoorStateType,     "",              IS_CLOSED,         IS_CLOSING,                 {},                 {}),
+    ENUM_TYPE_PAIR(KindType,          "KIND_",         KIND_NONE,         KIND_TEAMTYPE,              {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -140,6 +141,7 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(CloakType)
     RULE_VARIANT(FacingType)
     RULE_VARIANT(DoorStateType)
+    RULE_VARIANT(KindType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -189,6 +191,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(CloakType)
     CSV_RULE_VARIANT(FacingType)
     CSV_RULE_VARIANT(DoorStateType)
+    CSV_RULE_VARIANT(KindType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -237,8 +240,59 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(CloakType)
     TYPE_NAME_VARIANT(FacingType)
     TYPE_NAME_VARIANT(DoorStateType)
+    TYPE_NAME_VARIANT(KindType)
 
-    throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+    throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
+}
+
+#define TO_STRING_VARIANT(TYPE) if (std::holds_alternative<TYPE>(variant)) { \
+    return To_String<TYPE>(std::get<TYPE>(variant)); \
+}
+
+std::string TdTypeConverter::To_String_Variant(ConverterTypeVariant variant)
+{
+    TO_STRING_VARIANT(ArmorType)
+    TO_STRING_VARIANT(MPHType)
+    TO_STRING_VARIANT(WeaponType)
+    TO_STRING_VARIANT(HousesType)
+    TO_STRING_VARIANT(StructType)
+    TO_STRING_VARIANT(FactoryType)
+    TO_STRING_VARIANT(DirType)
+    TO_STRING_VARIANT(BSizeType)
+    TO_STRING_VARIANT(AircraftType)
+    TO_STRING_VARIANT(MissionType)
+    TO_STRING_VARIANT(AnimType)
+    TO_STRING_VARIANT(InfantryType)
+    TO_STRING_VARIANT(UnitType)
+    TO_STRING_VARIANT(SpeedType)
+    TO_STRING_VARIANT(BulletType)
+    TO_STRING_VARIANT(WarheadType)
+    TO_STRING_VARIANT(VocType)
+    TO_STRING_VARIANT(PlayerColorType)
+    TO_STRING_VARIANT(HouseColorType)
+    TO_STRING_VARIANT(DiffType)
+    TO_STRING_VARIANT(ScenarioDirType)
+    TO_STRING_VARIANT(ScenarioVarType)
+    TO_STRING_VARIANT(SourceType)
+    TO_STRING_VARIANT(RadarEnum)
+    TO_STRING_VARIANT(RTTIType)
+    TO_STRING_VARIANT(ZoneType)
+    TO_STRING_VARIANT(StateType)
+    TO_STRING_VARIANT(VoxType)
+    TO_STRING_VARIANT(MouseType)
+    TO_STRING_VARIANT(TheaterType)
+    TO_STRING_VARIANT(TemplateType)
+    TO_STRING_VARIANT(OverlayType)
+    TO_STRING_VARIANT(SmudgeType)
+    TO_STRING_VARIANT(LandType)
+    TO_STRING_VARIANT(TeamMissionType)
+    TO_STRING_VARIANT(RadioMessageType)
+    TO_STRING_VARIANT(CloakType)
+    TO_STRING_VARIANT(FacingType)
+    TO_STRING_VARIANT(DoorStateType)
+    TO_STRING_VARIANT(KindType)
+
+    throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
 
 nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(
@@ -258,19 +312,59 @@ nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(
     return target;
 }
 
+nlohmann::json TdTypeConverter::Techno_Type_Target_To_Json(const TechnoTypeClass* source)
+{
+    TechnoTypeClassJsonReference reference;
+
+    if (source == nullptr) {
+        reference.Kind = KIND_NONE;
+
+        return reference;
+    }
+
+    switch (const auto source_type = source->What_Am_I()) {
+        case RTTI_INFANTRYTYPE:
+            reference.Kind = KIND_INFANTRY;
+            reference.Instance = To_String(static_cast<const InfantryTypeClass*>(source)->Type);
+            break;
+
+        case RTTI_UNITTYPE:
+            reference.Kind = KIND_UNIT;
+            reference.Instance = To_String(static_cast<const UnitTypeClass*>(source)->Type);
+            break;
+
+        case RTTI_AIRCRAFTTYPE:
+            reference.Kind = KIND_AIRCRAFT;
+            reference.Instance = To_String(static_cast<const AircraftTypeClass*>(source)->Type);
+            break;
+
+        case RTTI_BUILDINGTYPE:
+            reference.Kind = KIND_BUILDING;
+            reference.Instance = To_String(static_cast<const BuildingTypeClass*>(source)->Type);
+            break;
+
+        default:
+            throw std::invalid_argument(
+                std::format("Unsupported TechnoTypeClass type: {}", To_String(source_type))
+            );
+    }
+
+    return reference;
+}
+
 nlohmann::json TdTypeConverter::Techno_Type_Target_Array_To_Json(
     const TechnoTypeClass* const* source,
     const unsigned int& length
 )
 {
-    std::vector<TARGET> elements;
-
+    nlohmann::json target;
     for (auto i = 0; i < length; i++) {
         const auto element = *(source + i);
 
-        elements.emplace_back(TECHNO_TYPE_PTR_TO_TARGET(element));
+        target.push_back(
+            Techno_Type_Target_To_Json(element)
+        );
     }
 
-    nlohmann::json target = elements;
     return target;
 }

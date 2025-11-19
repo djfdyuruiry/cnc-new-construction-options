@@ -116,6 +116,7 @@ set(TIBDAWN_SRC
     smudge.cpp
     sounddlg.cpp
     special.cpp
+    stage.cpp
     startup.cpp
     stats.cpp
     super.cpp
@@ -152,8 +153,8 @@ set(TIBDAWN_SRC
     lua/tdtypes_luaapi.cpp
     lua/ui_luaapi.cpp
     savegame.cpp
+    technotypejsonreference.cpp
     typeconverter.cpp
-        stage.cpp
 )
 
 # Generated code - see: ../cmake/NcoRules.cmake and ./rules

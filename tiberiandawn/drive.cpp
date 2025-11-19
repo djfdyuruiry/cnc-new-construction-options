@@ -2026,7 +2026,7 @@ TO_JSON(DriveClass)
 {
     BASE_CLASS_TO_JSON(FootClass);
 
-    TECHNO_TYPE_TARGET_PTR_TO_JSON(Class);
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
     FIELD_TO_JSON(SimLeptonX);
     FIELD_TO_JSON(SimLeptonY);
     FIELD_TO_JSON(Tiberium);

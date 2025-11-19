@@ -944,7 +944,7 @@ TO_JSON(TeamTypeClass)
     FIELD_TO_JSON(MissionList);
     FIELD_TO_JSON(ClassCount);
 
-    TECHNO_TYPE_TARGET_PTR_ARRAY_TO_JSON(Class);
+    TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON(Class);
 
     FIELD_TO_JSON(DesiredNum);
 }

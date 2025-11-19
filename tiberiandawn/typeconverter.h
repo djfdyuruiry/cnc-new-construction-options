@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include <optional>
 #include <stdexcept>
@@ -14,227 +13,12 @@
 #include "common/rulesections.h"
 #include "common/stringutils.h"
 
-#include "defines.h"
-#include "door.h"
-#include "teamtype.h"
-
-template<typename T>
-concept SupportedByTdTypeConverter = (
-    std::is_same_v<T, ArmorType> ||
-    std::is_same_v<T, MPHType> ||
-    std::is_same_v<T, WeaponType> ||
-    std::is_same_v<T, HousesType> ||
-    std::is_same_v<T, StructType> ||
-    std::is_same_v<T, FactoryType> ||
-    std::is_same_v<T, DirType> ||
-    std::is_same_v<T, BSizeType> ||
-    std::is_same_v<T, AircraftType> ||
-    std::is_same_v<T, MissionType> ||
-    std::is_same_v<T, AnimType> ||
-    std::is_same_v<T, InfantryType> ||
-    std::is_same_v<T, UnitType> ||
-    std::is_same_v<T, SpeedType> ||
-    std::is_same_v<T, BulletType> ||
-    std::is_same_v<T, WarheadType> ||
-    std::is_same_v<T, VocType> ||
-    std::is_same_v<T, PlayerColorType> ||
-    std::is_same_v<T, HouseColorType> ||
-    std::is_same_v<T, DiffType> ||
-    std::is_same_v<T, ScenarioDirType> ||
-    std::is_same_v<T, ScenarioVarType> ||
-    std::is_same_v<T, SourceType> ||
-    std::is_same_v<T, RadarEnum> ||
-    std::is_same_v<T, RTTIType> ||
-    std::is_same_v<T, ZoneType> ||
-    std::is_same_v<T, StateType> ||
-    std::is_same_v<T, VoxType> ||
-    std::is_same_v<T, MouseType> ||
-    std::is_same_v<T, TheaterType> ||
-    std::is_same_v<T, TemplateType> ||
-    std::is_same_v<T, OverlayType> ||
-    std::is_same_v<T, SmudgeType> ||
-    std::is_same_v<T, LandType> ||
-    std::is_same_v<T, TeamMissionType> ||
-    std::is_same_v<T, RadioMessageType> ||
-    std::is_same_v<T, CloakType> ||
-    std::is_same_v<T, FacingType> ||
-    std::is_same_v<T, DoorStateType>
-);
-
-// Matches the SupportedByTdTypeConverter Concept types
-using ConverterTypeVariant = std::variant<
-    ArmorType,
-    MPHType,
-    WeaponType,
-    HousesType,
-    StructType,
-    FactoryType,
-    DirType,
-    BSizeType,
-    AircraftType,
-    MissionType,
-    AnimType,
-    InfantryType,
-    UnitType,
-    SpeedType,
-    BulletType,
-    WarheadType,
-    VocType,
-    PlayerColorType,
-    HouseColorType,
-    DiffType,
-    ScenarioDirType,
-    ScenarioVarType,
-    SourceType,
-    RadarEnum,
-    RTTIType,
-    ZoneType,
-    StateType,
-    VoxType,
-    MouseType,
-    TheaterType,
-    TemplateType,
-    OverlayType,
-    SmudgeType,
-    LandType,
-    TeamMissionType,
-    RadioMessageType,
-    CloakType,
-    FacingType,
-    DoorStateType
->;
-
-#pragma region Target<-Ptr->Target Macros
-
-// Build target value for given pointer
-#define OBJECT_PTR_TO_TARGET(PTR) static_cast<TARGET>(PTR == nullptr ? 0 : PTR->As_Target())
-// Build techno target value for given pointer
-#define TECHNO_TYPE_PTR_TO_TARGET(PTR) static_cast<TARGET>(PTR == nullptr ? 0 : TechnoType_To_Target(PTR))
-
-// Convert target to a type compatible with a TYPE pointer address
-#define TARGET_TO_PTR_WITH_TYPE(TARGET, TYPE) reinterpret_cast<TYPE*>(static_cast<intptr_t>(TARGET))
-// Convert target to a type compatible with a ObjectClass pointer address
-#define OBJECT_TARGET_TO_PTR(TARGET) TARGET_TO_PTR_WITH_TYPE(TARGET, ObjectClass)
-// Convert target to a type compatible with a TechnoTypeClass pointer address
-#define TECHNO_TYPE_TARGET_TO_PTR(TARGET) TARGET_TO_PTR_WITH_TYPE(TARGET, TechnoTypeClass)
-
-#pragma endregion
-
-/**
- * Stores metadata about an enum type in Tiberian Dawn. Used to filter which values are exposed
- * in the Rule engine, Lua engine and INI rules. Patches enum names that don't match their INI
- * names (e.x. a Guard Tower is STRUCT_GTOWER, but is "GTWR" in INI files)
- */
-template <SupportedByTdTypeConverter T>
-class EnumTypeInfo final
-{
-public:
-    const std::string Prefix;
-    const T MinimumToInclude;
-    const T MaximumToInclude;
-    const TwoWayMap<T, std::string> PatchTable;
-    const std::vector<T> Excluded;
-
-    EnumTypeInfo(
-        const std::string_view& prefix,
-        const T& minimum_to_include,
-        const T& maximum_to_include,
-        const TwoWayMap<T, std::string>& patch_table = {},
-        const std::vector<T>& excluded = {}
-    ) : Prefix(prefix),
-        MinimumToInclude(minimum_to_include),
-        MaximumToInclude(maximum_to_include),
-        PatchTable(patch_table),
-        Excluded(excluded) {}
-
-    std::string Strip_Prefix(const std::string& subject) const
-    {
-        if (!subject.starts_with(Prefix)) {
-            return subject;
-        }
-
-        return subject.substr(Prefix.size());
-    }
-
-    std::string Strip_Prefix(const std::string_view& subject) const
-    {
-        return Strip_Prefix(std::string(subject));
-    }
-
-    bool Is_Excluded(const T& instance) const
-    {
-        if (instance < MinimumToInclude || instance > MaximumToInclude) {
-            return true;
-        }
-
-        return std::find(Excluded.begin(), Excluded.end(), instance) != Excluded.end();
-    }
-
-    std::optional<std::string> Get_Patch_String(const T& instance) const
-    {
-        auto result = PatchTable[instance];
-
-        if (!result.has_value()) {
-            return std::nullopt;
-        }
-
-        return std::string(*result);
-    }
-
-    std::optional<T> Get_Patch_Instance(const std::string& subject) const
-    {
-        auto result = PatchTable[subject];
-
-        if (!result.has_value()) {
-            return std::nullopt;
-        }
-
-        return *result;
-    }
-};
-
-// Allows template type EnumTypeInfo to be stored in stl container
-using EnumTypeInfoVariant = std::variant<
-    EnumTypeInfo<ArmorType>,
-    EnumTypeInfo<MPHType>,
-    EnumTypeInfo<WeaponType>,
-    EnumTypeInfo<HousesType>,
-    EnumTypeInfo<StructType>,
-    EnumTypeInfo<FactoryType>,
-    EnumTypeInfo<DirType>,
-    EnumTypeInfo<BSizeType>,
-    EnumTypeInfo<AircraftType>,
-    EnumTypeInfo<MissionType>,
-    EnumTypeInfo<AnimType>,
-    EnumTypeInfo<InfantryType>,
-    EnumTypeInfo<UnitType>,
-    EnumTypeInfo<SpeedType>,
-    EnumTypeInfo<BulletType>,
-    EnumTypeInfo<WarheadType>,
-    EnumTypeInfo<VocType>,
-    EnumTypeInfo<PlayerColorType>,
-    EnumTypeInfo<HouseColorType>,
-    EnumTypeInfo<DiffType>,
-    EnumTypeInfo<ScenarioDirType>,
-    EnumTypeInfo<ScenarioVarType>,
-    EnumTypeInfo<SourceType>,
-    EnumTypeInfo<RadarEnum>,
-    EnumTypeInfo<RTTIType>,
-    EnumTypeInfo<ZoneType>,
-    EnumTypeInfo<StateType>,
-    EnumTypeInfo<VoxType>,
-    EnumTypeInfo<MouseType>,
-    EnumTypeInfo<TheaterType>,
-    EnumTypeInfo<TemplateType>,
-    EnumTypeInfo<OverlayType>,
-    EnumTypeInfo<SmudgeType>,
-    EnumTypeInfo<LandType>,
-    EnumTypeInfo<TeamMissionType>,
-    EnumTypeInfo<RadioMessageType>,
-    EnumTypeInfo<CloakType>,
-    EnumTypeInfo<FacingType>,
-    EnumTypeInfo<DoorStateType>
->;
+#include "enumtypeinfo.h"
+#include "target.h"
+#include "technotypejsonreference.h"
+#include "type.h"
+#include "typevariants.h"
+#include "typeconvertermacros.h"
 
 /**
  * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.
@@ -530,6 +314,8 @@ public:
      */
     static std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant);
 
+    static std::string To_String_Variant(ConverterTypeVariant variant);
+
     // TODO: Ability to set default (if source doesn't contain the field)
     template<SupportedByTdTypeConverter T>
     static bool Load_Field_From_Json(
@@ -647,6 +433,8 @@ public:
         const unsigned int& length
     );
 
+    static nlohmann::json Techno_Type_Target_To_Json(const TechnoTypeClass* source);
+
     static nlohmann::json Techno_Type_Target_Array_To_Json(
         const TechnoTypeClass* const* source,
         const unsigned int& length
@@ -684,9 +472,99 @@ public:
         }
 
         for (auto i = 0; i < source.size(); i++) {
-            auto element = *(target + i);
+            auto& element = *(target + i);
             element = OBJECT_TARGET_TO_PTR(source.at(i).get<TARGET>());
         }
+    }
+
+    template<class T>
+    requires std::is_base_of_v<TechnoTypeClass, T>
+    static TARGET Techno_Type_Target_From_Json_Reference(
+        const nlohmann::json& source,
+        const std::string& json_path
+    )
+    {
+        if (!source.object()) {
+            CNC_LOGGER_ERROR(
+                "Invalid {} JSON value - expected object, actual type: {}",
+                json_path,
+                source.type_name()
+            );
+
+            return 0;
+        }
+
+        const TechnoTypeClassJsonReference reference = source;
+
+        switch (reference.Kind) {
+            case KIND_NONE:
+                return Build_Target(reference.Kind, 0);
+
+            case KIND_INFANTRY:
+                if (
+                    const auto infantry = Try_Parse<InfantryType>(reference.Instance);
+                    infantry.has_value()
+                ) {
+                    return Build_Target(reference.Kind, *infantry);
+                }
+
+            case KIND_UNIT:
+                if (
+                    const auto unit = Try_Parse<UnitType>(reference.Instance);
+                    unit.has_value()
+                ) {
+                    return Build_Target(reference.Kind, *unit);
+                }
+
+
+            case KIND_AIRCRAFT:
+                if (
+                    const auto aircraft = Try_Parse<AircraftType>(reference.Instance);
+                    aircraft.has_value()
+                ) {
+                    return Build_Target(reference.Kind, *aircraft);
+                }
+
+            case KIND_BUILDING:
+                if (
+                    const auto building = Try_Parse<StructType>(reference.Instance);
+                    building.has_value()
+                ) {
+                    return Build_Target(reference.Kind, *building);
+                }
+
+            default:
+                CNC_LOGGER_ERROR(
+                    "Invalid {} JSON value - unsupported Kind type: {}",
+                    json_path,
+                    To_String(reference.Kind)
+                );
+                return 0;
+        }
+
+        CNC_LOGGER_ERROR(
+            "Invalid {} JSON value - unable to parse Instance as a {}",
+            json_path,
+            To_String(reference.Kind)
+        );
+        return 0;
+    }
+
+    template<class T>
+    requires std::is_base_of_v<TechnoTypeClass, T>
+    static void Techno_Type_Target_From_Json(
+        const nlohmann::json& source,
+        std::string_view target_name,
+        std::string_view field_name,
+        T*& target
+    )
+    {
+        const auto json_path = std::format("{}.{}", target_name, field_name);
+
+        target = TARGET_TO_PTR_WITH_TYPE(
+            Techno_Type_Target_From_Json_Reference<T>(source, json_path),
+            T
+        );
     }
 
     template<class T>
@@ -721,8 +599,13 @@ public:
         }
 
         for (auto i = 0; i < source.size(); i++) {
-            auto element = *(target + i);
-            element = TECHNO_TYPE_TARGET_TO_PTR(source.at(i).get<TARGET>());
+            const auto sub_json_path = std::format("{}[{}]", json_path, i);
+
+            auto& element = *(target + i);
+            element = TARGET_TO_PTR_WITH_TYPE(
+                Techno_Type_Target_From_Json_Reference<T>(source.at(i), sub_json_path),
+                T
+            );
         }
     }
 private:
@@ -731,97 +614,4 @@ private:
     static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
 
     TdTypeConverter() = delete;
-};
-
-#pragma region IniRuleContext Macros
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
-#define Read_With_TdConverter(TYPE, VAR) \
-    Get_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](const auto& v) { VAR = v; })
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
-#define Read_Csv_With_TdConverter(TYPE, VAR) \
-    Get_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](auto v) { VAR = std::move(v); })
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
-#define Load_With_TdConverter(TYPE, VAR) \
-    Load_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](const auto& v) { VAR = v; })
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
-#define Load_Csv_With_TdConverter(TYPE, VAR) \
-    Load_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = std::move(v); })
-
-#pragma endregion
-
-#pragma region JSON Macros
-
-// Store target value for ObjectTypeClass pointer in JSON field
-#define OBJECT_TARGET_PTR_TO_JSON(FIELD) FIELD_VALUE_TO_JSON(FIELD, OBJECT_PTR_TO_TARGET(p.FIELD))
-// Store target value for TechnoTypeClass pointer in JSON field
-#define TECHNO_TYPE_TARGET_PTR_TO_JSON(FIELD) FIELD_VALUE_TO_JSON(FIELD, TECHNO_TYPE_PTR_TO_TARGET(p.FIELD))
-// Store target values for array of ObjectTypeClass pointer memory addresses in JSON array
-#define OBJECT_TARGET_PTR_ARRAY_TO_JSON(FIELD) \
-    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Object_Target_Array_To_Json(p.FIELD, std::size(p.FIELD)));
-// Store target values for array of TechnoTypeClass pointer memory addresses in JSON array
-#define TECHNO_TYPE_TARGET_PTR_ARRAY_TO_JSON(FIELD) \
-    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Techno_Type_Target_Array_To_Json(p.FIELD, std::size(p.FIELD)));
-
-// Load target value from JSON into pointer memory address
-#define TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = TARGET_TO_PTR_WITH_TYPE(j.at(#FIELD).get<TARGET>(), TYPE)
-// Load target value from JSON into pointer memory address
-#define TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) \
-    ((TYPE const*&)p.FIELD) = TARGET_TO_PTR_WITH_TYPE(j.at(#FIELD).get<TARGET>(), TYPE)
-// Load target value for ObjectTypeClass into pointer memory address
-#define OBJECT_TARGET_PTR_FROM_JSON(FIELD) TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, ObjectClass)
-// Load target value for TechnoTypeClass into pointer memory address
-#define TECHNO_TYPE_TARGET_PTR_FROM_JSON(FIELD) TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TechnoTypeClass)
-// Load target values for array of ObjectTypeClass pointer memory addresses
-#define OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Object_Target_Array_From_Json<TYPE>(j.at(#FIELD), #CLASS, #FIELD, p.FIELD, std::size(p.FIELD))
-// Load target values for array of TechnoTypeClass pointer memory addresses
-#define TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Techno_Type_Target_Array_From_Json<TYPE>( \
-        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, std::size(p.FIELD) \
-    )
-
-// Convert TD type field to string and store in JSON object, actual field value can be any expression
-// (e.g. fetch Type enum value from pointer object)
-#define CONVERT_TD_FIELD_VALUE_TO_JSON(FIELD, VALUE) \
-    CONVERT_FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_String, VALUE)
-
-// Convert TD type field to string and store in JSON object
-#define CONVERT_TD_FIELD_TO_JSON(FIELD) CONVERT_FIELD_TO_JSON(FIELD, TdTypeConverter::To_String)
-// Convert TD type array to csv string and store in JSON object
-#define CONVERT_TD_ARRAY_FIELD_TO_JSON(FIELD, TYPE) \
-    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::To_Csv_String(p.FIELD, std::size(p.FIELD)))
-
-// Parse TD type field from JSON string
-#define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v; })
-// Parse TD type field from JSON string
-#define PARSE_TD_ARRAY_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Load_Csv_Field_From_Json<TYPE>(j, #CLASS, #FIELD, std::size(p.FIELD), p.FIELD)
-
-#pragma endregion
-
-template<class T, class U>
-requires std::is_base_of_v<TechnoTypeClass, T> && SupportedByTdTypeConverter<U>
-class TechnoTypeClassReference
-{
-    RTTIType Type;
-    U Instance;
-
-
-
-    TO_JSON(TechnoTypeClassReference)
-    {
-        CONVERT_TD_FIELD_TO_JSON(Type);
-        CONVERT_TD_FIELD_TO_JSON(Instance);
-    }
-
-    FROM_JSON(TechnoTypeClassReference)
-    {
-        PARSE_TD_FIELD_FROM_JSON(TechnoTypeClassReference, Type, RTTIType);
-        PARSE_TD_FIELD_FROM_JSON(TechnoTypeClassReference, Instance, U);
-    }
 };

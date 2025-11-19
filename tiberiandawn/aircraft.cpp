@@ -3574,7 +3574,7 @@ TO_JSON(AircraftClass)
     BASE_CLASS_TO_JSON(FootClass);
     BASE_CLASS_TO_JSON(FlyClass);
 
-    TECHNO_TYPE_TARGET_PTR_TO_JSON(Class);
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
     FIELD_TO_JSON(SecondaryFacing);
     BITFIELD_TO_JSON(IsLanding);
     BITFIELD_TO_JSON(IsTakingOff);
@@ -3592,7 +3592,7 @@ FROM_JSON(AircraftClass)
     BASE_CLASS_FROM_JSON(FootClass);
     BASE_CLASS_FROM_JSON(FlyClass);
 
-    TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(Class, AircraftTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(AircraftType, Class, AircraftTypeClass);
     FIELD_FROM_JSON(SecondaryFacing);
     BITFIELD_FROM_JSON(IsLanding);
     BITFIELD_FROM_JSON(IsTakingOff);
