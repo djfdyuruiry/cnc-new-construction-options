@@ -60,6 +60,7 @@
 #include "terrain.h"
 #include "common/irandom.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 #define BARNACLE_STAGE       22
 #define FIRST_SPORE_STAGE    30
@@ -857,3 +858,18 @@ void TerrainClass::Write_INI(CCINIClass& ini)
         }
     }
 }
+
+TO_JSON(TerrainClass)
+{
+    BASE_CLASS_TO_JSON(ObjectClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+}
+
+FROM_JSON(TerrainClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TerrainClass, Class, TerrainTypeClass);
+}
+

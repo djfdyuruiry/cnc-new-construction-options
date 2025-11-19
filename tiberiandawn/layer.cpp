@@ -154,3 +154,13 @@ int LayerClass::Sorted_Add(ObjectClass const* const object)
     ActiveCount++;
     return (true);
 }
+
+TO_JSON(LayerClass)
+{
+    BASE_CLASS_TO_JSON(DynamicVectorClass<ObjectClass*>);
+}
+
+FROM_JSON(LayerClass)
+{
+    BASE_CLASS_FROM_JSON(DynamicVectorClass<ObjectClass*>);
+}

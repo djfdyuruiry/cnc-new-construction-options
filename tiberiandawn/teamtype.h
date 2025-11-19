@@ -83,7 +83,7 @@ typedef struct TeamMissionTag
     int Argument;
 } TeamMissionStruct;
 
-STRUCT_JSON_FUNCTIONS(TeamMissionTag)
+GLOBAL_JSON_FUNCTIONS(TeamMissionTag)
 
 /*
 **	TeamTypeClass declaration

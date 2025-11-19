@@ -446,12 +446,12 @@ public:
     static const fixed _3_4;
     static const fixed _2_3;
 
-    friend void to_json(nlohmann::json& j, const fixed& p)
+    friend TO_JSON(fixed)
     {
         j = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&p.Data));
     }
 
-    friend void from_json(const nlohmann::json& j, fixed& p)
+    friend FROM_JSON(fixed)
     {
         FixedData data;
         data.Raw = j.get<uint32_t>();

@@ -168,3 +168,15 @@ FROM_JSON(AbstractClass)
     BITFIELD_FROM_JSON(IsActive);
     BITFIELD_FROM_JSON(IsRecentlyCreated);
 }
+
+PTR_TO_JSON(AbstractClass)
+{
+    j = Build_Target(KIND_NONE, 0);
+}
+
+PTR_FROM_JSON(AbstractClass)
+{
+    if (p != nullptr) {
+        *p = TARGET_TO_PTR_WITH_TYPE(j.get<TARGET>(), AbstractClass);
+    }
+}

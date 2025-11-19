@@ -1745,3 +1745,15 @@ FROM_JSON(ObjectClass)
     TARGET_PTR_FROM_JSON_WITH_TYPE(Trigger, TriggerClass);
     FIELD_FROM_JSON(Strength);
 }
+
+PTR_TO_JSON(ObjectClass)
+{
+    j = OBJECT_PTR_TO_TARGET(p);
+}
+
+PTR_FROM_JSON(ObjectClass)
+{
+    if (p != nullptr) {
+        *p = OBJECT_TARGET_TO_PTR(j.get<TARGET>());
+    }
+}

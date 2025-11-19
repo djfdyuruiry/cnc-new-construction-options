@@ -35,6 +35,8 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
+#include "common/json.h"
+
 #include "layer.h"
 
 /***********************************************************************************************
@@ -53,5 +55,7 @@ public:
     ** Added. ST - 8/19/2019 5:46PM
     */
     void Clear_Recently_Created_Bits(void);
+
+    JSON_FUNCTIONS(LogicClass);
 };
 #endif

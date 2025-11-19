@@ -48,6 +48,7 @@
 #include "template.h"
 #include "tile.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 /***********************************************************************************************
  * TemplateClass::Validate -- validates template pointer													  *
@@ -370,4 +371,18 @@ TemplateClass::TemplateClass(TemplateType type, CELL pos)
     if (pos != -1) {
         Unlimbo(Cell_Coord(pos));
     }
+}
+
+TO_JSON(TemplateClass)
+{
+    BASE_CLASS_TO_JSON(ObjectClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+}
+
+FROM_JSON(TemplateClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TemplateClass, Class, TemplateTypeClass);
 }

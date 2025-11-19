@@ -225,7 +225,7 @@ public:
         return (index >= 0 && index < Length()) ? (T*)((*this)[index]) : NULL;
     };
 
-    friend void to_json(nlohmann::json& j, const TFixedIHeapClass<T>& p)
+    friend TO_JSON(TFixedIHeapClass<T>)
     {
         j = nlohmann::json::object();
 
@@ -239,7 +239,7 @@ public:
         }
     }
 
-    friend void from_json(const nlohmann::json& j, TFixedIHeapClass<T>& p)
+    friend FROM_JSON(TFixedIHeapClass<T>)
     {
         for (const auto& [key, val] : j.items()) {
             const auto id = std::stoi(key);

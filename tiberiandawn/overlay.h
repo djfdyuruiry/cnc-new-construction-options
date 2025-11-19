@@ -35,6 +35,8 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
 
+#include "common/json.h"
+
 #include "object.h"
 #include "type.h"
 
@@ -106,6 +108,8 @@ public:
     **	Dee-buggin' support.
     */
     int Validate(void) const;
+
+    JSON_FUNCTIONS(OverlayClass)
 
 private:
     /*

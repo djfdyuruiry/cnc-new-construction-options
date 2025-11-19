@@ -263,6 +263,7 @@ public:
     virtual void Move(FacingType);
 
     JSON_FUNCTIONS(ObjectClass)
+    JSON_PTR_FUNCTIONS(ObjectClass)
 };
 
 #endif

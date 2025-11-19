@@ -200,8 +200,6 @@ bool SaveGameScenarioState::Write_Globals() const
 #pragma region SaveGameObjectHeaps
 void SaveGameObjectHeaps::Read_Globals()
 {
-    // TODO: remaining heaps
-
     // see globals.cpp for heap declarations
     AnimsHeap = Anims;
     AircraftHeap = Aircraft;
@@ -210,10 +208,10 @@ void SaveGameObjectHeaps::Read_Globals()
     FactoriesHeap = Factories;
     HousesHeap = Houses;
     InfantryHeap = Infantry;
-    //OverlaysHeap = Overlays;
-    //SmudgesHeap = Smudges;
-    //TemplatesHeap = Templates;
-    //TerrainsHeap = Terrains;
+    OverlaysHeap = Overlays;
+    SmudgesHeap = Smudges;
+    TemplatesHeap = Templates;
+    TerrainsHeap = Terrains;
     TeamTypesHeap = TeamTypes;
     TeamsHeap = Teams;
     TriggersHeap = Triggers;
@@ -232,10 +230,10 @@ bool SaveGameObjectHeaps::Validate() const
         { NAMEOF(FactoriesHeap), &FactoriesHeap },
         { NAMEOF(HousesHeap), &HousesHeap },
         { NAMEOF(InfantryHeap), &InfantryHeap },
-        // { NAMEOF(OverlaysHeap), &OverlaysHeap },
-        // { NAMEOF(SmudgesHeap), &SmudgesHeap },
-        // { NAMEOF(TemplatesHeap), &TemplatesHeap },
-        // { NAMEOF(TerrainsHeap), &TerrainsHeap },
+        { NAMEOF(OverlaysHeap), &OverlaysHeap },
+        { NAMEOF(SmudgesHeap), &SmudgesHeap },
+        { NAMEOF(TemplatesHeap), &TemplatesHeap },
+        { NAMEOF(TerrainsHeap), &TerrainsHeap },
         { NAMEOF(TeamTypesHeap), &TeamTypesHeap },
         { NAMEOF(TeamsHeap), &TeamsHeap },
         { NAMEOF(TriggersHeap), &TriggersHeap },
@@ -266,20 +264,20 @@ bool SaveGameObjectHeaps::Write_Globals() const
         return false;
     }
 
-    //Anims = AnimsHeap;
+    from_json(AnimsHeap, Anims);
     from_json(AircraftHeap, Aircraft);
-    //Bullets = BulletsHeap;
-    //Buildings = BuildingsHeap;
+    from_json(BulletsHeap, Aircraft);
+    from_json(BuildingsHeap, Buildings);
     from_json(FactoriesHeap, Factories);
     from_json(HousesHeap, Houses);
-    //Infantry = InfantryHeap;
-    //Overlays = OverlaysHeap;
-    //Smudges = SmudgesHeap;
-    //Templates = TemplatesHeap;
-    //Terrains = TerrainsHeap;
+    from_json(InfantryHeap, Infantry);
+    from_json(OverlaysHeap, Overlays);
+    from_json(SmudgesHeap, Smudges);
+    from_json(TemplatesHeap, Templates);
+    from_json(TerrainsHeap, Terrains);
     from_json(TeamTypesHeap, TeamTypes);
-    //Teams = TeamsHeap;
-    //Triggers = TriggersHeap;
+    from_json(TeamsHeap, Teams);
+    from_json(TriggersHeap, Triggers);
     from_json(UnitsHeap, Units);
 
     return true;
@@ -291,13 +289,12 @@ void SaveGame::Read_Globals()
 {
     Header.Read_Globals();
     ScenarioState.Read_Globals();
-
-    GameMap = Map;
-
     Objects.Read_Globals();
 
+    GameMap = Map;
+    GameLogic = Logic;
+
     // TODO: BaseClass
-    // TODO: LogicClass
     // TODO: LayerClass
     // TODO: ScoreClass
 }
@@ -319,7 +316,16 @@ bool SaveGame::Validate() const
         );
     }
 
-    // TODO: Validate Layers, AiBase, Logic, Score
+    if (!GameLogic.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json object expected, actual type: {}",
+            NAMEOF(GameLogic),
+            GameMap.type_name()
+        );
+    }
+
+    // TODO: Validate Layers, AiBase, Score
 
     return result;
 }
@@ -330,15 +336,15 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
-    auto result = Header.Write_Globals() &&
+    const auto result = Header.Write_Globals() &&
         ScenarioState.Write_Globals() &&
         Objects.Write_Globals();
 
     Map = GameMap;
 
-    // TODO: Write SaveGame Globals
+    from_json(GameLogic, Logic);
 
-    // TODO: Call Decode_Pointers after everything imported into Globals
+    // TODO: Write Layers, AiBase, Score
 
     PlayerPtr = HouseClass::As_Pointer(
         Header.Parse_Player_House_Type()

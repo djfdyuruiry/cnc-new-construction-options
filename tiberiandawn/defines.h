@@ -1393,7 +1393,8 @@ typedef enum TerrainType : signed char
     TERRAIN_ROCK7,
 
     TERRAIN_COUNT,
-    TERRAIN_FIRST = 0
+    TERRAIN_FIRST = 0,
+    TERRAIN_LAST = TERRAIN_ROCK7
 } TerrainType;
 
 // inline TerrainType operator++(TerrainType &, int);

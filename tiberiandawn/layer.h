@@ -35,6 +35,8 @@
 #ifndef LAYER_H
 #define LAYER_H
 
+#include "common/json.h"
+
 #include "vector.h"
 
 class ObjectClass;
@@ -60,6 +62,8 @@ public:
     bool Save(FileClass& file);
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
+
+    JSON_FUNCTIONS(LayerClass)
 };
 
 #endif

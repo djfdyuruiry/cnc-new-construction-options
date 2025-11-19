@@ -167,6 +167,7 @@ public:
     }
 
     JSON_FUNCTIONS(AbstractClass)
+    JSON_PTR_FUNCTIONS(AbstractClass)
 };
 
 #endif

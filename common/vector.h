@@ -96,19 +96,53 @@ public:
     virtual int ID(T const* ptr); // Pointer based identification.
     virtual int ID(T const& ptr); // Value based identification.
 
-    friend void to_json(nlohmann::json& j, const VectorClass<T>& p)
+    friend TO_JSON(VectorClass<T>)
     {
-        j = nlohmann::json::array();
+        auto _items = nlohmann::json::array();
 
         for (auto i = 0U; i < p.Length(); i++) {
-            j[i] = p[i];
+            nlohmann::json item;
+
+            if constexpr (std::is_pointer<T>()) {
+                if (p[i] != nullptr) {
+                    to_json(item, p[i]);
+                }
+            } else {
+                to_json(item, p[i]);
+            }
+
+            _items[i] = item;
         }
+
+        j.emplace(NAMEOF(_items), _items);
     }
 
-    friend void from_json(const nlohmann::json& j, VectorClass<T>& p)
+    friend FROM_JSON(VectorClass<T>)
     {
+        if (!j.contains(NAMEOF(_items))) {
+            CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(_items));
+        }
+
+        auto _items = j.at(NAMEOF(_items));
+
+        if (!_items.is_array()) {
+            CNC_LOG_ERROR(
+                "Invalid JSON value {}, array expected - actual type: {}",
+                NAMEOF(_items),
+                _items.type_name()
+            );
+        }
+
         for (auto i = 0U; i < j.size(); i++) {
-            from_json(j[i], p[i]);
+            if constexpr (std::is_pointer<T>()) {
+                if (!_items[i].is_null()) {
+                    from_json(_items[i], &p[i]);
+                } else {
+                    _items[i] = nullptr;
+                }
+            } else {
+                from_json(_items[i], p[i]);
+            }
         }
     }
 protected:
@@ -193,6 +227,21 @@ public:
     };
     virtual int ID(T const& ptr);
 
+    friend TO_JSON(DynamicVectorClass<T>)
+    {
+        BASE_CLASS_TO_JSON(VectorClass<T>);
+
+        FIELD_TO_JSON(ActiveCount);
+        FIELD_TO_JSON(GrowthStep);
+    }
+
+    friend FROM_JSON(DynamicVectorClass<T>)
+    {
+        BASE_CLASS_FROM_JSON(VectorClass<T>);
+
+        FIELD_FROM_JSON(ActiveCount);
+        FIELD_FROM_JSON(GrowthStep);
+    }
 protected:
     /*
     **	This is a count of the number of active objects in this
@@ -739,6 +788,13 @@ VectorClass<T>::VectorClass(unsigned size, T const* array)
         } else {
             Vector = new T[size];
             IsAllocated = true;
+
+            if constexpr(std::is_pointer<T>()) {
+                // we are storing pointers, so ensure all are initialised
+                for (auto i = 0; i < size; i++) {
+                    Vector[i] = nullptr;
+                }
+            }
         }
     }
 }
@@ -957,6 +1013,13 @@ template <class T> int VectorClass<T>::Resize(unsigned newsize, T const* array)
         T* newptr;
         if (!array) {
             newptr = new T[newsize];
+
+            if constexpr(std::is_pointer<T>()) {
+                // we are storing pointers, so ensure all are initialised
+                for (auto i = 0; i < newsize; i++) {
+                    newptr[i] = nullptr;
+                }
+            }
         } else {
             newptr = new ((void*)array) T[newsize];
         }

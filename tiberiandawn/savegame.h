@@ -155,8 +155,8 @@ public:
 
     SaveGameObjectHeaps Objects;
 
+    nlohmann::json GameLogic;
     nlohmann::json AiBase;
-    nlohmann::json Logic;
     nlohmann::json Score;
 
     void Read_Globals();
@@ -169,7 +169,7 @@ public:
         Header,
         GameMap,
         Objects,
-        Logic,
+        GameLogic,
         Layers,
         Score,
         AiBase,
