@@ -3,6 +3,7 @@
 #include "defines.h"
 #include "door.h"
 #include "teamtype.h"
+#include "trigger.h"
 
 template<typename T>
 concept SupportedByTdTypeConverter = (
@@ -45,7 +46,12 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, CloakType> ||
     std::is_same_v<T, FacingType> ||
     std::is_same_v<T, DoorStateType>||
-    std::is_same_v<T, KindType>
+    std::is_same_v<T, KindType> ||
+    std::is_same_v<T, DoType> ||
+    std::is_same_v<T, BStateType> ||
+    std::is_same_v<T, EventType> ||
+    std::is_same_v<T, TriggerClass::ActionType> ||
+    std::is_same_v<T, TriggerClass::PersistantType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -89,5 +95,10 @@ using ConverterTypeVariant = std::variant<
     CloakType,
     FacingType,
     DoorStateType,
-    KindType
+    KindType,
+    DoType,
+    BStateType,
+    EventType,
+    TriggerClass::ActionType,
+    TriggerClass::PersistantType
 >;

@@ -35,6 +35,8 @@
 #ifndef ANIM_H
 #define ANIM_H
 
+#include "common/json.h"
+
 #include "type.h"
 
 /**********************************************************************************************
@@ -166,6 +168,8 @@ public:
     **	terminates.
     */
     char Loops;
+
+    JSON_FUNCTIONS(AnimClass)
 
 protected:
     void Middle(void);

@@ -121,5 +121,10 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<CloakType>,
     EnumTypeInfo<FacingType>,
     EnumTypeInfo<DoorStateType>,
-    EnumTypeInfo<KindType>
+    EnumTypeInfo<KindType>,
+    EnumTypeInfo<DoType>,
+    EnumTypeInfo<BStateType>,
+    EnumTypeInfo<EventType>,
+    EnumTypeInfo<TriggerClass::ActionType>,
+    EnumTypeInfo<TriggerClass::PersistantType>
 >;

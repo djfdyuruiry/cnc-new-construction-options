@@ -35,6 +35,8 @@
 #ifndef FUSE_H
 #define FUSE_H
 
+#include "common/json.h"
+
 /****************************************************************************
 **	The fuse is used by projectiles to determine whether detonation should
 **	occur. This is usually determined by tracking the distance to the
@@ -62,6 +64,8 @@ public:
     **	down. When it reaches zero, detonation occurs.
     */
     unsigned char Timer;
+
+    JSON_FUNCTIONS(FuseClass)
 
 private:
     /*

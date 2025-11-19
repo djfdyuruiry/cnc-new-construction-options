@@ -1592,7 +1592,8 @@ typedef enum DoType : signed char
     DO_PLEAD_DEATH,
 
     DO_COUNT,
-    DO_FIRST = 0
+    DO_FIRST = 0,
+    DO_LAST = 0
 } DoType;
 
 // inline DoType operator++(DoType &, int);

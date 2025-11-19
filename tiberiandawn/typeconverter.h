@@ -433,7 +433,7 @@ public:
         const unsigned int& length
     );
 
-    static nlohmann::json Techno_Type_Target_To_Json(const TechnoTypeClass* source);
+    static nlohmann::json Techno_Type_Target_To_Json(const ObjectTypeClass* source);
 
     static nlohmann::json Techno_Type_Target_Array_To_Json(
         const TechnoTypeClass* const* source,
@@ -478,80 +478,20 @@ public:
     }
 
     template<class T>
-    requires std::is_base_of_v<TechnoTypeClass, T>
-    static TARGET Techno_Type_Target_From_Json_Reference(
-        const nlohmann::json& source,
-        const std::string& json_path
-    )
+    requires SupportedByTdTypeConverter<T>
+    static std::optional<TARGET> Try_Convert_Techno_Type_Ref_To_Target(const TechnoTypeClassJsonReference& ref)
     {
-        if (!source.object()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected object, actual type: {}",
-                json_path,
-                source.type_name()
-            );
-
-            return 0;
+        if (const auto result = Try_Parse<T>(ref.Instance); result.has_value()) {
+            return Build_Target(ref.Kind, *result);
         }
 
-        const TechnoTypeClassJsonReference reference = source;
-
-        switch (reference.Kind) {
-            case KIND_NONE:
-                return Build_Target(reference.Kind, 0);
-
-            case KIND_INFANTRY:
-                if (
-                    const auto infantry = Try_Parse<InfantryType>(reference.Instance);
-                    infantry.has_value()
-                ) {
-                    return Build_Target(reference.Kind, *infantry);
-                }
-
-            case KIND_UNIT:
-                if (
-                    const auto unit = Try_Parse<UnitType>(reference.Instance);
-                    unit.has_value()
-                ) {
-                    return Build_Target(reference.Kind, *unit);
-                }
-
-
-            case KIND_AIRCRAFT:
-                if (
-                    const auto aircraft = Try_Parse<AircraftType>(reference.Instance);
-                    aircraft.has_value()
-                ) {
-                    return Build_Target(reference.Kind, *aircraft);
-                }
-
-            case KIND_BUILDING:
-                if (
-                    const auto building = Try_Parse<StructType>(reference.Instance);
-                    building.has_value()
-                ) {
-                    return Build_Target(reference.Kind, *building);
-                }
-
-            default:
-                CNC_LOGGER_ERROR(
-                    "Invalid {} JSON value - unsupported Kind type: {}",
-                    json_path,
-                    To_String(reference.Kind)
-                );
-                return 0;
-        }
-
-        CNC_LOGGER_ERROR(
-            "Invalid {} JSON value - unable to parse Instance as a {}",
-            json_path,
-            To_String(reference.Kind)
-        );
-        return 0;
+        return std::nullopt;
     }
 
+    static TARGET Techno_Type_Target_From_Json_Reference(const nlohmann::json& source, const std::string& json_path);
+
     template<class T>
-    requires std::is_base_of_v<TechnoTypeClass, T>
+    requires std::is_base_of_v<ObjectTypeClass, T>
     static void Techno_Type_Target_From_Json(
         const nlohmann::json& source,
         std::string_view target_name,
@@ -562,7 +502,7 @@ public:
         const auto json_path = std::format("{}.{}", target_name, field_name);
 
         target = TARGET_TO_PTR_WITH_TYPE(
-            Techno_Type_Target_From_Json_Reference<T>(source, json_path),
+            Techno_Type_Target_From_Json_Reference(source, json_path),
             T
         );
     }
@@ -603,7 +543,7 @@ public:
 
             auto& element = *(target + i);
             element = TARGET_TO_PTR_WITH_TYPE(
-                Techno_Type_Target_From_Json_Reference<T>(source.at(i), sub_json_path),
+                Techno_Type_Target_From_Json_Reference(source.at(i), sub_json_path),
                 T
             );
         }

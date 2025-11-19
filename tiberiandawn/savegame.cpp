@@ -203,20 +203,20 @@ void SaveGameObjectHeaps::Read_Globals()
     // TODO: remaining heaps
 
     // see globals.cpp for heap declarations
-    //AnimsHeap = Anims;
+    AnimsHeap = Anims;
     AircraftHeap = Aircraft;
-    //BulletsHeap = Bullets;
-    //BuildingsHeap = Buildings;
+    BulletsHeap = Bullets;
+    BuildingsHeap = Buildings;
     FactoriesHeap = Factories;
     HousesHeap = Houses;
-    //InfantryHeap = Infantry;
+    InfantryHeap = Infantry;
     //OverlaysHeap = Overlays;
     //SmudgesHeap = Smudges;
     //TemplatesHeap = Templates;
     //TerrainsHeap = Terrains;
     TeamTypesHeap = TeamTypes;
     //TeamsHeap = Teams;
-    //TriggersHeap = Triggers;
+    TriggersHeap = Triggers;
     UnitsHeap = Units;
 }
 
@@ -225,20 +225,20 @@ bool SaveGameObjectHeaps::Validate() const
     auto result = true;
 
     std::map<std::string_view, const nlohmann::json*> heaps = {
-        // { NAMEOF(AnimsHeap), &AnimsHeap },
+        { NAMEOF(AnimsHeap), &AnimsHeap },
         { NAMEOF(AircraftHeap), &AircraftHeap },
-        // { NAMEOF(BulletsHeap), &BulletsHeap },
-        // { NAMEOF(BuildingsHeap), &BuildingsHeap },
+        { NAMEOF(BulletsHeap), &BulletsHeap },
+        { NAMEOF(BuildingsHeap), &BuildingsHeap },
         { NAMEOF(FactoriesHeap), &FactoriesHeap },
         { NAMEOF(HousesHeap), &HousesHeap },
-        // { NAMEOF(InfantryHeap), &InfantryHeap },
+        { NAMEOF(InfantryHeap), &InfantryHeap },
         // { NAMEOF(OverlaysHeap), &OverlaysHeap },
         // { NAMEOF(SmudgesHeap), &SmudgesHeap },
         // { NAMEOF(TemplatesHeap), &TemplatesHeap },
         // { NAMEOF(TerrainsHeap), &TerrainsHeap },
         { NAMEOF(TeamTypesHeap), &TeamTypesHeap },
         // { NAMEOF(TeamsHeap), &TeamsHeap },
-        // { NAMEOF(TriggersHeap), &TriggersHeap },
+        { NAMEOF(TriggersHeap), &TriggersHeap },
         { NAMEOF(UnitsHeap), &UnitsHeap }
     };
 

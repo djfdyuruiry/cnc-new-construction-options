@@ -35,6 +35,8 @@
 #ifndef BUILDING_H
 #define BUILDING_H
 
+#include "common/json.h"
+
 #include "ftimer.h"
 #include "tarcom.h"
 #include "radio.h"
@@ -322,6 +324,8 @@ public:
     virtual void Set_Unselected_By_Player(HouseClass * player = NULL) override;
     TARGET Target_For_Rally_Point() const;
     bool Rally_Unit(FootClass& unit);
+
+    JSON_FUNCTIONS(BuildingClass)
 
 private:
     void Drop_Debris(TARGET source = TARGET_NONE);

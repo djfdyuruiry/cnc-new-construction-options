@@ -80,6 +80,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 int const InfantryClass::HumanShape[32] = {0, 0, 7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4,
                                            4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0};
@@ -3311,4 +3312,35 @@ bool InfantryClass::Is_Infantry(void) const
 {
     Validate();
     return (true);
+}
+
+TO_JSON(InfantryClass)
+{
+    BASE_CLASS_TO_JSON(FootClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+    CONVERT_TD_FIELD_TO_JSON(Doing);
+    FIELD_TO_JSON(Comment);
+    BITFIELD_TO_JSON(IsTechnician);
+    BITFIELD_TO_JSON(IsStoked);
+    BITFIELD_TO_JSON(IsProne);
+    BITFIELD_TO_JSON(IsBoxing);
+    FIELD_TO_JSON(StopDriverFrame);
+    FIELD_TO_JSON(Fear);
+}
+
+FROM_JSON(InfantryClass)
+{
+    BASE_CLASS_FROM_JSON(FootClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(InfantryClass, Class, InfantryTypeClass);
+    PARSE_TD_FIELD_FROM_JSON(InfantryClass, Doing, DoType);
+    FIELD_FROM_JSON(Comment);
+    BITFIELD_FROM_JSON(IsTechnician);
+    BITFIELD_FROM_JSON(IsStoked);
+    BITFIELD_FROM_JSON(IsProne);
+    BITFIELD_FROM_JSON(IsBoxing);
+    FIELD_FROM_JSON(StopDriverFrame);
+    FIELD_FROM_JSON(Fear);
+
 }

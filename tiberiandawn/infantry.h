@@ -35,6 +35,8 @@
 #ifndef INFANTRY_H
 #define INFANTRY_H
 
+#include "common/json.h"
+
 /**********************************************************************
 **	Infantry can be afraid. These defines are for the various infantry
 **	fear levels. When infantry be come scared enough they take cover and
@@ -254,6 +256,7 @@ public:
     */
     static int const HumanShape[32];
 
+    JSON_FUNCTIONS(InfantryClass)
 private:
     static DoStruct const MasterDoControls[DO_COUNT];
 

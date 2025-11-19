@@ -35,6 +35,8 @@
 #ifndef TRIGGER_H
 #define TRIGGER_H
 
+#include "common/json.h"
+
 class CCINIClass;
 
 typedef enum EventType : signed char
@@ -73,7 +75,8 @@ typedef enum EventType : signed char
     EVENT_BUILD,                // If specified building has been built.
 
     EVENT_COUNT,
-    EVENT_FIRST = 0
+    EVENT_FIRST = 0,
+    EVENT_LAST = EVENT_BUILD
 } EventType;
 
 class TriggerClass
@@ -107,7 +110,8 @@ public:
         ACTION_LUA_SCRIPT,     // Runs a lua script file.
 
         ACTION_COUNT,
-        ACTION_FIRST = 0
+        ACTION_FIRST = 0,
+        ACTION_LAST = ACTION_LUA_SCRIPT
     } ActionType;
 
     typedef enum PersistantType
@@ -272,6 +276,8 @@ public:
     int DataCopy;
 
     std::optional<std::string> StringData;
+
+    JSON_FUNCTIONS(TriggerClass)
 
 private:
     static inline const auto& Logger = CncLogger::For(TriggerClass);

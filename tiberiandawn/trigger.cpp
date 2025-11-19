@@ -1480,3 +1480,33 @@ static void Do_All_To_Hunt(void)
         }
     }
 }
+
+TO_JSON(TriggerClass)
+{
+    OBJECT_TARGET_PTR_TO_JSON(Team);
+    BITFIELD_TO_JSON(IsActive);
+    CONVERT_TD_FIELD_TO_JSON(IsPersistant);
+    FIELD_TO_JSON(AttachCount);
+    CONVERT_TD_FIELD_TO_JSON(Event);
+    CONVERT_TD_FIELD_TO_JSON(Action);
+    CONVERT_TD_FIELD_TO_JSON(House);
+    FIELD_TO_JSON(Data);
+    FIELD_TO_JSON(DataCopy);
+    FIELD_TO_JSON(StringData);
+    FIELD_TO_JSON(Name);
+}
+
+FROM_JSON(TriggerClass)
+{
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Team, TeamTypeClass);
+    BITFIELD_FROM_JSON(IsActive);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, IsPersistant, TriggerClass::PersistantType);
+    FIELD_FROM_JSON(AttachCount);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, Event, EventType);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, Action, TriggerClass::ActionType);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, House, HousesType);
+    FIELD_FROM_JSON(Data);
+    FIELD_FROM_JSON(DataCopy);
+    FIELD_FROM_JSON(StringData);
+    FIELD_FROM_JSON(Name);
+}
