@@ -98,6 +98,8 @@ public:
 
     friend void to_json(nlohmann::json& j, const VectorClass<T>& p)
     {
+        j = nlohmann::json::array();
+
         for (auto i = 0U; i < p.Length(); i++) {
             j[i] = p[i];
         }

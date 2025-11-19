@@ -300,15 +300,14 @@ nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(
     const unsigned int& length
 )
 {
-    std::vector<TARGET> elements;
+    nlohmann::json target = nlohmann::json::array();
 
     for (auto i = 0; i < length; i++) {
         const auto element = *(source + i);
 
-        elements.emplace_back(OBJECT_PTR_TO_TARGET(element));
+        target.emplace_back(OBJECT_PTR_TO_TARGET(element));
     }
 
-    nlohmann::json target = elements;
     return target;
 }
 
@@ -357,7 +356,8 @@ nlohmann::json TdTypeConverter::Techno_Type_Target_Array_To_Json(
     const unsigned int& length
 )
 {
-    nlohmann::json target;
+    nlohmann::json target = nlohmann::json::array();
+
     for (auto i = 0; i < length; i++) {
         const auto element = *(source + i);
 
