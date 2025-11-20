@@ -46,6 +46,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 /***********************************************************************************************
  * BaseNodeClass::operator == -- equality operator                                             *
@@ -516,4 +517,28 @@ BaseNodeClass* BaseClass::Next_Buildable(StructType type)
     // routine is called.
 
     return (NULL);
+}
+
+TO_JSON(BaseNodeClass)
+{
+    CONVERT_TD_FIELD_TO_JSON(Type);
+    FIELD_TO_JSON(Coord);
+}
+
+FROM_JSON(BaseNodeClass)
+{
+    PARSE_TD_FIELD_FROM_JSON(BaseNodeClass, Type, StructType);
+    FIELD_FROM_JSON(Coord);
+}
+
+TO_JSON(BaseClass)
+{
+    FIELD_TO_JSON(Nodes);
+    CONVERT_TD_FIELD_TO_JSON(House);
+}
+
+FROM_JSON(BaseClass)
+{
+    FIELD_FROM_JSON(Nodes);
+    PARSE_TD_FIELD_FROM_JSON(BaseClass, House, HousesType);
 }

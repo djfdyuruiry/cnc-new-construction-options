@@ -384,6 +384,17 @@ public:
         return Collection[context];
     }
 
+    friend TO_JSON(DynamicVectorArrayClass)
+    {
+        FIELD_TO_JSON(Collection);
+        FIELD_TO_JSON(Active);
+    }
+
+    friend FROM_JSON(DynamicVectorArrayClass)
+    {
+        FIELD_FROM_JSON(Collection);
+        FIELD_FROM_JSON(Active);
+    }
 private:
     DynamicVectorClass<T> Collection[COUNT];
     int Active;

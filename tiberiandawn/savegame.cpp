@@ -77,24 +77,9 @@ void SaveGameScenarioState::Read_Globals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
-    SelectedObjects = {};
-
-    for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
-        DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
-        const auto count = selection.Count();
-        std::vector<TARGET> selectedObjectsEntry;
-
-        for (auto j = 0; j < count; j++) {
-            selectedObjectsEntry.emplace_back(selection[j]->As_Target());
-        }
-
-        SelectedObjects.emplace_back(selectedObjectsEntry);
-    }
-
-    Waypoints = {};
-    Waypoints.assign(Scen.Waypoint, Scen.Waypoint + std::size(Scen.Waypoint));
-    Views = {};
-    Views.assign(Scen.Views, Scen.Views + std::size(Scen.Views));
+    SelectedObjects = CurrentObject;
+    Waypoints = Scen.Waypoint;
+    Views = Scen.Views;
 }
 
 bool SaveGameScenarioState::Validate() const
@@ -149,6 +134,49 @@ bool SaveGameScenarioState::Validate() const
         result = false;
     }
 
+    if (!TdTypeConverter::Try_Parse<DiffType>(AiDifficulty).has_value()) {
+        CNC_LOGGER_ERROR("Unable to parse ScenarioState.AiDifficulty save game value: {}", AiDifficulty);
+        result = false;
+    }
+
+    if (!SelectedObjects.is_object()) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.SelectedObjects save game value, expected object - actual type: {}",
+            SelectedObjects.type_name()
+        );
+        result = false;
+    }
+
+    if (!Waypoints.is_array()) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.Waypoints save game value, expected array - actual type: {}",
+            SelectedObjects.type_name()
+        );
+        result = false;
+    } else if (Waypoints.size() > std::size(Scen.Waypoint)) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.Waypoints save game value, expected an array with max {} elements - actual size: {}",
+            std::size(Scen.Waypoint),
+            SelectedObjects.size()
+        );
+        result = false;
+    }
+
+    if (!Views.is_array()) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.Views save game value, expected array - actual type: {}",
+            SelectedObjects.type_name()
+        );
+        result = false;
+    } else if (Views.size() > std::size(Scen.Views)) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.Views save game value, expected an array with max {} elements - actual size: {}",
+            std::size(Scen.Views),
+            SelectedObjects.size()
+        );
+        result = false;
+    }
+
     return result;
 }
 
@@ -183,15 +211,11 @@ bool SaveGameScenarioState::Write_Globals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
-    for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
-        DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
-        for (const auto& entry : SelectedObjects.at(i)) {
-            selection.Add(reinterpret_cast<ObjectClass*>(static_cast<intptr_t>(entry)));
-        }
-    }
 
-    std::ranges::copy(Waypoints, Scen.Waypoint);
-    std::ranges::copy(Views, Scen.Views);
+
+    from_json(SelectedObjects, CurrentObject);
+    from_json(Waypoints, Scen.Waypoint);
+    from_json(Views, Scen.Views);
 
     return true;
 }
@@ -293,10 +317,9 @@ void SaveGame::Read_Globals()
 
     GameMap = Map;
     GameLogic = Logic;
-
-    // TODO: BaseClass
-    // TODO: LayerClass
-    // TODO: ScoreClass
+    Layers = DisplayClass::Layer;
+    AiBase = Base;
+    GameScore = Score;
 }
 
 bool SaveGame::Validate() const
@@ -321,11 +344,44 @@ bool SaveGame::Validate() const
         CNC_LOGGER_ERROR(
             "Invalid {} save game value - json object expected, actual type: {}",
             NAMEOF(GameLogic),
-            GameMap.type_name()
+            GameLogic.type_name()
         );
     }
 
-    // TODO: Validate Layers, AiBase, Score
+    if (!Layers.is_array()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json array expected, actual type: {}",
+            NAMEOF(Layers),
+            Layers.type_name()
+        );
+    } else if (Layers.size() > std::size(DisplayClass::Layer)) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json array with max size {} expected, actual size: {}",
+            NAMEOF(Layers),
+            std::size(DisplayClass::Layer),
+            Layers.size()
+        );
+    }
+
+    if (!AiBase.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json object expected, actual type: {}",
+            NAMEOF(AiBase),
+            AiBase.type_name()
+        );
+    }
+
+    if (!GameScore.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json object expected, actual type: {}",
+            NAMEOF(GameScore),
+            GameScore.type_name()
+        );
+    }
 
     return result;
 }
@@ -343,8 +399,11 @@ bool SaveGame::Write_Globals() const
     Map = GameMap;
 
     from_json(GameLogic, Logic);
+    from_json(Layers, DisplayClass::Layer);
+    from_json(AiBase, Base);
+    from_json(GameScore, Score);
 
-    // TODO: Write Layers, AiBase, Score
+    // TODO: Decode ptrs
 
     PlayerPtr = HouseClass::As_Pointer(
         Header.Parse_Player_House_Type()

@@ -33,6 +33,8 @@
 #ifndef BASE_H
 #define BASE_H
 
+#include "common/json.h"
+
 /****************************************************************************
 ** This class defines one "node" in the pre-built base list.  Each node
 ** contains a type of building to build, and the COORD to build it at.
@@ -47,6 +49,8 @@ public:
 
     StructType Type;
     COORDINATE Coord;
+
+    JSON_FUNCTIONS(BaseNodeClass);
 };
 
 /****************************************************************************
@@ -127,6 +131,8 @@ public:
     ** This is the house this base belongs to.
     */
     HousesType House;
+
+    JSON_FUNCTIONS(BaseClass);
 };
 
 #endif

@@ -53,9 +53,9 @@ public:
     bool HasTempleBeenHitWithIonCannon;
     int AreThingiesEnabledFlag;
 
-    std::vector<std::vector<TARGET>> SelectedObjects;
-    std::vector<CELL> Waypoints;
-    std::vector<CELL> Views;
+    nlohmann::json SelectedObjects;
+    nlohmann::json Waypoints;
+    nlohmann::json Views;
 
     void Read_Globals();
     bool Validate() const;
@@ -149,15 +149,13 @@ class SaveGame
 public:
     SaveGameHeader Header;
     SaveGameScenarioState ScenarioState;
-
-    nlohmann::json GameMap;
-    std::vector<nlohmann::json> Layers;
-
     SaveGameObjectHeaps Objects;
 
+    nlohmann::json GameMap;
     nlohmann::json GameLogic;
+    nlohmann::json Layers;
     nlohmann::json AiBase;
-    nlohmann::json Score;
+    nlohmann::json GameScore;
 
     void Read_Globals();
     bool Validate() const;
@@ -167,13 +165,13 @@ public:
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame,
         Header,
+        ScenarioState,
         GameMap,
         Objects,
         GameLogic,
         Layers,
-        Score,
-        AiBase,
-        ScenarioState
+        GameScore,
+        AiBase
     )
 
 private:
