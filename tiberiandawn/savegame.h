@@ -148,6 +148,7 @@ private:
     static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
 };
 
+// TODO: DLLSave logic clone for remastered support
 // TODO: Lua state save and restore (what does this look like? API for scripters to flag values as persisting?)
 class SaveGame
 {
@@ -161,6 +162,8 @@ public:
     nlohmann::json Layers;
     nlohmann::json AiBase;
     nlohmann::json GameScore;
+
+    static bool From_File(const std::string& path, SaveGame& output);
 
     void Read_Globals();
     bool Validate() const;

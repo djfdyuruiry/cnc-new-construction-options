@@ -35,6 +35,8 @@
 #ifndef BFIOFILE_H
 #define BFIOFILE_H
 
+#include <string>
+
 #include "rawfile.h"
 
 /*
@@ -61,6 +63,7 @@ public:
     virtual int Seek(int pos, int dir = SEEK_CUR);
     virtual int Size(void);
     virtual int Write(void const* buffer, int size);
+    virtual int Write(const std::string& str);
     virtual void Close(void);
 
     enum

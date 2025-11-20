@@ -4,6 +4,8 @@
 #include "savegame.h"
 #include "typeconverter.h"
 
+#include <fstream>
+
 #pragma region SaveGameHeader
 void SaveGameHeader::Read_Globals()
 {
@@ -353,6 +355,28 @@ bool SaveGameObjectHeaps::Write_Globals() const
 #pragma endregion
 
 #pragma region SaveGame
+bool SaveGame::From_File(const std::string& path, SaveGame& output)
+{
+    std::string full_path;
+
+    if (CDFileClass file; !file.Open(path.c_str(), READ)) {
+        CNC_LOGGER_ERROR("Failed to open JSON save game file");
+        file.Close();
+        return false;
+    } else {
+        full_path = std::string(file.File_Name());
+        file.Close();
+    }
+
+    auto save_file_stream = std::ifstream(full_path);
+    const auto save_json = nlohmann::json::parse(save_file_stream);
+
+    output = save_json.get<SaveGame>();
+
+    return true;
+}
+
+
 void SaveGame::Read_Globals()
 {
     Header.Read_Globals();
@@ -436,17 +460,42 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
+    Clear_Scenario();
+
     const auto result = Header.Write_Globals() &&
         ScenarioState.Write_Globals() &&
         Objects.Write_Globals();
 
+    // Map
+    Map.Free_Cells();
+    Map.Alloc_Cells();
+
     from_json(GameMap, reinterpret_cast<MouseClass&>(Map));
+
+    if (Map.Theater != LastTheater) {
+        Reset_Theater_Shapes();
+    }
+
+    Map.Init_Theater(Map.Theater);
+    TerrainTypeClass::Init(Map.Theater);
+    TemplateTypeClass::Init(Map.Theater);
+    OverlayTypeClass::Init(Map.Theater);
+    UnitTypeClass::Init(Map.Theater);
+    InfantryTypeClass::Init(Map.Theater);
+    BuildingTypeClass::Init(Map.Theater);
+    BulletTypeClass::Init(Map.Theater);
+    AnimTypeClass::Init(Map.Theater);
+    AircraftTypeClass::Init(Map.Theater);
+    SmudgeTypeClass::Init(Map.Theater);
+
+    LastTheater = Map.Theater;
+
     from_json(GameLogic, Logic);
     from_json(Layers, DisplayClass::Layer);
     from_json(AiBase, Base);
     from_json(GameScore, Score);
 
-    // TODO: Decode ptrs
+    Decode_All_Pointers();
 
     PlayerPtr = HouseClass::As_Pointer(
         Header.Parse_Player_House_Type()
