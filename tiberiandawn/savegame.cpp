@@ -9,6 +9,7 @@ void SaveGameHeader::Read_Globals()
 {
     ScenarioID = Scen.Scenario;
     PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
+    PlayerType = TdTypeConverter::To_String(ScenPlayer);
 }
 
 bool SaveGameHeader::Validate() const
@@ -22,6 +23,11 @@ bool SaveGameHeader::Validate() const
 
     if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
         CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<ScenarioPlayerType>(PlayerType).has_value()) {
+        CNC_LOGGER_ERROR("Invalid Header.PlayerType save game value: {}", PlayerType);
         result = false;
     }
 
@@ -42,13 +48,18 @@ bool SaveGameHeader::Write_Globals() const
 
 HousesType SaveGameHeader::Parse_Player_House_Type() const
 {
-    const auto house = TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType);
+    return TdTypeConverter::Assert_Parse<HousesType>(
+        PlayerHouseType,
+        "Attempted to parse invalid Header.PlayerHouse save game value: {}"
+    );
+}
 
-    if (!house.has_value()) {
-        CNC_LOGGER_FATAL("Attempted to parse invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
-    }
-
-    return *house;
+ScenarioPlayerType SaveGameHeader::Parse_Player_Type() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioPlayerType>(
+        PlayerType,
+        "Attempted to parse invalid Header.PlayerType save game value: {}"
+    );
 }
 
 #pragma endregion
@@ -180,6 +191,22 @@ bool SaveGameScenarioState::Validate() const
     return result;
 }
 
+ScenarioDirType SaveGameScenarioState::Parse_Scenario_Direction() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioDirType>(
+        ScenarioDirection,
+        "Attempted to parse invalid ScenarioState.ScenarioDirection save game value: {}"
+    );
+}
+
+ScenarioVarType SaveGameScenarioState::Parse_Scenario_Variation() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioVarType>(
+        ScenarioVariation,
+        "Attempted to parse invalid ScenarioState.ScenarioVariation save game value: {}"
+    );
+}
+
 bool SaveGameScenarioState::Write_Globals() const
 {
     if (!Validate()) {
@@ -211,11 +238,28 @@ bool SaveGameScenarioState::Write_Globals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
-
-
     from_json(SelectedObjects, CurrentObject);
     from_json(Waypoints, Scen.Waypoint);
     from_json(Views, Scen.Views);
+
+    if (!CncStringUtils::Is_Blank(ScenarioFileName)) {
+        // TODO: Could change this to save the rules cache/RulesClass instance and rehydrate it (portable rules + preservation)
+        if (CCFileClass ini_file(ScenarioFileName.c_str()); ini_file.Is_Available()) {
+            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
+                Rule.Init(ini);
+                Rule.Init_Types(ini);
+            } else {
+                CNC_LOG_ERROR(
+                    "Failed to load scenario INI filename stored in save game JSON: {}",
+                    Scen.FileName
+                );
+            }
+        } else {
+            CNC_LOG_WARN("Scenario INI file recorded in save game JSON was not found: {}");
+        }
+    } else {
+        CNC_LOG_DEBUG("No scenario INI filename found in save game JSON");
+    }
 
     return true;
 }
@@ -396,8 +440,7 @@ bool SaveGame::Write_Globals() const
         ScenarioState.Write_Globals() &&
         Objects.Write_Globals();
 
-    Map = GameMap;
-
+    from_json(GameMap, reinterpret_cast<MouseClass&>(Map));
     from_json(GameLogic, Logic);
     from_json(Layers, DisplayClass::Layer);
     from_json(AiBase, Base);

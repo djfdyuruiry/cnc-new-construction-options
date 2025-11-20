@@ -739,6 +739,7 @@ typedef enum ScenarioPlayerEnum : signed char
     SCEN_PLAYER_MPLAYER,
     SCEN_PLAYER_COUNT,
     SCEN_PLAYER_FIRST = 0,
+    SCEN_PLAYER_LAST = SCEN_PLAYER_MPLAYER
 } ScenarioPlayerType;
 
 // inline ScenarioPlayerType operator++(ScenarioPlayerType &, int);

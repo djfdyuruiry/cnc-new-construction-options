@@ -74,7 +74,7 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(TeamMissionType,              "TMISSION_",    TMISSION_NONE,                          TMISSION_LAST,                            {},                 {}),
     ENUM_TYPE_PAIR(RadioMessageType,             "RADIO_",       RADIO_STATIC,                           RADIO_ON_DEPOT,                           {},                 {}),
     ENUM_TYPE_PAIR(CloakType,                    "",             UNCLOAKED,                              UNCLOAKING,                               {},                 {}),
-    ENUM_TYPE_PAIR(FacingType,                   "FACING_",      FACING_FIRST,                           FACING_LAST,                              {},                 {}),
+    ENUM_TYPE_PAIR(FacingType,                   "FACING_",      FACING_NONE,                            FACING_LAST,                              {},                 {}),
     ENUM_TYPE_PAIR(DoorStateType,                "IS_",          IS_CLOSED,                              IS_CLOSING,                               {},                 {}),
     ENUM_TYPE_PAIR(KindType,                     "KIND_",        KIND_NONE,                              KIND_TEAMTYPE,                            {},                 {}),
     ENUM_TYPE_PAIR(DoType,                       "DO_",          DO_NOTHING,                             DO_PLEAD_DEATH,                           {},                 {}),
@@ -82,7 +82,8 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(EventType,                    "EVENT_",       EVENT_NONE,                             EVENT_LAST,                               {},                 {}),
     ENUM_TYPE_PAIR(TriggerClass::ActionType,     "ACTION_",      TriggerClass::ActionType::ACTION_NONE,  TriggerClass::ActionType::ACTION_LAST,    {},                 {}),
     ENUM_TYPE_PAIR(TriggerClass::PersistantType, "",             TriggerClass::PersistantType::VOLATILE, TriggerClass::PersistantType::PERSISTANT, {},                 {}),
-    ENUM_TYPE_PAIR(TerrainType,                  "TERRAIN_",     TERRAIN_NONE,                           TERRAIN_LAST,                             {},                 {})
+    ENUM_TYPE_PAIR(TerrainType,                  "TERRAIN_",     TERRAIN_NONE,                           TERRAIN_LAST,                             {},                 {}),
+    ENUM_TYPE_PAIR(ScenarioPlayerType,           "SCEN_PLAYER_", SCEN_PLAYER_NONE,                       SCEN_PLAYER_LAST,                         {},                 {})
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
@@ -154,6 +155,7 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(TriggerClass::ActionType)
     RULE_VARIANT(TriggerClass::PersistantType)
     RULE_VARIANT(TerrainType)
+    RULE_VARIANT(ScenarioPlayerType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -210,6 +212,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(TriggerClass::ActionType)
     CSV_RULE_VARIANT(TriggerClass::PersistantType)
     CSV_RULE_VARIANT(TerrainType)
+    CSV_RULE_VARIANT(ScenarioPlayerType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -265,6 +268,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(TriggerClass::ActionType)
     TYPE_NAME_VARIANT(TriggerClass::PersistantType)
     TYPE_NAME_VARIANT(TerrainType)
+    TYPE_NAME_VARIANT(ScenarioPlayerType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -321,6 +325,7 @@ std::string TdTypeConverter::To_String_Variant(ConverterTypeVariant variant)
     TO_STRING_VARIANT(TriggerClass::ActionType)
     TO_STRING_VARIANT(TriggerClass::PersistantType)
     TO_STRING_VARIANT(TerrainType)
+    TO_STRING_VARIANT(ScenarioPlayerType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }

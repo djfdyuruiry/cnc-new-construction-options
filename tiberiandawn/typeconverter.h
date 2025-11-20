@@ -186,6 +186,21 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
+    static T Assert_Parse(const std::string& str, const std::string& assert_message)
+    {
+        const auto result = TdTypeConverter::Try_Parse<T>(str);
+
+        if (!result.has_value()) {
+            CNC_LOGGER_FATAL(
+                std::vformat(assert_message, std::make_format_args(str))
+            );
+        }
+
+        return *result;
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
     static T Get_Default_Value()
     {
         return Get_Type_Map<T>().First_Forward();

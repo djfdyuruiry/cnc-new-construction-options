@@ -2,12 +2,12 @@
 
 #include <map>
 #include <string>
-#include <vector>
 
 #include "common/json.h"
 #include "common/logger.h"
 
 #include "defines.h"
+#include "externs.h"
 
 class SaveGameHeader
 {
@@ -15,6 +15,7 @@ public:
     std::string Version;
     int ScenarioID;
     std::string PlayerHouseType;
+    std::string PlayerType;
     std::string Description;
 
     void Read_Globals();
@@ -22,6 +23,7 @@ public:
     bool Write_Globals() const;
 
     HousesType Parse_Player_House_Type() const;
+    ScenarioPlayerType Parse_Player_Type() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, Description)
 
@@ -59,6 +61,8 @@ public:
 
     void Read_Globals();
     bool Validate() const;
+    ScenarioDirType Parse_Scenario_Direction() const;
+    ScenarioVarType Parse_Scenario_Variation() const;
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
