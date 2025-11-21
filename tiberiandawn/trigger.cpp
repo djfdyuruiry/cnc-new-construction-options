@@ -1493,7 +1493,7 @@ TO_JSON(TriggerClass)
     FIELD_TO_JSON(Data);
     FIELD_TO_JSON(DataCopy);
     FIELD_TO_JSON(StringData);
-    FIELD_TO_JSON(Name);
+    CSTR_FIELD_TO_JSON(Name);
 }
 
 FROM_JSON(TriggerClass)
@@ -1508,5 +1508,15 @@ FROM_JSON(TriggerClass)
     FIELD_FROM_JSON(Data);
     FIELD_FROM_JSON(DataCopy);
     FIELD_FROM_JSON(StringData);
-    FIELD_FROM_JSON(Name);
+    CSTR_FIELD_FROM_JSON(TriggerClass, Name);
+}
+
+PTR_TO_JSON(TriggerClass)
+{
+    j = OBJECT_PTR_TO_TARGET(p);
+}
+
+PTR_FROM_JSON(TriggerClass)
+{
+    p = TARGET_TO_PTR_WITH_TYPE(j.get<TARGET>(), TriggerClass);
 }

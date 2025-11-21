@@ -1753,7 +1753,5 @@ PTR_TO_JSON(ObjectClass)
 
 PTR_FROM_JSON(ObjectClass)
 {
-    if (p != nullptr) {
-        *p = OBJECT_TARGET_TO_PTR(j.get<TARGET>());
-    }
+    p = OBJECT_TARGET_TO_PTR(j.get<TARGET>());
 }

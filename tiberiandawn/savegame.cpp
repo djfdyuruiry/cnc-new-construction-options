@@ -337,7 +337,7 @@ bool SaveGameObjectHeaps::Write_Globals() const
 
     from_json(AnimsHeap, Anims);
     from_json(AircraftHeap, Aircraft);
-    from_json(BulletsHeap, Aircraft);
+    from_json(BulletsHeap, Bullets);
     from_json(BuildingsHeap, Buildings);
     from_json(FactoriesHeap, Factories);
     from_json(HousesHeap, Houses);
@@ -384,6 +384,8 @@ void SaveGame::Read_Globals()
     ScenarioState.Read_Globals();
     Objects.Read_Globals();
 
+    GameCellTriggers = CellTriggers;
+    GameHouseTriggers = HouseTriggers;
     GameMap = Map;
     GameLogic = Logic;
     Layers = DisplayClass::Layer;
@@ -398,6 +400,32 @@ bool SaveGame::Validate() const
     result = Header.Validate() && result;
     result = ScenarioState.Validate() && result;
     result = Objects.Validate() && result;
+
+    if (!GameCellTriggers.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json object expected, actual type: {}",
+            NAMEOF(GameCellTriggers),
+            GameCellTriggers.type_name()
+        );
+    }
+
+    if (!GameHouseTriggers.is_array()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json array expected, actual type: {}",
+            NAMEOF(GameHouseTriggers),
+            GameHouseTriggers.type_name()
+        );
+    } else if (GameHouseTriggers.size() != std::size(HouseTriggers)) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json array with max size of {} expected, actual length: {}",
+            NAMEOF(GameHouseTriggers),
+            std::size(HouseTriggers),
+            GameHouseTriggers.size()
+        );
+    }
 
     if (!GameMap.is_object()) {
         result = false;
@@ -427,7 +455,7 @@ bool SaveGame::Validate() const
     } else if (Layers.size() > std::size(DisplayClass::Layer)) {
         result = false;
         CNC_LOGGER_ERROR(
-            "Invalid {} save game value - json array with max size {} expected, actual size: {}",
+            "Invalid {} save game value - json array with max size of {} expected, actual size: {}",
             NAMEOF(Layers),
             std::size(DisplayClass::Layer),
             Layers.size()
@@ -467,6 +495,10 @@ bool SaveGame::Write_Globals() const
         ScenarioState.Write_Globals() &&
         Objects.Write_Globals();
 
+    // Cell/House triggers
+    from_json(GameCellTriggers, CellTriggers);
+    from_json(GameHouseTriggers, HouseTriggers);
+
     // Map
     Map.Free_Cells();
     Map.Alloc_Cells();
@@ -495,6 +527,8 @@ bool SaveGame::Write_Globals() const
     from_json(Layers, DisplayClass::Layer);
     from_json(AiBase, Base);
     from_json(GameScore, Score);
+
+    PlayerPtr = HouseClass::As_Pointer(Header.Parse_Player_House_Type());
 
     Decode_All_Pointers();
 

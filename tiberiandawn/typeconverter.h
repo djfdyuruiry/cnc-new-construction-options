@@ -426,7 +426,7 @@ public:
             return false;
         }
 
-        if (!parse_result->size() != expected_length) {
+        if (parse_result->size() != expected_length) {
             CNC_LOGGER_ERROR(
                 "Invalid {} JSON value - expected csv of {} {} instances, actual length: {}",
                 json_path,

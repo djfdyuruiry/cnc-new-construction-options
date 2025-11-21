@@ -981,9 +981,8 @@ inline bool Sim_Percent_Chance(int percent)
 #ifdef CHEAT_KEYS
 #define Check_Ptr(ptr, file, line)                                                                                     \
     {                                                                                                                  \
-        if (!ptr) {                                                                                                    \
-            Mono_Clear_Screen();                                                                                       \
-            Mono_Printf("NULL Pointer, Module:%s, line:%d!\n", file, line);                                            \
+        if (!(ptr)) {                                                                                                  \
+            CNC_LOG_ERROR("NULL Pointer detected, aborting program!");                                                 \
             Prog_End();                                                                                                \
             exit(EXIT_SUCCESS);                                                                                        \
         }                                                                                                              \

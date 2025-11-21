@@ -8649,7 +8649,7 @@ FROM_JSON(HouseClass)
         NAMEOF(HouseClass),
         NAMEOF(Class),
         [&](const auto& h) {
-            const_cast<HouseTypeClass const*&>(p.Class) = &HouseTypeClass::As_Reference(h);
+            const_cast<HouseTypeClass const*&>(p.Class) = reinterpret_cast<HouseTypeClass const*>(h);
         }
     );
 }

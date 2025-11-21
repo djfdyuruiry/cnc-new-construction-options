@@ -101,17 +101,11 @@ public:
         auto _items = nlohmann::json::array();
 
         for (auto i = 0U; i < p.Length(); i++) {
-            nlohmann::json item;
+            nlohmann::json element;
 
-            if constexpr (std::is_pointer<T>()) {
-                if (p[i] != nullptr) {
-                    to_json(item, p[i]);
-                }
-            } else {
-                to_json(item, p[i]);
-            }
+            to_json(element, p.Vector[i]);
 
-            _items[i] = item;
+            _items[i] = element;
         }
 
         j.emplace(NAMEOF(_items), _items);
@@ -121,6 +115,7 @@ public:
     {
         if (!j.contains(NAMEOF(_items))) {
             CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(_items));
+            return;
         }
 
         auto _items = j.at(NAMEOF(_items));
@@ -131,18 +126,14 @@ public:
                 NAMEOF(_items),
                 _items.type_name()
             );
+            return;
         }
 
-        for (auto i = 0U; i < j.size(); i++) {
-            if constexpr (std::is_pointer<T>()) {
-                if (!_items[i].is_null()) {
-                    from_json(_items[i], &p[i]);
-                } else {
-                    _items[i] = nullptr;
-                }
-            } else {
-                from_json(_items[i], p[i]);
-            }
+        p.Clear();
+        p.Resize(_items.size());
+
+        for (auto i = 0U; i < _items.size(); i++) {
+            from_json(_items[i], p.Vector[i]);
         }
     }
 protected:

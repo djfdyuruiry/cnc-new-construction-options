@@ -157,6 +157,9 @@ public:
     SaveGameScenarioState ScenarioState;
     SaveGameObjectHeaps Objects;
 
+    nlohmann::json GameCellTriggers;
+    nlohmann::json GameHouseTriggers;
+
     nlohmann::json GameMap;
     nlohmann::json GameLogic;
     nlohmann::json Layers;
@@ -174,12 +177,14 @@ public:
         SaveGame,
         Header,
         ScenarioState,
-        GameMap,
         Objects,
+        GameCellTriggers,
+        GameHouseTriggers,
+        GameMap,
         GameLogic,
         Layers,
-        GameScore,
-        AiBase
+        AiBase,
+        GameScore
     )
 
 private:

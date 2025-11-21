@@ -235,7 +235,9 @@ public:
             const auto ptr = mutable_p.Ptr(i);
             const auto id = std::format("{}", mutable_p.ID(ptr));
 
-            to_json(j[id], *ptr);
+            const auto& ref = *ptr;
+
+            to_json(j[id], ref);
         }
     }
 
@@ -243,7 +245,7 @@ public:
     {
         for (const auto& [key, val] : j.items()) {
             const auto id = std::stoi(key);
-
+v
             auto ptr = static_cast<T*>(p[id]);
             p.FreeFlag[id] = true;
             ++p.ActiveCount;
@@ -251,8 +253,10 @@ public:
 
             new (ptr) T(NoInitClass());
 
+            T& ref = *ptr;
+
             // TODO: Investigate if any further re-hydration required (code/decode logic)
-            from_json(val, *ptr);
+            from_json(val, ref);
         }
     }
 };

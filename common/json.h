@@ -34,22 +34,22 @@
     friend void from_json(const nlohmann::json& j, TYPE& p);
 
 // to_json/from_json friend functions shorthand (pointer types)
-# define JSON_PTR_FUNCTIONS(TYPE) friend void to_json(nlohmann::json& j, const TYPE* p); \
-    friend void from_json(const nlohmann::json& j, TYPE** p);
+# define JSON_PTR_FUNCTIONS(TYPE) friend void to_json(nlohmann::json& j, const TYPE* const& p); \
+    friend void from_json(const nlohmann::json& j, TYPE*& p);
 
 // to_json/from_json global functions shorthand (reference types)
 # define GLOBAL_JSON_FUNCTIONS(TYPE) void to_json(nlohmann::json& j, const TYPE& p); \
     void from_json(const nlohmann::json& j, TYPE& p);
 
 // to_json/from_json global functions shorthand (reference types)
-# define GLOBAL_JSON_PTR_FUNCTIONS(TYPE) void to_json(nlohmann::json& j, const TYPE* p); \
-    void from_json(const nlohmann::json& j, TYPE* p);
+# define GLOBAL_JSON_PTR_FUNCTIONS(TYPE) void to_json(nlohmann::json& j, const TYPE* const& p); \
+    void from_json(const nlohmann::json& j, TYPE*& p);
 
 #define TO_JSON(TYPE) void to_json(nlohmann::json& j, const TYPE& p)
 #define FROM_JSON(TYPE) void from_json(const nlohmann::json& j, TYPE& p)
 
-#define PTR_TO_JSON(TYPE) void to_json(nlohmann::json& j, const TYPE* p)
-#define PTR_FROM_JSON(TYPE) void from_json(const nlohmann::json& j, TYPE** p)
+#define PTR_TO_JSON(TYPE) void to_json(nlohmann::json& j, const TYPE* const& p)
+#define PTR_FROM_JSON(TYPE) void from_json(const nlohmann::json& j, TYPE*& p)
 
 #define BASE_CLASS_TO_JSON(CLASS) to_json(j, static_cast<const CLASS&>(p))
 #define BASE_CLASS_FROM_JSON(CLASS) from_json(j, static_cast<CLASS&>(p))

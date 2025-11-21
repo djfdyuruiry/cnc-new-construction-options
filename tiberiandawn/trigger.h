@@ -278,7 +278,7 @@ public:
     std::optional<std::string> StringData;
 
     JSON_FUNCTIONS(TriggerClass)
-
+    JSON_PTR_FUNCTIONS(TriggerClass)
 private:
     static inline const auto& Logger = CncLogger::For(TriggerClass);
 

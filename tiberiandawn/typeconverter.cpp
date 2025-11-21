@@ -432,8 +432,8 @@ TARGET TdTypeConverter::Techno_Type_Target_From_Json_Reference(
         REF_TO_TARGET_CASE(KIND_BUILDING, StructType)
         REF_TO_TARGET_CASE(KIND_BULLET, BulletType)
         REF_TO_TARGET_CASE(KIND_ANIMATION, AnimType)
-        REF_TO_TARGET_CASE(KIND_TERRAIN, AnimType)
-        REF_TO_TARGET_CASE(KIND_TEMPLATE, AnimType)
+        REF_TO_TARGET_CASE(KIND_TERRAIN, TerrainType)
+        REF_TO_TARGET_CASE(KIND_TEMPLATE, TemplateType)
 
         default:
             unsupported_kind_type = true;
