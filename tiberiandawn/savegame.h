@@ -25,7 +25,7 @@ public:
     HousesType Parse_Player_House_Type() const;
     ScenarioPlayerType Parse_Player_Type() const;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, Description)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, PlayerType, Description)
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameHeader);

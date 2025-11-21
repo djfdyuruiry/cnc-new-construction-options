@@ -1524,7 +1524,7 @@ FROM_JSON(TeamClass)
     TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(Class, TeamTypeClass);
 
     TdTypeConverter::Load_Field_From_Json<HousesType>(
-        p,
+        j,
         NAMEOF(TeamClass),
         NAMEOF(House),
         [&] (const auto& h) {

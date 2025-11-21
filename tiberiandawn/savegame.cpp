@@ -44,6 +44,7 @@ bool SaveGameHeader::Validate() const
 bool SaveGameHeader::Write_Globals() const
 {
     Scen.Scenario = ScenarioID;
+    ScenPlayer = Parse_Player_Type();
 
     return true;
 }

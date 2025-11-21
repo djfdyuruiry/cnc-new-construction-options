@@ -362,7 +362,6 @@ nlohmann::json TdTypeConverter::Techno_Type_Target_To_Json(const ObjectTypeClass
     }
 
     switch (const auto source_type = source->What_Am_I()) {
-        // TODO: Add additional types (Terrain, Overlay etc..)
         TYPE_TO_REF_CASE(RTTI_INFANTRYTYPE, KIND_INFANTRY, InfantryTypeClass)
         TYPE_TO_REF_CASE(RTTI_UNITTYPE, KIND_UNIT, UnitTypeClass)
         TYPE_TO_REF_CASE(RTTI_AIRCRAFTTYPE, KIND_AIRCRAFT, AircraftTypeClass)
@@ -408,7 +407,7 @@ TARGET TdTypeConverter::Techno_Type_Target_From_Json_Reference(
     const std::string& json_path
 )
 {
-    if (!source.object()) {
+    if (!source.is_object()) {
         CNC_LOGGER_ERROR(
             "Invalid {} JSON value - expected object, actual type: {}",
             json_path,
@@ -427,7 +426,6 @@ TARGET TdTypeConverter::Techno_Type_Target_From_Json_Reference(
             target = Build_Target(reference.Kind, 0);
             break;
 
-        // TODO: Add aditional types (Terrain, Overlay etc..)
         REF_TO_TARGET_CASE(KIND_INFANTRY, InfantryType)
         REF_TO_TARGET_CASE(KIND_UNIT, UnitType)
         REF_TO_TARGET_CASE(KIND_AIRCRAFT, AircraftType)

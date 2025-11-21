@@ -4988,7 +4988,7 @@ FROM_JSON(TechnoClass)
     FIELD_FROM_JSON(ArchiveTarget);
 
     TdTypeConverter::Load_Field_From_Json<HousesType>(
-        p,
+        j,
         NAMEOF(TechnoClass),
         NAMEOF(House),
         [&] (const auto& h) {

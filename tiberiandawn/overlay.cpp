@@ -422,7 +422,7 @@ FROM_JSON(OverlayClass)
     BASE_CLASS_FROM_JSON(ObjectClass);
 
     TdTypeConverter::Load_Field_From_Json<OverlayType>(
-        p,
+        j,
         NAMEOF(OverlayClass),
         NAMEOF(Class),
         [&] (const auto& o) {
