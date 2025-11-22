@@ -543,7 +543,7 @@ DirType TurretClass::Fire_Direction(void) const
 
 TO_JSON(TurretClass)
 {
-    BASE_CLASS_TO_JSON(FootClass);
+    BASE_CLASS_TO_JSON(DriveClass);
 
     FIELD_TO_JSON(Reload);
     FIELD_TO_JSON(SecondaryFacing);
@@ -551,7 +551,7 @@ TO_JSON(TurretClass)
 
 FROM_JSON(TurretClass)
 {
-    BASE_CLASS_FROM_JSON(FootClass);
+    BASE_CLASS_FROM_JSON(DriveClass);
 
     FIELD_FROM_JSON(Reload);
     FIELD_FROM_JSON(SecondaryFacing);

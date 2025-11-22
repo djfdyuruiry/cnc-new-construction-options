@@ -651,12 +651,14 @@ void Decode_All_Pointers(const HousesType player_house)
     Units.Decode_Pointers();
     Factories.Decode_Pointers();
 
+    // CellTriggers
     for (auto ct_idx = 0; ct_idx < CellTriggers.Length(); ct_idx++) {
         TriggerClass*& ptr = CellTriggers[ct_idx];
 
         ptr = As_Trigger(TARGET_SAFE_CAST(ptr));
     }
 
+    // HouseTriggers
     for (auto& house_triggers : HouseTriggers) {
         for (auto hct_idx = 0; hct_idx < house_triggers.Length(); hct_idx++) {
             TriggerClass*& ptr = house_triggers[hct_idx];

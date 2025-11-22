@@ -6,6 +6,14 @@
 
 #include <fstream>
 
+/*
+ * SaveGame bugs
+ *
+ * - Infantry are glitched out (something to do with Overlapping on CELLs not de-serializing/de-coding correcty?)
+ * - Unit speeds seem incorrect (Tanks too fast etc.)
+ *
+ */
+
 #pragma region SaveGameHeader
 void SaveGameHeader::Read_Globals()
 {
