@@ -673,25 +673,7 @@ void Decode_All_Pointers(const HousesType player_house)
     **	PlayerPtr.
     */
     PlayerPtr = HouseClass::As_Pointer(player_house);
-    // Whom = PlayerPtr->Class->House;
-    // switch (PlayerPtr->Class->House) {
-    // case HOUSE_GOOD:
-    //     ScenPlayer = SCEN_PLAYER_GDI;
-    //     break;
-    //
-    // case HOUSE_BAD:
-    //     ScenPlayer = SCEN_PLAYER_NOD;
-    //     break;
-    //
-    // case HOUSE_JP:
-    //     ScenPlayer = SCEN_PLAYER_JP;
-    //     break;
-    // }
-    // Check_Ptr(PlayerPtr, __FILE__, __LINE__);
-    //
-    // if (PlayerPtr->ActLike == HOUSE_JP) {
-    //     ScenPlayer = SCEN_PLAYER_JP;
-    // }
+
     Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, ScenVar);
 
     /*

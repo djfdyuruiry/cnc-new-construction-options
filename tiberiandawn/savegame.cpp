@@ -45,6 +45,7 @@ bool SaveGameHeader::Write_Globals() const
 {
     Scen.Scenario = ScenarioID;
     ScenPlayer = Parse_Player_Type();
+    Whom = Parse_Player_House_Type();
 
     return true;
 }
