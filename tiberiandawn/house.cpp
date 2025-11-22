@@ -8340,7 +8340,7 @@ FROM_JSON(HouseClass::ZoneInfoStruct)
 
 TO_JSON(HouseClass)
 {
-    CONVERT_TD_FIELD_VALUE_TO_JSON(Class, static_cast<HousesType>(reinterpret_cast<uintptr_t>(&p.Class)));
+    CONVERT_TD_FIELD_VALUE_TO_JSON(Class, p.Class->House);
     FIELD_TO_JSON(FirepowerBias);
     FIELD_TO_JSON(GroundspeedBias);
     FIELD_TO_JSON(AirspeedBias);

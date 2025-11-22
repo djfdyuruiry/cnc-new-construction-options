@@ -983,6 +983,7 @@ inline bool Sim_Percent_Chance(int percent)
     {                                                                                                                  \
         if (!(ptr)) {                                                                                                  \
             CNC_LOG_ERROR("NULL Pointer detected, aborting program!");                                                 \
+            TRIGGER_DEBUGGER; \
             Prog_End();                                                                                                \
             exit(EXIT_SUCCESS);                                                                                        \
         }                                                                                                              \
