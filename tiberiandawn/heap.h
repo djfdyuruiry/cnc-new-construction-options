@@ -227,6 +227,8 @@ public:
 
     friend TO_JSON(TFixedIHeapClass<T>)
     {
+        CNC_LOG_DEBUG("Serializing TFixedIHeapClass holding type: {}", typeid(T).name());
+
         j = nlohmann::json::object();
 
         auto& mutable_p = const_cast<TFixedIHeapClass<T>&>(p);
@@ -243,32 +245,23 @@ public:
 
     friend FROM_JSON(TFixedIHeapClass<T>)
     {
-        CNC_LOG_INFO("Deserialising TFixedIHeapClass holding type: {}", typeid(T).name());
+        CNC_LOG_DEBUG("Deserialising TFixedIHeapClass holding type: {}", typeid(T).name());
 
         for (const auto& [key, val] : j.items()) {
             const auto id = std::stoi(key);
 
             T* ptr = static_cast<T*>(p[id]);
 
-            CNC_LOG_INFO("Loading ID {} into pointer address: {}", id, reinterpret_cast<uintptr_t>(ptr));
-
             p.FreeFlag[id] = true;
             ++p.ActiveCount;
             p.ActivePointers.Add(ptr);
-
-            CNC_LOG_INFO("Creating instance of type '{}' (with ID {}) at pointer address: {}", typeid(T).name(), id, reinterpret_cast<uintptr_t>(ptr));
 
             new (ptr) T(NoInitClass());
 
             T& ref = *ptr;
 
-            CNC_LOG_INFO("Calling from_json to load instance of type '{}' (with ID {}) at pointer address: {}", typeid(T).name(), id, reinterpret_cast<uintptr_t>(ptr));
-
             // TODO: Investigate if any further re-hydration required (code/decode logic)
             from_json(val, ref);
-
-            auto check_ptr = static_cast<T*>(p[id]);
-            CNC_LOG_INFO("Checking address for instance of type '{}' (with ID {}), was pointer address {} - checked address {}", typeid(T).name(), id, reinterpret_cast<uintptr_t>(ptr), reinterpret_cast<uintptr_t>(check_ptr));
         }
     }
 };
