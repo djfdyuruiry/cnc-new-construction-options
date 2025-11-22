@@ -528,13 +528,7 @@ bool SaveGame::Write_Globals() const
     from_json(AiBase, Base);
     from_json(GameScore, Score);
 
-    PlayerPtr = HouseClass::As_Pointer(Header.Parse_Player_House_Type());
-
-    Decode_All_Pointers();
-
-    PlayerPtr = HouseClass::As_Pointer(
-        Header.Parse_Player_House_Type()
-    );
+    Decode_All_Pointers(Header.Parse_Player_House_Type());
 
     return result;
 }

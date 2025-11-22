@@ -634,7 +634,7 @@ bool Save_Game(const char* file_name, const char* descr);
 TARGET TechnoType_To_Target(TechnoTypeClass const* ptr);
 TechnoTypeClass const* Target_To_TechnoType(TARGET target);
 void Code_All_Pointers(void);
-void Decode_All_Pointers(void);
+void Decode_All_Pointers(const HousesType player_house);
 void Dump(void);
 
 /*

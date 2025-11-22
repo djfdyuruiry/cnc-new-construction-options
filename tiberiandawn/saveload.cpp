@@ -613,7 +613,7 @@ void Code_All_Pointers(void)
  * HISTORY:                                                                                    *
  *   06/24/1995 BRR : Created.                                                                 *
  *=============================================================================================*/
-void Decode_All_Pointers(void)
+void Decode_All_Pointers(const HousesType player_house)
 {
     int i, j;
 
@@ -672,7 +672,7 @@ void Decode_All_Pointers(void)
     /*
     **	PlayerPtr.
     */
-    // PlayerPtr = HouseClass::As_Pointer((HousesType)(intptr_t)PlayerPtr);
+    PlayerPtr = HouseClass::As_Pointer(player_house);
     // Whom = PlayerPtr->Class->House;
     // switch (PlayerPtr->Class->House) {
     // case HOUSE_GOOD:
