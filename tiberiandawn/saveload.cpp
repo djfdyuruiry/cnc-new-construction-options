@@ -125,21 +125,21 @@ bool Save_Game(const char* file_name, const char* descr)
         return false;
     }
 
+    // read save data from game state
     SaveGame save;
-    std::string save_json;
 
-    save.Header.Version = "1.0";
-    static constexpr char ctrlZ = 26;
-    save.Header.Description = std::format("{}\r\n{}", descr, ctrlZ);
+    try {
+        save.Header.Version = "1.0";
+        save.Header.Description = descr;
 
-    save.Read_Globals();
+        save.Read_Globals();
+    } catch (const nlohmann::json::exception& e) {
+        CNC_LOG_ERROR("Error reading game state into {} instance: {}", NAMEOF(SaveGame), e.what());
 
-    save.Dump_Json(save_json);
+        return false;
+    }
 
-    save_file.Write(save_json);
-    save_file.Close();
-
-    return (true);
+    return save.To_File(save_file);
 }
 
 /***************************************************************************
@@ -748,62 +748,26 @@ void Decode_All_Pointers(const HousesType player_house)
  * HISTORY:                                                                *
  *   01/12/1995 BR : Created.                                              *
  *=========================================================================*/
-bool Get_Savefile_Info(int id, char* buf, unsigned* scenp, HousesType* housep)
+bool Get_Savefile_Info(int id, char* buf, unsigned& scenp, HousesType& housep)
 {
-    CDFileClass file;
-    char name[_MAX_FNAME + _MAX_EXT];
-    unsigned int version;
-    char descr_buf[DESCRIP_MAX];
+    const auto file_name = std::format("SAVEGAME.{:03d}", id);
 
-    /*
-    **	Generate the filename to load
-    */
-    sprintf(name, "SAVEGAME.%03d", id);
+    SaveGameHeader header;
 
-    /*
-    **	If the file opens OK, read the file
-    */
-    if (file.Open(name, READ)) {
-
-        /*
-        **	Read in the description, scenario #, and the house
-        */
-        if (file.Read(descr_buf, DESCRIP_MAX) != DESCRIP_MAX) {
-            file.Close();
-            return (false);
-        }
-
-        descr_buf[strlen(descr_buf) - 2] = '\0'; // trim off CR/LF
-        strcpy(buf, descr_buf);
-
-        if (file.Read(scenp, sizeof(unsigned)) != sizeof(unsigned)) {
-            file.Close();
-            return (false);
-        }
-
-        if (file.Read(housep, sizeof(HousesType)) != sizeof(HousesType)) {
-            file.Close();
-            return (false);
-        }
-
-        /*
-        **	Read & verify the save-game version #
-        */
-        if (file.Read(&version, sizeof(version)) != sizeof(version)) {
-            file.Close();
-            return (false);
-        }
-
-        if (version != SAVEGAME_VERSION) {
-            file.Close();
-            return (false);
-        }
-
-        file.Close();
-
-        return (true);
+    if (!SaveGameHeader::From_File(file_name, header)) {
+        return false;
     }
-    return (false);
+
+    scenp = header.ScenarioID;
+    housep = header.Parse_Player_House_Type();
+
+    strcpy(buf, header.Description.c_str());
+
+    if (header.Version != "1.0") {
+        return false;
+    }
+
+    return true;
 }
 
 /***************************************************************************

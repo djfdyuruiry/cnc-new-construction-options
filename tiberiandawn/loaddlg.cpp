@@ -623,7 +623,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
             /*
             ** get the game's info; if success, add it to the list
             */
-            bool ok = true; //Get_Savefile_Info(id, descr, &scenario, &house);
+            bool ok = Get_Savefile_Info(id, descr, scenario, house);
 
             fdata = new FileEntryClass;
 
@@ -637,8 +637,9 @@ void LoadOptionsClass::Fill_List(ListClass* list)
                     sprintf(fdata->Descr, "(%s) ", Text_String(TXT_G_D_I));
                 }
             }
-            //strncat(fdata->Descr, descr, (sizeof(fdata->Descr) - strlen(fdata->Descr)) - 1);
-            strncat(fdata->Descr, "JSON", (sizeof(fdata->Descr) - strlen(fdata->Descr)) - 1);
+
+            strncat(fdata->Descr, descr, (sizeof(fdata->Descr) - strlen(fdata->Descr)) - 1);
+
             fdata->Valid = ok;
             fdata->Scenario = scenario;
             fdata->House = house;

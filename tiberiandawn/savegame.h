@@ -18,12 +18,17 @@ public:
     std::string PlayerType;
     std::string Description;
 
+    static bool From_Stream(std::ifstream& stream, SaveGameHeader& output);
+    static bool From_File(const std::string& path, SaveGameHeader& output);
+
     void Read_Globals();
     bool Validate() const;
     bool Write_Globals() const;
 
     HousesType Parse_Player_House_Type() const;
     ScenarioPlayerType Parse_Player_Type() const;
+
+    void Dump_Json(std::string& output) const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, PlayerType, Description)
 
@@ -153,6 +158,8 @@ private:
 class SaveGame
 {
 public:
+    static constexpr char LINE_SEPERATOR = '\n';
+
     SaveGameHeader Header;
     SaveGameScenarioState ScenarioState;
     SaveGameObjectHeaps Objects;
@@ -172,10 +179,10 @@ public:
     bool Validate() const;
     bool Write_Globals() const;
     void Dump_Json(std::string& output) const;
+    bool To_File(CDFileClass& save_file) const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame,
-        Header,
         ScenarioState,
         Objects,
         GameCellTriggers,
@@ -186,6 +193,7 @@ public:
         AiBase,
         GameScore
     )
+
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGame);

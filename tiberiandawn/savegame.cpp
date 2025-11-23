@@ -15,6 +15,51 @@
  */
 
 #pragma region SaveGameHeader
+bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
+{
+    // read SaveGameHeader JSON
+    std::string header_line;
+    std::getline(stream, header_line, SaveGame::LINE_SEPERATOR);
+
+    if (CncStringUtils::Is_Blank(header_line)) {
+        CNC_LOGGER_ERROR("Save game is corrupt - {} JSON was not found", NAMEOF(SaveGameHeader));
+        return false;
+    }
+
+    // parse JSON
+    try {
+        from_json(nlohmann::json::parse(header_line), output);
+
+        return output.Validate();
+    } catch (nlohmann::json::exception& e) {
+        CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", e.what());
+
+        return false;
+    }
+}
+
+bool SaveGameHeader::From_File(const std::string& path, SaveGameHeader& output)
+{
+    // build path using CDFileClass logic
+    std::string full_path;
+
+    CNC_LOGGER_INFO("Attempting to read header from JSON save game file: {}", path);
+
+    if (CDFileClass file; !file.Open(path.c_str(), READ)) {
+        CNC_LOGGER_ERROR("Failed to read full path to JSON save game");
+        file.Close();
+        return false;
+    } else {
+        full_path = std::string(file.File_Name());
+        file.Close();
+    }
+
+    // open file stream
+    auto save_file_stream = std::ifstream(full_path);
+
+    return From_Stream(save_file_stream, output);
+}
+
 void SaveGameHeader::Read_Globals()
 {
     ScenarioID = Scen.Scenario;
@@ -74,6 +119,12 @@ ScenarioPlayerType SaveGameHeader::Parse_Player_Type() const
     );
 }
 
+void SaveGameHeader::Dump_Json(std::string& output) const
+{
+    const nlohmann::json save_json = *this;
+
+    output = save_json.dump();
+}
 #pragma endregion
 
 #pragma region SaveGameScenarioState
@@ -365,12 +416,22 @@ bool SaveGameObjectHeaps::Write_Globals() const
 #pragma endregion
 
 #pragma region SaveGame
+/**
+ * Read a JSON save game instance from file.
+ *
+ * @param path Path to the save game file, which should be in JSON lines format. (See: https://jsonlines.org/)
+ * @param output If save game is present and value, instance will be written here.
+ * @return Was a valid save game loaded from the file path given?
+ */
 bool SaveGame::From_File(const std::string& path, SaveGame& output)
 {
+    // build path using CDFileClass logic
     std::string full_path;
 
+    CNC_LOGGER_INFO("Attempting to read JSON save game file: {}", path);
+
     if (CDFileClass file; !file.Open(path.c_str(), READ)) {
-        CNC_LOGGER_ERROR("Failed to open JSON save game file");
+        CNC_LOGGER_ERROR("Failed to read full path to JSON save game");
         file.Close();
         return false;
     } else {
@@ -378,14 +439,34 @@ bool SaveGame::From_File(const std::string& path, SaveGame& output)
         file.Close();
     }
 
+    // open file stream
     auto save_file_stream = std::ifstream(full_path);
-    const auto save_json = nlohmann::json::parse(save_file_stream);
 
-    output = save_json.get<SaveGame>();
+    // read header
+    if (!SaveGameHeader::From_Stream(save_file_stream, output.Header)) {
+        return false;
+    }
 
-    return true;
+    // read SaveGame JSON
+    std::string save_line;
+    std::getline(save_file_stream, save_line, LINE_SEPERATOR);
+
+    if (CncStringUtils::Is_Blank(save_line)) {
+        CNC_LOGGER_ERROR("Save game is corrupt - {} JSON was not found", NAMEOF(SaveGame));
+        return false;
+    }
+
+    // parse JSON
+    try {
+        from_json(nlohmann::json::parse(save_line), output);
+
+        return output.Validate();
+    } catch (const nlohmann::json::exception& e) {
+        CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", e.what());
+
+        return false;
+    }
 }
-
 
 void SaveGame::Read_Globals()
 {
@@ -550,5 +631,37 @@ void SaveGame::Dump_Json(std::string& output) const
     const nlohmann::json save_json = *this;
 
     output = save_json.dump();
+}
+
+bool SaveGame::To_File(CDFileClass& save_file) const
+{
+    if (!save_file.Is_Open()) {
+        CNC_LOGGER_ERROR("Attempted to write {} to closed file handle", NAMEOF(SaveGame));
+        return false;
+    }
+
+    if (!Validate()) {
+        return false;
+    }
+
+    // write save data to file
+    std::string header_json;
+    std::string save_json;
+
+    try {
+        Header.Dump_Json(header_json);
+        Dump_Json(save_json);
+    } catch (const nlohmann::json::exception& e) {
+        CNC_LOGGER_ERROR("Error serializing {} to JSON: {}", NAMEOF(SaveGame), e.what());
+        return false;
+    }
+
+    constexpr char line_seperator_c_string[1] = { LINE_SEPERATOR };
+
+    save_file.Write(header_json);
+    save_file.Write(line_seperator_c_string, 1);
+    save_file.Write(save_json);
+
+    return true;
 }
 #pragma endregion
