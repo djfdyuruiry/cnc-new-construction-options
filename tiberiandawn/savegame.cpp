@@ -331,7 +331,7 @@ bool SaveGameObjectHeaps::Validate() const
                 heap.type_name()
             );
         } else if (std::ranges::distance(heap.items()) < 1) {
-            CNC_LOGGER_WARN("Objects.{} save game value has no entries", name);
+            CNC_LOGGER_DEBUG("Objects.{} save game value has no entries", name);
         }
     }
 
@@ -398,6 +398,7 @@ void SaveGame::Read_Globals()
     GameMap = Map;
     GameLogic = Logic;
     Layers = DisplayClass::Layer;
+
     AiBase = Base;
     GameScore = Score;
 }
@@ -498,11 +499,13 @@ bool SaveGame::Write_Globals() const
         return false;
     }
 
-    Clear_Scenario();
-
-    const auto result = Header.Write_Globals() &&
-        ScenarioState.Write_Globals() &&
-        Objects.Write_Globals();
+    if (
+        !Header.Write_Globals() ||
+        !ScenarioState.Write_Globals() ||
+        !Objects.Write_Globals()
+    ) {
+        return false;
+    }
 
     // Cell/House triggers
     from_json(GameCellTriggers, CellTriggers);
@@ -535,12 +538,11 @@ bool SaveGame::Write_Globals() const
 
     from_json(GameLogic, Logic);
     from_json(Layers, DisplayClass::Layer);
+
     from_json(AiBase, Base);
     from_json(GameScore, Score);
 
-    Decode_All_Pointers(Header.Parse_Player_House_Type());
-
-    return result;
+    return true;
 }
 
 void SaveGame::Dump_Json(std::string& output) const

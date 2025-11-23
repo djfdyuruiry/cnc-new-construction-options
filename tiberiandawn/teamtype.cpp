@@ -924,7 +924,12 @@ FROM_JSON(TeamMissionStruct)
 
 TO_JSON(TeamTypeClass)
 {
-    BASE_CLASS_TO_JSON(AbstractTypeClass);
+    // Base AbstractTypeClass fields; included here to prevent
+    // advertising AbstractTypeClass to/from json functions which
+    // may cause unsupported types to be serialized incorrectly, since
+    // AbstractTypeClass is a very common root class.
+    CSTR_FIELD_TO_JSON(IniName);
+    FIELD_TO_JSON(FullName);
 
     BITFIELD_TO_JSON(IsActive);
     BITFIELD_TO_JSON(IsRoundAbout);
@@ -944,14 +949,16 @@ TO_JSON(TeamTypeClass)
     FIELD_TO_JSON(MissionList);
     FIELD_TO_JSON(ClassCount);
 
-    TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON(Class);
+    TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON_WITH_SIZE(Class, p.ClassCount);
 
     FIELD_TO_JSON(DesiredNum);
 }
 
 FROM_JSON(TeamTypeClass)
 {
-    BASE_CLASS_FROM_JSON(AbstractTypeClass);
+    // Base AbstractTypeClass fields - See TO_JSON(TeamTypeClass)
+    CSTR_FIELD_FROM_JSON(TeamTypeClass, IniName);
+    FIELD_FROM_JSON(FullName);
 
     BITFIELD_FROM_JSON(IsActive);
     BITFIELD_FROM_JSON(IsRoundAbout);
@@ -971,7 +978,7 @@ FROM_JSON(TeamTypeClass)
     FIELD_FROM_JSON(MissionList);
     FIELD_FROM_JSON(ClassCount);
 
-    TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(TeamTypeClass, Class, TechnoTypeClass const);
+    TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON_WITH_SIZE(TeamTypeClass, Class, TechnoTypeClass const, p.ClassCount);
 
     FIELD_FROM_JSON(DesiredNum);
 }

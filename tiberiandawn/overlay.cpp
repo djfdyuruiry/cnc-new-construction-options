@@ -426,7 +426,7 @@ FROM_JSON(OverlayClass)
         NAMEOF(OverlayClass),
         NAMEOF(Class),
         [&] (const auto& o) {
-            const_cast<OverlayTypeClass*&>(p.Class) = reinterpret_cast<OverlayTypeClass*>(static_cast<intptr_t>(o));
+            const_cast<OverlayTypeClass*&>(p.Class) = reinterpret_cast<OverlayTypeClass*>(o);
         }
     );
 }

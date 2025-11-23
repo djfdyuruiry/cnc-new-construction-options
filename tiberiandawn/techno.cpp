@@ -4961,7 +4961,7 @@ TO_JSON(TechnoClass)
     FIELD_TO_JSON(LineFrame);
     FIELD_TO_JSON(LineMaxFrames);
     FIELD_TO_JSON(PurchasePrice);
-    BITFIELD_OF_WIDTH_TO_JSON(IsDiscoveredByPlayerMask, 32);
+    FIELD_TO_JSON(IsDiscoveredByPlayerMask);
 }
 
 FROM_JSON(TechnoClass)
@@ -5008,5 +5008,5 @@ FROM_JSON(TechnoClass)
     FIELD_FROM_JSON(LineFrame);
     FIELD_FROM_JSON(LineMaxFrames);
     FIELD_FROM_JSON(PurchasePrice);
-    BITFIELD_OF_WIDTH_FROM_JSON(TechnoClass, IsDiscoveredByPlayerMask, 32);
+    FIELD_FROM_JSON(IsDiscoveredByPlayerMask);
 }

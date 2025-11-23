@@ -2079,13 +2079,26 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 
 #endif // USE_RA_AI
 
-// Field 'Array' omitted as it's reset after save load anyway.
 TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);
 
-    // TODO: Array is very large (16K items+), consider optimisation techniques (dedup - existing should save logic?)
-    FIELD_TO_JSON(Array);
+    auto cells = nlohmann::json::array();
+
+    for (CELL cell = 0; cell < static_cast<CELL>(MAP_CELL_TOTAL); cell++) {
+        if (!p[cell].Should_Save()) {
+            continue;
+        }
+
+        auto cell_pair = nlohmann::json::object();
+
+        cell_pair.emplace(NAMEOF(cell), cell);
+        cell_pair.emplace("value", p[cell]);
+
+        cells.push_back(cell_pair);
+    }
+
+    FIELD_VALUE_TO_JSON(Array, cells);
     FIELD_TO_JSON(MapCellX);
     FIELD_TO_JSON(MapCellY);
     FIELD_TO_JSON(MapCellWidth);
@@ -2108,7 +2121,12 @@ FROM_JSON(MapClass)
 {
     BASE_CLASS_FROM_JSON(GScreenClass);
 
-    FIELD_FROM_JSON(Array);
+    for (const auto& cell_pair : j.at(NAMEOF(Array))) {
+        const auto cell = cell_pair.at(NAMEOF(cell)).get<CELL>();
+
+        from_json(cell_pair.at(NAMEOF(value)), p[cell]);
+    }
+
     FIELD_FROM_JSON(MapCellX);
     FIELD_FROM_JSON(MapCellY);
     FIELD_FROM_JSON(MapCellWidth);

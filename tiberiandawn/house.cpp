@@ -8473,7 +8473,7 @@ TO_JSON(HouseClass)
     FIELD_TO_JSON(IQ);
     CONVERT_TD_FIELD_TO_JSON(Difficulty);
 #endif
-    BITFIELD_OF_WIDTH_TO_JSON(Allies, 32);
+    FIELD_TO_JSON(Allies);
     FIELD_TO_JSON(AlertTime);
     FIELD_TO_JSON(BorrowedTime);
     FIELD_TO_JSON(FreeHarvester);
@@ -8626,7 +8626,7 @@ FROM_JSON(HouseClass)
     FIELD_FROM_JSON(IQ);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, Difficulty, DiffType);
 #endif
-    BITFIELD_OF_WIDTH_FROM_JSON(HouseClass, Allies, 32);
+    FIELD_FROM_JSON(Allies);
     FIELD_FROM_JSON(AlertTime);
     FIELD_FROM_JSON(BorrowedTime);
     FIELD_FROM_JSON(FreeHarvester);

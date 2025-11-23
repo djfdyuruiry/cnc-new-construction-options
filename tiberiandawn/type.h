@@ -339,8 +339,6 @@ public:
         ((char&)IniName[sizeof(IniName) - 1]) = '\0';
     };
     virtual unsigned short Get_Ownable(void) const;
-
-    JSON_FUNCTIONS(AbstractTypeClass)
 };
 
 /***************************************************************************

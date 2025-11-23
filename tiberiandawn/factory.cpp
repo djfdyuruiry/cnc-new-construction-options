@@ -788,7 +788,7 @@ FROM_JSON(FactoryClass)
         NAMEOF(FactoryClass),
         NAMEOF(House),
         [&] (const auto& h) {
-            p.House = reinterpret_cast<HouseClass*>(static_cast<intptr_t>(h));
+            p.House = reinterpret_cast<HouseClass*>(h);
         }
     );
 }

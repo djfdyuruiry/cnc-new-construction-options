@@ -2826,8 +2826,18 @@ TO_JSON(CellClass)
     FIELD_TO_JSON(SmudgeData);
     CONVERT_TD_FIELD_TO_JSON(Owner);
     CONVERT_TD_FIELD_TO_JSON(InfType);
-    OBJECT_TARGET_PTR_TO_JSON(OccupierPtr);
-    OBJECT_TARGET_PTR_ARRAY_TO_JSON(Overlapper);
+
+    FIELD_VALUE_TO_JSON(OccupierPtr, p.Cell_Occupier() ? OBJECT_PTR_TO_TARGET(p.OccupierPtr) : static_cast<TARGET>(0));
+
+    auto overlapper = nlohmann::json::array();
+
+    for (int index = 0; index < ARRAY_SIZE(p.Overlapper); index++) {
+        overlapper[index] = (p.Overlapper[index] != nullptr && p.Overlapper[index]->IsActive)
+            ? OBJECT_PTR_TO_TARGET(p.Overlapper[index])
+            : static_cast<TARGET>(0);
+    }
+
+    FIELD_VALUE_TO_JSON(Overlapper, overlapper);
 
     FIELD_TO_JSON(IsMappedByPlayerMask);
     FIELD_TO_JSON(IsVisibleByPlayerMask);

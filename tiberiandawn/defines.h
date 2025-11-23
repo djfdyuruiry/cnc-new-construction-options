@@ -789,7 +789,8 @@ typedef enum LayerType : signed char
     LAYER_TOP,    // Topmost layer (aircraft & bullets).
 
     LAYER_COUNT,
-    LAYER_FIRST = 0
+    LAYER_FIRST = 0,
+    LAYER_LAST = LAYER_TOP
 } LayerType;
 
 // inline LayerType operator++(LayerType &, int);

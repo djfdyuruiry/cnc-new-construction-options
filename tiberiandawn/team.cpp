@@ -1528,7 +1528,7 @@ FROM_JSON(TeamClass)
         NAMEOF(TeamClass),
         NAMEOF(House),
         [&] (const auto& h) {
-            const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(static_cast<intptr_t>(h));
+            const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(h);
         }
     );
 

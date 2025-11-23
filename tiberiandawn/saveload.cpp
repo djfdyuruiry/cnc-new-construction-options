@@ -200,9 +200,15 @@ bool Load_Game(const char* file_name)
 {
     SaveGame save;
 
+    Call_Back();
+
     if (!SaveGame::From_File(file_name, save)) {
         return false;
     }
+
+    Call_Back();
+
+    Clear_Scenario();
 
     const auto& scenario = save.Header.ScenarioID;
     const auto house = save.Header.Parse_Player_House_Type();
@@ -237,13 +243,23 @@ bool Load_Game(const char* file_name)
         return false;
     }
 
+    Call_Back();
+
     if (!save.Write_Globals()) {
         CNC_LOG_ERROR("Failed to load JSON save into game state");
         return false;
     }
 
+    Call_Back();
+
+    Decode_All_Pointers(save.Header.Parse_Player_House_Type());
+
+    Call_Back();
+
     Map.Init_IO();
     Map.Flag_To_Redraw(true);
+
+    Call_Back();
 
     Fixup_Scenario();
 
@@ -651,12 +667,7 @@ void Decode_All_Pointers(const HousesType player_house)
     Units.Decode_Pointers();
     Factories.Decode_Pointers();
 
-    // CellTriggers
-    for (auto ct_idx = 0; ct_idx < CellTriggers.Length(); ct_idx++) {
-        TriggerClass*& ptr = CellTriggers[ct_idx];
-
-        ptr = As_Trigger(TARGET_SAFE_CAST(ptr));
-    }
+    // CellTriggers are decoded as a side effect of CellClass::Decode_Pointers (Map.Decode_Pointers calls this)
 
     // HouseTriggers
     for (auto& house_triggers : HouseTriggers) {

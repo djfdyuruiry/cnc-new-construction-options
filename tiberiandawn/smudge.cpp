@@ -402,7 +402,7 @@ FROM_JSON(SmudgeClass)
         NAMEOF(SmudgeClass),
         NAMEOF(Class),
         [&] (const auto& s) {
-            const_cast<SmudgeTypeClass*&>(p.Class) = reinterpret_cast<SmudgeTypeClass*>(static_cast<intptr_t>(s));
+            const_cast<SmudgeTypeClass*&>(p.Class) = reinterpret_cast<SmudgeTypeClass*>(s);
         }
     );
 }

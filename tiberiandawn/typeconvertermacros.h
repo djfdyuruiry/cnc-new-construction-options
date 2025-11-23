@@ -48,13 +48,21 @@
 #define TECHNO_TYPE_PTR_REF_TO_JSON(FIELD) \
     FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Techno_Type_Target_To_Json(p.FIELD))
 
+// Store target values for array (with length SIZE) of ObjectTypeClass pointer memory addresses in JSON array
+#define OBJECT_TARGET_PTR_ARRAY_TO_JSON_WITH_SIZE(FIELD, SIZE) \
+    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Object_Target_Array_To_Json(p.FIELD, SIZE));
+
 // Store target values for array of ObjectTypeClass pointer memory addresses in JSON array
 #define OBJECT_TARGET_PTR_ARRAY_TO_JSON(FIELD) \
-    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Object_Target_Array_To_Json(p.FIELD, std::size(p.FIELD)));
+    OBJECT_TARGET_PTR_ARRAY_TO_JSON_WITH_SIZE(FIELD, std::size(p.FIELD));
+
+// Store target values for array (with length SIZE) of TechnoTypeClass pointer memory addresses in JSON array
+#define TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON_WITH_SIZE(FIELD, SIZE) \
+    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Techno_Type_Target_Array_To_Json(p.FIELD, SIZE));
 
 // Store target values for array of TechnoTypeClass pointer memory addresses in JSON array
 #define TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON(FIELD) \
-    FIELD_VALUE_TO_JSON(FIELD, TdTypeConverter::Techno_Type_Target_Array_To_Json(p.FIELD, std::size(p.FIELD)));
+    TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON_WITH_SIZE(FIELD, std::size(p.FIELD));
 
 // Convert TD type field to string and store in JSON object, actual field value can be any expression
 // (e.g. fetch Type enum value from pointer object)
@@ -98,17 +106,24 @@
 #define TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON(CLASS, FIELD) \
     TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(CLASS, FIELD, TechnoTypeClass)
 
-// Load target values for array of ObjectTypeClass pointer memory addresses
-#define OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
+// Load target values for array (with length SIZE) of ObjectTypeClass pointer memory addresses
+#define OBJECT_TARGET_PTR_ARRAY_FROM_JSON_WITH_SIZE(CLASS, FIELD, TYPE, SIZE) \
     TdTypeConverter::Object_Target_Array_From_Json<TYPE>( \
-        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, std::size(p.FIELD) \
+        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, SIZE \
     )
 
-// Load target values for array of refs to TechnoTypeClass of TYPE pointer memory addresses
-#define TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
+// Load target values for array of ObjectTypeClass pointer memory addresses
+#define OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
+    OBJECT_TARGET_PTR_ARRAY_FROM_JSON_WITH_SIZE(CLASS, FIELD, TYPE, std::size(p.FIELD))
+
+// Load target values for array (with length SIZE) of refs to TechnoTypeClass of TYPE pointer memory addresses
+#define TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON_WITH_SIZE(CLASS, FIELD, TYPE, SIZE) \
     TdTypeConverter::Techno_Type_Target_Array_From_Json<TYPE>( \
-        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, std::size(p.FIELD) \
+        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, SIZE \
     )
+
+#define TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE) \
+    TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON(CLASS, FIELD, TYPE, std::size(p.FIELD))
 
 // Parse TD type field from JSON string
 #define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \

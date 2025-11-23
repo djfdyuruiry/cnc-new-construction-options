@@ -128,5 +128,6 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<TriggerClass::ActionType>,
     EnumTypeInfo<TriggerClass::PersistantType>,
     EnumTypeInfo<TerrainType>,
-    EnumTypeInfo<ScenarioPlayerType>
+    EnumTypeInfo<ScenarioPlayerType>,
+    EnumTypeInfo<LayerType>
 >;

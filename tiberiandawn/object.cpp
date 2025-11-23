@@ -1722,7 +1722,7 @@ TO_JSON(ObjectClass)
     BITFIELD_TO_JSON(IsToDisplay);
     BITFIELD_TO_JSON(IsInLimbo);
     BITFIELD_TO_JSON(IsSelected);
-    BITFIELD_OF_WIDTH_TO_JSON(IsSelectedMask, 16);
+    FIELD_TO_JSON(IsSelectedMask);
     BITFIELD_TO_JSON(IsAnimAttached);
     OBJECT_TARGET_PTR_TO_JSON(Next);
     OBJECT_TARGET_PTR_TO_JSON(Trigger);
@@ -1739,7 +1739,7 @@ FROM_JSON(ObjectClass)
     BITFIELD_FROM_JSON(IsToDisplay);
     BITFIELD_FROM_JSON(IsInLimbo);
     BITFIELD_FROM_JSON(IsSelected);
-    BITFIELD_OF_WIDTH_FROM_JSON(ObjectClass, IsSelectedMask, 16);
+    FIELD_FROM_JSON(IsSelectedMask);
     BITFIELD_FROM_JSON(IsAnimAttached);
     OBJECT_TARGET_PTR_FROM_JSON(Next);
     TARGET_PTR_FROM_JSON_WITH_TYPE(Trigger, TriggerClass);
