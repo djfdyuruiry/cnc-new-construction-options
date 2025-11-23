@@ -98,17 +98,30 @@ public:
 
     friend TO_JSON(VectorClass<T>)
     {
-        auto _items = nlohmann::json::array();
+        auto _items = nlohmann::json::object();
 
-        for (auto i = 0U; i < p.Length(); i++) {
-            nlohmann::json element;
+        for (auto i = 0; i < p.Length(); i++) {
+            if constexpr(std::is_pointer<T>()) {
+                // record pairs of vector location and value (if not NULL)
+                const auto value = p.Vector[i];
 
-            to_json(element, p.Vector[i]);
+                if (value == nullptr) {
+                    continue;
+                }
 
-            _items[i] = element;
+                const auto key = std::format("{}", i);
+
+                _items.emplace(key, value);
+            } else {
+                const auto key = std::format("{}", i);
+                _items.emplace(key, p.Vector[i]);
+            }
         }
 
         j.emplace(NAMEOF(_items), _items);
+
+        // ensure vector size is recorded (otherwise, for pointers, only number of pairs is known)
+        j.emplace("_vector_size", p.Length());
     }
 
     friend FROM_JSON(VectorClass<T>)
@@ -118,22 +131,42 @@ public:
             return;
         }
 
-        auto _items = j.at(NAMEOF(_items));
+        const auto& _items = j.at(NAMEOF(_items));
 
-        if (!_items.is_array()) {
+        if (!_items.is_object()) {
             CNC_LOG_ERROR(
-                "Invalid JSON value {}, array expected - actual type: {}",
+                "Invalid JSON value {}, object expected - actual type: {}",
                 NAMEOF(_items),
                 _items.type_name()
             );
             return;
         }
 
-        p.Clear();
-        p.Resize(_items.size());
+        if (!j.contains(NAMEOF(_vector_size))) {
+            CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(_vector_size));
+            return;
+        }
 
-        for (auto i = 0U; i < _items.size(); i++) {
-            from_json(_items[i], p.Vector[i]);
+        const auto& _vector_size = j.at(NAMEOF(_vector_size));
+
+        if (!_vector_size.is_number_unsigned()) {
+            CNC_LOG_ERROR(
+                "Invalid JSON value {}, non-negative int expected - actual type: {}",
+                NAMEOF(_vector_size),
+                _vector_size.type_name()
+            );
+            return;
+        }
+
+        p.Clear();
+        p.Resize(
+            _vector_size.get<int>()
+        );
+
+        for (const auto& [key, value] : _items.items()) {
+            const auto idx = std::stoi(key);
+
+            from_json(value, p.Vector[idx]);
         }
     }
 protected:
