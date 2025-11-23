@@ -367,7 +367,7 @@ nlohmann::json TdTypeConverter::Techno_Type_Target_To_Json(const ObjectTypeClass
         TYPE_TO_REF_CASE(RTTI_AIRCRAFTTYPE, KIND_AIRCRAFT, AircraftTypeClass)
         TYPE_TO_REF_CASE(RTTI_BUILDINGTYPE, KIND_BUILDING, BuildingTypeClass)
         TYPE_TO_REF_CASE(RTTI_BULLETTYPE, KIND_BULLET, BulletTypeClass)
-        TYPE_TO_REF_CASE(RTTI_ANIMTYPE, KIND_BULLET, BulletTypeClass)
+        TYPE_TO_REF_CASE(RTTI_ANIMTYPE, KIND_ANIMATION, AnimTypeClass)
         TYPE_TO_REF_CASE(RTTI_TERRAINTYPE, KIND_TERRAIN, TerrainTypeClass)
         TYPE_TO_REF_CASE(RTTI_TEMPLATETYPE, KIND_TEMPLATE, TemplateTypeClass)
 

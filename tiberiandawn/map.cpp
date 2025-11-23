@@ -2084,7 +2084,7 @@ TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);
 
-    // TODO: Array is very large (16K items+), consider optimisation techniques (dedup
+    // TODO: Array is very large (16K items+), consider optimisation techniques (dedup - existing should save logic?)
     FIELD_TO_JSON(Array);
     FIELD_TO_JSON(MapCellX);
     FIELD_TO_JSON(MapCellY);

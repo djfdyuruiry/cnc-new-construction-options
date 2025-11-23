@@ -4561,13 +4561,24 @@ TO_JSON(DisplayClass)
     FIELD_TO_JSON(ZoneOffset);
 
     // Use existing method to prep data
-    const_cast<DisplayClass&>(p).Code_Pointers();
-    FIELD_TO_JSON(CursorShapeSave);
-    const_cast<DisplayClass&>(p).Decode_Pointers();
+    short cursor_shape[256];
+
+    if (p.CursorSize) {
+        constexpr auto save_buffer_element_size = std::size(cursor_shape);
+        auto index = 0;
+
+        while (index < save_buffer_element_size - 2 && p.CursorSize[index] != REFRESH_EOL) {
+            cursor_shape[index] = p.CursorSize[index];
+            index++;
+        }
+        cursor_shape[index] = REFRESH_EOL;
+    }
+
+    FIELD_VALUE_TO_JSON(CursorShapeSave, cursor_shape);
 
     FIELD_TO_JSON(ProximityCheck);
     OBJECT_TARGET_PTR_TO_JSON(PendingObjectPtr);
-    //TARGET_TO_JSON(PendingObject);  //? Needed - Possible?
+    TECHNO_TYPE_PTR_REF_TO_JSON(PendingObject);  //? Needed - Possible?
     CONVERT_TD_FIELD_TO_JSON(PendingHouse);
     FIELD_TO_JSON(TacPixelX);
     FIELD_TO_JSON(TacPixelY);
@@ -4601,7 +4612,7 @@ FROM_JSON(DisplayClass)
 
     FIELD_FROM_JSON(ProximityCheck);
     OBJECT_TARGET_PTR_FROM_JSON(PendingObjectPtr);
-    //TARGET_FROM_JSON(PendingObject, ObjectTypeClass); //? Needed - Possible?
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(DisplayClass, PendingObject, ObjectTypeClass);
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
     FIELD_FROM_JSON(TacPixelX);
     FIELD_FROM_JSON(TacPixelY);
