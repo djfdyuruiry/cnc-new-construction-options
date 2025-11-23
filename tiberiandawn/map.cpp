@@ -2083,19 +2083,16 @@ TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);
 
-    auto cells = nlohmann::json::array();
+    auto cells = nlohmann::json::object();
 
     for (CELL cell = 0; cell < static_cast<CELL>(MAP_CELL_TOTAL); cell++) {
         if (!p[cell].Should_Save()) {
             continue;
         }
 
-        auto cell_pair = nlohmann::json::object();
+        const auto cell_key = std::format("{}", static_cast<int>(cell));
 
-        cell_pair.emplace(NAMEOF(cell), cell);
-        cell_pair.emplace("value", p[cell]);
-
-        cells.push_back(cell_pair);
+        cells.emplace(cell_key, p[cell]);
     }
 
     FIELD_VALUE_TO_JSON(Array, cells);
@@ -2121,10 +2118,21 @@ FROM_JSON(MapClass)
 {
     BASE_CLASS_FROM_JSON(GScreenClass);
 
-    for (const auto& cell_pair : j.at(NAMEOF(Array))) {
-        const auto cell = cell_pair.at(NAMEOF(cell)).get<CELL>();
+    const auto& cells = j.at(NAMEOF(Array));
 
-        from_json(cell_pair.at(NAMEOF(value)), p[cell]);
+    if (!cells.is_object()) {
+        CNC_LOG_ERROR(
+            "Invalid JSON value {}, object expected - actual type: {}",
+            NAMEOF(Array),
+            cells.type_name()
+        );
+        return;
+    }
+
+    for (const auto& [cell_key, cell_json] : cells.items()) {
+        const auto cell = static_cast<CELL>(std::stoi(cell_key));
+
+        from_json(cell_json, p[cell]);
     }
 
     FIELD_FROM_JSON(MapCellX);
