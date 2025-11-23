@@ -229,17 +229,18 @@ public:
     {
         CNC_LOG_DEBUG("Serializing TFixedIHeapClass holding type: {}", typeid(T).name());
 
-        j = nlohmann::json::object();
+        if (p.ActiveCount == 0) {
+            j = nlohmann::json::object();
+            return;
+        }
 
         auto& mutable_p = const_cast<TFixedIHeapClass<T>&>(p);
 
-        for (auto i = 0U; i < p.ActiveCount; i++) {
+        for (auto i = 0; i < p.ActiveCount; i++) {
             const auto ptr = mutable_p.Ptr(i);
             const auto id = std::format("{}", mutable_p.ID(ptr));
 
-            const auto& ref = *ptr;
-
-            to_json(j[id], ref);
+            j.emplace(id, *ptr);
         }
     }
 
@@ -258,10 +259,7 @@ public:
 
             new (ptr) T(NoInitClass());
 
-            T& ref = *ptr;
-
-            // TODO: Investigate if any further re-hydration required (code/decode logic)
-            from_json(val, ref);
+            from_json(val, *ptr);
         }
     }
 };
