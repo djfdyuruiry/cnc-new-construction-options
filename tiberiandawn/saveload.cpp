@@ -764,6 +764,7 @@ bool Get_Savefile_Info(int id, char* buf, unsigned& scenp, HousesType& housep)
     strcpy(buf, header.Description.c_str());
 
     if (header.Version != "1.0") {
+        CNC_LOG_ERROR("Detected save file '{}' with unsupported version: {}", file_name, header.Version);
         return false;
     }
 
