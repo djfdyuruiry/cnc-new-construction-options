@@ -787,6 +787,8 @@ TARGET BulletClass::As_Target(void) const
 
 TO_JSON(BulletClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(ObjectClass);
     BASE_CLASS_TO_JSON(FlyClass);
     BASE_CLASS_TO_JSON(FuseClass);

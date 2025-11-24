@@ -1382,6 +1382,8 @@ void AnimClass::Set_Visible_Flags(unsigned flags)
 
 TO_JSON(AnimClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(ObjectClass);
     BASE_CLASS_TO_JSON(StageClass);
 

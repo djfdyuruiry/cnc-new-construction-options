@@ -412,6 +412,8 @@ void OverlayClass::Write_INI(CCINIClass& ini)
 
 TO_JSON(OverlayClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(ObjectClass);
 
     FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? OVERLAY_NONE : p.Class->Type));

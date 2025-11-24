@@ -375,6 +375,8 @@ TemplateClass::TemplateClass(TemplateType type, CELL pos)
 
 TO_JSON(TemplateClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(ObjectClass);
 
     TECHNO_TYPE_PTR_REF_TO_JSON(Class);

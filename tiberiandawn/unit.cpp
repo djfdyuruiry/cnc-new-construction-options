@@ -4396,6 +4396,8 @@ RTTIType UnitClass::What_Am_I(void) const
 
 TO_JSON(UnitClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(TarComClass);
 
     CONVERT_TD_FIELD_TO_JSON(Flagged);

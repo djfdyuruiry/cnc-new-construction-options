@@ -5701,6 +5701,8 @@ bool BuildingClass::Rally_Unit(FootClass& unit)
 
 TO_JSON(BuildingClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(TechnoClass);
 
     TECHNO_TYPE_PTR_REF_TO_JSON(Class);

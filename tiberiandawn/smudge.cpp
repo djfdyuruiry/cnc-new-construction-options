@@ -388,6 +388,8 @@ void SmudgeClass::Disown(CELL cell)
 
 TO_JSON(SmudgeClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(ObjectClass);
 
     FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? SMUDGE_NONE : p.Class->Type));

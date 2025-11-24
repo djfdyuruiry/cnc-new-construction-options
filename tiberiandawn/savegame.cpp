@@ -592,11 +592,6 @@ bool SaveGame::Write_Globals() const
     from_json(GameCellTriggers, CellTriggers);
     from_json(GameHouseTriggers, HouseTriggers);
 
-    // Map
-    Map.Free_Cells();
-    Map.Alloc_Cells();
-    Map.Init_Cells();
-
     from_json(GameMap, reinterpret_cast<MouseClass&>(Map));
 
     if (Map.Theater != LastTheater) {

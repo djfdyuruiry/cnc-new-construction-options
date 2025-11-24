@@ -3571,6 +3571,8 @@ void AircraftClass::Set_Reinforcement_Delay(int delay)
 
 TO_JSON(AircraftClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(FootClass);
     BASE_CLASS_TO_JSON(FlyClass);
 

@@ -153,6 +153,7 @@ private:
     static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
 };
 
+// TODO: Make whole save game object graph versioned (append v1 to all types and change file name)
 // TODO: DLLSave logic clone for remastered support
 // TODO: Lua state save and restore (what does this look like? API for scripters to flag values as persisting?)
 class SaveGame

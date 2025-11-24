@@ -1489,6 +1489,8 @@ void TeamClass::Suspend_Teams(int priority)
 
 TO_JSON(TeamClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(AbstractClass);
 
     OBJECT_TARGET_PTR_TO_JSON(Class);

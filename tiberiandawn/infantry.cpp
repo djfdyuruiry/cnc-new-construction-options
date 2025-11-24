@@ -3316,6 +3316,8 @@ bool InfantryClass::Is_Infantry(void) const
 
 TO_JSON(InfantryClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     BASE_CLASS_TO_JSON(FootClass);
 
     TECHNO_TYPE_PTR_REF_TO_JSON(Class);

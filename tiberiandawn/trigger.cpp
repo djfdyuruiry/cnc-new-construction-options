@@ -1483,6 +1483,8 @@ static void Do_All_To_Hunt(void)
 
 TO_JSON(TriggerClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     OBJECT_TARGET_PTR_TO_JSON(Team);
     BITFIELD_TO_JSON(IsActive);
     CONVERT_TD_FIELD_TO_JSON(IsPersistant);

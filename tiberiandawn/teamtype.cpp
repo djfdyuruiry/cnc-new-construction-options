@@ -924,6 +924,8 @@ FROM_JSON(TeamMissionStruct)
 
 TO_JSON(TeamTypeClass)
 {
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
     // Base AbstractTypeClass fields; included here to prevent
     // advertising AbstractTypeClass to/from json functions which
     // may cause unsupported types to be serialized incorrectly, since

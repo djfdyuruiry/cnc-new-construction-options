@@ -353,7 +353,7 @@ nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(
 
 #define TYPE_TO_REF_CASE(RTTI, KIND, TYPE) case RTTI: \
     reference.Kind = KIND; \
-    reference.Instance = To_String(static_cast<const TYPE*>(source)->Type); \
+    reference.Instance = To_String(dynamic_cast<const TYPE*>(source)->Type); \
     break;
 
 nlohmann::json TdTypeConverter::Techno_Type_Target_To_Json(const ObjectTypeClass* source)
