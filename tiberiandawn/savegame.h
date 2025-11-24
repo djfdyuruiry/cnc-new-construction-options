@@ -158,6 +158,8 @@ private:
 class SaveGame
 {
 public:
+    // Keep a consistent line seperator, ensuring save files are platform-agnostic.
+    // (JSON standard already ensures all text is UTF-8, so we just need to worry about this)
     static constexpr char LINE_SEPERATOR = '\n';
 
     SaveGameHeader Header;
