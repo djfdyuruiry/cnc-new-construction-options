@@ -106,6 +106,26 @@ public:
             }
 
             type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
+
+            if (enum_info.AllowNonEnumValuesInRange) {
+                // we need to fill in the gaps between types as DirType instances can be bit-shifted
+                for (auto i = static_cast<int>(enum_info.MaximumToInclude); i <= static_cast<int>(enum_info.MaximumToInclude); ++i) {
+                    const auto instance = static_cast<T>(i);
+
+                    if (enum_info.Is_Excluded(instance)) {
+                        continue;
+                    }
+
+                    if (CncStringUtils::Is_Blank(magic_enum::enum_name(instance_pairs))) {
+                        const auto ini_string = std::format("{}", i);
+
+                        std::pair<T, std::string> pair = { instance, ini_string };
+
+                        instance_pairs.emplace_back(pair);
+                    }
+                }
+            }
+
         });
 
         return *type_map;
@@ -141,9 +161,21 @@ public:
         }
 
         // use first value as default (either X_NONE or first valid value)
-        return instance_string.value_or(
-            type_map.First_Backward()
-        );
+        const auto result = instance_string.has_value()
+            ? *instance_string
+            : To_String(type_map.First_Forward());
+
+        if (!instance_string.has_value()) {
+            CNC_LOGGER_WARN(
+                "Attempt was made to convert excluded value ({}/{}) of type '{}' to string, returning default value: {}",
+                magic_enum::enum_name(instance),
+                static_cast<int>(instance),
+                Get_Type_Name<T>(),
+                result
+            );
+        }
+
+        return result;
     }
 
     template<class T>

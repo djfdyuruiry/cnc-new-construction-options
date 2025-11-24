@@ -1727,7 +1727,6 @@ TO_JSON(ObjectClass)
     OBJECT_TARGET_PTR_TO_JSON(Next);
     OBJECT_TARGET_PTR_TO_JSON(Trigger);
     FIELD_TO_JSON(Strength);
-
 }
 
 FROM_JSON(ObjectClass)

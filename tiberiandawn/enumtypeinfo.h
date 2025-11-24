@@ -21,18 +21,21 @@ public:
     const T MaximumToInclude;
     const TwoWayMap<T, std::string> PatchTable;
     const std::vector<T> Excluded;
+    const bool AllowNonEnumValuesInRange;
 
     EnumTypeInfo(
         const std::string_view& prefix,
         const T& minimum_to_include,
         const T& maximum_to_include,
         const TwoWayMap<T, std::string>& patch_table = {},
-        const std::vector<T>& excluded = {}
+        const std::vector<T>& excluded = {},
+        const bool include_invalid_values_in_range = false
     ) : Prefix(prefix),
         MinimumToInclude(minimum_to_include),
         MaximumToInclude(maximum_to_include),
         PatchTable(patch_table),
-        Excluded(excluded) {}
+        Excluded(excluded),
+        IncludeInvalidValuesInRange(include_invalid_values_in_range) {}
 
     std::string Strip_Prefix(const std::string& subject) const
     {
@@ -54,7 +57,7 @@ public:
             return true;
         }
 
-        return std::find(Excluded.begin(), Excluded.end(), instance) != Excluded.end();
+        return std::ranges::contains(Excluded, instance);
     }
 
     std::optional<std::string> Get_Patch_String(const T& instance) const

@@ -9,8 +9,7 @@
 /*
  * SaveGame bugs
  *
- * - Infantry are glitched out (something to do with Overlapping on CELLs not de-serializing/de-coding correcty?)
- * - Unit speeds seem incorrect (Tanks too fast etc.)
+ *   - Terrain that should be unpassable is passable
  *
  */
 

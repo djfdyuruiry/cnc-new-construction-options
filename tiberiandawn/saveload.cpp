@@ -410,13 +410,6 @@ bool Load_Game(const char* file_name)
 
     Decode_All_Pointers(save.Header.Parse_Player_House_Type());
 
-    auto bullet = Bullets.Raw_Ptr(0);
-    auto anim = Anims.Raw_Ptr(0);
-    auto air = Map.Layer[LAYER_AIR].Count() > 0 ? Map.Layer[LAYER_AIR][0] : nullptr;
-    auto grnd = Map.Layer[LAYER_GROUND].Count() > 0 ? Map.Layer[LAYER_GROUND][0] : nullptr;
-    auto top = Map.Layer[LAYER_TOP].Count() > 0 ? Map.Layer[LAYER_TOP][0] : nullptr;
-    CNC_LOG_INFO("{} ... {} ... {} ... {} ... {}", bullet->Class->IniName, dynamic_cast<const AnimTypeClass&>(anim->Class_Of()).IniName, (void*)air, (void*)grnd, (void*)top);
-
     Call_Back();
 
     Map.Init_IO();
@@ -1260,7 +1253,7 @@ void Decode_All_Pointers_Binary()
  * HISTORY:                                                                *
  *   01/12/1995 BR : Created.                                              *
  *=========================================================================*/
-bool Get_Savefile_Info(int id, char* buf, unsigned& scenp, HousesType& housep)
+bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep)
 {
     const auto file_name = std::format("SAVEGAME.{:03d}", id);
 
@@ -1281,6 +1274,64 @@ bool Get_Savefile_Info(int id, char* buf, unsigned& scenp, HousesType& housep)
     }
 
     return true;
+}
+
+bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* housep)
+{
+    CDFileClass file;
+    char name[_MAX_FNAME + _MAX_EXT];
+    unsigned int version;
+    char descr_buf[DESCRIP_MAX];
+
+    /*
+    **	Generate the filename to load
+    */
+    sprintf(name, "SAVEGAME.%03d", id);
+
+    /*
+    **	If the file opens OK, read the file
+    */
+    if (file.Open(name, READ)) {
+
+        /*
+        **	Read in the description, scenario #, and the house
+        */
+        if (file.Read(descr_buf, DESCRIP_MAX) != DESCRIP_MAX) {
+            file.Close();
+            return (false);
+        }
+
+        descr_buf[strlen(descr_buf) - 2] = '\0'; // trim off CR/LF
+        strcpy(buf, descr_buf);
+
+        if (file.Read(scenp, sizeof(unsigned)) != sizeof(unsigned)) {
+            file.Close();
+            return (false);
+        }
+
+        if (file.Read(housep, sizeof(HousesType)) != sizeof(HousesType)) {
+            file.Close();
+            return (false);
+        }
+
+        /*
+        **	Read & verify the save-game version #
+        */
+        if (file.Read(&version, sizeof(version)) != sizeof(version)) {
+            file.Close();
+            return (false);
+        }
+
+        if (version != SAVEGAME_VERSION) {
+            file.Close();
+            return (false);
+        }
+
+        file.Close();
+
+        return (true);
+    }
+    return (false);
 }
 
 /***************************************************************************

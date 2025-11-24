@@ -2827,21 +2827,30 @@ TO_JSON(CellClass)
     CONVERT_TD_FIELD_TO_JSON(Owner);
     CONVERT_TD_FIELD_TO_JSON(InfType);
 
-    FIELD_VALUE_TO_JSON(OccupierPtr, p.Cell_Occupier() ? OBJECT_PTR_TO_TARGET(p.OccupierPtr) : static_cast<TARGET>(0));
+    FIELD_VALUE_TO_JSON(OccupierPtr, p.Cell_Occupier() ? OBJECT_PTR_TO_TARGET(p.OccupierPtr) : TARGET_NONE);
 
     auto overlapper = nlohmann::json::array();
 
     for (int index = 0; index < ARRAY_SIZE(p.Overlapper); index++) {
         overlapper[index] = (p.Overlapper[index] != nullptr && p.Overlapper[index]->IsActive)
             ? OBJECT_PTR_TO_TARGET(p.Overlapper[index])
-            : static_cast<TARGET>(0);
+            : TARGET_NONE;
     }
 
     FIELD_VALUE_TO_JSON(Overlapper, overlapper);
 
     FIELD_TO_JSON(IsMappedByPlayerMask);
     FIELD_TO_JSON(IsVisibleByPlayerMask);
-    FIELD_VALUE_TO_JSON(Flag, p.Flag.Composite);
+
+    BITFIELD_TO_JSON(Flag.Occupy.Center);
+    BITFIELD_TO_JSON(Flag.Occupy.NW);
+    BITFIELD_TO_JSON(Flag.Occupy.NE);
+    BITFIELD_TO_JSON(Flag.Occupy.SW);
+    BITFIELD_TO_JSON(Flag.Occupy.SE);
+    BITFIELD_TO_JSON(Flag.Occupy.Vehicle);
+    BITFIELD_TO_JSON(Flag.Occupy.Monolith);
+    BITFIELD_TO_JSON(Flag.Occupy.Building);
+
     CONVERT_TD_FIELD_TO_JSON(Land);
     CONVERT_TD_FIELD_TO_JSON(OverrideLand);
     OBJECT_TARGET_PTR_TO_JSON(CTFFlag);
@@ -2869,7 +2878,17 @@ FROM_JSON(CellClass)
     OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CellClass, Overlapper, ObjectClass);
     FIELD_FROM_JSON(IsMappedByPlayerMask);
     FIELD_FROM_JSON(IsVisibleByPlayerMask);
-    FIELD_FROM_JSON_TO_VALUE(Flag, p.Flag.Composite);
+
+    p.Flag.Composite = 0;
+
+    BITFIELD_FROM_JSON(Flag.Occupy.Center);
+    BITFIELD_FROM_JSON(Flag.Occupy.NW);
+    BITFIELD_FROM_JSON(Flag.Occupy.NE);
+    BITFIELD_FROM_JSON(Flag.Occupy.SW);
+    BITFIELD_FROM_JSON(Flag.Occupy.SE);
+    BITFIELD_FROM_JSON(Flag.Occupy.Vehicle);
+    BITFIELD_FROM_JSON(Flag.Occupy.Monolith);
+    BITFIELD_FROM_JSON(Flag.Occupy.Building);
     PARSE_TD_FIELD_FROM_JSON(CellClass, Land, LandType);
     PARSE_TD_FIELD_FROM_JSON(CellClass, OverrideLand, LandType);
     TARGET_PTR_FROM_JSON_WITH_TYPE(CTFFlag, AnimClass);
