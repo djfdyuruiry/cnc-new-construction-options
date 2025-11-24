@@ -112,6 +112,7 @@ bool Save_Game(int id, char* descr)
     sprintf(name, "SAVEGAME.%03d", id);
 
     return Save_Game(name, descr);
+    // return Save_Game_Binary(name, descr);
 }
 
 /*
@@ -140,6 +141,160 @@ bool Save_Game(const char* file_name, const char* descr)
     }
 
     return save.To_File(save_file);
+}
+
+/*
+** Version that takes file name. ST - 9/9/2019 11:10AM
+*/
+bool Save_Game_Binary(const char* file_name, const char* descr)
+{
+    CDFileClass file;
+    int i;
+    unsigned int version;
+    unsigned scenario;
+    HousesType house;
+    char descr_buf[DESCRIP_MAX];
+
+    scenario = Scen.Scenario;        // get current scenario #
+    house = PlayerPtr->Class->House; // get current house
+
+    /*
+    **	Code everybody's pointers
+    */
+    Code_All_Pointers();
+
+    /*
+    **	Open the file
+    */
+    if (!file.Open(file_name, WRITE)) {
+        Decode_All_Pointers_Binary();
+        return (false);
+    }
+#ifdef REMASTER_BUILD
+    /*
+    ** Save the DLLs variables first, so we can do a version check in the DLL when we begin the load
+    */
+    if (RunningAsDLL) {
+        if (!DLLSave(file)) {
+            file.Close();
+            Decode_All_Pointers_Binary();
+            return false;
+        }
+    }
+#endif
+    /*
+    **	Save the description, scenario #, and house
+    **	(scenario # & house are saved separately from the actual Scenario &
+    **	PlayerPtr globals for convenience; we can quickly find out which
+    **	house & scenario this save-game file is for by reading these values.
+    **	Also, PlayerPtr is stored in a coded form in Save_Misc_Values(),
+    **	which may or may not be a HousesType number; so, saving 'house'
+    **	here ensures we can always pull out the house for this file.)
+    */
+    sprintf(descr_buf, "%s\r\n", descr);   // put CR-LF after text
+    descr_buf[strlen(descr_buf) + 1] = 26; // put CTRL-Z after NULL
+
+    if (file.Write(descr_buf, DESCRIP_MAX) != DESCRIP_MAX) {
+        file.Close();
+        return (false);
+    }
+
+    if (file.Write(&scenario, sizeof(scenario)) != sizeof(scenario)) {
+        file.Close();
+        return (false);
+    }
+
+    if (file.Write(&house, sizeof(house)) != sizeof(house)) {
+        file.Close();
+        return (false);
+    }
+
+    /*
+    **	Save the save-game version, for loading verification
+    */
+    version = SAVEGAME_VERSION;
+
+    if (file.Write(&version, sizeof(version)) != sizeof(version)) {
+        file.Close();
+        return (false);
+    }
+
+    Call_Back();
+    /*
+    **	Save the map.  The map must be saved first, since it saves the Theater.
+    */
+    Map.Save(file);
+
+    Call_Back();
+    /*
+    **	Save all game objects.  This code saves every object that's stored in a
+    **	TFixedIHeap class.
+    */
+    if (!Houses.Save(file) || !TeamTypes.Save(file) || !Teams.Save(file) || !Triggers.Save(file) || !Aircraft.Save(file)
+        || !Anims.Save(file) || !Buildings.Save(file) || !Bullets.Save(file) || !Infantry.Save(file)
+        || !Overlays.Save(file) || !Smudges.Save(file) || !Templates.Save(file) || !Terrains.Save(file)
+        || !Units.Save(file) || !Factories.Save(file)) {
+        file.Close();
+
+        Decode_All_Pointers_Binary();
+
+        return (false);
+    }
+
+    Call_Back();
+    /*
+    **	Save the Logic & Map layers
+    */
+    if (!Logic.Save(file)) {
+        file.Close();
+        Decode_All_Pointers_Binary();
+        return (false);
+    }
+
+    for (i = 0; i < LAYER_COUNT; i++) {
+        if (!Map.Layer[i].Save(file)) {
+            file.Close();
+            Decode_All_Pointers_Binary();
+            return (false);
+        }
+    }
+
+    /*
+    **	Save the Score
+    */
+    if (!Score.Save(file)) {
+        file.Close();
+        Decode_All_Pointers_Binary();
+        return (false);
+    }
+
+    /*
+    **	Save the AI Base
+    */
+    if (!Base.Save(file)) {
+        file.Close();
+        Decode_All_Pointers_Binary();
+        return (false);
+    }
+
+    /*
+    **	Save miscellaneous variables.
+    */
+    if (!Save_Misc_Values(file)) {
+        file.Close();
+        Decode_All_Pointers_Binary();
+        return (false);
+    }
+
+    Call_Back();
+
+    /*
+    **	Close the file; we're done
+    */
+    file.Close();
+    Decode_All_Pointers_Binary();
+
+    return (true);
 }
 
 /***************************************************************************
@@ -191,6 +346,7 @@ bool Load_Game(int id)
     sprintf(name, "SAVEGAME.%03d", id);
 
     return Load_Game(name);
+    // return Load_Game_Binary(name);
 }
 
 /*
@@ -254,6 +410,13 @@ bool Load_Game(const char* file_name)
 
     Decode_All_Pointers(save.Header.Parse_Player_House_Type());
 
+    auto bullet = Bullets.Raw_Ptr(0);
+    auto anim = Anims.Raw_Ptr(0);
+    auto air = Map.Layer[LAYER_AIR].Count() > 0 ? Map.Layer[LAYER_AIR][0] : nullptr;
+    auto grnd = Map.Layer[LAYER_GROUND].Count() > 0 ? Map.Layer[LAYER_GROUND][0] : nullptr;
+    auto top = Map.Layer[LAYER_TOP].Count() > 0 ? Map.Layer[LAYER_TOP][0] : nullptr;
+    CNC_LOG_INFO("{} ... {} ... {} ... {} ... {}", bullet->Class->IniName, dynamic_cast<const AnimTypeClass&>(anim->Class_Of()).IniName, (void*)air, (void*)grnd, (void*)top);
+
     Call_Back();
 
     Map.Init_IO();
@@ -277,6 +440,236 @@ bool Load_Game(const char* file_name)
         HouseClass* hptr = HouseClass::As_Pointer(house);
         if (hptr && hptr->IsActive) {
             hptr->Init_Data(hptr->RemapColor, hptr->ActLike, hptr->Credits);
+        }
+    }
+
+#ifdef DEMO
+    if (Scen.Scenario != 10 && Scen.Scenario != 1 && Scen.Scenario != 6) {
+        Clear_Scenario();
+        return (false);
+    }
+#endif
+
+    Call_Back();
+    return (true);
+}
+
+bool Load_Game_Binary(const char* file_name)
+{
+    CDFileClass file;
+    int i;
+    unsigned int version;
+    unsigned scenario;
+    HousesType house;
+    char descr_buf[DESCRIP_MAX];
+
+    /*
+    **	Open the file
+    */
+    if (!file.Open(file_name, READ)) {
+        return (false);
+    }
+#ifdef REMASTER_BUILD
+    /*
+    ** Load the DLLs variables first, in case we need to do something different based on version
+    */
+    if (RunningAsDLL) {
+        if (!DLLLoad(file)) {
+            file.Close();
+            return false;
+        }
+    }
+#endif
+    /*
+    **	Read & discard the save-game's header info
+    */
+    if (file.Read(descr_buf, DESCRIP_MAX) != DESCRIP_MAX) {
+        file.Close();
+        return (false);
+    }
+
+    if (file.Read(&scenario, sizeof(scenario)) != sizeof(scenario)) {
+        file.Close();
+        return (false);
+    }
+
+    if (file.Read(&house, sizeof(house)) != sizeof(house)) {
+        file.Close();
+        return (false);
+    }
+
+    Call_Back();
+    /*
+    **	Clear the scenario so we start fresh; this calls the Init_Clear() routine
+    **	for the Map, and all object arrays.  It has the following important
+    **	effects:
+    **	- Every cell is cleared to 0's, via MapClass::Init_Clear()
+    **	- All heap elements' are cleared
+    **	- The Houses are Initialized, which also clears their HouseTriggers
+    **	  array
+    **	- The map's Layers & Logic Layer are cleared to empty
+    **	- The list of currently-selected objects is cleared
+    */
+    Clear_Scenario();
+
+    /*
+    **	Read in & verify the save-game ID code
+    */
+    if (file.Read(&version, sizeof(version)) != sizeof(version)) {
+        file.Close();
+        return (false);
+    }
+
+    if (version != SAVEGAME_VERSION) {
+        file.Close();
+        return (false);
+    }
+
+    Call_Back();
+    /*
+    **	Set the required CD to be in the drive according to the scenario
+    **	loaded.
+    */
+    if (RequiredCD != -2) {
+        if (scenario >= 20 && scenario < 60 && GameToPlay == GAME_NORMAL) {
+            RequiredCD = 2;
+        } else {
+            if (scenario >= 60) {
+                /*
+                ** This is a gateway bonus scenario
+                */
+                RequiredCD = -1;
+            } else {
+                if (house == HOUSE_GOOD) {
+                    RequiredCD = 0;
+                } else {
+                    RequiredCD = 1;
+                }
+            }
+        }
+    }
+    if (!Force_CD_Available(RequiredCD)) {
+        Prog_End("Load_Game - CD not found", true);
+        if (!RunningAsDLL) {
+            exit(EXIT_FAILURE);
+        }
+        return false;
+    }
+
+    Call_Back();
+
+    /*
+    **	Load the map.  The map comes first, since it loads the Theater & init's
+    **	mixfiles.  The map calls all the type-class's Init routines, telling them
+    **	what the Theater is; this must be done before any objects are created, so
+    **	they'll be properly created.
+    */
+    Map.Load(file);
+
+    Call_Back();
+    /*
+    **	Load the object data.
+    */
+    if (!Houses.Load(file) || !TeamTypes.Load(file) || !Teams.Load(file) || !Triggers.Load(file) || !Aircraft.Load(file)
+        || !Anims.Load(file) || !Buildings.Load(file) || !Bullets.Load(file) || !Infantry.Load(file)
+        || !Overlays.Load(file) || !Smudges.Load(file) || !Templates.Load(file) || !Terrains.Load(file)
+        || !Units.Load(file) || !Factories.Load(file)) {
+        file.Close();
+        return (false);
+    }
+
+    Call_Back();
+    /*
+    **	Load the Logic & Map Layers
+    */
+    if (!Logic.Load(file)) {
+        file.Close();
+        return (false);
+    }
+    for (i = 0; i < LAYER_COUNT; i++) {
+        if (!Map.Layer[i].Load(file)) {
+            file.Close();
+            return (false);
+        }
+    }
+
+    Call_Back();
+    /*
+    **	Load the Score
+    */
+    if (!Score.Load(file)) {
+        file.Close();
+        return (false);
+    }
+
+    /*
+    **	Load the AI Base
+    */
+    if (!Base.Load(file)) {
+        file.Close();
+        return (false);
+    }
+
+    /*
+    **	Load miscellaneous variables, including the map size & the Theater
+    */
+    if (!Load_Misc_Values(file)) {
+        file.Close();
+        return (false);
+    }
+
+    file.Close();
+
+    /*
+    ** Load rules from scenario INI filename stored in save game data
+    ** (if present and available)
+    */
+    if (strlen(Scen.FileName) > 0) {
+        if (CCFileClass ini_file(Scen.FileName); ini_file.Is_Available()) {
+            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
+                Rule.Init(ini);
+                Rule.Init_Types(ini);
+            } else {
+                CNC_LOG_ERROR(
+                    "Failed to load scenario INI filename stored in save game data: {}",
+                    Scen.FileName
+                );
+            }
+        }
+    } else {
+        CNC_LOG_DEBUG("No scenario INI filename found in save game data");
+    }
+
+    Decode_All_Pointers_Binary();
+    Map.Init_IO();
+    Map.Flag_To_Redraw(true);
+
+    Fixup_Scenario();
+
+    ScenarioInit = 0;
+
+    /*
+    ** Fixup remap tables. ST - 2/28/2020 1:50PM
+    ** Only fixup remap of multiplayer houses. On non-remaster renderer, remapping
+    ** Nod breaks Nod radar color because it gets remapped to its primary color,
+    ** which is LTBLUE where it is supposed to be RED. Since only multiplayer colors
+    ** can change colors, this fix only makes sense on multiplayer houses
+    ** - mrparrot 07/12/2021
+    */
+    for (HousesType house = HOUSE_MULTI1; house < MPlayerCount + MPlayerGhosts; house++) {
+        HouseClass* hptr = HouseClass::As_Pointer(house);
+        if (hptr && hptr->IsActive) {
+            hptr->Init_Data(hptr->RemapColor, hptr->ActLike, hptr->Credits);
+        }
+    }
+
+    /*
+    ** Re-init unit trackers. They will be garbage pointers after the load
+    */
+    for (HousesType house = HOUSE_FIRST; house < HOUSE_COUNT; house++) {
+        HouseClass* hptr = HouseClass::As_Pointer(house);
+        if (hptr && hptr->IsActive) {
+            hptr->Init_Unit_Trackers();
         }
     }
 
@@ -629,7 +1022,7 @@ void Code_All_Pointers(void)
  * HISTORY:                                                                                    *
  *   06/24/1995 BRR : Created.                                                                 *
  *=============================================================================================*/
-void Decode_All_Pointers(const HousesType player_house)
+void Decode_All_Pointers(const HousesType& player_house)
 {
     int i, j;
 
@@ -699,7 +1092,126 @@ void Decode_All_Pointers(const HousesType player_house)
     /*
     **	PlayerPtr.
     */
+
     PlayerPtr = HouseClass::As_Pointer(player_house);
+
+    Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, ScenVar);
+
+    /*
+    **	Currently-selected objects.
+    */
+    for (i = 0; i < SelectedObjectsType::COUNT; i++) {
+        DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
+        for (j = 0; j < selection.Count(); j++) {
+            uintptr_t target_as_object_ptr = reinterpret_cast<uintptr_t>(selection[j]);
+            TARGET target = (TARGET)target_as_object_ptr;
+            selection[j] = As_Object(target);
+            Check_Ptr(selection[j], __FILE__, __LINE__);
+        }
+    }
+
+    /*
+    **	Last-Minute Fixups; to resolve these pointers properly requires all other
+    **	pointers to be loaded & decoded.
+    */
+    if (Map.PendingObjectPtr) {
+        Map.PendingObject = &Map.PendingObjectPtr->Class_Of();
+        Check_Ptr((void*)Map.PendingObject, __FILE__, __LINE__);
+        Map.Set_Cursor_Shape(Map.PendingObject->Occupy_List(true));
+    } else {
+        Map.PendingObject = 0;
+        Map.Set_Cursor_Shape(0);
+    }
+}
+
+void Decode_All_Pointers_Binary()
+{
+    int i, j;
+
+    /*
+    **	The Map.
+    */
+    Map.Decode_Pointers();
+
+    /*
+    ** Decode houses first, so we can properly decode all other objects'
+    ** House pointers
+    */
+    Houses.Decode_Pointers();
+#ifdef REMASTER_BUILD
+    /*
+    ** DLL data
+    */
+    DLL_Decode_Pointers();
+#endif
+    /*
+    **	The ArrayOf's.
+    */
+    TeamTypes.Decode_Pointers();
+    Teams.Decode_Pointers();
+    Triggers.Decode_Pointers();
+    Aircraft.Decode_Pointers();
+    Anims.Decode_Pointers();
+    Buildings.Decode_Pointers();
+    Bullets.Decode_Pointers();
+    Infantry.Decode_Pointers();
+    Overlays.Decode_Pointers();
+    Smudges.Decode_Pointers();
+    Templates.Decode_Pointers();
+    Terrains.Decode_Pointers();
+    Units.Decode_Pointers();
+    Factories.Decode_Pointers();
+
+    // CellTriggers are decoded as a side effect of CellClass::Decode_Pointers method (Map.Decode_Pointers calls this)
+    // HouseTriggers are restored via the TriggerClass::Load method
+
+    /*
+    **	The Layers.
+    */
+    Logic.Decode_Pointers();
+    for (i = 0; i < LAYER_COUNT; i++) {
+        Map.Layer[i].Decode_Pointers();
+    }
+
+    /*
+    **	The Score.
+    */
+    Score.Decode_Pointers();
+
+    /*
+    **	The Base.
+    */
+    Base.Decode_Pointers();
+
+    /*
+    **	PlayerPtr.
+    */
+
+    // binary player save logic
+    PlayerPtr = HouseClass::As_Pointer(static_cast<HousesType>(reinterpret_cast<intptr_t>(PlayerPtr)));
+    Whom = PlayerPtr->Class->House;
+
+    switch (PlayerPtr->Class->House) {
+        case HOUSE_GOOD:
+            ScenPlayer = SCEN_PLAYER_GDI;
+            break;
+
+        case HOUSE_BAD:
+            ScenPlayer = SCEN_PLAYER_NOD;
+            break;
+
+        case HOUSE_JP:
+            ScenPlayer = SCEN_PLAYER_JP;
+            break;
+
+        default:
+            break;
+    }
+    Check_Ptr(PlayerPtr, __FILE__, __LINE__);
+
+    if (PlayerPtr->ActLike == HOUSE_JP) {
+        ScenPlayer = SCEN_PLAYER_JP;
+    }
 
     Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, ScenVar);
 

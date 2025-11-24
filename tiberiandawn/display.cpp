@@ -4559,26 +4559,9 @@ TO_JSON(DisplayClass)
     FIELD_TO_JSON(TacLeptonHeight);
     FIELD_TO_JSON(ZoneCell);
     FIELD_TO_JSON(ZoneOffset);
-
-    // Use existing method to prep data
-    short cursor_shape[256];
-
-    if (p.CursorSize) {
-        constexpr auto save_buffer_element_size = std::size(cursor_shape);
-        auto index = 0;
-
-        while (index < save_buffer_element_size - 2 && p.CursorSize[index] != REFRESH_EOL) {
-            cursor_shape[index] = p.CursorSize[index];
-            index++;
-        }
-        cursor_shape[index] = REFRESH_EOL;
-    }
-
-    FIELD_VALUE_TO_JSON(CursorShapeSave, cursor_shape);
-
     FIELD_TO_JSON(ProximityCheck);
     OBJECT_TARGET_PTR_TO_JSON(PendingObjectPtr);
-    TECHNO_TYPE_PTR_REF_TO_JSON(PendingObject);  //? Needed - Possible?
+    // NOTE: PendingObject is handled in saveload.cpp, see: DisplayClass::Decode_Pointers
     CONVERT_TD_FIELD_TO_JSON(PendingHouse);
     FIELD_TO_JSON(TacPixelX);
     FIELD_TO_JSON(TacPixelY);
@@ -4594,6 +4577,22 @@ TO_JSON(DisplayClass)
     FIELD_TO_JSON(BandY);
     FIELD_TO_JSON(NewX);
     FIELD_TO_JSON(NewY);
+
+    // CursorShapeSave array
+    short cursor_shape[256];
+
+    if (p.CursorSize) {
+        constexpr auto save_buffer_element_size = std::size(cursor_shape);
+        auto index = 0;
+
+        while (index < save_buffer_element_size - 2 && p.CursorSize[index] != REFRESH_EOL) {
+            cursor_shape[index] = p.CursorSize[index];
+            index++;
+        }
+        cursor_shape[index] = REFRESH_EOL;
+    }
+
+    FIELD_VALUE_TO_JSON(CursorShapeSave, cursor_shape);
 }
 
 FROM_JSON(DisplayClass)
@@ -4606,13 +4605,9 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(TacLeptonHeight);
     FIELD_FROM_JSON(ZoneCell);
     FIELD_FROM_JSON(ZoneOffset);
-
-    FIELD_FROM_JSON(CursorShapeSave);
-    p.CursorSize = p.CursorShapeSave;
-
     FIELD_FROM_JSON(ProximityCheck);
     OBJECT_TARGET_PTR_FROM_JSON(PendingObjectPtr);
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(DisplayClass, PendingObject, ObjectTypeClass);
+    // NOTE: PendingObject is handled in saveload.cpp, see: DisplayClass::Decode_Pointers
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
     FIELD_FROM_JSON(TacPixelX);
     FIELD_FROM_JSON(TacPixelY);
@@ -4628,4 +4623,5 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(BandY);
     FIELD_FROM_JSON(NewX);
     FIELD_FROM_JSON(NewY);
+    FIELD_FROM_JSON(CursorShapeSave);
 }

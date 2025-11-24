@@ -2043,7 +2043,7 @@ FROM_JSON(DriveClass)
 {
     BASE_CLASS_FROM_JSON(FootClass);
 
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(DriveClass, Class, UnitTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(DriveClass, Class, UnitTypeClass, UnitType);
     FIELD_FROM_JSON(SimLeptonX);
     FIELD_FROM_JSON(SimLeptonY);
     FIELD_FROM_JSON(Tiberium);

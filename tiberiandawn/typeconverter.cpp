@@ -356,7 +356,7 @@ nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(
     reference.Instance = To_String(dynamic_cast<const TYPE*>(source)->Type); \
     break;
 
-nlohmann::json TdTypeConverter::Techno_Type_Target_To_Json(const ObjectTypeClass* source)
+nlohmann::json TdTypeConverter::Techno_Type_To_Reference_Json(const ObjectTypeClass* source)
 {
     TechnoTypeClassJsonReference reference;
 
@@ -385,29 +385,7 @@ nlohmann::json TdTypeConverter::Techno_Type_Target_To_Json(const ObjectTypeClass
     return reference;
 }
 
-nlohmann::json TdTypeConverter::Techno_Type_Target_Array_To_Json(
-    const TechnoTypeClass* const* source,
-    const unsigned int& length
-)
-{
-    nlohmann::json target = nlohmann::json::array();
-
-    for (auto i = 0; i < length; i++) {
-        const auto element = *(source + i);
-
-        target.push_back(
-            Techno_Type_Target_To_Json(element)
-        );
-    }
-
-    return target;
-}
-
-#define REF_TO_TARGET_CASE(KIND, TYPE) case KIND: \
-    target = Try_Convert_Techno_Type_Ref_To_Target<TYPE>(reference); \
-    break;
-
-TARGET TdTypeConverter::Techno_Type_Target_From_Json_Reference(
+std::optional<TechnoTypeClassJsonReference> TdTypeConverter::Techno_Type_Reference_From_Json(
     const nlohmann::json& source,
     const std::string& json_path
 )
@@ -419,44 +397,10 @@ TARGET TdTypeConverter::Techno_Type_Target_From_Json_Reference(
             source.type_name()
         );
 
-        return 0;
+        return std::nullopt;
     }
 
-    const TechnoTypeClassJsonReference reference = source;
-    std::optional<TARGET> target;
-    bool unsupported_kind_type = false;
+    TechnoTypeClassJsonReference ref = source;
 
-    switch (reference.Kind) {
-        case KIND_NONE:
-            target = Build_Target(reference.Kind, 0);
-            break;
-
-        REF_TO_TARGET_CASE(KIND_INFANTRY, InfantryType)
-        REF_TO_TARGET_CASE(KIND_UNIT, UnitType)
-        REF_TO_TARGET_CASE(KIND_AIRCRAFT, AircraftType)
-        REF_TO_TARGET_CASE(KIND_BUILDING, StructType)
-        REF_TO_TARGET_CASE(KIND_BULLET, BulletType)
-        REF_TO_TARGET_CASE(KIND_ANIMATION, AnimType)
-        REF_TO_TARGET_CASE(KIND_TERRAIN, TerrainType)
-        REF_TO_TARGET_CASE(KIND_TEMPLATE, TemplateType)
-
-        default:
-            unsupported_kind_type = true;
-    }
-
-    if (unsupported_kind_type) {
-        CNC_LOGGER_ERROR(
-            "Invalid {} JSON value - unsupported Kind type: {}",
-            json_path,
-            To_String(reference.Kind)
-        );
-    } else if (!target.has_value()) {
-        CNC_LOGGER_ERROR(
-            "Invalid {} JSON value - unable to parse Instance as a {}",
-            json_path,
-            To_String(reference.Kind)
-        );
-    }
-
-    return target.value_or(0);
+    return ref;
 }

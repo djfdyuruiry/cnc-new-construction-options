@@ -1417,7 +1417,7 @@ FROM_JSON(AnimClass)
     BITFIELD_FROM_JSON(IsAlternate);
     BITFIELD_FROM_JSON(IsInvisible);
     FIELD_FROM_JSON(VisibleFlags);
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(AnimClass, Class, AnimTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(AnimClass, Class, AnimTypeClass, AnimType);
     FIELD_FROM_JSON(Delay);
     FIELD_FROM_JSON(Accum);
     TARGET_PTR_FROM_JSON_WITH_TYPE(VirtualAnim, AnimClass);

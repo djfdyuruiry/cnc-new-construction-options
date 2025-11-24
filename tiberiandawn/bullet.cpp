@@ -810,7 +810,7 @@ FROM_JSON(BulletClass)
     BASE_CLASS_FROM_JSON(FlyClass);
     BASE_CLASS_FROM_JSON(FuseClass);
 
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BulletClass, Class, BulletTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BulletClass, Class, BulletTypeClass, BulletType);
     TARGET_PTR_FROM_JSON_WITH_TYPE(Payback, TechnoClass);
     FIELD_FROM_JSON(PrimaryFacing);
     BITFIELD_FROM_JSON(IsInaccurate);

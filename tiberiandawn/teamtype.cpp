@@ -949,11 +949,18 @@ TO_JSON(TeamTypeClass)
     CONVERT_TD_FIELD_TO_JSON(House);
     FIELD_TO_JSON(MissionCount);
     FIELD_TO_JSON(MissionList);
+    FIELD_TO_JSON(DesiredNum);
     FIELD_TO_JSON(ClassCount);
 
-    TECHNO_TYPE_PTR_REF_ARRAY_TO_JSON_WITH_SIZE(Class, p.ClassCount);
+    // Class array
+    auto class_array = nlohmann::json::array();
 
-    FIELD_TO_JSON(DesiredNum);
+    for (auto i = 0; i < p.ClassCount; i++) {
+        auto target = TechnoType_To_Target(p.Class[i]);
+        class_array.push_back(target);
+    }
+
+    FIELD_VALUE_TO_JSON(Class, class_array);
 }
 
 FROM_JSON(TeamTypeClass)
@@ -978,9 +985,28 @@ FROM_JSON(TeamTypeClass)
     PARSE_TD_FIELD_FROM_JSON(TeamTypeClass, House, HousesType);
     FIELD_FROM_JSON(MissionCount);
     FIELD_FROM_JSON(MissionList);
+    FIELD_FROM_JSON(DesiredNum);
     FIELD_FROM_JSON(ClassCount);
 
-    TECHNO_TYPE_TARGET_PTR_ARRAY_FROM_JSON_WITH_SIZE(TeamTypeClass, Class, TechnoTypeClass const, p.ClassCount);
+    // Class array
+    const auto class_array = j.at(NAMEOF(Class));
 
-    FIELD_FROM_JSON(DesiredNum);
+    if (class_array.is_array() && class_array.size() <= std::size(p.Class)) {
+        for (auto i = 0; i < class_array.size(); i++) {
+            p.Class[i] = TARGET_TO_PTR_WITH_TYPE(class_array[i].get<TARGET>(), TechnoTypeClass);
+        }
+    } else if (class_array.is_array()) {
+        CNC_LOG_ERROR(
+            "Invalid {} JSON value - expected array with max length of {}, actual length: {}",
+            NAMEOF(Class),
+            std::size(p.Class),
+            class_array.size()
+        );
+    } else {
+        CNC_LOG_ERROR(
+            "Invalid {} JSON value - expected array, actual type: {}",
+            NAMEOF(Class),
+            class_array.type_name()
+        );
+    }
 }

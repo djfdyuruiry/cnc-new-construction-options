@@ -448,12 +448,7 @@ public:
         const unsigned int& length
     );
 
-    static nlohmann::json Techno_Type_Target_To_Json(const ObjectTypeClass* source);
-
-    static nlohmann::json Techno_Type_Target_Array_To_Json(
-        const TechnoTypeClass* const* source,
-        const unsigned int& length
-    );
+    static nlohmann::json Techno_Type_To_Reference_Json(const ObjectTypeClass* source);
 
     template<class T>
     requires std::is_base_of_v<ObjectClass, T>
@@ -492,21 +487,13 @@ public:
         }
     }
 
-    template<class T>
-    requires SupportedByTdTypeConverter<T>
-    static std::optional<TARGET> Try_Convert_Techno_Type_Ref_To_Target(const TechnoTypeClassJsonReference& ref)
-    {
-        if (const auto result = Try_Parse<T>(ref.Instance); result.has_value()) {
-            return Build_Target(ref.Kind, *result);
-        }
+    static std::optional<TechnoTypeClassJsonReference> Techno_Type_Reference_From_Json(
+        const nlohmann::json& source,
+        const std::string& json_path
+    );
 
-        return std::nullopt;
-    }
-
-    static TARGET Techno_Type_Target_From_Json_Reference(const nlohmann::json& source, const std::string& json_path);
-
-    template<class T>
-    requires std::is_base_of_v<ObjectTypeClass, T>
+    template<class T, class U>
+    requires std::is_base_of_v<ObjectTypeClass, T> && SupportedByTdTypeConverter<U>
     static void Techno_Type_Target_From_Json(
         const nlohmann::json& source,
         std::string_view target_name,
@@ -516,53 +503,27 @@ public:
     {
         const auto json_path = std::format("{}.{}", target_name, field_name);
 
-        target = TARGET_TO_PTR_WITH_TYPE(
-            Techno_Type_Target_From_Json_Reference(source, json_path),
-            T
-        );
+        auto reference = Techno_Type_Reference_From_Json(source, json_path);
+
+        auto instance = Get_Default_Value<U>();
+
+        if (reference.has_value()) {
+            auto parsed_instance = Try_Parse<U>(reference->Instance);
+
+            if (parsed_instance.has_value()) {
+                instance = *parsed_instance;
+            } else {
+                CNC_LOGGER_ERROR(
+                    "Failed to parse techo type target instance of type '{}' from string: {}",
+                    Get_Type_Name<U>(),
+                    reference->Instance
+                );
+            }
+        }
+
+        target = reinterpret_cast<T*>(instance);
     }
 
-    template<class T>
-    requires std::is_base_of_v<TechnoTypeClass, T>
-    static void Techno_Type_Target_Array_From_Json(
-        const nlohmann::json& source,
-        std::string_view target_name,
-        std::string_view field_name,
-        T** target,
-        const unsigned int& length
-    )
-    {
-        const auto json_path = std::format("{}.{}", target_name, field_name);
-
-        if (!source.is_array()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected array, actual type: {}",
-                json_path,
-                source.type_name()
-            );
-
-            return;
-        }
-        if (source.size() != length) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected array with {} element, actual length: {}",
-                json_path,
-                length,
-                source.size()
-            );
-            return;
-        }
-
-        for (auto i = 0; i < source.size(); i++) {
-            const auto sub_json_path = std::format("{}[{}]", json_path, i);
-
-            auto& element = *(target + i);
-            element = TARGET_TO_PTR_WITH_TYPE(
-                Techno_Type_Target_From_Json_Reference(source.at(i), sub_json_path),
-                T
-            );
-        }
-    }
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
     static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;

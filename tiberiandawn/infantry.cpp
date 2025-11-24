@@ -3335,7 +3335,7 @@ FROM_JSON(InfantryClass)
 {
     BASE_CLASS_FROM_JSON(FootClass);
 
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(InfantryClass, Class, InfantryTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(InfantryClass, Class, InfantryTypeClass, InfantryType);
     PARSE_TD_FIELD_FROM_JSON(InfantryClass, Doing, DoType);
     FIELD_FROM_JSON(Comment);
     BITFIELD_FROM_JSON(IsTechnician);
@@ -3344,5 +3344,4 @@ FROM_JSON(InfantryClass)
     BITFIELD_FROM_JSON(IsBoxing);
     FIELD_FROM_JSON(StopDriverFrame);
     FIELD_FROM_JSON(Fear);
-
 }

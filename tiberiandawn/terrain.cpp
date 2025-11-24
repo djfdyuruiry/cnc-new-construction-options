@@ -870,6 +870,6 @@ FROM_JSON(TerrainClass)
 {
     BASE_CLASS_FROM_JSON(ObjectClass);
 
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TerrainClass, Class, TerrainTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TerrainClass, Class, TerrainTypeClass, TerrainType);
 }
 

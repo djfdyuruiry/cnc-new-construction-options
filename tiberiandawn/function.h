@@ -629,12 +629,15 @@ bool Save_Misc_Values(FileClass& file);
 bool Get_Savefile_Info(int id, char* buf, unsigned& scenp, HousesType& housep);
 bool Load_Game(int id);
 bool Load_Game(const char* file_name);
+bool Load_Game_Binary(const char* file_name);
 bool Save_Game(int id, char* descr);
 bool Save_Game(const char* file_name, const char* descr);
+bool Save_Game_Binary(const char* file_name, const char* descr);
 TARGET TechnoType_To_Target(TechnoTypeClass const* ptr);
 TechnoTypeClass const* Target_To_TechnoType(TARGET target);
 void Code_All_Pointers(void);
-void Decode_All_Pointers(const HousesType player_house);
+void Decode_All_Pointers(const HousesType& house);
+void Decode_All_Pointers_Binary();
 void Dump(void);
 
 /*

@@ -5730,7 +5730,7 @@ FROM_JSON(BuildingClass)
 {
     BASE_CLASS_FROM_JSON(TechnoClass);
 
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BuildingClass, Class, BuildingTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BuildingClass, Class, BuildingTypeClass, StructType);
 
     p.Factory = reinterpret_cast<FactoryClass*>(static_cast<intptr_t>(j.at(NAMEOF(Factory)).get<int>()));
 

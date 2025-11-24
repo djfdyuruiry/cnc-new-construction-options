@@ -386,5 +386,5 @@ FROM_JSON(TemplateClass)
 {
     BASE_CLASS_FROM_JSON(ObjectClass);
 
-    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TemplateClass, Class, TemplateTypeClass);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TemplateClass, Class, TemplateTypeClass, TemplateType);
 }
