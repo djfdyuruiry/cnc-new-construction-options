@@ -448,15 +448,14 @@ public:
 
     friend TO_JSON(fixed)
     {
-        j = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&p.Data));
+        j = std::string(p.As_ASCII());
     }
 
     friend FROM_JSON(fixed)
     {
-        FixedData data;
-        data.Raw = j.get<uint32_t>();
+        const auto fixed_ascii= j.get<std::string>();
 
-        p.Data = data;
+        p = fixed(fixed_ascii.c_str());
     }
 private:
     union FixedData
