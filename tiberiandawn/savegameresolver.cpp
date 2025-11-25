@@ -5,6 +5,15 @@
 #include "savegame_v1.h"
 #include "savegameresolver.h"
 
+/**
+ * BUGS:
+ *
+ *   - Build tree is not restored (sidebar options)
+ *   - In progress builds are not restored
+ *   - Trigger heap validation fails (sometimes - ID of TriggerClass instance in Heap is outside bounds)
+ *   - Uninitialized CellTriggers attempted to be accessed (sometimes - possibly due being a DynamicVector but only accessed via VectorClass::[] operator methods)
+ */
+
 //The implementation of the current save game version
 #define CURRENT_SAVE_CLASS SaveGame_v1
 
