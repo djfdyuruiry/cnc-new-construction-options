@@ -9,6 +9,7 @@ class CncStringUtils final
 {
 public:
     static bool Is_Blank(const std::string& subject);
+    static bool Is_Blank(const std::string_view& subject);
 
     static void To_Lower(std::string& subject);
 

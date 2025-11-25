@@ -29,13 +29,13 @@ public:
         const T& maximum_to_include,
         const TwoWayMap<T, std::string>& patch_table = {},
         const std::vector<T>& excluded = {},
-        const bool include_invalid_values_in_range = false
+        const bool allow_non_enum_values_in_range = false
     ) : Prefix(prefix),
         MinimumToInclude(minimum_to_include),
         MaximumToInclude(maximum_to_include),
         PatchTable(patch_table),
         Excluded(excluded),
-        IncludeInvalidValuesInRange(include_invalid_values_in_range) {}
+        AllowNonEnumValuesInRange(allow_non_enum_values_in_range) {}
 
     std::string Strip_Prefix(const std::string& subject) const
     {

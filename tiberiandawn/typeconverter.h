@@ -76,6 +76,13 @@ public:
         return *type_info;
     }
 
+    /**
+     * Get a static TwoWayMap instance that allows translating between type T instances
+     * and strings. This map is initialised once at first call to this method for type T,
+     * in an atomic fashion.
+     *
+     * Limits, exclusions and STRING patches to match INI values are applied here, as well as adding
+     */
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static const TwoWayMap<T, std::string>& Get_Type_Map()
@@ -90,6 +97,7 @@ public:
 
             std::vector<std::pair<T, std::string>> instance_pairs;
 
+            // take the magic_enum pairs and add those that are included (patching name string as needed)
             for (const auto& [instance, instance_string] : enum_pairs) {
                 if (enum_info.Is_Excluded(instance)) {
                     continue;
@@ -105,27 +113,36 @@ public:
                 instance_pairs.emplace_back(pair);
             }
 
-            type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
-
-            if (enum_info.AllowNonEnumValuesInRange) {
-                // we need to fill in the gaps between types as DirType instances can be bit-shifted
-                for (auto i = static_cast<int>(enum_info.MaximumToInclude); i <= static_cast<int>(enum_info.MaximumToInclude); ++i) {
-                    const auto instance = static_cast<T>(i);
-
-                    if (enum_info.Is_Excluded(instance)) {
-                        continue;
-                    }
-
-                    if (CncStringUtils::Is_Blank(magic_enum::enum_name(instance_pairs))) {
-                        const auto ini_string = std::format("{}", i);
-
-                        std::pair<T, std::string> pair = { instance, ini_string };
-
-                        instance_pairs.emplace_back(pair);
-                    }
-                }
+            if (!enum_info.AllowNonEnumValuesInRange) {
+                type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
+                return;
             }
 
+            const auto min = static_cast<int>(enum_info.MinimumToInclude);
+            const auto max = static_cast<int>(enum_info.MaximumToInclude);
+
+            // we need to fill in the gaps between types as declared enum instances
+            // (since AllowNonEnumValuesInRange is true)
+            for (auto i = min; i <= max; ++i) {
+                const auto instance = static_cast<T>(i);
+
+                if (enum_info.Is_Excluded(instance)) {
+                    continue;
+                }
+
+                // if there is no enum entry declared for the current value, magic_enum::enum_name returns blank
+                if (!CncStringUtils::Is_Blank(magic_enum::enum_name<T>(instance))) {
+                    continue;
+                }
+
+                const auto ini_string = std::format("{}", i);
+
+                std::pair<T, std::string> pair = { instance, ini_string };
+
+                instance_pairs.emplace_back(pair);
+            }
+
+            type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
         });
 
         return *type_map;
