@@ -9,7 +9,7 @@
 /*
  * SaveGame bugs
  *
- *   - Terrain that should be unpassable is passable
+ *   - Attempting to save the game after loading causes an uninitialized pointer in dynamic vector (?) to crash JSON logic
  *
  */
 

@@ -205,7 +205,7 @@ FROM_JSON(DoorClass)
     FIELD_FROM_JSON(Control);
     FIELD_FROM_JSON(Stages);
 
-    PARSE_TD_FIELD_FROM_JSON(DoorClass, State, DoorStateType);
+    PARSE_TD_FIELD_FROM_JSON(DoorClass, State, DoorClass::DoorStateType);
 
     BITFIELD_FROM_JSON(IsToRedraw);
 }

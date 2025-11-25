@@ -45,7 +45,7 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, RadioMessageType> ||
     std::is_same_v<T, CloakType> ||
     std::is_same_v<T, FacingType> ||
-    std::is_same_v<T, DoorStateType>||
+    std::is_same_v<T, DoorClass::DoorStateType>||
     std::is_same_v<T, KindType> ||
     std::is_same_v<T, DoType> ||
     std::is_same_v<T, BStateType> ||
@@ -97,7 +97,7 @@ using ConverterTypeVariant = std::variant<
     RadioMessageType,
     CloakType,
     FacingType,
-    DoorStateType,
+    DoorClass::DoorStateType,
     KindType,
     DoType,
     BStateType,

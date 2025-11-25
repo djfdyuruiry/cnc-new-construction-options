@@ -123,7 +123,7 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<RadioMessageType>,
     EnumTypeInfo<CloakType>,
     EnumTypeInfo<FacingType>,
-    EnumTypeInfo<DoorStateType>,
+    EnumTypeInfo<DoorClass::DoorStateType>,
     EnumTypeInfo<KindType>,
     EnumTypeInfo<DoType>,
     EnumTypeInfo<BStateType>,

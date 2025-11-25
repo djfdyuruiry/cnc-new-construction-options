@@ -33,7 +33,7 @@ static const std::vector TemplateExcludes = { TEMPLATE_COUNT };
 
 #define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
-// TODO: Determine if LAST/COUNT ETC values are actually excluded from TwoWayMaps (we use these as number boundaries, but don't want the actual enum value X_LAST to parse)
+// Info about each enum supported type, indexed against it's typename
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
     //             [Typename]                     [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]   [Excluded Vals]      [Allow non-enum values?]
     ENUM_TYPE_PAIR(ArmorType,                    "ARMOR_",       ARMOR_NONE,                             ARMOR_LAST,                               {},                 {},                  false),
@@ -74,7 +74,7 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(RadioMessageType,             "RADIO_",       RADIO_STATIC,                           RADIO_ON_DEPOT,                           {},                 {},                  false),
     ENUM_TYPE_PAIR(CloakType,                    "",             UNCLOAKED,                              UNCLOAKING,                               {},                 {},                  false),
     ENUM_TYPE_PAIR(FacingType,                   "FACING_",      FACING_NONE,                            FACING_LAST,                              {},                 {},                  false),
-    ENUM_TYPE_PAIR(DoorStateType,                "IS_",          IS_CLOSED,                              IS_CLOSING,                               {},                 {},                  false),
+    ENUM_TYPE_PAIR(DoorClass::DoorStateType,     "IS_",          DoorClass::IS_CLOSED,                   DoorClass::IS_CLOSING,                    {},                 {},                  false),
     ENUM_TYPE_PAIR(KindType,                     "KIND_",        KIND_NONE,                              KIND_TEAMTYPE,                            {},                 {},                  false),
     ENUM_TYPE_PAIR(DoType,                       "DO_",          DO_NOTHING,                             DO_PLEAD_DEATH,                           {},                 {},                  false),
     ENUM_TYPE_PAIR(BStateType,                   "BSTATE_",      BSTATE_NONE,                            BSTATE_AUX2,                              {},                 {},                  false),
@@ -147,7 +147,7 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     RULE_VARIANT(RadioMessageType)
     RULE_VARIANT(CloakType)
     RULE_VARIANT(FacingType)
-    RULE_VARIANT(DoorStateType)
+    RULE_VARIANT(DoorClass::DoorStateType)
     RULE_VARIANT(KindType)
     RULE_VARIANT(DoType)
     RULE_VARIANT(BStateType)
@@ -205,7 +205,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     CSV_RULE_VARIANT(RadioMessageType)
     CSV_RULE_VARIANT(CloakType)
     CSV_RULE_VARIANT(FacingType)
-    CSV_RULE_VARIANT(DoorStateType)
+    CSV_RULE_VARIANT(DoorClass::DoorStateType)
     CSV_RULE_VARIANT(KindType)
     CSV_RULE_VARIANT(DoType)
     CSV_RULE_VARIANT(BStateType)
@@ -262,7 +262,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     TYPE_NAME_VARIANT(RadioMessageType)
     TYPE_NAME_VARIANT(CloakType)
     TYPE_NAME_VARIANT(FacingType)
-    TYPE_NAME_VARIANT(DoorStateType)
+    TYPE_NAME_VARIANT(DoorClass::DoorStateType)
     TYPE_NAME_VARIANT(KindType)
     TYPE_NAME_VARIANT(DoType)
     TYPE_NAME_VARIANT(BStateType)
@@ -320,7 +320,7 @@ std::string TdTypeConverter::To_String_Variant(ConverterTypeVariant variant)
     TO_STRING_VARIANT(RadioMessageType)
     TO_STRING_VARIANT(CloakType)
     TO_STRING_VARIANT(FacingType)
-    TO_STRING_VARIANT(DoorStateType)
+    TO_STRING_VARIANT(DoorClass::DoorStateType)
     TO_STRING_VARIANT(KindType)
     TO_STRING_VARIANT(DoType)
     TO_STRING_VARIANT(BStateType)

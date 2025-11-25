@@ -47,9 +47,8 @@
 class TdTypeConverter final
 {
 public:
-    static const inline std::string_view EnumPostfix = "Type";
+    static constexpr std::string_view EnumPostfix = "Type";
     static const std::map<std::string, std::string_view> TypeNamePatchTable;
-    // Info about each enum type, indexed against it's typename
     static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
 
     template<class T>
@@ -81,7 +80,7 @@ public:
      * and strings. This map is initialised once at first call to this method for type T,
      * in an atomic fashion.
      *
-     * Limits, exclusions and STRING patches to match INI values are applied here, as well as adding
+     * Limits, exclusions and STRING patches to match INI values are applied here - see enumtypeinfo.h
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>

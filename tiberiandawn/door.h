@@ -39,16 +39,17 @@
 
 #include "stage.h"
 
-typedef enum DoorStateType
-{
-    IS_CLOSED,  // Door is closed.
-    IS_OPENING, // Door is in the process of opening.
-    IS_OPEN,    // Door is fully open.
-    IS_CLOSING  //	Door is in the process of closing.
-} DoorStateType;
-
 class DoorClass
 {
+public:
+    typedef enum DoorStateType
+    {
+        IS_CLOSED,  // Door is closed.
+        IS_OPENING, // Door is in the process of opening.
+        IS_OPEN,    // Door is fully open.
+        IS_CLOSING  //	Door is in the process of closing.
+    } DoorStateType;
+
 private:
     /*
     **	This is the animation control handler.
