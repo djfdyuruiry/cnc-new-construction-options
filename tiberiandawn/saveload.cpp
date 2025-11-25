@@ -45,7 +45,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
-#include "savegame.h"
+#include "savegameresolver.h"
 
 extern bool DLLSave(FileClass& file);
 extern bool DLLLoad(FileClass& file);
@@ -126,21 +126,13 @@ bool Save_Game(const char* file_name, const char* descr)
         return false;
     }
 
-    // read save data from game state
-    SaveGame save;
-
     try {
-        save.Header.Version = "1.0";
-        save.Header.Description = descr;
-
-        save.Read_Globals();
+        return SaveGameResolver::Save(save_file, descr);
     } catch (const nlohmann::json::exception& e) {
         CNC_LOG_ERROR("Error reading game state into {} instance: {}", NAMEOF(SaveGame), e.what());
 
         return false;
     }
-
-    return save.To_File(save_file);
 }
 
 /*
@@ -354,20 +346,20 @@ bool Load_Game(int id)
 */
 bool Load_Game(const char* file_name)
 {
-    SaveGame save;
+    Clear_Scenario();
 
     Call_Back();
 
-    if (!SaveGame::From_File(file_name, save)) {
+    const auto save_header = SaveGameResolver::Load(file_name);
+
+    if (!save_header.has_value()) {
         return false;
     }
 
     Call_Back();
 
-    Clear_Scenario();
-
-    const auto& scenario = save.Header.ScenarioID;
-    const auto house = save.Header.Parse_Player_House_Type();
+    const auto& scenario = save_header->ScenarioID;
+    const auto house = save_header->Parse_Player_House_Type();
 
     /*
     **	Set the required CD to be in the drive according to the scenario
@@ -401,14 +393,28 @@ bool Load_Game(const char* file_name)
 
     Call_Back();
 
-    if (!save.Write_Globals()) {
-        CNC_LOG_ERROR("Failed to load JSON save into game state");
-        return false;
+    // load theater data
+    if (Map.Theater != LastTheater) {
+        Reset_Theater_Shapes();
     }
+
+    Map.Init_Theater(Map.Theater);
+    TerrainTypeClass::Init(Map.Theater);
+    TemplateTypeClass::Init(Map.Theater);
+    OverlayTypeClass::Init(Map.Theater);
+    UnitTypeClass::Init(Map.Theater);
+    InfantryTypeClass::Init(Map.Theater);
+    BuildingTypeClass::Init(Map.Theater);
+    BulletTypeClass::Init(Map.Theater);
+    AnimTypeClass::Init(Map.Theater);
+    AircraftTypeClass::Init(Map.Theater);
+    SmudgeTypeClass::Init(Map.Theater);
+
+    LastTheater = Map.Theater;
 
     Call_Back();
 
-    Decode_All_Pointers(save.Header.Parse_Player_House_Type());
+    Decode_All_Pointers(save_header->Parse_Player_House_Type());
 
     Call_Back();
 
@@ -1257,21 +1263,16 @@ bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& ho
 {
     const auto file_name = std::format("SAVEGAME.{:03d}", id);
 
-    SaveGameHeader header;
+    const auto header = SaveGameResolver::Load_Header(file_name);
 
-    if (!SaveGameHeader::From_File(file_name, header)) {
+    if (!header.has_value()) {
         return false;
     }
 
-    scenp = header.ScenarioID;
-    housep = header.Parse_Player_House_Type();
+    scenp = header->ScenarioID;
+    housep = header->Parse_Player_House_Type();
 
-    strcpy(buf, header.Description.c_str());
-
-    if (header.Version != "1.0") {
-        CNC_LOG_ERROR("Detected save file '{}' with unsupported version: {}", file_name, header.Version);
-        return false;
-    }
+    strcpy(buf, header->Description.c_str());
 
     return true;
 }

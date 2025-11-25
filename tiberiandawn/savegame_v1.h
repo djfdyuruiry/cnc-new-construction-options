@@ -1,44 +1,24 @@
 #pragma once
 
-#include <map>
+#include <fstream>
 #include <string>
 
+#include "common/cdfile.h"
 #include "common/json.h"
 #include "common/logger.h"
 
 #include "defines.h"
-#include "externs.h"
+#include "savegameheader.h"
 
-class SaveGameHeader
+/**
+ * Various metadata about the current scenario, consisting of INI
+ * file data, game settings and game state.
+ */
+class SaveGameScenarioState_v1
 {
 public:
-    std::string Version;
-    int ScenarioID;
-    std::string PlayerHouseType;
-    std::string PlayerType;
-    std::string Description;
+    // ini file values
 
-    static bool From_Stream(std::ifstream& stream, SaveGameHeader& output);
-    static bool From_File(const std::string& path, SaveGameHeader& output);
-
-    void Read_Globals();
-    bool Validate() const;
-    bool Write_Globals() const;
-
-    HousesType Parse_Player_House_Type() const;
-    ScenarioPlayerType Parse_Player_Type() const;
-
-    void Dump_Json(std::string& output) const;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, PlayerType, Description)
-
-private:
-    static inline const auto& Logger = CncLogger::For(SaveGameHeader);
-};
-
-class SaveGameScenarioState
-{
-public:
     int ScenarioNumber;
     std::string ScenarioDirection;
     std::string ScenarioVariation;
@@ -52,8 +32,12 @@ public:
     int CarryOverPercent;
     unsigned int BuildLevelNumber;
 
+    // game settings
+
     std::string Difficulty;
     std::string AiDifficulty;
+
+    // game state
 
     int FrameNumber;
     int EndCountdownNumber;
@@ -71,7 +55,7 @@ public:
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        SaveGameScenarioState,
+        SaveGameScenarioState_v1,
         ScenarioNumber,
         ScenarioDirection,
         ScenarioVariation,
@@ -107,7 +91,12 @@ private:
     };
 };
 
-class SaveGameObjectHeaps
+/**
+ * C&C uses TFixedIHeapClass instances to store objects in heaps, grouped by
+ * the type of the object (Unit, Infantry etc.). This class records the values
+ * of these heaps as JSON.
+ */
+class SaveGameObjectHeaps_v1
 {
 public:
     nlohmann::json AnimsHeap;
@@ -131,7 +120,7 @@ public:
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        SaveGameObjectHeaps,
+        SaveGameObjectHeaps_v1,
         AnimsHeap,
         AircraftHeap,
         BulletsHeap,
@@ -153,39 +142,46 @@ private:
     static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
 };
 
-// TODO: Make whole save game object graph versioned (append v1 to all types and change file name)
-// TODO: DLLSave logic clone for remastered support
-// TODO: Lua state save and restore (what does this look like? API for scripters to flag values as persisting?)
-class SaveGame
+/**
+ * Version 1 of the JSON save game format. New versions should inherit this class. New versions should provide sane
+ * defaults for new values. Any new behaviour should also be backwards compatible with previous versions.
+ */
+class SaveGame_v1
 {
 public:
-    // Keep a consistent line seperator, ensuring save files are platform-agnostic.
-    // (JSON standard already ensures all text is UTF-8, so we just need to worry about this)
-    static constexpr char LINE_SEPERATOR = '\n';
+    static constexpr std::string_view Version_Name = "v1";
 
-    SaveGameHeader Header;
-    SaveGameScenarioState ScenarioState;
-    SaveGameObjectHeaps Objects;
+    SaveGameScenarioState_v1 ScenarioState;
+    SaveGameObjectHeaps_v1 Objects;
+
+    // triggers
 
     nlohmann::json GameCellTriggers;
     nlohmann::json GameHouseTriggers;
+
+    // map objects
 
     nlohmann::json GameMap;
     nlohmann::json GameLogic;
     nlohmann::json Layers;
     nlohmann::json AiBase;
+
+    // score tracking
     nlohmann::json GameScore;
 
-    static bool From_File(const std::string& path, SaveGame& output);
-
+    bool Load_From_File(const std::string& path);
     void Read_Globals();
     bool Validate() const;
     bool Write_Globals() const;
     void Dump_Json(std::string& output) const;
-    bool To_File(CDFileClass& save_file) const;
+    bool To_File(CDFileClass& save_file, const SaveGameHeader& header) const;
 
+    /**
+     * Header is stored separately from main JSON object to allow reading header
+     * info without parsing entire JSON structure.
+     */
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        SaveGame,
+        SaveGame_v1,
         ScenarioState,
         Objects,
         GameCellTriggers,
@@ -196,7 +192,6 @@ public:
         AiBase,
         GameScore
     )
-
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGame);

@@ -152,7 +152,9 @@ set(TIBDAWN_SRC
     lua/td_luaapi.cpp
     lua/tdtypes_luaapi.cpp
     lua/ui_luaapi.cpp
-    savegame.cpp
+    savegame_v1.cpp
+    savegameheader.cpp
+    savegameresolver.cpp
     technotypejsonreference.cpp
     typeconverter.cpp
 )
