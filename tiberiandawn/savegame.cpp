@@ -6,13 +6,6 @@
 
 #include <fstream>
 
-/*
- * SaveGame bugs
- *
- *   - Attempting to save the game after loading causes an uninitialized pointer in dynamic vector (?) to crash JSON logic
- *
- */
-
 #pragma region SaveGameHeader
 bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
 {
