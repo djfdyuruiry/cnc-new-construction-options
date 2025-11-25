@@ -96,6 +96,16 @@ public:
     virtual int ID(T const* ptr); // Pointer based identification.
     virtual int ID(T const& ptr); // Value based identification.
 
+    /**
+     * Record elements as a metadata object with `_items` as a map
+     * of [vector idx] -> value and `_vector_size` as the total size of
+     * the vector.
+     *
+     * If T is a pointer type, NULL pointer values are omitted to prevent
+     * JSON bloat. `_vector_size` allows us to rebuild the vector size on
+     * deserialize, where the gaps between `_items` elements will be initialised
+     * with NULL.
+     */
     friend TO_JSON(VectorClass<T>)
     {
         auto _items = nlohmann::json::object();
@@ -159,6 +169,7 @@ public:
         }
 
         p.Clear();
+        // if T is a pointer type, Resize(..) inits all entries in the vector to NULL
         p.Resize(
             _vector_size.get<int>()
         );
@@ -251,6 +262,10 @@ public:
     };
     virtual int ID(T const& ptr);
 
+    /**
+     * Note: If the VectorClass::[] operator is used to write elements, ActiveCount
+     * will be zero, as it has no awareness of ActiveCount;
+     */
     friend TO_JSON(DynamicVectorClass<T>)
     {
         BASE_CLASS_TO_JSON(VectorClass<T>);

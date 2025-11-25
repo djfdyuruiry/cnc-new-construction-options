@@ -28,8 +28,8 @@ static const TwoWayMap<WeaponType, std::string> WeaponPatchTable = {{ WEAPON_GRE
  * (only required when enum doesn't follow standard X_FIRST/X_LAST convention or has 'extra' values after X_COUNT)
  */
 static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
-static const std::vector VocExcludes = { VOC_FIRST, VOC_COUNT };
-static const std::vector TemplateExcludes = { TEMPLATE_COUNT };
+static const std::vector VocExcludes = {VOC_FIRST, VOC_COUNT};
+static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 
 #define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
@@ -86,20 +86,36 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(LayerType,                    "LAYER_",       LAYER_NONE,                             LAYER_LAST,                               {},                 {},                  false)
 };
 
-bool TdTypeConverter::Rule_Requires_Converter(std::string_view type_name, std::string_view rule) {
-return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
-    || Rule_Requires_Csv_Converter(type_name, rule);
+bool TdTypeConverter::Rule_Requires_Converter(
+    const std::string_view& type_name,
+    const std::string_view& rule
+)
+{
+    return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
+        || Rule_Requires_Csv_Converter(type_name, rule);
 }
 
-bool TdTypeConverter::Rule_Requires_Csv_Converter(std::string_view type_name, std::string_view rule ){
+bool TdTypeConverter::Rule_Requires_Csv_Converter(
+    const std::string_view& type_name,
+    const std::string_view& rule
+)
+{
     return RegisteredCsvRuleTypes.contains(type_name) && RegisteredCsvRuleTypes[type_name].contains(rule);
 }
 
-ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(std::string_view type_name, std::string_view rule) {
+ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(
+    const std::string_view& type_name,
+    const std::string_view& rule
+)
+{
     return RegisteredRuleTypes[type_name][rule];
 }
 
-ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(std::string_view type_name, std::string_view rule) {
+ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(
+    const std::string_view& type_name,
+    const std::string_view& rule
+)
+{
     return RegisteredCsvRuleTypes[type_name][rule];
 }
 
@@ -108,7 +124,13 @@ ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(std::string_view type
     return; \
 }
 
-void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant) {
+void TdTypeConverter::Set_Rule_With_Variant(
+    RuleSection& section,
+    const std::string_view& rule,
+    const std::string& value,
+    const ConverterTypeVariant& variant
+)
+{
     RULE_VARIANT(ArmorType)
     RULE_VARIANT(MPHType)
     RULE_VARIANT(WeaponType)
@@ -166,7 +188,13 @@ void TdTypeConverter::Set_Rule_With_Variant(RuleSection& section, std::string_vi
     return; \
 }
 
-void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant) {
+void TdTypeConverter::Set_Csv_Rule_With_Variant(
+    RuleSection& section,
+    const std::string_view& rule,
+    const std::string& csv_value,
+    const ConverterTypeVariant& variant
+)
+{
     CSV_RULE_VARIANT(ArmorType)
     CSV_RULE_VARIANT(MPHType)
     CSV_RULE_VARIANT(WeaponType)
@@ -223,7 +251,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(RuleSection& section, std::strin
     return Get_Type_Name<TYPE>(); \
 }
 
-std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant variant) {
+std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVariant& variant) {
     TYPE_NAME_VARIANT(ArmorType)
     TYPE_NAME_VARIANT(MPHType)
     TYPE_NAME_VARIANT(WeaponType)
@@ -280,7 +308,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(ConverterTypeVariant var
     return To_String<TYPE>(std::get<TYPE>(variant)); \
 }
 
-std::string TdTypeConverter::To_String_Variant(ConverterTypeVariant variant)
+std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& variant)
 {
     TO_STRING_VARIANT(ArmorType)
     TO_STRING_VARIANT(MPHType)

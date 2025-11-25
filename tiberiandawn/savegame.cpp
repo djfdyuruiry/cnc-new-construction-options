@@ -526,10 +526,10 @@ bool SaveGame::Validate() const
         );
     }
 
-    if (!GameLogic.is_object()) {
+    if (!GameLogic.is_array()) {
         result = false;
         CNC_LOGGER_ERROR(
-            "Invalid {} save game value - json object expected, actual type: {}",
+            "Invalid {} save game value - json array expected, actual type: {}",
             NAMEOF(GameLogic),
             GameLogic.type_name()
         );
@@ -635,6 +635,7 @@ bool SaveGame::To_File(CDFileClass& save_file) const
     }
 
     if (!Validate()) {
+        save_file.Delete();
         return false;
     }
 
@@ -647,6 +648,8 @@ bool SaveGame::To_File(CDFileClass& save_file) const
         Dump_Json(save_json);
     } catch (const nlohmann::json::exception& e) {
         CNC_LOGGER_ERROR("Error serializing {} to JSON: {}", NAMEOF(SaveGame), e.what());
+
+        save_file.Delete();
         return false;
     }
 

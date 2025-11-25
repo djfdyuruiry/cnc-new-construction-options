@@ -27,21 +27,21 @@
  * and enum values, matching INI names for strings. EnumTypeInfo is used to construct the TwoWayMap
  * by excluding values and patching string representations that don't match INI strings.
  *
- * This provides reflection and conversion for all support enum types: to/from string, get instances,
+ * This provides reflection and conversion for all supported enum types: to/from string, get instances,
  * convert lists of values, get type names.
  *
  * Supports both compile-time access via templates and runtime access using ConverterTypeVariant.
  *
  * Has specific methods for working Getting/Setting INI values for class enum fields, and for converting class
- * enum fields to/from JSON.
+ * enum fields and object references to/from JSON.
  *
  * Stores registry of rules that have been loaded into RuleSection instances which require conversion to/from
  * string representations (values based on TD enum values, not plain numbers/strings/booleans).
  *
  * To add a new type to the converter:
  *
- *   - Add type to SupportedByTdTypeConverter, ConverterTypeVariant and EnumTypeInfoVariant (above)
- *   - Add entry to TdTypeConverter::EnumTypes with relevant values
+ *   - Add type to SupportedByTdTypeConverter, ConverterTypeVariant and EnumTypeInfoVariant (see typevariants.h)
+ *   - Add entry to TdTypeConverter::EnumTypes with relevant values (see enumtypeinfo.h)
  *   - Update Variant method bodies in typeconverter.cpp to handle new types
  */
 class TdTypeConverter final
@@ -64,15 +64,15 @@ public:
         }
 
         const auto& type_info_variant = EnumTypes.at(type_name);
-        const auto type_info = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
+        const auto type_info_ptr = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
 
-        if (type_info == nullptr) {
+        if (type_info_ptr == nullptr) {
             throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
                                         "this is normally caused by variant being updated without updating "
                                         "supporting code");
         }
 
-        return *type_info;
+        return *type_info_ptr;
     }
 
     /**
@@ -87,10 +87,10 @@ public:
     static const TwoWayMap<T, std::string>& Get_Type_Map()
     {
         static std::shared_ptr<TwoWayMap<T, std::string>> type_map;
-        static std::once_flag onceFlag;
+        static std::once_flag once_flag;
 
-        // create type map once, the first time it's requested
-        std::call_once(onceFlag, [&] {
+        // create type map once, the first time T is requested
+        std::call_once(once_flag, [&] {
             const auto& enum_info = Get_Info_For_Type<T>();
             const auto enum_pairs = magic_enum::enum_entries<T>();
 
@@ -163,7 +163,7 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static std::string To_String(T instance)
+    static std::string To_String(const T& instance)
     {
         const auto& type_map = Get_Type_Map<T>();
         const auto instance_string = type_map[instance];
@@ -183,7 +183,7 @@ public:
 
         if (!instance_string.has_value()) {
             CNC_LOGGER_WARN(
-                "Attempt was made to convert excluded value ({}/{}) of type '{}' to string, returning default value: {}",
+                "Attempt was made to convert excluded value (string='{}' | int={}) of type '{}' to string, returning default value: {}",
                 magic_enum::enum_name(instance),
                 static_cast<int>(instance),
                 Get_Type_Name<T>(),
@@ -256,7 +256,7 @@ public:
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static std::optional<std::vector<T>> Try_Parse_Csv(const std::string& csv_str, const char delimiter = ',')
+    static std::optional<std::vector<T>> Try_Parse_Csv(const std::string& csv_str, const char& delimiter = ',')
     {
         std::vector<T> instances;
         size_t start = 0;
@@ -295,7 +295,7 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Rule_Type(std::string_view type_name, std::string_view rule)
+    static void Register_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
         if (!RegisteredRuleTypes.contains(type_name)) {
             RegisteredRuleTypes[type_name] = {};
@@ -309,7 +309,7 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Csv_Rule_Type(std::string_view type_name, std::string_view rule)
+    static void Register_Csv_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
         if (!RegisteredCsvRuleTypes.contains(type_name)) {
             RegisteredCsvRuleTypes[type_name] = {};
@@ -321,34 +321,44 @@ public:
     /**
      * Does the given type name rule require a converter to read/write from?
      */
-    static bool Rule_Requires_Converter(std::string_view type_name, std::string_view rule);
+    static bool Rule_Requires_Converter(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Does the given type name rule require a CSV converter to read/write from?
      */
-    static bool Rule_Requires_Csv_Converter(std::string_view type_name, std::string_view rule);
+    static bool Rule_Requires_Csv_Converter(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Get the corresponding variant for a given type rule, it must have been registered by calling
      * Rule_Requires_Converter first.
      */
-    static ConverterTypeVariant Get_Rule_Variant(std::string_view type_name, std::string_view rule);
+    static ConverterTypeVariant Get_Rule_Variant(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Get the corresponding variant for a given type csv rule, it must have been registered by calling
      * Rule_Requires_Csv_Converter first.
      */
-    static ConverterTypeVariant Get_Csv_Rule_Variant(std::string_view type_name, std::string_view rule);
+    static ConverterTypeVariant Get_Csv_Rule_Variant(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Using a given type rule variant, call RuleSection::Set_With_Converter with appropriate type arguments.
      */
-    static void Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant);
+    static void Set_Rule_With_Variant(
+        RuleSection& section,
+        const std::string_view& rule,
+        const std::string& value,
+        const ConverterTypeVariant& variant
+    );
 
     /**
      * Using a given type rule variant, call RuleSection::Set_With_Csv_Converter with appropriate type arguments.
      */
-    static void Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant);
+    static void Set_Csv_Rule_With_Variant(
+        RuleSection& section,
+        const std::string_view& rule,
+        const std::string& csv_value,
+        const ConverterTypeVariant& variant
+    );
 
     /**
      * Return a human-readable name for a given converter type.
@@ -357,34 +367,39 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string_view Get_Type_Name()
     {
-        // get enum type name and remove EnumPostfix
-        static const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
+        static std::string type_name;
+        static std::once_flag once_flag;
 
-        if (TypeNamePatchTable.contains(raw_type_name)) {
-            return TypeNamePatchTable.at(raw_type_name);
-        }
+        // resolve type name once, the first time T is requested
+        std::call_once(once_flag, [&] {
+            // get enum type name and remove EnumPostfix
+            const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
 
-        static const auto type_name_without_prefix = raw_type_name.substr(
-            0,
-            raw_type_name.length() - EnumPostfix.length()
-        );
+            if (TypeNamePatchTable.contains(raw_type_name)) {
+                type_name = TypeNamePatchTable.at(raw_type_name);
+            }
 
-        return type_name_without_prefix;
+            type_name = raw_type_name.substr(
+                0,
+                raw_type_name.length() - EnumPostfix.length()
+            );
+        });
+
+        return type_name;
     }
 
     /**
      * Return a human-readable name for a given type rule variant type.
      */
-    static std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant);
+    static std::string_view Get_Type_Name_Variant(const ConverterTypeVariant& variant);
 
-    static std::string To_String_Variant(ConverterTypeVariant variant);
+    static std::string To_String_Variant(const ConverterTypeVariant& variant);
 
-    // TODO: Ability to set default (if source doesn't contain the field)
     template<SupportedByTdTypeConverter T>
     static bool Load_Field_From_Json(
         const nlohmann::json& source,
-        std::string_view target,
-        std::string_view field_name,
+        const std::string_view& target,
+        const std::string_view& field_name,
         const std::function<void(T)>& with_valid_value
     )
     {
@@ -426,12 +441,11 @@ public:
         return true;
     }
 
-    // TODO: Ability to set default (if source doesn't contain the field)
     template<SupportedByTdTypeConverter T>
     static bool Load_Csv_Field_From_Json(
         const nlohmann::json& source,
-        std::string_view target_name,
-        std::string_view field_name,
+        const std::string_view& target_name,
+        const std::string_view& field_name,
         const unsigned int& expected_length,
         T* target
     )
@@ -502,8 +516,8 @@ public:
     requires std::is_base_of_v<ObjectClass, T>
     static void Object_Target_Array_From_Json(
         const nlohmann::json& source,
-        std::string_view target_name,
-        std::string_view field_name,
+        const std::string_view& target_name,
+        const std::string_view& field_name,
         T** target,
         const unsigned int& length
     )
@@ -544,8 +558,8 @@ public:
     requires std::is_base_of_v<ObjectTypeClass, T> && SupportedByTdTypeConverter<U>
     static void Techno_Type_Target_From_Json(
         const nlohmann::json& source,
-        std::string_view target_name,
-        std::string_view field_name,
+        const std::string_view& target_name,
+        const std::string_view& field_name,
         T*& target
     )
     {
