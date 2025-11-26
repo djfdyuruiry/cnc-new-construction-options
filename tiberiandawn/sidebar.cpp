@@ -2745,6 +2745,7 @@ TO_JSON(SidebarClass)
     FIELD_TO_JSON(ButtonTwoWidth);
     FIELD_TO_JSON(ButtonThreeWidth);
     FIELD_TO_JSON(ButtonHeight);
+    FIELD_TO_JSON(Column);
     BITFIELD_TO_JSON(IsSidebarActive);
     BITFIELD_TO_JSON(IsToRedraw);
     BITFIELD_TO_JSON(IsRepairActive);
@@ -2767,6 +2768,7 @@ FROM_JSON(SidebarClass)
     FIELD_FROM_JSON(ButtonTwoWidth);
     FIELD_FROM_JSON(ButtonThreeWidth);
     FIELD_FROM_JSON(ButtonHeight);
+    FIELD_FROM_JSON(Column);
     BITFIELD_FROM_JSON(IsSidebarActive);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsRepairActive);
