@@ -31,7 +31,12 @@ const LuaEngine& ScenarioLua::Get_Engine()
     return Engine.value();
 }
 
-void ScenarioLua::On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, ScenarioClass& scenario, HouseClass* player)
+void ScenarioLua::On_Scenario_Load(
+    const GameEnum& game_type,
+    const ScenarioClass& scenario,
+    const HouseClass& player,
+    const std::optional<std::string>& ini_script_path
+)
 {
     Call_Back();
 
@@ -39,8 +44,8 @@ void ScenarioLua::On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, Sc
 
     auto scenario_name = std::string(scenario.ScenarioName);
     std::string scenario_type_name = game_type == GAME_NORMAL ? "single-player" : "multiplayer";
-    std::string faction = player->ActLike == HOUSE_GOOD ? "gdi" : "nod";
-    auto house_name = std::string(player->Class->IniName);
+    std::string faction = player.ActLike == HOUSE_GOOD ? "gdi" : "nod";
+    auto house_name = std::string(player.Class->IniName);
 
     CncStringUtils::To_Lower(scenario_name);
 
@@ -56,11 +61,46 @@ void ScenarioLua::On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, Sc
     // ensure house_name is lowercase for filename use
     CncStringUtils::To_Lower(house_name);
 
-    Exec_Scenario_Lua_Scripts(ini, scenario, scenario_name, faction, house_name);
+    Exec_Scenario_Lua_Scripts(ini_script_path, scenario, scenario_name, faction, house_name);
 
     CNC_LOGGER_DEBUG("Scenario Lua initialization done");
 
     Call_Back();
+}
+
+void ScenarioLua::On_Scenario_Load(
+    const GameEnum& game_type,
+    const ScenarioClass& scenario,
+    const HouseClass& player,
+    const CCINIClass& ini
+)
+{
+    const auto ini_script_path = ini.Get_String(
+        "Basic",
+        "LuaScript",
+        std::string_view("__NOT_FOUND__")
+    );
+
+    On_Scenario_Load(game_type, scenario, player, ini_script_path);
+}
+
+void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClass& scenario, const HouseClass& player)
+{
+    const std::string scenario_ini_file = scenario.FileName;
+
+    if (!CncStringUtils::Is_Blank(scenario_ini_file)) {
+        if (CCFileClass ini_file(scenario_ini_file.c_str()); ini_file.Is_Available()) {
+            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
+                On_Scenario_Load(game_type, scenario, player, ini);
+                return;
+            }
+
+            CNC_LOGGER_ERROR("Failed to load scenario INI filename: {}", scenario_ini_file);
+        }
+    }
+
+    CNC_LOGGER_DEBUG("Scenario has no associated INI file");
+    On_Scenario_Load(game_type, scenario, player, std::nullopt);
 }
 
 bool ScenarioLua::Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name)
@@ -107,6 +147,11 @@ bool ScenarioLua::Exec_Script_Trigger(std::string_view trigger_name, std::string
     return status;
 }
 
+void ScenarioLua::On_Clear_Scenario()
+{
+    Engine.reset();
+}
+
 void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
 {
     events.Access([](auto& q) {
@@ -139,7 +184,12 @@ void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(std::string& scenario_name, std:
       .Build();
     }
 
-void ScenarioLua::Exec_Scenario_Lua_Scripts(const CCINIClass& ini, ScenarioClass& scenario, const std::string& scenario_name, const std::string& faction_name, const std::string& house_name)
+void ScenarioLua::Exec_Scenario_Lua_Scripts(
+    const std::optional<std::string>& ini_script_path,
+    const ScenarioClass& scenario,
+    const std::string& scenario_name,
+    const std::string& faction_name,
+    const std::string& house_name)
 {
     auto lua_scripts_to_load = std::vector {
       std::string(LuaScripts::On_Scenario_Load),
@@ -148,16 +198,19 @@ void ScenarioLua::Exec_Scenario_Lua_Scripts(const CCINIClass& ini, ScenarioClass
       std::format("{}-scenario.lua", faction_name),
       std::format("{}-scenario.lua", house_name)
     };
-    auto ini_script_path = ini.Get_String("Basic", "LuaScript", std::string_view("__NOT_FOUND__"));
 
-    if (ini_script_path != "__NOT_FOUND__") {
-      if (!CncStringUtils::Is_Blank(ini_script_path)) {
-          CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", ini_script_path);
-          CncStringUtils::To_Lower(ini_script_path);
-          lua_scripts_to_load.emplace_back(ini_script_path);
-      }
-    } else {
-      CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");
+    if (ini_script_path.has_value()) {
+        if (*ini_script_path != "__NOT_FOUND__") {
+            if (!CncStringUtils::Is_Blank(*ini_script_path)) {
+                auto path = *ini_script_path;
+
+                CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", path);
+                CncStringUtils::To_Lower(path);
+                lua_scripts_to_load.emplace_back(path);
+            }
+        } else {
+            CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");
+        }
     }
 
     for (const auto& script_path : lua_scripts_to_load) {

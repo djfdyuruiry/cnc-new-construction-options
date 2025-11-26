@@ -267,6 +267,24 @@ void RulesClass::Init(CCINIClass& ini)
     Apply_Static_And_Global_Values();
 }
 
+void RulesClass::Init_For_Scenario(const ScenarioClass& scenario)
+{
+    const std::string scenario_ini_file = scenario.FileName;
+
+    if (!CncStringUtils::Is_Blank(scenario_ini_file)) {
+        if (CCFileClass ini_file(scenario_ini_file.c_str()); ini_file.Is_Available()) {
+            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
+                Init(ini);
+                return;
+            }
+
+            CNC_LOGGER_ERROR("Failed to load scenario INI filename: {}", scenario_ini_file);
+        }
+    }
+
+    CNC_LOGGER_DEBUG("Scenario has no associated INI file");
+}
+
 /**
  * Init rules from INI files, falls back to hardcoded values for any missing INI file.
  *
@@ -598,6 +616,25 @@ void RulesClass::Init_Types(CCINIClass& ini)
     Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, ini);
     Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, ini);
 }
+
+void RulesClass::Init_Types_For_Scenario(const ScenarioClass& scenario)
+{
+    const std::string scenario_ini_file = scenario.FileName;
+
+    if (!CncStringUtils::Is_Blank(scenario_ini_file)) {
+        if (CCFileClass ini_file(scenario_ini_file.c_str()); ini_file.Is_Available()) {
+            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
+                Init_Types(ini);
+                return;
+            }
+
+            CNC_LOGGER_ERROR("Failed to load scenario INI filename: {}", scenario_ini_file);
+        }
+    }
+
+    CNC_LOGGER_DEBUG("Scenario has no associated INI file");
+}
+
 
 /***********************************************************************************************
  * RulesClass::Export_Difficulty -- Export the various difficulty group settings.              *

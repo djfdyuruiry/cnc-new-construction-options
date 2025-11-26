@@ -157,9 +157,15 @@ FROM_JSON(AbstractClass)
     BITFIELD_FROM_JSON(IsRecentlyCreated);
 }
 
+/**
+ * Serializing an AbstractClass pointer isn't possible
+ * due to the lack of type information required to locate
+ * the object in the heap, so just place the TARGET
+ * equivalent of 'NULL'.
+ */
 PTR_TO_JSON(AbstractClass)
 {
-    j =  Build_Target(KIND_NONE, 0);
+    j = Build_Target(KIND_NONE, 0);
 }
 
 PTR_FROM_JSON(AbstractClass)

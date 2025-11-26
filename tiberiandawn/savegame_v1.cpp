@@ -180,25 +180,6 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     from_json(Waypoints, Scen.Waypoint);
     from_json(Views, Scen.Views);
 
-    if (!CncStringUtils::Is_Blank(ScenarioFileName)) {
-        // TODO: Could change this to save the rules cache/RulesClass instance and rehydrate it (portable rules + preservation)
-        if (CCFileClass ini_file(ScenarioFileName.c_str()); ini_file.Is_Available()) {
-            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
-                Rule.Init(ini);
-                Rule.Init_Types(ini);
-            } else {
-                CNC_LOG_ERROR(
-                    "Failed to load scenario INI filename stored in save game JSON: {}",
-                    Scen.FileName
-                );
-            }
-        } else {
-            CNC_LOG_WARN("Scenario INI file recorded in save game JSON was not found: {}");
-        }
-    } else {
-        CNC_LOG_DEBUG("No scenario INI filename found in save game JSON");
-    }
-
     return true;
 }
 #pragma endregion

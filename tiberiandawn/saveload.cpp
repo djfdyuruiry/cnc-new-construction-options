@@ -46,6 +46,7 @@
 
 #include "function.h"
 #include "savegameresolver.h"
+#include "lua/scenariolua.h"
 
 extern bool DLLSave(FileClass& file);
 extern bool DLLLoad(FileClass& file);
@@ -341,6 +342,13 @@ bool Load_Game(int id)
     // return Load_Game_Binary(name);
 }
 
+static void Load_INI_Rules_And_Lua()
+{
+    Rule.Init_For_Scenario(Scen);
+    Rule.Init_Types_For_Scenario(Scen);
+    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr);
+}
+
 /*
 ** Version that takes a file name instead. ST - 9/9/2019 11:13AM
 */
@@ -424,6 +432,8 @@ bool Load_Game(const char* file_name)
     Call_Back();
 
     Fixup_Scenario();
+
+    Load_INI_Rules_And_Lua();
 
     ScenarioInit = 0;
 
@@ -644,6 +654,8 @@ bool Load_Game_Binary(const char* file_name)
     Map.Flag_To_Redraw(true);
 
     Fixup_Scenario();
+
+    Load_INI_Rules_And_Lua();
 
     ScenarioInit = 0;
 

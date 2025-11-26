@@ -1745,6 +1745,15 @@ FROM_JSON(ObjectClass)
     FIELD_FROM_JSON(Strength);
 }
 
+/**
+ * We don't actually serialize the object that the pointer
+ * resolves to here. This would create duplicate objects and
+ * break the shared link to the given data.
+ *
+ * Instead, we use the existing TARGET functionality to store a
+ * reference to the object, which points to an instance in one
+ * of the TFixedIHeapClass heaps.
+ */
 PTR_TO_JSON(ObjectClass)
 {
     j = OBJECT_PTR_TO_TARGET(p);

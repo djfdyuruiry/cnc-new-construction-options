@@ -46,6 +46,7 @@
 
 #include "function.h"
 #include "common/framelimit.h"
+#include "lua/scenariolua.h"
 
 extern int PreserveVQAScreen;
 
@@ -395,6 +396,9 @@ void Clear_Scenario(void)
      * by a Lua script call or loaded from the scenario file.
      */
     Rule.Init();
+
+    // Tear down Lua runtime
+    ScenarioLua::On_Clear_Scenario();
 }
 
 /***********************************************************************************************

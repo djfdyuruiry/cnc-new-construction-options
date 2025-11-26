@@ -658,7 +658,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     /**
      * Lua rabbit hole
      */
-    ScenarioLua::On_Scenario_Load(ini, GameToPlay, Scen, PlayerPtr);
+    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini);
 
     /*
     **	Return with flag saying that the scenario file was read.
