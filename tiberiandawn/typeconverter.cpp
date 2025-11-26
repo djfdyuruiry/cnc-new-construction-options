@@ -60,7 +60,7 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(ScenarioVarType,              "SCEN_VAR_",    SCEN_VAR_NONE,                          SCEN_VAR_LOSE,                            {},                 ScenarioVarExcludes, false),
     ENUM_TYPE_PAIR(SourceType,                   "SOURCE_",      SOURCE_NONE,                            SOURCE_OCEAN,                             {},                 {},                  false),
     ENUM_TYPE_PAIR(RadarEnum,                    "RADAR_",       RADAR_NONE,                             RADAR_OFF,                                {},                 {},                  false),
-    ENUM_TYPE_PAIR(RTTIType,                     "RTTITYPE_",    RTTI_NONE,                              RTTI_LAST,                                {},                 {},                  false),
+    ENUM_TYPE_PAIR(RTTIType,                     "RTTI_",        RTTI_NONE,                              RTTI_LAST,                                {},                 {},                  false),
     ENUM_TYPE_PAIR(ZoneType,                     "ZONE_",        ZONE_NONE,                              ZONE_LAST,                                {},                 {},                  false),
     ENUM_TYPE_PAIR(StateType,                    "STATE_",       STATE_BUILDUP,                          STATE_ENDGAME,                            {},                 {},                  false),
     ENUM_TYPE_PAIR(VoxType,                      "VOX_",         VOX_NONE,                               VOX_LAST,                                 {},                 {},                  false),
@@ -360,6 +360,68 @@ std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& varia
     TO_STRING_VARIANT(LayerType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
+}
+
+#define RTTI_TYPE_TO_STRING(RTTI, TYPE, ID) case RTTI: \
+    return To_String<TYPE>(static_cast<TYPE>(ID));
+
+std::optional<std::string> TdTypeConverter::RTTI_Instance_To_String(const RTTIType& type, const int& instance_id)
+{
+    switch (type) {
+    case RTTI_NONE:
+            return std::nullopt;
+
+        RTTI_TYPE_TO_STRING(RTTI_INFANTRYTYPE, InfantryType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_UNITTYPE, UnitType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_AIRCRAFTTYPE, AircraftType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_BUILDINGTYPE, StructType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_ANIMTYPE, AnimType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_BULLETTYPE, BulletType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_OVERLAYTYPE, OverlayType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_SMUDGETYPE, SmudgeType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_TEMPLATETYPE, TemplateType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_TERRAINTYPE, TerrainType, instance_id)
+
+        default:
+            throw std::invalid_argument(
+                std::format("Unsupported RTTI type passed: {}", To_String(type))
+            );
+    }
+}
+
+#define TRY_PARSE_RTTI_TYPE(RTTI, TYPE, ID) case RTTI: \
+    { \
+        const auto& TYPE##_result = Try_Parse<TYPE>(ID); \
+\
+        if (!TYPE##_result.has_value()) { \
+          return std::nullopt; \
+        } \
+\
+        return static_cast<int>(*TYPE##_result); \
+    }
+
+std::optional<int> TdTypeConverter::Try_Parse_RTTI_Instance(const RTTIType& type, const std::string& instance)
+{
+    switch (type) {
+        case RTTI_NONE:
+            return 0;
+
+        TRY_PARSE_RTTI_TYPE(RTTI_INFANTRYTYPE, InfantryType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_UNITTYPE, UnitType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_AIRCRAFTTYPE, AircraftType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_BUILDINGTYPE, StructType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_ANIMTYPE, AnimType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_BULLETTYPE, BulletType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_OVERLAYTYPE, OverlayType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_SMUDGETYPE, SmudgeType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_TEMPLATETYPE, TemplateType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_TERRAINTYPE, TerrainType, instance)
+
+        default:
+            throw std::invalid_argument(
+                std::format("Unsupported RTTI type passed: {}", To_String(type))
+            );
+    }
 }
 
 nlohmann::json TdTypeConverter::Object_Target_Array_To_Json(

@@ -2668,18 +2668,53 @@ SidebarClass::~SidebarClass()
 
 TO_JSON(SidebarClass::StripClass::BuildType)
 {
-    FIELD_TO_JSON(BuildableID);
     CONVERT_TD_FIELD_TO_JSON(BuildableType);
     FIELD_TO_JSON(Factory);
     FIELD_TO_JSON(BuildableViaCapture);
+
+    // BuildableID field
+    const auto buildable_id_str = TdTypeConverter::RTTI_Instance_To_String(p.BuildableType, p.BuildableID);
+
+    FIELD_VALUE_TO_JSON(BuildableID, buildable_id_str.value_or("NONE"));
 }
 
 FROM_JSON(SidebarClass::StripClass::BuildType)
 {
-    FIELD_FROM_JSON(BuildableID);
-    PARSE_TD_FIELD_FROM_JSON(BuildType, BuildableType, RTTIType);
+    PARSE_TD_FIELD_FROM_JSON(SidebarClass::StripClass::BuildType, BuildableType, RTTIType);
     FIELD_FROM_JSON(Factory);
     FIELD_FROM_JSON(BuildableViaCapture);
+
+    // BuildableID field
+    if (!j.contains(NAMEOF(BuildableID))) {
+        CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(BuildableID));
+        return;
+    }
+
+    const auto& buildable_id_json = j.at(NAMEOF(BuildableID));
+
+    if (!buildable_id_json.is_string()) {
+        CNC_LOG_ERROR(
+            "Invalid JSON value {}, string expected - actual type: {}",
+            NAMEOF(BuildableID),
+            buildable_id_json.type_name()
+        );
+        return;
+    }
+
+    const auto buildable_id_str = buildable_id_json.get<std::string>();
+    const auto buildable_id = TdTypeConverter::Try_Parse_RTTI_Instance(p.BuildableType, buildable_id_str);
+
+    if (!buildable_id.has_value()) {
+        CNC_LOG_ERROR(
+            "Invalid JSON value {}, failed to parse string as RTTI type '{}' instance: {}",
+            NAMEOF(BuildableID),
+            TdTypeConverter::To_String(p.BuildableType),
+            buildable_id_str
+        );
+        return;
+    }
+
+    p.BuildableID = *buildable_id;
 }
 
 TO_JSON(SidebarClass::StripClass)

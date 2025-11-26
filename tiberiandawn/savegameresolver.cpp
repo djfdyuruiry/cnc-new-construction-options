@@ -8,6 +8,7 @@
 /**
  * BUGS:
  *
+ *   - Need to unload Lua on Scenario_Clear and init Lua on successful load
  *   - SelectedObjects serialization sometimes tries to access an invalid pointer (*Maybe* fixed, created manual TO/FROM JSON for DynamicVectorArrayClass)
  *   - Trigger heap validation fails (*Maybe* fixed now by clearing CellTriggers in Clear_Scenario | it is rare - ID of TriggerClass instance in Heap is outside bounds)
  */
@@ -16,7 +17,7 @@
 #define CURRENT_SAVE_CLASS SaveGame_v1
 
 const std::string_view& SaveGameResolver::Current_Save_Version = CURRENT_SAVE_CLASS::Version_Name;
-const std::vector<std::string_view>& SaveGameResolver::Supported_Save_Versions = std::vector { CURRENT_SAVE_CLASS::Version_Name };
+const std::vector<std::string_view> SaveGameResolver::Supported_Save_Versions = std::vector { CURRENT_SAVE_CLASS::Version_Name };
 
 bool SaveGameResolver::Save(CDFileClass& file, const char* description)
 {

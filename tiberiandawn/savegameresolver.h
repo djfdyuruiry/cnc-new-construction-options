@@ -29,7 +29,7 @@ public:
     // The current version to use when saving the game
     static const std::string_view& Current_Save_Version;
     // A list of supported versions as strings
-    static const std::vector<std::string_view>& Supported_Save_Versions;
+    static const std::vector<std::string_view> Supported_Save_Versions;
 
     /**
      * Attempt to write a save game to a file handle, the header will have the given description.
