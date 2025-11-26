@@ -342,6 +342,14 @@ bool Load_Game(int id)
     // return Load_Game_Binary(name);
 }
 
+/**
+ * Ensure Rules from the scenario INI file recorded in the save game
+ * are loaded. Also, init Lua runtime so all scripts are re-ran in prep
+ * for continuing the scenario.
+ *
+ * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
+ * BUG: Lua triggers and teams might be duplicated if script doesn't check them (need approach for this)
+ */
 static void Load_INI_Rules_And_Lua()
 {
     Rule.Init_For_Scenario(Scen);
