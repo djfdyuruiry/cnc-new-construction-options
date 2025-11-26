@@ -364,7 +364,7 @@ void Clear_Scenario(void)
     Score.Init();
     Logic.Init();
 
-    HouseClass::Init();
+    HouseClass::Init(); // This also resets the HouseTriggers vectors
     ObjectClass::Init();
     TeamTypeClass::Init();
     TeamClass::Init();
@@ -385,6 +385,10 @@ void Clear_Scenario(void)
     Base.Init();
 
     CurrentObject.Clear_All();
+
+    // Reset CellTriggers since we are saving/loading it now
+    CellTriggers.Clear();
+    CellTriggers.Resize(MAP_CELL_TOTAL);
 
     /**
      * Reset all rules to the default found in INI files, they might have been changed
