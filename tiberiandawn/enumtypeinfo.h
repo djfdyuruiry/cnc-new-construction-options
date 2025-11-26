@@ -21,6 +21,12 @@ public:
     const T MaximumToInclude;
     const TwoWayMap<T, std::string> PatchTable;
     const std::vector<T> Excluded;
+
+    /**
+     * Certain enum types are actually a full range of integers, with
+     * 'markers' at set values. Setting this to true will allow code
+     * to accept all values in the range when going to/from strings.
+     */
     const bool AllowNonEnumValuesInRange;
 
     EnumTypeInfo(

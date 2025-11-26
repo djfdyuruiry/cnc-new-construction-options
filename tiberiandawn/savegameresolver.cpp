@@ -10,8 +10,8 @@
  *
  *   - Build tree is not restored (sidebar options)
  *   - In progress builds are not restored
- *   - Trigger heap validation fails (sometimes - ID of TriggerClass instance in Heap is outside bounds)
- *   - Uninitialized CellTriggers attempted to be accessed (sometimes - possibly due being a DynamicVector but only accessed via VectorClass::[] operator methods)
+ *   - SelectedObjects serialization sometimes tries to access an invalid pointer (*Maybe* fixed, created manual TO/FROM JSON for DynamicVectorArrayClass)
+ *   - Trigger heap validation fails (it is rare - ID of TriggerClass instance in Heap is outside bounds)
  */
 
 //The implementation of the current save game version

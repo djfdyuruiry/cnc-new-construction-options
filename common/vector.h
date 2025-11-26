@@ -423,15 +423,65 @@ public:
         return Collection[context];
     }
 
+    /**
+     * We do this manually as the DynamicVectorClass root class VectorClass::[] operator
+     * has no awareness of DynamicVectorClass::ActiveCount, this can cause DynamicVectorClass
+     * instances to have an ActiveCount that doesn't align with the VectorClass::VectorMax and visa-versa.
+     *
+     * This class uses the DynamicVectorClass::Add to write elements, which manages ActiveCount.
+     */
     friend TO_JSON(DynamicVectorArrayClass)
     {
-        FIELD_TO_JSON(Collection);
+        // Collection field
+        auto json_collection = nlohmann::json::array();
+
+        for (auto collection_idx = 0; collection_idx < COUNT; collection_idx++) {
+            auto json_vector = nlohmann::json::array();
+
+            const auto& vector = p.Collection[collection_idx];
+
+            for (auto vector_idx = 0; vector_idx < vector.Count(); ++vector_idx) {
+                json_vector.emplace_back(p[vector_idx]);
+            }
+
+            json_collection.emplace_back(json_vector);
+        }
+
+        FIELD_VALUE_TO_JSON(Collection, json_collection);
         FIELD_TO_JSON(Active);
     }
 
     friend FROM_JSON(DynamicVectorArrayClass)
     {
-        FIELD_FROM_JSON(Collection);
+        // Collection field
+        if (!j.contains(NAMEOF(Collection))) {
+            CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(Collection));
+            return;
+        }
+
+        const auto& json_collection = j.at(NAMEOF(Collection));
+
+        if (!json_collection.is_array()) {
+            CNC_LOG_ERROR(
+                "Invalid JSON value {}, array expected - actual type: {}",
+                NAMEOF(Collection),
+                json_collection.type_name()
+            );
+            return;
+        }
+
+        p.Clear_All();
+
+        for (auto i = 0; i < json_collection.size(); i++) {
+            for (const auto& item : json_collection[i]) {
+                T elem;
+
+                from_json(item, elem);
+
+                p.Add(i, elem);
+            }
+        }
+
         FIELD_FROM_JSON(Active);
     }
 private:

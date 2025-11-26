@@ -37,7 +37,7 @@ static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
     //             [Typename]                     [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]   [Excluded Vals]      [Allow non-enum values?]
     ENUM_TYPE_PAIR(ArmorType,                    "ARMOR_",       ARMOR_NONE,                             ARMOR_LAST,                               {},                 {},                  false),
-    ENUM_TYPE_PAIR(MPHType,                      "MPH_",         MPH_IMMOBILE,                           MPH_LIGHT_SPEED,                          {},                 {},                  false),
+    ENUM_TYPE_PAIR(MPHType,                      "MPH_",         MPH_IMMOBILE,                           MPH_LIGHT_SPEED,                          {},                 {},                  true),
     ENUM_TYPE_PAIR(WeaponType,                   "WEAPON_",      WEAPON_NONE,                            WEAPON_LAST,                              WeaponPatchTable,   {},                  false),
     ENUM_TYPE_PAIR(HousesType,                   "HOUSE_",       HOUSE_NONE,                             HOUSE_LAST,                               {},                 {},                  false),
     ENUM_TYPE_PAIR(StructType,                   "STRUCT_",      STRUCT_NONE,                            STRUCT_LAST,                              StructPatchTable,   {},                  false),

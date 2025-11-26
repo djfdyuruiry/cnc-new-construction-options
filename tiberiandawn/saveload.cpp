@@ -1023,10 +1023,10 @@ void Code_All_Pointers(void)
  *=============================================================================================*/
 void Decode_All_Pointers(const HousesType& player_house)
 {
-    int i, j;
-
     /*
     **	The Map.
+    **
+    **	CellTriggers are decoded as a side effect (CellClass::Decode_Pointers is called)
     */
     Map.Decode_Pointers();
 
@@ -1059,12 +1059,10 @@ void Decode_All_Pointers(const HousesType& player_house)
     Units.Decode_Pointers();
     Factories.Decode_Pointers();
 
-    // CellTriggers are decoded as a side effect of CellClass::Decode_Pointers (Map.Decode_Pointers calls this)
-
     // HouseTriggers
     for (auto& house_triggers : HouseTriggers) {
-        for (auto hct_idx = 0; hct_idx < house_triggers.Length(); hct_idx++) {
-            TriggerClass*& ptr = house_triggers[hct_idx];
+        for (auto i = 0; i < house_triggers.Length(); i++) {
+            auto& ptr = house_triggers[i];
 
             ptr = As_Trigger(TARGET_SAFE_CAST(ptr));
         }
@@ -1074,8 +1072,8 @@ void Decode_All_Pointers(const HousesType& player_house)
     **	The Layers.
     */
     Logic.Decode_Pointers();
-    for (i = 0; i < LAYER_COUNT; i++) {
-        Map.Layer[i].Decode_Pointers();
+    for (auto& i : DisplayClass::Layer) {
+        i.Decode_Pointers();
     }
 
     /*
@@ -1099,13 +1097,14 @@ void Decode_All_Pointers(const HousesType& player_house)
     /*
     **	Currently-selected objects.
     */
-    for (i = 0; i < SelectedObjectsType::COUNT; i++) {
-        DynamicVectorClass<ObjectClass*>& selection = CurrentObject.Raw(i);
-        for (j = 0; j < selection.Count(); j++) {
-            uintptr_t target_as_object_ptr = reinterpret_cast<uintptr_t>(selection[j]);
-            TARGET target = (TARGET)target_as_object_ptr;
-            selection[j] = As_Object(target);
-            Check_Ptr(selection[j], __FILE__, __LINE__);
+    for (auto i = 0; i < SelectedObjectsType::COUNT; i++) {
+        auto& selection = CurrentObject.Raw(i);
+
+        for (auto j = 0; j < selection.Count(); j++) {
+            auto& object = selection[j];
+
+            object = As_Object(TARGET_SAFE_CAST(object));
+            Check_Ptr(object, __FILE__, __LINE__);
         }
     }
 
@@ -1115,11 +1114,12 @@ void Decode_All_Pointers(const HousesType& player_house)
     */
     if (Map.PendingObjectPtr) {
         Map.PendingObject = &Map.PendingObjectPtr->Class_Of();
-        Check_Ptr((void*)Map.PendingObject, __FILE__, __LINE__);
+        Check_Ptr((void*)(Map.PendingObject), __FILE__, __LINE__);
+
         Map.Set_Cursor_Shape(Map.PendingObject->Occupy_List(true));
     } else {
-        Map.PendingObject = 0;
-        Map.Set_Cursor_Shape(0);
+        Map.PendingObject = nullptr;
+        Map.Set_Cursor_Shape(nullptr);
     }
 }
 

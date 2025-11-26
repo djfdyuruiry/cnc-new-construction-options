@@ -377,6 +377,7 @@ public:
 
             if (TypeNamePatchTable.contains(raw_type_name)) {
                 type_name = TypeNamePatchTable.at(raw_type_name);
+                return;
             }
 
             type_name = raw_type_name.substr(
