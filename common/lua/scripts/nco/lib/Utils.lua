@@ -28,16 +28,7 @@ Utils.arrayToCsv = function(array, delimiter)
 
   local stringDelimiter = type(delimiter) == "string" and delimiter or ","
 
-  local result = ""
-
-  for i, v in ipairs(array) do
-    if i > 1 then
-      result = result .. stringDelimiter
-    end
-    result = result .. tostring(v)
-  end
-
-  return result
+  return table.concat(array, stringDelimiter)
 end
 
 --- Simple table to CSV conversion for dictionary

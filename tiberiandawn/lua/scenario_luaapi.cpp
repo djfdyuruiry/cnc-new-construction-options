@@ -83,14 +83,12 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         .addCFunction("getTeamTypeNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto trigger_names_table = LuaTableBuilder(engine);
-            auto i = 0;
+            auto team_names = LuaTableBuilder(engine);
 
-            while (i < Triggers.Count()) {
-                auto trigger_name = Triggers.Ptr(i)->Get_Name();
-
-                trigger_names_table.With_Index_Value(trigger_name);
-                i++;
+            for (auto i = 0; i < TeamTypes.Count(); ++i) {
+                team_names.With_Index_Value(
+                    TeamTypes.Ptr(i)->Name()
+                );
             }
 
             return 1;
@@ -143,13 +141,11 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             const auto engine = SharedLuaEngine(L);
 
             auto trigger_names_table = LuaTableBuilder(engine);
-            auto i = 0;
 
-            while (i < Triggers.Count()) {
-                const auto trigger_name = Triggers.Ptr(i)->Get_Name();
-
-                trigger_names_table.With_Index_Value(trigger_name);
-                i++;
+            for (auto i = 0; i < Triggers.Count(); ++i) {
+                trigger_names_table.With_Index_Value(
+                    Triggers.Ptr(i)->Get_Name()
+                );
             }
 
             return 1;
@@ -178,6 +174,8 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             return 1;
         })
+        // TODO: Figure out how to make this idempotent, currently lua blocks add if duplicate name found but we need to track deleted triggers
+        //       so loading a save game (saved after a sprung trigger removed itself) doesn't try to re-add the trigger (when lua script is ran)
         .addCFunction("addTrigger", [](auto L) {
             const auto engine = SharedLuaEngine(L);
             auto arguments = LuaArguments(engine, "Scenario.addTrigger(<string: name>, <string: definitionCsv>)");
@@ -219,16 +217,16 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
     });
 }
 
-HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, const std::string& name)
+HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, std::string name)
 {
-    const auto houseType = HouseTypeClass::From_Name(name.c_str());
+    const auto houseType = TdTypeConverter::Try_Parse<HousesType>(name);
 
-    if (houseType == HOUSE_NONE) {
+    if (!houseType.has_value()) {
         engine.Raise_Error_Format(
             "Failed to parse house name from string: {}",
             name
         );
     }
 
-    return houseType;
+    return *houseType;
 }

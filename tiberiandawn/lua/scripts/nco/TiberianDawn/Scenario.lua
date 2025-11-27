@@ -99,6 +99,26 @@ local function builder(cppApi)
     }
   )
 
+  local function teamExists(teamName)
+    for _, team in ipairs(cppApi.getTeamTypeNames()) do
+        if teamName == team then
+            return true
+        end
+    end
+
+    return false
+  end
+
+  local function triggerExists(triggerName)
+    for _, trigger in ipairs(cppApi.getTriggerNames()) do
+         if triggerName == trigger then
+            return true
+        end
+    end
+
+    return false
+  end
+
   return {
     name = cppApi.name,
     type = cppApi.type,
@@ -119,6 +139,11 @@ local function builder(cppApi)
           return cppApi.getTeamType(teamName)
         end,
         __newindex = function (_, teamName, csvDefinition)
+          if (teamExists(teamName)) then
+              -- TODO: log
+              return
+          end
+
           return cppApi.addTeamType(teamName, csvDefinition)
         end
       }
@@ -133,7 +158,12 @@ local function builder(cppApi)
         __index = function (_, triggerName)
           return cppApi.getTrigger(triggerName)
         end,
-        __newindex = function (_, triggerName, csvDefinition)
+        __newindex = function(_, triggerName, csvDefinition)
+          if (triggerExists(triggerName)) then
+            -- TODO: log
+            return
+          end
+
           return cppApi.addTrigger(triggerName, csvDefinition)
         end
       }

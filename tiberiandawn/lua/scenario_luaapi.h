@@ -29,7 +29,7 @@ protected:
     }
 
 private:
-    static HousesType Parse_House_Name(const LuaEngine& engine, const std::string& name);
+    static HousesType Parse_House_Name(const LuaEngine& engine, std::string name);
 
     std::string ScenarioName;
     std::string ScenarioType;
