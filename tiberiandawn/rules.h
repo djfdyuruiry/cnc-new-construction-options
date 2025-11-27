@@ -304,11 +304,11 @@ public:
 
     void Init();
     void Init(CCINIClass& ini);
-    void Init_For_Scenario(const ScenarioClass& scenario);
 
     void Init_Types();
     void Init_Types(CCINIClass& ini);
-    void Init_Types_For_Scenario(const ScenarioClass& scenario);
+
+    void Init_For_Scenario(const ScenarioClass& scenario);
 
     template<EnumSignedChar T>
     RuleSections& Get_Rule_Sections_For_Type()

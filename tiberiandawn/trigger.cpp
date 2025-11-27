@@ -330,6 +330,7 @@ TriggerClass::~TriggerClass(void)
 void TriggerClass::Init(void)
 {
     Triggers.Free_All();
+    RemovedTriggers.clear();
 }
 
 /***********************************************************************************************
@@ -1003,6 +1004,9 @@ bool TriggerClass::Remove(void)
     for (h = HOUSE_FIRST; h < HOUSE_COUNT; h++) {
         HouseTriggers[h].Delete(this);
     }
+
+    // Record that this trigger was removed
+    RemovedTriggers.emplace_back(Get_Name());
 
     delete this;
 

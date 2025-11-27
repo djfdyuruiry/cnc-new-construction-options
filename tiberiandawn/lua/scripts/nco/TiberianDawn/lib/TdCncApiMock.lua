@@ -22,6 +22,7 @@ local function extendCallsTable(calls)
     getTeamType = {},
     addTeamType = {},
     getTriggerNames = {},
+    getDeletedTriggerNames = {},
     getTrigger = {},
     addTrigger = {},
     deleteTriggerIfExists = {}
@@ -126,6 +127,12 @@ local function extendMockTable(getCalls, mock)
             table.insert(getCalls().Scenario.getTriggerNames, {...})
 
             return { "RNF1", "RNF2" }
+          end
+        elseif k == "getDeletedTriggerNames" then
+          return function(...)
+            table.insert(getCalls().Scenario.getDeletedTriggerNames, {...})
+
+            return { "OLD1", "OLD2" }
           end
         elseif k == "getTrigger" then
           return function(...)

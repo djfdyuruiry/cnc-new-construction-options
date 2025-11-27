@@ -37,7 +37,7 @@ public:
                 auto engine = SharedLuaEngine(L);
 
                 auto section_names = R::Sections().Section_Names();
-                auto table_builder = LuaTableBuilder(engine);
+                auto table_builder = LuaTableBuilder::Push_New_Table(engine);
 
                 for (const auto& name : section_names) {
                     table_builder.With_Index_Value(name);
@@ -64,7 +64,7 @@ public:
                 }
 
                 auto rule_names = R::Sections()[section].Rule_Names();
-                auto table_builder = LuaTableBuilder(engine);
+                auto table_builder = LuaTableBuilder::Push_New_Table(engine);
 
                 for (const auto& name : rule_names) {
                     table_builder.With_Index_Value(name);

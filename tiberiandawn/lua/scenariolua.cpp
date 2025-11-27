@@ -78,29 +78,41 @@ void ScenarioLua::On_Scenario_Load(
     const auto ini_script_path = ini.Get_String(
         "Basic",
         "LuaScript",
-        std::string_view("__NOT_FOUND__")
+        NotFoundStr
     );
 
     On_Scenario_Load(game_type, scenario, player, ini_script_path);
 }
 
 void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClass& scenario, const HouseClass& player)
-{
-    const std::string scenario_ini_file = scenario.FileName;
+{    const std::string scenario_ini_file = scenario.FileName;
 
-    if (!CncStringUtils::Is_Blank(scenario_ini_file)) {
-        if (CCFileClass ini_file(scenario_ini_file.c_str()); ini_file.Is_Available()) {
-            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
-                On_Scenario_Load(game_type, scenario, player, ini);
-                return;
-            }
+    if (CncStringUtils::Is_Blank(scenario_ini_file)) {
+        CNC_LOGGER_DEBUG("Not checking scenario INI for lua scripts - no filename provided");
 
-            CNC_LOGGER_ERROR("Failed to load scenario INI filename: {}", scenario_ini_file);
-        }
+        On_Scenario_Load(game_type, scenario, player, std::nullopt);
+        return;
     }
 
-    CNC_LOGGER_DEBUG("Scenario has no associated INI file");
-    On_Scenario_Load(game_type, scenario, player, std::nullopt);
+    CCFileClass ini_file(scenario_ini_file.c_str());
+
+    if (!ini_file.Is_Available()) {
+        CNC_LOGGER_WARN("Not checking scenario INI for lua scripts - file is missing: {}", scenario_ini_file);
+
+        On_Scenario_Load(game_type, scenario, player, std::nullopt);
+        return;
+    }
+
+    CCINIClass ini;
+
+    if (!ini.Load(ini_file, true)) {
+        CNC_LOGGER_FATAL("Failed to check scenario INI for lua scripts - file is corrupt: {}", scenario_ini_file);
+        return;
+    }
+
+    CNC_LOGGER_INFO("Checking scenario INI file for lua scripts: {}", scenario_ini_file);
+
+    On_Scenario_Load(game_type, scenario, player, ini);
 }
 
 bool ScenarioLua::Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name)
@@ -200,7 +212,7 @@ void ScenarioLua::Exec_Scenario_Lua_Scripts(
     };
 
     if (ini_script_path.has_value()) {
-        if (*ini_script_path != "__NOT_FOUND__") {
+        if (*ini_script_path != NotFoundStr) {
             if (!CncStringUtils::Is_Blank(*ini_script_path)) {
                 auto path = *ini_script_path;
 

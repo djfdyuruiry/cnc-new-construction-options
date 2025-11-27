@@ -329,6 +329,8 @@ void SaveGame_v1::Read_Globals()
 
     GameCellTriggers = CellTriggers;
     GameHouseTriggers = HouseTriggers;
+    RemovedTriggers = TriggerClass::RemovedTriggers;
+
     GameMap = Map;
     GameLogic = Logic;
     Layers = DisplayClass::Layer;
@@ -367,6 +369,15 @@ bool SaveGame_v1::Validate() const
             NAMEOF(GameHouseTriggers),
             std::size(HouseTriggers),
             GameHouseTriggers.size()
+        );
+    }
+
+    if (!RemovedTriggers.is_array()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json array expected, actual type: {}",
+            NAMEOF(RemovedTriggers),
+            RemovedTriggers.type_name()
         );
     }
 
@@ -439,9 +450,9 @@ bool SaveGame_v1::Write_Globals() const
     // Cell/House triggers
     from_json(GameCellTriggers, CellTriggers);
     from_json(GameHouseTriggers, HouseTriggers);
+    from_json(RemovedTriggers, TriggerClass::RemovedTriggers);
 
     from_json(GameMap, reinterpret_cast<MouseClass&>(Map));
-
     from_json(GameLogic, Logic);
     from_json(Layers, DisplayClass::Layer);
 

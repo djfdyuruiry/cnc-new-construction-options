@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include "luaengine.h"
 #include "lualib.h"
 
@@ -9,31 +7,26 @@
  * Fluent builder for setting up Lua Tables on the stack.
  * Supports both index based array tables and key=value tables.
  * 
- * Arrays: New_Table() -> With_Index_Value() (repeat With_Index_Value as needed)
- * Maps:   New_Table() -> With_Key_Value()   (repeat With_Key_Value as needed)
+ * Arrays: Push_New_Table(...) -> With_Index_Value() (repeat With_Index_Value as needed)
+ * Maps:   Push_New_Table(...) -> With_Key_Value()   (repeat With_Key_Value as needed)
  * 
- * Values are pushed onto the stack as methods are called, no need to finalize.
+ * Values are pushed onto the stack as methods are called, no need to finalize. If no methods
+ * are called after Push_New_Table then the stack will contain an empty table.
  */
 class LuaTableBuilder
 {
 public:
-    LuaTableBuilder(const LuaEngine& engine) : Lua(engine) {}
-
-    LuaTableBuilder& New_Table();
+    static LuaTableBuilder Push_New_Table(const LuaEngine& engine);
 
     template <LuaPushType T>
     LuaTableBuilder& With_Index_Value(T value)
     {
-        if (!TableStreamIndex.has_value()) {
-            New_Table();
-        }
-
         Lua.Push_Value<T>(value);
         Lua.With_State([&](auto L) {
-            lua_rawseti(L, -2, TableStreamIndex.value());
+            lua_rawseti(L, -2, TableStreamIndex);
         });
     
-        TableStreamIndex = TableStreamIndex.value() + 1;
+        TableStreamIndex = TableStreamIndex + 1;
 
         return *this;
     }
@@ -41,20 +34,18 @@ public:
     template <LuaPushType T>
     LuaTableBuilder& With_Key_Value(std::string_view key, T value)
     {
-        if (!TableStreamIndex.has_value()) {
-            New_Table();
-        }
-
         Lua.Push_Value<std::string_view>(key);
         Lua.Push_Value<T>(value);
         Lua.With_State([](auto L) { lua_settable(L, -3); });
 
-        TableStreamIndex = TableStreamIndex.value() + 1;
+        TableStreamIndex = TableStreamIndex + 1;
 
         return *this;
     }
 private:
     const LuaEngine& Lua;
 
-    std::optional<int> TableStreamIndex;
+    unsigned int TableStreamIndex;
+
+    LuaTableBuilder(const LuaEngine& engine);
 };

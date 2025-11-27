@@ -158,6 +158,7 @@ public:
 
     nlohmann::json GameCellTriggers;
     nlohmann::json GameHouseTriggers;
+    nlohmann::json RemovedTriggers;
 
     // map objects
 
@@ -186,6 +187,7 @@ public:
         Objects,
         GameCellTriggers,
         GameHouseTriggers,
+        RemovedTriggers,
         GameMap,
         GameLogic,
         Layers,

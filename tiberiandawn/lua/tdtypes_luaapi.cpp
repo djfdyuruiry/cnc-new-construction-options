@@ -10,7 +10,7 @@ void TiberianDawnTypesLuaApi::Register_Functions(LuaEngine& engine) const
         n.addCFunction("getTypeNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            LuaTableBuilder(engine)
+            LuaTableBuilder::Push_New_Table(engine)
                 .With_Index_Value(TdTypeConverter::Get_Type_Name<AnimType>())
                 .With_Index_Value(TdTypeConverter::Get_Type_Name<WarheadType>())
                 .With_Index_Value(TdTypeConverter::Get_Type_Name<BulletType>())

@@ -18,6 +18,8 @@ public:
         std::string scenario_house
     ) ;
 
+    void Register_Dependencies(LuaEngine& engine) const override;
+
     void Register_Consts(LuaEngine& engine) const override;
 
     void Register_Functions(LuaEngine& engine) const override;

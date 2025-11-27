@@ -353,7 +353,6 @@ bool Load_Game(int id)
 static void Load_INI_Rules_And_Lua()
 {
     Rule.Init_For_Scenario(Scen);
-    Rule.Init_Types_For_Scenario(Scen);
     ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr);
 }
 

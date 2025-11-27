@@ -79,13 +79,10 @@ local function main()
   editTypes()
 end
 
-local status, error = pcall(main)
-
-if not status then
+xpcall(main, function(error)
   -- show the error to the player
   Messages.sendToPlayer("LUA ERROR: %s", error)
 
   -- log for debugging later
-  Logger.error("Error in scg01ea.lua: %s", error)
-end
-
+  Logger.error("Error in scg01ea.lua: %s - %s", error, debug.traceback(error, 2))
+end)

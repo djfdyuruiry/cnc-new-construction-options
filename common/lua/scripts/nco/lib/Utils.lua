@@ -130,4 +130,17 @@ Utils.splitString = function(subject, delimiter)
   return result
 end
 
+---@param array any[]
+---@param value any
+---@return boolean
+Utils.arrayContains = function(array, value)
+  for _, v in ipairs(array) do
+    if v == value then
+      return true
+    end
+  end
+
+  return false
+end
+
 return Utils

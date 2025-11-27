@@ -219,6 +219,12 @@ public:
     int Validate(void) const;
 
     /*
+    **  When a trigger is deleted for any reason it is removed from the trigger
+    **  heap, so we want to track that here. Reset on Init method call.
+    */
+    static inline std::vector<std::string> RemovedTriggers;
+
+    /*
     **	This is the pointer to the team that gets created or destroyed when
     **	a team-related trigger goes off, or for reinforcements. The house
     **	for reinforcements is determined by the house for that team.

@@ -8,6 +8,7 @@ AddTeamLuaEvent::AddTeamLuaEvent(std::string name, std::string definition): LuaE
     Definition = std::move(definition);
 }
 
+// BUG: Game crashes on parse if definition CSV is not valid
 void AddTeamLuaEvent::Execute() const
 {
     LuaEvent::Execute();

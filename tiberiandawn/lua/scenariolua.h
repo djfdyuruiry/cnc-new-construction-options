@@ -87,6 +87,7 @@ public:
 #pragma endregion
 
 private:
+    static constexpr std::string_view NotFoundStr = "__NOT_FOUND__";
     static inline const auto& Logger = CncLogger::For(ScenarioLua);
     static inline std::optional<UniqueLuaEngine> Engine;
 

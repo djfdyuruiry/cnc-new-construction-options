@@ -271,18 +271,28 @@ void RulesClass::Init_For_Scenario(const ScenarioClass& scenario)
 {
     const std::string scenario_ini_file = scenario.FileName;
 
-    if (!CncStringUtils::Is_Blank(scenario_ini_file)) {
-        if (CCFileClass ini_file(scenario_ini_file.c_str()); ini_file.Is_Available()) {
-            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
-                Init(ini);
-                return;
-            }
-
-            CNC_LOGGER_ERROR("Failed to load scenario INI filename: {}", scenario_ini_file);
-        }
+    if (CncStringUtils::Is_Blank(scenario_ini_file)) {
+        CNC_LOGGER_DEBUG("Not loading rules for scenario - no INI filename provided");
     }
 
-    CNC_LOGGER_DEBUG("Scenario has no associated INI file");
+    CCFileClass ini_file(scenario_ini_file.c_str());
+
+    if (!ini_file.Is_Available()) {
+        CNC_LOGGER_WARN("Not loading rules for scenario - INI file is missing: {}", scenario_ini_file);
+        return;
+    }
+
+    CCINIClass ini;
+
+    if (!ini.Load(ini_file, true)) {
+        CNC_LOGGER_FATAL("Failed to load rules for scenario - INI file is corrupt: {}", scenario_ini_file);
+        return;
+    }
+
+    CNC_LOGGER_INFO("Reading scenario rules from INI file: {}", scenario_ini_file);
+
+    Init(ini);
+    Init_Types(ini);
 }
 
 /**
@@ -524,10 +534,12 @@ void RulesClass::Difficulty(CCINIClass& ini)
  * Lua APIs to interact with the classes indirectly via the Rules section.
  */
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini)
+static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini, const CncLogger& Logger)
 {
     // get name for type and rules section
     auto type_name = TdTypeConverter::Get_Type_Name<U>();
+
+    CNC_LOGGER_INFO("Processing rule sections for type: {}", type_name);
 
     rules.TypeRules[type_name] = std::make_unique<RuleSections>();
     auto& sections = *rules.TypeRules[type_name];
@@ -562,7 +574,7 @@ static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& 
 }
 
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static void Init_Type(RulesClass& rules, U first, U count)
+static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logger)
 {
     auto prefix = TdTypeConverter::Get_Type_Name<U>();
     const auto rules_filename = std::format("{}.INI", prefix);
@@ -572,18 +584,27 @@ static void Init_Type(RulesClass& rules, U first, U count)
     const auto ini_file_exists = ini_file.Is_Available();
 
     if (ini_file_exists) {
-        ini.Load(ini_file, false);
+        CNC_LOGGER_DEBUG("Loading type rules from INI file: {}", rules_filename);
+
+        if (!ini.Load(ini_file, false)) {
+            CNC_LOGGER_FATAL("Failed to load type rules - INI file is corrupt: {}", rules_filename);
+        }
     }
 
-    auto& sections = Init_Type<U, T>(rules, first, count, ini);
+    auto& sections = Init_Type<U, T>(rules, first, count, ini, Logger);
 
     // TODO: Load new types instances for ini sections with names not found in game engine
     //       (needs type ptr/reference rework and enums refactoring - to allow types to grow rather than be static)
 
     // provide player with a default <PREFIX>.INI file
     if (!ini_file_exists) {
+        CNC_LOGGER_DEBUG("Writing type rules to INI file: {}", rules_filename);
+
         sections.Save_All_To_Ini(ini);
-        ini.Save(ini_file, false);
+
+        if (ini.Save(ini_file, false) != 0) {
+            CNC_LOGGER_FATAL("Failed to save type rules to INI file: {}", rules_filename);
+        }
     }
 
     ini_file.Close();
@@ -592,49 +613,30 @@ static void Init_Type(RulesClass& rules, U first, U count)
 void RulesClass::Init_Types()
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT);
-    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT);
-    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT);
-    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT);
-    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT);
-    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT);
-    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT);
-    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT);
-    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT);
+    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, Logger);
+    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, Logger);
+    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, Logger);
+    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, Logger);
+    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger);
+    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, Logger);
+    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, Logger);
+    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, Logger);
+    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, Logger);
 }
 
 void RulesClass::Init_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, ini);
-    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, ini);
-    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, ini);
-    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, ini);
-    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini);
-    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, ini);
-    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, ini);
-    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, ini);
-    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, ini);
+    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, ini, Logger);
+    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, ini, Logger);
+    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, ini, Logger);
+    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, ini, Logger);
+    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini, Logger);
+    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, ini, Logger);
+    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, ini, Logger);
+    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, ini, Logger);
+    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, ini, Logger);
 }
-
-void RulesClass::Init_Types_For_Scenario(const ScenarioClass& scenario)
-{
-    const std::string scenario_ini_file = scenario.FileName;
-
-    if (!CncStringUtils::Is_Blank(scenario_ini_file)) {
-        if (CCFileClass ini_file(scenario_ini_file.c_str()); ini_file.Is_Available()) {
-            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
-                Init_Types(ini);
-                return;
-            }
-
-            CNC_LOGGER_ERROR("Failed to load scenario INI filename: {}", scenario_ini_file);
-        }
-    }
-
-    CNC_LOGGER_DEBUG("Scenario has no associated INI file");
-}
-
 
 /***********************************************************************************************
  * RulesClass::Export_Difficulty -- Export the various difficulty group settings.              *

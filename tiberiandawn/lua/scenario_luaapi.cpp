@@ -1,3 +1,4 @@
+#include "../common/lua/logging_luaapi.h"
 #include "../common/lua/luaapi.h"
 #include "../common/lua/luaarguments.h"
 #include "../common/lua/luatablebuilder.h"
@@ -18,6 +19,11 @@ ScenarioLuaApi::ScenarioLuaApi(std::string scenario_name, std::string scenario_t
     ScenarioHouse = std::move(scenario_house);
 }
 
+void ScenarioLuaApi::Register_Dependencies(LuaEngine& engine) const
+{
+    engine.Register_Api<LoggingLuaApi>();
+}
+
 void ScenarioLuaApi::Register_Consts(LuaEngine& engine) const
 {
     With_Api_Namespace(engine, [&](auto& n) {
@@ -34,7 +40,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         n.addCFunction("getHouseNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto house_name_table = LuaTableBuilder(engine);
+            auto house_name_table = LuaTableBuilder::Push_New_Table(engine);
 
             for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; i++) {
                 house_name_table.With_Index_Value(
@@ -83,7 +89,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         .addCFunction("getTeamTypeNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto team_names = LuaTableBuilder(engine);
+            auto team_names = LuaTableBuilder::Push_New_Table(engine);
 
             for (auto i = 0; i < TeamTypes.Count(); ++i) {
                 team_names.With_Index_Value(
@@ -132,7 +138,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             arguments.Assert_String_Parameter_Is_Valid("name", name, 8);
             arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
-            // BUG: Game crashes on parse if definition CSV is not valid
+            // TODO: Validate method create, and call before push
             LuaList.Push<AddTeamLuaEvent>(name, definition);
 
             return 0;
@@ -140,12 +146,24 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         .addCFunction("getTriggerNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto trigger_names_table = LuaTableBuilder(engine);
+            auto trigger_names_table = LuaTableBuilder::Push_New_Table(engine);
 
             for (auto i = 0; i < Triggers.Count(); ++i) {
                 trigger_names_table.With_Index_Value(
                     Triggers.Ptr(i)->Get_Name()
                 );
+            }
+
+            return 1;
+        })
+        .addCFunction("getDeletedTriggerNames", [](auto L) {
+            const auto engine = SharedLuaEngine(L);
+
+            auto trigger_names_table = LuaTableBuilder::Push_New_Table(engine);
+            auto triggers = TriggerClass::RemovedTriggers;
+
+            for (const auto& trigger_name : triggers) {
+                trigger_names_table.With_Index_Value(trigger_name);
             }
 
             return 1;
@@ -174,8 +192,6 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             return 1;
         })
-        // TODO: Figure out how to make this idempotent, currently lua blocks add if duplicate name found but we need to track deleted triggers
-        //       so loading a save game (saved after a sprung trigger removed itself) doesn't try to re-add the trigger (when lua script is ran)
         .addCFunction("addTrigger", [](auto L) {
             const auto engine = SharedLuaEngine(L);
             auto arguments = LuaArguments(engine, "Scenario.addTrigger(<string: name>, <string: definitionCsv>)");
@@ -191,7 +207,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             arguments.Assert_String_Parameter_Is_Valid("name", name, 4);
             arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
-            // BUG: Game crashes on parse if definition CSV is not valid
+            // TODO: Validate method create, call before push
             LuaList.Push<AddTriggerLuaEvent>(name, definition);
 
             return 0;
