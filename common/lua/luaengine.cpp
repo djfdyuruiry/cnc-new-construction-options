@@ -365,6 +365,7 @@ void LuaStateDeleter::operator()(lua_State* L) const
 {
     if (L)
     {
+        CNC_LOGGER_INFO("Destroying Lua state: {}", static_cast<void*>(L));
         lua_close(L);
     }
 }
@@ -376,7 +377,9 @@ const UniqueLuaEngine& UniqueLuaEngine::Global()
     return global;
 }
 
-UniqueLuaEngine::UniqueLuaEngine(): State(Build_State(), LuaStateDeleter())
+UniqueLuaEngine::UniqueLuaEngine() :
+    State(Build_State(), LuaStateDeleter()),
+    Id(std::format("{}", static_cast<void*>(Get_State())))
 {
     With_Global("package", LUA_TTABLE, [&]() {
         auto read_result = Try_Read_Table_Field<std::string>("package", "path");
@@ -395,10 +398,11 @@ UniqueLuaEngine::UniqueLuaEngine(): State(Build_State(), LuaStateDeleter())
 
             return Set_Table_Field("package", "path", package_path);
         });
-    }).On_Error([](auto& r) {
+    }).On_Error([&](auto& r) {
         CNC_LOGGER_FATAL(
-            "Failed to initialise Lua package paths: {}",
-            r.Error_Message()
+            "Failed to initialise Lua package paths: {} | Engine ID = {}",
+            r.Error_Message(),
+            Get_Id()
         );
     });
 }
@@ -408,14 +412,32 @@ lua_State* UniqueLuaEngine::Get_State() const
     return State.get();
 }
 
-lua_State* UniqueLuaEngine::Build_State() {
+lua_State* UniqueLuaEngine::Build_State()
+{
     const auto L = luaL_newstate();
+    CNC_LOGGER_INFO("Created Lua state: {}", static_cast<void*>(L));
+
+    CNC_LOGGER_DEBUG("Opening Lua libraries for state:", static_cast<void*>(L));
     luaL_openlibs(L);
 
     return L;
 }
 
+const std::string& UniqueLuaEngine::Get_Id() const
+{
+    return Id;
+}
+
+SharedLuaEngine::SharedLuaEngine(lua_State* L) : State(L), Id(std::format("{}", static_cast<void*>(L)))
+{
+}
+
 lua_State* SharedLuaEngine::Get_State() const
 {
     return State;
+}
+
+const std::string& SharedLuaEngine::Get_Id() const
+{
+    return Id;
 }

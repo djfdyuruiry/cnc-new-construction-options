@@ -121,7 +121,7 @@ public:
         auto it = std::find(RegisteredApis.begin(), RegisteredApis.end(), api.Name);
 
         if (it != RegisteredApis.end()) {
-            CNC_LOG_DEBUG("Request to register Api '{}' ignored, it's already registered", api.Name);
+            CNC_LOGGER_DEBUG("Request to register Api '{}' ignored, it's already registered", api.Name);
             return;
         }
 
@@ -442,6 +442,9 @@ public:
     {
         return luabridge::getGlobalNamespace(Get_State());
     }
+
+    virtual const std::string& Get_Id() const = 0;
+
 protected:
     static inline const auto& Logger = CncLogger::For(LuaEngine);
 
@@ -457,6 +460,9 @@ class LuaStateDeleter
 {
 public:
     void operator()(lua_State *L) const;
+
+private:
+    static inline const auto& Logger = CncLogger::For(LuaStateDeleter);
 };
 
 /**
@@ -471,18 +477,20 @@ class UniqueLuaEngine final : public LuaEngine
 public:
     /**
      * Global lua state for the lifetime of the C++ process.
-     * 
+     *
      * Note: This state is NOT shared or accessible from instances of UniqueLuaEngine.
      */
     static const UniqueLuaEngine& Global();
 
-    UniqueLuaEngine() ;
+    UniqueLuaEngine();
 
+    const std::string& Get_Id() const override;
 protected:
     lua_State* Get_State() const override;
 
 private:
     std::unique_ptr<lua_State, LuaStateDeleter> State;
+    std::string Id;
 
     static lua_State* Build_State();;
 };
@@ -497,13 +505,15 @@ private:
 class SharedLuaEngine final : public LuaEngine
 {
 public:
-    SharedLuaEngine(lua_State* L) : State(L) {}
+    SharedLuaEngine(lua_State* L);
 
+    const std::string& Get_Id() const override;
 protected:
     lua_State* Get_State() const override;
 
 private:
     lua_State* State;
+    std::string Id;
 };
 
 /**

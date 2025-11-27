@@ -49,7 +49,7 @@ void ScenarioLua::On_Scenario_Load(
 
     CncStringUtils::To_Lower(scenario_name);
 
-    CNC_LOG_INFO("Initializing Lua for scenario: {}", scenario_name);
+    CNC_LOGGER_INFO("Initializing Lua for scenario: {}", scenario_name);
 
     Init_Tiberian_Dawn_Lua_Engine(
        scenario_name,
@@ -172,17 +172,17 @@ void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
 void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(std::string& scenario_name, std::string& scenario_type_name, std::string& faction, std::string& house_name)
 {
     Engine = LuaEngineBuilder<UniqueLuaEngine>()
-      .With_Api<SystemLuaApi>()
-      .With_Api<LoggingLuaApi>()
-      .With_Api<RulesLuaApi<TdRuleSectionsProvider>>()
-      .With_Api<EventLuaApi>()
-      .With_Api<TiberianDawnTypesLuaApi>()
-      .With_Api<GameLuaApi>()
-      .With_Api<MessagesLuaApi>()
-      .With_Api<UiLuaApi>()
-      .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name)
-      .Build();
-    }
+        .With_Api<SystemLuaApi>()
+        .With_Api<LoggingLuaApi>()
+        .With_Api<RulesLuaApi<TdRuleSectionsProvider>>()
+        .With_Api<EventLuaApi>()
+        .With_Api<TiberianDawnTypesLuaApi>()
+        .With_Api<GameLuaApi>()
+        .With_Api<MessagesLuaApi>()
+        .With_Api<UiLuaApi>()
+        .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name)
+        .Build();
+}
 
 void ScenarioLua::Exec_Scenario_Lua_Scripts(
     const std::optional<std::string>& ini_script_path,
@@ -192,11 +192,11 @@ void ScenarioLua::Exec_Scenario_Lua_Scripts(
     const std::string& house_name)
 {
     auto lua_scripts_to_load = std::vector {
-      std::string(LuaScripts::On_Scenario_Load),
-      std::format("{}.lua", scenario_name),
-      std::format("{}.lua", scenario_name.substr(0, 5)),
-      std::format("{}-scenario.lua", faction_name),
-      std::format("{}-scenario.lua", house_name)
+        std::string(LuaScripts::On_Scenario_Load),
+        std::format("{}.lua", scenario_name),
+        std::format("{}.lua", scenario_name.substr(0, 5)),
+        std::format("{}-scenario.lua", faction_name),
+        std::format("{}-scenario.lua", house_name)
     };
 
     if (ini_script_path.has_value()) {

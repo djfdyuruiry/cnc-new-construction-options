@@ -24,8 +24,14 @@ private:
 };
 
 /**
- * Used to manage Lua runtime from game engine
- * static code.
+ * Used to manage Lua runtime from game engine static code.
+ *
+ * This class is called from:
+ *
+ *   - scenarioini.cpp => when loading a scenario from an INI file
+ *   - saveload.cpp    => when loading a scenario from a save file
+ *   - scenario.cpp    => when clearing the scenario state
+ *
  */
 class ScenarioLua final
 {
