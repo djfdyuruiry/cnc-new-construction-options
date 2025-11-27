@@ -58,6 +58,8 @@
 class CncJsonUtils final
 {
 public:
+    // TODO: Add Check_Type(json) -> bool + Assert_Type(json) { CNC_LOGGER_FATAL(...) }
+
     static void Cstr_Field_From_Json(
         const nlohmann::json& j,
         const std::string_view& json_path,
