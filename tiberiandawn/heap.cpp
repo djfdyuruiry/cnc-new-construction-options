@@ -253,8 +253,6 @@ int FixedHeapClass::ID(void const* pointer)
         id = ((int)(((char*)pointer - (char*)Buffer) / Size));
     }
 
-    CNC_LOG_DEBUG("Heap ID for pointer: {} | Size={}", id, Size);
-
     return id;
 }
 

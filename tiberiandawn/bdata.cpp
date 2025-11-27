@@ -4552,7 +4552,7 @@ int BuildingTypeClass::Full_Name(void) const
         && (PlayerPtr && PlayerPtr->Class->House == HOUSE_BAD)
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, RENAME_TECH_CENTER_TO_PRISON_IN_NOD_SCENARIO_3_RULE)
     ) {
-        CNC_LOG_WARN("Mission 3 detected, renaming {} to {}", TechnoTypeClass::Full_Name(), TXT_PRISON);
+        CNC_LOGGER_WARN("Mission 3 detected, renaming {} to {}", TechnoTypeClass::Full_Name(), TXT_PRISON);
 
         return (TXT_PRISON);
     }

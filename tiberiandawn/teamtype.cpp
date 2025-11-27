@@ -965,6 +965,8 @@ TO_JSON(TeamTypeClass)
 
 FROM_JSON(TeamTypeClass)
 {
+    static const auto& Logger = CncLogger::For(TeamTypeClass);
+
     // Base AbstractTypeClass fields - See TO_JSON(TeamTypeClass)
     CSTR_FIELD_FROM_JSON(TeamTypeClass, IniName);
     FIELD_FROM_JSON(FullName);
@@ -989,21 +991,21 @@ FROM_JSON(TeamTypeClass)
     FIELD_FROM_JSON(ClassCount);
 
     // Class array
-    const auto class_array = j.at(NAMEOF(Class));
+    const auto& class_array = j.at(NAMEOF(Class));
 
     if (class_array.is_array() && class_array.size() <= std::size(p.Class)) {
         for (auto i = 0; i < class_array.size(); i++) {
             p.Class[i] = TARGET_TO_PTR_WITH_TYPE(class_array[i].get<TARGET>(), TechnoTypeClass);
         }
     } else if (class_array.is_array()) {
-        CNC_LOG_ERROR(
+        CNC_LOGGER_ERROR(
             "Invalid {} JSON value - expected array with max length of {}, actual length: {}",
             NAMEOF(Class),
             std::size(p.Class),
             class_array.size()
         );
     } else {
-        CNC_LOG_ERROR(
+        CNC_LOGGER_ERROR(
             "Invalid {} JSON value - expected array, actual type: {}",
             NAMEOF(Class),
             class_array.type_name()

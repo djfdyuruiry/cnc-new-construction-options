@@ -2116,12 +2116,14 @@ TO_JSON(MapClass)
 // Field 'Array' omitted as it's reset after save load anyway.
 FROM_JSON(MapClass)
 {
+    static const auto& Logger = CncLogger::For(MapClass);
+
     BASE_CLASS_FROM_JSON(GScreenClass);
 
     const auto& cells = j.at(NAMEOF(Array));
 
     if (!cells.is_object()) {
-        CNC_LOG_ERROR(
+        CNC_LOGGER_ERROR(
             "Invalid JSON value {}, object expected - actual type: {}",
             NAMEOF(Array),
             cells.type_name()

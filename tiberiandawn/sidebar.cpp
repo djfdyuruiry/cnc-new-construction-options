@@ -2680,20 +2680,22 @@ TO_JSON(SidebarClass::StripClass::BuildType)
 
 FROM_JSON(SidebarClass::StripClass::BuildType)
 {
+    static const auto& Logger = CncLogger::For(SidebarClass::StripClass::BuildType);
+
     PARSE_TD_FIELD_FROM_JSON(SidebarClass::StripClass::BuildType, BuildableType, RTTIType);
     FIELD_FROM_JSON(Factory);
     FIELD_FROM_JSON(BuildableViaCapture);
 
     // BuildableID field
     if (!j.contains(NAMEOF(BuildableID))) {
-        CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(BuildableID));
+        CNC_LOGGER_ERROR("Missing JSON value {}", NAMEOF(BuildableID));
         return;
     }
 
     const auto& buildable_id_json = j.at(NAMEOF(BuildableID));
 
     if (!buildable_id_json.is_string()) {
-        CNC_LOG_ERROR(
+        CNC_LOGGER_ERROR(
             "Invalid JSON value {}, string expected - actual type: {}",
             NAMEOF(BuildableID),
             buildable_id_json.type_name()
@@ -2705,7 +2707,7 @@ FROM_JSON(SidebarClass::StripClass::BuildType)
     const auto buildable_id = TdTypeConverter::Try_Parse_RTTI_Instance(p.BuildableType, buildable_id_str);
 
     if (!buildable_id.has_value()) {
-        CNC_LOG_ERROR(
+        CNC_LOGGER_ERROR(
             "Invalid JSON value {}, failed to parse string as RTTI type '{}' instance: {}",
             NAMEOF(BuildableID),
             TdTypeConverter::To_String(p.BuildableType),

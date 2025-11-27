@@ -136,15 +136,17 @@ public:
 
     friend FROM_JSON(VectorClass<T>)
     {
+        static const auto& Logger = CncLogger::For(VectorClass<T>);
+
         if (!j.contains(NAMEOF(_items))) {
-            CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(_items));
+            CNC_LOGGER_ERROR("Missing JSON value {}", NAMEOF(_items));
             return;
         }
 
         const auto& _items = j.at(NAMEOF(_items));
 
         if (!_items.is_object()) {
-            CNC_LOG_ERROR(
+            CNC_LOGGER_ERROR(
                 "Invalid JSON value {}, object expected - actual type: {}",
                 NAMEOF(_items),
                 _items.type_name()
@@ -153,14 +155,14 @@ public:
         }
 
         if (!j.contains(NAMEOF(_vector_size))) {
-            CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(_vector_size));
+            CNC_LOGGER_ERROR("Missing JSON value {}", NAMEOF(_vector_size));
             return;
         }
 
         const auto& _vector_size = j.at(NAMEOF(_vector_size));
 
         if (!_vector_size.is_number_unsigned()) {
-            CNC_LOG_ERROR(
+            CNC_LOGGER_ERROR(
                 "Invalid JSON value {}, non-negative int expected - actual type: {}",
                 NAMEOF(_vector_size),
                 _vector_size.type_name()

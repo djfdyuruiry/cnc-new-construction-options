@@ -26,6 +26,9 @@ public:
      * Certain enum types are actually a full range of integers, with
      * 'markers' at set values. Setting this to true will allow code
      * to accept all values in the range when going to/from strings.
+     *
+     * These are formatted by TdTypeConverter to have the string name `${ENUM_PREFIX}_${VALUE}`
+     * - so for example `DirType a = (DirType)24` would be written as `DIR_24`.
      */
     const bool AllowNonEnumValuesInRange;
 

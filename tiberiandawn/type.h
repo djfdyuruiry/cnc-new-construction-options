@@ -116,6 +116,9 @@ public:
     // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& rules);
+private:
+    static inline const auto& Logger = CncLogger::For(WeaponTypeClass);
+
 };
 
 /**********************************************************************
@@ -178,6 +181,9 @@ public:
     // see: types-nco.cpp.in
     const IniRuleContext& Read_INI(const IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& rules);
+private:
+    static inline const auto& Logger = CncLogger::For(WarheadTypeClass);
+
 };
 
 /**********************************************************************
@@ -292,6 +298,7 @@ public:
     const RuleSection& Read_Rules(const RuleSection& ini);
 private:
     static HouseTypeClass const* const Pointers[HOUSE_COUNT];
+    static inline const auto& Logger = CncLogger::For(HouseTypeClass);
 };
 
 /***************************************************************************
@@ -979,6 +986,7 @@ private:
     short const* OverlapList;
 
     static BuildingTypeClass const* const Pointers[STRUCT_COUNT];
+    static inline const auto& Logger = CncLogger::For(BuildingTypeClass);
 
     /*
     **	The construction animation graphic data pointer is

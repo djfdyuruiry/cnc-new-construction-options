@@ -227,7 +227,9 @@ public:
 
     friend TO_JSON(TFixedIHeapClass<T>)
     {
-        CNC_LOG_DEBUG("Serializing TFixedIHeapClass holding type: {}", typeid(T).name());
+        static const auto& Logger = CncLogger::For(TFixedIHeapClass<T>);
+
+        CNC_LOGGER_DEBUG("Serializing TFixedIHeapClass holding type: {}", typeid(T).name());
 
         if (p.ActiveCount == 0) {
             j = nlohmann::json::object();
@@ -246,7 +248,9 @@ public:
 
     friend FROM_JSON(TFixedIHeapClass<T>)
     {
-        CNC_LOG_DEBUG("Deserialising TFixedIHeapClass holding type: {}", typeid(T).name());
+        static const auto& Logger = CncLogger::For(TFixedIHeapClass<T>);
+
+        CNC_LOGGER_DEBUG("Deserialising TFixedIHeapClass holding type: {}", typeid(T).name());
 
         for (const auto& [key, val] : j.items()) {
             const auto id = std::stoi(key);

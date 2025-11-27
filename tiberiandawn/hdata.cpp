@@ -316,7 +316,7 @@ void HouseTypeClass::Set_Suffix(const std::string& str)
     auto suffix_length = strlen(Suffix);
 
     if (str.length() != suffix_length) {
-        CNC_LOG_FATAL(
+        CNC_LOGGER_FATAL(
             "Property 'Suffix' for House '{}' must be exactly {} characters, value provided: {}",
             Name(),
             suffix_length,
@@ -332,7 +332,7 @@ void HouseTypeClass::Set_Suffix(const std::string& str)
 void HouseTypeClass::Set_Prefix(const std::string& str)
 {
     if (str.length() != 1) {
-        CNC_LOG_FATAL(
+        CNC_LOGGER_FATAL(
             "Property 'Suffix' for House '{}' must be exactly 1 character, value provided: {}",
             Name(),
             str

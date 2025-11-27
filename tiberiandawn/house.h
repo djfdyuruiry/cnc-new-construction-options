@@ -844,6 +844,8 @@ public:
     JSON_FUNCTIONS(HouseClass::ZoneInfoStruct)
 
 private:
+    static inline const auto& Logger = CncLogger::For(HouseClass);
+
     /*
     **	Tracks number of each building type owned by this house. Even if the
     **	building is in construction, it will be reflected in this total.
