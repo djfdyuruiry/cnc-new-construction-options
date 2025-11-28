@@ -4946,9 +4946,6 @@ TO_JSON(TechnoClass)
     BITFIELD_TO_JSON(IsALemon);
     BITFIELD_TO_JSON(IsSecondShot);
     FIELD_TO_JSON(ArchiveTarget);
-
-    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
-
     CONVERT_TD_FIELD_TO_JSON(Cloak);
     FIELD_TO_JSON(CloakingDevice);
     FIELD_TO_JSON(TarCom);
@@ -4962,6 +4959,9 @@ TO_JSON(TechnoClass)
     FIELD_TO_JSON(LineMaxFrames);
     FIELD_TO_JSON(PurchasePrice);
     FIELD_TO_JSON(IsDiscoveredByPlayerMask);
+
+    // House field
+    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
 }
 
 FROM_JSON(TechnoClass)
@@ -4986,16 +4986,6 @@ FROM_JSON(TechnoClass)
     BITFIELD_FROM_JSON(IsALemon);
     BITFIELD_FROM_JSON(IsSecondShot);
     FIELD_FROM_JSON(ArchiveTarget);
-
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(TechnoClass),
-        NAMEOF(House),
-        [&] (const auto& h) {
-            p.House = reinterpret_cast<HouseClass*>(static_cast<intptr_t>(h));
-        }
-    );
-
     PARSE_TD_FIELD_FROM_JSON(TechnoClass, Cloak, CloakType);
     FIELD_FROM_JSON(CloakingDevice);
     FIELD_FROM_JSON(TarCom);
@@ -5009,4 +4999,14 @@ FROM_JSON(TechnoClass)
     FIELD_FROM_JSON(LineMaxFrames);
     FIELD_FROM_JSON(PurchasePrice);
     FIELD_FROM_JSON(IsDiscoveredByPlayerMask);
+
+    // House field
+    TdTypeConverter::Load_Field_From_Json<HousesType>(
+        j,
+        NAMEOF(TechnoClass),
+        NAMEOF(House),
+        [&] (const auto& h) {
+            p.House = reinterpret_cast<HouseClass*>(static_cast<intptr_t>(h));
+        }
+    );
 }

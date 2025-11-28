@@ -2083,19 +2083,6 @@ TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);
 
-    auto cells = nlohmann::json::object();
-
-    for (CELL cell = 0; cell < static_cast<CELL>(MAP_CELL_TOTAL); cell++) {
-        if (!p[cell].Should_Save()) {
-            continue;
-        }
-
-        const auto cell_key = std::format("{}", static_cast<int>(cell));
-
-        cells.emplace(cell_key, p[cell]);
-    }
-
-    FIELD_VALUE_TO_JSON(Array, cells);
     FIELD_TO_JSON(MapCellX);
     FIELD_TO_JSON(MapCellY);
     FIELD_TO_JSON(MapCellWidth);
@@ -2111,6 +2098,21 @@ TO_JSON(MapClass)
     FIELD_TO_JSON(TiberiumSpreadCount);
     FIELD_TO_JSON(TiberiumScan);
     BITFIELD_TO_JSON(IsForwardScan);
+
+    // Array field - follows MouseClass::Save logic
+    auto cells = nlohmann::json::object();
+
+    for (CELL cell = 0; cell < static_cast<CELL>(MAP_CELL_TOTAL); cell++) {
+        if (!p[cell].Should_Save()) {
+            continue;
+        }
+
+        const auto cell_key = std::format("{}", static_cast<int>(cell));
+
+        cells.emplace(cell_key, p[cell]);
+    }
+
+    FIELD_VALUE_TO_JSON(Array, cells);
 }
 
 // Field 'Array' omitted as it's reset after save load anyway.
@@ -2119,23 +2121,6 @@ FROM_JSON(MapClass)
     static const auto& Logger = CncLogger::For(MapClass);
 
     BASE_CLASS_FROM_JSON(GScreenClass);
-
-    const auto& cells = j.at(NAMEOF(Array));
-
-    if (!cells.is_object()) {
-        CNC_LOGGER_ERROR(
-            "Invalid JSON value {}, object expected - actual type: {}",
-            NAMEOF(Array),
-            cells.type_name()
-        );
-        return;
-    }
-
-    for (const auto& [cell_key, cell_json] : cells.items()) {
-        const auto cell = static_cast<CELL>(std::stoi(cell_key));
-
-        from_json(cell_json, p[cell]);
-    }
 
     FIELD_FROM_JSON(MapCellX);
     FIELD_FROM_JSON(MapCellY);
@@ -2152,4 +2137,22 @@ FROM_JSON(MapClass)
     FIELD_FROM_JSON(TiberiumSpreadCount);
     FIELD_FROM_JSON(TiberiumScan);
     BITFIELD_FROM_JSON(IsForwardScan);
+
+    // Array field - follows MouseClass::Save logic
+    const auto& cells = j.at(NAMEOF(Array));
+
+    if (!cells.is_object()) {
+        CNC_LOGGER_ERROR(
+            "Invalid JSON value {}, object expected - actual type: {}",
+            NAMEOF(Array),
+            cells.type_name()
+        );
+        return;
+    }
+
+    for (const auto& [cell_key, cell_json] : cells.items()) {
+        const auto cell = static_cast<CELL>(std::stoi(cell_key));
+
+        from_json(cell_json, p[cell]);
+    }
 }

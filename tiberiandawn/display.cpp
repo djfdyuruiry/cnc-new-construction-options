@@ -75,8 +75,6 @@
  *   DisplayClass::Center_Map -- Centers the map about the currently selected objects          *
  *   DisplayClass::Prev_Object -- Searches for the previous object on the map.                 *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-#include <bitset>
-
 #include "function.h"
 #include "common/fading.h"
 #include "ccini.h"
@@ -4578,7 +4576,7 @@ TO_JSON(DisplayClass)
     FIELD_TO_JSON(NewX);
     FIELD_TO_JSON(NewY);
 
-    // CursorShapeSave array
+    // CursorShapeSave field - follows DisplayClass::Code_Pointers logic
     short cursor_shape[256];
 
     if (p.CursorSize) {

@@ -865,7 +865,6 @@ TO_JSON(TerrainClass)
     BASE_CLASS_TO_JSON(StageClass);
 
     TECHNO_TYPE_PTR_REF_TO_JSON(Class);
-
     BITFIELD_TO_JSON(IsOnFire);
     BITFIELD_TO_JSON(IsCrumbling);
     BITFIELD_TO_JSON(IsBlossoming);

@@ -45,8 +45,8 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
-#include "savegameresolver.h"
 #include "lua/scenariolua.h"
+#include "savegameresolver.h"
 
 extern bool DLLSave(FileClass& file);
 extern bool DLLLoad(FileClass& file);
@@ -127,13 +127,7 @@ bool Save_Game(const char* file_name, const char* descr)
         return false;
     }
 
-    try {
-        return SaveGameResolver::Save(save_file, descr);
-    } catch (const nlohmann::json::exception& e) {
-        CNC_LOG_ERROR("Error reading game state into {} instance: {}", NAMEOF(SaveGame), e.what());
-
-        return false;
-    }
+    return SaveGameResolver::Save(save_file, descr);
 }
 
 /*
@@ -348,7 +342,6 @@ bool Load_Game(int id)
  * for continuing the scenario.
  *
  * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
- * BUG: Lua triggers and teams might be duplicated if script doesn't check them (need approach for this)
  */
 static void Load_INI_Rules_And_Lua()
 {
@@ -806,12 +799,12 @@ bool Save_Misc_Values(FileClass& file)
     file.Write(Scen.Views, sizeof(Scen.Views));
     file.Write(&EndCountDown, sizeof(EndCountDown));
     file.Write(Scen.BriefingText, sizeof(Scen.BriefingText));
-    file.Write(Scen.FileName, sizeof(Scen.FileName));
 
     // This is new...
     file.Write(ActionMovie, sizeof(ActionMovie));
     file.Write(&TempleIoned, sizeof(TempleIoned));
     file.Write(&AreThingiesEnabled, sizeof(AreThingiesEnabled));
+    file.Write(Scen.FileName, sizeof(Scen.FileName));
 
     return (true);
 }
@@ -919,10 +912,6 @@ bool Load_Misc_Values(FileClass& file)
     file.Read(Scen.BriefingText, sizeof(Scen.BriefingText));
 
     if (file.Seek(0, SEEK_CUR) < file.Size()) {
-        file.Read(Scen.FileName, sizeof(Scen.FileName));
-    }
-
-    if (file.Seek(0, SEEK_CUR) < file.Size()) {
         file.Read(ActionMovie, sizeof(ActionMovie));
     }
 
@@ -932,6 +921,10 @@ bool Load_Misc_Values(FileClass& file)
 
     if (file.Seek(0, SEEK_CUR) < file.Size()) {
         file.Read(&AreThingiesEnabled, sizeof(AreThingiesEnabled));
+    }
+
+    if (file.Seek(0, SEEK_CUR) < file.Size()) {
+        file.Read(Scen.FileName, sizeof(Scen.FileName));
     }
 
     return (true);

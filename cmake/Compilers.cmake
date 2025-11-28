@@ -26,7 +26,8 @@ if(MSVC)
     list(APPEND VC_CXX_FLAGS /MP)
     # Enforce strict __cplusplus version
     list(APPEND VC_CXX_FLAGS /Zc:__cplusplus)
-
+    # Enable large object file format (needed for large std::variant types)
+    list(APPEND VC_CXX_FLAGS /bigobj)
 else()
     # We go a bit wild here and assume any other compiler we are going to use supports -g for debug info.
     string(APPEND CMAKE_CXX_FLAGS_RELEASE " -g")

@@ -247,13 +247,11 @@ int FixedHeapClass::Free(void* pointer)
  *=============================================================================================*/
 int FixedHeapClass::ID(void const* pointer)
 {
-    auto id = -1;
-
     if (pointer && Size) {
-        id = ((int)(((char*)pointer - (char*)Buffer) / Size));
+        return ((int)(((char*)pointer - (char*)Buffer) / Size));
     }
 
-    return id;
+    return (-1);
 }
 
 /***********************************************************************************************

@@ -2,8 +2,8 @@
 
 #include <bitset>
 #include <functional>
-#include <optional>
 
+// this define ensures that CNC enum types are never serialized as numbers
 #define JSON_DISABLE_ENUM_SERIALIZATION 1
 #include <nlohmann/json.hpp>
 
@@ -54,11 +54,22 @@
 #define BASE_CLASS_TO_JSON(CLASS) to_json(j, static_cast<const CLASS&>(p))
 #define BASE_CLASS_FROM_JSON(CLASS) from_json(j, static_cast<CLASS&>(p))
 
+/**
+ * Wrapper around runtime_error, constructor allows formatting the error message using std::vformat.
+ */
+class CncJsonException final : protected std::runtime_error
+{
+public:
+    template<typename... Args>
+    CncJsonException(const std::string& fmt, Args&&... args)
+        : runtime_error(std::vformat(fmt, std::make_format_args(args...))) {}
+};
+
 // static helper functions
 class CncJsonUtils final
 {
 public:
-    // TODO: Add Check_Type(json) -> bool + Assert_Type(json) { CNC_LOGGER_FATAL(...) }
+    // TODO: Assert_Type_Is(json) { throw nlohmann::json::exception(...) } Assert_Array_Is(...) Assert_Object_Contains(...)
 
     static void Cstr_Field_From_Json(
         const nlohmann::json& j,
@@ -80,8 +91,8 @@ public:
 
         try {
             on_valid_value(std::bitset<N>(value));
-        } catch (const std::out_of_range& e) {
-            CNC_LOGGER_ERROR(
+        } catch (const std::logic_error& e) {
+            throw CncJsonException(
                 "Invalid {}{} JSON value - expected {} bit binary string, actual value: {} | parse error: {}",
                 json_path,
                 field_name,

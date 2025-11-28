@@ -2827,33 +2827,42 @@ TO_JSON(CellClass)
     CONVERT_TD_FIELD_TO_JSON(Owner);
     CONVERT_TD_FIELD_TO_JSON(InfType);
 
-    FIELD_VALUE_TO_JSON(OccupierPtr, p.Cell_Occupier() ? OBJECT_PTR_TO_TARGET(p.OccupierPtr) : TARGET_NONE);
-
-    auto overlapper = nlohmann::json::array();
-
-    for (int index = 0; index < ARRAY_SIZE(p.Overlapper); index++) {
-        overlapper[index] = (p.Overlapper[index] != nullptr && p.Overlapper[index]->IsActive)
-            ? OBJECT_PTR_TO_TARGET(p.Overlapper[index])
-            : TARGET_NONE;
-    }
-
-    FIELD_VALUE_TO_JSON(Overlapper, overlapper);
-
     FIELD_TO_JSON(IsMappedByPlayerMask);
     FIELD_TO_JSON(IsVisibleByPlayerMask);
-
-    BITFIELD_TO_JSON(Flag.Occupy.Center);
-    BITFIELD_TO_JSON(Flag.Occupy.NW);
-    BITFIELD_TO_JSON(Flag.Occupy.NE);
-    BITFIELD_TO_JSON(Flag.Occupy.SW);
-    BITFIELD_TO_JSON(Flag.Occupy.SE);
-    BITFIELD_TO_JSON(Flag.Occupy.Vehicle);
-    BITFIELD_TO_JSON(Flag.Occupy.Monolith);
-    BITFIELD_TO_JSON(Flag.Occupy.Building);
 
     CONVERT_TD_FIELD_TO_JSON(Land);
     CONVERT_TD_FIELD_TO_JSON(OverrideLand);
     OBJECT_TARGET_PTR_TO_JSON(CTFFlag);
+
+    // Flag field - compress Flag.Occupy bitfields to a bitset string
+    std::bitset<8> flag;
+
+    flag.set(0, p.Flag.Occupy.Center);
+    flag.set(1, p.Flag.Occupy.NW);
+    flag.set(2, p.Flag.Occupy.NE);
+    flag.set(3, p.Flag.Occupy.SW);
+    flag.set(4, p.Flag.Occupy.SE);
+    flag.set(5, p.Flag.Occupy.Vehicle);
+    flag.set(6, p.Flag.Occupy.Monolith);
+    flag.set(7, p.Flag.Occupy.Building);
+
+    FIELD_VALUE_TO_JSON(Flag, flag.to_string());
+
+    // OccupierPtr field - follows CellClass::Code_Pointers logic
+    FIELD_VALUE_TO_JSON(OccupierPtr, p.Cell_Occupier() ? OBJECT_PTR_TO_TARGET(p.OccupierPtr) : TARGET_NONE);
+
+    // Overlapper field - follows CellClass::Code_Pointers logic
+    auto overlapper = nlohmann::json::array();
+
+    for (const auto& object : p.Overlapper) {
+        const auto overlapper_target = object != nullptr && object->IsActive
+            ? OBJECT_PTR_TO_TARGET(object)
+            : TARGET_NONE;
+
+        overlapper.emplace_back(overlapper_target);
+    }
+
+    FIELD_VALUE_TO_JSON(Overlapper, overlapper);
 }
 
 FROM_JSON(CellClass)
@@ -2874,22 +2883,32 @@ FROM_JSON(CellClass)
     FIELD_FROM_JSON(SmudgeData);
     PARSE_TD_FIELD_FROM_JSON(CellClass, Owner, HousesType);
     PARSE_TD_FIELD_FROM_JSON(CellClass, InfType, HousesType);
-    OBJECT_TARGET_PTR_FROM_JSON(OccupierPtr);
-    OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CellClass, Overlapper, ObjectClass);
     FIELD_FROM_JSON(IsMappedByPlayerMask);
     FIELD_FROM_JSON(IsVisibleByPlayerMask);
 
-    p.Flag.Composite = 0;
-
-    BITFIELD_FROM_JSON(Flag.Occupy.Center);
-    BITFIELD_FROM_JSON(Flag.Occupy.NW);
-    BITFIELD_FROM_JSON(Flag.Occupy.NE);
-    BITFIELD_FROM_JSON(Flag.Occupy.SW);
-    BITFIELD_FROM_JSON(Flag.Occupy.SE);
-    BITFIELD_FROM_JSON(Flag.Occupy.Vehicle);
-    BITFIELD_FROM_JSON(Flag.Occupy.Monolith);
-    BITFIELD_FROM_JSON(Flag.Occupy.Building);
     PARSE_TD_FIELD_FROM_JSON(CellClass, Land, LandType);
     PARSE_TD_FIELD_FROM_JSON(CellClass, OverrideLand, LandType);
     TARGET_PTR_FROM_JSON_WITH_TYPE(CTFFlag, AnimClass);
+
+    OBJECT_TARGET_PTR_FROM_JSON(OccupierPtr);
+    OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CellClass, Overlapper, ObjectClass);
+
+    // Flag field
+    p.Flag.Composite = 0; // reset union fields
+
+    CncJsonUtils::Bitfield_Of_Width_From_Json<8>( // decompress bitset string to Flag.Occupy bitfields
+        j,
+        NAMEOF(CellClass),
+        NAMEOF(Flag),
+        [&](const auto& v) {
+            p.Flag.Occupy.Center = v.test(0);
+            p.Flag.Occupy.NW = v.test(1);
+            p.Flag.Occupy.NE = v.test(2);
+            p.Flag.Occupy.SW = v.test(3);
+            p.Flag.Occupy.SE = v.test(4);
+            p.Flag.Occupy.Vehicle = v.test(5);
+            p.Flag.Occupy.Monolith = v.test(6);
+            p.Flag.Occupy.Building = v.test(7);
+        }
+    );
 }

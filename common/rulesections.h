@@ -380,7 +380,7 @@ public:
     }
 
     // TODO: Handle OnRulesChanged, if needed
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 

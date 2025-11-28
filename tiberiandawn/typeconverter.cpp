@@ -83,7 +83,8 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(TriggerClass::PersistantType, "",             TriggerClass::PersistantType::VOLATILE, TriggerClass::PersistantType::PERSISTANT, {},                 {},                  false),
     ENUM_TYPE_PAIR(TerrainType,                  "TERRAIN_",     TERRAIN_NONE,                           TERRAIN_LAST,                             {},                 {},                  false),
     ENUM_TYPE_PAIR(ScenarioPlayerType,           "SCEN_PLAYER_", SCEN_PLAYER_NONE,                       SCEN_PLAYER_LAST,                         {},                 {},                  false),
-    ENUM_TYPE_PAIR(LayerType,                    "LAYER_",       LAYER_NONE,                             LAYER_LAST,                               {},                 {},                  false)
+    ENUM_TYPE_PAIR(LayerType,                    "LAYER_",       LAYER_NONE,                             LAYER_LAST,                               {},                 {},                  false),
+    ENUM_TYPE_PAIR(UrgencyType,                  "URGENCY_",     URGENCY_NONE,                           URGENCY_FIRST,                            {},                 {},                  false)
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(
@@ -179,6 +180,7 @@ void TdTypeConverter::Set_Rule_With_Variant(
     RULE_VARIANT(TerrainType)
     RULE_VARIANT(ScenarioPlayerType)
     RULE_VARIANT(LayerType)
+    RULE_VARIANT(UrgencyType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -243,6 +245,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(
     CSV_RULE_VARIANT(TerrainType)
     CSV_RULE_VARIANT(ScenarioPlayerType)
     CSV_RULE_VARIANT(LayerType)
+    CSV_RULE_VARIANT(UrgencyType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -300,6 +303,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVaria
     TYPE_NAME_VARIANT(TerrainType)
     TYPE_NAME_VARIANT(ScenarioPlayerType)
     TYPE_NAME_VARIANT(LayerType)
+    TYPE_NAME_VARIANT(UrgencyType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -358,6 +362,7 @@ std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& varia
     TO_STRING_VARIANT(TerrainType)
     TO_STRING_VARIANT(ScenarioPlayerType)
     TO_STRING_VARIANT(LayerType)
+    TO_STRING_VARIANT(UrgencyType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }

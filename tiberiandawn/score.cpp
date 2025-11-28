@@ -2130,34 +2130,3 @@ void Multi_Score_Presentation(void)
     ControlQ = 0;
     Show_Mouse();
 }
-
-TO_JSON(ScoreClass)
-{
-    FIELD_TO_JSON(Score);
-    FIELD_TO_JSON(NKilled);
-    FIELD_TO_JSON(GKilled);
-    FIELD_TO_JSON(CKilled);
-    FIELD_TO_JSON(NBKilled);
-    FIELD_TO_JSON(GBKilled);
-    FIELD_TO_JSON(CBKilled);
-    FIELD_TO_JSON(NHarvested);
-    FIELD_TO_JSON(GHarvested);
-    FIELD_TO_JSON(CHarvested);
-    FIELD_TO_JSON(ElapsedTime);
-}
-
-FROM_JSON(ScoreClass)
-{
-    FIELD_FROM_JSON(Score);
-    FIELD_FROM_JSON(NKilled);
-    FIELD_FROM_JSON(GKilled);
-    FIELD_FROM_JSON(CKilled);
-    FIELD_FROM_JSON(NBKilled);
-    FIELD_FROM_JSON(GBKilled);
-    FIELD_FROM_JSON(CBKilled);
-    FIELD_FROM_JSON(NHarvested);
-    FIELD_FROM_JSON(GHarvested);
-    FIELD_FROM_JSON(CHarvested);
-    FIELD_FROM_JSON(ElapsedTime);
-}
-

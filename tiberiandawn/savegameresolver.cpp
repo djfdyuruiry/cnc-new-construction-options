@@ -5,35 +5,34 @@
 #include "savegame_v1.h"
 #include "savegameresolver.h"
 
-/**
- * BUGS:
- *
- *   - Need to unload Lua on Scenario_Clear and init Lua on successful load
- *   - SelectedObjects serialization sometimes tries to access an invalid pointer (*Maybe* fixed, created manual TO/FROM JSON for DynamicVectorArrayClass)
- *   - Trigger heap validation fails (*Maybe* fixed now by clearing CellTriggers in Clear_Scenario | it is rare - ID of TriggerClass instance in Heap is outside bounds)
- */
-
 //The implementation of the current save game version
 #define CURRENT_SAVE_CLASS SaveGame_v1
+#define CURRENT_SAVE_CLASS_NAME NAMEOF(SaveGame_v1)
 
 const std::string_view& SaveGameResolver::Current_Save_Version = CURRENT_SAVE_CLASS::Version_Name;
 const std::vector<std::string_view> SaveGameResolver::Supported_Save_Versions = std::vector { CURRENT_SAVE_CLASS::Version_Name };
 
 bool SaveGameResolver::Save(CDFileClass& file, const char* description)
 {
-    // build header
-    SaveGameHeader header;
+    try {
+        // build header
+        SaveGameHeader header;
 
-    header.Version = Current_Save_Version;
-    header.Description = description;
-    header.Read_Globals();
+        header.Version = Current_Save_Version;
+        header.Description = description;
+        header.Read_Globals();
 
-    // build save
-    CURRENT_SAVE_CLASS save;
+        // build save
+        CURRENT_SAVE_CLASS save;
 
-    save.Read_Globals();
+        save.Read_Globals();
 
-    return save.To_File(file, header);
+        return save.To_File(file, header);
+    } catch (const nlohmann::json::exception& e) {
+        CNC_LOG_ERROR("Error reading game state into {} instance: {}", CURRENT_SAVE_CLASS_NAME, e.what());
+
+        return false;
+    }
 }
 
 std::optional<SaveGameHeader> SaveGameResolver::Load_Header(const std::string& path)

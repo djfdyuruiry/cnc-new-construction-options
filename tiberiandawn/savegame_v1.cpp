@@ -476,7 +476,7 @@ bool SaveGame_v1::To_File(CDFileClass& save_file, const SaveGameHeader& header) 
         return false;
     }
 
-    if (!Validate()) {
+    if (!header.Validate() || !Validate()) {
         save_file.Delete();
         return false;
     }

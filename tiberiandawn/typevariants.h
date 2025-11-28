@@ -54,7 +54,8 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, TriggerClass::PersistantType> ||
     std::is_same_v<T, TerrainType> ||
     std::is_same_v<T, ScenarioPlayerType> ||
-    std::is_same_v<T, LayerType>
+    std::is_same_v<T, LayerType> ||
+    std::is_same_v<T, UrgencyType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -106,5 +107,6 @@ using ConverterTypeVariant = std::variant<
     TriggerClass::PersistantType,
     TerrainType,
     ScenarioPlayerType,
-    LayerType
+    LayerType,
+    UrgencyType
 >;

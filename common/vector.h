@@ -437,13 +437,11 @@ public:
         // Collection field
         auto json_collection = nlohmann::json::array();
 
-        for (auto collection_idx = 0; collection_idx < COUNT; collection_idx++) {
+        for (const auto& vector : p.Collection) {
             auto json_vector = nlohmann::json::array();
 
-            const auto& vector = p.Collection[collection_idx];
-
-            for (auto vector_idx = 0; vector_idx < vector.Count(); ++vector_idx) {
-                json_vector.emplace_back(p[vector_idx]);
+            for (auto i = 0; i < vector.Count(); ++i) {
+                json_vector.emplace_back(p[i]);
             }
 
             json_collection.emplace_back(json_vector);

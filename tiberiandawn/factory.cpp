@@ -767,6 +767,7 @@ TO_JSON(FactoryClass)
     OBJECT_TARGET_PTR_TO_JSON(Object);
     FIELD_TO_JSON(SpecialItem);
 
+    // House field
     FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
 }
 
@@ -783,6 +784,7 @@ FROM_JSON(FactoryClass)
     TARGET_PTR_FROM_JSON_WITH_TYPE(Object, TechnoClass);
     FIELD_FROM_JSON(SpecialItem);
 
+    // House field
     TdTypeConverter::Load_Field_From_Json<HousesType>(
         j,
         NAMEOF(FactoryClass),

@@ -76,7 +76,20 @@ public:
     void Code_Pointers(void);
     void Decode_Pointers(void);
 
-    JSON_FUNCTIONS(ScoreClass)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        ScoreClass,
+        Score,
+        NKilled,
+        GKilled,
+        CKilled,
+        NBKilled,
+        GBKilled,
+        CBKilled,
+        NHarvested,
+        GHarvested,
+        CHarvested,
+        ElapsedTime
+    )
 
 protected:
 private:

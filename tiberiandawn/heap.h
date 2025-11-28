@@ -35,7 +35,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#include "json.h"
+#include "common/json.h"
 #include "vector.h"
 
 /**************************************************************************

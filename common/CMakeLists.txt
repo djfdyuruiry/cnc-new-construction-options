@@ -98,6 +98,7 @@ set(COMMON_SRC
     xpipe.cpp
     xstraw.cpp
     # nco
+    json.cpp
     lua/event_luaapi.cpp
     lua/logging_luaapi.cpp
     lua/luaapi.cpp
@@ -110,7 +111,6 @@ set(COMMON_SRC
     logger.cpp
     rulesections.cpp
     stringutils.cpp
-        json.cpp
 )
 
 if (WIN32)

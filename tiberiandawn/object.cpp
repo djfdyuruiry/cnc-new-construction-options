@@ -1748,7 +1748,7 @@ FROM_JSON(ObjectClass)
 /**
  * We don't actually serialize the object that the pointer
  * resolves to here. This would create duplicate objects and
- * break the shared link to the given data.
+ * break the link to the heap object.
  *
  * Instead, we use the existing TARGET functionality to store a
  * reference to the object, which points to an instance in one

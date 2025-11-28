@@ -123,7 +123,7 @@ public:
         InNetworkFormat = 0; // Flag that data is now in PC format
     }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(UnitTrackerClass, InNetworkFormat, UnitTotals);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(UnitTrackerClass, InNetworkFormat, UnitTotals)
 private:
     int InNetworkFormat;
     int UnitTotals[N];

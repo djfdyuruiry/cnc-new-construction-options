@@ -10,18 +10,27 @@ void CncJsonUtils::Cstr_Field_From_Json(
     const unsigned int& str_length
 )
 {
-    const auto value = j.at(field_name).get<std::string>();
+    const auto& field_json = j.at(field_name);
 
-    if (CncStringUtils::Is_Blank(value) || value.length() > str_length) {
-        CNC_LOGGER_ERROR(
-            "Invalid {}{} JSON value - expected a non-blank string with 1-{} characters, actual value: {}",
+    if (!field_json.is_string()) {
+        throw CncJsonException(
+            "Invalid {}{} JSON value - expected a string, actual type: {}",
+            json_path,
+            field_name,
+            field_json.type_name()
+        );
+    }
+
+    const auto value = field_json.get<std::string>();
+
+    if (value.length() > str_length) {
+        throw CncJsonException(
+            "Invalid {}{} JSON value - expected a string with at most {} characters, actual value: {}",
             json_path,
             field_name,
             str_length,
             value
         );
-
-        return;
     }
 
     const auto copied_length = value.copy(field, str_length);

@@ -1517,6 +1517,7 @@ FROM_JSON(TriggerClass)
     CSTR_FIELD_FROM_JSON(TriggerClass, Name);
 }
 
+// See: PTR_TO_JSON(ObjectClass) in object.cpp
 PTR_TO_JSON(TriggerClass)
 {
     j = OBJECT_PTR_TO_TARGET(p);

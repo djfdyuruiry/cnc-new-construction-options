@@ -1494,9 +1494,6 @@ TO_JSON(TeamClass)
     BASE_CLASS_TO_JSON(AbstractClass);
 
     OBJECT_TARGET_PTR_TO_JSON(Class);
-
-    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
-
     BITFIELD_TO_JSON(IsForcedActive);
     BITFIELD_TO_JSON(IsHasBeen);
     BITFIELD_TO_JSON(IsFullStrength);
@@ -1518,22 +1515,16 @@ TO_JSON(TeamClass)
     FIELD_TO_JSON(TimeOut);
     OBJECT_TARGET_PTR_TO_JSON(Member);
     FIELD_TO_JSON(Quantity);
+
+    // House field
+    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
+
 }
 
 FROM_JSON(TeamClass)
 {
     BASE_CLASS_FROM_JSON(AbstractClass);
     TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(Class, TeamTypeClass);
-
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(TeamClass),
-        NAMEOF(House),
-        [&] (const auto& h) {
-            const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(h);
-        }
-    );
-
     BITFIELD_FROM_JSON(IsForcedActive);
     BITFIELD_FROM_JSON(IsHasBeen);
     BITFIELD_FROM_JSON(IsFullStrength);
@@ -1555,4 +1546,14 @@ FROM_JSON(TeamClass)
     FIELD_FROM_JSON(TimeOut);
     TARGET_PTR_FROM_JSON_WITH_TYPE(Member, FootClass);
     FIELD_FROM_JSON(Quantity);
+
+    // House field
+    TdTypeConverter::Load_Field_From_Json<HousesType>(
+        j,
+        NAMEOF(TeamClass),
+        NAMEOF(House),
+        [&] (const auto& h) {
+            const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(h);
+        }
+    );
 }

@@ -35,7 +35,6 @@
 #ifndef FIXED_H
 #define FIXED_H
 
-
 #include <stdint.h>
 #include "endianness.h"
 #include "json.h"
@@ -458,7 +457,7 @@ public:
         p = fixed(fixed_ascii.c_str());
     }
 private:
-    union FixedData
+    union
     {
         struct
         {
@@ -471,9 +470,7 @@ private:
 #endif
         } Composite;
         uint32_t Raw;
-    };
-
-    FixedData Data;
+    } Data;
 };
 
 #endif

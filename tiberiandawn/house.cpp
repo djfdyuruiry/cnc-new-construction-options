@@ -8340,7 +8340,6 @@ FROM_JSON(HouseClass::ZoneInfoStruct)
 
 TO_JSON(HouseClass)
 {
-    CONVERT_TD_FIELD_VALUE_TO_JSON(Class, p.Class->House);
     FIELD_TO_JSON(FirepowerBias);
     FIELD_TO_JSON(GroundspeedBias);
     FIELD_TO_JSON(AirspeedBias);
@@ -8490,6 +8489,9 @@ TO_JSON(HouseClass)
     FIELD_TO_JSON(NukeDest);
     FIELD_TO_JSON(VisibleCredits);
     FIELD_TO_JSON(DebugUnlockBuildables);
+
+    // Class field
+    FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? HOUSE_NONE : p.Class->House));
 }
 
 FROM_JSON(HouseClass)
@@ -8644,6 +8646,7 @@ FROM_JSON(HouseClass)
     FIELD_FROM_JSON(VisibleCredits);
     FIELD_FROM_JSON(DebugUnlockBuildables);
 
+    // Class field
     TdTypeConverter::Load_Field_From_Json<HousesType>(
         j,
         NAMEOF(HouseClass),

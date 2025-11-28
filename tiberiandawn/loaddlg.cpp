@@ -638,9 +638,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
                     sprintf(fdata->Descr, "(%s) ", Text_String(TXT_G_D_I));
                 }
             }
-
             strncat(fdata->Descr, descr, (sizeof(fdata->Descr) - strlen(fdata->Descr)) - 1);
-
             fdata->Valid = ok;
             fdata->Scenario = scenario;
             fdata->House = house;
