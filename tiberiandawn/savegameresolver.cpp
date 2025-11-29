@@ -65,7 +65,7 @@ std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
         return std::nullopt;
     }
 
-    if (header.Version == SaveGame_v1::Version_Name) { \
+    if (header.Version == SaveGame_v1::Version_Name) {
         CNC_LOGGER_INFO("Loading save game version '{}' from file: {}", SaveGame_v1::Version_Name, path);
 
             if (SaveGame_v1 save; save.Load_From_File(path)) {
