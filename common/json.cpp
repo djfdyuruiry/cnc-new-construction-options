@@ -36,3 +36,8 @@ void CncJsonUtils::Cstr_Field_From_Json(
     const auto copied_length = value.copy(field, str_length);
     field[copied_length] = '\0';
 }
+
+std::string CncJsonUtils::Build_Type_Error(const std::string& expected_type, const nlohmann::json& subject)
+{
+    return std::format("expected {}, actual type: {}", expected_type, subject.type_name());
+}

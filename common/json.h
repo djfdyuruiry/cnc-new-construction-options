@@ -65,11 +65,171 @@ public:
         : runtime_error(std::vformat(fmt, std::make_format_args(args...))) {}
 };
 
+typedef nlohmann::json::string_t JsonString;
+typedef nlohmann::json::boolean_t JsonBoolean;
+typedef nlohmann::json::number_integer_t JsonInt;
+typedef nlohmann::json::number_unsigned_t JsonUnsignedInt;
+typedef nlohmann::json::number_float_t JsonFloat;
+typedef nlohmann::json::array_t JsonArray;
+typedef nlohmann::json::object_t JsonObject;
+typedef void* JsonAny;
+
+template <class T>
+concept JsonType = std::is_same_v<T, JsonString>
+        || std::is_same_v<T, JsonBoolean>
+        || std::is_same_v<T, JsonInt>
+        || std::is_same_v<T, JsonUnsignedInt>
+        || std::is_same_v<T, JsonFloat>
+        || std::is_same_v<T, JsonArray>
+        || std::is_same_v<T, JsonObject>
+        || std::is_same_v<T, JsonAny>;
+
 // static helper functions
 class CncJsonUtils final
 {
 public:
     // TODO: Assert_Type_Is(json) { throw nlohmann::json::exception(...) } Assert_Array_Is(...) Assert_Object_Contains(...)
+
+    template<JsonType T>
+    static void Assert_Json_Is(const nlohmann::json& subject, const std::string& json_path)
+    {
+        auto assert_failed = false;
+        std::string expected_type;
+
+        if constexpr (std::is_same_v<T, JsonAny>) {
+            if (assert_failed = subject.is_null(); assert_failed) {
+                expected_type = "not null";
+            }
+        }
+
+        if constexpr (std::is_same_v<T, JsonArray>) {
+            if (assert_failed = !subject.is_array(); assert_failed) {
+                expected_type = "an array";
+            }
+        }
+
+        if constexpr (std::is_same_v<T, JsonObject>) {
+            if (assert_failed = !subject.is_object(); assert_failed) {
+                expected_type = "object";
+            }
+        }
+
+        if constexpr (std::is_same_v<T, JsonUnsignedInt>) {
+            if (assert_failed = !subject.is_number_unsigned(); assert_failed) {
+                expected_type = "non-negative int";
+            }
+        }
+
+        if constexpr (std::is_same_v<T, JsonInt>) {
+            if (assert_failed = !subject.is_number_integer(); assert_failed) {
+                expected_type = "int";
+            }
+        }
+
+        if constexpr (std::is_same_v<T, JsonBoolean>) {
+            if (assert_failed = !subject.is_boolean(); assert_failed) {
+                expected_type = "bool";
+            }
+        }
+
+        if constexpr (std::is_same_v<T, JsonString>) {
+            if (assert_failed = !subject.is_string(); assert_failed) {
+                expected_type = "string";
+            }
+        }
+
+        if (assert_failed) {
+            Throw_Json_Assert_Failure(json_path, Build_Type_Error(expected_type, subject.type_name()));
+        }
+    }
+
+    template<JsonType T>
+    static void Assert_Json_Is_Array_With_Size(
+        const nlohmann::json& subject,
+        const std::string& json_path,
+        const unsigned int& min_size,
+        std::optional<unsigned int> max_size = std::nullopt
+    )
+    {
+        if (!subject.is_array()) {
+            Throw_Json_Assert_Failure(json_path, Build_Type_Error("array", subject));
+        }
+
+        const auto size = subject.size();
+
+        if (max_size.has_value()) {
+            if (size < min_size || size > *max_size) {
+                Throw_Json_Assert_Failure(
+                    json_path,
+                    "expected array with a size of {}-{} element(s), actual size: {}",
+                    min_size,
+                    *max_size,
+                    subject.size()
+                );
+            }
+        } else if (size < min_size) {
+            Throw_Json_Assert_Failure(
+                json_path,
+                "expected array with a size of at least {} element(s), actual size: {}",
+                min_size,
+                subject.size()
+            );
+        }
+
+        if (size < 1) {
+            // unable to assert element type
+            return;
+        }
+
+        Assert_Json_Is<T>(subject[0], std::format("{}[0]", json_path));
+    }
+
+    static void Assert_Json_Is_Array(const nlohmann::json& subject, const std::string& json_path)
+    {
+        return Assert_Json_Is_Array_With_Size<JsonAny>(subject, json_path, 0);
+    }
+
+    template<JsonType T>
+    static void Assert_Json_Is_Array_Of_Exact_Size(
+        const nlohmann::json& subject,
+        const std::string& json_path,
+        unsigned int size
+    )
+    {
+        return Assert_Json_Is_Array_With_Size<T>(subject, json_path, size, size);
+    }
+
+    static void Assert_Json_Is_Object_With_Keys(
+        const nlohmann::json& subject,
+        const std::string& json_path,
+        const std::vector<std::string>& expected_keys
+    )
+    {
+        Assert_Json_Is<JsonObject>(subject, json_path);
+
+        std::vector<std::string> missing_keys;
+
+        for (const auto& key : expected_keys) {
+            if (!subject.contains(key)) {
+                missing_keys.push_back(key);
+            }
+        }
+
+        if (!missing_keys.empty()) {
+            std::vector<std::string> actual_keys;
+
+            for (const auto& [key, _] : subject.items()) {
+                actual_keys.emplace_back(key);
+            }
+
+            Throw_Json_Assert_Failure(
+                json_path,
+                "expected object with keys '{}', actual keys: {}",
+                CncStringUtils::To_Csv(expected_keys),
+                CncStringUtils::To_Csv(actual_keys)
+            );
+        }
+    }
 
     static void Cstr_Field_From_Json(
         const nlohmann::json& j,
@@ -107,6 +267,18 @@ private:
     static inline const auto& Logger = CncLogger::For(CncJsonUtils);
 
     CncJsonUtils() = delete;
+
+    static std::string Build_Type_Error(const std::string& expected_type, const nlohmann::json& subject);
+
+    template<typename... Args>
+    static void Throw_Json_Assert_Failure(const std::string& json_path, const std::string& fmt, Args&&... args)
+    {
+        throw CncJsonException(
+            "Invalid JSON value {}, {}",
+            json_path,
+            std::vformat(fmt, std::make_format_args(args...))
+        );
+    }
 };
 
 // Load the value for a c-string from JSON string (with validation)
