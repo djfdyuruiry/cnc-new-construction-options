@@ -2687,33 +2687,21 @@ FROM_JSON(SidebarClass::StripClass::BuildType)
     FIELD_FROM_JSON(BuildableViaCapture);
 
     // BuildableID field
-    if (!j.contains(NAMEOF(BuildableID))) {
-        CNC_LOGGER_ERROR("Missing JSON value {}", NAMEOF(BuildableID));
-        return;
-    }
-
     const auto& buildable_id_json = j.at(NAMEOF(BuildableID));
 
-    if (!buildable_id_json.is_string()) {
-        CNC_LOGGER_ERROR(
-            "Invalid JSON value {}, string expected - actual type: {}",
-            NAMEOF(BuildableID),
-            buildable_id_json.type_name()
-        );
-        return;
-    }
+    CncJsonUtils::Assert_Json_Is<JsonString>(buildable_id_json, NAMEOF(BuildableID));
 
     const auto buildable_id_str = buildable_id_json.get<std::string>();
     const auto buildable_id = TdTypeConverter::Try_Parse_RTTI_Instance(p.BuildableType, buildable_id_str);
 
     if (!buildable_id.has_value()) {
-        CNC_LOGGER_ERROR(
-            "Invalid JSON value {}, failed to parse string as RTTI type '{}' instance: {}",
+        CncJsonUtils::Throw_Json_Assert_Failure(
             NAMEOF(BuildableID),
-            TdTypeConverter::To_String(p.BuildableType),
-            buildable_id_str
+            CncJsonUtils::Build_Parse_Error(
+                std::format("RTTI type '{}'", TdTypeConverter::To_String(p.BuildableType)),
+                buildable_id_str
+            )
         );
-        return;
     }
 
     p.BuildableID = *buildable_id;

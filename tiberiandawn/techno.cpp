@@ -5001,12 +5001,9 @@ FROM_JSON(TechnoClass)
     FIELD_FROM_JSON(IsDiscoveredByPlayerMask);
 
     // House field
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(TechnoClass),
-        NAMEOF(House),
-        [&] (const auto& h) {
-            p.House = reinterpret_cast<HouseClass*>(static_cast<intptr_t>(h));
-        }
+    p.House = reinterpret_cast<HouseClass*>(
+        static_cast<intptr_t>(
+            TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(TechnoClass), NAMEOF(House))
+        )
     );
 }

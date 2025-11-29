@@ -785,12 +785,7 @@ FROM_JSON(FactoryClass)
     FIELD_FROM_JSON(SpecialItem);
 
     // House field
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(FactoryClass),
-        NAMEOF(House),
-        [&] (const auto& h) {
-            p.House = reinterpret_cast<HouseClass*>(h);
-        }
+    p.House = reinterpret_cast<HouseClass*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(FactoryClass), NAMEOF(House))
     );
 }

@@ -1548,12 +1548,7 @@ FROM_JSON(TeamClass)
     FIELD_FROM_JSON(Quantity);
 
     // House field
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(TeamClass),
-        NAMEOF(House),
-        [&] (const auto& h) {
-            const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(h);
-        }
+    const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(TeamClass), NAMEOF(House))
     );
 }

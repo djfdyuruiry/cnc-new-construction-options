@@ -136,39 +136,13 @@ public:
 
     friend FROM_JSON(VectorClass<T>)
     {
-        static const auto& Logger = CncLogger::For(VectorClass<T>);
-
-        if (!j.contains(NAMEOF(_items))) {
-            CNC_LOGGER_ERROR("Missing JSON value {}", NAMEOF(_items));
-            return;
-        }
-
-        const auto& _items = j.at(NAMEOF(_items));
-
-        if (!_items.is_object()) {
-            CNC_LOGGER_ERROR(
-                "Invalid JSON value {}, object expected - actual type: {}",
-                NAMEOF(_items),
-                _items.type_name()
-            );
-            return;
-        }
-
-        if (!j.contains(NAMEOF(_vector_size))) {
-            CNC_LOGGER_ERROR("Missing JSON value {}", NAMEOF(_vector_size));
-            return;
-        }
+        CncJsonUtils::Assert_Json_Is_Object_With_Keys(j, ". (VectorClass)", {NAMEOF(_items), NAMEOF(_vector_size)});
 
         const auto& _vector_size = j.at(NAMEOF(_vector_size));
+        const auto& _items = j.at(NAMEOF(_items));
 
-        if (!_vector_size.is_number_unsigned()) {
-            CNC_LOGGER_ERROR(
-                "Invalid JSON value {}, non-negative int expected - actual type: {}",
-                NAMEOF(_vector_size),
-                _vector_size.type_name()
-            );
-            return;
-        }
+        CncJsonUtils::Assert_Json_Is<JsonUnsignedInt>(_vector_size, ". (VectorClass)");
+        CncJsonUtils::Assert_Json_Is<JsonObject>(_items, NAMEOF(_items));
 
         p.Clear();
         // if T is a pointer type, Resize(..) inits all entries in the vector to NULL
@@ -454,21 +428,9 @@ public:
     friend FROM_JSON(DynamicVectorArrayClass)
     {
         // Collection field
-        if (!j.contains(NAMEOF(Collection))) {
-            CNC_LOG_ERROR("Missing JSON value {}", NAMEOF(Collection));
-            return;
-        }
-
         const auto& json_collection = j.at(NAMEOF(Collection));
 
-        if (!json_collection.is_array()) {
-            CNC_LOG_ERROR(
-                "Invalid JSON value {}, array expected - actual type: {}",
-                NAMEOF(Collection),
-                json_collection.type_name()
-            );
-            return;
-        }
+        CncJsonUtils::Assert_Json_Is<JsonArray>(json_collection, NAMEOF(Collection));
 
         p.Clear_All();
 

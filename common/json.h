@@ -57,7 +57,7 @@
 /**
  * Wrapper around runtime_error, constructor allows formatting the error message using std::vformat.
  */
-class CncJsonException final : protected std::runtime_error
+class CncJsonException final : public std::runtime_error
 {
 public:
     template<typename... Args>
@@ -88,7 +88,23 @@ concept JsonType = std::is_same_v<T, JsonString>
 class CncJsonUtils final
 {
 public:
-    // TODO: Assert_Type_Is(json) { throw nlohmann::json::exception(...) } Assert_Array_Is(...) Assert_Object_Contains(...)
+    static std::string Build_Type_Error(const std::string& expected_type, const nlohmann::json& subject);
+
+    static std::string Build_Parse_Error(
+        const std::string& attempted_parse_type,
+        const std::string& subject,
+        const std::string_view& error = "invalid string value"
+    );
+
+    template<typename... Args>
+    static void Throw_Json_Assert_Failure(const std::string& json_path, const std::string& fmt, Args&&... args)
+    {
+        throw CncJsonException(
+            "Invalid JSON value {} - {}",
+            json_path,
+            std::vformat(fmt, std::make_format_args(args...))
+        );
+    }
 
     template<JsonType T>
     static void Assert_Json_Is(const nlohmann::json& subject, const std::string& json_path)
@@ -151,9 +167,7 @@ public:
         std::optional<unsigned int> max_size = std::nullopt
     )
     {
-        if (!subject.is_array()) {
-            Throw_Json_Assert_Failure(json_path, Build_Type_Error("array", subject));
-        }
+        Assert_Json_Is<JsonArray>(subject, json_path);
 
         const auto size = subject.size();
 
@@ -182,11 +196,6 @@ public:
         }
 
         Assert_Json_Is<T>(subject[0], std::format("{}[0]", json_path));
-    }
-
-    static void Assert_Json_Is_Array(const nlohmann::json& subject, const std::string& json_path)
-    {
-        return Assert_Json_Is_Array_With_Size<JsonAny>(subject, json_path, 0);
     }
 
     template<JsonType T>
@@ -236,49 +245,47 @@ public:
         const std::string_view& json_path,
         const std::string_view& field_name,
         char* field,
-        const unsigned int& length
+        const unsigned int& str_length
     );
 
     template<int N>
-    static void Bitfield_Of_Width_From_Json(
+    static std::bitset<N> Bitset_Of_Width_From_Json(
         const nlohmann::json& j,
         const std::string_view& json_path,
-        const std::string_view& field_name,
-        const std::function<void(std::bitset<N>)>& on_valid_value
+        const std::string_view& field_name
     )
     {
-        const auto value = j.at(field_name).get<std::string>();
+        const auto& field = j.at(field_name);
+
+        Assert_Json_Is<JsonString>(json_path, field);
+
+        const auto value = field.get<std::string>();
+        std::string error_message;
 
         try {
-            on_valid_value(std::bitset<N>(value));
-        } catch (const std::logic_error& e) {
-            throw CncJsonException(
-                "Invalid {}{} JSON value - expected {} bit binary string, actual value: {} | parse error: {}",
-                json_path,
-                field_name,
-                N,
-                value,
-                e.what()
-            );
+            return std::bitset<N>(value);
+        } catch (const std::out_of_range& e) {
+            error_message = e.what();
+        } catch (const std::invalid_argument& e) {
+            error_message = e.what();
         }
+
+        Throw_Json_Assert_Failure(
+            std::format("{}{}", json_path, field_name),
+            Build_Parse_Error(
+                std::format("{} bit bitset", N),
+                value,
+                error_message
+            )
+        );
+
+        throw std::runtime_error("Throw_Json_Assert_Failure will throw before I am called");
     }
 
 private:
     static inline const auto& Logger = CncLogger::For(CncJsonUtils);
 
     CncJsonUtils() = delete;
-
-    static std::string Build_Type_Error(const std::string& expected_type, const nlohmann::json& subject);
-
-    template<typename... Args>
-    static void Throw_Json_Assert_Failure(const std::string& json_path, const std::string& fmt, Args&&... args)
-    {
-        throw CncJsonException(
-            "Invalid JSON value {}, {}",
-            json_path,
-            std::vformat(fmt, std::make_format_args(args...))
-        );
-    }
 };
 
 // Load the value for a c-string from JSON string (with validation)
@@ -286,4 +293,4 @@ private:
     CncJsonUtils::Cstr_Field_From_Json(j, #CLASS, #FIELD, p.FIELD, std::size(p.FIELD) - 1)
 
 #define BITFIELD_OF_WIDTH_FROM_JSON(CLASS, FIELD, WIDTH) \
-    CncJsonUtils::Bitfield_Of_Width_From_Json<WIDTH>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v.to_ulong(); })
+    p.FIELD = (CncJsonUtils::Bitset_Of_Width_From_Json<WIDTH>(j, #CLASS, #FIELD)).to_ulong()

@@ -993,22 +993,13 @@ FROM_JSON(TeamTypeClass)
     // Class array
     const auto& class_array = j.at(NAMEOF(Class));
 
-    if (class_array.is_array() && class_array.size() <= std::size(p.Class)) {
-        for (auto i = 0; i < class_array.size(); i++) {
-            p.Class[i] = TARGET_TO_PTR_WITH_TYPE(class_array[i].get<TARGET>(), TechnoTypeClass);
-        }
-    } else if (class_array.is_array()) {
-        CNC_LOGGER_ERROR(
-            "Invalid {} JSON value - expected array with max length of {}, actual length: {}",
-            NAMEOF(Class),
-            std::size(p.Class),
-            class_array.size()
-        );
-    } else {
-        CNC_LOGGER_ERROR(
-            "Invalid {} JSON value - expected array, actual type: {}",
-            NAMEOF(Class),
-            class_array.type_name()
-        );
+    CncJsonUtils::Assert_Json_Is_Array_Of_Exact_Size<JsonUnsignedInt>(
+        class_array,
+        NAMEOF(Class),
+        p.ClassCount
+    );
+
+    for (auto i = 0; i < p.ClassCount; i++) {
+        p.Class[i] = TARGET_TO_PTR_WITH_TYPE(class_array[i].get<TARGET>(), TechnoTypeClass);
     }
 }

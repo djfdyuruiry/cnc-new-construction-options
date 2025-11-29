@@ -2896,19 +2896,15 @@ FROM_JSON(CellClass)
     // Flag field
     p.Flag.Composite = 0; // reset union fields
 
-    CncJsonUtils::Bitfield_Of_Width_From_Json<8>( // decompress bitset string to Flag.Occupy bitfields
-        j,
-        NAMEOF(CellClass),
-        NAMEOF(Flag),
-        [&](const auto& v) {
-            p.Flag.Occupy.Center = v.test(0);
-            p.Flag.Occupy.NW = v.test(1);
-            p.Flag.Occupy.NE = v.test(2);
-            p.Flag.Occupy.SW = v.test(3);
-            p.Flag.Occupy.SE = v.test(4);
-            p.Flag.Occupy.Vehicle = v.test(5);
-            p.Flag.Occupy.Monolith = v.test(6);
-            p.Flag.Occupy.Building = v.test(7);
-        }
-    );
+    const auto bitset = CncJsonUtils::Bitset_Of_Width_From_Json<8>(j, NAMEOF(CellClass), NAMEOF(Flag));
+
+    // decompress bitset string to Flag.Occupy bitfields
+    p.Flag.Occupy.Center = bitset.test(0);
+    p.Flag.Occupy.NW = bitset.test(1);
+    p.Flag.Occupy.NE = bitset.test(2);
+    p.Flag.Occupy.SW = bitset.test(3);
+    p.Flag.Occupy.SE = bitset.test(4);
+    p.Flag.Occupy.Vehicle = bitset.test(5);
+    p.Flag.Occupy.Monolith = bitset.test(6);
+    p.Flag.Occupy.Building = bitset.test(7);
 }

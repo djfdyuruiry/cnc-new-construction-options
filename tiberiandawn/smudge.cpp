@@ -399,12 +399,7 @@ FROM_JSON(SmudgeClass)
 {
     BASE_CLASS_FROM_JSON(ObjectClass);
 
-    TdTypeConverter::Load_Field_From_Json<SmudgeType>(
-        j,
-        NAMEOF(SmudgeClass),
-        NAMEOF(Class),
-        [&] (const auto& s) {
-            const_cast<SmudgeTypeClass*&>(p.Class) = reinterpret_cast<SmudgeTypeClass*>(s);
-        }
+    const_cast<SmudgeTypeClass*&>(p.Class) = reinterpret_cast<SmudgeTypeClass*>(
+        TdTypeConverter::Load_Field_From_Json<SmudgeType>(j, NAMEOF(SmudgeClass), NAMEOF(Class))
     );
 }

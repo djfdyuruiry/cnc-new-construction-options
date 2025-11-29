@@ -99,7 +99,7 @@
 
 // Parse TD type field from JSON string
 #define PARSE_TD_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \
-    TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD, [&](const auto& v) { p.FIELD = v; })
+    p.FIELD = TdTypeConverter::Load_Field_From_Json<TYPE>(j, #CLASS, #FIELD)
 
 // Parse TD type field from JSON string
 #define PARSE_TD_ARRAY_FIELD_FROM_JSON(CLASS, FIELD, TYPE) \

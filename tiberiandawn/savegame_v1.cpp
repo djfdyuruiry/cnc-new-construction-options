@@ -310,16 +310,21 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
         return false;
     }
 
+    std::string error_message;
+
     // parse JSON
     try {
         from_json(nlohmann::json::parse(save_line), *this);
 
         return Validate();
+    } catch (const CncJsonException& e) {
+        error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
-        CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", e.what());
-
-        return false;
+        error_message = e.what();
     }
+
+    CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", error_message);
+    return false;
 }
 
 void SaveGame_v1::Read_Globals()
@@ -484,12 +489,19 @@ bool SaveGame_v1::To_File(CDFileClass& save_file, const SaveGameHeader& header) 
     // write save data to file
     std::string header_json;
     std::string save_json;
+    std::optional<std::string> error_message;
 
     try {
         header.Dump_Json(header_json);
         Dump_Json(save_json);
+    } catch (const CncJsonException& e) {
+        error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
-        CNC_LOGGER_ERROR("Error serializing {} to JSON: {}", NAMEOF(SaveGame), e.what());
+        error_message = e.what();
+    }
+
+    if (error_message.has_value()) {
+        CNC_LOGGER_ERROR("Error serializing {} to JSON: {}", NAMEOF(SaveGame), *error_message);
 
         save_file.Delete();
         return false;

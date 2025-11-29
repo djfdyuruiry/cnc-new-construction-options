@@ -2118,8 +2118,6 @@ TO_JSON(MapClass)
 // Field 'Array' omitted as it's reset after save load anyway.
 FROM_JSON(MapClass)
 {
-    static const auto& Logger = CncLogger::For(MapClass);
-
     BASE_CLASS_FROM_JSON(GScreenClass);
 
     FIELD_FROM_JSON(MapCellX);
@@ -2141,14 +2139,7 @@ FROM_JSON(MapClass)
     // Array field - follows MouseClass::Save logic
     const auto& cells = j.at(NAMEOF(Array));
 
-    if (!cells.is_object()) {
-        CNC_LOGGER_ERROR(
-            "Invalid JSON value {}, object expected - actual type: {}",
-            NAMEOF(Array),
-            cells.type_name()
-        );
-        return;
-    }
+    CncJsonUtils::Assert_Json_Is<JsonObject>(cells, NAMEOF(Array));
 
     for (const auto& [cell_key, cell_json] : cells.items()) {
         const auto cell = static_cast<CELL>(std::stoi(cell_key));

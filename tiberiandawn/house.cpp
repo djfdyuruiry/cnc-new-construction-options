@@ -8647,12 +8647,7 @@ FROM_JSON(HouseClass)
     FIELD_FROM_JSON(DebugUnlockBuildables);
 
     // Class field
-    TdTypeConverter::Load_Field_From_Json<HousesType>(
-        j,
-        NAMEOF(HouseClass),
-        NAMEOF(Class),
-        [&](const auto& h) {
-            const_cast<HouseTypeClass const*&>(p.Class) = reinterpret_cast<HouseTypeClass const*>(h);
-        }
+    const_cast<HouseTypeClass const*&>(p.Class) = reinterpret_cast<HouseTypeClass const*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(HouseClass), NAMEOF(Class))
     );
 }

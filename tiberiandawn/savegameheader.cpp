@@ -16,15 +16,20 @@ bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
     }
 
     // parse JSON
+    std::string error_message;
+
     try {
         from_json(nlohmann::json::parse(header_line), output);
 
         return output.Validate();
-    } catch (nlohmann::json::exception& e) {
-        CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", e.what());
-
-        return false;
+    } catch (const CncJsonException& e) {
+        error_message = e.what();
+    } catch (const nlohmann::json::exception& e) {
+        error_message = e.what();
     }
+
+    CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", error_message);
+    return false;
 }
 
 bool SaveGameHeader::From_File(const std::string& path, SaveGameHeader& output)

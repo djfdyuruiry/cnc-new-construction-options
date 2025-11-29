@@ -401,53 +401,36 @@ public:
     static std::optional<int> Try_Parse_RTTI_Instance(const RTTIType& type, const std::string& instance);
 
     template<SupportedByTdTypeConverter T>
-    static bool Load_Field_From_Json(
+    static T Load_Field_From_Json(
         const nlohmann::json& source,
         const std::string_view& target,
-        const std::string_view& field_name,
-        const std::function<void(T)>& with_valid_value
+        const std::string_view& field_name
     )
     {
         const auto json_path = std::format("{}.{}", target, field_name);
 
-        if (!source.contains(field_name)) {
-            CNC_LOGGER_ERROR("Mising {} JSON value - expected string", json_path);
-            return false;
-        }
-
         auto const& json_value = source.at(field_name);
 
-        if (!json_value.is_string()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected string, actual type: {}",
-                json_path,
-                json_value.type_name()
-            );
-
-            return false;
-        }
+        CncJsonUtils::Assert_Json_Is<JsonString>(json_value, json_path);
 
         const auto json_string = json_value.get<std::string>();
         const auto parse_result = Try_Parse<T>(json_string);
 
         if (!parse_result.has_value()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected {} instance, actual value: {}",
+            CncJsonUtils::Throw_Json_Assert_Failure(
                 json_path,
-                Get_Type_Name<T>(),
-                json_string
+                CncJsonUtils::Build_Parse_Error(
+                    std::format("{} instance", Get_Type_Name<T>()),
+                    json_string
+                )
             );
-
-            return false;
         }
 
-        with_valid_value(*parse_result);
-
-        return true;
+        return *parse_result;
     }
 
     template<SupportedByTdTypeConverter T>
-    static bool Load_Csv_Field_From_Json(
+    static void Load_Csv_Field_From_Json(
         const nlohmann::json& source,
         const std::string_view& target_name,
         const std::string_view& field_name,
@@ -457,57 +440,34 @@ public:
     {
         const auto json_path = std::format("{}.{}", target_name, field_name);
 
-        if (!source.contains(field_name)) {
-            CNC_LOGGER_ERROR(
-                "Mising {} JSON value - expected csv string",
-                json_path,
-                Get_Type_Name<T>()
-            );
-
-            return false;
-        }
-
         auto const& json_value = source.at(field_name);
 
-        if (!json_value.is_string()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected csv string, actual type: {}",
-                json_path,
-                json_value.type_name()
-            );
-
-            return false;
-        }
+        CncJsonUtils::Assert_Json_Is<JsonString>(json_path, json_path);
 
         const auto json_string = json_value.get<std::string>();
         const auto parse_result = Try_Parse_Csv<T>(json_string);
 
         if (!parse_result.has_value()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected csv of {} instances, actual value: {}",
+            CncJsonUtils::Throw_Json_Assert_Failure(
                 json_path,
-                Get_Type_Name<T>(),
-                json_string
+                CncJsonUtils::Build_Parse_Error(
+                    std::format("csv string of {} instances", Get_Type_Name<T>()),
+                    json_string
+                )
             );
-
-            return false;
         }
 
         if (parse_result->size() != expected_length) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected csv of {} {} instances, actual length: {}",
+            CncJsonUtils::Throw_Json_Assert_Failure(
                 json_path,
+                " expected csv of {} {} instances, actual length: {}",
                 expected_length,
                 Get_Type_Name<T>(),
                 parse_result->size()
             );
-
-            return false;
         }
 
         std::ranges::copy(*parse_result, target);
-
-        return true;
     }
 
     static nlohmann::json Object_Target_Array_To_Json(
@@ -529,32 +489,15 @@ public:
     {
         const auto json_path = std::format("{}.{}", target_name, field_name);
 
-        if (!source.is_array()) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected array, actual type: {}",
-                json_path,
-                source.type_name()
-            );
+        CncJsonUtils::Assert_Json_Is_Array_Of_Exact_Size<JsonUnsignedInt>(source, json_path, length);
 
-            return;
-        }
-        if (source.size() != length) {
-            CNC_LOGGER_ERROR(
-                "Invalid {} JSON value - expected array with {} elements, actual length: {}",
-                json_path,
-                length,
-                source.size()
-            );
-            return;
-        }
-
-        for (auto i = 0; i < source.size(); i++) {
+        for (auto i = 0; i < length; i++) {
             auto& element = *(target + i);
             element = OBJECT_TARGET_TO_PTR(source.at(i).get<TARGET>());
         }
     }
 
-    static std::optional<TechnoTypeClassJsonReference> Techno_Type_Reference_From_Json(
+    static TechnoTypeClassJsonReference Techno_Type_Reference_From_Json(
         const nlohmann::json& source,
         const std::string& json_path
     );
@@ -570,25 +513,21 @@ public:
     {
         const auto json_path = std::format("{}.{}", target_name, field_name);
 
-        auto reference = Techno_Type_Reference_From_Json(source, json_path);
+        const auto [ _, instance_str ] = Techno_Type_Reference_From_Json(source, json_path);
 
-        auto instance = Get_Default_Value<U>();
+        auto parsed_instance = Try_Parse<U>(instance_str);
 
-        if (reference.has_value()) {
-            auto parsed_instance = Try_Parse<U>(reference->Instance);
-
-            if (parsed_instance.has_value()) {
-                instance = *parsed_instance;
-            } else {
-                CNC_LOGGER_ERROR(
-                    "Failed to parse techo type target instance of type '{}' from string: {}",
-                    Get_Type_Name<U>(),
-                    reference->Instance
-                );
-            }
+        if (!parsed_instance.has_value()) {
+            CncJsonUtils::Throw_Json_Assert_Failure(
+                std::format("{}.{}", json_path, NAMEOF(Instance)),
+                CncJsonUtils::Build_Parse_Error(
+                    std::format("techno type target instance of type {}", Get_Type_Name<U>()),
+                    instance_str
+                )
+            );
         }
 
-        target = reinterpret_cast<T*>(instance);
+        target = reinterpret_cast<T*>(*parsed_instance);
     }
 
 private:

@@ -479,20 +479,12 @@ nlohmann::json TdTypeConverter::Techno_Type_To_Reference_Json(const ObjectTypeCl
     return reference;
 }
 
-std::optional<TechnoTypeClassJsonReference> TdTypeConverter::Techno_Type_Reference_From_Json(
+TechnoTypeClassJsonReference TdTypeConverter::Techno_Type_Reference_From_Json(
     const nlohmann::json& source,
     const std::string& json_path
 )
 {
-    if (!source.is_object()) {
-        CNC_LOGGER_ERROR(
-            "Invalid {} JSON value - expected object, actual type: {}",
-            json_path,
-            source.type_name()
-        );
-
-        return std::nullopt;
-    }
+    CncJsonUtils::Assert_Json_Is_Object_With_Keys(source, json_path, { NAMEOF(Kind) });
 
     TechnoTypeClassJsonReference ref = source;
 
