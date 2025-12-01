@@ -15,6 +15,12 @@
       "type": "bool",
       "default": true,
       "comment": "Barracks, Hand of Nod, Weapons Factory etc. support setting rally points for produced units TS/RA2 style. Ported from the CFEPatch - see: https://bitbucket.org/cfehunter/cncremastered/src/cfepatch/"
+    },
+    {
+      "name": "NewSaveGameFormat",
+      "type": "bool",
+      "default": true,
+      "comment": "Use the new JSON save game format for cross-platform, backwards compatible and mod friendly saves. Note disabling this will use the old binary save format, which doesn't support save/load of Scenario Rules or Lua Scripts."
     }
   ]
 }

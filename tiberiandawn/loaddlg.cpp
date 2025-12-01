@@ -623,8 +623,9 @@ void LoadOptionsClass::Fill_List(ListClass* list)
             /*
             ** get the game's info; if success, add it to the list
             */
-            bool ok = Get_Savefile_Info(id, descr, scenario, house);
-            // bool ok = Get_Savefile_Info_Binary(id, descr, &scenario, &house);
+            bool ok = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+                ? Get_Savefile_Info(id, descr, scenario, house)
+                : Get_Savefile_Info_Binary(id, descr, &scenario, &house);
 
             fdata = new FileEntryClass;
 

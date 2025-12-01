@@ -112,8 +112,9 @@ bool Save_Game(int id, char* descr)
     */
     sprintf(name, "SAVEGAME.%03d", id);
 
-    return Save_Game(name, descr);
-    // return Save_Game_Binary(name, descr);
+    return Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+        ? Save_Game(name, descr)
+        : Save_Game_Binary(name, descr);
 }
 
 /*
@@ -332,8 +333,9 @@ bool Load_Game(int id)
     */
     sprintf(name, "SAVEGAME.%03d", id);
 
-    return Load_Game(name);
-    // return Load_Game_Binary(name);
+    return Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+        ? Load_Game(name)
+        : Load_Game_Binary(name);
 }
 
 /**
@@ -342,6 +344,7 @@ bool Load_Game(int id)
  * for continuing the scenario.
  *
  * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
+ * TODO: Store RuleSections as map in save game, refactor RulesClass to accept this instead of INI file for scenario rules
  */
 static void Load_INI_Rules_And_Lua()
 {
@@ -629,33 +632,11 @@ bool Load_Game_Binary(const char* file_name)
 
     file.Close();
 
-    /*
-    ** Load rules from scenario INI filename stored in save game data
-    ** (if present and available)
-    */
-    if (strlen(Scen.FileName) > 0) {
-        if (CCFileClass ini_file(Scen.FileName); ini_file.Is_Available()) {
-            if (CCINIClass ini; ini.Load(ini_file, true) != 0) {
-                Rule.Init(ini);
-                Rule.Init_Types(ini);
-            } else {
-                CNC_LOG_ERROR(
-                    "Failed to load scenario INI filename stored in save game data: {}",
-                    Scen.FileName
-                );
-            }
-        }
-    } else {
-        CNC_LOG_DEBUG("No scenario INI filename found in save game data");
-    }
-
     Decode_All_Pointers_Binary();
     Map.Init_IO();
     Map.Flag_To_Redraw(true);
 
     Fixup_Scenario();
-
-    Load_INI_Rules_And_Lua();
 
     ScenarioInit = 0;
 
@@ -804,7 +785,6 @@ bool Save_Misc_Values(FileClass& file)
     file.Write(ActionMovie, sizeof(ActionMovie));
     file.Write(&TempleIoned, sizeof(TempleIoned));
     file.Write(&AreThingiesEnabled, sizeof(AreThingiesEnabled));
-    file.Write(Scen.FileName, sizeof(Scen.FileName));
 
     return (true);
 }
