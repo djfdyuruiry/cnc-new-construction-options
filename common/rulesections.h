@@ -219,19 +219,19 @@ public:
             return std::nullopt;
         }
 
-        const auto value = std::get_if<T>(&value_variant_optional.value());
+        const auto& value_variant = *value_variant_optional;
 
-        if (value == nullptr) {
+        if (!std::holds_alternative<T>(value_variant)) {
             CNC_LOGGER_FATAL(
                 "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
-                typeid(T).name(),
+                Get_Variant_Type(value_variant),
                 Get_Type(name),
                 SectionName,
                 name
             );
         }
 
-        return *value;
+        return std::get<T>(value_variant);
     }
 
     template<RuleValueVariantCompatible T>
@@ -278,7 +278,7 @@ public:
                 rules_value,
                 SectionName,
                 name,
-                typeid(T).name()
+                C::template Get_Type_Name<T>()
             );
         }
 
@@ -305,7 +305,7 @@ public:
                 rules_value,
                 SectionName,
                 name,
-                typeid(T).name()
+                C::template Get_Type_Name<T>()
             );
         }
 
@@ -370,7 +370,7 @@ public:
                 std::format(
                     "Failed to parse instance string '{}' as csv list of type: {} | valid_values={}",
                     instances_csv,
-                    typeid(T).name(),
+                    C::template Get_Type_Name<T>(),
                     CncStringUtils::To_Csv(type_strings)
                 )
             );
@@ -503,7 +503,7 @@ public:
                          s,
                          Section.SectionName,
                          name,
-                         typeid(T).name(),
+                         C::template Get_Type_Name<T>(),
                          CncStringUtils::To_Csv(type_strings)
                     );
                 }
@@ -535,7 +535,7 @@ public:
                          csv,
                          Section.SectionName,
                          name,
-                         typeid(T).name()
+                         C::template Get_Type_Name<T>()
                     );
                 }
 
