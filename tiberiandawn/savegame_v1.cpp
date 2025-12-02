@@ -298,8 +298,8 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
     auto save_file_stream = std::ifstream(full_path);
 
     // read header (discarded)
-    std::string header_json;
-    std::getline(save_file_stream, header_json, SaveGameHeader::LINE_SEPERATOR);
+    SaveGameHeader header;
+    SaveGameHeader::From_Stream(save_file_stream, header);
 
     // read SaveGame JSON
     std::string save_line;

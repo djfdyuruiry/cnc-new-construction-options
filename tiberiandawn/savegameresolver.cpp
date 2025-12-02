@@ -10,7 +10,9 @@
 #define CURRENT_SAVE_CLASS_NAME NAMEOF(SaveGame_v1)
 
 const std::string_view& SaveGameResolver::Current_Save_Version = CURRENT_SAVE_CLASS::Version_Name;
-const std::vector<std::string_view> SaveGameResolver::Supported_Save_Versions = std::vector { CURRENT_SAVE_CLASS::Version_Name };
+const std::vector<std::string_view> SaveGameResolver::Supported_Save_Versions = std::vector {
+    CURRENT_SAVE_CLASS::Version_Name
+};
 
 // TODO: Write converter that parses remastered and original game save format, and emits a JSON file
 bool SaveGameResolver::Save(CDFileClass& file, const char* description)
@@ -84,8 +86,7 @@ std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
 
                 CNC_LOGGER_ERROR("Save game is corrupt, JSON parse error: {}", error_message);
             }
-    }
-    else {
+    } else {
         CNC_LOGGER_ERROR("Save game version '{}' is unsupported, file path: {}", header.Version, path);
     }
 

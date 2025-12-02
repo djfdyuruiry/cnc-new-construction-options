@@ -25,9 +25,6 @@
 // Build target value for given pointer
 #define OBJECT_PTR_TO_TARGET(PTR) static_cast<TARGET>(PTR == nullptr ? TARGET_NONE : PTR->As_Target())
 
-// Build techno target value for given pointer
-#define TECHNO_TYPE_PTR_TO_TARGET(PTR) static_cast<TARGET>(PTR == nullptr ? TARGET_NONE : TechnoType_To_Target(PTR))
-
 // Convert target to a type compatible with a TYPE pointer address
 #define TARGET_TO_PTR_WITH_TYPE(TARGET, TYPE) reinterpret_cast<TYPE*>(static_cast<intptr_t>(TARGET))
 
