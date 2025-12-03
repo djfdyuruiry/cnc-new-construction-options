@@ -304,8 +304,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     /**
      * Load any rule sections embedded in the scenario file.
      */
-    Rule.Init(ini);
-    Rule.Init_Types(ini);
+    Rule.Init_For_Scenario(Scen);
 
     /*
     **	For single-player scenarios, 'BuildLevel' is the scenario number.

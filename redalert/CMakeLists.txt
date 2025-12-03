@@ -205,7 +205,7 @@ if(BUILD_REMASTERRA)
         ${REDALERT_HEADERS}
         ${REMASTERRA_RC}
     )
-    target_compile_definitions(RedAlert PUBLIC $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING> ${REMASTER_DEFS})
+    target_compile_definitions(RedAlert PUBLIC $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING> $<$<BOOL:TRIGGER_DEBUGGER_MACRO>:TRIGGER_DEBUGGER_MACROA> ${REMASTER_DEFS})
     target_include_directories(RedAlert PUBLIC ${CMAKE_SOURCE_DIR} .)
     target_link_libraries(RedAlert commonr ${REMASTER_LIBS} ${STATIC_LIBS})
     set_target_properties(RedAlert PROPERTIES PREFIX "")

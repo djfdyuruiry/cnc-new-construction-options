@@ -20,15 +20,19 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
-#ifdef _WIN32
-    #include <intrin.h>
-    #define TRIGGER_DEBUGGER __debugbreak()
-#elif defined(__GNUC__) && !defined(__clang__)
-    #define TRIGGER_DEBUGGER __builtin_trap()
-#elif defined(__GNUC__) && defined(__clang__)
-    #define TRIGGER_DEBUGGER __builtin_debugtrap()
+#ifdef _DEBUG
+    #ifdef _WIN32
+        #include <intrin.h>
+        #define TRIGGER_DEBUGGER __debugbreak()
+    #elif defined(__GNUC__) && !defined(__clang__)
+        #define TRIGGER_DEBUGGER __builtin_trap()
+    #elif defined(__GNUC__) && defined(__clang__)
+        #define TRIGGER_DEBUGGER __builtin_debugtrap()
+    #else
+        #define TRIGGER_DEBUGGER assert(false)
+    #endif
 #else
-    #define TRIGGER_DEBUGGER assert(false)
+    #define TRIGGER_DEBUGGER (void)0
 #endif
 
 /**
