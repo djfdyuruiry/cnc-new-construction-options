@@ -318,7 +318,9 @@ void RulesClass::Init()
         Export(ini);
         Sections.Save_All_To_Ini(ini);
 
-        ini.Save(ini_file, false);
+        if (!ini.Save(ini_file, false)) {
+            CNC_LOGGER_FATAL("Failed to generate RULES.INI file");
+        }
     }
 
     ini_file.Close();
@@ -602,7 +604,7 @@ static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logg
 
         sections.Save_All_To_Ini(ini);
 
-        if (ini.Save(ini_file, false) != 0) {
+        if (!ini.Save(ini_file, false)) {
             CNC_LOGGER_FATAL("Failed to save type rules to INI file: {}", rules_filename);
         }
     }
