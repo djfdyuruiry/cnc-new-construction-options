@@ -35,6 +35,8 @@
 #ifndef POWER_H
 #define POWER_H
 
+#include "common/json.h"
+
 #include "radar.h"
 
 class PowerClass : public RadarClass
@@ -102,6 +104,7 @@ protected:
         POWER_STEP_FACTOR = 6,
     };
 
+    JSON_FUNCTIONS(PowerClass)
 private:
     int Power_Height(int value);
 

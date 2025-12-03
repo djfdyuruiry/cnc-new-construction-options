@@ -188,3 +188,19 @@ void FuseClass::Fuse_Read(FileClass& file)
     file.Read(&HeadTo, sizeof(HeadTo));
     file.Read(&Proximity, sizeof(Proximity));
 }
+
+TO_JSON(FuseClass)
+{
+    FIELD_TO_JSON(Timer);
+    FIELD_TO_JSON(Arming);
+    FIELD_TO_JSON(HeadTo);
+    FIELD_TO_JSON(Proximity);
+}
+
+FROM_JSON(FuseClass)
+{
+    FIELD_FROM_JSON(Timer);
+    FIELD_FROM_JSON(Arming);
+    FIELD_FROM_JSON(HeadTo);
+    FIELD_FROM_JSON(Proximity);
+}

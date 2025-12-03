@@ -38,6 +38,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /***********************************************************************************************
  * DoorClass::DoorClass -- Constructor for the DoorClass object.                               *
@@ -190,4 +191,20 @@ int DoorClass::Door_Stage(void) const
         return (Stages - 1);
     }
     return (0);
+}
+
+TO_JSON(DoorClass)
+{
+    FIELD_TO_JSON(Control);
+    FIELD_TO_JSON(Stages);
+    CONVERT_TD_FIELD_TO_JSON(State);
+    BITFIELD_TO_JSON(IsToRedraw);
+}
+
+FROM_JSON(DoorClass)
+{
+    FIELD_FROM_JSON(Control);
+    FIELD_FROM_JSON(Stages);
+    PARSE_TD_FIELD_FROM_JSON(DoorClass, State, DoorClass::DoorStateType);
+    BITFIELD_FROM_JSON(IsToRedraw);
 }

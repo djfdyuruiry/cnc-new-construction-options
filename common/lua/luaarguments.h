@@ -29,7 +29,7 @@ public:
     template<LuaVariantCompatible T>
     LuaMapParameter& With_Key(std::string key)
     {
-        if (Data.find(key) == Data.end()) {
+        if (!Data.contains(key)) {
             Lua.Raise_Error_Format(
                 "({}) Parameter '{}' didn't contain expected key: {}",
                 FunctionSignature,
@@ -38,8 +38,7 @@ public:
             );
         }
 
-        auto value_ptr = std::get_if<T>(&Data[key]);
-        if (!value_ptr) {
+        if (!std::holds_alternative<T>(Data[key])) {
             auto expected_lua_type = LUA_TNONE;
 
             if constexpr (std::is_same_v<T, std::string>) {
@@ -105,9 +104,7 @@ public:
             );
         }
 
-        auto value_ptr = std::get_if<T>(&Data[idx]);
-
-        if (!value_ptr) {
+        if (!std::holds_alternative<T>(Data[idx])) {
             auto expected_lua_type = LUA_TNONE;
 
             if constexpr (std::is_same_v<T, std::string>) {

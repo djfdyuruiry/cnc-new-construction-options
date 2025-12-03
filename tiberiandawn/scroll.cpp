@@ -250,3 +250,19 @@ bool ScrollClass::Set_Autoscroll(int control)
     }
     return (old);
 }
+
+TO_JSON(ScrollClass)
+{
+    BASE_CLASS_TO_JSON(HelpClass);
+
+    BITFIELD_TO_JSON(IsAutoScroll);
+    FIELD_TO_JSON(Inertia);
+}
+
+FROM_JSON(ScrollClass)
+{
+    BASE_CLASS_FROM_JSON(HelpClass);
+
+    BITFIELD_FROM_JSON(IsAutoScroll);
+    FIELD_FROM_JSON(Inertia);
+}

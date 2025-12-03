@@ -35,6 +35,8 @@
 #ifndef GSCREEN_H
 #define GSCREEN_H
 
+#include "common/json.h"
+
 #include "function.h"
 #include "cell.h"
 
@@ -123,6 +125,7 @@ private:
     */
     unsigned IsToUpdate : 1;
 
+    JSON_FUNCTIONS(GScreenClass)
 private:
     /*
     ** Some additional padding in case we need to add data to the class and maintain backwards compatibility for

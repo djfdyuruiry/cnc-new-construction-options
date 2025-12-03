@@ -29,6 +29,7 @@
 
 #include "fixed.h"
 #include "ini.h"
+#include "json.h"
 #include "logger.h"
 #include "stringutils.h"
 
@@ -113,9 +114,9 @@ public:
         const std::optional<std::function<bool(std::string)>>& str_validator = std::nullopt
     )
     {
-        auto sectionIsInIni = ini.Section_Present(SectionName.data());
+        const auto section_is_in_ini = ini.Section_Present(SectionName.data());
 
-        if (!sectionIsInIni) {
+        if (!section_is_in_ini) {
             CNC_LOGGER_DEBUG(
                 "Loading default value '{}' for '{}', rule section not found in provided INI: [{}]",
                 Variant_To_String(default_value),
@@ -212,25 +213,25 @@ public:
     [[nodiscard]]
     std::optional<T> Try_Get(std::string_view name) const
     {
-        auto value_variant_optional = Try_Get_Variant(name);
+        const auto value_variant_optional = Try_Get_Variant(name);
 
         if (!value_variant_optional.has_value()) {
             return std::nullopt;
         }
 
-        auto value_variant = value_variant_optional.value();
+        const auto& value_variant = *value_variant_optional;
 
-        if (!std::get_if<T>(&value_variant)) {
+        if (!std::holds_alternative<T>(value_variant)) {
             CNC_LOGGER_FATAL(
                 "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
-                typeid(T).name(),
+                Get_Variant_Type(value_variant),
                 Get_Type(name),
                 SectionName,
                 name
             );
         }
 
-        return *std::get_if<T>(&value_variant);
+        return std::get<T>(value_variant);
     }
 
     template<RuleValueVariantCompatible T>
@@ -277,7 +278,7 @@ public:
                 rules_value,
                 SectionName,
                 name,
-                typeid(T).name()
+                C::template Get_Type_Name<T>()
             );
         }
 
@@ -304,7 +305,7 @@ public:
                 rules_value,
                 SectionName,
                 name,
-                typeid(T).name()
+                C::template Get_Type_Name<T>()
             );
         }
 
@@ -369,7 +370,7 @@ public:
                 std::format(
                     "Failed to parse instance string '{}' as csv list of type: {} | valid_values={}",
                     instances_csv,
-                    typeid(T).name(),
+                    C::template Get_Type_Name<T>(),
                     CncStringUtils::To_Csv(type_strings)
                 )
             );
@@ -377,6 +378,9 @@ public:
 
         return Set(name, instances_csv);
     }
+
+    // TODO: Handle OnRulesChanged, if needed
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 
@@ -499,7 +503,7 @@ public:
                          s,
                          Section.SectionName,
                          name,
-                         typeid(T).name(),
+                         C::template Get_Type_Name<T>(),
                          CncStringUtils::To_Csv(type_strings)
                     );
                 }
@@ -531,7 +535,7 @@ public:
                          csv,
                          Section.SectionName,
                          name,
-                         typeid(T).name()
+                         C::template Get_Type_Name<T>()
                     );
                 }
 
@@ -643,6 +647,7 @@ public:
 
     RuleSection& operator[](std::string_view name);
 
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSections, Sections)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSections);
 

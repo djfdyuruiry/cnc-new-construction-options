@@ -74,20 +74,20 @@ void LogicClass::Debug_Dump(MonoClass* mono) const
     AverageFramesPerSecond = TotalFrames / FPSDivider++;
 
     mono->Set_Cursor(21, 9);
-    mono->Print("ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r"
-                "³Units.....³   ³Frame Rate:      Avg:      Frame:        ³\r"
-                "³Infantry..³   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´\r"
-                "³Aircraft..³   ³                                         ³\r"
-                "³Buildings.³   ³                                         ³\r"
-                "³Terrain...³   Ã                                         ´\r"
-                "³Bullets...³   ³                                         ³\r"
-                "³Anims.....³   ³                                         ³\r"
-                "³Teams.....³   Ã                                        Ä´\r"
-                "³Triggers..³   ³                                         ³\r"
-                "³Factories.³   ³                                         ³\r"
-                "³          ³   Ã                                         ´\r"
-                "³          ³   ³                                         ³\r"
-                "ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄ´Spare CPU TimeÃÄÄÄÄÄÄÄÄÄÄÄÄÙ\r");
+    mono->Print("ÃšÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã‚Ã„Ã„Ã„Ã‚Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Â¿\r"
+                "Â³Units.....Â³   Â³Frame Rate:      Avg:      Frame:        Â³\r"
+                "Â³Infantry..Â³   ÃƒÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Â´\r"
+                "Â³Aircraft..Â³   Â³                                         Â³\r"
+                "Â³Buildings.Â³   Â³                                         Â³\r"
+                "Â³Terrain...Â³   Ãƒ                                         Â´\r"
+                "Â³Bullets...Â³   Â³                                         Â³\r"
+                "Â³Anims.....Â³   Â³                                         Â³\r"
+                "Â³Teams.....Â³   Ãƒ                                        Ã„Â´\r"
+                "Â³Triggers..Â³   Â³                                         Â³\r"
+                "Â³Factories.Â³   Â³                                         Â³\r"
+                "Â³          Â³   Ãƒ                                         Â´\r"
+                "Â³          Â³   Â³                                         Â³\r"
+                "Ã€Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„ÃÃ„Ã„Ã„ÃÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Â´Spare CPU TimeÃƒÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã™\r");
 
     _framecounter++;
     mono->Set_Cursor(70, 10);
@@ -352,4 +352,14 @@ void LogicClass::Clear_Recently_Created_Bits(void)
         ObjectClass* obj = (*this)[index];
         obj->IsRecentlyCreated = false;
     }
+}
+
+TO_JSON(LogicClass)
+{
+    BASE_CLASS_TO_JSON(LayerClass);
+}
+
+FROM_JSON(LogicClass)
+{
+    BASE_CLASS_FROM_JSON(LayerClass);
 }

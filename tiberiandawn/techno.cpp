@@ -114,6 +114,7 @@
 #include <numeric>
 
 #include "function.h"
+#include "typeconverter.h"
 
 /***************************************************************************
 **	Cloaking control values.
@@ -4922,3 +4923,87 @@ int TechnoTypeClass::Legal_Placement(CELL pos) const
     return (1);
 }
 #endif // USE_RA_AI
+
+TO_JSON(TechnoClass)
+{
+    BASE_CLASS_TO_JSON(RadioClass);
+    BASE_CLASS_TO_JSON(FlasherClass);
+    BASE_CLASS_TO_JSON(StageClass);
+    BASE_CLASS_TO_JSON(CargoClass);
+    BASE_CLASS_TO_JSON(DoorClass);
+    BASE_CLASS_TO_JSON(CrewClass);
+
+    BITFIELD_TO_JSON(IsTickedOff);
+    BITFIELD_TO_JSON(IsCloakable);
+    BITFIELD_TO_JSON(IsLeader);
+    BITFIELD_TO_JSON(IsALoaner);
+    BITFIELD_TO_JSON(IsLocked);
+    BITFIELD_TO_JSON(IsInRecoilState);
+    BITFIELD_TO_JSON(IsTethered);
+    BITFIELD_TO_JSON(IsOwnedByPlayer);
+    BITFIELD_TO_JSON(IsDiscoveredByPlayer);
+    BITFIELD_TO_JSON(IsDiscoveredByComputer);
+    BITFIELD_TO_JSON(IsALemon);
+    BITFIELD_TO_JSON(IsSecondShot);
+    FIELD_TO_JSON(ArchiveTarget);
+    CONVERT_TD_FIELD_TO_JSON(Cloak);
+    FIELD_TO_JSON(CloakingDevice);
+    FIELD_TO_JSON(TarCom);
+    FIELD_TO_JSON(SuspendedTarCom);
+    FIELD_TO_JSON(PrimaryFacing);
+    FIELD_TO_JSON(Arm);
+    FIELD_TO_JSON(Ammo);
+    FIELD_TO_JSON(Lines);
+    FIELD_TO_JSON(LineCount);
+    FIELD_TO_JSON(LineFrame);
+    FIELD_TO_JSON(LineMaxFrames);
+    FIELD_TO_JSON(PurchasePrice);
+    FIELD_TO_JSON(IsDiscoveredByPlayerMask);
+
+    // House field
+    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
+}
+
+FROM_JSON(TechnoClass)
+{
+    BASE_CLASS_FROM_JSON(RadioClass);
+    BASE_CLASS_FROM_JSON(FlasherClass);
+    BASE_CLASS_FROM_JSON(StageClass);
+    BASE_CLASS_FROM_JSON(CargoClass);
+    BASE_CLASS_FROM_JSON(DoorClass);
+    BASE_CLASS_FROM_JSON(CrewClass);
+
+    BITFIELD_FROM_JSON(IsTickedOff);
+    BITFIELD_FROM_JSON(IsCloakable);
+    BITFIELD_FROM_JSON(IsLeader);
+    BITFIELD_FROM_JSON(IsALoaner);
+    BITFIELD_FROM_JSON(IsLocked);
+    BITFIELD_FROM_JSON(IsInRecoilState);
+    BITFIELD_FROM_JSON(IsTethered);
+    BITFIELD_FROM_JSON(IsOwnedByPlayer);
+    BITFIELD_FROM_JSON(IsDiscoveredByPlayer);
+    BITFIELD_FROM_JSON(IsDiscoveredByComputer);
+    BITFIELD_FROM_JSON(IsALemon);
+    BITFIELD_FROM_JSON(IsSecondShot);
+    FIELD_FROM_JSON(ArchiveTarget);
+    PARSE_TD_FIELD_FROM_JSON(TechnoClass, Cloak, CloakType);
+    FIELD_FROM_JSON(CloakingDevice);
+    FIELD_FROM_JSON(TarCom);
+    FIELD_FROM_JSON(SuspendedTarCom);
+    FIELD_FROM_JSON(PrimaryFacing);
+    FIELD_FROM_JSON(Arm);
+    FIELD_FROM_JSON(Ammo);
+    FIELD_FROM_JSON(Lines);
+    FIELD_FROM_JSON(LineCount);
+    FIELD_FROM_JSON(LineFrame);
+    FIELD_FROM_JSON(LineMaxFrames);
+    FIELD_FROM_JSON(PurchasePrice);
+    FIELD_FROM_JSON(IsDiscoveredByPlayerMask);
+
+    // House field
+    p.House = reinterpret_cast<HouseClass*>(
+        static_cast<intptr_t>(
+            TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(TechnoClass), NAMEOF(House))
+        )
+    );
+}

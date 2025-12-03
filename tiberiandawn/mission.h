@@ -35,6 +35,8 @@
 #ifndef MISSION_H
 #define MISSION_H
 
+#include "common/json.h"
+
 #include "object.h"
 #include "monoc.h"
 
@@ -119,6 +121,7 @@ public:
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
 
+    JSON_FUNCTIONS(MissionClass)
 private:
     /*
     **	This the thread processing timer. When this value counts down to zero, then

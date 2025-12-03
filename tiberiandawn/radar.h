@@ -35,6 +35,8 @@
 #ifndef RADAR_H
 #define RADAR_H
 
+#include "common/json.h"
+
 #include "display.h"
 
 class RadarClass : public DisplayClass
@@ -126,6 +128,7 @@ public:
         return IsZoomed;
     }
 
+    JSON_FUNCTIONS(RadarClass)
 protected:
     /*
     **	Radar map constant values.

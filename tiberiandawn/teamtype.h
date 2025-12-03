@@ -33,6 +33,12 @@
 #ifndef TEAMTYPE_H
 #define TEAMTYPE_H
 
+#include "common/json.h"
+
+#include "abstract.h"
+#include "ftimer.h"
+#include "type.h"
+
 /*
 ********************************** Defines **********************************
 */
@@ -58,7 +64,8 @@ typedef enum TeamMissionType : signed char
     TMISSION_ATTACKTARCOM,    // attack tarcom
     TMISSION_UNLOAD,          // Unload at current location.
     TMISSION_COUNT,
-    TMISSION_FIRST = 0
+    TMISSION_FIRST = 0,
+    TMISSION_LAST = TMISSION_UNLOAD
 } TeamMissionType;
 
 /*
@@ -75,6 +82,8 @@ typedef struct TeamMissionTag
     TeamMissionType Mission;
     int Argument;
 } TeamMissionStruct;
+
+GLOBAL_JSON_FUNCTIONS(TeamMissionTag)
 
 /*
 **	TeamTypeClass declaration
@@ -264,6 +273,7 @@ public:
     *save/load
     */
 
+    JSON_FUNCTIONS(TeamTypeClass)
 private:
     static char const* TMissions[TMISSION_COUNT];
 };

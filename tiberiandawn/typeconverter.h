@@ -5,258 +5,193 @@
 #include <string>
 #include <type_traits>
 
+#define MAGIC_ENUM_RANGE_MAX 256 // ensure all values for 'unsigned char' enums are detected
+#include <magic_enum.hpp>
+
+#include "common/json.h"
 #include "common/twowaymap.h"
+#include "common/rulesections.h"
 #include "common/stringutils.h"
 
-#include "defines.h"
-#include "rulesections.h"
+#include "enumtypeinfo.h"
+#include "target.h"
+#include "technotypejsonreference.h"
+#include "type.h"
+#include "typevariants.h"
+#include "typeconvertermacros.h"
 
-using ConverterTypeVariant = std::variant<
-    ArmorType,
-    MPHType,
-    WeaponType,
-    HousesType,
-    StructType,
-    FactoryType,
-    DirType,
-    BSizeType,
-    AircraftType,
-    MissionType,
-    AnimType,
-    InfantryType,
-    UnitType,
-    SpeedType,
-    BulletType,
-    WarheadType,
-    VocType,
-    PlayerColorType,
-    HouseColorType
->;
-
-template<typename T>
-concept SupportedByTdTypeConverter = (
-    std::is_same_v<T, ArmorType> ||
-    std::is_same_v<T, MPHType> ||
-    std::is_same_v<T, WeaponType> ||
-    std::is_same_v<T, HousesType> ||
-    std::is_same_v<T, StructType> ||
-    std::is_same_v<T, FactoryType> ||
-    std::is_same_v<T, DirType> ||
-    std::is_same_v<T, BSizeType> ||
-    std::is_same_v<T, AircraftType> ||
-    std::is_same_v<T, MissionType> ||
-    std::is_same_v<T, AnimType> ||
-    std::is_same_v<T, InfantryType> ||
-    std::is_same_v<T, UnitType> ||
-    std::is_same_v<T, SpeedType> ||
-    std::is_same_v<T, BulletType> ||
-    std::is_same_v<T, WarheadType> ||
-    std::is_same_v<T, VocType> ||
-    std::is_same_v<T, PlayerColorType> ||
-    std::is_same_v<T, HouseColorType>
-);
-
+/**
+ * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.
+ *
+ * Uses magic_enum library for enum type reflection and TwoWayMap to convert between strings
+ * and enum values, matching INI names for strings. EnumTypeInfo is used to construct the TwoWayMap
+ * by excluding values and patching string representations that don't match INI strings.
+ *
+ * This provides reflection and conversion for all supported enum types: to/from string, get instances,
+ * convert lists of values, get type names.
+ *
+ * Supports both compile-time access via templates and runtime access using ConverterTypeVariant.
+ *
+ * Has specific methods for working Getting/Setting INI values for class enum fields, and for converting class
+ * enum fields and object references to/from JSON.
+ *
+ * Stores registry of rules that have been loaded into RuleSection instances which require conversion to/from
+ * string representations (values based on TD enum values, not plain numbers/strings/booleans).
+ *
+ * To add a new type to the converter:
+ *
+ *   - Add type to SupportedByTdTypeConverter, ConverterTypeVariant and EnumTypeInfoVariant (see typevariants.h)
+ *   - Add entry to TdTypeConverter::EnumTypes with relevant values (see enumtypeinfo.h)
+ *   - Update Variant method bodies in typeconverter.cpp to handle new types
+ */
 class TdTypeConverter final
 {
 public:
-    static const TwoWayMap<ArmorType, std::string> Armor_Types;
-    static const TwoWayMap<MPHType, std::string> Mph_Types;
-    static const TwoWayMap<WeaponType, std::string> Weapon_Types;
-    static const TwoWayMap<HousesType, std::string> House_Types;
-    static const TwoWayMap<StructType, std::string> Struct_Types;
-    static const TwoWayMap<FactoryType, std::string> Factory_Types;
-    static const TwoWayMap<DirType, std::string> Dir_Types;
-    static const TwoWayMap<BSizeType, std::string> BSize_Types;
-    static const TwoWayMap<AircraftType, std::string> Aircraft_Types;
-    static const TwoWayMap<MissionType, std::string> Mission_Types;
-    static const TwoWayMap<AnimType, std::string> Anim_Types;
-    static const TwoWayMap<InfantryType, std::string> Infantry_Types;
-    static const TwoWayMap<UnitType, std::string> Unit_Types;
-    static const TwoWayMap<SpeedType, std::string> Speed_Types;
-    static const TwoWayMap<BulletType, std::string> Bullet_Types;
-    static const TwoWayMap<WarheadType, std::string> Warhead_Types;
-    // VOC_BUILD_SELECT is omitted as it appears unused an is a pointer to another VOC (non-unique)
-    static const TwoWayMap<VocType, std::string> Voc_Types;
-    static const TwoWayMap<PlayerColorType, std::string> Player_Color_Types;
-    static const TwoWayMap<HouseColorType, std::string> House_Color_Types;
+    static constexpr std::string_view EnumPostfix = "Type";
+    static const std::map<std::string, std::string_view> TypeNamePatchTable;
+    static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static const EnumTypeInfo<T>& Get_Info_For_Type()
+    {
+        const auto type_name = Get_Type_Name<T>();
+
+        if (!EnumTypes.contains(type_name)) {
+            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
+                                        "this is normally caused by variant being updated without updating "
+                                        "supporting code");
+        }
+
+        const auto& type_info_variant = EnumTypes.at(type_name);
+        const auto type_info_ptr = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
+
+        if (type_info_ptr == nullptr) {
+            throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
+                                        "this is normally caused by variant being updated without updating "
+                                        "supporting code");
+        }
+
+        return *type_info_ptr;
+    }
+
+    /**
+     * Get a static TwoWayMap instance that allows translating between type T instances
+     * and strings. This map is initialised once at first call to this method for type T,
+     * in an atomic fashion.
+     *
+     * Limits, exclusions and STRING patches to match INI values are applied here - see enumtypeinfo.h
+     */
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static const TwoWayMap<T, std::string>& Get_Type_Map()
+    {
+        static std::shared_ptr<TwoWayMap<T, std::string>> type_map;
+        static std::once_flag once_flag;
+
+        // create type map once, the first time T is requested
+        std::call_once(once_flag, [&] {
+            const auto& enum_info = Get_Info_For_Type<T>();
+            const auto enum_pairs = magic_enum::enum_entries<T>();
+
+            std::vector<std::pair<T, std::string>> instance_pairs;
+
+            // take the magic_enum pairs and add those that are included (patching name string as needed)
+            for (const auto& [instance, instance_string] : enum_pairs) {
+                if (enum_info.Is_Excluded(instance)) {
+                    continue;
+                }
+
+                auto patch_string = enum_info.Get_Patch_String(instance);
+                auto ini_string = patch_string.has_value()
+                    ? *patch_string
+                    : enum_info.Strip_Prefix(instance_string);
+
+                std::pair<T, std::string> pair = { instance, ini_string };
+
+                instance_pairs.emplace_back(pair);
+            }
+
+            if (!enum_info.AllowNonEnumValuesInRange) {
+                type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
+                return;
+            }
+
+            const auto min = static_cast<int>(enum_info.MinimumToInclude);
+            const auto max = static_cast<int>(enum_info.MaximumToInclude);
+
+            // we need to fill in the gaps between types as declared enum instances
+            // (since AllowNonEnumValuesInRange is true)
+            for (auto i = min; i <= max; ++i) {
+                const auto instance = static_cast<T>(i);
+
+                if (enum_info.Is_Excluded(instance)) {
+                    continue;
+                }
+
+                // if there is no enum entry declared for the current value, magic_enum::enum_name returns blank
+                if (!CncStringUtils::Is_Blank(magic_enum::enum_name<T>(instance))) {
+                    continue;
+                }
+
+                const auto ini_string = std::format("{}", i);
+
+                std::pair<T, std::string> pair = { instance, ini_string };
+
+                instance_pairs.emplace_back(pair);
+            }
+
+            type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
+        });
+
+        return *type_map;
+    }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static std::vector<std::string> Get_Valid_Strings()
     {
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return Armor_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return Mph_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return Weapon_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return House_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return Struct_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return Factory_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return Dir_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return BSize_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return Aircraft_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return Mission_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return Anim_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return Infantry_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return Unit_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return Speed_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return Bullet_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return Warhead_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return Voc_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return Player_Color_Types.Get_Backward_Keys();
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return House_Color_Types.Get_Backward_Keys();
-        }
-
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        return Get_Type_Map<T>().Get_Backward_Keys();
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static std::vector<T> Get_Valid_Instances()
     {
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return Armor_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return Mph_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return Weapon_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return House_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return Struct_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return Factory_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return Dir_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return BSize_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return Aircraft_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return Mission_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return Anim_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return Infantry_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return Unit_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return Speed_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return Bullet_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return Warhead_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return Voc_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return Player_Color_Types.Get_Forward_Keys();
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return House_Color_Types.Get_Forward_Keys();
-        }
-
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        return Get_Type_Map<T>().Get_Forward_Keys();
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static std::string To_String(T instance)
+    static std::string To_String(const T& instance)
     {
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return Armor_Types[instance].value_or(
-                Armor_Types[ARMOR_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return Mph_Types[instance].value_or(
-                Mph_Types[MPH_IMMOBILE].value()
-            );
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return Weapon_Types[instance].value_or(
-                Weapon_Types[WEAPON_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return House_Types[instance].value_or(
-                House_Types[HOUSE_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return Struct_Types[instance].value_or(
-                Struct_Types[STRUCT_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return Factory_Types[instance].value_or(
-                Factory_Types[FACTORY_TYPE_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return Dir_Types[instance].value_or(
-                Dir_Types[DIR_N].value()
-            );
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return BSize_Types[instance].value_or(
-                BSize_Types[BSIZE_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return Aircraft_Types[instance].value_or(
-                Aircraft_Types[AIRCRAFT_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return Mission_Types[instance].value_or(
-                Mission_Types[MISSION_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return Anim_Types[instance].value_or(
-                Anim_Types[ANIM_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return Infantry_Types[instance].value_or(
-                Infantry_Types[INFANTRY_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return Unit_Types[instance].value_or(
-                Unit_Types[UNIT_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return Speed_Types[instance].value_or(
-                Speed_Types[SPEED_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return Bullet_Types[instance].value_or(
-                Bullet_Types[BULLET_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return Warhead_Types[instance].value_or(
-                Warhead_Types[WARHEAD_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return Voc_Types[instance].value_or(
-                Voc_Types[VOC_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return Player_Color_Types[instance].value_or(
-                Player_Color_Types[REMAP_NONE].value()
-            );
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return House_Color_Types[instance].value_or(
-                House_Color_Types[HOUSE_COLOR_GOOD].value()
+        const auto& type_map = Get_Type_Map<T>();
+        const auto instance_string = type_map[instance];
+
+        if (!instance_string.has_value()) {
+            CNC_LOGGER_DEBUG(
+                "Attempt was made to convert an invalid {} value to string: {}",
+                Get_Type_Name<T>(),
+                static_cast<int>(instance)
             );
         }
 
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        // use first value as default (either X_NONE or first valid value)
+        const auto result = instance_string.has_value()
+            ? *instance_string
+            : To_String(type_map.First_Forward());
+
+        if (!instance_string.has_value()) {
+            CNC_LOGGER_WARN(
+                "Attempt was made to convert excluded value (string='{}' | int={}) of type '{}' to string, returning default value: {}",
+                magic_enum::enum_name(instance),
+                static_cast<int>(instance),
+                Get_Type_Name<T>(),
+                result
+            );
+        }
+
+        return result;
     }
 
     template<class T>
@@ -266,6 +201,18 @@ public:
         std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
 
         return CncStringUtils::To_Csv(instances, to_string);
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static std::string To_Csv_String(const T* instances, const unsigned int& size)
+    {
+        std::vector<T> items;
+        items.assign(instances, instances + size);
+
+        std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
+
+        return CncStringUtils::To_Csv(items, to_string);
     }
 
     template<class T>
@@ -280,99 +227,36 @@ public:
         // forgive bad casing for type instance
         CncStringUtils::To_Upper(str);
 
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return Armor_Types[str];
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return Mph_Types[str];
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return Weapon_Types[str];
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return House_Types[str];
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return Struct_Types[str];
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return Factory_Types[str];
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return Dir_Types[str];
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return BSize_Types[str];
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return Aircraft_Types[str];
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return Mission_Types[str];
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return Anim_Types[str];
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return Infantry_Types[str];
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return Unit_Types[str];
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return Speed_Types[str];
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return Bullet_Types[str];
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return Warhead_Types[str];
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return Voc_Types[str];
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return Player_Color_Types[str];
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return House_Color_Types[str];
+        auto result = Get_Type_Map<T>()[str];
+
+        return result;
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static T Assert_Parse(const std::string& str, const std::string& assert_message)
+    {
+        const auto result = TdTypeConverter::Try_Parse<T>(str);
+
+        if (!result.has_value()) {
+            CNC_LOGGER_FATAL(
+                std::vformat(assert_message, std::make_format_args(str))
+            );
         }
 
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        return *result;
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static T Get_Default_Value()
     {
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return Armor_Types.First_Forward();
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return Mph_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return Weapon_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return House_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return Struct_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return Factory_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return Dir_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return BSize_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return Aircraft_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return Mission_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return Anim_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return Infantry_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return Unit_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return Speed_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return Bullet_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return Warhead_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return Voc_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return Player_Color_Types.First_Forward();;
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return House_Color_Types.First_Forward();;
-        }
-
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        return Get_Type_Map<T>().First_Forward();
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static std::optional<std::vector<T>> Try_Parse_Csv(const std::string& csv_str, const char delimiter = ',')
+    static std::optional<std::vector<T>> Try_Parse_Csv(const std::string& csv_str, const char& delimiter = ',')
     {
         std::vector<T> instances;
         size_t start = 0;
@@ -411,7 +295,7 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Rule_Type(std::string_view type_name, std::string_view rule)
+    static void Register_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
         if (!RegisteredRuleTypes.contains(type_name)) {
             RegisteredRuleTypes[type_name] = {};
@@ -425,7 +309,7 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Csv_Rule_Type(std::string_view type_name, std::string_view rule)
+    static void Register_Csv_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
         if (!RegisteredCsvRuleTypes.contains(type_name)) {
             RegisteredCsvRuleTypes[type_name] = {};
@@ -437,34 +321,44 @@ public:
     /**
      * Does the given type name rule require a converter to read/write from?
      */
-    static bool Rule_Requires_Converter(std::string_view type_name, std::string_view rule);
+    static bool Rule_Requires_Converter(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Does the given type name rule require a CSV converter to read/write from?
      */
-    static bool Rule_Requires_Csv_Converter(std::string_view type_name, std::string_view rule);
+    static bool Rule_Requires_Csv_Converter(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Get the corresponding variant for a given type rule, it must have been registered by calling
      * Rule_Requires_Converter first.
      */
-    static ConverterTypeVariant Get_Rule_Variant(std::string_view type_name, std::string_view rule);
+    static ConverterTypeVariant Get_Rule_Variant(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Get the corresponding variant for a given type csv rule, it must have been registered by calling
      * Rule_Requires_Csv_Converter first.
      */
-    static ConverterTypeVariant Get_Csv_Rule_Variant(std::string_view type_name, std::string_view rule);
+    static ConverterTypeVariant Get_Csv_Rule_Variant(const std::string_view& type_name, const std::string_view& rule);
 
     /**
      * Using a given type rule variant, call RuleSection::Set_With_Converter with appropriate type arguments.
      */
-    static void Set_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string value, const ConverterTypeVariant variant);
+    static void Set_Rule_With_Variant(
+        RuleSection& section,
+        const std::string_view& rule,
+        const std::string& value,
+        const ConverterTypeVariant& variant
+    );
 
     /**
      * Using a given type rule variant, call RuleSection::Set_With_Csv_Converter with appropriate type arguments.
      */
-    static void Set_Csv_Rule_With_Variant(RuleSection& section, std::string_view rule, std::string csv_value, const ConverterTypeVariant variant);
+    static void Set_Csv_Rule_With_Variant(
+        RuleSection& section,
+        const std::string_view& rule,
+        const std::string& csv_value,
+        const ConverterTypeVariant& variant
+    );
 
     /**
      * Return a human-readable name for a given converter type.
@@ -473,53 +367,168 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string_view Get_Type_Name()
     {
-        if constexpr (std::is_same_v<T, ArmorType>) {
-            return "Armor";
-        } else if constexpr (std::is_same_v<T, MPHType>) {
-            return "MphSpeed";
-        } else if constexpr (std::is_same_v<T, WeaponType>) {
-            return "Weapon";
-        } else if constexpr (std::is_same_v<T, HousesType>) {
-            return "House";
-        } else if constexpr (std::is_same_v<T, StructType>) {
-            return "Building";
-        } else if constexpr (std::is_same_v<T, FactoryType>) {
-            return "Factory";
-        } else if constexpr (std::is_same_v<T, DirType>) {
-            return "Direction";
-        } else if constexpr (std::is_same_v<T, BSizeType>) {
-            return "BuildingSize";
-        } else if constexpr (std::is_same_v<T, AircraftType>) {
-            return "Aircraft";
-        } else if constexpr (std::is_same_v<T, MissionType>) {
-            return "Mission";
-        } else if constexpr (std::is_same_v<T, AnimType>) {
-            return "Animation";
-        } else if constexpr (std::is_same_v<T, InfantryType>) {
-            return "Infantry";
-        } else if constexpr (std::is_same_v<T, UnitType>) {
-            return "Unit";
-        } else if constexpr (std::is_same_v<T, SpeedType>) {
-            return "Speed";
-        } else if constexpr (std::is_same_v<T, BulletType>) {
-            return "Bullet";
-        } else if constexpr (std::is_same_v<T, WarheadType>) {
-            return "Warhead";
-        } else if constexpr (std::is_same_v<T, VocType>) {
-            return "SoundEffect";
-        } else if constexpr (std::is_same_v<T, PlayerColorType>) {
-            return "PlayerColor";
-        } else if constexpr (std::is_same_v<T, HouseColorType>) {
-            return "HouseColor";
-        }
+        static std::string type_name;
+        static std::once_flag once_flag;
 
-        throw std::invalid_argument("Unsupported SupportedByTdTypeConverter type - this is normally caused by concept being updated without updating supporting code");
+        // resolve type name once, the first time T is requested
+        std::call_once(once_flag, [&] {
+            // get enum type name and remove EnumPostfix
+            const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
+
+            if (TypeNamePatchTable.contains(raw_type_name)) {
+                type_name = TypeNamePatchTable.at(raw_type_name);
+                return;
+            }
+
+            type_name = raw_type_name.substr(
+                0,
+                raw_type_name.length() - EnumPostfix.length()
+            );
+        });
+
+        return type_name;
     }
 
     /**
      * Return a human-readable name for a given type rule variant type.
      */
-    static std::string_view Get_Type_Name_Variant(ConverterTypeVariant variant);
+    static std::string_view Get_Type_Name_Variant(const ConverterTypeVariant& variant);
+
+    static std::string To_String_Variant(const ConverterTypeVariant& variant);
+
+    static std::optional<std::string> RTTI_Instance_To_String(const RTTIType& type, const int& instance_id);
+
+    static std::optional<int> Try_Parse_RTTI_Instance(const RTTIType& type, const std::string& instance);
+
+    template<SupportedByTdTypeConverter T>
+    static T Load_Field_From_Json(
+        const nlohmann::json& source,
+        const std::string_view& target,
+        const std::string_view& field_name
+    )
+    {
+        const auto json_path = std::format("{}.{}", target, field_name);
+
+        auto const& json_value = source.at(field_name);
+
+        CncJsonUtils::Assert_Json_Is<JsonString>(json_value, json_path);
+
+        const auto json_string = json_value.get<std::string>();
+        const auto parse_result = Try_Parse<T>(json_string);
+
+        if (!parse_result.has_value()) {
+            CncJsonUtils::Throw_Json_Assert_Failure(
+                json_path,
+                CncJsonUtils::Build_Parse_Error(
+                    std::format("{} instance", Get_Type_Name<T>()),
+                    json_string
+                )
+            );
+        }
+
+        return *parse_result;
+    }
+
+    template<SupportedByTdTypeConverter T>
+    static void Load_Csv_Field_From_Json(
+        const nlohmann::json& source,
+        const std::string_view& target_name,
+        const std::string_view& field_name,
+        const unsigned int& expected_length,
+        T* target
+    )
+    {
+        const auto json_path = std::format("{}.{}", target_name, field_name);
+
+        auto const& json_value = source.at(field_name);
+
+        CncJsonUtils::Assert_Json_Is<JsonString>(json_path, json_path);
+
+        const auto json_string = json_value.get<std::string>();
+        const auto parse_result = Try_Parse_Csv<T>(json_string);
+
+        if (!parse_result.has_value()) {
+            CncJsonUtils::Throw_Json_Assert_Failure(
+                json_path,
+                CncJsonUtils::Build_Parse_Error(
+                    std::format("csv string of {} instances", Get_Type_Name<T>()),
+                    json_string
+                )
+            );
+        }
+
+        if (parse_result->size() != expected_length) {
+            CncJsonUtils::Throw_Json_Assert_Failure(
+                json_path,
+                " expected csv of {} {} instances, actual length: {}",
+                expected_length,
+                Get_Type_Name<T>(),
+                parse_result->size()
+            );
+        }
+
+        std::ranges::copy(*parse_result, target);
+    }
+
+    static nlohmann::json Object_Target_Array_To_Json(
+        const ObjectClass* const* source,
+        const unsigned int& length
+    );
+
+    static nlohmann::json Techno_Type_To_Reference_Json(const ObjectTypeClass* source);
+
+    template<class T>
+    requires std::is_base_of_v<ObjectClass, T>
+    static void Object_Target_Array_From_Json(
+        const nlohmann::json& source,
+        const std::string_view& target_name,
+        const std::string_view& field_name,
+        T** target,
+        const unsigned int& length
+    )
+    {
+        const auto json_path = std::format("{}.{}", target_name, field_name);
+
+        CncJsonUtils::Assert_Json_Is_Array_Of_Exact_Size<JsonUnsignedInt>(source, json_path, length);
+
+        for (auto i = 0; i < length; i++) {
+            auto& element = *(target + i);
+            element = OBJECT_TARGET_TO_PTR(source.at(i).get<TARGET>());
+        }
+    }
+
+    static TechnoTypeClassJsonReference Techno_Type_Reference_From_Json(
+        const nlohmann::json& source,
+        const std::string& json_path
+    );
+
+    template<class T, class U>
+    requires std::is_base_of_v<ObjectTypeClass, T> && SupportedByTdTypeConverter<U>
+    static void Techno_Type_Target_From_Json(
+        const nlohmann::json& source,
+        const std::string_view& target_name,
+        const std::string_view& field_name,
+        T*& target
+    )
+    {
+        const auto json_path = std::format("{}.{}", target_name, field_name);
+
+        const auto [ _, instance_str ] = Techno_Type_Reference_From_Json(source, json_path);
+
+        auto parsed_instance = Try_Parse<U>(instance_str);
+
+        if (!parsed_instance.has_value()) {
+            CncJsonUtils::Throw_Json_Assert_Failure(
+                std::format("{}.{}", json_path, NAMEOF(Instance)),
+                CncJsonUtils::Build_Parse_Error(
+                    std::format("techno type target instance of type {}", Get_Type_Name<U>()),
+                    instance_str
+                )
+            );
+        }
+
+        target = reinterpret_cast<T*>(*parsed_instance);
+    }
 
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
@@ -528,19 +537,3 @@ private:
 
     TdTypeConverter() = delete;
 };
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
-#define Read_With_TdConverter(TYPE, VAR) \
-    Get_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](auto v) { VAR = v; })
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
-#define Read_Csv_With_TdConverter(TYPE, VAR) \
-    Get_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, [&](auto v) { VAR = std::move(v); })
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type
-#define Load_With_TdConverter(TYPE, VAR) \
-    Load_With_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = v; })
-
-// IniRuleContext macro 'method' for loading types that are converted from string representation to a list of non-trivial type instances
-#define Load_Csv_With_TdConverter(TYPE, VAR) \
-    Load_With_Csv_Converter_Callback<TYPE, TdTypeConverter>(#VAR, VAR, [&](auto v) { VAR = std::move(v); })

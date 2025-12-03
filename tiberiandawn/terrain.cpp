@@ -60,6 +60,7 @@
 #include "terrain.h"
 #include "common/irandom.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 #define BARNACLE_STAGE       22
 #define FIRST_SPORE_STAGE    30
@@ -857,3 +858,30 @@ void TerrainClass::Write_INI(CCINIClass& ini)
         }
     }
 }
+
+TO_JSON(TerrainClass)
+{
+    BASE_CLASS_TO_JSON(ObjectClass);
+    BASE_CLASS_TO_JSON(StageClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+    BITFIELD_TO_JSON(IsOnFire);
+    BITFIELD_TO_JSON(IsCrumbling);
+    BITFIELD_TO_JSON(IsBlossoming);
+    BITFIELD_TO_JSON(IsBarnacled);
+    BITFIELD_TO_JSON(IsSporing);
+}
+
+FROM_JSON(TerrainClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+    BASE_CLASS_FROM_JSON(StageClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(TerrainClass, Class, TerrainTypeClass, TerrainType);
+    BITFIELD_FROM_JSON(IsOnFire);
+    BITFIELD_FROM_JSON(IsCrumbling);
+    BITFIELD_FROM_JSON(IsBlossoming);
+    BITFIELD_FROM_JSON(IsBarnacled);
+    BITFIELD_FROM_JSON(IsSporing);
+}
+

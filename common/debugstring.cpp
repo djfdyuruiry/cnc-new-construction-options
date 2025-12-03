@@ -2,8 +2,8 @@
 #include <assert.h>
 #include <format>
 #include <memory>
+#include <ranges>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -18,12 +18,12 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
 {
     assert(level <= 6);
 
-    static std::vector<spdlog::string_view_t> levels SPDLOG_LEVEL_NAMES;
+    static std::vector levels SPDLOG_LEVEL_NAMES;
     static std::once_flag levels_init;
 
     std::call_once(levels_init, []() {
         // reverse to match level param logic ( level indicates (0)off->trace(6), but SPDLOG_LEVEL_NAMES is (0)trace->off(6))
-        std::reverse(levels.begin(), levels.end());
+        std::ranges::reverse(levels);
     });
 
     auto spd_level = spdlog::level::from_str(
@@ -38,7 +38,7 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
 
     // get message_size
     va_start(args, fmt);
-    auto message_size = vsnprintf(NULL, 0, fmt, args);
+    const auto message_size = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
 
     if (message_size < 0) {
@@ -52,10 +52,10 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
     }
 
     // format the message
-    std::unique_ptr<char[]> formatted_message(new char[message_size + 1]);
+    const std::unique_ptr<char[]> formatted_message(new char[message_size + 1]);
 
     va_start(args, fmt);
-    auto result = vsnprintf(formatted_message.get(), message_size + 1, fmt, args);
+    const auto result = vsnprintf(formatted_message.get(), message_size + 1, fmt, args);
     va_end(args);
 
     if (result < 0) {
@@ -69,7 +69,7 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
     }
 
     // log message using CncLogger
-    auto message = std::string(formatted_message.get());
+    const auto message = std::string(formatted_message.get());
 
     if (spd_level == spdlog::level::critical) {
         CNC_LOG_FATAL(message);

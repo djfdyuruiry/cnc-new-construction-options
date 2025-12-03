@@ -18,6 +18,8 @@ public:
         std::string scenario_house
     ) ;
 
+    void Register_Dependencies(LuaEngine& engine) const override;
+
     void Register_Consts(LuaEngine& engine) const override;
 
     void Register_Functions(LuaEngine& engine) const override;
@@ -29,7 +31,7 @@ protected:
     }
 
 private:
-    static HousesType Parse_House_Name(const LuaEngine& engine, const std::string& name);
+    static HousesType Parse_House_Name(const LuaEngine& engine, std::string name);
 
     std::string ScenarioName;
     std::string ScenarioType;

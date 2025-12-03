@@ -35,6 +35,8 @@
 #ifndef TRIGGER_H
 #define TRIGGER_H
 
+#include "common/json.h"
+
 class CCINIClass;
 
 typedef enum EventType : signed char
@@ -73,7 +75,8 @@ typedef enum EventType : signed char
     EVENT_BUILD,                // If specified building has been built.
 
     EVENT_COUNT,
-    EVENT_FIRST = 0
+    EVENT_FIRST = 0,
+    EVENT_LAST = EVENT_BUILD
 } EventType;
 
 class TriggerClass
@@ -107,7 +110,8 @@ public:
         ACTION_LUA_SCRIPT,     // Runs a lua script file.
 
         ACTION_COUNT,
-        ACTION_FIRST = 0
+        ACTION_FIRST = 0,
+        ACTION_LAST = ACTION_LUA_SCRIPT
     } ActionType;
 
     typedef enum PersistantType
@@ -215,6 +219,12 @@ public:
     int Validate(void) const;
 
     /*
+    **  When a trigger is deleted for any reason it is removed from the trigger
+    **  heap, so we want to track that here. Reset on Init method call.
+    */
+    static inline std::vector<std::string> RemovedTriggers;
+
+    /*
     **	This is the pointer to the team that gets created or destroyed when
     **	a team-related trigger goes off, or for reinforcements. The house
     **	for reinforcements is determined by the house for that team.
@@ -273,6 +283,8 @@ public:
 
     std::optional<std::string> StringData;
 
+    JSON_FUNCTIONS(TriggerClass)
+    JSON_PTR_FUNCTIONS(TriggerClass)
 private:
     static inline const auto& Logger = CncLogger::For(TriggerClass);
 

@@ -35,6 +35,8 @@
 #ifndef FLASHER_H
 #define FLASHER_H
 
+#include "common/json.h"
+
 class FlasherClass
 {
 public:
@@ -79,6 +81,8 @@ public:
     // 2019/09/20 JAS - Flashing info needs to exist per player
     unsigned int Get_Flashing_Flags() const;
     unsigned int FlashCountPerPlayer[HOUSE_COUNT];
+
+    JSON_FUNCTIONS(FlasherClass)
 };
 
 #endif

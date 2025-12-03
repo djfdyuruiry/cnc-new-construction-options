@@ -53,6 +53,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 DriveClass::DriveClass(void)
     : Class(0)
@@ -2020,3 +2021,37 @@ DriveClass::TurnTrackType const DriveClass::TrackControl[67] = {
     {12, 12, DIR_SW_X2, F_}, // Drive back into refinery.
     {13, 13, DIR_SW, F_}     // Drive out of weapons factory.
 };
+
+TO_JSON(DriveClass)
+{
+    BASE_CLASS_TO_JSON(FootClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+    FIELD_TO_JSON(SimLeptonX);
+    FIELD_TO_JSON(SimLeptonY);
+    FIELD_TO_JSON(Tiberium);
+    BITFIELD_TO_JSON(IsHarvesting);
+    BITFIELD_TO_JSON(IsReturning);
+    BITFIELD_TO_JSON(IsTurretLockedDown);
+    BITFIELD_TO_JSON(IsOnShortTrack);
+    FIELD_TO_JSON(SpeedAccum);
+    FIELD_TO_JSON(TrackNumber);
+    FIELD_TO_JSON(TrackIndex);
+}
+
+FROM_JSON(DriveClass)
+{
+    BASE_CLASS_FROM_JSON(FootClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(DriveClass, Class, UnitTypeClass, UnitType);
+    FIELD_FROM_JSON(SimLeptonX);
+    FIELD_FROM_JSON(SimLeptonY);
+    FIELD_FROM_JSON(Tiberium);
+    BITFIELD_FROM_JSON(IsHarvesting);
+    BITFIELD_FROM_JSON(IsReturning);
+    BITFIELD_FROM_JSON(IsTurretLockedDown);
+    BITFIELD_FROM_JSON(IsOnShortTrack);
+    FIELD_FROM_JSON(SpeedAccum);
+    FIELD_FROM_JSON(TrackNumber);
+    FIELD_FROM_JSON(TrackIndex);
+}

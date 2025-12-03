@@ -35,6 +35,8 @@
 #ifndef SMUDGE_H
 #define SMUDGE_H
 
+#include "common/json.h"
+
 #include "object.h"
 #include "type.h"
 
@@ -108,6 +110,8 @@ public:
     **	Dee-buggin' support.
     */
     int Validate(void) const;
+
+    JSON_FUNCTIONS(SmudgeClass)
 
 private:
     static HousesType ToOwn;

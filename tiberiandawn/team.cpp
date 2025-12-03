@@ -53,6 +53,7 @@
 
 #include "function.h"
 #include "mission.h"
+#include "typeconverter.h"
 
 /*
 **	This array records the number of teams in existance of each type.
@@ -1484,4 +1485,70 @@ void TeamClass::Suspend_Teams(int priority)
             team->Suspended = true;
         }
     }
+}
+
+TO_JSON(TeamClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    BASE_CLASS_TO_JSON(AbstractClass);
+
+    OBJECT_TARGET_PTR_TO_JSON(Class);
+    BITFIELD_TO_JSON(IsForcedActive);
+    BITFIELD_TO_JSON(IsHasBeen);
+    BITFIELD_TO_JSON(IsFullStrength);
+    BITFIELD_TO_JSON(IsUnderStrength);
+    BITFIELD_TO_JSON(IsReforming);
+    BITFIELD_TO_JSON(IsLagging);
+    BITFIELD_TO_JSON(IsAltered);
+    BITFIELD_TO_JSON(IsMoving);
+    BITFIELD_TO_JSON(IsNextMission);
+    BITFIELD_TO_JSON(Suspended);
+    FIELD_TO_JSON(Center);
+    FIELD_TO_JSON(ObjectiveCenter);
+    FIELD_TO_JSON(MissionTarget);
+    FIELD_TO_JSON(Target);
+    FIELD_TO_JSON(Total);
+    FIELD_TO_JSON(Risk);
+    FIELD_TO_JSON(SuspendTimer);
+    FIELD_TO_JSON(CurrentMission);
+    FIELD_TO_JSON(TimeOut);
+    OBJECT_TARGET_PTR_TO_JSON(Member);
+    FIELD_TO_JSON(Quantity);
+
+    // House field
+    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
+
+}
+
+FROM_JSON(TeamClass)
+{
+    BASE_CLASS_FROM_JSON(AbstractClass);
+    TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(Class, TeamTypeClass);
+    BITFIELD_FROM_JSON(IsForcedActive);
+    BITFIELD_FROM_JSON(IsHasBeen);
+    BITFIELD_FROM_JSON(IsFullStrength);
+    BITFIELD_FROM_JSON(IsUnderStrength);
+    BITFIELD_FROM_JSON(IsReforming);
+    BITFIELD_FROM_JSON(IsLagging);
+    BITFIELD_FROM_JSON(IsAltered);
+    BITFIELD_FROM_JSON(IsMoving);
+    BITFIELD_FROM_JSON(IsNextMission);
+    BITFIELD_FROM_JSON(Suspended);
+    FIELD_FROM_JSON(Center);
+    FIELD_FROM_JSON(ObjectiveCenter);
+    FIELD_FROM_JSON(MissionTarget);
+    FIELD_FROM_JSON(Target);
+    FIELD_FROM_JSON(Total);
+    FIELD_FROM_JSON(Risk);
+    FIELD_FROM_JSON(SuspendTimer);
+    FIELD_FROM_JSON(CurrentMission);
+    FIELD_FROM_JSON(TimeOut);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Member, FootClass);
+    FIELD_FROM_JSON(Quantity);
+
+    // House field
+    const_cast<HouseClass*&>(p.House) = reinterpret_cast<HouseClass*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(TeamClass), NAMEOF(House))
+    );
 }

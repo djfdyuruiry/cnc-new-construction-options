@@ -99,8 +99,7 @@
                 "MAP_EDITORTD": "ON",
                 "MAP_EDITORRA": "ON",
                 "BUILD_TOOLS": "ON",
-                "BUILD_TESTS": "ON",
-                "CNC_DEBUG_LOGGING": "ON"
+                "BUILD_TESTS": "ON"
             }
         },
         {

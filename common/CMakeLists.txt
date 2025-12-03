@@ -98,6 +98,7 @@ set(COMMON_SRC
     xpipe.cpp
     xstraw.cpp
     # nco
+    json.cpp
     lua/event_luaapi.cpp
     lua/logging_luaapi.cpp
     lua/luaapi.cpp
@@ -185,7 +186,7 @@ target_link_libraries(common PUBLIC ${COMMON_LIBS})
 
 target_include_directories(common PUBLIC .)
 
-target_compile_definitions(common PRIVATE FIXIT_FAST_LOAD $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING>)
+target_compile_definitions(common PRIVATE FIXIT_FAST_LOAD $<$<CONFIG:Debug>:_DEBUG>)
 target_compile_options(common PUBLIC ${VC_CXX_FLAGS})
 target_compile_features(common PUBLIC cxx_std_11)
 
@@ -202,14 +203,14 @@ endif()
 
 if(BUILD_REMASTERTD OR BUILD_REMASTERRA)
     add_library(commonr STATIC ${COMMONR_SRC})
-    target_compile_definitions(commonr PUBLIC $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING> ${REMASTER_DEFS})
+    target_compile_definitions(commonr PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${REMASTER_DEFS})
     target_link_libraries(commonr PUBLIC common ${REMASTER_LIBS})
 endif()
 
 # These options currently require directx components from the aug 2007 SDK.
 if(BUILD_VANILLATD OR BUILD_VANILLARA OR BUILD_TESTS)
     add_library(commonv STATIC ${COMMONV_SRC})
-    target_compile_definitions(commonv PUBLIC $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING> ${VANILLA_DEFS})
+    target_compile_definitions(commonv PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${VANILLA_DEFS})
     target_link_libraries(commonv PUBLIC common ${VANILLA_LIBS})
     if(DSOUND)
         target_compile_definitions(commonv PUBLIC DSOUND_BUILD)

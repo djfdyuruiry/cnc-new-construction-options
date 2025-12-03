@@ -151,19 +151,21 @@ function(ScanForTypeFiles _TYPE_STATE_FILE _TYPES_FILES _TYPES_HASH _FILES_HAVE_
   file(SHA256 "${TYPES_TEMPLATE_PATH}" FILE_HASH)
   string(SHA256 TYPES_HASH "${TYPES_HASH}${FILE_HASH}")
 
+  WatchFileForChanges("${TYPES_TEMPLATE_PATH}")
+
   # If a previous hash was calculated, and does not match the
   # hash we just calculated, then flag that files have changed.
   set(FILES_HAVE_CHANGED true)
 
   if(EXISTS "${_TYPE_STATE_FILE}")
-    file(READ "${_TYPE_STATE_FILE}" OLD_RULES_HASH)
-    if(OLD_RULES_HASH STREQUAL "${TYPES_HASH}")
+    file(READ "${_TYPE_STATE_FILE}" OLD_TYPES_HASH)
+    if(OLD_TYPES_HASH STREQUAL "${TYPES_HASH}")
         set(FILES_HAVE_CHANGED false)
     endif()
   endif()
 
   set("${_TYPES_FILES}" ${TYPES_FILES} PARENT_SCOPE)
-  set("${_TYPES_HASH}" ${TYPES_FILES} PARENT_SCOPE)
+  set("${_TYPES_HASH}" ${TYPES_HASH} PARENT_SCOPE)
   set("${_FILES_HAVE_CHANGED}" ${FILES_HAVE_CHANGED} PARENT_SCOPE)
 endfunction()
 
@@ -181,7 +183,7 @@ function(Main)
     return()
   endif()
 
-  message(STATUS "[NcoTypeRules] Generating Rules code...")
+  message(STATUS "[NcoTypeRules] Generating Types code...")
 
   SET(RELATIVE_TYPE_FILES "")
 

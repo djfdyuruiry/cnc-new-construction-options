@@ -142,3 +142,31 @@ void AbstractClass::Delete_This(void)
 
     *this_ptr = vtable_ptr;
 }
+
+TO_JSON(AbstractClass)
+{
+    FIELD_TO_JSON(Coord);
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsRecentlyCreated);
+}
+
+FROM_JSON(AbstractClass)
+{
+    FIELD_FROM_JSON(Coord);
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsRecentlyCreated);
+}
+
+/**
+ * Serializing an AbstractClass pointer isn't possible due to the lack of type information required to locate
+ * the object in the heap, so just place the TARGET equivalent of 'NULL'.
+ */
+PTR_TO_JSON(AbstractClass)
+{
+    j = Build_Target(KIND_NONE, 0);
+}
+
+PTR_FROM_JSON(AbstractClass)
+{
+    p = TARGET_TO_PTR_WITH_TYPE(j.get<TARGET>(), AbstractClass);
+}

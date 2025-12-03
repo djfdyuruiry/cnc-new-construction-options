@@ -35,6 +35,10 @@
 #ifndef STAGE_H
 #define STAGE_H
 
+#include "common/json.h"
+
+#include "noinit.h"
+
 class StageClass
 {
 
@@ -116,6 +120,8 @@ public:
     {
         return;
     }
+
+    JSON_FUNCTIONS(StageClass)
 };
 
 #endif

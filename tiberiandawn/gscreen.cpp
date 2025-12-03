@@ -480,3 +480,15 @@ void GScreenClass::Blit_Display(void)
     }
 #endif //(0)
 }
+
+TO_JSON(GScreenClass)
+{
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsToUpdate);
+}
+
+FROM_JSON(GScreenClass)
+{
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsToUpdate);
+}

@@ -250,6 +250,7 @@ int FixedHeapClass::ID(void const* pointer)
     if (pointer && Size) {
         return ((int)(((char*)pointer - (char*)Buffer) / Size));
     }
+
     return (-1);
 }
 

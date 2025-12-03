@@ -330,6 +330,7 @@ TriggerClass::~TriggerClass(void)
 void TriggerClass::Init(void)
 {
     Triggers.Free_All();
+    RemovedTriggers.clear();
 }
 
 /***********************************************************************************************
@@ -1004,6 +1005,9 @@ bool TriggerClass::Remove(void)
         HouseTriggers[h].Delete(this);
     }
 
+    // Record that this trigger was removed
+    RemovedTriggers.emplace_back(Get_Name());
+
     delete this;
 
     return (true);
@@ -1479,4 +1483,47 @@ static void Do_All_To_Hunt(void)
             infantry->Assign_Mission(MISSION_HUNT);
         }
     }
+}
+
+TO_JSON(TriggerClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    OBJECT_TARGET_PTR_TO_JSON(Team);
+    BITFIELD_TO_JSON(IsActive);
+    CONVERT_TD_FIELD_TO_JSON(IsPersistant);
+    FIELD_TO_JSON(AttachCount);
+    CONVERT_TD_FIELD_TO_JSON(Event);
+    CONVERT_TD_FIELD_TO_JSON(Action);
+    CONVERT_TD_FIELD_TO_JSON(House);
+    FIELD_TO_JSON(Data);
+    FIELD_TO_JSON(DataCopy);
+    FIELD_TO_JSON(StringData);
+    CSTR_FIELD_TO_JSON(Name);
+}
+
+FROM_JSON(TriggerClass)
+{
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Team, TeamTypeClass);
+    BITFIELD_FROM_JSON(IsActive);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, IsPersistant, TriggerClass::PersistantType);
+    FIELD_FROM_JSON(AttachCount);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, Event, EventType);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, Action, TriggerClass::ActionType);
+    PARSE_TD_FIELD_FROM_JSON(TriggerClass, House, HousesType);
+    FIELD_FROM_JSON(Data);
+    FIELD_FROM_JSON(DataCopy);
+    FIELD_FROM_JSON(StringData);
+    CSTR_FIELD_FROM_JSON(TriggerClass, Name);
+}
+
+// See: PTR_TO_JSON(ObjectClass) in object.cpp
+PTR_TO_JSON(TriggerClass)
+{
+    j = OBJECT_PTR_TO_TARGET(p);
+}
+
+PTR_FROM_JSON(TriggerClass)
+{
+    p = TARGET_TO_PTR_WITH_TYPE(j.get<TARGET>(), TriggerClass);
 }

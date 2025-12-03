@@ -43,6 +43,7 @@
 #include "function.h"
 #include "overlay.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 /*
 ** This contains the value of the Virtual Function Table Pointer
@@ -407,4 +408,22 @@ void OverlayClass::Write_INI(CCINIClass& ini)
             ini.Put_String(INI_Name(), uname, buf);
         }
     }
+}
+
+TO_JSON(OverlayClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    BASE_CLASS_TO_JSON(ObjectClass);
+
+    FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? OVERLAY_NONE : p.Class->Type));
+}
+
+FROM_JSON(OverlayClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+
+    const_cast<OverlayTypeClass const*&>(p.Class) = reinterpret_cast<OverlayTypeClass const*>(
+        TdTypeConverter::Load_Field_From_Json<OverlayType>(j, NAMEOF(OverlayClass), NAMEOF(Class))
+    );
 }

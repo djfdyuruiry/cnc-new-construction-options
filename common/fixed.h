@@ -37,6 +37,7 @@
 
 #include <stdint.h>
 #include "endianness.h"
+#include "json.h"
 
 /*
 **	This is a very simple fixed point class that functions like a regular integral type. However
@@ -444,6 +445,17 @@ public:
     static const fixed _3_4;
     static const fixed _2_3;
 
+    friend TO_JSON(fixed)
+    {
+        j = std::string(p.As_ASCII());
+    }
+
+    friend FROM_JSON(fixed)
+    {
+        const auto fixed_ascii= j.get<std::string>();
+
+        p = fixed(fixed_ascii.c_str());
+    }
 private:
     union
     {

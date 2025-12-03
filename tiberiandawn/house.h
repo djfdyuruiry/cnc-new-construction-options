@@ -41,6 +41,7 @@
 #include "credits.h"
 #include "common/miscasm.h"
 #include "common/fixed.h"
+#include "common/json.h"
 
 class TriggerClass;
 class CCINIClass;
@@ -732,6 +733,7 @@ public:
     */
     TCountDownTimerClass ScreenShakeTime;
 
+    JSON_FUNCTIONS(HouseClass)
 private:
     void Silo_Redraw_Check(int oldtib, int oldcap);
 
@@ -795,12 +797,14 @@ public:
     */
     COORDINATE Center; // Center of the base.
     int Radius;        // Average building distance from center (leptons).
-    struct
+    typedef struct ZoneInfoStruct
     {
         int AirDefense;
         int ArmorDefense;
         int InfantryDefense;
-    } ZoneInfo[ZONE_COUNT];
+    } ZoneInfoStruct;
+
+    ZoneInfoStruct ZoneInfo[ZONE_COUNT];
 
     /*
     **	This records information about the last time a building of this
@@ -837,7 +841,11 @@ public:
     */
     // QuarryType PreferredTarget;
 
+    JSON_FUNCTIONS(HouseClass::ZoneInfoStruct)
+
 private:
+    static inline const auto& Logger = CncLogger::For(HouseClass);
+
     /*
     **	Tracks number of each building type owned by this house. Even if the
     **	building is in construction, it will be reflected in this total.

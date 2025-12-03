@@ -35,6 +35,8 @@
 #ifndef TECHNO_H
 #define TECHNO_H
 
+#include "common/json.h"
+
 #include "radio.h"
 #include "stage.h"
 #include "cargo.h"
@@ -384,6 +386,8 @@ public:
     */
     static int const BodyShape[32];
     //		static int const TurretShape[32];
+
+    JSON_FUNCTIONS(TechnoClass)
 };
 
 #endif

@@ -1,3 +1,6 @@
+local Utils = require("nco.lib.Utils")
+local Logger = require("nco.Logger")
+
 local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 --[[
@@ -27,12 +30,15 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 
 ---@class ScenarioTeamTypes
 ---@field getNames fun(): string[]
+---@field exists fun(name: string): boolean
 
 --[[
   Manage triggers for the current scenario.
 ]]
 ---@class ScenarioTriggers
 ---@field getNames fun(): string[]
+---@field getDeletedNames fun(): string[]
+---@field exists fun(name: string): boolean
 ---@field deleteIfExists fun(name: string): boolean
 
 --[[
@@ -66,6 +72,20 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
       -- take 500 credits away from the player
       Scenario.player.house.takeMoney(500)
     ```
+
+  **Note on Duplicate Teams & Triggers**
+
+  Triggers and teams are identified by a name (e.x. LUA1,TMR1) - names are unique, so a team/trigger with the same name
+  can only be added once. The Lua API will prevent any attempts to add duplicate teams/triggers.
+
+  - You can explicitly check if a team exists by calling: `local exists = Scenario.teams.exists("NAME")`
+  - You can explicitly check if a trigger exists by calling: `local exists = Scenario.triggers.exists("NAME")`
+
+  Triggers can also be deleted during gameplay (via other Triggers or Lua Scripts), this is used to provide gameplay
+  behaviour like stopping Airstrikes if you destroy the Comm Center.
+
+  **Even if a trigger is deleted, the Lua API will prevent any attempt to recreate the trigger. This ensures that Lua
+  scripts executed after loading a save game don't re-add already deleted triggers.**
 ]]
 ---@class Scenario : ApiModule
 ---@field name string
@@ -99,6 +119,18 @@ local function builder(cppApi)
     }
   )
 
+  -- Does a team currently exist with the same name?
+  local function teamExists(teamName)
+    return Utils.arrayContains(cppApi.getTeamTypeNames(), teamName)
+  end
+
+  -- Has a trigger ever existed in the current scenario with the same name?
+  local function triggerExists(triggerName)
+    -- search deleted triggers first (speeds up search since this is more likely)
+    return Utils.arrayContains(cppApi.getDeletedTriggerNames(), triggerName) or
+      Utils.arrayContains(cppApi.getTriggerNames(), triggerName)
+  end
+
   return {
     name = cppApi.name,
     type = cppApi.type,
@@ -112,13 +144,19 @@ local function builder(cppApi)
 
     teams = setmetatable(
       {
-        getNames = cppApi.getTeamTypeNames
+        getNames = cppApi.getTeamTypeNames,
+        exists = teamExists
       },
       {
         __index = function (_, teamName)
           return cppApi.getTeamType(teamName)
         end,
         __newindex = function (_, teamName, csvDefinition)
+          if (teamExists(teamName)) then
+              Logger.warning("Ignoring add team request, team with same name already exists: %s", teamName)
+              return
+          end
+
           return cppApi.addTeamType(teamName, csvDefinition)
         end
       }
@@ -127,13 +165,23 @@ local function builder(cppApi)
     triggers = setmetatable(
       {
         getNames = cppApi.getTriggerNames,
+        getDeletedNames = cppApi.getDeletedTriggerNames,
+        exists = triggerExists,
         deleteIfExists = cppApi.deleteTriggerIfExists
       },
       {
         __index = function (_, triggerName)
           return cppApi.getTrigger(triggerName)
         end,
-        __newindex = function (_, triggerName, csvDefinition)
+        __newindex = function(_, triggerName, csvDefinition)
+          if (triggerExists(triggerName)) then
+            Logger.warning(
+              "Ignoring add trigger request, trigger name was previously used in current scenario: %s",
+              triggerName
+            )
+            return
+          end
+
           return cppApi.addTrigger(triggerName, csvDefinition)
         end
       }

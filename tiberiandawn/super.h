@@ -35,6 +35,8 @@
 #ifndef SUPER_H
 #define SUPER_H
 
+#include "common/json.h"
+
 #include "ftimer.h"
 
 class SuperClass
@@ -77,6 +79,7 @@ public:
         return (RechargeTime);
     };
 
+    JSON_FUNCTIONS(SuperClass)
 private:
     bool Recharge(bool player = false);
 

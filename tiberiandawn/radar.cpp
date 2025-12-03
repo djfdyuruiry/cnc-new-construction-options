@@ -1956,3 +1956,79 @@ void RadarClass::Draw_Names(void)
         }
     }
 }
+
+TO_JSON(RadarClass)
+{
+    BASE_CLASS_TO_JSON(DisplayClass);
+
+    FIELD_TO_JSON(RadX);
+    FIELD_TO_JSON(RadOffX);
+    FIELD_TO_JSON(RadY);
+    FIELD_TO_JSON(RadOffY);
+    FIELD_TO_JSON(RadWidth);
+    FIELD_TO_JSON(RadHeight);
+    FIELD_TO_JSON(RadIWidth);
+    FIELD_TO_JSON(RadIHeight);
+    FIELD_TO_JSON(RadPWidth);
+    FIELD_TO_JSON(RadPHeight);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(RadarCursorRedraw);
+    BITFIELD_TO_JSON(DoesRadarExist);
+    BITFIELD_TO_JSON(IsRadarActive);
+    BITFIELD_TO_JSON(IsRadarActivating);
+    BITFIELD_TO_JSON(IsRadarDeactivating);
+    BITFIELD_OF_WIDTH_TO_JSON(SpecialRadarFrame, 3);
+    BITFIELD_OF_WIDTH_TO_JSON(RadarAnimFrame, 6);
+    FIELD_TO_JSON(RadarX);
+    FIELD_TO_JSON(RadarY);
+    FIELD_TO_JSON(RadarCell);
+    FIELD_TO_JSON(BaseX);
+    FIELD_TO_JSON(BaseY);
+    FIELD_TO_JSON(RadarWidth);
+    FIELD_TO_JSON(RadarCellWidth);
+    FIELD_TO_JSON(RadarHeight);
+    FIELD_TO_JSON(RadarCellHeight);
+    BITFIELD_TO_JSON(IsZoomed);
+    BITFIELD_TO_JSON(IsPlayerNames);
+    FIELD_TO_JSON(PixelPtr);
+    FIELD_TO_JSON(ZoomFactor);
+    FIELD_TO_JSON(PixelStack);
+}
+
+FROM_JSON(RadarClass)
+{
+    BASE_CLASS_FROM_JSON(DisplayClass);
+
+    FIELD_FROM_JSON(RadX);
+    FIELD_FROM_JSON(RadOffX);
+    FIELD_FROM_JSON(RadY);
+    FIELD_FROM_JSON(RadOffY);
+    FIELD_FROM_JSON(RadWidth);
+    FIELD_FROM_JSON(RadHeight);
+    FIELD_FROM_JSON(RadIWidth);
+    FIELD_FROM_JSON(RadIHeight);
+    FIELD_FROM_JSON(RadPWidth);
+    FIELD_FROM_JSON(RadPHeight);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(RadarCursorRedraw);
+    BITFIELD_FROM_JSON(DoesRadarExist);
+    BITFIELD_FROM_JSON(IsRadarActive);
+    BITFIELD_FROM_JSON(IsRadarActivating);
+    BITFIELD_FROM_JSON(IsRadarDeactivating);
+    BITFIELD_OF_WIDTH_FROM_JSON(RadarClass, SpecialRadarFrame, 3);
+    BITFIELD_OF_WIDTH_FROM_JSON(RadarClass, RadarAnimFrame, 6);
+    FIELD_FROM_JSON(RadarX);
+    FIELD_FROM_JSON(RadarY);
+    FIELD_FROM_JSON(RadarCell);
+    FIELD_FROM_JSON(BaseX);
+    FIELD_FROM_JSON(BaseY);
+    FIELD_FROM_JSON(RadarWidth);
+    FIELD_FROM_JSON(RadarCellWidth);
+    FIELD_FROM_JSON(RadarHeight);
+    FIELD_FROM_JSON(RadarCellHeight);
+    BITFIELD_FROM_JSON(IsZoomed);
+    BITFIELD_FROM_JSON(IsPlayerNames);
+    FIELD_FROM_JSON(PixelPtr);
+    FIELD_FROM_JSON(ZoomFactor);
+    FIELD_FROM_JSON(PixelStack);
+}

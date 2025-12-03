@@ -28,16 +28,7 @@ Utils.arrayToCsv = function(array, delimiter)
 
   local stringDelimiter = type(delimiter) == "string" and delimiter or ","
 
-  local result = ""
-
-  for i, v in ipairs(array) do
-    if i > 1 then
-      result = result .. stringDelimiter
-    end
-    result = result .. tostring(v)
-  end
-
-  return result
+  return table.concat(array, stringDelimiter)
 end
 
 --- Simple table to CSV conversion for dictionary
@@ -137,6 +128,19 @@ Utils.splitString = function(subject, delimiter)
   end
 
   return result
+end
+
+---@param array any[]
+---@param value any
+---@return boolean
+Utils.arrayContains = function(array, value)
+  for _, v in ipairs(array) do
+    if v == value then
+      return true
+    end
+  end
+
+  return false
 end
 
 return Utils

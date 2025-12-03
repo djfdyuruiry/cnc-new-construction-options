@@ -55,6 +55,7 @@
 #ifndef FTIMER_H
 #define FTIMER_H
 
+#include "json.h"
 #include "timer.h"
 
 /*
@@ -729,6 +730,7 @@ public:
         return (remain);
     }; // Fetch current count down value.
 
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TCountDownTimerClass, Started, DelayTime)
 protected:
     int Started;   // Initial frame time start.
     int DelayTime; // Ticks remaining before countdown timer expires.

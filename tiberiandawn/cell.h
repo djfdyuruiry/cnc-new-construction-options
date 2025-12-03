@@ -35,6 +35,8 @@
 #ifndef CELL_H
 #define CELL_H
 
+#include "common/json.h"
+
 #include "building.h"
 #include "unit.h"
 #include "template.h"
@@ -312,6 +314,8 @@ public:
     */
     bool Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const;
 #endif
+
+    JSON_FUNCTIONS(CellClass)
 
 private:
     CellClass(CellClass const&){};

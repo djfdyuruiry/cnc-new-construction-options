@@ -35,6 +35,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
+#include "common/json.h"
 #include "vector.h"
 
 /**************************************************************************
@@ -223,6 +224,48 @@ public:
     {
         return (index >= 0 && index < Length()) ? (T*)((*this)[index]) : NULL;
     };
+
+    friend TO_JSON(TFixedIHeapClass<T>)
+    {
+        static const auto& Logger = CncLogger::For(TFixedIHeapClass<T>);
+
+        CNC_LOGGER_DEBUG("Serializing TFixedIHeapClass holding type: {}", typeid(T).name());
+
+        if (p.ActiveCount == 0) {
+            j = nlohmann::json::object();
+            return;
+        }
+
+        auto& mutable_p = const_cast<TFixedIHeapClass<T>&>(p);
+
+        for (auto i = 0; i < p.ActiveCount; i++) {
+            const auto ptr = mutable_p.Ptr(i);
+            const auto id = std::format("{}", mutable_p.ID(ptr));
+
+            j.emplace(id, *ptr);
+        }
+    }
+
+    friend FROM_JSON(TFixedIHeapClass<T>)
+    {
+        static const auto& Logger = CncLogger::For(TFixedIHeapClass<T>);
+
+        CNC_LOGGER_DEBUG("Deserialising TFixedIHeapClass holding type: {}", typeid(T).name());
+
+        for (const auto& [key, val] : j.items()) {
+            const auto id = std::stoi(key);
+
+            T* ptr = static_cast<T*>(p[id]);
+
+            p.FreeFlag[id] = true;
+            ++p.ActiveCount;
+            p.ActivePointers.Add(ptr);
+
+            new (ptr) T(NoInitClass());
+
+            from_json(val, *ptr);
+        }
+    }
 };
 
 /***********************************************************************************************

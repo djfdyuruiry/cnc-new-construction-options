@@ -1,3 +1,4 @@
+#include "../common/lua/logging_luaapi.h"
 #include "../common/lua/luaapi.h"
 #include "../common/lua/luaarguments.h"
 #include "../common/lua/luatablebuilder.h"
@@ -18,6 +19,11 @@ ScenarioLuaApi::ScenarioLuaApi(std::string scenario_name, std::string scenario_t
     ScenarioHouse = std::move(scenario_house);
 }
 
+void ScenarioLuaApi::Register_Dependencies(LuaEngine& engine) const
+{
+    engine.Register_Api<LoggingLuaApi>();
+}
+
 void ScenarioLuaApi::Register_Consts(LuaEngine& engine) const
 {
     With_Api_Namespace(engine, [&](auto& n) {
@@ -34,7 +40,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         n.addCFunction("getHouseNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto house_name_table = LuaTableBuilder(engine);
+            auto house_name_table = LuaTableBuilder::Push_New_Table(engine);
 
             for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; i++) {
                 house_name_table.With_Index_Value(
@@ -83,14 +89,12 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         .addCFunction("getTeamTypeNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto trigger_names_table = LuaTableBuilder(engine);
-            auto i = 0;
+            auto team_names = LuaTableBuilder::Push_New_Table(engine);
 
-            while (i < Triggers.Count()) {
-                auto trigger_name = Triggers.Ptr(i)->Get_Name();
-
-                trigger_names_table.With_Index_Value(trigger_name);
-                i++;
+            for (auto i = 0; i < TeamTypes.Count(); ++i) {
+                team_names.With_Index_Value(
+                    TeamTypes.Ptr(i)->Name()
+                );
             }
 
             return 1;
@@ -134,7 +138,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             arguments.Assert_String_Parameter_Is_Valid("name", name, 8);
             arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
-            // BUG: Game crashes on parse if definition CSV is not valid
+            // TODO: Validate method create, and call before push
             LuaList.Push<AddTeamLuaEvent>(name, definition);
 
             return 0;
@@ -142,14 +146,24 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
         .addCFunction("getTriggerNames", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            auto trigger_names_table = LuaTableBuilder(engine);
-            auto i = 0;
+            auto trigger_names_table = LuaTableBuilder::Push_New_Table(engine);
 
-            while (i < Triggers.Count()) {
-                const auto trigger_name = Triggers.Ptr(i)->Get_Name();
+            for (auto i = 0; i < Triggers.Count(); ++i) {
+                trigger_names_table.With_Index_Value(
+                    Triggers.Ptr(i)->Get_Name()
+                );
+            }
 
+            return 1;
+        })
+        .addCFunction("getDeletedTriggerNames", [](auto L) {
+            const auto engine = SharedLuaEngine(L);
+
+            auto trigger_names_table = LuaTableBuilder::Push_New_Table(engine);
+            auto triggers = TriggerClass::RemovedTriggers;
+
+            for (const auto& trigger_name : triggers) {
                 trigger_names_table.With_Index_Value(trigger_name);
-                i++;
             }
 
             return 1;
@@ -193,7 +207,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             arguments.Assert_String_Parameter_Is_Valid("name", name, 4);
             arguments.Assert_String_Parameter_Is_Valid("definition", definition, 127);
 
-            // BUG: Game crashes on parse if definition CSV is not valid
+            // TODO: Validate method create, call before push
             LuaList.Push<AddTriggerLuaEvent>(name, definition);
 
             return 0;
@@ -219,16 +233,16 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
     });
 }
 
-HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, const std::string& name)
+HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, std::string name)
 {
-    const auto houseType = HouseTypeClass::From_Name(name.c_str());
+    const auto houseType = TdTypeConverter::Try_Parse<HousesType>(name);
 
-    if (houseType == HOUSE_NONE) {
+    if (!houseType.has_value()) {
         engine.Raise_Error_Format(
             "Failed to parse house name from string: {}",
             name
         );
     }
 
-    return houseType;
+    return *houseType;
 }

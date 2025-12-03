@@ -394,3 +394,39 @@ void HelpClass::Set_Tactical_Position(COORDINATE coord)
     }
     TabClass::Set_Tactical_Position(coord);
 }
+
+TO_JSON(HelpClass)
+{
+    BASE_CLASS_TO_JSON(TabClass);
+
+    FIELD_TO_JSON(HelpX);
+    FIELD_TO_JSON(HelpY);
+    FIELD_TO_JSON(HelpWidth);
+    BITFIELD_TO_JSON(IsRight);
+    FIELD_TO_JSON(Cost);
+    FIELD_TO_JSON(X);
+    FIELD_TO_JSON(Y);
+    FIELD_TO_JSON(DrawX);
+    FIELD_TO_JSON(DrawY);
+    FIELD_TO_JSON(Width);
+    FIELD_TO_JSON(Text);
+    FIELD_TO_JSON(Color);
+}
+
+FROM_JSON(HelpClass)
+{
+    BASE_CLASS_FROM_JSON(TabClass);
+
+    FIELD_FROM_JSON(HelpX);
+    FIELD_FROM_JSON(HelpY);
+    FIELD_FROM_JSON(HelpWidth);
+    BITFIELD_FROM_JSON(IsRight);
+    FIELD_FROM_JSON(Cost);
+    FIELD_FROM_JSON(X);
+    FIELD_FROM_JSON(Y);
+    FIELD_FROM_JSON(DrawX);
+    FIELD_FROM_JSON(DrawY);
+    FIELD_FROM_JSON(Width);
+    FIELD_FROM_JSON(Text);
+    FIELD_FROM_JSON(Color);
+}

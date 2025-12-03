@@ -72,7 +72,7 @@ private:
             auto valid_instances = sections.Section_Names();
 
             // push instance names table to caller
-            auto properties_table = LuaTableBuilder(engine);
+            auto properties_table = LuaTableBuilder::Push_New_Table(engine);
 
             for (const auto& name : valid_instances) {
                 properties_table.With_Index_Value(name);
@@ -93,7 +93,7 @@ private:
             }
 
             // push property names table to caller
-            auto properties_table = LuaTableBuilder(engine);
+            auto properties_table = LuaTableBuilder::Push_New_Table(engine);
 
             auto rule_names = sections[section_names.front()].Rule_Names();
 

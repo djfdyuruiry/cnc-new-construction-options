@@ -23,7 +23,6 @@ option(BUILD_REMASTERTD "Build Tiberian Dawn remaster dll." OFF)
 option(BUILD_REMASTERRA "Build Red Alert remaster dll." OFF)
 option(BUILD_VANILLATD "Build Tiberian Dawn executable." ON)
 option(BUILD_VANILLARA "Build Red Alert executable." ON)
-option(CNC_DEBUG_LOGGING "Enable game engine debug logging." OFF)
 option(MAP_EDITORTD "Include internal scenario editor in Tiberian Dawn build." OFF)
 option(MAP_EDITORRA "Include internal scenario editor in Red Alert build." OFF)
 option(NETWORKING "Enable network play." ON)
@@ -167,6 +166,16 @@ list(APPEND VANILLA_LIBS ${LUA_LIBRARIES})
 # luabridge
 find_path(LUABRIDGE_INCLUDE_DIRS "LuaBridge/Array.h")
 include_directories(${LUABRIDGE_INCLUDE_DIRS})
+
+# magic-enum
+find_package(magic_enum CONFIG REQUIRED)
+list(APPEND COMMON_LIBS magic_enum::magic_enum)
+list(APPEND VANILLA_LIBS magic_enum::magic_enum)
+
+# json
+find_package(nlohmann_json CONFIG REQUIRED)
+list(APPEND COMMON_LIBS nlohmann_json::nlohmann_json)
+list(APPEND VANILLA_LIBS nlohmann_json::nlohmann_json)
 
 # spdlog
 find_package(spdlog CONFIG REQUIRED)

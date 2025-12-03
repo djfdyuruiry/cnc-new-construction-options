@@ -44,6 +44,7 @@
 #include "function.h"
 #include "smudge.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 HousesType SmudgeClass::ToOwn = HOUSE_NONE;
 
@@ -383,4 +384,22 @@ void SmudgeClass::Disown(CELL cell)
             }
         }
     }
+}
+
+TO_JSON(SmudgeClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    BASE_CLASS_TO_JSON(ObjectClass);
+
+    FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? SMUDGE_NONE : p.Class->Type));
+}
+
+FROM_JSON(SmudgeClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+
+    const_cast<SmudgeTypeClass*&>(p.Class) = reinterpret_cast<SmudgeTypeClass*>(
+        TdTypeConverter::Load_Field_From_Json<SmudgeType>(j, NAMEOF(SmudgeClass), NAMEOF(Class))
+    );
 }

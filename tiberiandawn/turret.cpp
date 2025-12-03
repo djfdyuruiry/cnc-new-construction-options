@@ -540,3 +540,19 @@ DirType TurretClass::Fire_Direction(void) const
 
     return (PrimaryFacing.Current());
 }
+
+TO_JSON(TurretClass)
+{
+    BASE_CLASS_TO_JSON(DriveClass);
+
+    FIELD_TO_JSON(Reload);
+    FIELD_TO_JSON(SecondaryFacing);
+}
+
+FROM_JSON(TurretClass)
+{
+    BASE_CLASS_FROM_JSON(DriveClass);
+
+    FIELD_FROM_JSON(Reload);
+    FIELD_FROM_JSON(SecondaryFacing);
+}

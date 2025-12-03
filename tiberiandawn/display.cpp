@@ -4546,3 +4546,80 @@ ActionType Best_Object_Action(CELL cell)
 {
     return Best_Object_Action(CurrentObject.Raw(), cell);
 }
+
+TO_JSON(DisplayClass)
+{
+    BASE_CLASS_TO_JSON(MapClass);
+
+    CONVERT_TD_FIELD_TO_JSON(Theater);
+    FIELD_TO_JSON(TacticalCoord);
+    FIELD_TO_JSON(TacLeptonWidth);
+    FIELD_TO_JSON(TacLeptonHeight);
+    FIELD_TO_JSON(ZoneCell);
+    FIELD_TO_JSON(ZoneOffset);
+    FIELD_TO_JSON(ProximityCheck);
+    OBJECT_TARGET_PTR_TO_JSON(PendingObjectPtr);
+    // NOTE: PendingObject is handled in saveload.cpp, see: DisplayClass::Decode_Pointers
+    CONVERT_TD_FIELD_TO_JSON(PendingHouse);
+    FIELD_TO_JSON(TacPixelX);
+    FIELD_TO_JSON(TacPixelY);
+    FIELD_TO_JSON(DesiredTacticalCoord);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsRepairMode);
+    BITFIELD_TO_JSON(IsSellMode);
+    BITFIELD_OF_WIDTH_TO_JSON(IsTargettingMode, 2);
+    BITFIELD_TO_JSON(IsRubberBand);
+    BITFIELD_TO_JSON(IsTentative);
+    BITFIELD_TO_JSON(IsShadowPresent);
+    FIELD_TO_JSON(BandX);
+    FIELD_TO_JSON(BandY);
+    FIELD_TO_JSON(NewX);
+    FIELD_TO_JSON(NewY);
+
+    // CursorShapeSave field - follows DisplayClass::Code_Pointers logic
+    short cursor_shape[256];
+
+    if (p.CursorSize) {
+        constexpr auto save_buffer_element_size = std::size(cursor_shape);
+        auto index = 0;
+
+        while (index < save_buffer_element_size - 2 && p.CursorSize[index] != REFRESH_EOL) {
+            cursor_shape[index] = p.CursorSize[index];
+            index++;
+        }
+        cursor_shape[index] = REFRESH_EOL;
+    }
+
+    FIELD_VALUE_TO_JSON(CursorShapeSave, cursor_shape);
+}
+
+FROM_JSON(DisplayClass)
+{
+    BASE_CLASS_FROM_JSON(MapClass);
+
+    PARSE_TD_FIELD_FROM_JSON(DisplayClass, Theater, TheaterType);
+    FIELD_FROM_JSON(TacticalCoord);
+    FIELD_FROM_JSON(TacLeptonWidth);
+    FIELD_FROM_JSON(TacLeptonHeight);
+    FIELD_FROM_JSON(ZoneCell);
+    FIELD_FROM_JSON(ZoneOffset);
+    FIELD_FROM_JSON(ProximityCheck);
+    OBJECT_TARGET_PTR_FROM_JSON(PendingObjectPtr);
+    // NOTE: PendingObject is handled in saveload.cpp, see: DisplayClass::Decode_Pointers
+    PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
+    FIELD_FROM_JSON(TacPixelX);
+    FIELD_FROM_JSON(TacPixelY);
+    FIELD_FROM_JSON(DesiredTacticalCoord);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsRepairMode);
+    BITFIELD_FROM_JSON(IsSellMode);
+    BITFIELD_OF_WIDTH_FROM_JSON(DisplayClass, IsTargettingMode, 2);
+    BITFIELD_FROM_JSON(IsRubberBand);
+    BITFIELD_FROM_JSON(IsTentative);
+    BITFIELD_FROM_JSON(IsShadowPresent);
+    FIELD_FROM_JSON(BandX);
+    FIELD_FROM_JSON(BandY);
+    FIELD_FROM_JSON(NewX);
+    FIELD_FROM_JSON(NewY);
+    FIELD_FROM_JSON(CursorShapeSave);
+}

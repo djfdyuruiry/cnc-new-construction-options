@@ -52,6 +52,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 int FactoryClass::STEP_COUNT = 108;
 
@@ -751,4 +752,40 @@ bool FactoryClass::Completed(void)
         return (true);
     }
     return (false);
+}
+
+TO_JSON(FactoryClass)
+{
+    BASE_CLASS_TO_JSON(StageClass);
+
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsSuspended);
+    BITFIELD_TO_JSON(IsDifferent);
+    BITFIELD_TO_JSON(IsBlocked);
+    BITFIELD_TO_JSON(Balance);
+    BITFIELD_TO_JSON(OriginalBalance);
+    OBJECT_TARGET_PTR_TO_JSON(Object);
+    FIELD_TO_JSON(SpecialItem);
+
+    // House field
+    FIELD_VALUE_TO_JSON(House, TdTypeConverter::To_String(p.House == nullptr ? HOUSE_NONE : p.House->Class->House));
+}
+
+FROM_JSON(FactoryClass)
+{
+    BASE_CLASS_FROM_JSON(StageClass);
+
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsSuspended);
+    BITFIELD_FROM_JSON(IsDifferent);
+    BITFIELD_FROM_JSON(IsBlocked);
+    BITFIELD_FROM_JSON(Balance);
+    BITFIELD_FROM_JSON(OriginalBalance);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Object, TechnoClass);
+    FIELD_FROM_JSON(SpecialItem);
+
+    // House field
+    p.House = reinterpret_cast<HouseClass*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(FactoryClass), NAMEOF(House))
+    );
 }

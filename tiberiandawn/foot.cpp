@@ -75,6 +75,7 @@
 
 #include "function.h"
 #include "common/irandom.h"
+#include "typeconverter.h"
 
 /***********************************************************************************************
  * FootClass::FootClass -- Default constructor for foot class objects.                         *
@@ -2068,4 +2069,54 @@ COORDINATE FootClass::Likely_Coord(void) const
         return (Head_To_Coord());
     }
     return (Target_Coord());
+}
+
+TO_JSON(FootClass)
+{
+    BASE_CLASS_TO_JSON(TechnoClass);
+
+    BITFIELD_TO_JSON(IsInitiated);
+    BITFIELD_TO_JSON(IsNewNavCom);
+    BITFIELD_TO_JSON(IsPlanningToLook);
+    BITFIELD_TO_JSON(IsDeploying);
+    BITFIELD_TO_JSON(IsFiring);
+    BITFIELD_TO_JSON(IsRotating);
+    BITFIELD_TO_JSON(IsDriving);
+    BITFIELD_TO_JSON(IsUnloading);
+    FIELD_TO_JSON(Speed);
+    FIELD_TO_JSON(NavCom);
+    FIELD_TO_JSON(SuspendedNavCom);
+    OBJECT_TARGET_PTR_TO_JSON(Team);
+    FIELD_TO_JSON(Group);
+    OBJECT_TARGET_PTR_TO_JSON(Member);
+    CONVERT_TD_ARRAY_FIELD_TO_JSON(Path, FacingType);
+    FIELD_TO_JSON(PathDelay);
+    FIELD_TO_JSON(TryTryAgain);
+    FIELD_TO_JSON(BaseAttackTimer);
+    FIELD_TO_JSON(HeadToCoord);
+}
+
+FROM_JSON(FootClass)
+{
+    BASE_CLASS_FROM_JSON(TechnoClass);
+
+    BITFIELD_FROM_JSON(IsInitiated);
+    BITFIELD_FROM_JSON(IsNewNavCom);
+    BITFIELD_FROM_JSON(IsPlanningToLook);
+    BITFIELD_FROM_JSON(IsDeploying);
+    BITFIELD_FROM_JSON(IsFiring);
+    BITFIELD_FROM_JSON(IsRotating);
+    BITFIELD_FROM_JSON(IsDriving);
+    BITFIELD_FROM_JSON(IsUnloading);
+    FIELD_FROM_JSON(Speed);
+    FIELD_FROM_JSON(NavCom);
+    FIELD_FROM_JSON(SuspendedNavCom);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Team, TeamClass);
+    FIELD_FROM_JSON(Group);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Member, FootClass);
+    PARSE_TD_ARRAY_FIELD_FROM_JSON(FootClass, Path, FacingType);
+    FIELD_FROM_JSON(PathDelay);
+    FIELD_FROM_JSON(TryTryAgain);
+    FIELD_FROM_JSON(BaseAttackTimer);
+    FIELD_FROM_JSON(HeadToCoord);
 }

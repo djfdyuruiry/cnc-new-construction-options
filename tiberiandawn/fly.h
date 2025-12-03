@@ -74,6 +74,8 @@ public:
     void Code_Pointers(void);
     void Decode_Pointers(void);
 
+    JSON_FUNCTIONS(FlyClass)
+
 private:
     /*
     **	Object movement consists of incrementing the accumulator until enough "distance"

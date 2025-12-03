@@ -48,6 +48,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 /*
 ********************************** Globals **********************************
@@ -907,4 +908,98 @@ TeamTypeClass const* TeamTypeClass::Suggested_New_Team(HouseClass* house, int ut
     }
 
     return (best);
+}
+
+TO_JSON(TeamMissionStruct)
+{
+    CONVERT_TD_FIELD_TO_JSON(Mission);
+    FIELD_TO_JSON(Argument);
+}
+
+FROM_JSON(TeamMissionStruct)
+{
+    PARSE_TD_FIELD_FROM_JSON(TeamMissionStruct, Mission, TeamMissionType);
+    FIELD_FROM_JSON(Argument);
+}
+
+TO_JSON(TeamTypeClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    // Base AbstractTypeClass fields; included here to prevent
+    // advertising AbstractTypeClass to/from json functions which
+    // may cause unsupported types to be serialized incorrectly, since
+    // AbstractTypeClass is a very common root class.
+    CSTR_FIELD_TO_JSON(IniName);
+    FIELD_TO_JSON(FullName);
+
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsRoundAbout);
+    BITFIELD_TO_JSON(IsLearning);
+    BITFIELD_TO_JSON(IsSuicide);
+    BITFIELD_TO_JSON(IsAutocreate);
+    BITFIELD_TO_JSON(IsMercenary);
+    BITFIELD_TO_JSON(IsPrebuilt);
+    BITFIELD_TO_JSON(IsReinforcable);
+    BITFIELD_TO_JSON(IsTransient);
+    FIELD_TO_JSON(RecruitPriority);
+    FIELD_TO_JSON(InitNum);
+    FIELD_TO_JSON(MaxAllowed);
+    FIELD_TO_JSON(Fear);
+    CONVERT_TD_FIELD_TO_JSON(House);
+    FIELD_TO_JSON(MissionCount);
+    FIELD_TO_JSON(MissionList);
+    FIELD_TO_JSON(DesiredNum);
+    FIELD_TO_JSON(ClassCount);
+
+    // Class array
+    auto class_array = nlohmann::json::array();
+
+    for (auto i = 0; i < p.ClassCount; i++) {
+        auto target = TechnoType_To_Target(p.Class[i]);
+        class_array.push_back(target);
+    }
+
+    FIELD_VALUE_TO_JSON(Class, class_array);
+}
+
+FROM_JSON(TeamTypeClass)
+{
+    static const auto& Logger = CncLogger::For(TeamTypeClass);
+
+    // Base AbstractTypeClass fields - See TO_JSON(TeamTypeClass)
+    CSTR_FIELD_FROM_JSON(TeamTypeClass, IniName);
+    FIELD_FROM_JSON(FullName);
+
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsRoundAbout);
+    BITFIELD_FROM_JSON(IsLearning);
+    BITFIELD_FROM_JSON(IsSuicide);
+    BITFIELD_FROM_JSON(IsAutocreate);
+    BITFIELD_FROM_JSON(IsMercenary);
+    BITFIELD_FROM_JSON(IsPrebuilt);
+    BITFIELD_FROM_JSON(IsReinforcable);
+    BITFIELD_FROM_JSON(IsTransient);
+    FIELD_FROM_JSON(RecruitPriority);
+    FIELD_FROM_JSON(InitNum);
+    FIELD_FROM_JSON(MaxAllowed);
+    FIELD_FROM_JSON(Fear);
+    PARSE_TD_FIELD_FROM_JSON(TeamTypeClass, House, HousesType);
+    FIELD_FROM_JSON(MissionCount);
+    FIELD_FROM_JSON(MissionList);
+    FIELD_FROM_JSON(DesiredNum);
+    FIELD_FROM_JSON(ClassCount);
+
+    // Class array
+    const auto& class_array = j.at(NAMEOF(Class));
+
+    CncJsonUtils::Assert_Json_Is_Array_Of_Exact_Size<JsonUnsignedInt>(
+        class_array,
+        NAMEOF(Class),
+        p.ClassCount
+    );
+
+    for (auto i = 0; i < p.ClassCount; i++) {
+        p.Class[i] = TARGET_TO_PTR_WITH_TYPE(class_array[i].get<TARGET>(), TechnoTypeClass);
+    }
 }

@@ -73,6 +73,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /*
 ** New sidebar for GlyphX multiplayer. ST - 3/26/2019 12:24PM
@@ -2806,3 +2807,104 @@ bool CellClass::Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const
 }
 
 #endif // USE_RA_AI
+
+TO_JSON(CellClass)
+{
+    BITFIELD_TO_JSON(IsPlot);
+    BITFIELD_TO_JSON(IsCursorHere);
+    BITFIELD_TO_JSON(IsMapped);
+    BITFIELD_TO_JSON(IsVisible);
+    BITFIELD_TO_JSON(IsTrigger);
+    BITFIELD_TO_JSON(IsWaypoint);
+    BITFIELD_TO_JSON(IsRadarCursor);
+    BITFIELD_TO_JSON(IsFlagged);
+    CONVERT_TD_FIELD_TO_JSON(TType);
+    FIELD_TO_JSON(TIcon);
+    CONVERT_TD_FIELD_TO_JSON(Overlay);
+    FIELD_TO_JSON(OverlayData);
+    CONVERT_TD_FIELD_TO_JSON(Smudge);
+    FIELD_TO_JSON(SmudgeData);
+    CONVERT_TD_FIELD_TO_JSON(Owner);
+    CONVERT_TD_FIELD_TO_JSON(InfType);
+
+    FIELD_TO_JSON(IsMappedByPlayerMask);
+    FIELD_TO_JSON(IsVisibleByPlayerMask);
+
+    CONVERT_TD_FIELD_TO_JSON(Land);
+    CONVERT_TD_FIELD_TO_JSON(OverrideLand);
+    OBJECT_TARGET_PTR_TO_JSON(CTFFlag);
+
+    // Flag field - compress Flag.Occupy bitfields to a bitset string
+    std::bitset<8> flag;
+
+    flag.set(0, p.Flag.Occupy.Center);
+    flag.set(1, p.Flag.Occupy.NW);
+    flag.set(2, p.Flag.Occupy.NE);
+    flag.set(3, p.Flag.Occupy.SW);
+    flag.set(4, p.Flag.Occupy.SE);
+    flag.set(5, p.Flag.Occupy.Vehicle);
+    flag.set(6, p.Flag.Occupy.Monolith);
+    flag.set(7, p.Flag.Occupy.Building);
+
+    FIELD_VALUE_TO_JSON(Flag, flag.to_string());
+
+    // OccupierPtr field - follows CellClass::Code_Pointers logic
+    FIELD_VALUE_TO_JSON(OccupierPtr, p.Cell_Occupier() ? OBJECT_PTR_TO_TARGET(p.OccupierPtr) : TARGET_NONE);
+
+    // Overlapper field - follows CellClass::Code_Pointers logic
+    auto overlapper = nlohmann::json::array();
+
+    for (const auto& object : p.Overlapper) {
+        const auto overlapper_target = object != nullptr && object->IsActive
+            ? OBJECT_PTR_TO_TARGET(object)
+            : TARGET_NONE;
+
+        overlapper.emplace_back(overlapper_target);
+    }
+
+    FIELD_VALUE_TO_JSON(Overlapper, overlapper);
+}
+
+FROM_JSON(CellClass)
+{
+    BITFIELD_FROM_JSON(IsPlot);
+    BITFIELD_FROM_JSON(IsCursorHere);
+    BITFIELD_FROM_JSON(IsMapped);
+    BITFIELD_FROM_JSON(IsVisible);
+    BITFIELD_FROM_JSON(IsTrigger);
+    BITFIELD_FROM_JSON(IsWaypoint);
+    BITFIELD_FROM_JSON(IsRadarCursor);
+    BITFIELD_FROM_JSON(IsFlagged);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, TType, TemplateType);
+    FIELD_FROM_JSON(TIcon);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Overlay, OverlayType);
+    FIELD_FROM_JSON(OverlayData);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Smudge, SmudgeType);
+    FIELD_FROM_JSON(SmudgeData);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Owner, HousesType);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, InfType, HousesType);
+    FIELD_FROM_JSON(IsMappedByPlayerMask);
+    FIELD_FROM_JSON(IsVisibleByPlayerMask);
+
+    PARSE_TD_FIELD_FROM_JSON(CellClass, Land, LandType);
+    PARSE_TD_FIELD_FROM_JSON(CellClass, OverrideLand, LandType);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(CTFFlag, AnimClass);
+
+    OBJECT_TARGET_PTR_FROM_JSON(OccupierPtr);
+    OBJECT_TARGET_PTR_ARRAY_FROM_JSON(CellClass, Overlapper, ObjectClass);
+
+    // Flag field
+    p.Flag.Composite = 0; // reset union fields
+
+    const auto bitset = CncJsonUtils::Bitset_Of_Width_From_Json<8>(j, NAMEOF(CellClass), NAMEOF(Flag));
+
+    // decompress bitset string to Flag.Occupy bitfields
+    p.Flag.Occupy.Center = bitset.test(0);
+    p.Flag.Occupy.NW = bitset.test(1);
+    p.Flag.Occupy.NE = bitset.test(2);
+    p.Flag.Occupy.SW = bitset.test(3);
+    p.Flag.Occupy.SE = bitset.test(4);
+    p.Flag.Occupy.Vehicle = bitset.test(5);
+    p.Flag.Occupy.Monolith = bitset.test(6);
+    p.Flag.Occupy.Building = bitset.test(7);
+}

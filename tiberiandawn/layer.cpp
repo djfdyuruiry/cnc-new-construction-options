@@ -154,3 +154,32 @@ int LayerClass::Sorted_Add(ObjectClass const* const object)
     ActiveCount++;
     return (true);
 }
+
+/**
+ * We do this manually as the DynamicVectorClass root class VectorClass::[] operator
+ * has no awareness of DynamicVectorClass::ActiveCount, this can cause DynamicVectorClass
+ * instances to have an ActiveCount that doesn't align with the VectorClass::VectorMax and visa-versa.
+ *
+ * This class uses the DynamicVectorClass::Add to write elements, which manages ActiveCount.
+ */
+TO_JSON(LayerClass)
+{
+    j = nlohmann::json::array();
+
+    for (auto i = 0; i < p.Count(); ++i) {
+        j.emplace_back(p[i]);
+    }
+}
+
+FROM_JSON(LayerClass)
+{
+    p.Clear();
+
+    for (const auto& item : j) {
+        ObjectClass* elem;
+
+        from_json(item, elem);
+
+        p.Add(elem);
+    }
+}

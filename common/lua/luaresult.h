@@ -99,7 +99,7 @@ public:
     T Unpack()
     {
         if (!ValueSource.has_value()) {
-            CNC_LOG_FATAL("Attempted to unpack empty LuaResultWithValue");
+            CNC_LOGGER_FATAL("Attempted to unpack empty result");
         }
 
         return ValueSource.value();
@@ -109,12 +109,14 @@ public:
     U Map(std::function<U(T)> mapper)
     {
         if (!ValueSource.has_value()) {
-            CNC_LOG_FATAL("Attempted to map empty LuaResultWithValue");
+            CNC_LOGGER_FATAL("Attempted to map empty result");
         }
 
         return mapper(ValueSource.value());
     }
 
 private:
+    static inline const auto& Logger = CncLogger::For(LuaResultWithValue);
+
     std::optional<T> ValueSource;
 };

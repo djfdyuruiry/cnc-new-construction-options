@@ -35,6 +35,8 @@
 #ifndef CARGO_H
 #define CARGO_H
 
+#include "common/json.h"
+
 class FootClass;
 
 /****************************************************************************
@@ -94,6 +96,8 @@ private:
     **	that no object is attached.
     */
     FootClass* CargoHold;
+
+    JSON_FUNCTIONS(CargoClass)
 };
 
 #endif

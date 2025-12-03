@@ -58,6 +58,7 @@
 #include "miscasm.h"
 
 #include "noinit.h"
+#include "json.h"
 /**************************************************************************
 **	This is a general purpose vector class. A vector is defined by this
 **	class, as an array of arbitrary objects where the array can be dynamically
@@ -95,6 +96,66 @@ public:
     virtual int ID(T const* ptr); // Pointer based identification.
     virtual int ID(T const& ptr); // Value based identification.
 
+    /**
+     * Record elements as a metadata object with `_items` as a map
+     * of [vector idx] -> value and `_vector_size` as the total size of
+     * the vector.
+     *
+     * If T is a pointer type, NULL pointer values are omitted to prevent
+     * JSON bloat. `_vector_size` allows us to rebuild the vector size on
+     * deserialize, where the gaps between `_items` elements will be initialised
+     * with NULL.
+     */
+    friend TO_JSON(VectorClass<T>)
+    {
+        auto _items = nlohmann::json::object();
+
+        for (auto i = 0; i < p.Length(); i++) {
+            if constexpr(std::is_pointer<T>()) {
+                // record pairs of vector location and value (if not NULL)
+                const auto value = p.Vector[i];
+
+                if (value == nullptr) {
+                    continue;
+                }
+
+                const auto key = std::format("{}", i);
+
+                _items.emplace(key, value);
+            } else {
+                const auto key = std::format("{}", i);
+                _items.emplace(key, p.Vector[i]);
+            }
+        }
+
+        j.emplace(NAMEOF(_items), _items);
+
+        // ensure vector size is recorded (otherwise, for pointers, only number of pairs is known)
+        j.emplace("_vector_size", p.Length());
+    }
+
+    friend FROM_JSON(VectorClass<T>)
+    {
+        CncJsonUtils::Assert_Json_Is_Object_With_Keys(j, ". (VectorClass)", {NAMEOF(_items), NAMEOF(_vector_size)});
+
+        const auto& _vector_size = j.at(NAMEOF(_vector_size));
+        const auto& _items = j.at(NAMEOF(_items));
+
+        CncJsonUtils::Assert_Json_Is<JsonUnsignedInt>(_vector_size, ". (VectorClass)");
+        CncJsonUtils::Assert_Json_Is<JsonObject>(_items, NAMEOF(_items));
+
+        p.Clear();
+        // if T is a pointer type, Resize(..) inits all entries in the vector to NULL
+        p.Resize(
+            _vector_size.get<int>()
+        );
+
+        for (const auto& [key, value] : _items.items()) {
+            const auto idx = std::stoi(key);
+
+            from_json(value, p.Vector[idx]);
+        }
+    }
 protected:
     /*
     **	This is a pointer to the allocated vector array of elements.
@@ -177,6 +238,25 @@ public:
     };
     virtual int ID(T const& ptr);
 
+    /**
+     * Note: If the VectorClass::[] operator is used to write elements, ActiveCount
+     * will be zero, as it has no awareness of ActiveCount;
+     */
+    friend TO_JSON(DynamicVectorClass<T>)
+    {
+        BASE_CLASS_TO_JSON(VectorClass<T>);
+
+        FIELD_TO_JSON(ActiveCount);
+        FIELD_TO_JSON(GrowthStep);
+    }
+
+    friend FROM_JSON(DynamicVectorClass<T>)
+    {
+        BASE_CLASS_FROM_JSON(VectorClass<T>);
+
+        FIELD_FROM_JSON(ActiveCount);
+        FIELD_FROM_JSON(GrowthStep);
+    }
 protected:
     /*
     **	This is a count of the number of active objects in this
@@ -319,6 +399,53 @@ public:
         return Collection[context];
     }
 
+    /**
+     * We do this manually as the DynamicVectorClass root class VectorClass::[] operator
+     * has no awareness of DynamicVectorClass::ActiveCount, this can cause DynamicVectorClass
+     * instances to have an ActiveCount that doesn't align with the VectorClass::VectorMax and visa-versa.
+     *
+     * This class uses the DynamicVectorClass::Add to write elements, which manages ActiveCount.
+     */
+    friend TO_JSON(DynamicVectorArrayClass)
+    {
+        // Collection field
+        auto json_collection = nlohmann::json::array();
+
+        for (const auto& vector : p.Collection) {
+            auto json_vector = nlohmann::json::array();
+
+            for (auto i = 0; i < vector.Count(); ++i) {
+                json_vector.emplace_back(p[i]);
+            }
+
+            json_collection.emplace_back(json_vector);
+        }
+
+        FIELD_VALUE_TO_JSON(Collection, json_collection);
+        FIELD_TO_JSON(Active);
+    }
+
+    friend FROM_JSON(DynamicVectorArrayClass)
+    {
+        // Collection field
+        const auto& json_collection = j.at(NAMEOF(Collection));
+
+        CncJsonUtils::Assert_Json_Is<JsonArray>(json_collection, NAMEOF(Collection));
+
+        p.Clear_All();
+
+        for (auto i = 0; i < json_collection.size(); i++) {
+            for (const auto& item : json_collection[i]) {
+                T elem;
+
+                from_json(item, elem);
+
+                p.Add(i, elem);
+            }
+        }
+
+        FIELD_FROM_JSON(Active);
+    }
 private:
     DynamicVectorClass<T> Collection[COUNT];
     int Active;
@@ -723,6 +850,13 @@ VectorClass<T>::VectorClass(unsigned size, T const* array)
         } else {
             Vector = new T[size];
             IsAllocated = true;
+
+            if constexpr(std::is_pointer<T>()) {
+                // we are storing pointers, so ensure all are initialised
+                for (auto i = 0; i < size; i++) {
+                    Vector[i] = nullptr;
+                }
+            }
         }
     }
 }
@@ -941,6 +1075,13 @@ template <class T> int VectorClass<T>::Resize(unsigned newsize, T const* array)
         T* newptr;
         if (!array) {
             newptr = new T[newsize];
+
+            if constexpr(std::is_pointer<T>()) {
+                // we are storing pointers, so ensure all are initialised
+                for (auto i = 0; i < newsize; i++) {
+                    newptr[i] = nullptr;
+                }
+            }
         } else {
             newptr = new ((void*)array) T[newsize];
         }

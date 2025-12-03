@@ -35,8 +35,21 @@
 #ifndef DOOR_H
 #define DOOR_H
 
+#include "common/json.h"
+
+#include "stage.h"
+
 class DoorClass
 {
+public:
+    typedef enum DoorStateType
+    {
+        IS_CLOSED,  // Door is closed.
+        IS_OPENING, // Door is in the process of opening.
+        IS_OPEN,    // Door is fully open.
+        IS_CLOSING  //	Door is in the process of closing.
+    } DoorStateType;
+
 private:
     /*
     **	This is the animation control handler.
@@ -52,13 +65,7 @@ private:
     /*
     **	This is the door state.
     */
-    enum
-    {
-        IS_CLOSED,  // Door is closed.
-        IS_OPENING, // Door is in the process of opening.
-        IS_OPEN,    // Door is fully open.
-        IS_CLOSING  //	Door is in the process of closing.
-    } State;
+    DoorStateType State;
 
     /*
     **	If the animation for this door indicates that the object it is
@@ -112,6 +119,8 @@ public:
     {
         return;
     }
+
+    JSON_FUNCTIONS(DoorClass)
 };
 
 #endif

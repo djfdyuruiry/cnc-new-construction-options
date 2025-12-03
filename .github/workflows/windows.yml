@@ -153,7 +153,7 @@ jobs:
 
         cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
 
-    # BUG: separate out ra and td into sep archives (data files cluttering zip)
+    # TODO: separate out ra and td into sep archives (separate folders in zip for now)
     - name: Create archives
       shell: bash
       run: |
@@ -172,7 +172,6 @@ jobs:
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra
         fi
 
-        # BUG: PDB files included in non debug zip
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "nco-red-alert" ]; then
           # debug symbols
           7z a artifact/vanilla-conquer-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb

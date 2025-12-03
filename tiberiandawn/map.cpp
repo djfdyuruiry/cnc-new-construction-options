@@ -2078,3 +2078,72 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 }
 
 #endif // USE_RA_AI
+
+TO_JSON(MapClass)
+{
+    BASE_CLASS_TO_JSON(GScreenClass);
+
+    FIELD_TO_JSON(MapCellX);
+    FIELD_TO_JSON(MapCellY);
+    FIELD_TO_JSON(MapCellWidth);
+    FIELD_TO_JSON(MapCellHeight);
+    FIELD_TO_JSON(TotalValue);
+    FIELD_TO_JSON(MapBinaryVersion);
+    FIELD_TO_JSON(XSize);
+    FIELD_TO_JSON(YSize);
+    FIELD_TO_JSON(Size);
+    FIELD_TO_JSON(TiberiumGrowth);
+    FIELD_TO_JSON(TiberiumGrowthCount);
+    FIELD_TO_JSON(TiberiumSpread);
+    FIELD_TO_JSON(TiberiumSpreadCount);
+    FIELD_TO_JSON(TiberiumScan);
+    BITFIELD_TO_JSON(IsForwardScan);
+
+    // Array field - follows MouseClass::Save logic
+    auto cells = nlohmann::json::object();
+
+    for (CELL cell = 0; cell < static_cast<CELL>(MAP_CELL_TOTAL); cell++) {
+        if (!p[cell].Should_Save()) {
+            continue;
+        }
+
+        const auto cell_key = std::format("{}", static_cast<int>(cell));
+
+        cells.emplace(cell_key, p[cell]);
+    }
+
+    FIELD_VALUE_TO_JSON(Array, cells);
+}
+
+// Field 'Array' omitted as it's reset after save load anyway.
+FROM_JSON(MapClass)
+{
+    BASE_CLASS_FROM_JSON(GScreenClass);
+
+    FIELD_FROM_JSON(MapCellX);
+    FIELD_FROM_JSON(MapCellY);
+    FIELD_FROM_JSON(MapCellWidth);
+    FIELD_FROM_JSON(MapCellHeight);
+    FIELD_FROM_JSON(TotalValue);
+    FIELD_FROM_JSON(MapBinaryVersion);
+    FIELD_FROM_JSON(XSize);
+    FIELD_FROM_JSON(YSize);
+    FIELD_FROM_JSON(Size);
+    FIELD_FROM_JSON(TiberiumGrowth);
+    FIELD_FROM_JSON(TiberiumGrowthCount);
+    FIELD_FROM_JSON(TiberiumSpread);
+    FIELD_FROM_JSON(TiberiumSpreadCount);
+    FIELD_FROM_JSON(TiberiumScan);
+    BITFIELD_FROM_JSON(IsForwardScan);
+
+    // Array field - follows MouseClass::Save logic
+    const auto& cells = j.at(NAMEOF(Array));
+
+    CncJsonUtils::Assert_Json_Is<JsonObject>(cells, NAMEOF(Array));
+
+    for (const auto& [cell_key, cell_json] : cells.items()) {
+        const auto cell = static_cast<CELL>(std::stoi(cell_key));
+
+        from_json(cell_json, p[cell]);
+    }
+}

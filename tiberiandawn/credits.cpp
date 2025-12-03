@@ -35,6 +35,7 @@
  *   CreditClass::CreditClass -- Default constructor for the credit class object.              *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include "credits.h"
 #include "function.h"
 
 /***********************************************************************************************
@@ -191,4 +192,22 @@ void CreditClass::AI(bool forced, HouseClass* player_ptr, bool logic_only)
 void CreditClass::Init_Clear()
 {
     Current = 0;
+}
+
+TO_JSON(CreditClass)
+{
+    FIELD_TO_JSON(Current);
+    BITFIELD_TO_JSON(IsToRedraw);
+    BITFIELD_TO_JSON(IsUp);
+    BITFIELD_TO_JSON(IsAudible);
+    FIELD_TO_JSON(Countdown);
+}
+
+FROM_JSON(CreditClass)
+{
+    FIELD_FROM_JSON(Current);
+    BITFIELD_FROM_JSON(IsToRedraw);
+    BITFIELD_FROM_JSON(IsUp);
+    BITFIELD_FROM_JSON(IsAudible);
+    FIELD_FROM_JSON(Countdown);
 }

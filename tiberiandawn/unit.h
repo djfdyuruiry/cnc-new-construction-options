@@ -35,6 +35,8 @@
 #ifndef UNIT_H
 #define UNIT_H
 
+#include "common/json.h"
+
 #include "tarcom.h"
 #include "radio.h"
 #include "cargo.h"
@@ -206,6 +208,8 @@ public:
     **	Dee-buggin' support.
     */
     int Validate(void) const;
+
+    JSON_FUNCTIONS(UnitClass)
 
 private:
     /*

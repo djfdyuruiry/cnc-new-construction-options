@@ -54,6 +54,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 /***********************************************************************************************
  * AnimClass::Validate -- validates anim pointer															  *
@@ -1377,4 +1378,48 @@ void AnimClass::Set_Visible_Flags(unsigned flags)
     if (VirtualAnim != NULL) {
         VirtualAnim->Set_Visible_Flags(flags);
     }
+}
+
+TO_JSON(AnimClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    BASE_CLASS_TO_JSON(ObjectClass);
+    BASE_CLASS_TO_JSON(StageClass);
+
+    OBJECT_TARGET_PTR_TO_JSON(Object);
+    FIELD_TO_JSON(SortTarget);
+    CONVERT_TD_FIELD_TO_JSON(OwnerHouse);
+    FIELD_TO_JSON(Loops);
+    BITFIELD_TO_JSON(IsToDelete);
+    BITFIELD_TO_JSON(IsBrandNew);
+    BITFIELD_TO_JSON(IsAlternate);
+    BITFIELD_TO_JSON(IsInvisible);
+    FIELD_TO_JSON(VisibleFlags);
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+    FIELD_TO_JSON(Delay);
+    FIELD_TO_JSON(Accum);
+    OBJECT_TARGET_PTR_TO_JSON(VirtualAnim);
+    FIELD_TO_JSON(KillTime);
+}
+
+FROM_JSON(AnimClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+    BASE_CLASS_FROM_JSON(StageClass);
+
+    OBJECT_TARGET_PTR_FROM_JSON(Object);
+    FIELD_FROM_JSON(SortTarget);
+    PARSE_TD_FIELD_FROM_JSON(AnimClass, OwnerHouse, HousesType);
+    FIELD_FROM_JSON(Loops);
+    BITFIELD_FROM_JSON(IsToDelete);
+    BITFIELD_FROM_JSON(IsBrandNew);
+    BITFIELD_FROM_JSON(IsAlternate);
+    BITFIELD_FROM_JSON(IsInvisible);
+    FIELD_FROM_JSON(VisibleFlags);
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(AnimClass, Class, AnimTypeClass, AnimType);
+    FIELD_FROM_JSON(Delay);
+    FIELD_FROM_JSON(Accum);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(VirtualAnim, AnimClass);
+    FIELD_FROM_JSON(KillTime);
 }

@@ -691,6 +691,11 @@ int BufferIOFileClass::Write(void const* buffer, int size)
     return (size);
 }
 
+int BufferIOFileClass::Write(const std::string& str)
+{
+    return Write(str.c_str(), static_cast<int>(str.length()));
+}
+
 /***********************************************************************************************
  * BufferIOFileClass::Read -- Reads data from the file cache.                                  *
  *                                                                                             *

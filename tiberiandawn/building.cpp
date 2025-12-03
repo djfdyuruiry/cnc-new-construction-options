@@ -96,6 +96,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "typeconverter.h"
 
 /*
 ** New sidebar for GlyphX multiplayer. ST - 3/26/2019 12:24PM
@@ -5696,4 +5697,58 @@ bool BuildingClass::Rally_Unit(FootClass& unit)
     }
 
     return false;
+}
+
+TO_JSON(BuildingClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    BASE_CLASS_TO_JSON(TechnoClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+    FIELD_VALUE_TO_JSON(Factory, Factories.ID(p.Factory) + 1);
+    CONVERT_TD_FIELD_TO_JSON(ActLike);
+    BITFIELD_TO_JSON(IsReadyToCommence);
+    BITFIELD_TO_JSON(IsRepairing);
+    BITFIELD_TO_JSON(IsWrenchVisible);
+    BITFIELD_TO_JSON(IsGoingToBlow);
+    BITFIELD_TO_JSON(IsSurvivorless);
+    BITFIELD_TO_JSON(IsCharging);
+    BITFIELD_TO_JSON(IsCharged);
+    BITFIELD_TO_JSON(IsCaptured);
+    FIELD_TO_JSON(CountDown);
+    CONVERT_TD_FIELD_TO_JSON(BState);
+    CONVERT_TD_FIELD_TO_JSON(QueueBState);
+    CONVERT_TD_FIELD_TO_JSON(WhoLastHurtMe);
+    FIELD_TO_JSON(WhomToRepay);
+    FIELD_TO_JSON(LastStrength);
+    FIELD_TO_JSON(PlacementDelay);
+    FIELD_TO_JSON(RallyPoint);
+}
+
+FROM_JSON(BuildingClass)
+{
+    BASE_CLASS_FROM_JSON(TechnoClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BuildingClass, Class, BuildingTypeClass, StructType);
+
+    p.Factory = TARGET_TO_PTR_WITH_TYPE(j.at(NAMEOF(Factory)).get<int>(), FactoryClass);
+
+    PARSE_TD_FIELD_FROM_JSON(BuildingClass, ActLike, HousesType);
+    BITFIELD_FROM_JSON(IsReadyToCommence);
+    BITFIELD_FROM_JSON(IsRepairing);
+    BITFIELD_FROM_JSON(IsWrenchVisible);
+    BITFIELD_FROM_JSON(IsGoingToBlow);
+    BITFIELD_FROM_JSON(IsSurvivorless);
+    BITFIELD_FROM_JSON(IsCharging);
+    BITFIELD_FROM_JSON(IsCharged);
+    BITFIELD_FROM_JSON(IsCaptured);
+    FIELD_FROM_JSON(CountDown);
+    PARSE_TD_FIELD_FROM_JSON(BuildingClass, BState, BStateType);
+    PARSE_TD_FIELD_FROM_JSON(BuildingClass, QueueBState, BStateType);
+    PARSE_TD_FIELD_FROM_JSON(BuildingClass, WhoLastHurtMe, HousesType);
+    FIELD_FROM_JSON(WhomToRepay);
+    FIELD_FROM_JSON(LastStrength);
+    FIELD_FROM_JSON(PlacementDelay);
+    FIELD_FROM_JSON(RallyPoint);
 }

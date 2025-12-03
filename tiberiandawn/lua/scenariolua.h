@@ -24,39 +24,70 @@ private:
 };
 
 /**
- * Used to manage Lua runtime from game engine
- * static code.
+ * Used to manage Lua runtime from game engine static code.
+ *
+ * This class is called from:
+ *
+ *   - scenarioini.cpp => when loading a scenario from an INI file
+ *   - saveload.cpp    => when loading a scenario from a save file
+ *   - scenario.cpp    => when clearing the scenario state
+ *
  */
 class ScenarioLua final
 {
 public:
-     static const LuaEngine& Get_Engine();
+    static const LuaEngine& Get_Engine();
 
-     /**
-      * Scenario has been fully loaded, so time to 
-      * initialize Lua runtime with scenario data.
-      */
-     static void On_Scenario_Load(const CCINIClass& ini, GameEnum game_type, ScenarioClass& scenario, HouseClass* player);
+    /**
+     * Scenario has been fully loaded, so time to
+     * initialize Lua runtime with scenario data.
+     */
+    static void On_Scenario_Load(
+        const GameEnum& game_type,
+        const ScenarioClass& scenario,
+        const HouseClass& player,
+        const std::optional<std::string>& ini
+    );
 
-     #pragma region Triggers
+    static void On_Scenario_Load(
+        const GameEnum& game_type,
+        const ScenarioClass& scenario,
+        const HouseClass& player,
+        const CCINIClass& ini
+    );
 
-     // TODO: Create similar to call lua events for things other than scenario trigger (on defeated, on building built etc.)
-     static bool Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name);
+    static void On_Scenario_Load(
+        const GameEnum& game_type,
+        const ScenarioClass& scenario,
+        const HouseClass& player
+    );
 
-     static bool Exec_Script_Trigger(std::string_view trigger_name, std::string_view script_path);
+    /**
+     * Scenario state is being reset, so we need to ensure
+     * any existing Lua runtime state is destroyed.
+     */
+    static void On_Clear_Scenario();
 
-     #pragma endregion
+#pragma region Triggers
 
-     #pragma region Events
+    // TODO: Create similar to call lua events for things other than scenario trigger (on defeated, on building built etc.)
+    static bool Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name);
 
-     /**
-      * Iterate through FIFO lua events, discarding each after processing.
-      */
-     static void Process_Lua_Events(AtomicQueue<LuaEvent>& events);
+    static bool Exec_Script_Trigger(std::string_view trigger_name, std::string_view script_path);
 
-     #pragma endregion
+#pragma endregion
+
+#pragma region Events
+
+    /**
+     * Iterate through FIFO lua events, discarding each after processing.
+     */
+    static void Process_Lua_Events(AtomicQueue<LuaEvent>& events);
+
+#pragma endregion
 
 private:
+    static constexpr std::string_view NotFoundStr = "__NOT_FOUND__";
     static inline const auto& Logger = CncLogger::For(ScenarioLua);
     static inline std::optional<UniqueLuaEngine> Engine;
 
@@ -85,11 +116,11 @@ private:
      *       overrides can be applied appropriately and files down the chain are executed.
      */
     static void Exec_Scenario_Lua_Scripts(
-         const CCINIClass& ini,
-         ScenarioClass& scenario,
-         const std::string& scenario_name,
-         const std::string& faction_name,
-         const std::string& house_name
+        const std::optional<std::string>& ini_script_path,
+        const ScenarioClass& scenario,
+        const std::string& scenario_name,
+        const std::string& faction_name,
+        const std::string& house_name
     );
 
      ScenarioLua() = delete;

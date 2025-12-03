@@ -43,6 +43,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "super.h"
 
 /***********************************************************************************************
  * SuperClass::SuperClass -- Constructor for special super weapon objects.                     *
@@ -371,4 +372,36 @@ void SuperClass::Forced_Charge(bool player)
             Speak(VoxRecharge);
         }
     }
+}
+
+TO_JSON(SuperClass)
+{
+    BITFIELD_TO_JSON(IsPresent);
+    BITFIELD_TO_JSON(IsOneTime);
+    BITFIELD_TO_JSON(IsReady);
+    BITFIELD_TO_JSON(IsSuspended);
+    FIELD_TO_JSON(Control);
+    FIELD_TO_JSON(OldStage);
+    FIELD_TO_JSON(SuspendTime);
+    CONVERT_TD_FIELD_TO_JSON(VoxRecharge);
+    CONVERT_TD_FIELD_TO_JSON(VoxCharging);
+    CONVERT_TD_FIELD_TO_JSON(VoxImpatient);
+    CONVERT_TD_FIELD_TO_JSON(VoxSuspend);
+    FIELD_TO_JSON(RechargeTime);
+}
+
+FROM_JSON(SuperClass)
+{
+    BITFIELD_FROM_JSON(IsPresent);
+    BITFIELD_FROM_JSON(IsOneTime);
+    BITFIELD_FROM_JSON(IsReady);
+    BITFIELD_FROM_JSON(IsSuspended);
+    FIELD_FROM_JSON(Control);
+    FIELD_FROM_JSON(OldStage);
+    FIELD_FROM_JSON(SuspendTime);
+    PARSE_TD_FIELD_FROM_JSON(SuperClass, VoxRecharge, VoxType);
+    PARSE_TD_FIELD_FROM_JSON(SuperClass, VoxCharging, VoxType);
+    PARSE_TD_FIELD_FROM_JSON(SuperClass, VoxImpatient, VoxType);
+    PARSE_TD_FIELD_FROM_JSON(SuperClass, VoxSuspend, VoxType);
+    FIELD_FROM_JSON(RechargeTime);
 }

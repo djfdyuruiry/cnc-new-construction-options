@@ -35,6 +35,8 @@
 #ifndef SIDEBAR_H
 #define SIDEBAR_H
 
+#include "common/json.h"
+
 #include "function.h"
 #include "power.h"
 #include "factory.h"
@@ -367,6 +369,8 @@ public:
         */
         static char ClockTranslucentTable[(1 + 1) * 256];
 
+        JSON_FUNCTIONS(BuildType)
+        JSON_FUNCTIONS(StripClass)
     } Column[COLUMNS];
 
     /*
@@ -406,6 +410,8 @@ public:
     */
     static void const* SidebarShape1;
     static void const* SidebarShape2;
+
+    JSON_FUNCTIONS(SidebarClass)
 
 private:
     bool Activate_Repair(int control);

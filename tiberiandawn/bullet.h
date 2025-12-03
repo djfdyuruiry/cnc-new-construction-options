@@ -35,6 +35,8 @@
 #ifndef BULLET_H
 #define BULLET_H
 
+#include "common/json.h"
+
 #include "object.h"
 #include "fly.h"
 #include "fuse.h"
@@ -138,6 +140,8 @@ public:
     **	firing while moving is a good example.
     */
     unsigned IsInaccurate : 1;
+
+    JSON_FUNCTIONS(BulletClass)
 
 private:
     // Crude animation flag.

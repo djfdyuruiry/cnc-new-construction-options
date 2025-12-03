@@ -46,6 +46,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "typeconverter.h"
 
 #define GRAVITY 3
 
@@ -782,4 +783,40 @@ TARGET BulletClass::As_Target(void) const
 {
     Validate();
     return (Build_Target(KIND_BULLET, Bullets.ID(this)));
+}
+
+TO_JSON(BulletClass)
+{
+    FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
+
+    BASE_CLASS_TO_JSON(ObjectClass);
+    BASE_CLASS_TO_JSON(FlyClass);
+    BASE_CLASS_TO_JSON(FuseClass);
+
+    TECHNO_TYPE_PTR_REF_TO_JSON(Class);
+    OBJECT_TARGET_PTR_TO_JSON(Payback);
+    FIELD_TO_JSON(PrimaryFacing);
+    BITFIELD_TO_JSON(IsInaccurate);
+    BITFIELD_TO_JSON(IsToAnimate);
+    FIELD_TO_JSON(Altitude);
+    FIELD_TO_JSON(Riser);
+    FIELD_TO_JSON(TarCom);
+    BITFIELD_TO_JSON(IsLocked);
+}
+
+FROM_JSON(BulletClass)
+{
+    BASE_CLASS_FROM_JSON(ObjectClass);
+    BASE_CLASS_FROM_JSON(FlyClass);
+    BASE_CLASS_FROM_JSON(FuseClass);
+
+    TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BulletClass, Class, BulletTypeClass, BulletType);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Payback, TechnoClass);
+    FIELD_FROM_JSON(PrimaryFacing);
+    BITFIELD_FROM_JSON(IsInaccurate);
+    BITFIELD_FROM_JSON(IsToAnimate);
+    FIELD_FROM_JSON(Altitude);
+    FIELD_FROM_JSON(Riser);
+    FIELD_FROM_JSON(TarCom);
+    BITFIELD_FROM_JSON(IsLocked);
 }

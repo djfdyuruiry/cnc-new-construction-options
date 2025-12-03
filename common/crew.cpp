@@ -31,3 +31,15 @@
  *---------------------------------------------------------------------------------------------*
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#include "crew.h"
+
+TO_JSON(CrewClass)
+{
+    FIELD_TO_JSON(Kills);
+}
+
+FROM_JSON(CrewClass)
+{
+    FIELD_FROM_JSON(Kills);
+}

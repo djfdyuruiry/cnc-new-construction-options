@@ -8,6 +8,7 @@ AddTriggerLuaEvent::AddTriggerLuaEvent(std::string name, std::string definition)
     Definition = std::move(definition);
 }
 
+// BUG: Game crashes on parse if definition CSV is not valid
 void AddTriggerLuaEvent::Execute() const
 {
     LuaEvent::Execute();

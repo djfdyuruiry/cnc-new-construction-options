@@ -35,6 +35,8 @@
 #ifndef TEMPLATE_H
 #define TEMPLATE_H
 
+#include "common/json.h"
+
 #include "object.h"
 #include "type.h"
 
@@ -124,6 +126,8 @@ public:
     **	Dee-buggin' support.
     */
     int Validate(void) const;
+
+    JSON_FUNCTIONS(TemplateClass)
 
 private:
     /*

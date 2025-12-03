@@ -1712,3 +1712,54 @@ int ObjectClass::Full_Name(void) const
 {
     return Class_Of().Full_Name();
 };
+
+TO_JSON(ObjectClass)
+{
+    BASE_CLASS_TO_JSON(AbstractClass);
+
+    BITFIELD_TO_JSON(IsDown);
+    BITFIELD_TO_JSON(IsToDamage);
+    BITFIELD_TO_JSON(IsToDisplay);
+    BITFIELD_TO_JSON(IsInLimbo);
+    BITFIELD_TO_JSON(IsSelected);
+    FIELD_TO_JSON(IsSelectedMask);
+    BITFIELD_TO_JSON(IsAnimAttached);
+    OBJECT_TARGET_PTR_TO_JSON(Next);
+    OBJECT_TARGET_PTR_TO_JSON(Trigger);
+    FIELD_TO_JSON(Strength);
+}
+
+FROM_JSON(ObjectClass)
+{
+    BASE_CLASS_FROM_JSON(AbstractClass);
+
+    BITFIELD_FROM_JSON(IsDown);
+    BITFIELD_FROM_JSON(IsToDamage);
+    BITFIELD_FROM_JSON(IsToDisplay);
+    BITFIELD_FROM_JSON(IsInLimbo);
+    BITFIELD_FROM_JSON(IsSelected);
+    FIELD_FROM_JSON(IsSelectedMask);
+    BITFIELD_FROM_JSON(IsAnimAttached);
+    OBJECT_TARGET_PTR_FROM_JSON(Next);
+    TARGET_PTR_FROM_JSON_WITH_TYPE(Trigger, TriggerClass);
+    FIELD_FROM_JSON(Strength);
+}
+
+/**
+ * We don't actually serialize the object that the pointer
+ * resolves to here. This would create duplicate objects and
+ * break the link to the heap object.
+ *
+ * Instead, we use the existing TARGET functionality to store a
+ * reference to the object, which points to an instance in one
+ * of the TFixedIHeapClass heaps.
+ */
+PTR_TO_JSON(ObjectClass)
+{
+    j = OBJECT_PTR_TO_TARGET(p);
+}
+
+PTR_FROM_JSON(ObjectClass)
+{
+    p = OBJECT_TARGET_TO_PTR(j.get<TARGET>());
+}

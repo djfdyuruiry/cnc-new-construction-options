@@ -106,7 +106,11 @@
 #include "defines.h"
 #include "common/irandom.h"
 #include "ccini.h"
+#include "typeconverter.h"
 #include "common/fixed.h"
+#include "common/json.h"
+
+#include <bitset>
 
 /***********************************************************************************************
  * HouseClass::Validate -- validates house pointer															  *
@@ -621,7 +625,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (house == HOUSE_BAD && type->What_Am_I() == RTTI_UNITTYPE && ((UnitTypeClass const*)type)->Type == UNIT_STANK
         && level == 11
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, REQUIRE_TECH_CENTRE_FOR_STEALTH_TANK_IN_NOD_SCENARIO_11_RULE)) {
-        CNC_LOG_TRACE("NOD scenario 11 detected, changing Stealth Tank prerequisite to Tech Centre");
+        CNC_LOGGER_TRACE("NOD scenario 11 detected, changing Stealth Tank prerequisite to Tech Centre");
 
         pre = STRUCTF_MISSION;
         level = type->Scenario;
@@ -634,7 +638,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (house == HOUSE_GOOD && type->What_Am_I() == RTTI_INFANTRYTYPE
         && ((InfantryTypeClass const*)type)->Type == INFANTRY_E3 && level < 7
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, HIDE_BAZOOKA_FROM_GDI_UNTIL_SCENARIO_8_RULE)) {
-        CNC_LOG_TRACE("GDI scenario earlier than #8 detected, hiding Bazooka infantry from player");
+        CNC_LOGGER_TRACE("GDI scenario earlier than #8 detected, hiding Bazooka infantry from player");
 
         return (false);
     }
@@ -646,7 +650,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (house == HOUSE_GOOD && type->What_Am_I() == RTTI_UNITTYPE && ((UnitTypeClass const*)type)->Type == UNIT_MLRS
         && level < 9
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, HIDE_ROCKET_LAUNCHER_FROM_GDI_UNTIL_SCENARIO_9_RULE)) {
-        CNC_LOG_TRACE("GDI scenario earlier than #9 detected, hiding Rocket Launcher unit from player");
+        CNC_LOGGER_TRACE("GDI scenario earlier than #9 detected, hiding Rocket Launcher unit from player");
 
         return (false);
     }
@@ -656,7 +660,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_BAD && type->What_Am_I() == RTTI_UNITTYPE && ((UnitTypeClass const*)type)->Type == UNIT_APC
         && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_APC_FROM_NOD_RULE)) {
-        CNC_LOG_TRACE("NOD scenario detected, hiding APC unit from player");
+        CNC_LOGGER_TRACE("NOD scenario detected, hiding APC unit from player");
 
         return (false);
     }
@@ -671,13 +675,13 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
         && Class->House == HOUSE_GOOD) {
 		if (((BuildingTypeClass const*)type)->Type == STRUCT_TEMPLE 
             && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_TEMPLE_FROM_GDI_RULE)){
-            CNC_LOG_TRACE("GDI scenario detected, hiding Temple of Nod from player");
+            CNC_LOGGER_TRACE("GDI scenario detected, hiding Temple of Nod from player");
 			return false;
         }
 
         if (((BuildingTypeClass const*)type)->Type == STRUCT_OBELISK
             && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_OBELISK_FROM_GDI_RULE)) {
-            CNC_LOG_TRACE("GDI scenario detected, hiding Obelisk of Light from player");
+            CNC_LOGGER_TRACE("GDI scenario detected, hiding Obelisk of Light from player");
 			return false;
         }
 
@@ -690,7 +694,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (type->What_Am_I() == RTTI_UNITTYPE && ((UnitTypeClass const*)type)->Type == UNIT_MLRS
         && Class->House == HOUSE_BAD
         && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_ROCKET_LAUNCHER_FROM_NOD_RULE)) {
-        CNC_LOG_TRACE("NOD scenario detected, hiding Rocket Launcher unit from player");
+        CNC_LOGGER_TRACE("NOD scenario detected, hiding Rocket Launcher unit from player");
 
         return (false);
     }
@@ -702,7 +706,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (type->What_Am_I() == RTTI_BUILDINGTYPE && (((BuildingTypeClass const*)type)->Type == STRUCT_EYE)
         && Class->House == HOUSE_BAD
         && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_ADVANCED_COMM_CENTER_FROM_NOD_RULE)) {
-        CNC_LOG_TRACE("NOD scenario detected, hiding Advanced Comm Center from player");
+        CNC_LOGGER_TRACE("NOD scenario detected, hiding Advanced Comm Center from player");
 
         return (false);
     }
@@ -713,7 +717,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (house == HOUSE_BAD && level >= 12 && type->What_Am_I() == RTTI_BUILDINGTYPE
         && ((BuildingTypeClass const*)type)->Type == STRUCT_ADVANCED_POWER
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, ALLOW_NOD_TO_BUILD_ADVANCED_POWER_IN_SCENARIO_12_RULE)) {
-        CNC_LOG_TRACE("NOD scenario 12 detected, making Advanced Power Plant available");
+        CNC_LOGGER_TRACE("NOD scenario 12 detected, making Advanced Power Plant available");
 
         level = type->Scenario;
     }
@@ -724,7 +728,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (house == HOUSE_BAD && type->What_Am_I() == RTTI_BUILDINGTYPE
         && ((BuildingTypeClass const*)type)->Type == STRUCT_HELIPAD
         && Get_Bool_Rule(GAME_HOUSE_SECTION, HIDE_HELIPAD_FROM_NOD_RULE)) {
-        CNC_LOG_TRACE("NOD scenario detected, hiding Helipad from player");
+        CNC_LOGGER_TRACE("NOD scenario detected, hiding Helipad from player");
 
         return (false);
     }
@@ -735,7 +739,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     if (house == HOUSE_GOOD && level < 8 && type->What_Am_I() == RTTI_BUILDINGTYPE
         && ((BuildingTypeClass const*)type)->Type == STRUCT_SANDBAG_WALL
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, HIDE_SANDBAG_FROM_GDI_UNTIL_SCENARIO_9_RULE)) {
-        CNC_LOG_TRACE("GDI scenario earlier than #9 detected, hiding sandbags from player");
+        CNC_LOGGER_TRACE("GDI scenario earlier than #9 detected, hiding sandbags from player");
 
         return (false);
     }
@@ -746,7 +750,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_GOOD && level == 2 
         && Get_Bool_Rule(GAME_SCENARIOS_SECTION, SET_BUILD_LEVEL_TO_1_IN_GDI_SCENARIO_2_RULE)) {
-        CNC_LOG_TRACE("GDI scenario 2 detected, limiting tech level to 1");
+        CNC_LOGGER_TRACE("GDI scenario 2 detected, limiting tech level to 1");
 
         level = 1;
     }
@@ -754,7 +758,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     // ST - 8/23/2019 4:53PM
     if (DebugUnlockBuildables 
         || Get_Bool_Rule(GAME_CHEATS_SECTION, ALLOW_BUILDING_ALL_FOR_CURRENT_HOUSE_RULE)) {
-        CNC_LOG_TRACE("{} rule enabled, allowing player to build any standard object", ALLOW_BUILDING_ALL_FOR_CURRENT_HOUSE_RULE);
+        CNC_LOGGER_TRACE("{} rule enabled, allowing player to build any standard object", ALLOW_BUILDING_ALL_FOR_CURRENT_HOUSE_RULE);
 
         // prevent building non-standard objects (A10, civilians etc.)
         level = 98;
@@ -8319,3 +8323,331 @@ unsigned HouseClass::Get_Ally_Flags()
 }
 
 #endif
+
+TO_JSON(HouseClass::ZoneInfoStruct)
+{
+    FIELD_TO_JSON(AirDefense);
+    FIELD_TO_JSON(ArmorDefense);
+    FIELD_TO_JSON(InfantryDefense);
+}
+
+FROM_JSON(HouseClass::ZoneInfoStruct)
+{
+    FIELD_FROM_JSON(AirDefense);
+    FIELD_FROM_JSON(ArmorDefense);
+    FIELD_FROM_JSON(InfantryDefense);
+}
+
+TO_JSON(HouseClass)
+{
+    FIELD_TO_JSON(FirepowerBias);
+    FIELD_TO_JSON(GroundspeedBias);
+    FIELD_TO_JSON(AirspeedBias);
+    FIELD_TO_JSON(ArmorBias);
+    FIELD_TO_JSON(ROFBias);
+    FIELD_TO_JSON(CostBias);
+    FIELD_TO_JSON(BuildSpeedBias);
+    FIELD_TO_JSON(RepairDelay);
+    FIELD_TO_JSON(BuildDelay);
+    CONVERT_TD_FIELD_TO_JSON(ActLike);
+    BITFIELD_TO_JSON(IsActive);
+    BITFIELD_TO_JSON(IsHuman);
+    BITFIELD_TO_JSON(WasHuman);
+    BITFIELD_TO_JSON(IsStarted);
+    BITFIELD_TO_JSON(IsAlerted);
+    BITFIELD_TO_JSON(IsDiscovered);
+    BITFIELD_TO_JSON(IsMaxedOut);
+    BITFIELD_TO_JSON(IsDefeated);
+    BITFIELD_TO_JSON(IsToDie);
+    BITFIELD_TO_JSON(IsToWin);
+    BITFIELD_TO_JSON(IsToLose);
+    BITFIELD_TO_JSON(IsCivEvacuated);
+    BITFIELD_TO_JSON(IsRecalcNeeded);
+    BITFIELD_TO_JSON(IsVisionary);
+    BITFIELD_TO_JSON(IsAirstrikePending);
+    BITFIELD_OF_WIDTH_TO_JSON(NukePieces, 3);
+    BITFIELD_TO_JSON(IsFreeHarvester);
+    FIELD_TO_JSON(IonCannon);
+    FIELD_TO_JSON(AirStrike);
+    FIELD_TO_JSON(NukeStrike);
+    CONVERT_TD_FIELD_TO_JSON(JustBuilt);
+    FIELD_TO_JSON(Blockage);
+    FIELD_TO_JSON(BScan);
+    FIELD_TO_JSON(ActiveBScan);
+    FIELD_TO_JSON(NewBScan);
+    FIELD_TO_JSON(NewActiveBScan);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(OldBScan);
+#endif
+    FIELD_TO_JSON(UScan);
+    FIELD_TO_JSON(ActiveUScan);
+    FIELD_TO_JSON(NewUScan);
+    FIELD_TO_JSON(NewActiveUScan);
+    FIELD_TO_JSON(IScan);
+    FIELD_TO_JSON(ActiveIScan);
+    FIELD_TO_JSON(NewIScan);
+    FIELD_TO_JSON(NewActiveIScan);
+    FIELD_TO_JSON(AScan);
+    FIELD_TO_JSON(ActiveAScan);
+    FIELD_TO_JSON(NewAScan);
+    FIELD_TO_JSON(NewActiveAScan);
+    FIELD_TO_JSON(CreditsSpent);
+    FIELD_TO_JSON(HarvestedCredits);
+    FIELD_TO_JSON(CurUnits);
+    FIELD_TO_JSON(CurBuildings);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(CurInfantry);
+    FIELD_TO_JSON(CurAircraft);
+#endif
+    FIELD_TO_JSON(MaxUnit);
+    FIELD_TO_JSON(MaxBuilding);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(MaxInfantry);
+    FIELD_TO_JSON(MaxAircraft);
+#endif
+    FIELD_TO_JSON(Tiberium);
+    FIELD_TO_JSON(Credits);
+    FIELD_TO_JSON(InitialCredits);
+    FIELD_TO_JSON(Capacity);
+    BITFIELD_TO_JSON(Resigned);
+    BITFIELD_TO_JSON(IGaveUp);
+    FIELD_TO_JSON(AircraftTotals);
+    FIELD_TO_JSON(InfantryTotals);
+    FIELD_TO_JSON(UnitTotals);
+    FIELD_TO_JSON(BuildingTotals);
+    FIELD_TO_JSON(DestroyedAircraft);
+    FIELD_TO_JSON(DestroyedInfantry);
+    FIELD_TO_JSON(DestroyedUnits);
+    FIELD_TO_JSON(DestroyedBuildings);
+    FIELD_TO_JSON(CapturedBuildings);
+    FIELD_TO_JSON(TotalCrates);
+    FIELD_TO_JSON(AircraftFactories);
+    FIELD_TO_JSON(InfantryFactories);
+    FIELD_TO_JSON(UnitFactories);
+    FIELD_TO_JSON(BuildingFactories);
+    FIELD_TO_JSON(SpecialFactories);
+    FIELD_TO_JSON(Power);
+    FIELD_TO_JSON(Drain);
+    CONVERT_TD_FIELD_TO_JSON(Edge);
+    FIELD_TO_JSON(AircraftFactory);
+    FIELD_TO_JSON(InfantryFactory);
+    FIELD_TO_JSON(UnitFactory);
+    FIELD_TO_JSON(BuildingFactory);
+    FIELD_TO_JSON(SpecialFactory);
+    CONVERT_TD_FIELD_TO_JSON(Radar);
+    FIELD_TO_JSON(FlagLocation);
+    FIELD_TO_JSON(FlagHome);
+    CONVERT_TD_FIELD_TO_JSON(RemapColor);
+    CSTR_FIELD_TO_JSON(Name);
+    FIELD_TO_JSON(UnitsKilled);
+    FIELD_TO_JSON(UnitsLost);
+    FIELD_TO_JSON(BuildingsKilled);
+    FIELD_TO_JSON(BuildingsLost);
+    CONVERT_TD_FIELD_TO_JSON(WhoLastHurtMe);
+    FIELD_TO_JSON(StartLocationOverride);
+#ifdef USE_RA_AI
+    FIELD_TO_JSON(Center);
+    FIELD_TO_JSON(Radius);
+    FIELD_TO_JSON(ZoneInfo);
+    FIELD_TO_JSON(LATime);
+    CONVERT_TD_FIELD_TO_JSON(LAType);
+    CONVERT_TD_FIELD_TO_JSON(LAZone);
+    CONVERT_TD_FIELD_TO_JSON(LAEnemy);
+    FIELD_TO_JSON(ToCapture);
+    FIELD_TO_JSON(RadarSpied);
+    FIELD_TO_JSON(PointTotal);
+    FIELD_TO_JSON(BQuantity);
+    FIELD_TO_JSON(UQuantity);
+    FIELD_TO_JSON(IQuantity);
+    FIELD_TO_JSON(AQuantity);
+    CONVERT_TD_FIELD_TO_JSON(Enemy);
+    CONVERT_TD_FIELD_TO_JSON(BuildStructure);
+    CONVERT_TD_FIELD_TO_JSON(BuildUnit);
+    CONVERT_TD_FIELD_TO_JSON(BuildInfantry);
+    CONVERT_TD_FIELD_TO_JSON(BuildAircraft);
+    CONVERT_TD_FIELD_TO_JSON(State);
+    BITFIELD_TO_JSON(IsBaseBuilding);
+    BITFIELD_TO_JSON(IsTiberiumShort);
+    BITFIELD_TO_JSON(IsParanoid);
+    FIELD_TO_JSON(IQ);
+    CONVERT_TD_FIELD_TO_JSON(Difficulty);
+#endif
+    FIELD_TO_JSON(Allies);
+    FIELD_TO_JSON(AlertTime);
+    FIELD_TO_JSON(BorrowedTime);
+    FIELD_TO_JSON(FreeHarvester);
+    FIELD_TO_JSON(Attack);
+    FIELD_TO_JSON(AITimer);
+    FIELD_TO_JSON(DamageTime);
+    FIELD_TO_JSON(TeamTime);
+    FIELD_TO_JSON(TriggerTime);
+    FIELD_TO_JSON(SpeakAttackDelay);
+    FIELD_TO_JSON(SpeakPowerDelay);
+    FIELD_TO_JSON(SpeakMoneyDelay);
+    FIELD_TO_JSON(SpeakMaxedDelay);
+    FIELD_TO_JSON(BlitzTime);
+    FIELD_TO_JSON(NukeDest);
+    FIELD_TO_JSON(VisibleCredits);
+    FIELD_TO_JSON(DebugUnlockBuildables);
+
+    // Class field
+    FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? HOUSE_NONE : p.Class->House));
+}
+
+FROM_JSON(HouseClass)
+{
+    FIELD_FROM_JSON(FirepowerBias);
+    FIELD_FROM_JSON(GroundspeedBias);
+    FIELD_FROM_JSON(AirspeedBias);
+    FIELD_FROM_JSON(ArmorBias);
+    FIELD_FROM_JSON(ROFBias);
+    FIELD_FROM_JSON(CostBias);
+    FIELD_FROM_JSON(BuildSpeedBias);
+    FIELD_FROM_JSON(RepairDelay);
+    FIELD_FROM_JSON(BuildDelay);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, ActLike, HousesType);
+    BITFIELD_FROM_JSON(IsActive);
+    BITFIELD_FROM_JSON(IsHuman);
+    BITFIELD_FROM_JSON(WasHuman);
+    BITFIELD_FROM_JSON(IsStarted);
+    BITFIELD_FROM_JSON(IsAlerted);
+    BITFIELD_FROM_JSON(IsDiscovered);
+    BITFIELD_FROM_JSON(IsMaxedOut);
+    BITFIELD_FROM_JSON(IsDefeated);
+    BITFIELD_FROM_JSON(IsToDie);
+    BITFIELD_FROM_JSON(IsToWin);
+    BITFIELD_FROM_JSON(IsToLose);
+    BITFIELD_FROM_JSON(IsCivEvacuated);
+    BITFIELD_FROM_JSON(IsRecalcNeeded);
+    BITFIELD_FROM_JSON(IsVisionary);
+    BITFIELD_FROM_JSON(IsAirstrikePending);
+    BITFIELD_OF_WIDTH_FROM_JSON(HouseClass, NukePieces, 3);
+    BITFIELD_FROM_JSON(IsFreeHarvester);
+    FIELD_FROM_JSON(IonCannon);
+    FIELD_FROM_JSON(AirStrike);
+    FIELD_FROM_JSON(NukeStrike);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, JustBuilt, StructType);
+    FIELD_FROM_JSON(Blockage);
+    FIELD_FROM_JSON(BScan);
+    FIELD_FROM_JSON(ActiveBScan);
+    FIELD_FROM_JSON(NewBScan);
+    FIELD_FROM_JSON(NewActiveBScan);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(OldBScan);
+#endif
+    FIELD_FROM_JSON(UScan);
+    FIELD_FROM_JSON(ActiveUScan);
+    FIELD_FROM_JSON(NewUScan);
+    FIELD_FROM_JSON(NewActiveUScan);
+    FIELD_FROM_JSON(IScan);
+    FIELD_FROM_JSON(ActiveIScan);
+    FIELD_FROM_JSON(NewIScan);
+    FIELD_FROM_JSON(NewActiveIScan);
+    FIELD_FROM_JSON(AScan);
+    FIELD_FROM_JSON(ActiveAScan);
+    FIELD_FROM_JSON(NewAScan);
+    FIELD_FROM_JSON(NewActiveAScan);
+    FIELD_FROM_JSON(CreditsSpent);
+    FIELD_FROM_JSON(HarvestedCredits);
+    FIELD_FROM_JSON(CurUnits);
+    FIELD_FROM_JSON(CurBuildings);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(CurInfantry);
+    FIELD_FROM_JSON(CurAircraft);
+#endif
+    FIELD_FROM_JSON(MaxUnit);
+    FIELD_FROM_JSON(MaxBuilding);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(MaxInfantry);
+    FIELD_FROM_JSON(MaxAircraft);
+#endif
+    FIELD_FROM_JSON(Tiberium);
+    FIELD_FROM_JSON(Credits);
+    FIELD_FROM_JSON(InitialCredits);
+    FIELD_FROM_JSON(Capacity);
+    BITFIELD_FROM_JSON(Resigned);
+    BITFIELD_FROM_JSON(IGaveUp);
+    FIELD_FROM_JSON(AircraftTotals);
+    FIELD_FROM_JSON(InfantryTotals);
+    FIELD_FROM_JSON(UnitTotals);
+    FIELD_FROM_JSON(BuildingTotals);
+    FIELD_FROM_JSON(DestroyedAircraft);
+    FIELD_FROM_JSON(DestroyedInfantry);
+    FIELD_FROM_JSON(DestroyedUnits);
+    FIELD_FROM_JSON(DestroyedBuildings);
+    FIELD_FROM_JSON(CapturedBuildings);
+    FIELD_FROM_JSON(TotalCrates);
+    FIELD_FROM_JSON(AircraftFactories);
+    FIELD_FROM_JSON(InfantryFactories);
+    FIELD_FROM_JSON(UnitFactories);
+    FIELD_FROM_JSON(BuildingFactories);
+    FIELD_FROM_JSON(SpecialFactories);
+    FIELD_FROM_JSON(Power);
+    FIELD_FROM_JSON(Drain);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Edge, SourceType);
+    FIELD_FROM_JSON(AircraftFactory);
+    FIELD_FROM_JSON(InfantryFactory);
+    FIELD_FROM_JSON(UnitFactory);
+    FIELD_FROM_JSON(BuildingFactory);
+    FIELD_FROM_JSON(SpecialFactory);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Radar, RadarEnum);
+    FIELD_FROM_JSON(FlagLocation);
+    FIELD_FROM_JSON(FlagHome);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, RemapColor, PlayerColorType);
+    CSTR_FIELD_FROM_JSON(HouseClass, Name);
+    FIELD_FROM_JSON(UnitsKilled);
+    FIELD_FROM_JSON(UnitsLost);
+    FIELD_FROM_JSON(BuildingsKilled);
+    FIELD_FROM_JSON(BuildingsLost);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, WhoLastHurtMe, HousesType);
+    FIELD_FROM_JSON(StartLocationOverride);
+#ifdef USE_RA_AI
+    FIELD_FROM_JSON(Center);
+    FIELD_FROM_JSON(Radius);
+    FIELD_FROM_JSON(ZoneInfo);
+    FIELD_FROM_JSON(LATime);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, LAType, RTTIType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, LAZone, ZoneType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, LAEnemy, HousesType);
+    FIELD_FROM_JSON(ToCapture);
+    FIELD_FROM_JSON(RadarSpied);
+    FIELD_FROM_JSON(PointTotal);
+    FIELD_FROM_JSON(BQuantity);
+    FIELD_FROM_JSON(UQuantity);
+    FIELD_FROM_JSON(IQuantity);
+    FIELD_FROM_JSON(AQuantity);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Enemy, HousesType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildStructure, StructType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildUnit, UnitType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildInfantry, InfantryType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, BuildAircraft, AircraftType);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, State, StateType);
+    BITFIELD_FROM_JSON(IsBaseBuilding);
+    BITFIELD_FROM_JSON(IsTiberiumShort);
+    BITFIELD_FROM_JSON(IsParanoid);
+    FIELD_FROM_JSON(IQ);
+    PARSE_TD_FIELD_FROM_JSON(HouseClass, Difficulty, DiffType);
+#endif
+    FIELD_FROM_JSON(Allies);
+    FIELD_FROM_JSON(AlertTime);
+    FIELD_FROM_JSON(BorrowedTime);
+    FIELD_FROM_JSON(FreeHarvester);
+    FIELD_FROM_JSON(Attack);
+    FIELD_FROM_JSON(AITimer);
+    FIELD_FROM_JSON(DamageTime);
+    FIELD_FROM_JSON(TeamTime);
+    FIELD_FROM_JSON(TriggerTime);
+    FIELD_FROM_JSON(SpeakAttackDelay);
+    FIELD_FROM_JSON(SpeakPowerDelay);
+    FIELD_FROM_JSON(SpeakMoneyDelay);
+    FIELD_FROM_JSON(SpeakMaxedDelay);
+    FIELD_FROM_JSON(BlitzTime);
+    FIELD_FROM_JSON(NukeDest);
+    FIELD_FROM_JSON(VisibleCredits);
+    FIELD_FROM_JSON(DebugUnlockBuildables);
+
+    // Class field
+    const_cast<HouseTypeClass const*&>(p.Class) = reinterpret_cast<HouseTypeClass const*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(j, NAMEOF(HouseClass), NAMEOF(Class))
+    );
+}

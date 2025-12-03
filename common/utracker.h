@@ -36,7 +36,10 @@
 
 #ifndef UTRACKER_H
 #define UTRACKER_H
+
 #include <cstdlib>
+
+#include "common/json.h"
 
 /*
 ** UnitTracker Class
@@ -120,6 +123,7 @@ public:
         InNetworkFormat = 0; // Flag that data is now in PC format
     }
 
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(UnitTrackerClass, InNetworkFormat, UnitTotals)
 private:
     int InNetworkFormat;
     int UnitTotals[N];

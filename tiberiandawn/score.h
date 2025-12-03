@@ -35,6 +35,8 @@
 #ifndef SCORE_H
 #define SCORE_H
 
+#include "common/json.h"
+
 #include "unit.h"
 #include "building.h"
 
@@ -73,6 +75,21 @@ public:
     bool Save(FileClass& file);
     void Code_Pointers(void);
     void Decode_Pointers(void);
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        ScoreClass,
+        Score,
+        NKilled,
+        GKilled,
+        CKilled,
+        NBKilled,
+        GBKilled,
+        CBKilled,
+        NHarvested,
+        GHarvested,
+        CHarvested,
+        ElapsedTime
+    )
 
 protected:
 private:

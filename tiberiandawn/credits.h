@@ -35,6 +35,10 @@
 #ifndef CREDITS_H
 #define CREDITS_H
 
+#include "common/json.h"
+
+#include "noinit.h"
+
 class HouseClass;
 extern HouseClass* PlayerPtr;
 
@@ -71,6 +75,7 @@ public:
     unsigned IsUp : 1;
     unsigned IsAudible : 1;
 
+    JSON_FUNCTIONS(CreditClass)
 private:
     int Countdown; // Delay between ticks.
 };

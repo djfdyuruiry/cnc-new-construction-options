@@ -250,7 +250,7 @@ function(Main)
     string(APPEND RULE_KEYS_DEFINES "#define ${SECTION_DEFINE} \"${SECTION_NAME}\"\n")
 
     # rules-nco.cpp
-    string(CONCAT SECTION_LEAD_IN "\n    CNC_LOG_INFO(\"Processing rule section: [{}]\", ${SECTION_DEFINE});\n"
+    string(CONCAT SECTION_LEAD_IN "\n    CNC_LOGGER_INFO(\"Processing rule section: [{}]\", ${SECTION_DEFINE});\n"
                                  "\n    Assert_Section_Not_Present(${SECTION_DEFINE});\n"
                                  "\n"
                                  "    Sections[${SECTION_DEFINE}]\n"

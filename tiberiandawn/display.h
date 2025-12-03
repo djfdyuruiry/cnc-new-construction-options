@@ -35,6 +35,8 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "common/json.h"
+
 #include "map.h"
 #include "layer.h"
 
@@ -218,6 +220,7 @@ public:
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
 
+    JSON_FUNCTIONS(DisplayClass)
 protected:
     virtual void Mouse_Right_Press(void);
     virtual void Mouse_Left_Press(int x, int y);

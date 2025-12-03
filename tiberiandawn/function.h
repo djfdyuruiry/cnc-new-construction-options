@@ -626,15 +626,19 @@ int Create_Air_Reinforcement(HouseClass* house,
 */
 bool Load_Misc_Values(FileClass& file);
 bool Save_Misc_Values(FileClass& file);
-bool Get_Savefile_Info(int id, char* buf, unsigned* scenp, HousesType* housep);
+bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep);
+bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* housep);
 bool Load_Game(int id);
 bool Load_Game(const char* file_name);
+bool Load_Game_Binary(const char* file_name);
 bool Save_Game(int id, char* descr);
 bool Save_Game(const char* file_name, const char* descr);
+bool Save_Game_Binary(const char* file_name, const char* descr);
 TARGET TechnoType_To_Target(TechnoTypeClass const* ptr);
 TechnoTypeClass const* Target_To_TechnoType(TARGET target);
 void Code_All_Pointers(void);
-void Decode_All_Pointers(void);
+void Decode_All_Pointers(const HousesType& house);
+void Decode_All_Pointers_Binary();
 void Dump(void);
 
 /*
@@ -981,9 +985,9 @@ inline bool Sim_Percent_Chance(int percent)
 #ifdef CHEAT_KEYS
 #define Check_Ptr(ptr, file, line)                                                                                     \
     {                                                                                                                  \
-        if (!ptr) {                                                                                                    \
-            Mono_Clear_Screen();                                                                                       \
-            Mono_Printf("NULL Pointer, Module:%s, line:%d!\n", file, line);                                            \
+        if (!(ptr)) {                                                                                                  \
+            CNC_LOG_ERROR("NULL Pointer detected, aborting program!");                                                 \
+            TRIGGER_DEBUGGER;                                                                                          \
             Prog_End();                                                                                                \
             exit(EXIT_SUCCESS);                                                                                        \
         }                                                                                                              \

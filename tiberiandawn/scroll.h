@@ -35,6 +35,8 @@
 #ifndef SCROLL_H
 #define SCROLL_H
 
+#include "common/json.h"
+
 #include "help.h"
 
 class ScrollClass : public HelpClass
@@ -85,6 +87,8 @@ public:
     */
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
+
+    JSON_FUNCTIONS(ScrollClass)
 };
 
 #endif
