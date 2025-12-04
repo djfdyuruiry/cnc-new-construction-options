@@ -174,7 +174,7 @@ jobs:
         mkdir artifact
         
         # ninja build log (useful for profiling compilation)
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/nco/.ninja_log
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ steps.set_preset.outputs.preset }}/.ninja_log
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           # prep debug symbols

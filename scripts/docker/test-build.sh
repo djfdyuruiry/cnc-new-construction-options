@@ -33,7 +33,7 @@ function main() {
 
   # extract build output
   mkdir -p "${script_path:?}/bin"
-  docker cp nco-run-build:/build/build/nco/RelWithDebInfo/. "${script_path}/bin/"
+  docker cp nco-run-build:/build/build/release/RelWithDebInfo/. "${script_path}/bin/"
 
   # cleanup container
   docker rm nco-run-build

@@ -59,6 +59,6 @@ ENTRYPOINT "/usr/bin/bash" "-c" "\
   && ./scripts/bin/vcpkg install --triplet=x64-mingw-dynamic --x-install-root=/tmp/vcpkg_installed \
   && jq 'del((.configurePresets[] | select(.name == \"release\")).cacheVariables[\"CMAKE_TOOLCHAIN_FILE\"])' CMakePresets.json > /tmp/CMakePresets1.json \
   && mv /tmp/CMakePresets1.json CMakePresets.json \
-  && cmake --workflow --fresh --preset nco \
-  && tree build/nco/RelWithDebInfo \
+  && cmake --workflow --fresh --preset release \
+  && tree build/release/RelWithDebInfo \
 "
