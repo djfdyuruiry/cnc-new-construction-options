@@ -160,7 +160,7 @@ jobs:
         mkdir artifact
 
         # ninja build log (useful for profiling compilation)
-        7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ steps.set_preset.outputs.preset }}/.ninja_log
+        7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/.ninja_log
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           # debug symbols
