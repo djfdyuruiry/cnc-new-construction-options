@@ -200,11 +200,11 @@ jobs:
 
     - name: Add internal tools to archive
       run: |
-        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg
-        ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe
-        ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg
+        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dbg
+        ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.exe
+        ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.exe
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.exe
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dbg
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

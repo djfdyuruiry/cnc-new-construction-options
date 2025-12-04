@@ -198,7 +198,7 @@ const char* PathsClass::User_Path()
 {
     if (UserPath.empty()) {
 #ifdef __APPLE__
-        UserPath = User_Home() + "/Library/Application Support/NCO";
+        UserPath = User_Home() + "/Library/Application Support/nco";
 #else
         UserPath = Get_Posix_Default("XDG_CONFIG_HOME", ".config") + "/nco";
 #endif

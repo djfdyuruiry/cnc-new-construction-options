@@ -205,10 +205,10 @@ jobs:
 
     - name: Add internal tools to archive
       run: |
-        dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dSYM
-        strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dSYM
+        dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
+        strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

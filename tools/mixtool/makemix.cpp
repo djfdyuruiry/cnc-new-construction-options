@@ -54,11 +54,11 @@ void Print_Help()
         snprintf(revision, sizeof(revision), "r%d ", GitRevision);
     }
 
-    printf("\nncomix %s%s%s\n\n"
+    printf("\nnco-mix %s%s%s\n\n"
            "Usage:\n"
-           "  ncomix (-c | -x) [-d <path>] [-f <file>] <mixfile>\n"
-           "  ncomix -l <mixfile>\n"
-           "  ncomix -h | --help\n\n"
+           "  nco-mix (-c | -x) [-d <path>] [-f <file>] <mixfile>\n"
+           "  nco-mix -l <mixfile>\n"
+           "  nco-mix -h | --help\n\n"
            "Options:\n"
            "  -c --create     Pack loose files into a mix file.\n"
            "  -x --extract    Extract files from a mix file.\n"
