@@ -17,7 +17,7 @@ TiberianDawn:
   DisplayName: >-
     Command & Conquer: Tiberian Dawn
   NcoZipPath: td
-  InstallPostfix: td
+  InstallPostfix: tiberian-dawn
   Binary: nco-td
   DiscImages:
     - SortOrder: 1
@@ -92,7 +92,7 @@ RedAlert:
   DisplayName: >-
     Command & Conquer: Red Alert
   NcoZipPath: ra
-  InstallPostfix: ra
+  InstallPostfix: red-alert
   Binary: nco-ra
   DiscImages:
     - SortOrder: 1
