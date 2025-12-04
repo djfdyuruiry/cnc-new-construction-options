@@ -48,7 +48,7 @@ env:
   NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
 
 jobs:
-  vanilla_win_gcc:
+  nco_win_gcc:
     if: contains(github.event.pull_request.labels.*.name, 'mingw')
     runs-on: ubuntu-22.04
     strategy:
@@ -148,7 +148,7 @@ jobs:
         mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
           -Source "${{ env.NUGET_URL }}"
 
-    - name: Build Vanilla Conquer
+    - name: Build NCO
       env:
         CMAKE_MAKE_PROGRAM: ninja
         CMAKE_FIND_ROOT_PATH: "/tmp/vcpkg_installed/x64-mingw-dynamic"
@@ -173,43 +173,43 @@ jobs:
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           # prepare debug symbols
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.exe
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora.exe
 
           # ra bundle
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
           # prepare debug symbols
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.exe
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd.exe
 
           # td bundle
           rm -f ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg
         fi
 
     - name: Add internal tools to archive
       run: |
-        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg
-        ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.exe
-        ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.exe
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.exe
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg
+        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg
+        ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe
+        ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.exe
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: vanilla-conquer-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}
+        name: nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}
         path: artifact
 
     - name: Upload development release

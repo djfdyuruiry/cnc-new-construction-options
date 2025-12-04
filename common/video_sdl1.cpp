@@ -125,7 +125,7 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
     }
 
     SDL_SetPalette(window, SDL_LOGPAL, logpal, 0, 256);
-    SDL_WM_SetCaption("Vanilla Conquer", NULL);
+    SDL_WM_SetCaption("CNC: New Construction Options", NULL);
 
     DBG_INFO("Created SDL1 %s window in %dx%d@%dbpp",
              (window->flags & SDL_FULLSCREEN ? "fullscreen" : "windowed"),

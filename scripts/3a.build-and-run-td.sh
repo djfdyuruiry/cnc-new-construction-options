@@ -40,7 +40,7 @@ function main() {
   fi
 
   "${script_path}/1.build.sh" "${preset}" "${build_type}"
-  "${script_path}/2.deploy.sh" "${preset}" "td" "vanillatd" "${TD_DATA_PATH}/vanillatd-dev"
+  "${script_path}/2.deploy.sh" "${preset}" "td" "ncotd" "${TD_DATA_PATH}/ncotd-dev"
 
   pushd_silent "${TD_DATA_PATH}"
 
@@ -56,14 +56,14 @@ function main() {
   fi
 
   # run with debug logging and capture profiling info
-  NCO_LOG_LEVEL="debug" ${prefix_command} ./vanillatd-dev -CHEAT "$@" || {
+  NCO_LOG_LEVEL="debug" ${prefix_command} ./ncotd-dev -CHEAT "$@" || {
     exit_code="$?"
     log_error "Game finished with non-zero exit code: ${exit_code}"
   }
 
   log_warning "View full game log: $(pwd)/nco.log"
 
-  rm "vanillatd-dev"
+  rm "ncotd-dev"
   popd_silent
 
   exit "${exit_code}"

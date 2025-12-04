@@ -38,7 +38,7 @@ function main() {
   fi
 
   "${script_path}/1.build.sh" "${preset}" "${build_type}"
-  "${script_path}/2.deploy.sh" "${preset}" "ra" "vanillara" "${RA_DATA_PATH}/vanillara-dev"
+  "${script_path}/2.deploy.sh" "${preset}" "ra" "ncora" "${RA_DATA_PATH}/ncora-dev"
 
   pushd_silent "${RA_DATA_PATH}"
 
@@ -54,14 +54,14 @@ function main() {
   fi
 
   # run with debug logging and capture profiling info
-  NCO_LOG_LEVEL="debug" ${prefix_command} ./vanillara-dev "$@" || {
+  NCO_LOG_LEVEL="debug" ${prefix_command} ./ncora-dev "$@" || {
     exit_code="$?"
     log_error "Game finished with non-zero exit code: ${exit_code}"
   }
 
   log_warning "View full game log: $(pwd)/nco.log"
 
-  rm "vanillara-dev"
+  rm "ncora-dev"
   popd_silent
 
   exit "${exit_code}"

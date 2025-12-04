@@ -289,7 +289,7 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
         Settings.Video.WindowHeight = win_h;
     }
 
-    window = SDL_CreateWindow("Vanilla Conquer", x, y, win_w, win_h, win_flags);
+    window = SDL_CreateWindow("CNC: New Construction Options", x, y, win_w, win_h, win_flags);
 
     if (window == nullptr) {
         DBG_ERROR("SDL_CreateWindow failed: %s", SDL_GetError());

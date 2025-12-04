@@ -50,7 +50,7 @@ env:
   NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
 
 jobs:
-  vanilla-linux:
+  nco-linux:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -157,7 +157,7 @@ jobs:
         mono nuget.exe setapikey "${{ secrets.GITHUB_TOKEN }}" \
           -Source "${{ env.NUGET_URL }}"
 
-    - name: Build Vanilla Conquer
+    - name: Build NCO
       env:
         CC: ${{ matrix.compiler.cc }}
         CXX: ${{ matrix.compiler.cxx }}
@@ -179,52 +179,52 @@ jobs:
       run: |
         # prep debug symbols
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
-          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara
-          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg
+          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora
+          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
-          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd
-          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg
+          strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd
+          objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd
         fi
 
         mkdir artifact
 
         # ninja build log (useful for profiling compilation)
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/nco/.ninja_log
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/nco/.ninja_log
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
           # ra bundle
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dbg
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dbg
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg
         fi
 
     - name: Add internal tools to archive
       run: |
-        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg
-        objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
-        strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
+        cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg
+        objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix
+        strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix
 
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dbg
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncomix.dbg
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: vanilla-conquer-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64
+        name: nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64
         path: artifact
 
     - name: Upload development release

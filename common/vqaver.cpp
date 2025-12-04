@@ -13,7 +13,7 @@
 #include "gitinfo.h"
 #include <stdio.h>
 
-#define VQA_LIBNAME "VQALib (VanillaConquer)"
+#define VQA_LIBNAME "VQALib (CncNco)"
 
 // Version numbers
 #define VQA_VERSION_MAJOR    "2"
