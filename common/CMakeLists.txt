@@ -201,14 +201,14 @@ if(WIN32)
     endif()
 endif()
 
-if(BUILD_REMASTERTD OR BUILD_REMASTERRA)
+if(BUILD_REMASTER_TD OR BUILD_REMASTER_RA)
     add_library(commonr STATIC ${COMMONR_SRC})
     target_compile_definitions(commonr PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${REMASTER_DEFS})
     target_link_libraries(commonr PUBLIC common ${REMASTER_LIBS})
 endif()
 
 # These options currently require directx components from the aug 2007 SDK.
-if(BUILD_NCOTD OR BUILD_NCORA OR BUILD_TESTS)
+if(BUILD_NCO_TD OR BUILD_NCO_RA OR BUILD_TESTS)
     add_library(commonv STATIC ${COMMONV_SRC})
     target_compile_definitions(commonv PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${NCO_DEFS})
     target_link_libraries(commonv PUBLIC common ${NCO_LIBS})

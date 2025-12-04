@@ -16,9 +16,9 @@ on:
         required: false
         default: 'x86_64'
       preset:
-        description: 'Build preset (e.g., nco-tiberian-dawn)'
+        description: 'Build preset (e.g., tiberian-dawn)'
         required: false
-        default: 'nco-tiberian-dawn'
+        default: 'tiberian-dawn'
 
   # TODO: Builds *only* run for PRs and *only* if you label the PR with 'mingw'.
   #       I want to save on action minute usage for now.
@@ -57,7 +57,7 @@ jobs:
           - win: "${{ github.event.inputs.arch_win || 'Win64' }}"
             lin: "${{ github.event.inputs.arch_lin || 'x86_64' }}"
         preset:
-          - "${{ github.event.inputs.preset || 'nco-tiberian-dawn' }}"
+          - "${{ github.event.inputs.preset || 'tiberian-dawn' }}"
 
     steps:
     - uses: actions/checkout@v4
@@ -108,23 +108,23 @@ jobs:
         PRESET=""
 
         if [ "${{ steps.changes.outputs.nco }}" = "true" ]; then
-          echo "Changes to shared files detected - building everything using cmake preset: nco"
-          PRESET="nco"
+          echo "Changes to shared files detected - building everything using cmake preset: release"
+          PRESET="release"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] && [ "${{ steps.changes.outputs.td }}" = "true" ]; then
-          echo "Red Alert & Tiberian Dawn changes detected - building both using cmake preset: nco"
-          PRESET="nco"
+          echo "Red Alert & Tiberian Dawn changes detected - building both using cmake preset: release"
+          PRESET="release"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] ; then
-          echo "Only Red Alert changes detected - using cmake preset: nco-red-alert"
-          PRESET="nco-red-alert"
+          echo "Only Red Alert changes detected - using cmake preset: red-alert"
+          PRESET="red-alert"
         elif [ "${{ steps.changes.outputs.td }}" = "true" ]; then
-          echo "Only Tiberian Dawn changes detected - using cmake preset: nco-tiberian-dawn"
-          PRESET="nco-tiberian-dawn"
+          echo "Only Tiberian Dawn changes detected - using cmake preset: tiberian-dawn"
+          PRESET="tiberian-dawn"
         elif [ "${{ steps.changes.outputs.ci }}" = "true" ]; then
-          echo "Workflow yml changes detected - testing workflow changes using cmake preset: nco"
-          PRESET="nco"
+          echo "Workflow yml changes detected - testing workflow changes using cmake preset: release"
+          PRESET="release"
         else
-          echo "WARNING: Unable to match changed files to a preset - defaulting to building everything using cmake preset: nco"
-          PRESET="nco"
+          echo "WARNING: Unable to match changed files to a preset - defaulting to building everything using cmake preset: release"
+          PRESET="release"
         fi
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
@@ -171,31 +171,31 @@ jobs:
       run: |
         mkdir artifact
 
-        if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
+        if [ "${{ steps.set_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           # prepare debug symbols
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/ncora.exe
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.exe
 
           # ra bundle
           7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
           # debug symbols
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncora.dbg
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dbg
         fi
 
-        if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
+        if [ "${{ steps.set_preset.outputs.preset }}" != "red-alert" ]; then
           # prepare debug symbols
-          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg
-          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd.exe
-          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/ncotd.exe
+          cp ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.exe ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dbg
+          ${{ matrix.arch.lin }}-w64-mingw32-strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.exe
+          ${{ matrix.arch.lin }}-w64-mingw32-objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.exe
 
           # td bundle
           rm -f ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
           7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # debug symbols
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ncotd.dbg
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-win-gcc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dbg
         fi
 
     - name: Add internal tools to archive

@@ -24,23 +24,20 @@ function main() {
   fi
 
   if [ -z "${preset}" ]; then
-    preset="nco-tiberian-dawn-debug"
+    preset="tiberian-dawn-debug"
   fi
 
   if [[ "${build_type}" =~ ^(Debug|RelWithDebInfo)$ ]]; then
     # custom build preset passed, remove it before forwarding args to game
     shift
-  elif [[ "${preset}" =~ ^nco.+-debug$ ]]; then
+  elif [[ "${preset}" =~ ^.+-debug$ ]]; then
     build_type="Debug"
-  elif [[ "${preset}" =~ ^nco.* ]]; then
-    build_type="RelWithDebInfo"
   else
-    # not a build type, don't pass to the build script
-    build_type=""
+    build_type="RelWithDebInfo"
   fi
 
   "${script_path}/1.build.sh" "${preset}" "${build_type}"
-  "${script_path}/2.deploy.sh" "${preset}" "td" "ncotd" "${TD_DATA_PATH}/ncotd-dev"
+  "${script_path}/2.deploy.sh" "${preset}" "td" "nco-td" "${TD_DATA_PATH}/nco-td-dev"
 
   pushd_silent "${TD_DATA_PATH}"
 
@@ -56,14 +53,14 @@ function main() {
   fi
 
   # run with debug logging and capture profiling info
-  NCO_LOG_LEVEL="debug" ${prefix_command} ./ncotd-dev -CHEAT "$@" || {
+  NCO_LOG_LEVEL="debug" ${prefix_command} ./nco-td-dev -CHEAT "$@" || {
     exit_code="$?"
     log_error "Game finished with non-zero exit code: ${exit_code}"
   }
 
   log_warning "View full game log: $(pwd)/nco.log"
 
-  rm "ncotd-dev"
+  rm "nco-td-dev"
   popd_silent
 
   exit "${exit_code}"

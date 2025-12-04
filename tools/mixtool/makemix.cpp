@@ -550,7 +550,7 @@ int main(int argc, char* argv[])
     }
 
     // Load the local mix name database and if one doesn't exist, start one.
-    Paths.Init("ncotools");
+    Paths.Init("nco-tools");
     MixNameDatabase namedb;
     bool prog_dir = false;
     std::string user_db = std::string(Paths.User_Path()) + "/filenames.db";

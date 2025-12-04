@@ -3,4 +3,4 @@ set -eEuo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-./ncotd -CHEAT
+./nco-td -CHEAT

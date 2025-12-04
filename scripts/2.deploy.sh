@@ -8,7 +8,7 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${script_path}/lib/functions.sh"
 
 function deploy_test_files() {
-  if [ "${cmake_preset}" == "nco-tiberian-dawn-debug" ]; then
+  if [ "${cmake_preset}" == "tiberian-dawn-debug" ]; then
     log_info "Deploying TD test files"
     cp -rfv "${td_test_resources_path}"/* "${target_dir}"
   fi
@@ -28,7 +28,7 @@ function main() {
 
   local build_type="Debug"
 
-  if ! [[ "${cmake_preset}" =~ ^nco.+-debug$ ]]; then
+  if ! [[ "${cmake_preset}" =~ ^.+-debug$ ]]; then
     build_type="RelWithDebInfo"
   fi
 

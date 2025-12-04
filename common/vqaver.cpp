@@ -13,7 +13,7 @@
 #include "gitinfo.h"
 #include <stdio.h>
 
-#define VQA_LIBNAME "VQALib (CncNco)"
+#define VQA_LIBNAME "VQALib (cnc-new-construction-options)"
 
 // Version numbers
 #define VQA_VERSION_MAJOR    "2"

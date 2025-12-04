@@ -8,7 +8,7 @@
     "configurePresets": [
         {
             "name": "release",
-            "displayName": "Vanilla Release build",
+            "displayName": "NCO Release build",
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
@@ -20,7 +20,11 @@
                 "SDL2": "ON",
                 "OPENAL": "ON",
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg/overlays"
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg/overlays",
+                "MAP_EDITOR_TD": "ON",
+                "MAP_EDITOR_RA": "ON",
+                "BUILD_TOOLS": "ON",
+                "BUILD_TESTS": "ON"
             },
             "environment": {
                 "VCPKG_ROOT": "${sourceDir}/.vcpkg"
@@ -29,137 +33,70 @@
         {
             "name": "remaster",
             "inherits": "release",
-            "displayName": "Vanilla Remaster build",
+            "displayName": "NCO Remaster build",
             "cacheVariables": {
-                "BUILD_REMASTERTD": "ON",
-                "BUILD_REMASTERRA": "ON",
-                "BUILD_VANILLATD": "OFF",
-                "BUILD_VANILLARA": "OFF",
-                "MAP_EDITORTD": "OFF",
-                "MAP_EDITORRA": "OFF",
+                "BUILD_REMASTER_TD": "ON",
+                "BUILD_REMASTER_RA": "ON",
+                "BUILD_NCO_TD": "OFF",
+                "BUILD_NCO_RA": "OFF",
+                "MAP_EDITOR_TD": "OFF",
+                "MAP_EDITOR_RA": "OFF",
                 "BUILD_TOOLS": "OFF"
             }
         },
         {
-            "name": "internal",
+            "name": "tiberian-dawn",
             "inherits": "release",
-            "displayName": "Vanilla Internal build",
-            "cacheVariables": {
-                "MAP_EDITORTD": "ON",
-                "MAP_EDITORRA": "ON",
-                "BUILD_TOOLS": "ON"
-            }
-        },
-        {
-            "name": "testing",
-            "inherits": "release",
-            "displayName": "Vanilla build with tests",
-            "cacheVariables": {
-                "BUILD_VANILLATD": "OFF",
-                "BUILD_VANILLARA": "OFF",
-                "BUILD_TESTS": "ON"
-            }
-        },
-        {
-            "name": "nonet",
-            "inherits": "internal",
-            "displayName": "Vanilla build no networking",
-            "cacheVariables": {
-                "NETWORKING": "OFF"
-            }
-        },
-        {
-            "name": "msvc2019-i686-remaster",
-            "inherits": "remaster",
-            "binaryDir": "${sourceDir}/build_remaster",
-            "displayName": "MSVC 2019 32bit Remaster build",
-            "generator": "Visual Studio 16 2019",
-            "architecture": "Win32"
-        },
-        {
-            "name": "msvc2019-i686-vanilla",
-            "inherits": "release",
-            "binaryDir": "${sourceDir}/build_msvc32",
-            "displayName": "MSVC 2019 32bit Vanilla build",
-            "generator": "Visual Studio 16 2019",
-            "architecture": "Win32"
-        },
-        {
-            "name": "msvc2019-x86-64-vanilla",
-            "inherits": "release",
-            "binaryDir": "${sourceDir}/build_msvc64",
-            "displayName": "MSVC 2019 64bit Vanilla build",
-            "architecture": "x64"
-        },
-        {
-            "name": "nco",
-            "inherits": "release",
-            "displayName": "NCO build",
-            "cacheVariables": {
-                "MAP_EDITORTD": "ON",
-                "MAP_EDITORRA": "ON",
-                "BUILD_TOOLS": "ON",
-                "BUILD_TESTS": "ON"
-            }
-        },
-        {
-            "name": "nco-tiberian-dawn",
-            "inherits": "nco",
             "displayName": "NCO build (TD)",
             "cacheVariables": {
-                "BUILD_VANILLARA": "OFF",
-                "MAP_EDITORRA": "OFF"
+                "BUILD_NCO_RA": "OFF",
+                "MAP_EDITOR_RA": "OFF"
             }
         },
         {
-            "name": "nco-red-alert",
-            "inherits": "nco",
+            "name": "red-alert",
+            "inherits": "release",
             "displayName": "NCO build (RA)",
             "cacheVariables": {
-                "BUILD_VANILLATD": "OFF",
-                "MAP_EDITORTD": "OFF"
+                "BUILD_NCO_TD": "OFF",
+                "MAP_EDITOR_TD": "OFF"
             }
         },
         {
-            "name": "nco-remaster",
+            "name": "tiberian-dawn-remaster",
             "inherits": "remaster",
-            "displayName": "NCO Remaster build"
-        },
-        {
-            "name": "nco-tiberian-dawn-remaster",
-            "inherits": "nco-remaster",
             "displayName": "NCO Remaster build (TD)",
             "cacheVariables": {
-                "BUILD_REMASTERRA": "OFF"
+                "BUILD_REMASTER_RA": "OFF"
             }
         },
         {
-            "name": "nco-red-alert-remaster",
-            "inherits": "nco-remaster",
+            "name": "red-alert-remaster",
+            "inherits": "remaster",
             "displayName": "NCO Remaster build (RA)",
             "cacheVariables": {
-                "BUILD_REMASTERTD": "OFF"
+                "BUILD_REMASTER_TD": "OFF"
             }
         },
         {
-            "name": "nco-debug",
-            "inherits": "nco",
+            "name": "debug",
+            "inherits": "release",
             "displayName": "NCO debug build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "nco-red-alert-debug",
-            "inherits": "nco-red-alert",
+            "name": "red-alert-debug",
+            "inherits": "red-alert",
             "displayName": "NCO debug build (RA)",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "nco-tiberian-dawn-debug",
-            "inherits": "nco-tiberian-dawn",
+            "name": "tiberian-dawn-debug",
+            "inherits": "tiberian-dawn",
             "displayName": "NCO debug build (TD)",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
@@ -168,99 +105,64 @@
     ],
     "buildPresets": [
         {
-            "name": "remaster",
-            "configurePreset": "remaster",
-            "displayName": "Vanilla Game Build",
-            "description": "Vanilla Game Build",
-            "configuration": "RelWithDebInfo"
-        },
-        {
             "name": "release",
             "configurePreset": "release",
-            "displayName": "Vanilla Game Build",
-            "description": "Vanilla Game Build",
+            "displayName": "NCO Game Build",
+            "description": "NCO Game Build",
             "configuration": "RelWithDebInfo"
         },
         {
-            "name": "internal",
-            "configurePreset": "internal",
-            "displayName": "Vanilla Game Build",
-            "description": "Vanilla Game Build",
+            "name": "remaster",
+            "configurePreset": "remaster",
+            "displayName": "NCO Game Build",
+            "description": "NCO Game Build",
             "configuration": "RelWithDebInfo"
         },
         {
-            "name": "testing",
-            "configurePreset": "testing",
-            "displayName": "Vanilla Game Build",
-            "description": "Vanilla Game Build",
-            "configuration": "RelWithDebInfo"
-        },
-        {
-            "name": "nonet",
-            "configurePreset": "nonet",
-            "displayName": "Vanilla Game Build",
-            "description": "Vanilla Game Build",
-            "configuration": "RelWithDebInfo"
-        },
-        {
-            "name": "nco",
-            "configurePreset": "nco",
-            "displayName": "NCO Build",
-            "description": "NCO Build",
-            "configuration": "RelWithDebInfo"
-        },
-        {
-            "name": "nco-debug",
-            "configurePreset": "nco-debug",
+            "name": "debug",
+            "configurePreset": "debug",
             "displayName": "NCO Debug Build",
             "description": "NCO Debug Build",
             "configuration": "Debug"
         },
         {
-            "name": "nco-red-alert",
-            "configurePreset": "nco-red-alert",
+            "name": "red-alert",
+            "configurePreset": "red-alert",
             "displayName": "NCO Red Alert Build",
             "description": "NCO Red Alert Build",
             "configuration": "RelWithDebInfo"
         },
         {
-            "name": "nco-tiberian-dawn",
-            "configurePreset": "nco-tiberian-dawn",
+            "name": "tiberian-dawn",
+            "configurePreset": "tiberian-dawn",
             "displayName": "NCO Tiberian Dawn Build",
             "description": "NCO Tiberian Dawn Build",
             "configuration": "RelWithDebInfo"
         },
         {
-            "name": "nco-red-alert-debug",
-            "configurePreset": "nco-red-alert-debug",
+            "name": "red-alert-debug",
+            "configurePreset": "red-alert-debug",
             "displayName": "NCO Red Alert Debug Build",
             "description": "NCO Red Alert Debug Build",
             "configuration": "Debug"
         },
         {
-            "name": "nco-tiberian-dawn-debug",
-            "configurePreset": "nco-tiberian-dawn-debug",
+            "name": "tiberian-dawn-debug",
+            "configurePreset": "tiberian-dawn-debug",
             "displayName": "NCO Tiberian Dawn Debug Build",
             "description": "NCO Tiberian Dawn Debug Build",
             "configuration": "Debug"
         },
         {
-            "name": "nco-remaster",
-            "configurePreset": "nco-remaster",
-            "displayName": "NCO Build (remaster)",
-            "description": "NCO Build (remaster)",
-            "configuration": "RelWithDebInfo"
-        },
-        {
-            "name": "nco-red-alert-remaster",
-            "configurePreset": "nco-red-alert-remaster",
+            "name": "red-alert-remaster",
+            "configurePreset": "red-alert-remaster",
             "displayName": "NCO Red Alert Build (remaster)",
             "description": "NCO Red Alert Build (remaster)",
             "configuration": "RelWithDebInfo"
         },
         {
-            "name": "nco-tiberian-dawn-remaster",
-            "configurePreset": "nco-tiberian-dawn-remaster",
+            "name": "tiberian-dawn-remaster",
+            "configurePreset": "tiberian-dawn-remaster",
             "displayName": "NCO Tiberian Dawn Build (remaster)",
             "description": "NCO Tiberian Dawn Build (remaster)",
             "configuration": "RelWithDebInfo"
@@ -269,7 +171,7 @@
     "testPresets": [
         {
             "name": "testing",
-            "configurePreset": "testing",
+            "configurePreset": "release",
             "configuration": "RelWithDebInfo",
             "output": {
                 "outputOnFailure": true
@@ -291,6 +193,10 @@
                 {
                     "type": "build",
                     "name": "release"
+                },
+                {
+                    "type": "test",
+                    "name": "testing"
                 }
             ]
         },
@@ -308,162 +214,41 @@
             ]
         },
         {
-            "name": "internal",
+            "name": "debug",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "internal"
+                    "name": "debug"
                 },
                 {
                     "type": "build",
-                    "name": "internal"
+                    "name": "debug"
                 }
             ]
         },
         {
-            "name": "testing",
+            "name": "tiberian-dawn-debug",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "testing"
+                    "name": "tiberian-dawn-debug"
                 },
                 {
                     "type": "build",
-                    "name": "testing"
-                },
-                {
-                    "type": "test",
-                    "name": "testing"
+                    "name": "tiberian-dawn-debug"
                 }
             ]
         },
         {
-            "name": "nonet",
+            "name": "red-alert-debug",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "nonet"
+                    "name": "red-alert-debug"
                 },
                 {
                     "type": "build",
-                    "name": "nonet"
-                }
-            ]
-        },
-        {
-            "name": "nco",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco"
-                },
-                {
-                    "type": "build",
-                    "name": "nco"
-                }
-            ]
-        },
-        {
-            "name": "nco-red-alert",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-red-alert"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-red-alert"
-                }
-            ]
-        },
-        {
-            "name": "nco-tiberian-dawn",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-tiberian-dawn"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-tiberian-dawn"
-                }
-            ]
-        },
-        {
-            "name": "nco-remaster",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-remaster"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-remaster"
-                }
-            ]
-        },
-        {
-            "name": "nco-red-alert-remaster",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-red-alert-remaster"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-red-alert-remaster"
-                }
-            ]
-        },
-        {
-            "name": "nco-tiberian-dawn-remaster",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-tiberian-dawn-remaster"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-tiberian-dawn-remaster"
-                }
-            ]
-        },
-        {
-            "name": "nco-debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-debug"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-debug"
-                }
-            ]
-        },
-        {
-            "name": "nco-tiberian-dawn-debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-tiberian-dawn-debug"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-tiberian-dawn-debug"
-                }
-            ]
-        },
-        {
-            "name": "nco-red-alert-debug",
-            "steps": [
-                {
-                    "type": "configure",
-                    "name": "nco-red-alert-debug"
-                },
-                {
-                    "type": "build",
-                    "name": "nco-red-alert-debug"
+                    "name": "red-alert-debug"
                 }
             ]
         }
