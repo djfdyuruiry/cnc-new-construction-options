@@ -45,6 +45,7 @@ jobs:
     runs-on: windows-2025
     outputs:
       preset: ${{ steps.set_preset.outputs.preset }}
+      remaster_preset: ${{ steps.set_preset.outputs.remaster_preset }}
     steps:
     - uses: actions/checkout@v4
       with:
