@@ -122,7 +122,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
   {
     var outputPath = Path.Join(
       downloadPath,
-      zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.PlatformInstallPrefix}/")
+      zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/")
     );
     var outputPathDir = Path.GetDirectoryName(outputPath);
 
