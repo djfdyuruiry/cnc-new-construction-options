@@ -249,10 +249,6 @@ jobs:
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" `
          -Source "${{ env.NUGET_URL }}"
 
-    - name: Init vcpkg
-      shell: bash
-      run: ./scripts/bin/vcpkg.ps1 --init
-
     - name: Build NCO
       env:
         CMAKE_MAKE_PROGRAM: ninja
