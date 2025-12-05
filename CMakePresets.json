@@ -41,7 +41,16 @@
                 "BUILD_NCO_RA": "OFF",
                 "MAP_EDITOR_TD": "OFF",
                 "MAP_EDITOR_RA": "OFF",
-                "BUILD_TOOLS": "OFF"
+                "BUILD_TOOLS": "OFF",
+                "VCPKG_TARGET_TRIPLET": "x86-windows-static-md"
+            }
+        },
+        {
+            "name": "remaster-debug",
+            "inherits": "remaster",
+            "displayName": "NCO Remaster debug build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
@@ -117,6 +126,13 @@
             "displayName": "NCO Game Build",
             "description": "NCO Game Build",
             "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "remaster-debug",
+            "configurePreset": "remaster-debug",
+            "displayName": "NCO Debug Build",
+            "description": "NCO Debug Build",
+            "configuration": "Debug"
         },
         {
             "name": "debug",
@@ -210,6 +226,19 @@
                 {
                     "type": "build",
                     "name": "remaster"
+                }
+            ]
+        },
+        {
+            "name": "remaster-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "remaster-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "remaster-debug"
                 }
             ]
         },
