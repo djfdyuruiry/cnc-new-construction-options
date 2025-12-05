@@ -80,24 +80,31 @@ jobs:
         if [ "${{ steps.changes.outputs.nco }}" = "true" ]; then
           echo "Changes to shared files detected - building everything using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] && [ "${{ steps.changes.outputs.td }}" = "true" ]; then
           echo "Red Alert & Tiberian Dawn changes detected - building both using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] ; then
           echo "Only Red Alert changes detected - using cmake preset: red-alert"
           PRESET="red-alert"
+          REMASTER_PRESET="red-alert-remaster"
         elif [ "${{ steps.changes.outputs.td }}" = "true" ]; then
           echo "Only Tiberian Dawn changes detected - using cmake preset: tiberian-dawn"
           PRESET="tiberian-dawn"
+          REMASTER_PRESET="tiberian-dawn-remaster"
         elif [ "${{ steps.changes.outputs.ci }}" = "true" ]; then
           echo "Workflow yml changes detected - testing workflow changes using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         else
           echo "WARNING: Unable to match changed files to a preset - defaulting to building everything using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         fi
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
+        echo "remaster_preset=${REMASTER_PRESET}" >> $GITHUB_OUTPUT
 
   # nco_win_msvc:
   #   needs:
@@ -146,7 +153,6 @@ jobs:
   #   - name: Build NCO
   #     env:
   #       CMAKE_MAKE_PROGRAM: ninja
-  #       VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
   #       VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
   #     run: |
   #       $env:CMAKE_FIND_ROOT_PATH="$(Split-Path -Path $(Get-Command magick).Path -Parent)"
@@ -252,38 +258,31 @@ jobs:
     - name: Build NCO
       env:
         CMAKE_MAKE_PROGRAM: ninja
-        VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
         VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
         $env:CMAKE_FIND_ROOT_PATH="$(Split-Path -Path $(Get-Command magick).Path -Parent)"
-        cmake --workflow --preset remaster
+        cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}
 
     - name: Create archives
       shell: bash
       run: |
-       mkdir artifact
+        mkdir artifact
       
-       if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
-         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/RedAlert.dll
-         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/RedAlert.pdb
-         7z a artifact/nco-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/NCO_RA
-       fi
+        if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.dll
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.pdb
+          7z a artifact/nco-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_RA
+
+          # TODO: Lua files + resources
+        fi
       
-       if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
-         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/TiberianDawn.dll
-         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/TiberianDawn.pdb
-         7z a artifact/nco-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/NCO_TD
-      
-         # lua library
-         mkdir -p lua/nco
-      
-         cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua/nco
-      
-         cp -rv common/lua/scripts/nco/* lua/nco
-         cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-      
-         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
-       fi
+        if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.dll
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.pdb
+          7z a artifact/nco-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_TD
+
+          # TODO: Lua files + resources
+        fi
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
