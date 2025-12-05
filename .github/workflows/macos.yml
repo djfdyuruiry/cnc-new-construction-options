@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       preset:
-        description: 'Build preset (e.g., nco-tiberian-dawn)'
+        description: 'Build preset (e.g., tiberian-dawn)'
         required: false
-        default: 'nco-tiberian-dawn'
+        default: 'tiberian-dawn'
 
   pull_request:
     paths:
@@ -38,12 +38,12 @@ env:
   NUGET_URL: https://nuget.pkg.github.com/djfdyuruiry/index.json
 
 jobs:
-  vanilla-macos:
+  nco-macos:
     runs-on: macos-15
     strategy:
       matrix:
         preset:
-          - "${{ github.event.inputs.preset || 'nco-tiberian-dawn' }}"
+          - "${{ github.event.inputs.preset || 'tiberian-dawn' }}"
 
     steps:
     - uses: actions/checkout@v4
@@ -85,23 +85,23 @@ jobs:
         PRESET=""
 
         if [ "${{ steps.changes.outputs.nco }}" = "true" ]; then
-          echo "Changes to shared files detected - building everything using cmake preset: nco"
-          PRESET="nco"
+          echo "Changes to shared files detected - building everything using cmake preset: release"
+          PRESET="release"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] && [ "${{ steps.changes.outputs.td }}" = "true" ]; then
-          echo "Red Alert & Tiberian Dawn changes detected - building both using cmake preset: nco"
-          PRESET="nco"
+          echo "Red Alert & Tiberian Dawn changes detected - building both using cmake preset: release"
+          PRESET="release"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] ; then
-          echo "Only Red Alert changes detected - using cmake preset: nco-red-alert"
-          PRESET="nco-red-alert"
+          echo "Only Red Alert changes detected - using cmake preset: red-alert"
+          PRESET="red-alert"
         elif [ "${{ steps.changes.outputs.td }}" = "true" ]; then
-          echo "Only Tiberian Dawn changes detected - using cmake preset: nco-tiberian-dawn"
-          PRESET="nco-tiberian-dawn"
+          echo "Only Tiberian Dawn changes detected - using cmake preset: tiberian-dawn"
+          PRESET="tiberian-dawn"
         elif [ "${{ steps.changes.outputs.ci }}" = "true" ]; then
-          echo "Workflow yml changes detected - testing workflow changes using cmake preset: nco"
-          PRESET="nco"
+          echo "Workflow yml changes detected - testing workflow changes using cmake preset: release"
+          PRESET="release"
         else
-          echo "WARNING: Unable to match changed files to a preset - defaulting to building everything using cmake preset: nco"
-          PRESET="nco"
+          echo "WARNING: Unable to match changed files to a preset - defaulting to building everything using cmake preset: release"
+          PRESET="release"
         fi
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
@@ -150,7 +150,7 @@ jobs:
 
         python -m lipomerge /tmp/vcpkg-arm64/arm64-osx14 /tmp/vcpkg-x64/x64-osx14 $installed_path/uni-osx14
 
-    - name: Build Vanilla Conquer
+    - name: Build NCO
       env:
         CMAKE_MAKE_PROGRAM: ninja
         CMAKE_OSX_ARCHITECTURES: "arm64;x86_64"
@@ -174,46 +174,46 @@ jobs:
         mkdir artifact
         
         # ninja build log (useful for profiling compilation)
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/nco/.ninja_log
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ steps.set_preset.outputs.preset }}/.ninja_log
 
-        if [ "${{ steps.set_preset.outputs.preset }}" != "nco-tiberian-dawn" ]; then
+        if [ "${{ steps.set_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           # prep debug symbols
-          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
-          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara
-          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/vanillara.app/Contents/MacOS/vanillara
+          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.app/Contents/MacOS/nco-ra -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dSYM
+          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.app/Contents/MacOS/nco-ra
+          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.app/Contents/MacOS/nco-ra
 
           # ra bundle
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillara.dSYM
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dSYM
         fi
 
-        if [ "${{ steps.set_preset.outputs.preset }}" != "nco-red-alert" ]; then
+        if [ "${{ steps.set_preset.outputs.preset }}" != "red-alert" ]; then
           # prep debug symbols
-          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
-          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
-          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/vanillatd.app/Contents/MacOS/vanillatd
+          dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.app/Contents/MacOS/nco-td -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dSYM
+          strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.app/Contents/MacOS/nco-td
+          dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/nco-td.app/Contents/MacOS/nco-td
 
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # debug symbols
-          7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillatd.dSYM
+          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dSYM
         fi
 
     - name: Add internal tools to archive
       run: |
-        dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dSYM
-        strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix
-        7z a artifact/vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/vanillamix.dSYM
+        dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
+        strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
+        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: vanilla-conquer-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2
+        name: nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2
         path: artifact
 
     - name: Upload development release

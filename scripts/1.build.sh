@@ -109,19 +109,19 @@ function main() {
   case "${target}" in
     # aliases for humans
     ra)
-      cmake_preset="nco-red-alert-debug"
+      cmake_preset="red-alert-debug"
       build_type="Debug"
       ;;
     td)
-      cmake_preset="nco-tiberian-dawn-debug"
+      cmake_preset="tiberian-dawn-debug"
       build_type="Debug"
       ;;
     debug)
-      cmake_preset="nco-debug"
+      cmake_preset="debug"
       build_type="Debug"
       ;;
     release)
-      cmake_preset="nco"
+      cmake_preset="release"
       build_type="RelWithDebInfo"
       ;;
     # direct cmake access for scripts

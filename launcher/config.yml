@@ -6,7 +6,7 @@ NCO:
     Owner: djfdyuruiry
     Name: cnc-new-construction-options
   Release: latest
-  AssetPrefix: vanilla-conquer-nco-${OS}
+  AssetPrefix: nco-${OS}
   MsvcRuntimeUrl: https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 # TODO: Read ICO files and add to UI as we install
@@ -17,8 +17,8 @@ TiberianDawn:
   DisplayName: >-
     Command & Conquer: Tiberian Dawn
   NcoZipPath: td
-  InstallPostfix: td
-  Binary: vanillatd
+  InstallPostfix: tiberian-dawn
+  Binary: nco-td
   DiscImages:
     - SortOrder: 1
       Name: GDI
@@ -92,8 +92,8 @@ RedAlert:
   DisplayName: >-
     Command & Conquer: Red Alert
   NcoZipPath: ra
-  InstallPostfix: ra
-  Binary: vanillara
+  InstallPostfix: red-alert
+  Binary: nco-ra
   DiscImages:
     - SortOrder: 1
       Name: ALLIES

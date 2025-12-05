@@ -54,11 +54,11 @@ void Print_Help()
         snprintf(revision, sizeof(revision), "r%d ", GitRevision);
     }
 
-    printf("\nvanillamix %s%s%s\n\n"
+    printf("\nnco-mix %s%s%s\n\n"
            "Usage:\n"
-           "  vanillamix (-c | -x) [-d <path>] [-f <file>] <mixfile>\n"
-           "  vanillamix -l <mixfile>\n"
-           "  vanillamix -h | --help\n\n"
+           "  nco-mix (-c | -x) [-d <path>] [-f <file>] <mixfile>\n"
+           "  nco-mix -l <mixfile>\n"
+           "  nco-mix -h | --help\n\n"
            "Options:\n"
            "  -c --create     Pack loose files into a mix file.\n"
            "  -x --extract    Extract files from a mix file.\n"
@@ -550,7 +550,7 @@ int main(int argc, char* argv[])
     }
 
     // Load the local mix name database and if one doesn't exist, start one.
-    Paths.Init("vanillatools");
+    Paths.Init("nco-tools");
     MixNameDatabase namedb;
     bool prog_dir = false;
     std::string user_db = std::string(Paths.User_Path()) + "/filenames.db";

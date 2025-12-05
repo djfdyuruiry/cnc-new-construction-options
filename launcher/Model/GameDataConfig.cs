@@ -88,8 +88,6 @@ public class GameDataConfig : INotifyPropertyChanged
 
   [YamlIgnore]
   public string PlatformBinary => OperatingSystem.IsWindows() ? $"{Binary}.exe" : Binary;
-  [YamlIgnore]
-  public string PlatformInstallPrefix => OperatingSystem.IsMacOS() ? $"vanilla{InstallPostfix}" : InstallPostfix;
 
   public event PropertyChangedEventHandler? PropertyChanged;
 

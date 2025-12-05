@@ -223,7 +223,7 @@ int main(int argc, char** argv)
     /*
     **	Remember the current working directory and drive.
     */
-    Paths.Init("vanillatd", "CONQUER.INI", "CONQUER.MIX", args.ArgV[0]);
+    Paths.Init("tiberian-dawn", "CONQUER.INI", "CONQUER.MIX", args.ArgV[0]);
     CDFileClass::Refresh_Search_Drives();
 
     if (Parse_Command_Line(args.ArgC, args.ArgV)) {

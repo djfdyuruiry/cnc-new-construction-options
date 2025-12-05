@@ -35,7 +35,7 @@ public class PathsConfig(
   public string AppDataDirectoryPath => appDataDirectoryPath;
   public string NcoAppDataPath =>
     OperatingSystem.IsMacOS()
-    ? Path.Join(UserHomePath, "Library/Application Support/Vanilla-Conquer")
+    ? Path.Join(UserHomePath, "Library", "Application Support", "nco")
     : Path.Join(appDataDirectoryPath, "nco");
 
   public string NcoCachePath => Path.Join(NcoAppDataPath, ".cache");

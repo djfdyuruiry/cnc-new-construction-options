@@ -296,7 +296,7 @@ public class GameDataService(
       foreach (var game in configService.Config.EnabledGames)
       {
         currentGame = game;
-        var installPath = Path.Join(installRoot, game.PlatformInstallPrefix);
+        var installPath = Path.Join(installRoot, game.InstallPostfix);
 
         Directory.CreateDirectory(installPath);
         downloadEventVisitor.Visit(new StartDownloadGameDataEvent(game));

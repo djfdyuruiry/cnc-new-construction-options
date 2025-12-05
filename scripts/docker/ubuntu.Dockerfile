@@ -65,6 +65,6 @@ ENV VC_CXX_FLAGS="-w;-Wwrite-strings;-Werror=write-strings"
 ENTRYPOINT "/usr/bin/bash" "-c" "\
   set -eEuo pipefail \
   && ./scripts/bin/vcpkg --init \
-  && cmake --workflow --preset nco \
-  && tree build/nco/RelWithDebInfo \
+  && cmake --workflow --preset release \
+  && tree build/release/RelWithDebInfo \
 "

@@ -202,19 +202,19 @@ endif()
 
 include(ProductVersion)
 
-if(BUILD_REMASTERTD)
+if(BUILD_REMASTER_TD)
     if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
         # Generate windows version info.
         generate_product_version(
             REMASTERTD_RC
-            NAME "Vanilla Conquer TiberianDawn DLL"
-            BUNDLE "Vanilla Conquer"
+            NAME "New Construction Options TiberianDawn DLL"
+            BUNDLE "New Construction Options"
             VERSION_MAJOR 1
             VERSION_MINOR 7
-            COMPANY_NAME "Vanilla Conquer"
+            COMPANY_NAME "New Construction Options"
             COMPANY_COPYRIGHT "Based on code released under GPLv3 by EA"
             ORIGINAL_FILENAME "TiberianDawn.dll"
-            RCFILE_PREFIX "RemasterTD"
+            RCFILE_PREFIX "NCO_RemasterTD"
         )
     endif()
     add_library(TiberianDawn SHARED 
@@ -232,111 +232,111 @@ if(BUILD_REMASTERTD)
 
     # TODO: When visiting remastered support, add lua and relevant data packs (may need to search user paths for lua scripts/rules.ini)
     add_custom_command(TARGET TiberianDawn POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/Vanilla_TD ${CMAKE_BINARY_DIR}/Vanilla_TD
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Vanilla_TD/Data
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:TiberianDawn> ${CMAKE_BINARY_DIR}/Vanilla_TD/Data/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_TD ${CMAKE_BINARY_DIR}/NCO_TD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NCO_TD/Data
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:TiberianDawn> ${CMAKE_BINARY_DIR}/NCO_TD/Data/
     )
 endif()
 
-if(BUILD_VANILLATD)
+if(BUILD_NCO_TD)
     include(BuildIcons)
     # Create the custom command for generating the ico/icns files for display in the OS.
-    make_icon(INPUT "${CMAKE_SOURCE_DIR}/resources/vanillatd_icon.svg" OUTPUT VANILLATD_ICON)
+    make_icon(INPUT "${CMAKE_SOURCE_DIR}/resources/nco-td_icon.svg" OUTPUT NCOTD_ICON)
 
     if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
         # Generate windows version info.
         generate_product_version(
-            VANILLATD_RC
-            NAME "VanillaTD"
-            BUNDLE "Vanilla Conquer"
+            NCOTD_RC
+            NAME "Tiberian Dawn"
+            BUNDLE "CNC New Construction Options"
             VERSION_MAJOR 1
             VERSION_MINOR 0
-            COMPANY_NAME "Vanilla Conquer"
+            COMPANY_NAME "New Construction Options"
             COMPANY_COPYRIGHT "Based on code released under GPLv3 by EA"
-            ORIGINAL_FILENAME "vanillatd.exe"
-            RCFILE_PREFIX "VanillaTD"
-            ICON "${VANILLATD_ICON}"
+            ORIGINAL_FILENAME "nco-td.exe"
+            RCFILE_PREFIX "NCO_TD"
+            ICON "${NCOTD_ICON}"
         )
     endif()
 
     # A target must include the icon for the custom command to run.
-    add_executable(VanillaTD ${TIBDAWN_SRC} ${TIBDAWN_NET_SRC} ${TIBDAWN_HEADERS} ${VANILLATD_RC} ${VANILLATD_ICON})
+    add_executable(NCO-TD ${TIBDAWN_SRC} ${TIBDAWN_NET_SRC} ${TIBDAWN_HEADERS} ${NCOTD_RC} ${NCOTD_ICON})
 
     if(MAKE_BUNDLE)
-        set_source_files_properties(${VANILLATD_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-        set_target_properties(VanillaTD PROPERTIES
+        set_source_files_properties(${NCOTD_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+        set_target_properties(NCO-TD PROPERTIES
             MACOSX_BUNDLE True
-            MACOSX_BUNDLE_GUI_IDENTIFIER com.vanilla-conquer.vanillatd
-            MACOSX_BUNDLE_BUNDLE_NAME VanillaTD
+            MACOSX_BUNDLE_GUI_IDENTIFIER com.cnc-nco.td
+            MACOSX_BUNDLE_BUNDLE_NAME NCO-TD
             MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
             MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
             MACOSX_BUNDLE_COPYRIGHT "Based on code released under GPLv3 by EA"
-            MACOSX_BUNDLE_ICON_FILE "vanillatd_icon.icns"
+            MACOSX_BUNDLE_ICON_FILE "nco-td_icon.icns"
         )
     endif()
 
-    target_compile_definitions(VanillaTD PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${VANILLA_DEFS} MEGAMAPS)
-    target_include_directories(VanillaTD PUBLIC ${CMAKE_SOURCE_DIR} .)
-    target_link_libraries(VanillaTD commonv ${VANILLA_LIBS} ${STATIC_LIBS})
-    set_target_properties(VanillaTD PROPERTIES OUTPUT_NAME vanillatd)
-    if(MAP_EDITORTD)
-        target_compile_definitions(VanillaTD PUBLIC INTERNAL_VERSION)
+    target_compile_definitions(NCO-TD PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${NCO_DEFS} MEGAMAPS)
+    target_include_directories(NCO-TD PUBLIC ${CMAKE_SOURCE_DIR} .)
+    target_link_libraries(NCO-TD commonv ${NCO_LIBS} ${STATIC_LIBS})
+    set_target_properties(NCO-TD PROPERTIES OUTPUT_NAME nco-td)
+    if(MAP_EDITOR_TD)
+        target_compile_definitions(NCO-TD PUBLIC INTERNAL_VERSION)
     endif()
     # Control if we auto generate a console and which "main" function we link using MSVC.
     if(MSVC)
-        target_link_options(VanillaTD PRIVATE /subsystem:windows /ENTRY:mainCRTStartup)
+        target_link_options(NCO-TD PRIVATE /subsystem:windows /ENTRY:mainCRTStartup)
     endif()
     if(WIN32 AND NOT MSVC)
-        set_target_properties(VanillaTD PROPERTIES LINK_FLAGS "-mwindows")
+        set_target_properties(NCO-TD PROPERTIES LINK_FLAGS "-mwindows")
     endif()
     if(BUILD_WITH_UBSAN)
-        target_compile_options(VanillaTD PUBLIC
+        target_compile_options(NCO-TD PUBLIC
                     -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability
                     -g3 -fno-omit-frame-pointer)
-        target_link_options(VanillaTD PUBLIC -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability)
+        target_link_options(NCO-TD PUBLIC -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability)
     endif()
     if(BUILD_WITH_ASAN)
-        target_compile_options(VanillaTD PUBLIC
+        target_compile_options(NCO-TD PUBLIC
                     -fsanitize=address
                     -g3 -fno-omit-frame-pointer)
-        target_link_options(VanillaTD PUBLIC -fsanitize=address)
+        target_link_options(NCO-TD PUBLIC -fsanitize=address)
     endif()
 
     # create td package: binary + lua library + data packs
     if(MAKE_BUNDLE)
         add_custom_command(
-            TARGET VanillaTD POST_BUILD
+            TARGET NCO-TD POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco/lib"
             COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco/TiberianDawn/lib"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/vanillatd.app"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/nco-td.app"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua/nco"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/lua" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/lua"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/vanillatd.app"
-            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillatd.app"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/nco-td.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/td/nco-td.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/nco-td.app"
         )
     else()
         set(COPY_TD_BIN_CMD "")
 
         if(WIN32)
             # include vcpkg built DLLs on Windows
-            set(COPY_TD_BIN_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin" $<TARGET_FILE_DIR:VanillaTD>/td)
+            set(COPY_TD_BIN_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin" $<TARGET_FILE_DIR:NCO-TD>/td)
         endif()
 
         add_custom_command(
-            TARGET VanillaTD POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:VanillaTD>/td
-            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/lib
-            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco/TiberianDawn/lib
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" $<TARGET_FILE_DIR:VanillaTD>/td
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" $<TARGET_FILE_DIR:VanillaTD>/td/lua/nco
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/lua" $<TARGET_FILE_DIR:VanillaTD>/td/lua
+            TARGET NCO-TD POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:NCO-TD>/td
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:NCO-TD>/td/lua/nco/lib
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:NCO-TD>/td/lua/nco/TiberianDawn/lib
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/td" $<TARGET_FILE_DIR:NCO-TD>/td
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" $<TARGET_FILE_DIR:NCO-TD>/td/lua/nco
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" $<TARGET_FILE_DIR:NCO-TD>/td/lua/nco
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/lua" $<TARGET_FILE_DIR:NCO-TD>/td/lua
             ${COPY_TD_BIN_CMD}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaTD> $<TARGET_FILE_DIR:VanillaTD>/td
-            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaTD>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:NCO-TD> $<TARGET_FILE_DIR:NCO-TD>/td
+            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:NCO-TD>
         )
     endif()
 endif()

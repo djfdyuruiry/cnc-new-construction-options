@@ -182,16 +182,16 @@ endif()
 
 include(ProductVersion)
 
-if(BUILD_REMASTERRA)
+if(BUILD_REMASTER_RA)
     if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
         # Generate windows version info.
         generate_product_version(
             REMASTERRA_RC
-            NAME "Vanilla Conquer RedAlert DLL"
-            BUNDLE "Vanilla Conquer"
+            NAME "New Construction Options RedAlert DLL"
+            BUNDLE "New Construction Options"
             VERSION_MAJOR 3
             VERSION_MINOR 3
-            COMPANY_NAME "Vanilla Conquer"
+            COMPANY_NAME "New Construction Options"
             COMPANY_COPYRIGHT "Based on code released under GPLv3 by EA"
             ORIGINAL_FILENAME "RedAlert.dll"
             RCFILE_PREFIX "RemasterRA"
@@ -212,102 +212,102 @@ if(BUILD_REMASTERRA)
 
     # TODO: When visiting remastered support, add lua and relevant data packs (may need to search user paths for lua scripts/rules.ini)
     add_custom_command(TARGET RedAlert POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/Vanilla_RA ${CMAKE_BINARY_DIR}/Vanilla_RA
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Vanilla_RA/Data
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:RedAlert> ${CMAKE_BINARY_DIR}/Vanilla_RA/Data/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_RA ${CMAKE_BINARY_DIR}/NCO_RA
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NCO_RA/Data
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:RedAlert> ${CMAKE_BINARY_DIR}/NCO_RA/Data/
     )
 endif()
 
-if(BUILD_VANILLARA)
+if(BUILD_NCO_RA)
     include(BuildIcons)
     # Create the custom command for generating the ico file for windows.
-    make_icon(INPUT "${CMAKE_SOURCE_DIR}/resources/vanillara_icon.svg" OUTPUT VANILLARA_ICON)
+    make_icon(INPUT "${CMAKE_SOURCE_DIR}/resources/nco-ra_icon.svg" OUTPUT NCORA_ICON)
 
     if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
         # Generate windows version info.
         generate_product_version(
-            VANILLARA_RC
-            NAME "VanillaRA"
-            BUNDLE "Vanilla Conquer"
+            NCORA_RC
+            NAME "NCORA"
+            BUNDLE "New Construction Options"
             VERSION_MAJOR 1
             VERSION_MINOR 0
-            COMPANY_NAME "Vanilla Conquer"
+            COMPANY_NAME "New Construction Options"
             COMPANY_COPYRIGHT "Based on code released under GPLv3 by EA"
-            ORIGINAL_FILENAME "vanillara.exe"
-            RCFILE_PREFIX "VanillaRA"
-            ICON "${VANILLARA_ICON}"
+            ORIGINAL_FILENAME "nco-ra.exe"
+            RCFILE_PREFIX "NCO_RA"
+            ICON "${NCORA_ICON}"
         )
     endif()
 
     # A target must include the icon for the custom command to run.
-    add_executable(VanillaRA ${REDALERT_SRC} ${REDALERT_NET_SRC} ${REDALERT_HEADERS} ${VANILLARA_RC} ${VANILLARA_ICON})
+    add_executable(NCO-RA ${REDALERT_SRC} ${REDALERT_NET_SRC} ${REDALERT_HEADERS} ${NCORA_RC} ${NCORA_ICON})
 
     if(MAKE_BUNDLE)
-        set_source_files_properties(${VANILLARA_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-        set_target_properties(VanillaRA PROPERTIES
+        set_source_files_properties(${NCORA_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+        set_target_properties(NCO-RA PROPERTIES
             MACOSX_BUNDLE True
-            MACOSX_BUNDLE_GUI_IDENTIFIER com.vanilla-conquer.vanillara
-            MACOSX_BUNDLE_BUNDLE_NAME VanillaRA
+            MACOSX_BUNDLE_GUI_IDENTIFIER com.cnc-nco.ra
+            MACOSX_BUNDLE_BUNDLE_NAME NCO-RA
             MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
             MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
             MACOSX_BUNDLE_COPYRIGHT "Based on code released under GPLv3 by EA"
-            MACOSX_BUNDLE_ICON_FILE "vanillara_icon.icns"
+            MACOSX_BUNDLE_ICON_FILE "nco-ra_icon.icns"
         )
     endif()
 
-    target_compile_definitions(VanillaRA PUBLIC $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING> ${VANILLA_DEFS})
-    target_include_directories(VanillaRA PUBLIC ${CMAKE_SOURCE_DIR} .)
-    target_link_libraries(VanillaRA commonv ${VANILLA_LIBS} ${STATIC_LIBS})
-    set_target_properties(VanillaRA PROPERTIES OUTPUT_NAME vanillara)
-    if(MAP_EDITORRA)
-        target_compile_definitions(VanillaRA PUBLIC INTERNAL_VERSION)
+    target_compile_definitions(NCO-RA PUBLIC $<$<CONFIG:Debug>:_DEBUG> $<$<BOOL:CNC_DEBUG_LOGGING>:DEBUG_LOGGING> ${NCO_DEFS})
+    target_include_directories(NCO-RA PUBLIC ${CMAKE_SOURCE_DIR} .)
+    target_link_libraries(NCO-RA commonv ${NCO_LIBS} ${STATIC_LIBS})
+    set_target_properties(NCO-RA PROPERTIES OUTPUT_NAME nco-ra)
+    if(MAP_EDITOR_RA)
+        target_compile_definitions(NCO-RA PUBLIC INTERNAL_VERSION)
     endif()
     # Control if we auto generate a console and which "main" function we link using MSVC.
     if(MSVC)
-        target_link_options(VanillaRA PRIVATE /subsystem:windows /ENTRY:mainCRTStartup)
+        target_link_options(NCO-RA PRIVATE /subsystem:windows /ENTRY:mainCRTStartup)
     endif()
     if(WIN32 AND NOT MSVC)
-        set_target_properties(VanillaRA PROPERTIES LINK_FLAGS "-mwindows")
+        set_target_properties(NCO-RA PROPERTIES LINK_FLAGS "-mwindows")
     endif()
     if(BUILD_WITH_UBSAN)
-        target_compile_options(VanillaRA PUBLIC
+        target_compile_options(NCO-RA PUBLIC
                     -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability
                     -g3 -fno-omit-frame-pointer)
-        target_link_options(VanillaRA PUBLIC -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability)
+        target_link_options(NCO-RA PUBLIC -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability)
     endif()
     if(BUILD_WITH_ASAN)
-        target_compile_options(VanillaRA PUBLIC
+        target_compile_options(NCO-RA PUBLIC
                     -fsanitize=address
                     -g3 -fno-omit-frame-pointer)
-            target_link_options(VanillaRA PUBLIC -fsanitize=address)
+            target_link_options(NCO-RA PUBLIC -fsanitize=address)
     endif()
 
     # create ra package: binary + data packs
     if(MAKE_BUNDLE)
         add_custom_command(
-            TARGET VanillaRA POST_BUILD
+            TARGET NCO-RA POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/nco-ra.app"
             COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/vanillara.app"
-            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vanillara.app"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/nco-ra.app" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/ra/nco-ra.app"
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/nco-ra.app"
         )
     else()
         set(COPY_RA_BIN_CMD "")
 
         if(WIN32)
             # include vcpkg built DLLs on Windows
-            set(COPY_RA_BIN_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin" $<TARGET_FILE_DIR:VanillaRA>/ra)
+            set(COPY_RA_BIN_CMD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin" $<TARGET_FILE_DIR:NCO-RA>/ra)
         endif()
 
         add_custom_command(
-            TARGET VanillaRA POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:VanillaRA>/ra
-            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:VanillaRA>/ra
-            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" $<TARGET_FILE_DIR:VanillaRA>/ra
+            TARGET NCO-RA POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:NCO-RA>/ra
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:NCO-RA>/ra
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/resources/data/ra" $<TARGET_FILE_DIR:NCO-RA>/ra
             ${COPY_RA_BIN_CMD}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:VanillaRA> $<TARGET_FILE_DIR:VanillaRA>/ra
-            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:VanillaRA>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:NCO-RA> $<TARGET_FILE_DIR:NCO-RA>/ra
+            COMMAND ${CMAKE_COMMAND} -E rm -f $<TARGET_FILE:NCO-RA>
         )
     endif()
 endif()

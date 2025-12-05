@@ -102,7 +102,7 @@ const char* PathsClass::User_Path()
         }
 
         UserPath = static_cast<const char*>(TCHARToUTF8(path));
-        UserPath += "\\Vanilla-Conquer";
+        UserPath += "\\nco";
 
         if (!Suffix.empty()) {
             UserPath += SEP + Suffix;
