@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../logger.h"
+#include "logger.h"
 
 /**
  * Encapsulates a piece of discrete logic that a Lua

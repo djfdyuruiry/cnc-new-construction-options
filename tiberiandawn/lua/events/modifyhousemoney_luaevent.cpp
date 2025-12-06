@@ -1,4 +1,4 @@
-#include "../../function.h"
+#include "function.h"
 
 #include "modifyhousemoney_luaevent.h"
 

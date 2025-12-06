@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/lua/luaengine.h"
+#include "common/lua/luaengine.h"
 
 #include "td_luaapi.h"
 

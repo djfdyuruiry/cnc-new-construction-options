@@ -6,8 +6,8 @@
 
 #include "lualib.h"
 
-#include "../logger.h"
-#include "../twowaymap.h"
+#include "logger.h"
+#include "twowaymap.h"
 
 /**
  * Models the result of making a call to the low-level C Lua API.

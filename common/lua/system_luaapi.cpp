@@ -1,4 +1,4 @@
-#include "../paths.h"
+#include "paths.h"
 
 #include "system_luaapi.h"
 

@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "../common/lua/luaengine.h"
+#include "common/lua/luaengine.h"
 
-#include "../defines.h"
+#include "defines.h"
 
 #include "td_luaapi.h"
 

@@ -1,8 +1,8 @@
 #pragma once 
 
-#include "../../../common/lua/luaevent.h"
+#include "common/lua/luaevent.h"
 
-#include "../../house.h"
+#include "house.h"
 
 class ModifyHouseMoneyLuaEvent : public LuaEvent
 {
