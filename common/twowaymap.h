@@ -6,16 +6,25 @@
 #include "logger.h"
 
 /**
+ * There are alot of template instantiations for TwoWayMap, and thus
+ * static fields would be repeated. So this delcares one set of static
+ * fields for all TwoWayMap classes.
+ */
+class TwoWayMapStatic
+{
+protected:
+    static inline const auto& Logger = CncLogger::For(TwoWayMap);
+};
+
+/**
  * Map that enables mapping between two lists of values, in
  * either direction. Useful for converting between enums/constants
  * and strings, for example.
  */
 template<typename A, typename B>
-class TwoWayMap
+class TwoWayMap : private TwoWayMapStatic
 {
 private:
-    static inline const auto& Logger = CncLogger::For(TwoWayMap);
-
     std::map<A, B> ForwardMap;
     std::map<B, A> BackwardMap;
 
