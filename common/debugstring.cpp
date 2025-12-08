@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <spdlog/spdlog.h>
-
 #include "logger.h"
 
 /**

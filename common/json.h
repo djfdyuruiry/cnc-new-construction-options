@@ -3,7 +3,7 @@
 #include <bitset>
 #include <functional>
 
-// this define ensures that CNC enum types are never serialized as numbers
+// force manual handling of enum values - ensures CNC enum types are never serialized by value (use strings instead)
 #define JSON_DISABLE_ENUM_SERIALIZATION 1
 #include <nlohmann/json.hpp>
 

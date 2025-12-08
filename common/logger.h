@@ -3,15 +3,16 @@
 #include <memory>
 #include <string_view>
 
-/**
- * spdlog static configuration
- */
-
-// pull in function call info for current compiler
-#if defined(__GNUC__) || defined(__clang__)
-    #define SPDLOG_FUNCTION static_cast<const char*>(__PRETTY_FUNCTION__)
-#elif defined(_MSC_VER)
-    #define SPDLOG_FUNCTION static_cast<const char*>(__FUNCSIG__)
+// set SPDLOG_FUNCTION to platform specific macro for more detailed function signatures
+#ifndef SPDLOG_FUNCTION
+    #if defined(__GNUC__) || defined(__clang__)
+        #define SPDLOG_FUNCTION static_cast<const char*>(__PRETTY_FUNCTION__)
+    #elif defined(_MSC_VER)
+        #define SPDLOG_FUNCTION static_cast<const char*>(__FUNCSIG__)
+    #else
+        // fallback, supported by all C++ compilers
+        #define SPDLOG_FUNCTION static_cast<const char*>(__FUNCTION__)
+    #endif
 #endif
 
 #include <spdlog/async.h>
@@ -20,19 +21,25 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
-#ifdef _DEBUG
-    #ifdef _WIN32
-        #include <intrin.h>
-        #define TRIGGER_DEBUGGER __debugbreak()
-    #elif defined(__GNUC__) && !defined(__clang__)
-        #define TRIGGER_DEBUGGER __builtin_trap()
-    #elif defined(__GNUC__) && defined(__clang__)
-        #define TRIGGER_DEBUGGER __builtin_debugtrap()
+#ifndef TRIGGER_DEBUGGER
+    #ifdef _DEBUG
+        // reference platform specific macro/function
+        #ifdef _WIN32
+            #include <intrin.h>
+            #define TRIGGER_DEBUGGER __debugbreak()
+        #elif defined(__GNUC__) && !defined(__clang__)
+            #define TRIGGER_DEBUGGER __builtin_trap()
+        #elif defined(__GNUC__) && defined(__clang__)
+            #define TRIGGER_DEBUGGER __builtin_debugtrap()
+        #else
+            // fallback, use C standard error handling
+            #define TRIGGER_DEBUGGER #include <assert.h>; \
+                assert(false)
+        #endif
     #else
-        #define TRIGGER_DEBUGGER assert(false)
+        // no-op if not building Debug version
+        #define TRIGGER_DEBUGGER (void)0
     #endif
-#else
-    #define TRIGGER_DEBUGGER (void)0
 #endif
 
 /**
