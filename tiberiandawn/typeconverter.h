@@ -5,9 +5,7 @@
 #include <string>
 #include <type_traits>
 
-#define MAGIC_ENUM_RANGE_MAX 256 // ensure all values for 'unsigned char' enums are detected
-#include <magic_enum.hpp>
-
+#include "common/enum.h"
 #include "common/json.h"
 #include "common/twowaymap.h"
 #include "common/rulesections.h"
