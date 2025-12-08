@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/lua/rulesluaadapter.h"
+#include "common/lua/rulesluaadapter.h"
 
 #include "externs.h"
 #include "rules.h"

@@ -1,9 +1,9 @@
-#include "../common/lua/logging_luaapi.h"
-#include "../common/lua/luaapi.h"
-#include "../common/lua/luaarguments.h"
-#include "../common/lua/luatablebuilder.h"
+#include "common/lua/logging_luaapi.h"
+#include "common/lua/luaapi.h"
+#include "common/lua/luaarguments.h"
+#include "common/lua/luatablebuilder.h"
 
-#include "../function.h"
+#include "function.h"
 
 #include "events/addteam_luaevent.h"
 #include "events/addtrigger_luaevent.h"

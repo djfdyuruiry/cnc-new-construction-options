@@ -3,11 +3,11 @@
 #include <optional>
 #include <string>
 
-#include "../common/lua/luaengine.h"
-#include "../common/atomicqueue.h"
-#include "../common/logger.h"
+#include "common/lua/luaengine.h"
+#include "common/atomicqueue.h"
+#include "common/logger.h"
 
-#include "../scenario.h"
+#include "scenario.h"
 
 /**
  * Adapter for Lua API to pull in static RulesClass variable.

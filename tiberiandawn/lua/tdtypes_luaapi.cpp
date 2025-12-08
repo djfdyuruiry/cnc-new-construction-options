@@ -1,6 +1,6 @@
-#include "../../common/lua/luatablebuilder.h"
+#include "common/lua/luatablebuilder.h"
 
-#include "../function.h"
+#include "function.h"
 
 #include "tdtypes_luaapi.h"
 

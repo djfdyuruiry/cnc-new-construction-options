@@ -2,7 +2,7 @@
 
 #include <concepts>
 
-#include "../rulesections.h"
+#include "rulesections.h"
 
 #include "luaapi.h"
 #include "luaarguments.h"

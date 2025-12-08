@@ -1,4 +1,4 @@
-#include "../../function.h"
+#include "function.h"
 
 #include "popup_luaevent.h"
 

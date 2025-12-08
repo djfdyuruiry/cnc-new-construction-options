@@ -1,7 +1,7 @@
 #include <format>
 #include <functional>
 
-#include "../stringutils.h"
+#include "stringutils.h"
 
 #include "luaarguments.h"
 

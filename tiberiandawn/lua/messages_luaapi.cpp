@@ -1,6 +1,6 @@
-#include "../../common/lua/luaarguments.h"
+#include "common/lua/luaarguments.h"
 
-#include "../function.h"
+#include "function.h"
 
 #include "events/addmessage_luaevent.h"
 #include "messages_luaapi.h"

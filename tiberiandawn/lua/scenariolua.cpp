@@ -1,14 +1,14 @@
 #include <format>
 #include <vector>
 
-#include "../common/lua/event_luaapi.h"
-#include "../common/lua/logging_luaapi.h"
-#include "../common/lua/luascripts.h"
-#include "../common/lua/rules_luaapi.h"
-#include "../common/lua/system_luaapi.h"
-#include "../common/stringutils.h"
+#include "common/lua/event_luaapi.h"
+#include "common/lua/logging_luaapi.h"
+#include "common/lua/luascripts.h"
+#include "common/lua/rules_luaapi.h"
+#include "common/lua/system_luaapi.h"
+#include "common/stringutils.h"
 
-#include "../function.h"
+#include "function.h"
 
 #include "game_luaapi.h"
 #include "messages_luaapi.h"

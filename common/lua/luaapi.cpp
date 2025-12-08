@@ -2,7 +2,7 @@
 #include <functional>
 #include <string>
 
-#include "../logger.h"
+#include "logger.h"
 
 #include "luaapi.h"
 #include "luaengine.h"

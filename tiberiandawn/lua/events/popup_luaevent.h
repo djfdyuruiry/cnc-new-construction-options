@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "../../../common/lua/luaevent.h"
+#include "common/lua/luaevent.h"
 
 class PopupLuaEvent : public LuaEvent
 {

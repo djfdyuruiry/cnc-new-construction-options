@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <string>
 
-#include "../common/lua/luaapi.h"
+#include "common/lua/luaapi.h"
 
 class TiberianDawnLuaApi : public LuaApi
 {

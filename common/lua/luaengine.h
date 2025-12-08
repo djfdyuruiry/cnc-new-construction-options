@@ -26,8 +26,8 @@
 
 #include "lualib.h"
 
-#include "../logger.h"
-#include "../twowaymap.h"
+#include "logger.h"
+#include "twowaymap.h"
 #include "luaresult.h"
 
 typedef unsigned short ushort;
