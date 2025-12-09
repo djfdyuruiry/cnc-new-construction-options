@@ -222,6 +222,7 @@ jobs:
             artifact/*
 
   # TODO: Remaster compatibility - some animations not working (white squares), default path for INI files in CNCRemastered game dir (wrong) and lua files not discovered (need to add appdata to search path)
+  #       Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load
   remaster_msvc:
     needs:
       - resolve_win_cmake_preset
