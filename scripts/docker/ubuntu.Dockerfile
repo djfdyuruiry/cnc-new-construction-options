@@ -58,6 +58,8 @@ USER ubuntu
 
 ENV CC="clang"
 ENV CXX="clang++"
+ENV CMAKE_C_COMPILER="clang"
+ENV CMAKE_CXX_COMPILER="clang++"
 ENV CMAKE_MAKE_PROGRAM="ninja"
 ENV VC_CXX_FLAGS="-w;-Wwrite-strings;-Werror=write-strings"
 
