@@ -39,6 +39,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "cdfile.h"
+#include "logger.h"
 #include "paths.h"
 #include <stdio.h>
 #include <string.h>
@@ -122,8 +123,12 @@ int CDFileClass::Open(int rights)
     ** Otherwise it will try and write it to the working directory, probably the binary dir.
     */
     if ((rights & WRITE) && !PathsClass::Is_Absolute(File_Name())) {
+        CNC_LOG_INFO("Appending User_Path to filename: {}", File_Name());
+
         path = Paths.Concatenate_Paths(Paths.User_Path(), File_Name());
         BufferIOFileClass::Set_Name(path.c_str());
+    } else {
+        CNC_LOG_INFO("Using filename directly: {}", File_Name());
     }
 
     return (BufferIOFileClass::Open(rights));

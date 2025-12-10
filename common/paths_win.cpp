@@ -9,6 +9,7 @@
 // distributed with this program. You should have received a copy of the
 // GNU General Public License along with permitted additional restrictions
 // with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
+#include "logger.h"
 #include "paths.h"
 #include "debugstring.h"
 #include "utf.h"
@@ -69,6 +70,8 @@ const char* PathsClass::Program_Path()
         if (path != buffer1) {
             free(path);
         }
+
+        CNC_LOG_INFO("Resolved ProgramPath: {}", ProgramPath);
     }
 
     return ProgramPath.c_str();
@@ -87,6 +90,8 @@ const char* PathsClass::Data_Path()
         if (!Suffix.empty()) {
             DataPath += SEP + Suffix;
         }
+
+        CNC_LOG_INFO("Resolved DataPath: {}", DataPath);
     }
 
     return DataPath.c_str();
@@ -109,6 +114,8 @@ const char* PathsClass::User_Path()
         }
 
         Create_Directory(UserPath.c_str());
+
+        CNC_LOG_INFO("Resolved UserPath: {}", UserPath);
     }
 
     return UserPath.c_str();
