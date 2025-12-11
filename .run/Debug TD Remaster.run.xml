@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug TD Remaster" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="GAME_INDEX=0 TIBERIANDAWN" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://D:/games/steamapps/common/CnCRemastered" PASS_PARENT_ENVS_2="true" PROJECT_NAME="cnc-new-construction-options" TARGET_NAME="TiberianDawn" CONFIG_NAME="tiberian-dawn-remaster-debug - tiberian-dawn-remaster-debug" RUN_PATH="D:/games/steamapps/common/CnCRemastered/ClientG.exe">
+    <envs>
+      <env name="NCO_LOG_LEVEL" value="info" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_Deploy TD Remaster Mod" />
+    </method>
+  </configuration>
+</component>

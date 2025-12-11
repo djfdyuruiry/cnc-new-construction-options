@@ -88,6 +88,14 @@
             }
         },
         {
+            "name": "tiberian-dawn-remaster-debug",
+            "inherits": "remaster-debug",
+            "displayName": "NCO Remaster build (TD)",
+            "cacheVariables": {
+                "BUILD_REMASTER_RA": "OFF"
+            }
+        },
+        {
             "name": "debug",
             "inherits": "release",
             "displayName": "NCO debug build",
@@ -182,6 +190,13 @@
             "displayName": "NCO Tiberian Dawn Build (remaster)",
             "description": "NCO Tiberian Dawn Build (remaster)",
             "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "tiberian-dawn-remaster-debug",
+            "configurePreset": "tiberian-dawn-remaster-debug",
+            "displayName": "NCO Tiberian Dawn Build (remaster)",
+            "description": "NCO Tiberian Dawn Build (remaster)",
+            "configuration": "Debug"
         }
     ],
     "testPresets": [
@@ -278,6 +293,19 @@
                 {
                     "type": "build",
                     "name": "red-alert-debug"
+                }
+            ]
+        },
+        {
+            "name": "tiberian-dawn-remaster-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "tiberian-dawn-remaster-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "tiberian-dawn-remaster-debug"
                 }
             ]
         }

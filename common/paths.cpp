@@ -106,6 +106,6 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
         UserPath = ProgramPath;
     }
 
-    DBG_INFO("Read only data directory is set to '%s'", DataPath.c_str());
+        DBG_INFO("Read only data directory is set to '%s'", DataPath.c_str());
     DBG_INFO("Read/Write user data directory is set to '%s'", UserPath.c_str());
 }

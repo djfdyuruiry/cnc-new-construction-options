@@ -13,6 +13,8 @@
 #ifndef COMMON_PATHS_H
 #define COMMON_PATHS_H
 
+#include "logger.h"
+
 #include <string>
 
 class PathsClass
@@ -51,6 +53,8 @@ private:
     static std::string Argv_Path(const char* cmd_arg);
 
 private:
+    static inline const auto& Logger = CncLogger::For(PathsClass);
+
     std::string Suffix;
     std::string ProgramPath;
     std::string DataPath;

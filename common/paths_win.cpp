@@ -20,6 +20,7 @@
 const char* PathsClass::Program_Path()
 {
     if (ProgramPath.empty()) {
+#ifndef REMASTER_BUILD
         /*
         ** Adapted from https://github.com/gpakosz/whereami
         ** dual licensed under the WTFPL v2 and MIT licenses without any warranty. by Gregory Pakosz (@gpakosz)
@@ -70,8 +71,28 @@ const char* PathsClass::Program_Path()
         if (path != buffer1) {
             free(path);
         }
+#else
+        TCHAR path[MAX_PATH];
+        HMODULE hm = nullptr;
 
-        CNC_LOG_INFO("Resolved ProgramPath: {}", ProgramPath);
+        // Get path to mod DLL (not remastered host exe)
+        if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                reinterpret_cast<LPCWSTR>(&PathsClass::Create_Directory), &hm) == 0) {
+            DWORD ret = GetLastError();
+            CNC_LOGGER_FATAL("GetModuleHandleEx failed, error = {}", ret);
+        }
+
+        if (GetModuleFileName(hm, path, sizeof(path)) == 0) {
+            DWORD ret = GetLastError();
+            CNC_LOGGER_FATAL("GetModuleFileName failed, error = {}", ret);
+        }
+
+        const std::string tmp((TCHARToUTF8(path)));
+        ProgramPath = tmp.substr(0, tmp.find_last_of('\\'));
+#endif
+
+        CNC_LOGGER_INFO("Resolved ProgramPath: {}", ProgramPath);
     }
 
     return ProgramPath.c_str();
@@ -91,7 +112,7 @@ const char* PathsClass::Data_Path()
             DataPath += SEP + Suffix;
         }
 
-        CNC_LOG_INFO("Resolved DataPath: {}", DataPath);
+        CNC_LOGGER_DEBUG("Resolved DataPath: {}", DataPath);
     }
 
     return DataPath.c_str();
@@ -115,7 +136,7 @@ const char* PathsClass::User_Path()
 
         Create_Directory(UserPath.c_str());
 
-        CNC_LOG_INFO("Resolved UserPath: {}", UserPath);
+        CNC_LOGGER_DEBUG("Resolved UserPath: {}", UserPath);
     }
 
     return UserPath.c_str();
