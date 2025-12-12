@@ -20,6 +20,7 @@
 const char* PathsClass::Program_Path()
 {
     if (ProgramPath.empty()) {
+        // TODO: Determine why REMASTER_BUILD is not defined in this translation unit
 #ifndef REMASTER_BUILD
         /*
         ** Adapted from https://github.com/gpakosz/whereami

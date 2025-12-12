@@ -20,6 +20,17 @@
 class PathsClass
 {
 public:
+#ifdef _WIN32
+    static constexpr static char SEP = '\\';
+#else
+    static constexpr char SEP = '/';
+#endif
+
+    static bool Create_Directory(const char* path);
+    static bool Is_Absolute(const char* path);
+    static std::string Concatenate_Paths(const char* path1, const char* path2);
+    static std::string Get_Filename(const char* path);
+
     PathsClass()
     {
     }
@@ -39,19 +50,6 @@ public:
     const char* Data_Path();
     const char* User_Path();
 
-    static bool Create_Directory(const char* path);
-    static bool Is_Absolute(const char* path);
-    static std::string Concatenate_Paths(const char* path1, const char* path2);
-    static std::string Get_Filename(const char* path);
-
-#ifdef _WIN32
-    constexpr static char SEP = '\\';
-#else
-    constexpr static char SEP = '/';
-#endif
-private:
-    static std::string Argv_Path(const char* cmd_arg);
-
 private:
     static inline const auto& Logger = CncLogger::For(PathsClass);
 
@@ -59,6 +57,8 @@ private:
     std::string ProgramPath;
     std::string DataPath;
     std::string UserPath;
+
+    static std::string Argv_Path(const char* cmd_arg);
 };
 
 extern PathsClass Paths;
