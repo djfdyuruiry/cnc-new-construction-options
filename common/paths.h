@@ -21,7 +21,7 @@ class PathsClass
 {
 public:
 #ifdef _WIN32
-    static constexpr static char SEP = '\\';
+    static constexpr char SEP = '\\';
 #else
     static constexpr char SEP = '/';
 #endif
