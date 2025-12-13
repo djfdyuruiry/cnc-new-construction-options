@@ -113,6 +113,15 @@ set(COMMON_SRC
     stringutils.cpp
 )
 
+if(BUILD_NCO_TD OR BUILD_NCO_RA OR BUILD_TESTS)
+    # Only include path/file logic in common lib if not building remaster dll
+    if (WIN32)
+        list(APPEND COMMON_SRC file_win.cpp paths_win.cpp)
+    else()
+        list(APPEND COMMON_SRC file_posix.cpp paths_posix.cpp)
+    endif()
+endif()
+
 set(COMMONR_SRC
     framelimit.cpp
     gbuffer.cpp
@@ -197,6 +206,7 @@ endif()
 
 if(BUILD_REMASTER_TD OR BUILD_REMASTER_RA)
     if (WIN32)
+        # REMASTER_DEFS are required for remaster dll path logic to be enabled with REMASTER_BUILD define
         list(APPEND COMMONR_SRC file_win.cpp paths_win.cpp)
     endif()
 
@@ -207,12 +217,6 @@ endif()
 
 # These options currently require directx components from the aug 2007 SDK.
 if(BUILD_NCO_TD OR BUILD_NCO_RA OR BUILD_TESTS)
-    if (WIN32)
-        list(APPEND COMMONV_SRC file_win.cpp paths_win.cpp)
-    else()
-        list(APPEND COMMONV_SRC file_posix.cpp paths_posix.cpp)
-    endif()
-
     add_library(commonv STATIC ${COMMONV_SRC})
     target_compile_definitions(commonv PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${NCO_DEFS})
     target_link_libraries(commonv PUBLIC common ${NCO_LIBS})
