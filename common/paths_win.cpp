@@ -81,19 +81,19 @@ const char* PathsClass::Program_Path()
                 GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                 reinterpret_cast<LPCWSTR>(&PathsClass::Create_Directory), &hm) == 0) {
             DWORD ret = GetLastError();
-            CNC_LOGGER_FATAL("GetModuleHandleEx failed, error = {}", ret);
+            //CNC_LOGGER_FATAL("GetModuleHandleEx failed, error = {}", ret);
         }
 
         if (GetModuleFileName(hm, path, sizeof(path)) == 0) {
             DWORD ret = GetLastError();
-            CNC_LOGGER_FATAL("GetModuleFileName failed, error = {}", ret);
+            //CNC_LOGGER_FATAL("GetModuleFileName failed, error = {}", ret);
         }
 
         const std::string tmp((TCHARToUTF8(path)));
         ProgramPath = tmp.substr(0, tmp.find_last_of('\\'));
 #endif
 
-        CNC_LOGGER_INFO("Resolved ProgramPath: {}", ProgramPath);
+        //CNC_LOGGER_INFO("Resolved ProgramPath: {}", ProgramPath);
     }
 
     return ProgramPath.c_str();
@@ -113,7 +113,7 @@ const char* PathsClass::Data_Path()
             DataPath += SEP + Suffix;
         }
 
-        CNC_LOGGER_DEBUG("Resolved DataPath: {}", DataPath);
+        //CNC_LOGGER_DEBUG("Resolved DataPath: {}", DataPath);
     }
 
     return DataPath.c_str();
@@ -125,7 +125,7 @@ const char* PathsClass::User_Path()
         TCHAR path[MAX_PATH];
 
         if (!SHGetSpecialFolderPath(nullptr, path, CSIDL_APPDATA, TRUE)) {
-            DBG_WARN("Failed to retrieve FOLDERID_RoamingAppData for PathsClass::User_Path()");
+            //DBG_WARN("Failed to retrieve FOLDERID_RoamingAppData for PathsClass::User_Path()");
         }
 
         UserPath = static_cast<const char*>(TCHARToUTF8(path));
@@ -137,7 +137,7 @@ const char* PathsClass::User_Path()
 
         Create_Directory(UserPath.c_str());
 
-        CNC_LOGGER_DEBUG("Resolved UserPath: {}", UserPath);
+        //CNC_LOGGER_DEBUG("Resolved UserPath: {}", UserPath);
     }
 
     return UserPath.c_str();

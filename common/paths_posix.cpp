@@ -70,14 +70,14 @@ namespace
                 int error_code = getpwuid_r(uid, &pwd, buffer.data(), buffer.size(), &pw);
 
                 if (error_code) {
-                    DBG_ERROR("Unable to get passwd entry for uid %d, error was %d.", uid, error_code);
+                    //DBG_ERROR("Unable to get passwd entry for uid %d, error was %d.", uid, error_code);
                     return _path;
                 }
 
                 const char* tmp = pw->pw_dir;
 
                 if (!tmp) {
-                    DBG_ERROR("User does not appear to have a home directory?");
+                    //DBG_ERROR("User does not appear to have a home directory?");
                     return _path;
                 }
 
@@ -102,7 +102,7 @@ namespace
                               "'%s'.",
                               tmp,
                               env_var);
-                DBG_WARN(buffer);
+                //DBG_WARN(buffer);
             } else {
                 return tmp;
             }
@@ -267,7 +267,7 @@ std::string PathsClass::Argv_Path(const char* cmd_arg)
     }
 
     if (realpath(arg_dir, &ret[0]) == nullptr) {
-        DBG_WARN("PathsClass::Argv_Path: realpath() failed");
+        //DBG_WARN("PathsClass::Argv_Path: realpath() failed");
         ret = arg_dir;
     } else {
         ret.resize(strlen(&ret[0]));
