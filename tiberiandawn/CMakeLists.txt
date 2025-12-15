@@ -231,10 +231,16 @@ if(BUILD_REMASTER_TD)
     set_target_properties(TiberianDawn PROPERTIES PREFIX "")
 
     # create remastered mod: dll + mod json + lua library + lua binaries
-    add_custom_command(TARGET TiberianDawn POST_BUILD
+    add_custom_command(
+        TARGET TiberianDawn POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/NCO_TD"
+        # static mod files
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_TD" "${CMAKE_BINARY_DIR}/NCO_TD"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data/CCDATA"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/remaster_mods/CCDATA-readme.txt" "${CMAKE_BINARY_DIR}/NCO_TD/Data/CCDATA/readme.txt"
+        # binary
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:TiberianDawn> "${CMAKE_BINARY_DIR}/NCO_TD/Data/"
+        # lua
         COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua/nco/lib"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua/nco/TiberianDawn/lib"

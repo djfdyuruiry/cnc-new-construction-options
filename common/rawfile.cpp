@@ -179,7 +179,7 @@ char const* RawFileClass::Set_Name(char const* filename)
     */
     Resolve_File(Filename);
 
-    CNC_LOG_INFO("Filename resolved: {} -> {}", filename, Filename);
+    CNC_LOG_DEBUG("Filename resolved: {} -> {}", filename, Filename);
 
     return (Filename);
 }

@@ -316,7 +316,6 @@ void RulesClass::Init()
     // provide player with a default RULES.INI file
     if (!ini_file_exists) {
         Export(ini);
-        Sections.Save_All_To_Ini(ini);
 
         if (!ini.Save(ini_file, false)) {
             CNC_LOGGER_FATAL("Failed to generate RULES.INI file");
@@ -343,6 +342,7 @@ void RulesClass::Export(CCINIClass& ini) const
     Export_AI(ini);
     Export_IQ(ini);
     Export_Difficulty(ini);
+    Sections.Save_All_To_Ini(ini);
 }
 
 /***********************************************************************************************

@@ -210,10 +210,14 @@ if(BUILD_REMASTER_RA)
     target_link_libraries(RedAlert commonr ${REMASTER_LIBS} ${STATIC_LIBS})
     set_target_properties(RedAlert PROPERTIES PREFIX "")
 
-    # TODO: When visiting remastered support, add lua and relevant data packs (may need to search user paths for lua scripts/rules.ini)
-    add_custom_command(TARGET RedAlert POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_RA ${CMAKE_BINARY_DIR}/NCO_RA
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NCO_RA/Data
+    # create remastered mod: dll + mod json
+    add_custom_command(
+        TARGET RedAlert POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/NCO_RA"
+        # static mod files
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_RA" "${CMAKE_BINARY_DIR}/NCO_RA"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_RA/Data/CCDATA"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/remaster_mods/CCDATA-readme.txt" "${CMAKE_BINARY_DIR}/NCO_RA/Data/CCDATA/readme.txt"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:RedAlert> ${CMAKE_BINARY_DIR}/NCO_RA/Data/
     )
 endif()

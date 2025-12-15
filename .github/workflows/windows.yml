@@ -221,8 +221,21 @@ jobs:
           files: |
             artifact/*
 
-  # TODO: Remaster compatibility - some animations not working (white squares), default path for INI files in CNCRemastered game dir (wrong) and lua files not discovered (need to add appdata to search path)
-  #       Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load
+  # TODO: Remaster compatibility
+  #
+  #   Issues:
+  #
+  #     - some animations not working (white squares)
+  #     - placeholder for putting buildings down has lines of cells inserted between each row
+  #     - rules.ini not saving (not even in an incorrect path)
+  #
+  #   Tested OK:
+  #
+  #     - loading scenario rules from INI (requires file to be in CCDATA folder beside mod DLL to work, readme added to mod zip)
+  #     - loading lua scripts
+  #     - logging
+  #
+  #       NOTE: Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load
   remaster_msvc:
     needs:
       - resolve_win_cmake_preset
@@ -277,16 +290,12 @@ jobs:
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.dll
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.pdb
           7z a artifact/nco-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_RA
-
-          # TODO: Lua files + resources
         fi
-      
+
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.dll
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.pdb
           7z a artifact/nco-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_TD
-
-          # TODO: Lua files + resources
         fi
 
     - name: Upload artifact
