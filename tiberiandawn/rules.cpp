@@ -307,6 +307,7 @@ void RulesClass::Init()
     const auto ini_file_exists = ini_file.Is_Available();
 
     if (ini_file_exists) {
+        CNC_LOGGER_INFO("Loading RULES.INI from existing file");
         ini.Load(ini_file, false);
     }
 
@@ -315,6 +316,7 @@ void RulesClass::Init()
 
     // provide player with a default RULES.INI file
     if (!ini_file_exists) {
+        CNC_LOGGER_INFO("Writing RULES.INI to new file");
         Export(ini);
 
         if (!ini.Save(ini_file, false)) {
@@ -586,7 +588,7 @@ static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logg
     const auto ini_file_exists = ini_file.Is_Available();
 
     if (ini_file_exists) {
-        CNC_LOGGER_DEBUG("Loading type rules from INI file: {}", rules_filename);
+        CNC_LOGGER_INFO("Loading type rules from INI file: {}", rules_filename);
 
         if (!ini.Load(ini_file, false)) {
             CNC_LOGGER_FATAL("Failed to load type rules - INI file is corrupt: {}", rules_filename);
@@ -600,7 +602,7 @@ static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logg
 
     // provide player with a default <PREFIX>.INI file
     if (!ini_file_exists) {
-        CNC_LOGGER_DEBUG("Writing type rules to INI file: {}", rules_filename);
+        CNC_LOGGER_INFO("Writing type rules to INI file: {}", rules_filename);
 
         sections.Save_All_To_Ini(ini);
 
