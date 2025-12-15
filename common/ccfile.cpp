@@ -331,6 +331,7 @@ int CCFileClass::Is_Available(int)
     **	A file that is part of a mixfile is also presumed available.
     */
     if (MixFileClass<CCFileClass>::Offset(File_Name())) {
+        CNC_LOG_INFO("Found in mix file: {}", File_Name());
         return (true);
     }
 

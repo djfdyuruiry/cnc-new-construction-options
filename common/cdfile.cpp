@@ -447,6 +447,7 @@ int CDFileClass::Is_Available(int forced)
         **	it will return false and the search process will continue.
         */
         if (RawFileClass(path.c_str()).Is_Available()) {
+            CNC_LOG_INFO("Found file at path: {}", path);
             return true;
         }
 
