@@ -327,11 +327,13 @@ int CCFileClass::Is_Available(int)
     if (Is_Open())
         return (true);
 
+    const auto file_name = File_Name();
+
     /*
     **	A file that is part of a mixfile is also presumed available.
     */
-    if (MixFileClass<CCFileClass>::Offset(File_Name())) {
-        CNC_LOG_INFO("Found in mix file: {}", File_Name());
+    if (MixFileClass<CCFileClass>::Offset(file_name)) {
+        CNC_LOG_DEBUG("Found file inside mix file: {}", file_name);
         return (true);
     }
 

@@ -227,7 +227,7 @@ jobs:
   #
   #     - some animations not working (white squares)
   #     - placeholder for putting buildings down has lines of cells inserted between each row
-  #     - rules.ini not saving (not even in an incorrect path)
+  #     - rules.ini not generating (file search loads it from a mix file, therefore seen as 'available' when save check runs)
   #
   #   Tested OK:
   #

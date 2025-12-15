@@ -116,19 +116,19 @@ int Is_Disk_Inserted(int disk)
  *=============================================================================================*/
 int CDFileClass::Open(int rights)
 {
-    std::string path = File_Name();
+    const auto path = File_Name();
     /*
     ** If we are wanting a writeable file and the path is not based off of the User_Path
     ** then we might have a problem. If the filename is relative then just append to User_Path.
     ** Otherwise it will try and write it to the working directory, probably the binary dir.
     */
-    if ((rights & WRITE) && !PathsClass::Is_Absolute(File_Name())) {
-        CNC_LOG_INFO("Appending User_Path to filename: {}", File_Name());
+    if ((rights & WRITE) && !PathsClass::Is_Absolute(path)) {
+        CNC_LOG_DEBUG("Appending User_Path to filename: {}", path);
 
-        path = Paths.Concatenate_Paths(Paths.User_Path(), File_Name());
-        BufferIOFileClass::Set_Name(path.c_str());
+        const auto user_file_path = PathsClass::Concatenate_Paths(Paths.User_Path(), path);
+        BufferIOFileClass::Set_Name(user_file_path.c_str());
     } else {
-        CNC_LOG_INFO("Using filename directly: {}", File_Name());
+        CNC_LOG_DEBUG("Using filename directly: {}", path);
     }
 
     return (BufferIOFileClass::Open(rights));
@@ -447,7 +447,7 @@ int CDFileClass::Is_Available(int forced)
         **	it will return false and the search process will continue.
         */
         if (RawFileClass(path.c_str()).Is_Available()) {
-            CNC_LOG_INFO("Found file at path: {}", path);
+            CNC_LOG_DEBUG("Found file at path: {}", path);
             return true;
         }
 
