@@ -87,6 +87,7 @@ static TerrainTypeClass const Tree1Class(TERRAIN_TREE1,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
                                          "T01",
+                                         "T01",
                                          TXT_TREE,
                                          TREE_NORMAL,
                                          ARMOR_WOOD,
@@ -105,6 +106,7 @@ static TerrainTypeClass const Tree2Class(TERRAIN_TREE2,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
+                                         "T02",
                                          "T02",
                                          TXT_TREE,
                                          TREE_NORMAL,
@@ -125,6 +127,7 @@ static TerrainTypeClass const Tree3Class(TERRAIN_TREE3,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
                                          "T03",
+                                         "T03",
                                          TXT_TREE,
                                          TREE_NORMAL,
                                          ARMOR_WOOD,
@@ -143,6 +146,7 @@ static TerrainTypeClass const Tree4Class(TERRAIN_TREE4,
                                          false,           // Can it be the target of a move or attack order?
                                          true,            // Don't make a big deal about it if it gets destroyed?
                                          false,           // Is it immune to normal combat damage?
+                                         "T04",
                                          "T04",
                                          TXT_TREE,
                                          TREE_NORMAL,
@@ -163,6 +167,7 @@ static TerrainTypeClass const Tree5Class(TERRAIN_TREE5,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
                                          "T05",
+                                         "T05",
                                          TXT_TREE,
                                          TREE_NORMAL,
                                          ARMOR_WOOD,
@@ -181,6 +186,7 @@ static TerrainTypeClass const Tree6Class(TERRAIN_TREE6,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
+                                         "T06",
                                          "T06",
                                          TXT_TREE,
                                          TREE_NORMAL,
@@ -201,6 +207,7 @@ static TerrainTypeClass const Tree7Class(TERRAIN_TREE7,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
                                          "T07",
+                                         "T07",
                                          TXT_TREE,
                                          TREE_NORMAL,
                                          ARMOR_WOOD,
@@ -219,6 +226,7 @@ static TerrainTypeClass const Tree8Class(TERRAIN_TREE8,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
+                                         "T08",
                                          "T08",
                                          TXT_TREE,
                                          TREE_NORMAL,
@@ -239,6 +247,7 @@ static TerrainTypeClass const Tree9Class(TERRAIN_TREE9,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          false,             // Is it immune to normal combat damage?
                                          "T09",
+                                         "T09",
                                          TXT_TREE,
                                          TREE_NORMAL,
                                          ARMOR_WOOD,
@@ -257,6 +266,7 @@ static TerrainTypeClass const Tree10Class(TERRAIN_TREE10,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
+                                          "T10",
                                           "T10",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -277,6 +287,7 @@ static TerrainTypeClass const Tree11Class(TERRAIN_TREE11,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
                                           "T11",
+                                          "T11",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -295,6 +306,7 @@ static TerrainTypeClass const Tree12Class(TERRAIN_TREE12,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
+                                          "T12",
                                           "T12",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -315,6 +327,7 @@ static TerrainTypeClass const Tree13Class(TERRAIN_TREE13,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
                                           "T13",
+                                          "T13",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -333,6 +346,7 @@ static TerrainTypeClass const Tree14Class(TERRAIN_TREE14,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
+                                          "T14",
                                           "T14",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -353,6 +367,7 @@ static TerrainTypeClass const Tree15Class(TERRAIN_TREE15,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
                                           "T15",
+                                          "T15",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -371,6 +386,7 @@ static TerrainTypeClass const Tree16Class(TERRAIN_TREE16,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
+                                          "T16",
                                           "T16",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -391,6 +407,7 @@ static TerrainTypeClass const Tree17Class(TERRAIN_TREE17,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
                                           "T17",
+                                          "T17",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -409,6 +426,7 @@ static TerrainTypeClass const Tree18Class(TERRAIN_TREE18,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           false,             // Is it immune to normal combat damage?
+                                          "T18",
                                           "T18",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -429,6 +447,7 @@ static TerrainTypeClass const Split1Class(TERRAIN_BLOSSOMTREE1,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
                                           "SPLIT2",
+                                          "SPLIT2",
                                           TXT_BLOSSOM_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -447,6 +466,7 @@ static TerrainTypeClass const Split2Class(TERRAIN_BLOSSOMTREE2,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
+                                          "SPLIT3",
                                           "SPLIT3",
                                           TXT_BLOSSOM_TREE,
                                           TREE_NORMAL,
@@ -467,6 +487,7 @@ static TerrainTypeClass const Clump1Class(TERRAIN_CLUMP1,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
                                           "TC01",
+                                          "TC01",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -485,6 +506,7 @@ static TerrainTypeClass const Clump2Class(TERRAIN_CLUMP2,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
+                                          "TC02",
                                           "TC02",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -505,6 +527,7 @@ static TerrainTypeClass const Clump3Class(TERRAIN_CLUMP3,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
                                           "TC03",
+                                          "TC03",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -523,6 +546,7 @@ static TerrainTypeClass const Clump4Class(TERRAIN_CLUMP4,
                                           false,             // Can it be the target of a move or attack order?
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
+                                          "TC04",
                                           "TC04",
                                           TXT_TREE,
                                           TREE_NORMAL,
@@ -543,6 +567,7 @@ static TerrainTypeClass const Clump5Class(TERRAIN_CLUMP5,
                                           true,              // Don't make a big deal about it if it gets destroyed?
                                           true,              // Is it immune to normal combat damage?
                                           "TC05",
+                                          "TC05",
                                           TXT_TREE,
                                           TREE_NORMAL,
                                           ARMOR_WOOD,
@@ -561,6 +586,7 @@ static TerrainTypeClass const Rock1Class(TERRAIN_ROCK1,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
+                                         "ROCK1",
                                          "ROCK1",
                                          TXT_ROCK,
                                          1000,
@@ -581,6 +607,7 @@ static TerrainTypeClass const Rock2Class(TERRAIN_ROCK2,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
                                          "ROCK2",
+                                         "ROCK2",
                                          TXT_ROCK,
                                          1000,
                                          ARMOR_STEEL,
@@ -599,6 +626,7 @@ static TerrainTypeClass const Rock3Class(TERRAIN_ROCK3,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
+                                         "ROCK3",
                                          "ROCK3",
                                          TXT_ROCK,
                                          1000,
@@ -619,6 +647,7 @@ static TerrainTypeClass const Rock4Class(TERRAIN_ROCK4,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
                                          "ROCK4",
+                                         "ROCK4",
                                          TXT_ROCK,
                                          1000,
                                          ARMOR_STEEL,
@@ -637,6 +666,7 @@ static TerrainTypeClass const Rock5Class(TERRAIN_ROCK5,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
+                                         "ROCK5",
                                          "ROCK5",
                                          TXT_ROCK,
                                          1000,
@@ -657,6 +687,7 @@ static TerrainTypeClass const Rock6Class(TERRAIN_ROCK6,
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
                                          "ROCK6",
+                                         "ROCK6",
                                          TXT_ROCK,
                                          1000,
                                          ARMOR_STEEL,
@@ -675,6 +706,7 @@ static TerrainTypeClass const Rock7Class(TERRAIN_ROCK7,
                                          false,             // Can it be the target of a move or attack order?
                                          true,              // Don't make a big deal about it if it gets destroyed?
                                          true,              // Is it immune to normal combat damage?
+                                         "ROCK7",
                                          "ROCK7",
                                          TXT_ROCK,
                                          1000,
@@ -745,6 +777,7 @@ TerrainTypeClass::TerrainTypeClass(TerrainType terrain,
                                    bool is_insignificant,
                                    bool is_immune,
                                    char const* ininame,
+                                   std::string image_name,
                                    int fullname,
                                    unsigned short strength,
                                    ArmorType armor,
@@ -760,6 +793,7 @@ TerrainTypeClass::TerrainTypeClass(TerrainType terrain,
                       is_immune,
                       fullname,
                       ininame,
+                      std::move(image_name),
                       armor,
                       strength)
 {

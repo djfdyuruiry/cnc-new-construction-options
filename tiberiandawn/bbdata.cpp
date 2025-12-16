@@ -521,7 +521,7 @@ BulletTypeClass const* const BulletTypeClass::Pointers[BULLET_COUNT] = {
  *=============================================================================================*/
 BulletTypeClass::BulletTypeClass(BulletType type,
                                  char const* ininame,
-                                 std::string_view image_name,
+                                 std::string image_name,
                                  bool is_high,
                                  bool is_homing,
                                  bool is_arcing,
@@ -540,7 +540,7 @@ BulletTypeClass::BulletTypeClass(BulletType type,
                                  unsigned rot,
                                  WarheadType warhead,
                                  AnimType explosion)
-    : ObjectTypeClass(true, false, false, true, false, false, true, true, TXT_NONE, ininame, ARMOR_NONE, 0)
+    : ObjectTypeClass(true, false, false, true, false, false, true, true, TXT_NONE, ininame, std::move(image_name), ARMOR_NONE, 0)
 {
     Explosion = explosion;
     IsHigh = is_high;
@@ -561,7 +561,6 @@ BulletTypeClass::BulletTypeClass(BulletType type,
     ROT = rot;
     Arming = arming;
     Range = range;
-    ImageName = image_name;
 }
 
 /***********************************************************************************************

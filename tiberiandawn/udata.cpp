@@ -1271,8 +1271,8 @@ UnitTypeClass const* const UnitTypeClass::Pointers[UNIT_COUNT] = {
 UnitTypeClass::UnitTypeClass(UnitType type,
                              int name,
                              char const* ininame,
-                             std::string_view cameo_name,
-                             std::string_view image_name,
+                             std::string cameo_name,
+                             std::string image_name,
                              AnimType exp,
                              unsigned char level,
                              StructType prereq,
@@ -1320,6 +1320,8 @@ UnitTypeClass::UnitTypeClass(UnitType type,
                              MissionType order)
     : TechnoTypeClass(name,
                       ininame,
+                      std::move(cameo_name),
+                      std::move(image_name),
                       level,
                       prereq,
                       is_leader,
@@ -1370,8 +1372,6 @@ UnitTypeClass::UnitTypeClass(UnitType type,
     Speed = speed;
     TurretOffset = toffset;
     Type = type;
-    CameoName = cameo_name;
-    ImageName = image_name;
 }
 
 /***********************************************************************************************

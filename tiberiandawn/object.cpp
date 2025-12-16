@@ -116,6 +116,7 @@ ObjectTypeClass::ObjectTypeClass(bool is_sentient,
                                  bool is_immune,
                                  int name,
                                  char const* ini,
+                                 std::string image_name,
                                  ArmorType armor,
                                  unsigned short strength)
     : AbstractTypeClass(name, ini)
@@ -132,6 +133,7 @@ ObjectTypeClass::ObjectTypeClass(bool is_sentient,
     MaxStrength = strength;
     ImageData = NULL;
     // RadarIcon = NULL;
+    ImageName = std::move(image_name);
 }
 
 /***********************************************************************************************

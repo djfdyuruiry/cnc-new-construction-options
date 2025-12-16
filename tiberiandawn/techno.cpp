@@ -149,6 +149,8 @@ int const TechnoClass::BodyShape[32] = {0,  31, 30, 29, 28, 27, 26, 25, 24, 23, 
  *=============================================================================================*/
 TechnoTypeClass::TechnoTypeClass(int name,
                                  char const* ininame,
+                                 std::string cameo_name,
+                                 std::string image_name,
                                  unsigned char level,
                                  StructType prereq,
                                  bool is_leader,
@@ -190,6 +192,7 @@ TechnoTypeClass::TechnoTypeClass(int name,
                       is_immune,
                       name,
                       ininame,
+                      std::move(image_name),
                       armor,
                       strength)
 {
@@ -214,6 +217,8 @@ TechnoTypeClass::TechnoTypeClass(int name,
 
     Prerequisite = prereq;
     OwnableBy = std::move(ownableBy);
+
+    CameoName = std::move(cameo_name);
 
     Set_Pre();
     Set_Ownable();

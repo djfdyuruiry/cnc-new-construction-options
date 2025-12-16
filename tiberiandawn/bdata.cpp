@@ -3641,8 +3641,8 @@ void const* WarFactoryOverlay;
 BuildingTypeClass::BuildingTypeClass(StructType type,
                                      int name,
                                      char const* ininame,
-                                     std::string_view cameo_name,
-                                     std::string_view image_name,
+                                     std::string cameo_name,
+                                     std::string image_name,
                                      COORDINATE exitpoint,
                                      unsigned char level,
                                      StructType prereq,
@@ -3690,6 +3690,8 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                                      bool is_unsellable)
     : TechnoTypeClass(name,
                       ininame,
+                      std::move(cameo_name),
+                      std::move(image_name),
                       level,
                       prereq,
                       false,
@@ -3762,9 +3764,35 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
     Anims[BSTATE_AUX2].Start = 0;
     Anims[BSTATE_AUX2].Count = 1;
     Anims[BSTATE_AUX2].Rate = 0;
+}
 
-    CameoName = cameo_name;
-    ImageName = image_name;
+/***********************************************************************************************
+ * Struct_From_Name -- Find BData structure from its name.                                     *
+ *                                                                                             *
+ *    This routine will convert an ASCII name for a building class into                        *
+ *    the actual building class it represents.                                                 *
+ *                                                                                             *
+ * INPUT:   name  -- ASCII representation of a building class.                                 *
+ *                                                                                             *
+ * OUTPUT:  Returns with the actual building class number that the string                      *
+ *          represents.                                                                        *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   10/07/1992 JLB : Created.                                                                 *
+ *   05/02/1994 JLB : Converted to member function.                                            *
+ *=============================================================================================*/
+StructType BuildingTypeClass::From_Name(char const* name)
+{
+    if (name) {
+        for (StructType classid = STRUCT_FIRST; classid < STRUCT_COUNT; classid++) {
+            if (stricmp(As_Reference(classid).IniName, name) == 0) {
+                return (classid);
+            }
+        }
+    }
+    return (STRUCT_NONE);
 }
 
 /***********************************************************************************************
@@ -3878,35 +3906,6 @@ void BuildingTypeClass::One_Time(void)
             b->Init_Anim(_anims[index].Stage, _anims[index].Start, _anims[index].Length, _anims[index].Rate);
         }
     }
-}
-
-/***********************************************************************************************
- * Struct_From_Name -- Find BData structure from its name.                                     *
- *                                                                                             *
- *    This routine will convert an ASCII name for a building class into                        *
- *    the actual building class it represents.                                                 *
- *                                                                                             *
- * INPUT:   name  -- ASCII representation of a building class.                                 *
- *                                                                                             *
- * OUTPUT:  Returns with the actual building class number that the string                      *
- *          represents.                                                                        *
- *                                                                                             *
- * WARNINGS:   none                                                                            *
- *                                                                                             *
- * HISTORY:                                                                                    *
- *   10/07/1992 JLB : Created.                                                                 *
- *   05/02/1994 JLB : Converted to member function.                                            *
- *=============================================================================================*/
-StructType BuildingTypeClass::From_Name(char const* name)
-{
-    if (name) {
-        for (StructType classid = STRUCT_FIRST; classid < STRUCT_COUNT; classid++) {
-            if (stricmp(As_Reference(classid).IniName, name) == 0) {
-                return (classid);
-            }
-        }
-    }
-    return (STRUCT_NONE);
 }
 
 #ifdef SCENARIO_EDITOR

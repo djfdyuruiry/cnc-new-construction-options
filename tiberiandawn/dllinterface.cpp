@@ -1446,7 +1446,6 @@ bool Debug_Write_Shape_Type(const ObjectTypeClass* type, int shapenum)
     CCFileClass file;
 
     if (type->ImageData != NULL) {
-
         sprintf(buffer, "%s_%d", type->IniName, shapenum);
         _makepath(fullname, NULL, NULL, buffer, ".PCX");
 
@@ -3036,7 +3035,7 @@ void DLLExportClass::DLL_Draw_Intercept(int shape_number,
     if (shape_file_name != NULL) {
         strncpy(new_object.AssetName, shape_file_name, CNC_OBJECT_ASSET_NAME_LENGTH);
     } else {
-        strncpy(new_object.AssetName, object->Class_Of().IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+        strncpy(new_object.AssetName, object->Class_Of().ImageName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
     }
 
     new_object.TypeName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
@@ -4098,7 +4097,7 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
                     sidebar_entry.Cost = tech->Cost * PlayerPtr->CostBias;
                     sidebar_entry.PowerProvided = 0;
                     sidebar_entry.BuildTime = tech->Time_To_Build(PlayerPtr->Class->House);
-                    strncpy(sidebar_entry.AssetName, tech->IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+                    strncpy(sidebar_entry.AssetName, tech->CameoName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
                     sidebar_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
                 } else {
                     sidebar_entry.Cost = 0;
@@ -4273,7 +4272,7 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
                         sidebar_entry.Cost = tech->Cost * PlayerPtr->CostBias;
                         sidebar_entry.PowerProvided = 0;
                         sidebar_entry.BuildTime = tech->Time_To_Build(PlayerPtr->Class->House);
-                        strncpy(sidebar_entry.AssetName, tech->IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+                        strncpy(sidebar_entry.AssetName, tech->CameoName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
                         sidebar_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
                     } else {
                         sidebar_entry.Cost = 0;
@@ -5919,7 +5918,7 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
 
             CNCDynamicMapEntryStruct& smudge_entry = dynamic_map->Entries[entry_index++];
 
-            strncpy(smudge_entry.AssetName, smudge_type.IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+            strncpy(smudge_entry.AssetName, smudge_type.ImageName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
             smudge_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
             smudge_entry.Type = (short)cell_ptr->Smudge;
             smudge_entry.Owner = (char)cell_ptr->Owner;
@@ -5961,7 +5960,7 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
                 IsTheaterShape = false;
             }
 
-            strncpy(overlay_entry.AssetName, overlay_type.IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+            strncpy(overlay_entry.AssetName, overlay_type.ImageName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
             overlay_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
             overlay_entry.Type = (short)cell_ptr->Overlay;
             overlay_entry.Owner = (char)cell_ptr->Owner;
