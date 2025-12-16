@@ -2,7 +2,7 @@
   "$schema": "../../cmake/nco-types-json-schema.json",
   "name": "Object",
   "has_enum": false,
-  "class": "InfantryTypeClass",
+  "class": "ObjectTypeClass",
   "is_base_class": true,
   "properties": [
     {
@@ -57,6 +57,11 @@
       "name": "MaxStrength",
       "type": "UShort",
       "comment": "This is the maximum strength of this object type."
+    },
+    {
+      "name": "ImageName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this infantry. (not supported in Lua)"
     }
   ]
 }
