@@ -129,7 +129,7 @@
     {
       "name": "CameoName",
       "type": "String",
-      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this infantry. (not supported in Lua)"
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this object type. (not supported in Lua)"
     }
   ]
 }
