@@ -54,6 +54,7 @@ public:
     virtual ~CCFileClass(void)
     {
         Position = 0;
+        AllowMixFile = true;
     };
 
     // Delete should be overloaded here as well. Don't allow deletes of mixfiles.
@@ -76,6 +77,9 @@ public:
     virtual int Write(void const* buffer, int size);
     virtual void Close(void);
     virtual void Error(int error, int canretry = false, char const* filename = NULL);
+    bool IsMixFileSearchingEnabled()  const;
+    void EnableMixFileSearching();
+    void DisableMixFileSearching();
 
 private:
     /*
@@ -99,6 +103,13 @@ private:
     **	range from zero to the size of the file in bytes.
     */
     int Position;
+
+    /*
+    ** Allow the path in this object to be resolved to a
+    ** mix archive entry. If false, no mix archives will be
+    ** searched when resolving the full file location.
+    */
+    bool AllowMixFile;
 
     // Force these to never be invoked.
     CCFileClass const& operator=(CCFileClass const& c) = delete;

@@ -62,7 +62,7 @@
  *   03/20/1995 JLB : Created.                                                                 *
  *=============================================================================================*/
 CCFileClass::CCFileClass(char const* filename)
-    : Position(0)
+    : Position(0), AllowMixFile(true)
 {
     CCFileClass::Set_Name(filename);
 }
@@ -82,7 +82,7 @@ CCFileClass::CCFileClass(char const* filename)
  *   03/20/1995 JLB : Created.                                                                 *
  *=============================================================================================*/
 CCFileClass::CCFileClass(void)
-    : Position(0)
+    : Position(0), AllowMixFile(true)
 {
 }
 
@@ -332,7 +332,7 @@ int CCFileClass::Is_Available(int)
     /*
     **	A file that is part of a mixfile is also presumed available.
     */
-    if (MixFileClass<CCFileClass>::Offset(file_name)) {
+    if (AllowMixFile && MixFileClass<CCFileClass>::Offset(file_name)) {
         CNC_LOG_DEBUG("Found file inside mix file: {}", file_name);
         return (true);
     }
@@ -426,6 +426,14 @@ int CCFileClass::Open(int rights)
     */
     if ((rights & WRITE) || CDFileClass::Is_Available()) {
         return (CDFileClass::Open(rights));
+    }
+
+    if (!AllowMixFile) {
+        /*
+        ** Mix file searching disabled, so it must reside as
+        ** an individual file on the disk. Or else it is just plain missing.
+        */
+        return CDFileClass::Open(rights);
     }
 
     /*
@@ -556,3 +564,19 @@ void WWDOS_Shutdown(void)
 void Unfragment_File_Cache(void)
 {
 }
+
+bool CCFileClass::IsMixFileSearchingEnabled() const
+{
+    return AllowMixFile;
+}
+
+void CCFileClass::EnableMixFileSearching()
+{
+    AllowMixFile = true;
+}
+
+void CCFileClass::DisableMixFileSearching()
+{
+    AllowMixFile = false;
+}
+

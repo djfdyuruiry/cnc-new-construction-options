@@ -304,6 +304,11 @@ void RulesClass::Init()
 {
     CCFileClass ini_file("RULES.INI");
     CCINIClass ini;
+
+    // Prevent an embedded rules.ini file shipped with some
+    // C&C mix files being preferred over a standalone file.
+    ini_file.DisableMixFileSearching();
+
     const auto ini_file_exists = ini_file.Is_Available();
 
     if (ini_file_exists) {
