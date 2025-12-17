@@ -225,9 +225,8 @@ jobs:
   #
   #   Issues:
   #
-  #     - some animations not working (white squares)
   #     - placeholder for putting buildings down has lines of cells inserted between each row
-  #     - rules.ini not generating (file search loads it from a mix file, therefore seen as 'available' when save check runs)
+  #     - some rules like AllowBuildingAllForCurrentHouse are not working (assuming logic in DLL interface missing)
   #
   #   Tested OK:
   #
