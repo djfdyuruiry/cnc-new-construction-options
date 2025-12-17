@@ -179,7 +179,7 @@ RuleSection& RuleSection::Set_Ini_Comment(INIClass& ini, const std::string& comm
         return *this;
     }
 
-    ini.Put_Comment(SectionName.c_str(), comment);
+    ini.Put_Section(SectionName.c_str(), comment);
 
     return *this;
 }

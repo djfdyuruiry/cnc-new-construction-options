@@ -114,16 +114,16 @@ void SettingsClass::Save(INIClass& ini)
     ini.Put_Int("Video", "WindowHeight", Video.WindowHeight);
     ini.Put_Bool("Video", "Windowed", Video.Windowed);
     ini.Put_Bool("Video", "Boxing", Video.Boxing);
-    ini.Put_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio);
+    ini.Put_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio, "4:3, 16:9 etc.");
     ini.Put_Int("Video", "Display", Video.Display);
     ini.Put_Int("Video", "Width", Video.Width);
     ini.Put_Int("Video", "Height", Video.Height);
     ini.Put_Int("Video", "FrameLimit", Video.FrameLimit);
     ini.Put_Bool("Video", "HardwareCursor", Video.HardwareCursor);
-    ini.Put_Bool("Video", "DOSMode", Video.DOSMode);
-    ini.Put_String("Video", "Scaler", Video.Scaler);
-    ini.Put_String("Video", "VideoDriver", Video.VideoDriver);
-    ini.Put_String("Video", "RenderDriver", Video.RenderDriver);
+    ini.Put_Bool("Video", "DOSMode", Video.DOSMode, "before you enable this, install the game data files from the DOS version");
+    ini.Put_String("Video", "Scaler", Video.Scaler, "nearest, linear ()");
+    ini.Put_String("Video", "VideoDriver", Video.VideoDriver, "default, x11, wayland");
+    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, direct3d, direct3d11, direct3d12, opengl, opengles2, opengles, metal, software");
     ini.Put_String("Video", "PixelFormat", Video.PixelFormat);
 
     /*
@@ -132,5 +132,9 @@ void SettingsClass::Save(INIClass& ini)
     ini.Put_Int("Video", "InterpolationMode", Video.InterpolationMode);
 
     ini.Put_String(
-        "Video", "ButtonStyle", Video.ButtonStyle == -1 ? "Default" : (Video.ButtonStyle == 1 ? "Gold" : "Classic"));
+        "Video",
+        "ButtonStyle",
+        Video.ButtonStyle == -1 ? "Default" : (Video.ButtonStyle == 1 ? "Gold" : "Classic"),
+        "Default, Gold, Classic, DOS"
+    );
 }
