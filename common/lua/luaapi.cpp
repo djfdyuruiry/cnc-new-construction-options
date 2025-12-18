@@ -51,17 +51,15 @@ void LuaApi::Register_Scripts(LuaEngine& engine) const
         return;
     }
 
-    CNC_LOGGER_INFO("Registering scripts using base path: {}", LuaEngine::Get_Lua_Path().string());
-
     for (const auto& script : Scripts) {
-        auto full_script_path = script;
+        auto partial_script_path = script;
 
         if (script.is_relative()) {
             // assume relative paths are part of the 'nco' library
-            full_script_path = Nco_Directory / script;
+            partial_script_path = Nco_Directory / script;
         }
 
-        engine.Exec_File(full_script_path.string())
+        engine.Exec_File(partial_script_path.string())
             .If_Ok([&](auto& r) { CNC_LOGGER_INFO("Loaded script OK: {}", script.string()); })
             .On_Error([&](auto& r) {
                 CNC_LOGGER_FATAL(

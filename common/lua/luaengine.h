@@ -78,18 +78,14 @@ class LuaEngine
 public:
     // all APIs will be available from this global Lua table
     static constexpr std::string_view RootApiNamespace = "__CNC_API";
-    static inline const TwoWayMap<int, std::string_view> LuaTypeMap {
-        {LUA_TNONE, "none"},
-        {LUA_TNIL, "nil"},
-        {LUA_TBOOLEAN, "boolean"},
-        {LUA_TLIGHTUSERDATA, "lightuserdata"},
-        {LUA_TNUMBER, "number"},
-        {LUA_TSTRING, "string"},
-        {LUA_TTABLE, "table"},
-        {LUA_TFUNCTION, "function"},
-        {LUA_TUSERDATA, "userdata"},
-        {LUA_TTHREAD, "thread"}
-    };
+    static const TwoWayMap<int, std::string_view> LuaTypeMap;
+    static const std::filesystem::path LuaProgramPath;
+    static const std::filesystem::path LuaUserPath;
+
+    /**
+     * Default paths for lua script files - we ensure this is in the Lua 'package.path'. See: UniqueLuaEngine()
+     */
+    static const std::vector<const std::filesystem::path*> LuaPaths;
 
     template<LuaVariantCompatible T>
     static std::string_view Get_Type_Name_For_Variant_Compatible()
@@ -105,8 +101,7 @@ public:
         }
     }
 
-    // default path for lua script files - we ensure this is in the Lua 'package.path', see UniqueLuaEngine()
-    static const std::filesystem::path& Get_Lua_Path();
+    static std::filesystem::path Resolve_Script_Path(const std::filesystem::path& script_path);
 
     virtual ~LuaEngine() = default;
 
@@ -167,8 +162,6 @@ public:
     LuaResult Exec(const std::string& script) const;
 
     std::future<LuaResult> Exec_Async(const std::string& script) const;
-
-    std::filesystem::path Resolve_Script_Path(const std::filesystem::path& script_path) const;
 
     LuaResult Exec_File(const std::filesystem::path& script_path) const;
 
