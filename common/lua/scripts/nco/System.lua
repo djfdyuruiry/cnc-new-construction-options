@@ -51,9 +51,9 @@ local function builder(cppApi)
   }
 
   -- make path objects and aliases to _openFile
-  for _, pathField in ipairs({ "game", "lua", "user"}) do
+  for _, pathField in ipairs({ "game", "user"}) do
     local upperName = pathField:sub(1, 1):upper() .. pathField:sub(2)
-  local funcName = string.format("open%sFile", upperName)
+    local funcName = string.format("open%sFile", upperName)
 
     local fieldName = string.format("%sPath", pathField)
 

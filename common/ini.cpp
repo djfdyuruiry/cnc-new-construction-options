@@ -374,19 +374,20 @@ int INIClass::Save(Pipe& pipe) const
         */
         INIEntry* entryptr = secptr->EntryList.First();
         while (entryptr && entryptr->Is_Valid()) {
-            total += pipe.Put(entryptr->Entry, (int)strlen(entryptr->Entry));
-            total += pipe.Put("=", 1);
-            total += pipe.Put(entryptr->Value, (int)strlen(entryptr->Value));
-
             /*
             **	Output the entry comment (if present).
             */
             if (entryptr->comment.has_value()) {
-                const auto entry_comment = secptr->comment->c_str();
+                const auto entry_comment = entryptr->comment->c_str();
 
                 total += pipe.Put(";  ", 2);
                 total += pipe.Put(entry_comment, static_cast<int>(strlen(entry_comment)));
+                total += pipe.Put("\r\n", (int)strlen("\r\n"));
             }
+
+            total += pipe.Put(entryptr->Entry, (int)strlen(entryptr->Entry));
+            total += pipe.Put("=", 1);
+            total += pipe.Put(entryptr->Value, (int)strlen(entryptr->Value));
 
             total += pipe.Put("\r\n", (int)strlen("\r\n"));
 

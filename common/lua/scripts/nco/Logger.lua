@@ -47,10 +47,17 @@ local function builder(cppApi)
         -- source is a file
         local sourceFilePath = System.Path(callerSource:match("^@(.+)$"))
 
-        if sourceFilePath.isSubPathOf(System.luaPath) then
-          -- remove leading path if it's a file inside the standard Lua directory
+        if sourceFilePath.isSubPathOf(System.gamePath) then
+          -- remove leading path if it's a file inside the game Lua directory
           callerSource = tostring(
-            sourceFilePath.asRelativeSubPathOf(System.luaPath)
+            sourceFilePath.asRelativeSubPathOf(System.gamePath)
+          )
+        end
+
+        if sourceFilePath.isSubPathOf(System.userPath) then
+          -- remove leading path if it's a file inside the user Lua directory
+          callerSource = tostring(
+            sourceFilePath.asRelativeSubPathOf(System.userPath)
           )
         end
       end
