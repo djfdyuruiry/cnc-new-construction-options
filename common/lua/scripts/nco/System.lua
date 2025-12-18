@@ -5,18 +5,20 @@ local Path = require("nco.lib.Path")
   API to work with file paths and provide OS info.
 
   - Returns file objects similar to io.open
-  - openXFile functions return file object and optional error string
+  - openGameFile/openUserFile functions return file object and optional error string
+  - openGameFile will access files stored beside the game binary (exe on Windows/dll if running as a Remastered mod)
+  - openUserFile will access files stored in the users config directory (ini files etc.)
 
   See: nco.lib.Path
 ]]
 ---@class System : ApiModule
 ---@field pathSeparator string
 ---@field isWindows boolean
+---@field isUnix boolean
+---@field isRemasteredMod boolean
 ---@field gamePath Path
----@field luaPath Path
 ---@field userPath Path
 ---@field openGameFile fun(subPath: Path|string, mode?: openmode): file*, string?
----@field openLuaFile fun(subPath: Path|string, mode?: openmode): file*, string?
 ---@field openUserFile fun(subPath: Path|string, mode?: openmode): file*, string?
 ---@field Path fun(path: Path|string): Path
 

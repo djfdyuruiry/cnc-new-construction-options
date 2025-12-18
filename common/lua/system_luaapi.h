@@ -25,4 +25,9 @@ private:
 #else
     static constexpr bool IsWindows = false;
 #endif
+#ifdef REMASTER_BUILD
+    static constexpr bool IsRemasteredMod = true;
+#else
+    static constexpr bool IsRemasteredMod = false;
+#endif
 };
