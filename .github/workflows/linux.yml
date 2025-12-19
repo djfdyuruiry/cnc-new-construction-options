@@ -121,13 +121,11 @@ jobs:
     # TODO: refine from mono-complete to actual list of packages needed for nuget.exe
     - name: Fetch Build Tools
       run: |
+        sudo apt-get update
         sudo apt-get install -y autoconf-archive \
-          build-essential \
-          cmake \
-          clang \
           imagemagick \
           mono-complete \
-          ninja-build
+          python3-jinja2
 
     - name: Fetch Dependencies
       run: |
@@ -135,8 +133,8 @@ jobs:
         # TODO: include these headers in the repo instead
         sudo apt-get install -y libltdl-dev
 
-        # SDL2 X11/Wayland support
-        sudo apt-get install -y libegl1-mesa-dev libwayland-dev libxkbcommon-dev libx11-dev libxext-dev libxft-dev
+        # vcpkg SDL2 package dependencies for X11/Wayland support
+        sudo apt-get install -y libegl1-mesa-dev libwayland-dev libx11-dev libxft-dev libxext-dev libxkbcommon-dev
 
     - name: Init vcpkg
       run: |
