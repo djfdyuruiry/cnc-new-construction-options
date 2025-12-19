@@ -2,7 +2,7 @@
 # This Dockerfile is used to test a clean environment build, ensuring that
 # all build dependencies are documented and understood. 
 #
-# - C++ toolchain used it clang
+# - C++ toolchain used is clang
 # - Mirrors CI build defined in .github/workflows/linux.yml
 # - See wiki page: wiki/5.Building.md
 ##
