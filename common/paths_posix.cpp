@@ -70,15 +70,19 @@ namespace
                 int error_code = getpwuid_r(uid, &pwd, buffer.data(), buffer.size(), &pw);
 
                 if (error_code) {
-                    //DBG_ERROR("Unable to get passwd entry for uid %d, error was %d.", uid, error_code);
-                    return _path;
+                    throw std::runtime_error(
+                        std::format(
+                            "Unable to get passwd entry for uid {}, error was {}.",
+                            uid,
+                            error_code
+                        )
+                    );
                 }
 
                 const char* tmp = pw->pw_dir;
 
                 if (!tmp) {
-                    //DBG_ERROR("User does not appear to have a home directory?");
-                    return _path;
+                    throw std::runtime_error("User does not appear to have a home directory?");
                 }
 
                 _path = tmp;
@@ -102,7 +106,7 @@ namespace
                               "'%s'.",
                               tmp,
                               env_var);
-                //DBG_WARN(buffer);
+                CNC_LOG_WARN(buffer);
             } else {
                 return tmp;
             }
@@ -118,59 +122,64 @@ namespace
 #define PROC_SELF_EXE "/proc/self/exe"
 #endif
 
+std::string PathsClass::Try_Get_Program_Path()
+{
+    /*
+    ** Adapted from https://github.com/gpakosz/whereami
+    ** dual licensed under the WTFPL v2 and MIT licenses without any warranty. by Gregory Pakosz (@gpakosz)
+    */
+    std::string tmp;
+    char buffer[PATH_MAX];
+    char* resolved = nullptr;
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__sun)
+    resolved = realpath(PROC_SELF_EXE, buffer);
+#elif defined(__APPLE__)
+    char buffer1[PATH_MAX];
+    char* path = buffer1;
+
+    uint32_t size = (uint32_t)sizeof(buffer1);
+    if (_NSGetExecutablePath(path, &size) == -1) {
+        path = (char*)malloc(size);
+        if (!_NSGetExecutablePath(path, &size)) {
+            free(path);
+            throw std::runtime_error("Failed to get game binary path");
+        }
+    }
+
+    resolved = realpath(path, buffer);
+
+    if (path != buffer1) {
+        free(path);
+    }
+#elif defined(__DragonFly__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__)
+    char buffer1[PATH_MAX];
+    char* path = buffer1;
+
+#if defined(__NetBSD__)
+    int mib[4] = {CTL_KERN, KERN_PROC_ARGS, -1, KERN_PROC_PATHNAME};
+#else
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+#endif
+    size_t size = sizeof(buffer1);
+
+    if (sysctl(mib, (u_int)(sizeof(mib) / sizeof(mib[0])), path, &size, NULL, 0) != 0) {
+        throw std::runtime_error("Failed to get game binary path");
+    }
+
+    resolved = realpath(path, buffer);
+#endif
+    if (!resolved) {
+        throw std::runtime_error("Failed to get game binary path");
+    }
+
+    tmp = resolved;
+    return tmp.substr(0, tmp.find_last_of("/"));
+}
+
 const char* PathsClass::Program_Path()
 {
     if (ProgramPath.empty()) {
-        /*
-        ** Adapted from https://github.com/gpakosz/whereami
-        ** dual licensed under the WTFPL v2 and MIT licenses without any warranty. by Gregory Pakosz (@gpakosz)
-        */
-        std::string tmp;
-        char buffer[PATH_MAX];
-        char* resolved = nullptr;
-#if defined(__linux__) || defined(__CYGWIN__) || defined(__sun)
-        resolved = realpath(PROC_SELF_EXE, buffer);
-#elif defined(__APPLE__)
-        char buffer1[PATH_MAX];
-        char* path = buffer1;
-
-        uint32_t size = (uint32_t)sizeof(buffer1);
-        if (_NSGetExecutablePath(path, &size) == -1) {
-            path = (char*)malloc(size);
-            if (!_NSGetExecutablePath(path, &size)) {
-                free(path);
-                return ProgramPath.c_str();
-            }
-        }
-
-        resolved = realpath(path, buffer);
-
-        if (path != buffer1) {
-            free(path);
-        }
-#elif defined(__DragonFly__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__)
-        char buffer1[PATH_MAX];
-        char* path = buffer1;
-
-#if defined(__NetBSD__)
-        int mib[4] = {CTL_KERN, KERN_PROC_ARGS, -1, KERN_PROC_PATHNAME};
-#else
-        int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
-#endif
-        size_t size = sizeof(buffer1);
-
-        if (sysctl(mib, (u_int)(sizeof(mib) / sizeof(mib[0])), path, &size, NULL, 0) != 0) {
-            return ProgramPath.c_str();
-        }
-
-        resolved = realpath(path, buffer);
-#endif
-        if (!resolved) {
-            return ProgramPath.c_str();
-        }
-
-        tmp = resolved;
-        ProgramPath = tmp.substr(0, tmp.find_last_of("/"));
+        ProgramPath = Try_Get_Program_Path();
     }
 
     return ProgramPath.c_str();

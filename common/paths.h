@@ -13,17 +13,17 @@
 #ifndef COMMON_PATHS_H
 #define COMMON_PATHS_H
 
+#include <filesystem>
 #include <string>
+
+#include "logger.h"
 
 class PathsClass
 {
 public:
-#ifdef _WIN32
-    static constexpr char SEP = '\\';
-#else
-    static constexpr char SEP = '/';
-#endif
+    static constexpr char SEP = std::filesystem::path::preferred_separator;
 
+    static std::string Try_Get_Program_Path();
     static bool Create_Directory(const char* path);
     static bool Is_Absolute(const char* path);
     static std::string Concatenate_Paths(const char* path1, const char* path2);
@@ -49,6 +49,8 @@ public:
     const char* User_Path();
 
 private:
+    static inline const auto Logger = CncLogger::For(PathsClass);
+
     std::string Suffix;
     std::string ProgramPath;
     std::string DataPath;

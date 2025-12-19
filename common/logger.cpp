@@ -77,14 +77,21 @@ void CncLogger::Init_SpdLog()
 
     Sinks.emplace_back(StdoutSink);
 
+    const auto log_file_name = std::format("{}.log", DefaultLoggerName);
 #ifndef __APPLE__
-    // file logging - written to user path
-    const auto log_file = std::filesystem::path(Paths.Program_Path()).append(
-        std::format("{}.log", DefaultLoggerName)
-    );
+    // crate log file beside game exe/binary/dll
+    const auto log_file = std::filesystem::path(PathsClass::Try_Get_Program_Path())
+        .append(log_file_name)
+        .string();
+#else
+    // create log file in user path (app bundle is read-only in macos)
+    const auto log_file = std::filesystem::path(Paths.User_Path())
+        .append(log_file_name)
+        .string();
+#endif
 
     RotatingSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        log_file.string(),
+        log_file,
         1024 * 1024 * 10,
         3
     );
@@ -93,9 +100,6 @@ void CncLogger::Init_SpdLog()
     );
 
     Sinks.emplace_back(RotatingSink);
-#else
-    // TODO: macos log path resolve (Library path)
-#endif
 
     // default logger for Debug_String_Log legacy support
     spdlog::set_default_logger(

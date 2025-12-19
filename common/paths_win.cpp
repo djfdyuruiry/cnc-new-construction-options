@@ -17,10 +17,8 @@
 #include <shlobj.h>
 #include <tchar.h>
 
-const char* PathsClass::Program_Path()
+std::string PathsClass::Try_Get_Program_Path()
 {
-    if (ProgramPath.empty()) {
-        // TODO: Determine why REMASTER_BUILD is not defined in this translation unit
 #ifndef REMASTER_BUILD
         /*
         ** Adapted from https://github.com/gpakosz/whereami
@@ -37,8 +35,10 @@ const char* PathsClass::Program_Path()
             size = GetModuleFileName(nullptr, buffer1, sizeof(buffer1) / sizeof(buffer1[0]));
 
             if (size == 0) {
-                break;
-            } else if (size == (DWORD)(sizeof(buffer1) / sizeof(buffer1[0]))) {
+                throw std::runtime_error(std::format("Failed to get EXE filename: {}", GetLastError()));
+            }
+
+            if (size == (DWORD)(sizeof(buffer1) / sizeof(buffer1[0]))) {
                 DWORD size_ = size;
                 do {
                     TCHAR* path_ = (TCHAR*)realloc(path, sizeof(TCHAR) * size_ * 2);
@@ -53,24 +53,23 @@ const char* PathsClass::Program_Path()
                 } while (size == size_);
 
                 if (size == size_) {
-                    break;
+                    throw std::runtime_error(std::format("Failed to get EXE filename: {}", GetLastError()));;
                 }
             } else {
                 path = buffer1;
             }
 
             if (!_tfullpath(buffer2, path, MAX_PATH)) {
-                break;
+                throw std::runtime_error(std::format("Failed to get EXE filename: {}", GetLastError()));
             }
 
             std::string tmp(static_cast<const char*>(TCHARToUTF8(buffer2)));
-            ProgramPath = tmp.substr(0, tmp.find_last_of("\\/"));
 
-            break;
-        }
+            if (path != buffer1) {
+                free(path);
+            }
 
-        if (path != buffer1) {
-            free(path);
+            return tmp.substr(0, tmp.find_last_of("\\/"));
         }
 #else
         TCHAR path[MAX_PATH];
@@ -80,20 +79,27 @@ const char* PathsClass::Program_Path()
         if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
                 GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                 reinterpret_cast<LPCWSTR>(&PathsClass::Create_Directory), &hm) == 0) {
-            DWORD ret = GetLastError();
-            //CNC_LOGGER_FATAL("GetModuleHandleEx failed, error = {}", ret);
+            throw std::runtime_error(std::format("Failed to get DLL filename: {}", GetLastError()));
         }
 
         if (GetModuleFileName(hm, path, sizeof(path)) == 0) {
-            DWORD ret = GetLastError();
-            //CNC_LOGGER_FATAL("GetModuleFileName failed, error = {}", ret);
+            throw std::runtime_error(std::format("Failed to get DLL filename: {}", GetLastError()));
         }
 
         const std::string tmp((TCHARToUTF8(path)));
-        ProgramPath = tmp.substr(0, tmp.find_last_of('\\'));
+        return tmp.substr(0, tmp.find_last_of('\\'));
 #endif
+}
 
-        //CNC_LOGGER_INFO("Resolved ProgramPath: {}", ProgramPath);
+const char* PathsClass::Program_Path()
+{
+    if (ProgramPath.empty()) {
+        try {
+            ProgramPath = Try_Get_Program_Path();
+            CNC_LOGGER_INFO("Resolved ProgramPath: {}", ProgramPath);
+        } catch (const std::runtime_error& e) {
+            CNC_LOGGER_FATAL("Failed to resolve ProgramPath: {}", e.what());
+        }
     }
 
     return ProgramPath.c_str();
@@ -125,11 +131,11 @@ const char* PathsClass::User_Path()
         TCHAR path[MAX_PATH];
 
         if (!SHGetSpecialFolderPath(nullptr, path, CSIDL_APPDATA, TRUE)) {
-            //DBG_WARN("Failed to retrieve FOLDERID_RoamingAppData for PathsClass::User_Path()");
+            CNC_LOGGER_FATAL("Failed to retrieve FOLDERID_RoamingAppData for PathsClass::User_Path(): {}", GetLastError());
         }
 
         UserPath = static_cast<const char*>(TCHARToUTF8(path));
-        UserPath += "\\nco";
+        UserPath += SEP + "nco";
 
         if (!Suffix.empty()) {
             UserPath += SEP + Suffix;
