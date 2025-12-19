@@ -134,19 +134,13 @@ const char* PathsClass::User_Path()
             CNC_LOGGER_FATAL("Failed to retrieve FOLDERID_RoamingAppData for PathsClass::User_Path(): {}", GetLastError());
         }
 
-        UserPath = static_cast<const char*>(TCHARToUTF8(path));
-        UserPath += SEP + "nco";
+        UserPath = std::format("{}{}{}", static_cast<const char*>(TCHARToUTF8(path)), SEP, "nco");
 
         if (!Suffix.empty()) {
             UserPath += SEP + Suffix;
         }
 
         Create_Directory(UserPath.c_str());
-
-        if (!Suffix.empty()) {
-            // ensure lua directory exists in game directory inside user path
-            Create_Directory(Concatenate_Paths(UserPath.c_str(), "lua").c_str());
-        }
 
         CNC_LOGGER_DEBUG("Resolved UserPath: {}", UserPath);
     }

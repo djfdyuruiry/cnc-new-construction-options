@@ -55,6 +55,7 @@ private:
     std::string ProgramPath;
     std::string DataPath;
     std::string UserPath;
+    std::string UserLuaPath;
 
     static std::string Argv_Path(const char* cmd_arg);
 };

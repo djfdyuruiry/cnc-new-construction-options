@@ -106,6 +106,12 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
         UserPath = ProgramPath;
     }
 
-        DBG_INFO("Read only data directory is set to '%s'", DataPath.c_str());
-    DBG_INFO("Read/Write user data directory is set to '%s'", UserPath.c_str());
+    UserLuaPath = Concatenate_Paths(UserPath.c_str(), "lua");
+
+    // ensure lua directory exists in game directory inside user path
+    Create_Directory(UserLuaPath.c_str());
+
+    CNC_LOGGER_INFO("Read only data directory is set to '{}'", DataPath);
+    CNC_LOGGER_INFO("Read/Write user data directory is set to '{}'", UserPath);
+    CNC_LOGGER_INFO("Lua user data directory is set to '{}'", UserLuaPath);
 }

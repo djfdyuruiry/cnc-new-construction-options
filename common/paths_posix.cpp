@@ -217,11 +217,6 @@ const char* PathsClass::User_Path()
         }
 
         Create_Directory(UserPath.c_str());
-
-        if (!Suffix.empty()) {
-            // ensure lua directory exists in game directory inside user path
-            Create_Directory(Concatenate_Paths(UserPath.c_str(), "lua").c_str());
-        }
     }
 
     return UserPath.c_str();

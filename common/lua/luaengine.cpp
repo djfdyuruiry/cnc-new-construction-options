@@ -15,9 +15,11 @@ const TwoWayMap<int, std::string_view> LuaEngine::LuaTypeMap {
     {LUA_TTHREAD, "thread"}
 };
 
+// TODO: Move back to static locals and use Paths global
 static PathsClass lua_paths;
 
 const auto LuaEngine::LuaProgramPath = std::filesystem::path(lua_paths.Program_Path()) / "lua";
+// TODO: Use provided UserLuaPath from PathsClass
 const auto LuaEngine::LuaUserPath = std::filesystem::path(lua_paths.User_Path()) / "lua";
 
 /**
