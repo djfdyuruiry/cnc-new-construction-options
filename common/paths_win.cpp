@@ -119,7 +119,7 @@ const char* PathsClass::Data_Path()
             DataPath += SEP + Suffix;
         }
 
-        //CNC_LOGGER_DEBUG("Resolved DataPath: {}", DataPath);
+        CNC_LOGGER_DEBUG("Resolved DataPath: {}", DataPath);
     }
 
     return DataPath.c_str();
@@ -148,7 +148,7 @@ const char* PathsClass::User_Path()
             Create_Directory(Concatenate_Paths(UserPath.c_str(), "lua").c_str());
         }
 
-        //CNC_LOGGER_DEBUG("Resolved UserPath: {}", UserPath);
+        CNC_LOGGER_DEBUG("Resolved UserPath: {}", UserPath);
     }
 
     return UserPath.c_str();

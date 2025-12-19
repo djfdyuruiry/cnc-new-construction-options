@@ -281,7 +281,7 @@ std::string PathsClass::Argv_Path(const char* cmd_arg)
     }
 
     if (realpath(arg_dir, &ret[0]) == nullptr) {
-        //DBG_WARN("PathsClass::Argv_Path: realpath() failed");
+        CNC_LOGGER_WARN("PathsClass::Argv_Path: realpath() failed");
         ret = arg_dir;
     } else {
         ret.resize(strlen(&ret[0]));
