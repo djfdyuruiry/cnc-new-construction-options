@@ -193,7 +193,7 @@ const char* PathsClass::Data_Path()
             Program_Path();
         }
 
-        DataPath = ProgramPath.substr(0, ProgramPath.find_last_of("/")) + SEP + "share";
+        DataPath = ProgramPath.substr(0, ProgramPath.find_last_of(SEP)) + SEP + "share";
 
         if (!Suffix.empty()) {
             DataPath += SEP + Suffix;

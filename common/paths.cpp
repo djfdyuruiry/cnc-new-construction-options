@@ -39,8 +39,10 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
 
     // Calls with unused returns to set the default variable values if not already set.
     Program_Path();
+    Program_Lua_Path();
     Data_Path();
     User_Path();
+    User_Lua_Path();
 
     DBG_INFO("Searching the following paths for path config data: < argv: '%s' | binary: '%s' | default data: "
              "'%s' | default user: '%s' >",
@@ -106,12 +108,28 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
         UserPath = ProgramPath;
     }
 
-    UserLuaPath = Concatenate_Paths(UserPath.c_str(), "lua");
-
-    // ensure lua directory exists in game directory inside user path
-    Create_Directory(UserLuaPath.c_str());
-
     CNC_LOGGER_INFO("Read only data directory is set to '{}'", DataPath);
     CNC_LOGGER_INFO("Read/Write user data directory is set to '{}'", UserPath);
     CNC_LOGGER_INFO("Lua user data directory is set to '{}'", UserLuaPath);
+}
+
+const char* PathsClass::Program_Lua_Path()
+{
+    if (ProgramLuaPath.empty()) {
+        ProgramLuaPath = Concatenate_Paths(Program_Path(), "lua");
+    }
+
+    return ProgramLuaPath.c_str();
+}
+
+const char* PathsClass::User_Lua_Path()
+{
+    if (UserLuaPath.empty()) {
+        UserLuaPath = Concatenate_Paths(User_Path(), "lua");
+
+        // ensure lua directory exists in game directory inside user path
+        Create_Directory(UserLuaPath.c_str());
+    }
+
+    return UserLuaPath.c_str();
 }

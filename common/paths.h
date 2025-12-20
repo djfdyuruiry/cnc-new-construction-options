@@ -45,14 +45,17 @@ public:
               const char* cmd_arg = nullptr);
 
     const char* Program_Path();
+    const char* Program_Lua_Path();
     const char* Data_Path();
     const char* User_Path();
+    const char* User_Lua_Path();
 
 private:
     static inline const auto Logger = CncLogger::For(PathsClass);
 
     std::string Suffix;
     std::string ProgramPath;
+    std::string ProgramLuaPath;
     std::string DataPath;
     std::string UserPath;
     std::string UserLuaPath;

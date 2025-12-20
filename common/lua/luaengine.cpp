@@ -15,20 +15,7 @@ const TwoWayMap<int, std::string_view> LuaEngine::LuaTypeMap {
     {LUA_TTHREAD, "thread"}
 };
 
-// TODO: Move back to static locals and use Paths global
-static PathsClass lua_paths;
-
-const auto LuaEngine::LuaProgramPath = std::filesystem::path(lua_paths.Program_Path()) / "lua";
-// TODO: Use provided UserLuaPath from PathsClass
-const auto LuaEngine::LuaUserPath = std::filesystem::path(lua_paths.User_Path()) / "lua";
-
-/**
- * Used when searching for scripts, put user path first so user scripts/mods can override
- * nco API scripts if desired. See: LuaEngine::Resolve_Script_Path
- */
-const auto LuaEngine::LuaPaths = std::vector {&(LuaEngine::LuaProgramPath), &(LuaEngine::LuaUserPath)};
-
-std::filesystem::path LuaEngine::Resolve_Script_Path(const std::filesystem::path& script_path)
+std::filesystem::path LuaEngine::Resolve_Script_Path(const std::filesystem::path& script_path) const
 {
     if (!script_path.is_relative()) {
         return script_path;
@@ -36,7 +23,7 @@ std::filesystem::path LuaEngine::Resolve_Script_Path(const std::filesystem::path
 
     // assume relative paths are part of @var{Lua_Path} file tree
     for (const auto& lua_path : LuaPaths) {
-        const auto potential_path = *lua_path / script_path;
+        const auto potential_path = lua_path / script_path;
 
         CNC_LOGGER_DEBUG("Checking for Lua script '{}' at path: {}", script_path.string(), potential_path.string());
 
@@ -46,12 +33,13 @@ std::filesystem::path LuaEngine::Resolve_Script_Path(const std::filesystem::path
         }
     }
 
-    const auto default_path = LuaProgramPath / script_path;
+    const auto default_lua_path = LuaPaths.at(0);
+    const auto default_path = default_lua_path / script_path;
 
     CNC_LOGGER_WARN(
-        "Unable to resolve lua script '{}' to any known path, defaulting to program path: {}",
+        "Unable to resolve lua script '{}' to any known path, defaulting to path: {}",
         script_path.string(),
-        LuaProgramPath.string()
+        default_lua_path.string()
     );
 
     return default_path;
@@ -397,6 +385,23 @@ bool LuaEngine::Iterate_Over_Table(int stack_index) const
     return Get_Value_From_State<bool>([&](auto L){ return lua_next(L, stack_index) != 0; });
 }
 
+luabridge::Namespace LuaEngine::Bridge() const
+{
+    return luabridge::getGlobalNamespace(Get_State());
+}
+
+const std::vector<std::filesystem::path>& LuaEngine::Get_Lua_Paths() const
+{
+    return LuaPaths;
+}
+
+void LuaEngine::Init_Paths()
+{
+    LuaPaths.clear();
+    LuaPaths.emplace_back(Paths.Program_Lua_Path());
+    LuaPaths.emplace_back(Paths.User_Lua_Path());
+}
+
 void LuaStateDeleter::operator()(lua_State* L) const
 {
     if (L)
@@ -417,6 +422,7 @@ UniqueLuaEngine::UniqueLuaEngine() :
     State(Build_State(), LuaStateDeleter()),
     Id(std::format("{}", static_cast<void*>(Get_State())))
 {
+    Init_Paths();
     With_Global("package", LUA_TTABLE, [&]() {
         auto read_result = Try_Read_Table_Field<std::string>("package", "path");
 
@@ -432,8 +438,8 @@ UniqueLuaEngine::UniqueLuaEngine() :
             for (const auto& lua_path : LuaPaths) {
                 package_path << std::format(
                     "{}/?.lua;{}/?/init.lua",
-                    lua_path->string(),
-                    lua_path->string()
+                    lua_path.string(),
+                    lua_path.string()
                 ) << ';';
             }
 
@@ -475,6 +481,7 @@ const std::string& UniqueLuaEngine::Get_Id() const
 
 SharedLuaEngine::SharedLuaEngine(lua_State* L) : State(L), Id(std::format("{}", static_cast<void*>(L)))
 {
+    Init_Paths();
 }
 
 lua_State* SharedLuaEngine::Get_State() const

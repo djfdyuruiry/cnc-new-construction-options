@@ -79,13 +79,6 @@ public:
     // all APIs will be available from this global Lua table
     static constexpr std::string_view RootApiNamespace = "__CNC_API";
     static const TwoWayMap<int, std::string_view> LuaTypeMap;
-    static const std::filesystem::path LuaProgramPath;
-    static const std::filesystem::path LuaUserPath;
-
-    /**
-     * Default paths for lua script files - we ensure this is in the Lua 'package.path'. See: UniqueLuaEngine()
-     */
-    static const std::vector<const std::filesystem::path*> LuaPaths;
 
     template<LuaVariantCompatible T>
     static std::string_view Get_Type_Name_For_Variant_Compatible()
@@ -101,7 +94,7 @@ public:
         }
     }
 
-    static std::filesystem::path Resolve_Script_Path(const std::filesystem::path& script_path);
+    std::filesystem::path Resolve_Script_Path(const std::filesystem::path& script_path) const;
 
     virtual ~LuaEngine() = default;
 
@@ -431,17 +424,23 @@ public:
     #pragma endregion
 
     // for API building
-    luabridge::Namespace Bridge() const
-    {
-        return luabridge::getGlobalNamespace(Get_State());
-    }
+    luabridge::Namespace Bridge() const;
+
+    const std::vector<std::filesystem::path>& Get_Lua_Paths() const;
 
     virtual const std::string& Get_Id() const = 0;
+
 
 protected:
     static inline const auto& Logger = CncLogger::For(LuaEngine);
 
+    /**
+     * Default paths for lua script files - we ensure this is in the Lua 'package.path'. See: UniqueLuaEngine()
+     */
+    std::vector<std::filesystem::path> LuaPaths;
     std::vector<std::string_view> RegisteredApis;
+
+    void Init_Paths();
 
     virtual lua_State* Get_State() const = 0;
 };
