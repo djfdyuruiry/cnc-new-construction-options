@@ -437,9 +437,12 @@ UniqueLuaEngine::UniqueLuaEngine() :
 
             for (const auto& lua_path : LuaPaths) {
                 package_path << std::format(
-                    "{}/?.lua;{}/?/init.lua",
+                    "{}{}?.lua;{}{}?{}init.lua",
                     lua_path.string(),
-                    lua_path.string()
+                    PathsClass::SEP,
+                    lua_path.string(),
+                    PathsClass::SEP,
+                    PathsClass::SEP
                 ) << ';';
             }
 
