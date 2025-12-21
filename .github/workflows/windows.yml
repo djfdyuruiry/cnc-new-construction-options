@@ -226,7 +226,6 @@ jobs:
   #   Issues:
   #
   #     - placeholder for putting buildings down has lines of cells inserted between each row (See tiberiandawn/house.cpp:3044)
-  #     - some rules like AllowBuildingAllForCurrentHouse are not working (assuming logic in DLL interface missing, see old nco mod code for guidance)
   #
   #   Tested OK:
   #
