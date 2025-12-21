@@ -297,36 +297,69 @@ void RulesClass::Init_For_Scenario(const ScenarioClass& scenario)
 }
 
 /**
+ * Purge all existing rule definitions, leaving the rule sections
+ * and type rules blank.
+ */
+void RulesClass::Reset()
+{
+    Sections = RuleSections();
+
+    static const auto type_names = std::vector {
+        TdTypeConverter::Get_Type_Name<AnimType>(),
+        TdTypeConverter::Get_Type_Name<WarheadType>(),
+        TdTypeConverter::Get_Type_Name<BulletType>(),
+        TdTypeConverter::Get_Type_Name<WeaponType>(),
+        TdTypeConverter::Get_Type_Name<AircraftType>(),
+        TdTypeConverter::Get_Type_Name<StructType>(),
+        TdTypeConverter::Get_Type_Name<InfantryType>(),
+        TdTypeConverter::Get_Type_Name<UnitType>(),
+        TdTypeConverter::Get_Type_Name<HousesType>(),
+    };
+
+    TypeRules.clear();
+
+    for (const auto& type_name : type_names) {
+        TypeRules[type_name] = std::make_unique<RuleSections>();
+    }
+}
+
+/**
  * Init rules from INI files, falls back to hardcoded values for any missing INI file.
  *
  * Also generates any missing INI file, using defaults from hardcoded values.
  */
 void RulesClass::Init()
 {
-    CCFileClass ini_file("RULES.INI");
+    Reset();
+
+    CCFileClass ini_file(RulesFilename);
     CCINIClass ini;
 
-    // Prevent an embedded rules.ini file shipped with some
+    // Prevent an embedded ::RulesFilename file shipped with some
     // C&C mix files being preferred over a standalone file.
     ini_file.DisableMixFileSearching();
 
     const auto ini_file_exists = ini_file.Is_Available();
 
     if (ini_file_exists) {
-        CNC_LOGGER_INFO("Loading RULES.INI from existing file");
-        ini.Load(ini_file, false);
+        if (!ini.Load(ini_file, false)) {
+            CNC_LOGGER_FATAL("Failed to rules from existing file - INI file is corrupt: {}", RulesFilename);
+            return;
+        }
+
+        CNC_LOGGER_INFO("Loaded rules from existing file: {}", RulesFilename);
     }
 
     Init(ini);
     Init_Types();
 
-    // provide player with a default RULES.INI file
+    // provide player with a default ::RulesFilename file
     if (!ini_file_exists) {
-        CNC_LOGGER_INFO("Writing RULES.INI to new file");
+        CNC_LOGGER_INFO("Writing rules to new file: {}", RulesFilename);
         Export(ini);
 
         if (!ini.Save(ini_file, false)) {
-            CNC_LOGGER_FATAL("Failed to generate RULES.INI file");
+            CNC_LOGGER_FATAL("Failed to generate rules file: {}", RulesFilename);
         }
     }
 
@@ -551,7 +584,6 @@ static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& 
 
     CNC_LOGGER_INFO("Processing rule sections for type: {}", type_name);
 
-    rules.TypeRules[type_name] = std::make_unique<RuleSections>();
     auto& sections = *rules.TypeRules[type_name];
 
     // override rules to ensure INI comments for all types reveal real names
@@ -561,8 +593,6 @@ static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& 
     for (auto i = first; i < count; ++i) {
         auto& typeInstance = T::As_Mutable_Reference(i);
         auto name = std::string(typeInstance.Name());
-
-        rules.Assert_Section_Not_Present(name);
 
         // load type instance properties using INI
         sections.Add_Section(name, [&](auto& section, auto rule, const auto& value) {
@@ -679,8 +709,9 @@ void RulesClass::Assert_Section_Not_Present(std::string_view name)
     ) {
         CNC_LOGGER_FATAL(
             "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
-            "more than once in rules.ini or for a type INI name (Infantry, Unit etc.). All INI names must be unique. "
+            "more than once in {} or for a type INI name (Infantry, Unit etc.). All INI names must be unique. "
             "INI Name: {}",
+            RulesFilename,
             name
         );
     }

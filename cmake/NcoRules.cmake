@@ -251,7 +251,6 @@ function(Main)
 
     # rules-nco.cpp
     string(CONCAT SECTION_LEAD_IN "\n    CNC_LOGGER_INFO(\"Processing rule section: [{}]\", ${SECTION_DEFINE});\n"
-                                 "\n    Assert_Section_Not_Present(${SECTION_DEFINE});\n"
                                  "\n"
                                  "    Sections[${SECTION_DEFINE}]\n"
                                  "        .Set_Ini_Comment(ini, \"${INI_COMMENT}\")\n"

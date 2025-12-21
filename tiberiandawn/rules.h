@@ -84,6 +84,7 @@ class RuleSections;
 class RulesClass
 {
 public:
+    static constexpr char RulesFilename[] = "RULES.INI";
     static inline const auto& Logger = CncLogger::For(RulesClass);
 
     /*
@@ -323,8 +324,10 @@ private:
     void IQ(CCINIClass& ini);
     void Difficulty(CCINIClass& ini);
 
+    void Reset();
+
     // see rules-nco.cpp
-    void Init_Sections(CCINIClass& ini);
+    void Init_Sections(CCINIClass& ini); // TODO: Add back section asserts ONLY when resetting rules (same for types)
     void Apply_Special_Properties();
     void Apply_Static_And_Global_Values();
 

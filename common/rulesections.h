@@ -114,17 +114,28 @@ public:
         const std::optional<std::function<bool(std::string)>>& str_validator = std::nullopt
     )
     {
-        const auto section_is_in_ini = ini.Section_Present(SectionName.data());
+        // if entry has an existing value, keep it if parsing fails - apply default_value when no existing value found
+        const auto entry_has_existing_value = Has_Key(name);
+        const auto resolved_default_value = entry_has_existing_value ? Get<T>(name) : default_value;
 
-        if (!section_is_in_ini) {
+        if (entry_has_existing_value) {
             CNC_LOGGER_DEBUG(
-                "Loading default value '{}' for '{}', rule section not found in provided INI: [{}]",
-                Variant_To_String(default_value),
+                "Existing value for rule detected: [{}] -> {} (value = {})",
+                SectionName,
+                name,
+                Variant_To_String(resolved_default_value)
+            );
+        }
+
+        if (!ini.Section_Present(SectionName.data())) {
+            CNC_LOGGER_DEBUG(
+                "Loading value '{}' for '{}', rule section not found in provided INI: [{}]",
+                Variant_To_String(resolved_default_value),
                 name,
                 SectionName
             );
 
-            Rules[name.data()] = default_value;
+            Rules[name.data()] = resolved_default_value;
             return *this;
         }
 
@@ -132,17 +143,17 @@ public:
             "Attempting to find rule in INI: [{}] -> {} (with default = {})",
             SectionName,
             name,
-            Variant_To_String(default_value)
+            Variant_To_String(resolved_default_value)
         );
 
-        auto value = default_value;
+        auto value = resolved_default_value;
 
         if constexpr (std::is_same_v<T, int>) {
-            value = ini.Get_Int(SectionName.data(), name.data(), default_value);
+            value = ini.Get_Int(SectionName.data(), name.data(), resolved_default_value);
         } else if constexpr (std::is_same_v<T, bool>) {
-            value = ini.Get_Bool(SectionName.data(), name.data(), default_value);
+            value = ini.Get_Bool(SectionName.data(), name.data(), resolved_default_value);
         } else if constexpr (std::is_same_v<T, float>) {
-            auto default_value_str = std::format("{}", default_value);
+            auto default_value_str = std::format("{}", resolved_default_value);
 
             Safe_Parse<float>(
                 name,
@@ -153,12 +164,12 @@ public:
         } else if constexpr (std::is_same_v<T, ushort>) {
             Safe_Parse_Int<ushort>(
                 name,
-                ini.Get_Int(SectionName.data(), name.data(), default_value),
+                ini.Get_Int(SectionName.data(), name.data(), resolved_default_value),
                 value,
                 ValidateUShort
             );
         } else if constexpr (std::is_same_v<T, uint>) {
-            auto default_value_str = std::format("{}", default_value);
+            auto default_value_str = std::format("{}", resolved_default_value);
 
             Safe_Parse<uint, ulong>(
                 name,
@@ -170,19 +181,19 @@ public:
         } else if constexpr (std::is_same_v<T, char>) {
             Safe_Parse_Int<char>(
                 name,
-                ini.Get_Int(SectionName.data(), name.data(), default_value),
+                ini.Get_Int(SectionName.data(), name.data(), resolved_default_value),
                 value,
                 ValidateChar
             );
         } else if constexpr (std::is_same_v<T, uchar>) {
             Safe_Parse_Int<uchar>(
                 name,
-                ini.Get_Int(SectionName.data(), name.data(), default_value),
+                ini.Get_Int(SectionName.data(), name.data(), resolved_default_value),
                 value,
                 ValidateUChar
             );
         } else if constexpr (std::is_same_v<T, std::string>) {
-            auto str_value = ini.Get_String(SectionName.data(), name.data(), default_value);
+            auto str_value = ini.Get_String(SectionName.data(), name.data(), resolved_default_value);
 
             // TODO: trim string to forgive spacing around rule string
             // forgive incorrect casing in rule values

@@ -10,8 +10,6 @@
 
 void RulesClass::Init_Sections(CCINIClass& ini)
 {
-    Sections = RuleSections();
-
     // generated code START@RULE_PROCESS_CODE@
 
     // generated code END
