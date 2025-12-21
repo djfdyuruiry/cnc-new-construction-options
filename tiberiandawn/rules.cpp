@@ -272,7 +272,8 @@ void RulesClass::Init_For_Scenario(const ScenarioClass& scenario)
     const std::string scenario_ini_file = scenario.FileName;
 
     if (CncStringUtils::Is_Blank(scenario_ini_file)) {
-        CNC_LOGGER_DEBUG("Not loading rules for scenario - no INI filename provided");
+        CNC_LOGGER_WARN("Not loading rules for scenario - no INI filename provided");
+        return;
     }
 
     CCFileClass ini_file(scenario_ini_file.c_str());
