@@ -175,12 +175,12 @@ std::string_view RuleSection::Get_Type(std::string_view name) const
 RuleSection& RuleSection::Set_Ini_Comment(INIClass& ini, const std::string& comment)
 {
     if (CncStringUtils::Is_Blank(comment)) {
-        CNC_LOGGER_WARN("Skipping blank INI comment for section: {}", SectionName);
+        CNC_LOGGER_DEBUG("Skipping blank INI comment for section: {}", SectionName);
         return *this;
     }
 
     if (ini.Section_Present(SectionName.c_str())) {
-        CNC_LOGGER_WARN("Ignoring INI comment call for already existing section: {}", SectionName);
+        CNC_LOGGER_DEBUG("Ignoring INI comment call for already existing section: {}", SectionName);
         return *this;
     }
 
