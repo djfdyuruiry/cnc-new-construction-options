@@ -226,6 +226,7 @@ jobs:
   #   Issues:
   #
   #     - placeholder for putting buildings down has lines of cells inserted between each row (See tiberiandawn/house.cpp:3044)
+  #     - user rules being override with code defaults before scenario INI rules load (code things RULES.INI and type INI's don't exist - but the Init at DLL load does say it exists)
   #
   #   Tested OK:
   #
