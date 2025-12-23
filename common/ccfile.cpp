@@ -321,21 +321,25 @@ int CCFileClass::Size(void)
  *=============================================================================================*/
 int CCFileClass::Is_Available(int)
 {
+    const auto file_name = File_Name();
+
     /*
     **	A file that is open is presumed available.
     */
-    if (Is_Open())
+    if (Is_Open()) {
+        CNC_LOGGER_DEBUG("File is already open: {}", file_name);
         return (true);
-
-    const auto file_name = File_Name();
+    }
 
     /*
     **	A file that is part of a mixfile is also presumed available.
     */
     if (AllowMixFile && MixFileClass<CCFileClass>::Offset(file_name)) {
-        CNC_LOG_DEBUG("Found file inside mix file: {}", file_name);
+        CNC_LOGGER_DEBUG("Found file inside a mix file: {}", file_name);
         return (true);
     }
+
+    CNC_LOG_DEBUG("Deferring to CDFileClass::Is_Available for file: {}", file_name);
 
     /*
     **	Otherwise a manual check of the file system is required to

@@ -40,6 +40,7 @@
 #include "mixfile.h"
 #include "cdfile.h"
 #include "buff.h"
+#include "logger.h"
 
 /*
 **	This derived class for file access knows about mixfiles (packed files). It can handle opening
@@ -82,6 +83,8 @@ public:
     void DisableMixFileSearching();
 
 private:
+    static inline const CncLogger Logger = CncLogger::For(CCFileClass);
+
     /*
     **	This indicates the file is actually part of a resident image of the mixfile
     **	itself. In this case, the embedded file handle is invalid. All file access actually

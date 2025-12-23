@@ -425,6 +425,13 @@ int CDFileClass::Is_Available(int forced)
     std::string filename = RawFileClass::File_Name();
 
     if (IsDisabled || !First || PathsClass::Is_Absolute(filename.c_str())) {
+        CNC_LOGGER_DEBUG(
+            "Deferring to BufferIOFileClass::Is_Available for file: {} (IsDisabled={} !First={} PathsClass::Is_Absolute={})",
+            filename,
+            static_cast<bool>(IsDisabled),
+            !First,
+            PathsClass::Is_Absolute(filename.c_str())
+        );
         return BufferIOFileClass::Is_Available(forced);
     }
 
@@ -436,6 +443,8 @@ int CDFileClass::Is_Available(int forced)
     SearchDriveType* srch = First;
 
     while (srch) {
+        CNC_LOGGER_DEBUG("Searching for file '{}' in search path: {}", filename, srch->Path);
+
         /*
         **	Build a pathname to search for.
         */
@@ -454,8 +463,10 @@ int CDFileClass::Is_Available(int forced)
         /*
         **	It wasn't found, so try the next path entry.
         */
-        srch = (SearchDriveType*)srch->Next;
+        srch = static_cast<SearchDriveType*>(srch->Next);
     }
+
+    CNC_LOG_DEBUG("File search failed, deferring to BufferIOFileClass::Is_Available for file: {}", filename);
 
     /*
     **	At this point, all path searching has failed. Just set the file name to the
