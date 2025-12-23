@@ -2012,8 +2012,8 @@ void DLLExportClass::Add_Mod_Path(const char* mod_path)
  **************************************************************************************************/
 void DLLExportClass::Set_Content_Directory(const char* content_directory)
 {
-    CCFileClass::Clear_Search_Drives();
-    CCFileClass::Reset_Raw_Path();
+    Paths.Init("tiberian-dawn", "CONQUER.INI", "CONQUER.MIX", nullptr);
+    CDFileClass::Refresh_Search_Drives();
 
     if ((content_directory == NULL || strlen(content_directory) == 0) && ModSearchPaths.Count() == 0) {
         return;
