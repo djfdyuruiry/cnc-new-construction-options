@@ -226,12 +226,12 @@ jobs:
   #   Issues:
   #
   #     - placeholder for putting buildings down has lines of cells inserted between each row (See tiberiandawn/house.cpp:3044)
-  #     - user rules being override with code defaults before scenario INI rules load (code things RULES.INI and type INI's don't exist - but the Init at DLL load does say it exists)
   #
   #   Tested OK:
   #
   #     - loading scenario rules from INI (requires file to be in CCDATA folder beside mod DLL to work, readme added to mod zip)
   #     - loading lua scripts
+  #     - applying rules from user INI files
   #     - logging
   #
   #       NOTE: Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load
