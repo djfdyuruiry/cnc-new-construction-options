@@ -3041,6 +3041,8 @@ bool HouseClass::Manual_Place(BuildingClass* builder, BuildingClass* object)
         Map.PendingHouse = Class->House;
 
         // TODO: Remaster bug with placement shape might likely be here (OR BuildingTypeClass::Occupy_List)
+        CNC_LOG_INFO("Getting cursor shape for building: INI={} Image={} Cameo={}", object->Class->Name(), object->Class->ImageName, object->Class->CameoName);
+
         Map.Set_Cursor_Shape(object->Occupy_List(true));
         Map.Set_Cursor_Pos(Coord_Cell(builder->Coord));
         builder->Mark(MARK_CHANGE);
