@@ -234,7 +234,7 @@ jobs:
   #     - applying rules from user INI files
   #     - logging
   #
-  #       NOTE: Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load
+  #       NOTE: Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load (Could do static comp to include msvc but might be work to get vcpkg packages to build)
   remaster_msvc:
     needs:
       - resolve_win_cmake_preset

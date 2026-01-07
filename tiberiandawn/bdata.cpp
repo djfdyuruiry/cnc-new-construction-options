@@ -3767,35 +3767,6 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
 }
 
 /***********************************************************************************************
- * Struct_From_Name -- Find BData structure from its name.                                     *
- *                                                                                             *
- *    This routine will convert an ASCII name for a building class into                        *
- *    the actual building class it represents.                                                 *
- *                                                                                             *
- * INPUT:   name  -- ASCII representation of a building class.                                 *
- *                                                                                             *
- * OUTPUT:  Returns with the actual building class number that the string                      *
- *          represents.                                                                        *
- *                                                                                             *
- * WARNINGS:   none                                                                            *
- *                                                                                             *
- * HISTORY:                                                                                    *
- *   10/07/1992 JLB : Created.                                                                 *
- *   05/02/1994 JLB : Converted to member function.                                            *
- *=============================================================================================*/
-StructType BuildingTypeClass::From_Name(char const* name)
-{
-    if (name) {
-        for (StructType classid = STRUCT_FIRST; classid < STRUCT_COUNT; classid++) {
-            if (stricmp(As_Reference(classid).IniName, name) == 0) {
-                return (classid);
-            }
-        }
-    }
-    return (STRUCT_NONE);
-}
-
-/***********************************************************************************************
  * BuildingTypeClass::One_Time -- Performs special one time action for buildings.              *
  *                                                                                             *
  *    This routine is used to do the one time action necessary to handle building type class   *
@@ -3906,6 +3877,35 @@ void BuildingTypeClass::One_Time(void)
             b->Init_Anim(_anims[index].Stage, _anims[index].Start, _anims[index].Length, _anims[index].Rate);
         }
     }
+}
+
+/***********************************************************************************************
+ * Struct_From_Name -- Find BData structure from its name.                                     *
+ *                                                                                             *
+ *    This routine will convert an ASCII name for a building class into                        *
+ *    the actual building class it represents.                                                 *
+ *                                                                                             *
+ * INPUT:   name  -- ASCII representation of a building class.                                 *
+ *                                                                                             *
+ * OUTPUT:  Returns with the actual building class number that the string                      *
+ *          represents.                                                                        *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   10/07/1992 JLB : Created.                                                                 *
+ *   05/02/1994 JLB : Converted to member function.                                            *
+ *=============================================================================================*/
+StructType BuildingTypeClass::From_Name(char const* name)
+{
+    if (name) {
+        for (StructType classid = STRUCT_FIRST; classid < STRUCT_COUNT; classid++) {
+            if (stricmp(As_Reference(classid).IniName, name) == 0) {
+                return (classid);
+            }
+        }
+    }
+    return (STRUCT_NONE);
 }
 
 #ifdef SCENARIO_EDITOR
