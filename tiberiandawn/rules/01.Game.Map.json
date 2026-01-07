@@ -56,7 +56,7 @@
       "name": "TiberiumInfantryDamage",
       "type": "int",
       "default": 2,
-      "comment": "The amount of damage infantry takes by walking across a cell of tiberium, if infantry type has the `ImmuneToTiberium ` flag is set to `yes` then this is ignored for that type."
+      "comment": "The amount of damage infantry takes by walking across a cell of tiberium, if infantry type has the `ImmuneToTiberium` flag is set to `yes` then this is ignored for that type."
     },
     {
       "name": "TiberiumBlossomTreeDamage",

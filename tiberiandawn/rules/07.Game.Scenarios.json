@@ -8,13 +8,13 @@
       "name": "SetBuildLevelTo1InGdiScenario2",
       "type": "bool",
       "default": true,
-      "comment": "When player is in GDI level 2 set the build level to 1"
+      "comment": "When player is in GDI mission 2 set the build level to 1"
     },
     {
       "name": "RenameTechCenterToPrisonInNodScenario3",
       "type": "bool",
       "default": true,
-      "comment": "When playing level 3 rename Tech Centers to `Prison`"
+      "comment": "When playing NOD mission 3 rename Tech Centers to `Prison`"
     },
     {
       "name": "HideBazookaFromGdiUntilScenario8",
