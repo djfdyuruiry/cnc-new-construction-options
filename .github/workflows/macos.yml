@@ -58,7 +58,7 @@ jobs:
 
     - name: Install homebrew deps
       run: |
-        brew install dylibbundler imagemagick jinja2-cli mono
+        brew install dylibbundler imagemagick-full jinja2-cli mono
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -164,6 +164,8 @@ jobs:
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_OSX_DEPLOYMENT_TARGET"] = "14.0"' /tmp/CMakePresets1.json > CMakePresets.json
   
         cp cmake/vcpkg/triplets/uni-osx14.cmake .vcpkg/triplets
+
+        magick --version || echo "Failed to resolve magick command"
 
         # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}
