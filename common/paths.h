@@ -16,8 +16,6 @@
 #include <filesystem>
 #include <string>
 
-#include "logger.h"
-
 class PathsClass
 {
 public:
@@ -51,8 +49,6 @@ public:
     const char* User_Lua_Path();
 
 private:
-    static inline const auto Logger = CncLogger::For(PathsClass);
-
     std::string Suffix;
     std::string ProgramPath;
     std::string ProgramLuaPath;

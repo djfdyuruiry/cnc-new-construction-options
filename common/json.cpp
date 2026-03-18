@@ -1,6 +1,6 @@
-#include <format>
-
 #include "json.h"
+
+#include <format>
 
 void CncJsonUtils::Cstr_Field_From_Json(
     const nlohmann::json& j,

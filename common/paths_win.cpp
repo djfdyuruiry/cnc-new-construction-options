@@ -12,10 +12,13 @@
 #include "logger.h"
 #include "paths.h"
 #include "debugstring.h"
+#include "logger.h"
 #include "utf.h"
 #include <winerror.h>
 #include <shlobj.h>
 #include <tchar.h>
+
+static const auto Logger = CncLogger::For(PathsClass);
 
 std::string PathsClass::Try_Get_Program_Path()
 {

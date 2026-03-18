@@ -10,8 +10,10 @@
 // GNU General Public License along with permitted additional restrictions
 // with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
 #include "paths.h"
+
 #include "debugstring.h"
 #include "ini.h"
+#include "logger.h"
 #include "rawfile.h"
 #include <stdlib.h>
 #include <string>
@@ -23,6 +25,7 @@
 #endif
 
 PathsClass Paths;
+static const auto Logger = CncLogger::For(PathsClass);
 
 void PathsClass::Init(const char* suffix, const char* ini_name, const char* data_name, const char* cmd_arg)
 {

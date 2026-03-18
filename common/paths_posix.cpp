@@ -11,6 +11,7 @@
 // with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
 #include "paths.h"
 #include "debugstring.h"
+#include "logger.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -44,6 +45,8 @@
 
 namespace
 {
+    static const auto Logger = CncLogger::For(PathsClass);
+
     const std::string& User_Home()
     {
         static std::string _path;
