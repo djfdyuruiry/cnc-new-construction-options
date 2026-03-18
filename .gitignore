@@ -10,3 +10,4 @@ perf.data*
 *.rock
 
 .idea
+*.LOG
