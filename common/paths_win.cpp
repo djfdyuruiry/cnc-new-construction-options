@@ -108,6 +108,7 @@ const char* PathsClass::Program_Path()
     return ProgramPath.c_str();
 }
 
+// BUG: If this is hit it will produce a unix like path <ProgramPath>\share\<Suffix> - probably not right
 const char* PathsClass::Data_Path()
 {
     if (DataPath.empty()) {
