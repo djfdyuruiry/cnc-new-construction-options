@@ -4310,6 +4310,11 @@ short const* BuildingTypeClass::Occupy_List(bool placement) const
 
         SmudgeTypeClass const& smudge = SmudgeTypeClass::As_Reference(bib);
         static short _list[50];
+
+        for (auto& i : _list) {
+            i = REFRESH_EOL;
+        }
+
         short* dest = &_list[0];
 
         /*
@@ -4336,7 +4341,7 @@ short const* BuildingTypeClass::Occupy_List(bool placement) const
         return (OccupyList);
     }
 
-    static short const _templap[] = {REFRESH_EOL};
+    static constexpr short _templap[] = {REFRESH_EOL};
     return (&_templap[0]);
 }
 
