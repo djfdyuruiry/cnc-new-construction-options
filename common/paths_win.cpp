@@ -116,11 +116,15 @@ const char* PathsClass::Data_Path()
             Program_Path();
         }
 
+#ifndef REMASTER_BUILD
         DataPath = ProgramPath.substr(0, ProgramPath.find_last_of("\\/")) + SEP + "share";
 
         if (!Suffix.empty()) {
             DataPath += SEP + Suffix;
         }
+#else
+        DataPath = ProgramPath + SEP + "CCDATA";
+#endif
 
         CNC_LOGGER_DEBUG("Resolved DataPath: {}", DataPath);
     }
