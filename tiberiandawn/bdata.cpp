@@ -3864,9 +3864,11 @@ void BuildingTypeClass::One_Time(void)
     }
 
     // Try to load weap2.shp
-    char fullname[_MAX_FNAME + _MAX_EXT];
-    _makepath(fullname, NULL, NULL, (char const*)"WEAP2", ".SHP");
-    WarFactoryOverlay = MFCD::Retrieve(fullname);
+    if (WarFactoryOverlay == nullptr) {
+        char fullname[_MAX_FNAME + _MAX_EXT];
+        _makepath(fullname, NULL, NULL, (char const*)"WEAP2", ".SHP");
+        WarFactoryOverlay = MFCD::Retrieve(fullname);
+    }
 
     /*
     **	Install all the special animation sequences for the different building types.
