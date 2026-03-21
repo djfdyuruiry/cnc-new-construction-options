@@ -23,6 +23,7 @@ void CncLogger::On_Fatal_Error(std::string errorMessage)
 void CncLogger::Fatal(const std::string_view message) const
 {
     spdlog::get(Name)->critical(message);
+    spdlog::shutdown();
     exit(1);
 }
 
