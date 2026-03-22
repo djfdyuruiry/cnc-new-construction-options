@@ -2088,7 +2088,9 @@ TO_JSON(MapClass)
     FIELD_TO_JSON(MapCellWidth);
     FIELD_TO_JSON(MapCellHeight);
     FIELD_TO_JSON(TotalValue);
+#ifdef MEGAMAPS
     FIELD_TO_JSON(MapBinaryVersion);
+#endif
     FIELD_TO_JSON(XSize);
     FIELD_TO_JSON(YSize);
     FIELD_TO_JSON(Size);
@@ -2125,7 +2127,11 @@ FROM_JSON(MapClass)
     FIELD_FROM_JSON(MapCellWidth);
     FIELD_FROM_JSON(MapCellHeight);
     FIELD_FROM_JSON(TotalValue);
+// BUG: Need to make this optional OR error if MapBinaryVersion exists AND MEGAMAPS is defined
+//      (can't load a MEGAMAPS save in a non-MEGAMAPS build)
+#ifdef MEGAMAPS
     FIELD_FROM_JSON(MapBinaryVersion);
+#endif
     FIELD_FROM_JSON(XSize);
     FIELD_FROM_JSON(YSize);
     FIELD_FROM_JSON(Size);

@@ -225,7 +225,8 @@ if(BUILD_REMASTER_TD)
         ${TIBDAWN_HEADERS}
         ${REMASTERTD_RC}
     )
-    target_compile_definitions(TiberianDawn PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${REMASTER_DEFS} MEGAMAPS)
+    # BUG: Adding MEGAMAPS def will break remaster UI by inserting blank cells in placement outline when placing structure
+    target_compile_definitions(TiberianDawn PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${REMASTER_DEFS})
     target_include_directories(TiberianDawn PUBLIC ${CMAKE_SOURCE_DIR} .)
     target_link_libraries(TiberianDawn commonr ${REMASTER_LIBS} ${STATIC_LIBS})
     set_target_properties(TiberianDawn PROPERTIES PREFIX "")
