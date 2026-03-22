@@ -123,12 +123,12 @@ int CDFileClass::Open(int rights)
     ** Otherwise it will try and write it to the working directory, probably the binary dir.
     */
     if ((rights & WRITE) && !PathsClass::Is_Absolute(path)) {
-        CNC_LOG_DEBUG("Appending User_Path to filename: {}", path);
+        CNC_LOGGER_DEBUG("Appending User_Path to filename: {}", path);
 
         const auto user_file_path = PathsClass::Concatenate_Paths(Paths.User_Path(), path);
         BufferIOFileClass::Set_Name(user_file_path.c_str());
     } else {
-        CNC_LOG_DEBUG("Using filename directly: {}", path);
+        CNC_LOGGER_DEBUG("Using filename directly: {}", path);
     }
 
     return (BufferIOFileClass::Open(rights));
@@ -456,7 +456,7 @@ int CDFileClass::Is_Available(int forced)
         **	it will return false and the search process will continue.
         */
         if (RawFileClass(path.c_str()).Is_Available()) {
-            CNC_LOG_DEBUG("Found file at path: {}", path);
+            CNC_LOGGER_DEBUG("Found file at path: {}", path);
             return true;
         }
 
@@ -466,7 +466,7 @@ int CDFileClass::Is_Available(int forced)
         srch = static_cast<SearchDriveType*>(srch->Next);
     }
 
-    CNC_LOG_DEBUG("File search failed, deferring to BufferIOFileClass::Is_Available for file: {}", filename);
+    CNC_LOGGER_DEBUG("File search failed, deferring to BufferIOFileClass::Is_Available for file: {}", filename);
 
     /*
     **	At this point, all path searching has failed. Just set the file name to the

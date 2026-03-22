@@ -8,8 +8,9 @@ void SystemLuaApi::Register_Consts(LuaEngine& engine) const
         n.addConstant("gamePath", Paths.Program_Path())
          .addConstant("userPath", Paths.User_Path())
          .addConstant("pathSeparator", PathsClass::SEP)
-         .addConstant("isWindows", IsWindows)
-         .addConstant("isUnix", !IsWindows)
-         .addConstant("isRemasteredMod", IsRemasteredMod);
+         .addConstant("isRemasteredMod", IsRemasteredMod)
+         .addConstant("isMacOS", IsMacOS)
+         .addConstant("isUnix", IsUnix)
+         .addConstant("isWindows", IsWindows);
     });
 }

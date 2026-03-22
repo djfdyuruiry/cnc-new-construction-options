@@ -78,7 +78,7 @@ public:
     virtual int Write(void const* buffer, int size);
     virtual void Close(void);
     virtual void Error(int error, int canretry = false, char const* filename = NULL);
-    bool IsMixFileSearchingEnabled()  const;
+    bool IsMixFileSearchingEnabled() const;
     void EnableMixFileSearching();
     void DisableMixFileSearching();
 

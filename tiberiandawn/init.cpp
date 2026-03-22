@@ -474,7 +474,7 @@ bool Init_Game(int, char*[])
     /*
     **	Find and process any rules for this game.
     */
-    CNC_LOG_INFO("Initialising RulesClass global instance: Rule");
+    CNC_LOG_DEBUG("Initialising RulesClass global instance: Rule");
     Rule.Init();
 
     /* Initialize the Interpolation Table.  */

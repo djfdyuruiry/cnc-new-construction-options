@@ -339,7 +339,7 @@ int CCFileClass::Is_Available(int)
         return (true);
     }
 
-    CNC_LOG_DEBUG("Deferring to CDFileClass::Is_Available for file: {}", file_name);
+    CNC_LOGGER_DEBUG("Deferring to CDFileClass::Is_Available for file: {}", file_name);
 
     /*
     **	Otherwise a manual check of the file system is required to

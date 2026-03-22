@@ -13,8 +13,9 @@ local Path = require("nco.lib.Path")
 ]]
 ---@class System : ApiModule
 ---@field pathSeparator string
----@field isWindows boolean
+---@field isMacOS boolean
 ---@field isUnix boolean
+---@field isWindows boolean
 ---@field isRemasteredMod boolean
 ---@field gamePath Path
 ---@field userPath Path
@@ -27,7 +28,10 @@ local Path = require("nco.lib.Path")
 local function builder(cppApi)
   local system = {
     pathSeparator = cppApi.pathSeparator,
+    isMacOS = cppApi.isMacOS,
+    isUnix = cppApi.isUnix,
     isWindows = cppApi.isWindows,
+    isRemasteredMod = cppApi.isRemasteredMod,
 
     ---@param rootPath Path|string
     ---@param subPath string

@@ -4213,7 +4213,6 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
 
                             if (sidebar_entry.Completed && sidebar_entry.Type == BUILDING_TYPE) {
                                 if (tech) {
-                                    // TODO: Here is where remastered determines occupy shape for completed building
                                     BuildingTypeClass* building_type = (BuildingTypeClass*)tech;
                                     short const* occupy_list = building_type->Occupy_List(true);
                                     if (occupy_list) {
@@ -4222,11 +4221,10 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
                                             sidebar_entry.PlacementList[sidebar_entry.PlacementListLength] =
                                                 *occupy_list;
                                             sidebar_entry.PlacementListLength++;
+                                            sidebar_entry.PlacementListLength++;
                                             occupy_list++;
                                         }
                                     }
-
-                                    CNC_LOGGER_INFO("Exporting sidebar state for '{}' - occupy length: {}", building_type->IniName, sidebar_entry.PlacementListLength);
                                 }
                             }
                         }

@@ -221,20 +221,7 @@ jobs:
           files: |
             artifact/*
 
-  # TODO: Remaster compatibility
-  #
-  #   Issues:
-  #
-  #     - placeholder for putting buildings down has lines of cells inserted between each row (See tiberiandawn/house.cpp:3044)
-  #
-  #   Tested OK:
-  #
-  #     - loading scenario rules from INI (requires file to be in CCDATA folder beside mod DLL to work, readme added to mod zip)
-  #     - loading lua scripts
-  #     - applying rules from user INI files
-  #     - logging
-  #
-  #       NOTE: Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load (Could do static comp to include msvc but might be work to get vcpkg packages to build)
+  # TODO: add note for Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load (Could do static comp to include msvc but might be work to get vcpkg packages to build)
   remaster_msvc:
     needs:
       - resolve_win_cmake_preset
