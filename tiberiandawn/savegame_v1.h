@@ -142,6 +142,71 @@ private:
     static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
 };
 
+#ifdef REMASTER_BUILD
+/**
+ * C&C remastered uses the DLLExportClass Save/Load methods to write extra data to binary save.
+ * This class is to model and replicate this logic for the new JSON save format.
+ */
+class SaveGameRemasterState_v1
+{
+public:
+    uint DllVersion;
+    nlohmann::json MultiplayerStartPositions[MAX_PLAYERS];
+    nlohmann::json GlyphxPlayerIDs[MAX_PLAYERS];
+    int GlyphXClientSidebarWidthInLeptons;
+    bool MPlayerIsHuman[MAX_PLAYERS];
+    nlohmann::json PlacementType[MAX_PLAYERS];
+    int MPlayerCount;
+    bool MPlayerBases;
+    int MPlayerCredits;
+    int MPlayerTiberium;
+    int MPlayerGoodies;
+    int MPlayerGhosts;
+    int MPlayerSolo;
+    int MPlayerUnitCount;
+    unsigned char MPlayerLocalID;
+    nlohmann::json MPlayerHouses[MAX_PLAYERS];
+    char MPlayerNames[MAX_PLAYERS];
+    unsigned char MPlayerID[MAX_PLAYERS];
+    nlohmann::json MultiplayerSidebars[MAX_PLAYERS];
+    nlohmann::json Special;
+    bool NotAllowSuperWeapons;
+
+    // TODO: Impl
+    void Read_Dll_State();
+    bool Validate() const;
+    bool Write_Dll_State() const;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        SaveGameRemasterState_v1,
+        DllVersion,
+        MultiplayerStartPositions,
+        GlyphxPlayerIDs,
+        GlyphXClientSidebarWidthInLeptons,
+        MPlayerIsHuman,
+        PlacementType,
+        MPlayerCount,
+        MPlayerBases,
+        MPlayerCredits,
+        MPlayerTiberium,
+        MPlayerGoodies,
+        MPlayerGhosts,
+        MPlayerSolo,
+        MPlayerUnitCount,
+        MPlayerLocalID,
+        MPlayerHouses,
+        MPlayerNames,
+        MPlayerID,
+        MultiplayerSidebars,
+        Special,
+        NotAllowSuperWeapons
+    )
+
+private:
+    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
+};
+#endif
+
 /**
  * Version 1 of the JSON save game format. New versions should inherit this class. New versions should provide sane
  * defaults for new values. Any new behaviour should also be backwards compatible with previous versions.
@@ -169,6 +234,10 @@ public:
 
     // score tracking
     nlohmann::json GameScore;
+
+#ifdef REMASTER_BUILD
+    SaveGameRemasterState_v1 RemasterState;
+#endif
 
     bool Load_From_File(const std::string& path);
     void Read_Globals();

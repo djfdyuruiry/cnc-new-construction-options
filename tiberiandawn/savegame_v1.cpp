@@ -342,6 +342,10 @@ void SaveGame_v1::Read_Globals()
 
     AiBase = Base;
     GameScore = Score;
+
+#ifdef REMASTER_BUILD
+    RemasterState.Read_Dll_State();
+#endif
 }
 
 bool SaveGame_v1::Validate() const
@@ -439,6 +443,10 @@ bool SaveGame_v1::Validate() const
         );
     }
 
+#ifdef REMASTER_BUILD
+    result = RemasterState.Validate() && result;
+#endif
+
     return result;
 }
 
@@ -463,6 +471,10 @@ bool SaveGame_v1::Write_Globals() const
 
     from_json(AiBase, Base);
     from_json(GameScore, Score);
+
+#ifdef REMASTER_BUILD
+    RemasterState.Write_Dll_State();
+#endif
 
     return true;
 }

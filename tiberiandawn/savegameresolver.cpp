@@ -14,7 +14,7 @@ const std::vector<std::string_view> SaveGameResolver::Supported_Save_Versions = 
     CURRENT_SAVE_CLASS::Version_Name
 };
 
-// TODO: Write converter that parses remastered and original game save format, and emits a JSON file
+// TODO: Write converter that parses remastered/original game binary save format, and emits a JSON file
 bool SaveGameResolver::Save(CDFileClass& file, const char* description)
 {
     std::string error_message;
