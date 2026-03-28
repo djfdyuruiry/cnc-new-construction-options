@@ -36,6 +36,7 @@
 #define SPECIAL_H
 
 #include "common/bitfields.h"
+#include "common/json.h"
 #include <stdint.h>
 
 #pragma pack(push, 1)
@@ -271,6 +272,8 @@ public:
     // Fixes issue from Change 738397 2020/07/17 14:06:03
     //
     //
+
+    JSON_FUNCTIONS(SpecialClass)
 };
 #pragma pack(pop)
 

@@ -31,6 +31,7 @@
 #include "dllinterface.h"
 #include "gadget.h"
 #include "defines.h" // VOC_COUNT, VOX_COUNT
+#include "savegame_v1.h"
 #include "sidebarglyphx.h"
 #include "common/irandom.h"
 
@@ -416,6 +417,9 @@ private:
     ** Mod directories
     */
     static DynamicVectorClass<char*> ModSearchPaths;
+
+    // We require access to private state for JSON save games.
+    friend class SaveGameRemasterState_v1;
 };
 
 /*
@@ -7750,3 +7754,64 @@ void DLL_Decode_Pointers(void)
 {
     DLLExportClass::Decode_Pointers();
 }
+
+#pragma region SaveGameRemasterState_v1
+void SaveGameRemasterState_v1::Read_Dll_State()
+{
+    DllVersion = CNC_DLL_API_VERSION;
+    MultiplayerStartPositions = DLLExportClass::MultiplayerStartPositions;
+    RemasterPlayerIDs = DLLExportClass::GlyphxPlayerIDs;
+    RemasterClientSidebarWidthInLeptons = GlyphXClientSidebarWidthInLeptons;
+    RemasterMPlayerIsHuman = MPlayerIsHuman;
+
+    PlacementType = nlohmann::json::array();
+    for (auto i = 0; i < MAX_PLAYERS; i++) {
+        PlacementType.emplace_back(
+            TdTypeConverter::Techno_Type_To_Reference_Json(
+                DLLExportClass::PlacementType[i]
+            )
+        );
+    }
+
+    RemasterMPlayerCount = MPlayerCount;
+    RemasterMPlayerBases = MPlayerBases;
+    RemasterMPlayerCredits = MPlayerCredits;
+    RemasterMPlayerTiberium = MPlayerTiberium;
+    RemasterMPlayerGoodies = MPlayerGoodies;
+    RemasterMPlayerGhosts = MPlayerGhosts;
+    RemasterMPlayerSolo = MPlayerSolo;
+    RemasterMPlayerUnitCount = MPlayerUnitCount;
+    RemasterMPlayerLocalID = MPlayerLocalID;
+
+    RemasterMPlayerHouses = nlohmann::json::array();
+    for (auto i = 0; i < MAX_PLAYERS; i++) {
+        RemasterMPlayerHouses.emplace_back(
+            TdTypeConverter::To_String(MPlayerHouses[i])
+        );
+    }
+
+    RemasterMPlayerNames = MPlayerNames;
+    RemasterMPlayerID = MPlayerID;
+
+    MultiplayerSidebars = nlohmann::json::array();
+
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        MultiplayerSidebars.emplace_back(
+            DLLExportClass::MultiplayerSidebars[i]
+        );
+    }
+
+    RemasterSpecial = Special;
+    NotAllowSuperWeapons = !Rule.AllowSuperWeapons;
+}
+
+bool SaveGameRemasterState_v1::Validate() const
+{
+    return true;
+}
+
+bool SaveGameRemasterState_v1::Write_Dll_State() const
+{
+    return  true;
+}
+#pragma endregion

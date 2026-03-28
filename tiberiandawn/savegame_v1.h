@@ -151,25 +151,25 @@ class SaveGameRemasterState_v1
 {
 public:
     uint DllVersion;
-    nlohmann::json MultiplayerStartPositions[MAX_PLAYERS];
-    nlohmann::json GlyphxPlayerIDs[MAX_PLAYERS];
-    int GlyphXClientSidebarWidthInLeptons;
-    bool MPlayerIsHuman[MAX_PLAYERS];
-    nlohmann::json PlacementType[MAX_PLAYERS];
-    int MPlayerCount;
-    bool MPlayerBases;
-    int MPlayerCredits;
-    int MPlayerTiberium;
-    int MPlayerGoodies;
-    int MPlayerGhosts;
-    int MPlayerSolo;
-    int MPlayerUnitCount;
-    unsigned char MPlayerLocalID;
-    nlohmann::json MPlayerHouses[MAX_PLAYERS];
-    char MPlayerNames[MAX_PLAYERS];
-    unsigned char MPlayerID[MAX_PLAYERS];
-    nlohmann::json MultiplayerSidebars[MAX_PLAYERS];
-    nlohmann::json Special;
+    nlohmann::json MultiplayerStartPositions;
+    nlohmann::json RemasterPlayerIDs;
+    int RemasterClientSidebarWidthInLeptons;
+    nlohmann::json RemasterMPlayerIsHuman;
+    nlohmann::json PlacementType;
+    int RemasterMPlayerCount;
+    bool RemasterMPlayerBases;
+    int RemasterMPlayerCredits;
+    int RemasterMPlayerTiberium;
+    int RemasterMPlayerGoodies;
+    int RemasterMPlayerGhosts;
+    int RemasterMPlayerSolo;
+    int RemasterMPlayerUnitCount;
+    unsigned char RemasterMPlayerLocalID;
+    nlohmann::json RemasterMPlayerHouses;
+    nlohmann::json RemasterMPlayerNames;
+    nlohmann::json RemasterMPlayerID;
+    nlohmann::json MultiplayerSidebars;
+    nlohmann::json RemasterSpecial;
     bool NotAllowSuperWeapons;
 
     // TODO: Impl
@@ -181,24 +181,24 @@ public:
         SaveGameRemasterState_v1,
         DllVersion,
         MultiplayerStartPositions,
-        GlyphxPlayerIDs,
-        GlyphXClientSidebarWidthInLeptons,
-        MPlayerIsHuman,
+        RemasterPlayerIDs,
+        RemasterClientSidebarWidthInLeptons,
+        RemasterMPlayerIsHuman,
         PlacementType,
-        MPlayerCount,
-        MPlayerBases,
-        MPlayerCredits,
-        MPlayerTiberium,
-        MPlayerGoodies,
-        MPlayerGhosts,
-        MPlayerSolo,
-        MPlayerUnitCount,
-        MPlayerLocalID,
-        MPlayerHouses,
-        MPlayerNames,
-        MPlayerID,
+        RemasterMPlayerCount,
+        RemasterMPlayerBases,
+        RemasterMPlayerCredits,
+        RemasterMPlayerTiberium,
+        RemasterMPlayerGoodies,
+        RemasterMPlayerGhosts,
+        RemasterMPlayerSolo,
+        RemasterMPlayerUnitCount,
+        RemasterMPlayerLocalID,
+        RemasterMPlayerHouses,
+        RemasterMPlayerNames,
+        RemasterMPlayerID,
         MultiplayerSidebars,
-        Special,
+        RemasterSpecial,
         NotAllowSuperWeapons
     )
 

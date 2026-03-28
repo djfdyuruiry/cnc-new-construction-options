@@ -791,3 +791,85 @@ void Sidebar_Glyphx_Decode_Pointers(SidebarGlyphxClass* sidebar)
         sidebar->Decode_Pointers();
     }
 }
+
+TO_JSON(SidebarGlyphxClass::StripClass::BuildType)
+{
+    CONVERT_TD_FIELD_TO_JSON(BuildableType);
+    FIELD_TO_JSON(Factory);
+    FIELD_TO_JSON(BuildableViaCapture);
+
+    // BuildableID field
+    const auto buildable_id_str = TdTypeConverter::RTTI_Instance_To_String(p.BuildableType, p.BuildableID);
+
+    FIELD_VALUE_TO_JSON(BuildableID, buildable_id_str.value_or("NONE"));
+}
+
+FROM_JSON(SidebarGlyphxClass::StripClass::BuildType)
+{
+    PARSE_TD_FIELD_FROM_JSON(SidebarGlyphxClass::StripClass::BuildType, BuildableType, RTTIType);
+    FIELD_FROM_JSON(Factory);
+    FIELD_FROM_JSON(BuildableViaCapture);
+
+    // BuildableID field
+    const auto& buildable_id_json = j.at(NAMEOF(BuildableID));
+
+    CncJsonUtils::Assert_Json_Is<JsonString>(buildable_id_json, NAMEOF(BuildableID));
+
+    const auto buildable_id_str = buildable_id_json.get<std::string>();
+    const auto buildable_id = TdTypeConverter::Try_Parse_RTTI_Instance(p.BuildableType, buildable_id_str);
+
+    if (!buildable_id.has_value()) {
+        CncJsonUtils::Throw_Json_Assert_Failure(
+            NAMEOF(BuildableID),
+            CncJsonUtils::Build_Parse_Error(
+                std::format("RTTI type '{}'", TdTypeConverter::To_String(p.BuildableType)),
+                buildable_id_str
+            )
+        );
+    }
+
+    p.BuildableID = *buildable_id;
+}
+
+TO_JSON(SidebarGlyphxClass::StripClass)
+{
+    BASE_CLASS_TO_JSON(StageClass);
+
+    FIELD_TO_JSON(ID);
+    BITFIELD_TO_JSON(IsBuilding);
+    FIELD_TO_JSON(BuildableCount);
+    FIELD_TO_JSON(Buildables);
+}
+
+FROM_JSON(SidebarGlyphxClass::StripClass)
+{
+    BASE_CLASS_FROM_JSON(StageClass);
+
+    FIELD_FROM_JSON(ID);
+    BITFIELD_FROM_JSON(IsBuilding);
+    FIELD_FROM_JSON(BuildableCount);
+    FIELD_FROM_JSON(Buildables);
+}
+
+TO_JSON(SidebarGlyphxClass)
+{
+    FIELD_TO_JSON(Column);
+    FIELD_VALUE_TO_JSON(
+        SidebarPlayerPtr,
+        TdTypeConverter::To_String(p.SidebarPlayerPtr == nullptr ? HOUSE_NONE : p.SidebarPlayerPtr->Class->House)
+    );
+}
+
+FROM_JSON(SidebarGlyphxClass)
+{
+    FIELD_FROM_JSON(Column);
+
+    p.SidebarPlayerPtr = reinterpret_cast<HouseClass*>(
+        TdTypeConverter::Load_Field_From_Json<HousesType>(
+            j, NAMEOF(HouseClass), NAMEOF(SidebarPlayerPtr)
+        )
+    );
+
+    p.Column[0].Set_Parent_Sidebar(&p);
+    p.Column[0].Set_Parent_Sidebar(&p);
+}

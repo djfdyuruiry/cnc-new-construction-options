@@ -41,18 +41,18 @@
 #include "power.h"
 #include "factory.h"
 
+#include "common/json.h"
+
 /*
 **  ST - 3/14/2019 10:49AM
 **
 **  We are going to need one sidebar per player for multiplayer with GlyphX. We can't have different maps / cell arrays
-*per
-**  player though, so SidebarClass being in the middle of the map/display class hierarchy is a problem.
+**  per player though, so SidebarClass being in the middle of the map/display class hierarchy is a problem.
 **
 **  All the class static data will have to be made non-static so we can have multiple instances.
 **
 **  So, this is a stub sidebar class with the functionality we need just to support the exporting of production data to
-*the
-**  GlyphX client.
+**  the GlyphX client.
 **
 **
 */
@@ -179,7 +179,11 @@ public:
         } BuildType;
         BuildType Buildables[MAX_BUILDABLES];
 
+        JSON_FUNCTIONS(BuildType)
+        JSON_FUNCTIONS(StripClass)
     } Column[COLUMNS];
+
+    JSON_FUNCTIONS(SidebarGlyphxClass)
 
 private:
     int Which_Column(RTTIType type);
