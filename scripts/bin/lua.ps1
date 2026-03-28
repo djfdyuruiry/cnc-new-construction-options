@@ -1,11 +1,9 @@
 $ErrorActionPreference = "Stop"
 
-$libScriptsPath = Split-Path $PSScriptRoot -Parent
 $repoPath = Resolve-Path "$PSScriptRoot/../.."
 
 $commonLuaScriptsPath = Join-Path $repoPath "common/lua/scripts"
 $tdLuaScriptsPath = Join-Path $repoPath "tiberiandawn/lua/scripts"
-$testLuaScriptsPath = Join-Path $repoPath "tests/lua/scripts"
 
 # Check if lua command exists
 if (-not (Get-Command -Name "lua" -ErrorAction SilentlyContinue)) {
