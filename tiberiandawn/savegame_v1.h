@@ -247,6 +247,7 @@ public:
      * Header is stored separately from main JSON object to allow reading header
      * info without parsing entire JSON structure.
      */
+#ifndef REMASTER_BUILD
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame_v1,
         ScenarioState,
@@ -260,6 +261,22 @@ public:
         AiBase,
         GameScore
     )
+#else
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        SaveGame_v1,
+        ScenarioState,
+        Objects,
+        GameCellTriggers,
+        GameHouseTriggers,
+        RemovedTriggers,
+        GameMap,
+        GameLogic,
+        Layers,
+        AiBase,
+        GameScore,
+        RemasterState
+    )
+#endif
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGame);
