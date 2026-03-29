@@ -222,6 +222,7 @@ jobs:
             artifact/*
 
   # TODO: add note for Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load (Could do static comp to include msvc but might be work to get vcpkg packages to build)
+  # BUG: Remaster Placement outlines have a solid square in the top left (where there shouldn't be) for structures like hand of nod/repair bay etc.
   remaster_msvc:
     needs:
       - resolve_win_cmake_preset
