@@ -150,7 +150,6 @@ private:
 class SaveGameRemasterState_v1
 {
 public:
-    uint DllVersion;
     nlohmann::json MultiplayerStartPositions;
     nlohmann::json RemasterPlayerIDs;
     int RemasterClientSidebarWidthInLeptons;
@@ -172,14 +171,12 @@ public:
     nlohmann::json RemasterSpecial;
     bool NotAllowSuperWeapons;
 
-    // TODO: Impl
     void Read_Dll_State();
     bool Validate() const;
     bool Write_Dll_State() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGameRemasterState_v1,
-        DllVersion,
         MultiplayerStartPositions,
         RemasterPlayerIDs,
         RemasterClientSidebarWidthInLeptons,

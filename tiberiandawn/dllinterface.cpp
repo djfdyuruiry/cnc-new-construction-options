@@ -7758,19 +7758,14 @@ void DLL_Decode_Pointers(void)
 #pragma region SaveGameRemasterState_v1
 void SaveGameRemasterState_v1::Read_Dll_State()
 {
-    DllVersion = CNC_DLL_API_VERSION;
     MultiplayerStartPositions = DLLExportClass::MultiplayerStartPositions;
     RemasterPlayerIDs = DLLExportClass::GlyphxPlayerIDs;
     RemasterClientSidebarWidthInLeptons = GlyphXClientSidebarWidthInLeptons;
     RemasterMPlayerIsHuman = MPlayerIsHuman;
 
     PlacementType = nlohmann::json::array();
-    for (auto i = 0; i < MAX_PLAYERS; i++) {
-        PlacementType.emplace_back(
-            TdTypeConverter::Techno_Type_To_Reference_Json(
-                DLLExportClass::PlacementType[i]
-            )
-        );
+    for (const auto& building_type : DLLExportClass::PlacementType) {
+        PlacementType.emplace_back(TdTypeConverter::Techno_Type_To_Reference_Json(building_type));
     }
 
     RemasterMPlayerCount = MPlayerCount;
@@ -7784,10 +7779,8 @@ void SaveGameRemasterState_v1::Read_Dll_State()
     RemasterMPlayerLocalID = MPlayerLocalID;
 
     RemasterMPlayerHouses = nlohmann::json::array();
-    for (auto i = 0; i < MAX_PLAYERS; i++) {
-        RemasterMPlayerHouses.emplace_back(
-            TdTypeConverter::To_String(MPlayerHouses[i])
-        );
+    for (const auto& house : MPlayerHouses) {
+        RemasterMPlayerHouses.emplace_back(TdTypeConverter::To_String(house));
     }
 
     RemasterMPlayerNames = MPlayerNames;
@@ -7795,10 +7788,8 @@ void SaveGameRemasterState_v1::Read_Dll_State()
 
     MultiplayerSidebars = nlohmann::json::array();
 
-    for (int i = 0; i < MAX_PLAYERS; i++) {
-        MultiplayerSidebars.emplace_back(
-            DLLExportClass::MultiplayerSidebars[i]
-        );
+    for (const auto& sidebar : DLLExportClass::MultiplayerSidebars) {
+        MultiplayerSidebars.emplace_back(sidebar);
     }
 
     RemasterSpecial = Special;
@@ -7807,11 +7798,96 @@ void SaveGameRemasterState_v1::Read_Dll_State()
 
 bool SaveGameRemasterState_v1::Validate() const
 {
-    return true;
+    auto result = true;
+
+    std::map<std::string, nlohmann::json> player_fields = {
+        { NAMEOF(MultiplayerStartPositions), MultiplayerStartPositions },
+        { NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs },
+        { NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman },
+        { NAMEOF(PlacementType), PlacementType },
+        { NAMEOF(RemasterMPlayerHouses), RemasterMPlayerHouses },
+        { NAMEOF(RemasterMPlayerNames), RemasterMPlayerNames },
+        { NAMEOF(RemasterMPlayerID), RemasterMPlayerID },
+        { NAMEOF(MultiplayerSidebars), MultiplayerSidebars }
+    };
+
+    for (const auto& [field, json_value] : player_fields) {
+        if (!json_value.is_array()) {
+            result = false;
+            CNC_LOGGER_ERROR(
+                "Invalid RemasterState.{} save game value - json array expected, actual type: {}",
+                field,
+                json_value.type_name()
+            );
+        } else if (json_value.size() != MAX_PLAYERS) {
+            result = false;
+            CNC_LOGGER_ERROR(
+                "Invalid RemasterState.{} save game value - json array with max size of {} expected, actual size: {}",
+                field,
+                MAX_PLAYERS,
+                json_value.size()
+            );
+        }
+    }
+
+    if (!RemasterSpecial.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid RemasterState.{} save game value - json object expected, actual type: {}",
+            NAMEOF(RemasterSpecial),
+            RemasterSpecial.type_name()
+        );
+    }
+
+    return result;
 }
 
 bool SaveGameRemasterState_v1::Write_Dll_State() const
 {
-    return  true;
+    if (!Validate()) {
+        return false;
+    }
+
+    from_json(MultiplayerStartPositions, DLLExportClass::MultiplayerStartPositions);
+    from_json(RemasterPlayerIDs, DLLExportClass::GlyphxPlayerIDs);
+    GlyphXClientSidebarWidthInLeptons = RemasterClientSidebarWidthInLeptons;
+    from_json(RemasterMPlayerIsHuman, MPlayerIsHuman);
+
+    for (auto i = 0; i < PlacementType.size(); i++) {
+        TdTypeConverter::Techno_Type_Target_From_Json<BuildingTypeClass, StructType>(
+            PlacementType.at(i),
+            std::format("RemasterState.{}", NAMEOF(PlacementType)),
+            std::format("{}", i),
+            DLLExportClass::PlacementType[i]
+        );
+    }
+
+    MPlayerCount = RemasterMPlayerCount;
+    MPlayerBases = RemasterMPlayerBases;
+    MPlayerCredits = RemasterMPlayerCredits;
+    MPlayerTiberium = RemasterMPlayerTiberium;
+    MPlayerGoodies = RemasterMPlayerGoodies;
+    MPlayerGhosts = RemasterMPlayerGhosts;
+    MPlayerSolo = RemasterMPlayerSolo;
+    MPlayerUnitCount = RemasterMPlayerUnitCount;
+    MPlayerLocalID = RemasterMPlayerLocalID;
+
+    for (auto i = 0; i < RemasterMPlayerHouses.size(); i++) {
+        MPlayerHouses[i] = TdTypeConverter::Load_Field_From_Json<HousesType>(
+            RemasterMPlayerHouses[i],
+            std::format("RemasterState.{}", NAMEOF(RemasterMPlayerHouses)),
+            std::format("{}", i)
+        );
+    }
+
+    from_json(RemasterMPlayerNames, MPlayerNames);
+    from_json(RemasterMPlayerID, MPlayerID);
+
+    from_json(MultiplayerSidebars, DLLExportClass::MultiplayerSidebars);
+
+    from_json(RemasterSpecial, Special);
+    Rule.AllowSuperWeapons = !NotAllowSuperWeapons;
+
+    return true;
 }
 #pragma endregion
