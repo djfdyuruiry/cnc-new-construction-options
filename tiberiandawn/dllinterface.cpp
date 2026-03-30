@@ -1783,6 +1783,8 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
         result = Load_Game(file_path_and_name);
 
         if (result == false) {
+            CNC_LOG_ERROR("Failed to load remaster save");
+
             return false;
         }
 
@@ -7850,7 +7852,9 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
 
     from_json(MultiplayerStartPositions, DLLExportClass::MultiplayerStartPositions);
     from_json(RemasterPlayerIDs, DLLExportClass::GlyphxPlayerIDs);
+
     GlyphXClientSidebarWidthInLeptons = RemasterClientSidebarWidthInLeptons;
+
     from_json(RemasterMPlayerIsHuman, MPlayerIsHuman);
 
     for (auto i = 0; i < PlacementType.size(); i++) {
@@ -7873,14 +7877,27 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
     MPlayerLocalID = RemasterMPlayerLocalID;
 
     for (auto i = 0; i < RemasterMPlayerHouses.size(); i++) {
-        MPlayerHouses[i] = TdTypeConverter::Load_Field_From_Json<HousesType>(
-            RemasterMPlayerHouses[i],
+        MPlayerHouses[i] = TdTypeConverter::Load_Value_From_Json<HousesType>(
+            RemasterMPlayerHouses.at(i),
             std::format("RemasterState.{}", NAMEOF(RemasterMPlayerHouses)),
             std::format("{}", i)
         );
     }
 
-    from_json(RemasterMPlayerNames, MPlayerNames);
+    for (auto i = 0; i < RemasterMPlayerNames.size(); i++) {
+        auto json_name = RemasterMPlayerNames.at(i);
+
+        if (!json_name.is_string()) {
+            MPlayerNames[i][0] = '\0';
+            continue;
+        }
+
+        auto name = json_name.get<std::string>();
+
+        strcpy(MPlayerNames[i], name.c_str());
+        MPlayerNames[i][11] = '\0';
+    }
+
     from_json(RemasterMPlayerID, MPlayerID);
 
     from_json(MultiplayerSidebars, DLLExportClass::MultiplayerSidebars);

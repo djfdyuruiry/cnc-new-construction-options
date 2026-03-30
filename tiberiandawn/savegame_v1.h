@@ -80,7 +80,7 @@ public:
     )
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGameScenarioState);
+    static inline const auto& Logger = CncLogger::For(SaveGameScenarioState_v1);
     static inline const std::map<std::string, int> GlobalBufferSizes = {
         { NAMEOF(ScenarioFileName), std::size(Scen.FileName) },
         { NAMEOF(BriefText), std::size(Scen.BriefingText) },
@@ -139,7 +139,7 @@ public:
     )
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
+    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps_v1);
 };
 
 #ifdef REMASTER_BUILD
@@ -200,7 +200,7 @@ public:
     )
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
+    static inline const auto& Logger = CncLogger::For(SaveGameRemasterState_v1);
 };
 #endif
 
@@ -279,5 +279,5 @@ public:
 #endif
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGame);
+    static inline const auto& Logger = CncLogger::For(SaveGame_v1);
 };

@@ -19,3 +19,5 @@ test_lua_scripts_path="${repo_path}/tests/lua/scripts"
 
 td_resources_path="${repo_path}/resources/data/td"
 td_test_resources_path="${repo_path}/resources/test/td"
+
+remaster_steam_id="1213210"

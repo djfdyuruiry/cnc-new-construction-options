@@ -405,9 +405,17 @@ public:
         const std::string_view& field_name
     )
     {
-        const auto json_path = std::format("{}.{}", target, field_name);
+        return Load_Value_From_Json<T>(source.at(field_name), target, field_name);
+    }
 
-        auto const& json_value = source.at(field_name);
+    template<SupportedByTdTypeConverter T>
+    static T Load_Value_From_Json(
+        const nlohmann::json& json_value,
+        const std::string_view& target,
+        const std::string_view& field_name
+    )
+    {
+        const auto json_path = std::format("{}.{}", target, field_name);
 
         CncJsonUtils::Assert_Json_Is<JsonString>(json_value, json_path);
 
@@ -511,7 +519,12 @@ public:
     {
         const auto json_path = std::format("{}.{}", target_name, field_name);
 
-        const auto [ _, instance_str ] = Techno_Type_Reference_From_Json(source, json_path);
+        const auto [ kind_type, instance_str ] = Techno_Type_Reference_From_Json(source, json_path);
+
+        if (kind_type == KIND_NONE) {
+            target = nullptr;
+            return;
+        }
 
         auto parsed_instance = Try_Parse<U>(instance_str);
 
