@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 using CNC.NCO.Launcher.Model.Util;
@@ -12,7 +13,7 @@ public static class ProcessUtils
     new()
     {
       FileName = binaryPath,
-      Arguments = string.Join(" ", arguments),
+      Arguments = string.Join(" ", arguments.Select(a => $"\"{a}\"").ToArray()),
       CreateNoWindow = true,
       RedirectStandardOutput = true,
       RedirectStandardError = true

@@ -6,7 +6,7 @@ NCO:
     Owner: djfdyuruiry
     Name: cnc-new-construction-options
   Release: latest
-  AssetPrefix: nco-${OS}
+  AssetPrefix: nco-release-${OS}
   MsvcRuntimeUrl: https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 # TODO: Read ICO files and add to UI as we install
@@ -24,11 +24,11 @@ TiberianDawn:
       Name: GDI
       Required: true
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
-          File: CNC95_GDI.iso
-          Checksum: d5382a8f2cb4c60c5cc70fb79169f5e942d1eeb51cba157b695c0dc63cbc8c21
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerUSAWindows95Rerelease/Command%20%26%20Conquer%20%28USA%29%20%28Disc%201%29%20%28Windows%2095%29%20%28Rerelease%29.zip
+          File: Command & Conquer (USA) (Disc 1) (Windows 95) (Rerelease).bin
+          Checksum: 245847b1b76b0b1d04edda360ece732430158b774f5cecffd492bbf95ae96f62
       SplashScreenFile: SETUP.BMP
       SetupPackageFile: INSTALL\\SETUP.Z
       Provides:
@@ -53,11 +53,11 @@ TiberianDawn:
     - SortOrder: 2
       Name: NOD
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
-          File: CNC95_Nod.iso
-          Checksum: cf935c0b107518654cd14ba191dc8672f4e5759e035f24c341787f2133d12764
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerUSAWindows95Rerelease/Command%20%26%20Conquer%20%28USA%29%20%28Disc%202%29%20%28Windows%2095%29%20%28Rerelease%29%20%28Rev%201%29.zip
+          File: Command & Conquer (USA) (Disc 2) (Windows 95) (Rerelease) (Rev 1).bin
+          Checksum: ed12239cd39c31036cf93cb75bf9584726a3ab8b78304a0d5ac075cd75283e3c
       SplashScreenFile: SETUP.BMP
       SetupPackageFile: INSTALL\\SETUP.Z
       Provides:
@@ -70,11 +70,11 @@ TiberianDawn:
       DisplayName: >-
         Covert Operations (Expansion)
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
-          File: CD3_Covertops.bin
-          Checksum: 3b9e0ccb7c66e5d023382d48116d64e05a8c3f6bb16af009c3b38d04be649c26
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerTheCovertOperationsUSA/Command%20%26%20Conquer%20-%20The%20Covert%20Operations%20%28USA%29.zip
+          File: Command & Conquer - The Covert Operations (USA) (Track 1).bin
+          Checksum: c5f6a8245063b7ddde9b0290c4da62bdfd83f8a326191d12a66a95db55593280
       Provides:
         _root:
           - INSTALL\\SC-000.MIX
