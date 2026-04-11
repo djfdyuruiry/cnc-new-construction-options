@@ -7757,9 +7757,16 @@ void DLL_Decode_Pointers(void)
     DLLExportClass::Decode_Pointers();
 }
 
+/**
+ * Code for the NCO JSON save game system - it requires access to the DLLExportClass
+ * which is a static class local to this file, so we have to define methods for the
+ * SaveGameRemasterState_v1 class here. See: @file savegame_v1.h
+ */
 #pragma region SaveGameRemasterState_v1
 void SaveGameRemasterState_v1::Read_Dll_State()
 {
+    CNC_LOGGER_DEBUG("Reading DLL state into save data");
+
     MultiplayerStartPositions = DLLExportClass::MultiplayerStartPositions;
     RemasterPlayerIDs = DLLExportClass::GlyphxPlayerIDs;
     RemasterClientSidebarWidthInLeptons = GlyphXClientSidebarWidthInLeptons;
@@ -7800,45 +7807,41 @@ void SaveGameRemasterState_v1::Read_Dll_State()
 
 bool SaveGameRemasterState_v1::Validate() const
 {
+    CNC_LOGGER_DEBUG("Validating save data");
+
     auto result = true;
 
     std::map<std::string, nlohmann::json> player_fields = {
-        { NAMEOF(MultiplayerStartPositions), MultiplayerStartPositions },
-        { NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs },
-        { NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman },
-        { NAMEOF(PlacementType), PlacementType },
-        { NAMEOF(RemasterMPlayerHouses), RemasterMPlayerHouses },
-        { NAMEOF(RemasterMPlayerNames), RemasterMPlayerNames },
-        { NAMEOF(RemasterMPlayerID), RemasterMPlayerID },
-        { NAMEOF(MultiplayerSidebars), MultiplayerSidebars }
-    };
+        {NAMEOF(MultiplayerStartPositions), MultiplayerStartPositions},
+        {NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs},
+        {NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman},
+        {NAMEOF(PlacementType), PlacementType},
+        {NAMEOF(RemasterMPlayerHouses), RemasterMPlayerHouses},
+        {NAMEOF(RemasterMPlayerNames), RemasterMPlayerNames},
+        {NAMEOF(RemasterMPlayerID), RemasterMPlayerID},
+        {NAMEOF(MultiplayerSidebars), MultiplayerSidebars}};
 
     for (const auto& [field, json_value] : player_fields) {
         if (!json_value.is_array()) {
             result = false;
-            CNC_LOGGER_ERROR(
-                "Invalid RemasterState.{} save game value - json array expected, actual type: {}",
-                field,
-                json_value.type_name()
-            );
+            CNC_LOGGER_ERROR("Invalid RemasterState.{} save game value - json array expected, actual type: {}",
+                             field,
+                             json_value.type_name());
         } else if (json_value.size() != MAX_PLAYERS) {
             result = false;
             CNC_LOGGER_ERROR(
                 "Invalid RemasterState.{} save game value - json array with max size of {} expected, actual size: {}",
                 field,
                 MAX_PLAYERS,
-                json_value.size()
-            );
+                json_value.size());
         }
     }
 
     if (!RemasterSpecial.is_object()) {
         result = false;
-        CNC_LOGGER_ERROR(
-            "Invalid RemasterState.{} save game value - json object expected, actual type: {}",
-            NAMEOF(RemasterSpecial),
-            RemasterSpecial.type_name()
-        );
+        CNC_LOGGER_ERROR("Invalid RemasterState.{} save game value - json object expected, actual type: {}",
+                         NAMEOF(RemasterSpecial),
+                         RemasterSpecial.type_name());
     }
 
     return result;
@@ -7847,8 +7850,12 @@ bool SaveGameRemasterState_v1::Validate() const
 bool SaveGameRemasterState_v1::Write_Dll_State() const
 {
     if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write to DLL state from invalid save data");
+
         return false;
     }
+
+    CNC_LOGGER_DEBUG("Writing DLL state from save data");
 
     from_json(MultiplayerStartPositions, DLLExportClass::MultiplayerStartPositions);
     from_json(RemasterPlayerIDs, DLLExportClass::GlyphxPlayerIDs);
@@ -7862,8 +7869,7 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
             PlacementType.at(i),
             std::format("RemasterState.{}", NAMEOF(PlacementType)),
             std::format("{}", i),
-            DLLExportClass::PlacementType[i]
-        );
+            DLLExportClass::PlacementType[i]);
     }
 
     MPlayerCount = RemasterMPlayerCount;
@@ -7880,10 +7886,10 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
         MPlayerHouses[i] = TdTypeConverter::Load_Value_From_Json<HousesType>(
             RemasterMPlayerHouses.at(i),
             std::format("RemasterState.{}", NAMEOF(RemasterMPlayerHouses)),
-            std::format("{}", i)
-        );
+            std::format("{}", i));
     }
 
+    // copy RemasterMPlayerNames[] JSON string character data into MPlayerNames[]
     for (auto i = 0; i < RemasterMPlayerNames.size(); i++) {
         auto json_name = RemasterMPlayerNames.at(i);
 

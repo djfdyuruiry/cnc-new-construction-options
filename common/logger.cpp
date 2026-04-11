@@ -29,7 +29,13 @@ void CncLogger::Fatal(const std::string_view message) const
 
 std::shared_ptr<spdlog::logger> CncLogger::operator()() const
 {
-    return spdlog::get(Name);
+    auto logger = spdlog::get(Name);
+
+#ifdef REMASTER_BUILD
+    logger->flush();
+#endif
+
+    return logger;
 }
 
 bool CncLogger::Load_Env_Log_Levels()

@@ -148,6 +148,7 @@ ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
 bool SaveGameScenarioState_v1::Write_Globals() const
 {
     if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write globals from invalid save data");
         return false;
     }
 
@@ -248,6 +249,7 @@ bool SaveGameObjectHeaps_v1::Validate() const
 bool SaveGameObjectHeaps_v1::Write_Globals() const
 {
     if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write to globals from invalid save data");
         return false;
     }
 
@@ -453,6 +455,7 @@ bool SaveGame_v1::Validate() const
 bool SaveGame_v1::Write_Globals() const
 {
     if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write to globals from invalid save data");
         return false;
     }
 
