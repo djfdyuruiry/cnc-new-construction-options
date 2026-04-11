@@ -4227,7 +4227,6 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
                                             sidebar_entry.PlacementList[sidebar_entry.PlacementListLength] =
                                                 *occupy_list;
                                             sidebar_entry.PlacementListLength++;
-                                            sidebar_entry.PlacementListLength++;
                                             occupy_list++;
                                         }
                                     }
