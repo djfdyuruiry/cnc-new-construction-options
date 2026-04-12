@@ -275,13 +275,13 @@ jobs:
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.dll
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.pdb
-          7z a artifact/nco-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_RA
+          7z a artifact/nco-remaster-ra-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_RA
         fi
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.dll
           7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.pdb
-          7z a artifact/nco-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_TD
+          7z a artifact/nco-remaster-td-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_TD
         fi
 
     - name: Upload artifact
