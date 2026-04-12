@@ -6,7 +6,7 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 . "${script_path}/lib/vars.sh"
 
-# Read log file usage example: cat "$(./scripts/89.get-remaster-log-path.sh)"
+# Read log file usage example: cat "$(./scripts/89c.get-remaster-log-path-td.sh)"
 function main() {
   set -Eeuo pipefail
 
