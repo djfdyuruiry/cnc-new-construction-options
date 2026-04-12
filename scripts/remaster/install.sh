@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-set -Eexuo pipefail
+set -Eeuo pipefail
 
 GITHUB_RELEASE_URL="https://api.github.com/repos/djfdyuruiry/cnc-new-construction-options/releases"
 
@@ -49,9 +49,8 @@ function download_mod() {
 function download_and_install_mods() {
   set -eEuo pipefail
 
-  local pfx_path="${1}"
+  local mods_path="${1}"
 
-  local mods_path="${pfx_path}/drive_c/users/steamuser/Documents/CnCRemastered/Mods"
   echo "Mods path: ${mods_path}"
 
   # Tiberian Dawn
@@ -149,7 +148,9 @@ function main()
   echo ">> Installing Microsoft Visual C++ Redistributable in Proton"
   ${protontricks_cmd} --no-runtime "${game_id}" --unattended vcrun2022
 
-  download_and_install_mods "${pfx_path}"
+  local mods_path="${pfx_path}/drive_c/users/steamuser/Documents/CnCRemastered/Mods"
+
+  download_and_install_mods "${mods_path}"
 
   echo ">> Installation Complete!"
 
