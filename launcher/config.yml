@@ -119,7 +119,7 @@ RedAlert:
           DisplayName: Internet Archive
           Url: https://archive.org/download/command-conquer-red-alert-1/C%26C-RA-CD2.bin
           File: C&C-RA-CD2.bin
-          Checksum: 1127d6f013a4ae7596f19dce5e6ed5b235e0f837849b593dd97a455d4cbcc986
+          Checksum: 0018a1a2734b24abb64e86fcfea207e227bd2e30046b92860bbc071e80dfabd2
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         _root:
