@@ -20,9 +20,7 @@ Full guide on how use the launcher can be found [here](https://github.com/djfdyu
 
 ### Remastered Collection
 
-To install NCO as a mod for the Remastered Collection grab the latest mod zip files [here](https://github.com/djfdyuruiry/cnc-new-construction-options/releases/tag/latest)
-
-![Launcher Downloads](wiki/img/remaster-download.png)
+NCO can be installed as a mod for the Remastered Collection, follow the steps [here](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/1a.Install-Remaster-Mod)
 
 ---
 
