@@ -58,7 +58,7 @@ function download_and_install_mods() {
   td_mod_zip_path="$(mktemp)"
   local td_path="${mods_path}/Tiberian_Dawn"
 
-  download_mod "nco-td-remaster-mod-msvc" "${td_mod_zip_path}"
+  download_mod "nco-remaster-td-mod-msvc" "${td_mod_zip_path}"
   install_mod "NCO_TD" "${td_mod_zip_path}" "${td_path}"
 
   # Red Alert
@@ -66,7 +66,7 @@ function download_and_install_mods() {
   ra_mod_zip_path="$(mktemp)"
   local ra_path="${mods_path}/Red_Alert"
 
-  download_mod "nco-ra-remaster-mod-msvc" "${ra_mod_zip_path}"
+  download_mod "nco-remaster-ra-mod-msvc" "${ra_mod_zip_path}"
   install_mod "NCO_RA" "${ra_mod_zip_path}" "${ra_path}"
 }
 

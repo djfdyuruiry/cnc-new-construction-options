@@ -82,14 +82,14 @@ function Main() {
   $ncoTdModZipPath = New-TemporaryFile
   $tdPath = "$modsPath\Tiberian_Dawn"
 
-  Download-Mod-Zip "nco-td-remaster-mod-msvc" $ncoTdModZipPath
+  Download-Mod-Zip "nco-remaster-td-mod-msvc" $ncoTdModZipPath
   Install-Mod "NCO_TD" $ncoTdModZipPath $tdPath
 
   # Red Alert
   $ncoRaModZipPath = New-TemporaryFile
   $raPath = "$modsPath\Red_Alert"
 
-  Download-Mod-Zip "nco-ra-remaster-mod-msvc" $ncoRaModZipPath
+  Download-Mod-Zip "nco-remaster-ra-mod-msvc" $ncoRaModZipPath
   Install-Mod "NCO_RA" $ncoRaModZipPath $raPath
 
   Write-Host ">> Installation Complete!"
