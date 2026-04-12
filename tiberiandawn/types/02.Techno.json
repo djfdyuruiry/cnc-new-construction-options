@@ -125,6 +125,11 @@
       "requires_csv_converter": true,
       "comment": "Comma seperated list of houses that are allowed to own (by normal means) this particular object type. This value is typically used in production contexts. It is possible for a side to take possession of an object type otherwise not normally allowed. This event usually occurs as a result of capture.",
       "valid_values": "NONE, GOOD, BAD, NEUTRAL, JP, MULTI1, MULTI2, MULTI3, MULTI4, MULTI5, MULTI6 - See: [house.ini](#houseini)"
+    },
+    {
+      "name": "CameoName",
+      "type": "String",
+      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this object type. (not supported in Lua)"
     }
   ]
 }

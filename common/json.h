@@ -7,7 +7,6 @@
 #define JSON_DISABLE_ENUM_SERIALIZATION 1
 #include <nlohmann/json.hpp>
 
-#include "logger.h"
 #include "stringutils.h"
 
 // emulate C# style nameof
@@ -283,7 +282,6 @@ public:
     }
 
 private:
-    static inline const auto& Logger = CncLogger::For(CncJsonUtils);
 
     CncJsonUtils() = delete;
 };

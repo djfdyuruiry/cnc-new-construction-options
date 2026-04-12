@@ -31,6 +31,7 @@
 #include "dllinterface.h"
 #include "gadget.h"
 #include "defines.h" // VOC_COUNT, VOX_COUNT
+#include "savegame_v1.h"
 #include "sidebarglyphx.h"
 #include "common/irandom.h"
 
@@ -373,6 +374,8 @@ public:
     }
 
 private:
+    static inline const auto Logger = CncLogger::For(DLLExportClass);
+
     static void Calculate_Single_Player_Score(EventCallbackStruct&);
 
     static unsigned int TD_Calculate_Efficiency(unsigned int harvested_credits,
@@ -414,6 +417,9 @@ private:
     ** Mod directories
     */
     static DynamicVectorClass<char*> ModSearchPaths;
+
+    // We require access to private state for JSON save games.
+    friend class SaveGameRemasterState_v1;
 };
 
 /*
@@ -1446,7 +1452,6 @@ bool Debug_Write_Shape_Type(const ObjectTypeClass* type, int shapenum)
     CCFileClass file;
 
     if (type->ImageData != NULL) {
-
         sprintf(buffer, "%s_%d", type->IniName, shapenum);
         _makepath(fullname, NULL, NULL, buffer, ".PCX");
 
@@ -1778,6 +1783,8 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
         result = Load_Game(file_path_and_name);
 
         if (result == false) {
+            CNC_LOG_ERROR("Failed to load remaster save");
+
             return false;
         }
 
@@ -2013,8 +2020,8 @@ void DLLExportClass::Add_Mod_Path(const char* mod_path)
  **************************************************************************************************/
 void DLLExportClass::Set_Content_Directory(const char* content_directory)
 {
-    CCFileClass::Clear_Search_Drives();
-    CCFileClass::Reset_Raw_Path();
+    Paths.Init("tiberian-dawn", "CONQUER.INI", "CONQUER.MIX", nullptr);
+    CDFileClass::Refresh_Search_Drives();
 
     if ((content_directory == NULL || strlen(content_directory) == 0) && ModSearchPaths.Count() == 0) {
         return;
@@ -3036,7 +3043,7 @@ void DLLExportClass::DLL_Draw_Intercept(int shape_number,
     if (shape_file_name != NULL) {
         strncpy(new_object.AssetName, shape_file_name, CNC_OBJECT_ASSET_NAME_LENGTH);
     } else {
-        strncpy(new_object.AssetName, object->Class_Of().IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+        strncpy(new_object.AssetName, object->Class_Of().ImageName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
     }
 
     new_object.TypeName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
@@ -4098,7 +4105,7 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
                     sidebar_entry.Cost = tech->Cost * PlayerPtr->CostBias;
                     sidebar_entry.PowerProvided = 0;
                     sidebar_entry.BuildTime = tech->Time_To_Build(PlayerPtr->Class->House);
-                    strncpy(sidebar_entry.AssetName, tech->IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+                    strncpy(sidebar_entry.AssetName, tech->CameoName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
                     sidebar_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
                 } else {
                     sidebar_entry.Cost = 0;
@@ -4273,7 +4280,7 @@ bool DLLExportClass::Get_Sidebar_State(uint64 player_id, unsigned char* buffer_i
                         sidebar_entry.Cost = tech->Cost * PlayerPtr->CostBias;
                         sidebar_entry.PowerProvided = 0;
                         sidebar_entry.BuildTime = tech->Time_To_Build(PlayerPtr->Class->House);
-                        strncpy(sidebar_entry.AssetName, tech->IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+                        strncpy(sidebar_entry.AssetName, tech->CameoName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
                         sidebar_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
                     } else {
                         sidebar_entry.Cost = 0;
@@ -5919,7 +5926,7 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
 
             CNCDynamicMapEntryStruct& smudge_entry = dynamic_map->Entries[entry_index++];
 
-            strncpy(smudge_entry.AssetName, smudge_type.IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+            strncpy(smudge_entry.AssetName, smudge_type.ImageName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
             smudge_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
             smudge_entry.Type = (short)cell_ptr->Smudge;
             smudge_entry.Owner = (char)cell_ptr->Owner;
@@ -5961,7 +5968,7 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
                 IsTheaterShape = false;
             }
 
-            strncpy(overlay_entry.AssetName, overlay_type.IniName, CNC_OBJECT_ASSET_NAME_LENGTH);
+            strncpy(overlay_entry.AssetName, overlay_type.ImageName.c_str(), CNC_OBJECT_ASSET_NAME_LENGTH);
             overlay_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
             overlay_entry.Type = (short)cell_ptr->Overlay;
             overlay_entry.Owner = (char)cell_ptr->Owner;
@@ -7748,3 +7755,161 @@ void DLL_Decode_Pointers(void)
 {
     DLLExportClass::Decode_Pointers();
 }
+
+/**
+ * Code for the NCO JSON save game system - it requires access to the DLLExportClass
+ * which is a static class local to this file, so we have to define methods for the
+ * SaveGameRemasterState_v1 class here. See: @file savegame_v1.h
+ */
+#pragma region SaveGameRemasterState_v1
+void SaveGameRemasterState_v1::Read_Dll_State()
+{
+    CNC_LOGGER_DEBUG("Reading DLL state into save data");
+
+    MultiplayerStartPositions = DLLExportClass::MultiplayerStartPositions;
+    RemasterPlayerIDs = DLLExportClass::GlyphxPlayerIDs;
+    RemasterClientSidebarWidthInLeptons = GlyphXClientSidebarWidthInLeptons;
+    RemasterMPlayerIsHuman = MPlayerIsHuman;
+
+    PlacementType = nlohmann::json::array();
+    for (const auto& building_type : DLLExportClass::PlacementType) {
+        PlacementType.emplace_back(TdTypeConverter::Techno_Type_To_Reference_Json(building_type));
+    }
+
+    RemasterMPlayerCount = MPlayerCount;
+    RemasterMPlayerBases = MPlayerBases;
+    RemasterMPlayerCredits = MPlayerCredits;
+    RemasterMPlayerTiberium = MPlayerTiberium;
+    RemasterMPlayerGoodies = MPlayerGoodies;
+    RemasterMPlayerGhosts = MPlayerGhosts;
+    RemasterMPlayerSolo = MPlayerSolo;
+    RemasterMPlayerUnitCount = MPlayerUnitCount;
+    RemasterMPlayerLocalID = MPlayerLocalID;
+
+    RemasterMPlayerHouses = nlohmann::json::array();
+    for (const auto& house : MPlayerHouses) {
+        RemasterMPlayerHouses.emplace_back(TdTypeConverter::To_String(house));
+    }
+
+    RemasterMPlayerNames = MPlayerNames;
+    RemasterMPlayerID = MPlayerID;
+
+    MultiplayerSidebars = nlohmann::json::array();
+
+    for (const auto& sidebar : DLLExportClass::MultiplayerSidebars) {
+        MultiplayerSidebars.emplace_back(sidebar);
+    }
+
+    RemasterSpecial = Special;
+    NotAllowSuperWeapons = !Rule.AllowSuperWeapons;
+}
+
+bool SaveGameRemasterState_v1::Validate() const
+{
+    CNC_LOGGER_DEBUG("Validating save data");
+
+    auto result = true;
+
+    std::map<std::string, nlohmann::json> player_fields = {
+        {NAMEOF(MultiplayerStartPositions), MultiplayerStartPositions},
+        {NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs},
+        {NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman},
+        {NAMEOF(PlacementType), PlacementType},
+        {NAMEOF(RemasterMPlayerHouses), RemasterMPlayerHouses},
+        {NAMEOF(RemasterMPlayerNames), RemasterMPlayerNames},
+        {NAMEOF(RemasterMPlayerID), RemasterMPlayerID},
+        {NAMEOF(MultiplayerSidebars), MultiplayerSidebars}};
+
+    for (const auto& [field, json_value] : player_fields) {
+        if (!json_value.is_array()) {
+            result = false;
+            CNC_LOGGER_ERROR("Invalid RemasterState.{} save game value - json array expected, actual type: {}",
+                             field,
+                             json_value.type_name());
+        } else if (json_value.size() != MAX_PLAYERS) {
+            result = false;
+            CNC_LOGGER_ERROR(
+                "Invalid RemasterState.{} save game value - json array with max size of {} expected, actual size: {}",
+                field,
+                MAX_PLAYERS,
+                json_value.size());
+        }
+    }
+
+    if (!RemasterSpecial.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR("Invalid RemasterState.{} save game value - json object expected, actual type: {}",
+                         NAMEOF(RemasterSpecial),
+                         RemasterSpecial.type_name());
+    }
+
+    return result;
+}
+
+bool SaveGameRemasterState_v1::Write_Dll_State() const
+{
+    if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write to DLL state from invalid save data");
+
+        return false;
+    }
+
+    CNC_LOGGER_DEBUG("Writing DLL state from save data");
+
+    from_json(MultiplayerStartPositions, DLLExportClass::MultiplayerStartPositions);
+    from_json(RemasterPlayerIDs, DLLExportClass::GlyphxPlayerIDs);
+
+    GlyphXClientSidebarWidthInLeptons = RemasterClientSidebarWidthInLeptons;
+
+    from_json(RemasterMPlayerIsHuman, MPlayerIsHuman);
+
+    for (auto i = 0; i < PlacementType.size(); i++) {
+        TdTypeConverter::Techno_Type_Target_From_Json<BuildingTypeClass, StructType>(
+            PlacementType.at(i),
+            std::format("RemasterState.{}", NAMEOF(PlacementType)),
+            std::format("{}", i),
+            DLLExportClass::PlacementType[i]);
+    }
+
+    MPlayerCount = RemasterMPlayerCount;
+    MPlayerBases = RemasterMPlayerBases;
+    MPlayerCredits = RemasterMPlayerCredits;
+    MPlayerTiberium = RemasterMPlayerTiberium;
+    MPlayerGoodies = RemasterMPlayerGoodies;
+    MPlayerGhosts = RemasterMPlayerGhosts;
+    MPlayerSolo = RemasterMPlayerSolo;
+    MPlayerUnitCount = RemasterMPlayerUnitCount;
+    MPlayerLocalID = RemasterMPlayerLocalID;
+
+    for (auto i = 0; i < RemasterMPlayerHouses.size(); i++) {
+        MPlayerHouses[i] = TdTypeConverter::Load_Value_From_Json<HousesType>(
+            RemasterMPlayerHouses.at(i),
+            std::format("RemasterState.{}", NAMEOF(RemasterMPlayerHouses)),
+            std::format("{}", i));
+    }
+
+    // copy RemasterMPlayerNames[] JSON string character data into MPlayerNames[]
+    for (auto i = 0; i < RemasterMPlayerNames.size(); i++) {
+        auto json_name = RemasterMPlayerNames.at(i);
+
+        if (!json_name.is_string()) {
+            MPlayerNames[i][0] = '\0';
+            continue;
+        }
+
+        auto name = json_name.get<std::string>();
+
+        strcpy(MPlayerNames[i], name.c_str());
+        MPlayerNames[i][11] = '\0';
+    }
+
+    from_json(RemasterMPlayerID, MPlayerID);
+
+    from_json(MultiplayerSidebars, DLLExportClass::MultiplayerSidebars);
+
+    from_json(RemasterSpecial, Special);
+    Rule.AllowSuperWeapons = !NotAllowSuperWeapons;
+
+    return true;
+}
+#pragma endregion

@@ -10,8 +10,10 @@
 // GNU General Public License along with permitted additional restrictions
 // with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
 #include "paths.h"
+
 #include "debugstring.h"
 #include "ini.h"
+#include "logger.h"
 #include "rawfile.h"
 #include <stdlib.h>
 #include <string>
@@ -23,6 +25,7 @@
 #endif
 
 PathsClass Paths;
+static const auto Logger = CncLogger::For(PathsClass);
 
 void PathsClass::Init(const char* suffix, const char* ini_name, const char* data_name, const char* cmd_arg)
 {
@@ -39,8 +42,10 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
 
     // Calls with unused returns to set the default variable values if not already set.
     Program_Path();
+    Program_Lua_Path();
     Data_Path();
     User_Path();
+    User_Lua_Path();
 
     DBG_INFO("Searching the following paths for path config data: < argv: '%s' | binary: '%s' | default data: "
              "'%s' | default user: '%s' >",
@@ -85,7 +90,9 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
     ini.Load(file);
 
     const char section[] = "Paths";
-    char buffer[128]; // TODO max ini line size.
+
+    // BUG: Should really match the max file path size for the target platform
+    char buffer[128]; // TODO: max ini line size.
 
     // Even if the config was found with the binary, we still check to see if it gives use alternative paths.
     // If not, assume we are in portable mode and point the DataPath to ProgramPath.
@@ -106,6 +113,28 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
         UserPath = ProgramPath;
     }
 
-    DBG_INFO("Read only data directory is set to '%s'", DataPath.c_str());
-    DBG_INFO("Read/Write user data directory is set to '%s'", UserPath.c_str());
+    CNC_LOGGER_INFO("Read only data directory is set to '{}'", DataPath);
+    CNC_LOGGER_INFO("Read/Write user data directory is set to '{}'", UserPath);
+    CNC_LOGGER_INFO("Lua user data directory is set to '{}'", UserLuaPath);
+}
+
+const char* PathsClass::Program_Lua_Path()
+{
+    if (ProgramLuaPath.empty()) {
+        ProgramLuaPath = Concatenate_Paths(Program_Path(), "lua");
+    }
+
+    return ProgramLuaPath.c_str();
+}
+
+const char* PathsClass::User_Lua_Path()
+{
+    if (UserLuaPath.empty()) {
+        UserLuaPath = Concatenate_Paths(User_Path(), "lua");
+
+        // ensure lua directory exists in game directory inside user path
+        Create_Directory(UserLuaPath.c_str());
+    }
+
+    return UserLuaPath.c_str();
 }

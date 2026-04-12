@@ -25,7 +25,7 @@ if(MSVC)
     # Multithreaded build in Visual Studio/MSBuild.
     list(APPEND VC_CXX_FLAGS /MP)
     # Enforce strict __cplusplus version
-    list(APPEND VC_CXX_FLAGS /Zc:__cplusplus)
+    list(APPEND VC_CXX_FLAGS /Zc:__cplusplus /Zc:strictStrings -wd4244 -wd4018 -wd4291 -wd4101 -wd4267 -wd4200 -wd4828)
     # Enable large object file format (needed for large std::variant types)
     list(APPEND VC_CXX_FLAGS /bigobj)
 else()

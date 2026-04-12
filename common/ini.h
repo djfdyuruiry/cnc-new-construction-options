@@ -122,15 +122,15 @@ public:
     **	Put a data type to the section and entry specified.
     */
     bool Put_Fixed(char const* section, char const* entry, fixed value);
-    bool Put_String(char const* section, char const* entry, char const* string);
-    bool Put_String(char const* section, char const* entry, std::string const& string);
+    bool Put_String(char const* section, char const* entry, char const* string, std::optional<std::string> comment = std::nullopt);
+    bool Put_String(char const* section, char const* entry, std::string const& string, std::optional<std::string> comment = std::nullopt);
     bool Put_Hex(char const* section, char const* entry, int number);
     bool Put_Int(char const* section, char const* entry, int number, int format = 0);
-    bool Put_Bool(char const* section, char const* entry, bool value);
+    bool Put_Bool(char const* section, char const* entry, bool value, std::optional<std::string> comment = std::nullopt);
     bool Put_TextBlock(char const* section, char const* text);
     bool Put_UUBlock(char const* section, void const* block, int len);
     bool Put_PKey(PKey const& key);
-    void Put_Comment(char const* section, const std::string& comment);
+    void Put_Section(char const* section, std::optional<std::string> comment = std::nullopt);
 
 protected:
     /*
@@ -156,6 +156,7 @@ protected:
             return CRC(Entry);
         };
 
+        std::optional<std::string> comment;
         char* Entry;
         char* Value;
     };

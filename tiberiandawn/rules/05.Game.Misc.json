@@ -37,7 +37,7 @@
     {
       "name": "ShowBibsOnBuildings",
       "type": "bool",
-      "default": false,
+      "default": true,
       "comment": "Show little dirt bibs on buildings (if turned off, overrides any rules for individual buildings)"
     },
     {

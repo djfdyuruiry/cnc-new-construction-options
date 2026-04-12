@@ -45,6 +45,7 @@ jobs:
     runs-on: windows-2025
     outputs:
       preset: ${{ steps.set_preset.outputs.preset }}
+      remaster_preset: ${{ steps.set_preset.outputs.remaster_preset }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -76,28 +77,37 @@ jobs:
       shell: bash
       run: |
         PRESET=""
+        REMASTER_PRESET=""
 
         if [ "${{ steps.changes.outputs.nco }}" = "true" ]; then
           echo "Changes to shared files detected - building everything using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] && [ "${{ steps.changes.outputs.td }}" = "true" ]; then
           echo "Red Alert & Tiberian Dawn changes detected - building both using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] ; then
           echo "Only Red Alert changes detected - using cmake preset: red-alert"
           PRESET="red-alert"
+          REMASTER_PRESET="red-alert-remaster"
         elif [ "${{ steps.changes.outputs.td }}" = "true" ]; then
           echo "Only Tiberian Dawn changes detected - using cmake preset: tiberian-dawn"
           PRESET="tiberian-dawn"
+          REMASTER_PRESET="tiberian-dawn-remaster"
         elif [ "${{ steps.changes.outputs.ci }}" = "true" ]; then
           echo "Workflow yml changes detected - testing workflow changes using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         else
           echo "WARNING: Unable to match changed files to a preset - defaulting to building everything using cmake preset: release"
           PRESET="release"
+          REMASTER_PRESET="remaster"
         fi
 
         echo "preset=${PRESET}" >> $GITHUB_OUTPUT
+        echo "remaster_preset=${REMASTER_PRESET}" >> $GITHUB_OUTPUT
+
 
   nco_win_msvc:
     needs:
@@ -111,6 +121,112 @@ jobs:
             cmd: x64
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 0
+          ref: "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: ${{ matrix.arch.cmd }}
+
+      - name: Set Git Info
+        id: gitinfo
+        shell: pwsh
+        run: |
+          $gitoutput = git rev-parse --short HEAD
+          echo "sha_short=${gitoutput}" >> $env:GITHUB_OUTPUT
+
+      - name: Init vcpkg
+        run: scripts/bin/vcpkg.ps1 --init
+
+      - name: Init vcpkg Binary Cache
+        run: |
+          nuget sources add `
+            -Source "${{ env.NUGET_URL }}" `
+            -StorePasswordInClearText `
+            -Name GitHubPackages `
+            -UserName "djfdyuruiry" `
+            -Password "${{ secrets.GITHUB_TOKEN }}"
+          
+          nuget setapikey "${{ secrets.GITHUB_TOKEN }}" `
+            -Source "${{ env.NUGET_URL }}"
+
+      - name: Build NCO
+        env:
+          CMAKE_MAKE_PROGRAM: ninja
+          VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
+          VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
+        run: |
+          $env:CMAKE_FIND_ROOT_PATH="$(Split-Path -Path $(Get-Command magick).Path -Parent)"
+          
+          cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
+
+      # TODO: separate out ra and td into sep archives (separate folders in zip for now)
+      - name: Create archives
+        shell: bash
+        run: |
+          mkdir artifact
+          
+          # ninja build log (useful for profiling compilation)
+          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/.ninja_log
+          
+          if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
+            # debug symbols
+            7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra/*.pdb
+          
+            rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra/*.pdb
+          
+            # ra bundle
+            7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra
+          fi
+          
+          if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
+            # debug symbols
+            7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
+          
+            rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb    
+          
+            # td bundle
+            rm -f ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
+            7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td
+          fi
+
+      - name: Add internal tools to archive
+        run: |
+          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/nco-mix.exe
+          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/nco-mix.pdb
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}
+          path: artifact
+
+      - name: Upload development release
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Development Build
+          tag_name: "latest"
+          prerelease: true
+          files: |
+            artifact/*
+
+      - name: Upload tagged release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifact/*
+
+  # TODO: add note for Linux/Proton - Requires protontricks to install MSVC 2015-2022 redist inside C&C wine prefix (https://github.com/Matoking/protontricks) - otherwise mod dll fails to load (Could do static comp to include msvc but might be work to get vcpkg packages to build)
+  remaster_msvc:
+    needs:
+      - resolve_win_cmake_preset
+    runs-on: windows-2025
+    steps:
     - uses: actions/checkout@v4
       with:
         submodules: 'true'
@@ -119,7 +235,7 @@ jobs:
 
     - uses: ilammy/msvc-dev-cmd@v1.13.0
       with:
-        arch: ${{ matrix.arch.cmd }}
+        arch: x86
 
     - name: Set Git Info
       id: gitinfo
@@ -134,172 +250,59 @@ jobs:
     - name: Init vcpkg Binary Cache
       run: |
         nuget sources add `
-          -Source "${{ env.NUGET_URL }}" `
-          -StorePasswordInClearText `
-          -Name GitHubPackages `
-          -UserName "djfdyuruiry" `
-          -Password "${{ secrets.GITHUB_TOKEN }}"
-
+         -Source "${{ env.NUGET_URL }}" `
+         -StorePasswordInClearText `
+         -Name GitHubPackages `
+         -UserName "djfdyuruiry" `
+         -Password "${{ secrets.GITHUB_TOKEN }}"
+        
         nuget setapikey "${{ secrets.GITHUB_TOKEN }}" `
-          -Source "${{ env.NUGET_URL }}"
+         -Source "${{ env.NUGET_URL }}"
 
     - name: Build NCO
       env:
         CMAKE_MAKE_PROGRAM: ninja
-        VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200;-wd4828"
         VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
         $env:CMAKE_FIND_ROOT_PATH="$(Split-Path -Path $(Get-Command magick).Path -Parent)"
+        cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}
 
-        cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}
-
-    # TODO: separate out ra and td into sep archives (separate folders in zip for now)
     - name: Create archives
       shell: bash
       run: |
         mkdir artifact
-
-        # ninja build log (useful for profiling compilation)
-        7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/.ninja_log
-
+      
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
-          # debug symbols
-          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra/*.pdb
-
-          rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra/*.pdb
-
-          # ra bundle
-          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/ra
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.dll
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/RedAlert.pdb
+          7z a artifact/nco-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_RA
         fi
 
         if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
-          # debug symbols
-          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/*.pdb ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb
-
-          rm -rf ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.pdb    
-
-          # td bundle
-          rm -f ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td/*.sh
-          7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/td
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.dll
+          7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/RelWithDebInfo/TiberianDawn.pdb
+          7z a artifact/nco-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.remaster_preset }}/NCO_TD
         fi
-
-    - name: Add internal tools to archive
-      run: |
-        7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/nco-mix.exe
-        7z a artifact/nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}/RelWithDebInfo/nco-mix.pdb
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: nco-${{ needs.resolve_win_cmake_preset.outputs.preset }}-win-msvc-${{ matrix.arch.lin }}
-        path: artifact
+       name: nco-remaster-msvc
+       path: artifact
 
     - name: Upload development release
       if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
       uses: softprops/action-gh-release@v2
       with:
-        name: Development Build
-        tag_name: "latest"
-        prerelease: true
-        files: |
-          artifact/*
+       name: Development Build
+       tag_name: "latest"
+       prerelease: true
+       files: |
+         artifact/*
 
     - name: Upload tagged release
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
       uses: softprops/action-gh-release@v2
       with:
-        files: |
-          artifact/*
-
-  # TODO: Remaster compatibility
-  # remaster_msvc:
-  #   needs:
-  #     - resolve_win_cmake_preset
-  #   runs-on: windows-2022
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #     with:
-  #       submodules: 'true'
-  #       fetch-depth: 0
-  #       ref: "${{ github.event.pull_request.head.sha || github.sha }}"
-
-  #   - uses: ilammy/msvc-dev-cmd@v1.13.0
-  #     with:
-  #       arch: x86
-
-  #   - name: Set Git Info
-  #     id: gitinfo
-  #     shell: pwsh
-  #     run: |
-  #       $gitoutput = git rev-parse --short HEAD
-  #       echo "sha_short=${gitoutput}" >> $env:GITHUB_OUTPUT
-
-  #   - name: Install Dependencies
-  #     run: |
-  #       Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.10.1/ninja-win.zip -OutFile $Env:TEMP\ninja-win.zip
-  #       Expand-Archive $Env:TEMP\ninja-win.zip -DestinationPath $Env:TEMP\ninja
-
-  #       echo "$Env:TEMP\ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-  #       ninja --version
-
-  #   - name: Init vcpkg
-  #     shell: bash
-  #     run: IS_WINDOWS=true ./scripts/bin/vcpkg --init
-
-  #   - name: Build NCO
-  #     env:
-  #       VC_CXX_FLAGS: "/Zc:strictStrings;-wd4244;-wd4018;-wd4291;-wd4101;-wd4267;-wd4200"
-  #     run: |
-  #       cmake --workflow --preset ${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster
-
-  #   - name: Create archives
-  #     shell: bash
-  #     run: |
-  #       mkdir artifact
-
-  #       if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "tiberian-dawn" ]; then
-  #         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/RedAlert.dll
-  #         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/RedAlert.pdb
-  #         7z a artifact/nco-ra-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/NCO_RA
-  #       fi
-
-  #       if [ "${{ needs.resolve_win_cmake_preset.outputs.preset }}" != "red-alert" ]; then
-  #         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/TiberianDawn.dll
-  #         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/RelWithDebInfo/TiberianDawn.pdb
-  #         7z a artifact/nco-td-remaster-mod-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ needs.resolve_win_cmake_preset.outputs.preset }}-remaster/NCO_TD
-  #
-  #         # lua library
-  #         mkdir -p lua/nco
-
-  #         cp -rv build/${{ steps.set_preset.outputs.preset }}/vcpkg_installed/*/tools/lua/* lua/nco
-
-  #         cp -rv common/lua/scripts/nco/* lua/nco
-  #         cp -rfv tiberiandawn/lua/scripts/nco/* lua/nco
-
-  #         7z a artifact/nco-remasterdll-msvc-${{ steps.gitinfo.outputs.sha_short }}.zip ./lua
-  #       fi
-
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: nco-remaster-msvc
-  #       path: artifact
-
-  #   - name: Upload development release
-  #     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
-  #     uses: softprops/action-gh-release@v2
-  #     with:
-  #       name: Development Build
-  #       tag_name: "latest"
-  #       prerelease: true
-  #       files: |
-  #         artifact/*
-
-
-  #   - name: Upload tagged release
-  #     if: ${{ startsWith(github.ref, 'refs/tags/') }}
-  #     uses: softprops/action-gh-release@v2
-  #     with:
-  #       files: |
-  #         artifact/*
-
+       files: |
+         artifact/*

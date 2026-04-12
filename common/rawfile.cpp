@@ -54,6 +54,7 @@
 #include <stddef.h>
 
 #include "debugstring.h"
+#include "logger.h"
 #include "rawfile.h"
 #include "file.h"
 #include "wwstd.h"
@@ -177,6 +178,8 @@ char const* RawFileClass::Set_Name(char const* filename)
     ** Try to locate an existing file ignoring case, updates Filename
     */
     Resolve_File(Filename);
+
+    CNC_LOG_DEBUG("Filename resolved: {} -> {}", filename, Filename);
 
     return (Filename);
 }

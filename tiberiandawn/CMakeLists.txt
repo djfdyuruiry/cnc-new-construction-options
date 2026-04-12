@@ -225,16 +225,29 @@ if(BUILD_REMASTER_TD)
         ${TIBDAWN_HEADERS}
         ${REMASTERTD_RC}
     )
-    target_compile_definitions(TiberianDawn PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${REMASTER_DEFS} MEGAMAPS)
+    # BUG: Enabling MEGAMAPS via define will break remaster UI by inserting blank cells in placement outline when placing structure
+    target_compile_definitions(TiberianDawn PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${REMASTER_DEFS})
     target_include_directories(TiberianDawn PUBLIC ${CMAKE_SOURCE_DIR} .)
     target_link_libraries(TiberianDawn commonr ${REMASTER_LIBS} ${STATIC_LIBS})
     set_target_properties(TiberianDawn PROPERTIES PREFIX "")
 
-    # TODO: When visiting remastered support, add lua and relevant data packs (may need to search user paths for lua scripts/rules.ini)
-    add_custom_command(TARGET TiberianDawn POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_TD ${CMAKE_BINARY_DIR}/NCO_TD
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NCO_TD/Data
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:TiberianDawn> ${CMAKE_BINARY_DIR}/NCO_TD/Data/
+    # create remastered mod: dll + mod json + lua library + lua binaries
+    add_custom_command(
+        TARGET TiberianDawn POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/NCO_TD"
+        # static mod files
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/resources/remaster_mods/NCO_TD" "${CMAKE_BINARY_DIR}/NCO_TD"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data/CCDATA"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/remaster_mods/CCDATA-readme.txt" "${CMAKE_BINARY_DIR}/NCO_TD/Data/CCDATA/readme.txt"
+        # binary
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:TiberianDawn> "${CMAKE_BINARY_DIR}/NCO_TD/Data/"
+        # lua
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua/nco/lib"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua/nco/TiberianDawn/lib"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/common/lua/scripts/nco" "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua/nco"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/tiberiandawn/lua/scripts/nco" "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua/nco"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/lua" "${CMAKE_BINARY_DIR}/NCO_TD/Data/lua"
     )
 endif()
 

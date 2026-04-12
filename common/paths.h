@@ -13,11 +13,20 @@
 #ifndef COMMON_PATHS_H
 #define COMMON_PATHS_H
 
+#include <filesystem>
 #include <string>
 
 class PathsClass
 {
 public:
+    static constexpr char SEP = std::filesystem::path::preferred_separator;
+
+    static std::string Try_Get_Program_Path();
+    static bool Create_Directory(const char* path);
+    static bool Is_Absolute(const char* path);
+    static std::string Concatenate_Paths(const char* path1, const char* path2);
+    static std::string Get_Filename(const char* path);
+
     PathsClass()
     {
     }
@@ -34,27 +43,20 @@ public:
               const char* cmd_arg = nullptr);
 
     const char* Program_Path();
+    const char* Program_Lua_Path();
     const char* Data_Path();
     const char* User_Path();
-
-    static bool Create_Directory(const char* path);
-    static bool Is_Absolute(const char* path);
-    static std::string Concatenate_Paths(const char* path1, const char* path2);
-    static std::string Get_Filename(const char* path);
-
-#ifdef _WIN32
-    constexpr static char SEP = '\\';
-#else
-    constexpr static char SEP = '/';
-#endif
-private:
-    static std::string Argv_Path(const char* cmd_arg);
+    const char* User_Lua_Path();
 
 private:
     std::string Suffix;
     std::string ProgramPath;
+    std::string ProgramLuaPath;
     std::string DataPath;
     std::string UserPath;
+    std::string UserLuaPath;
+
+    static std::string Argv_Path(const char* cmd_arg);
 };
 
 extern PathsClass Paths;

@@ -44,11 +44,14 @@
  *   OverlayTypeClass::Radar_Icon -- Gets a pointer to the radar icons                         *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <utility>
+
 #include "function.h"
 #include "type.h"
 
 static OverlayTypeClass const Road(OVERLAY_ROAD, // Overlay type number.
                                    "ROAD",       // INI name of overlay.
+                                   "ROAD",       // Image name of overlay.
                                    TXT_CONCRETE, // Full name of overlay.
                                    LAND_ROAD,    // What kind of ground is it?
                                    0,            // If this is a wall, how many damage levels?
@@ -65,6 +68,7 @@ static OverlayTypeClass const Road(OVERLAY_ROAD, // Overlay type number.
 );
 static OverlayTypeClass const Concrete(OVERLAY_CONCRETE, // Overlay type number.
                                        "CONC",           // INI name of overlay.
+                                       "CONC",           // Image name of overlay.
                                        TXT_CONCRETE,     // Full name of overlay.
                                        LAND_ROAD,        // What kind of ground is it?
                                        0,                // If this is a wall, how many damage levels?
@@ -81,6 +85,7 @@ static OverlayTypeClass const Concrete(OVERLAY_CONCRETE, // Overlay type number.
 );
 static OverlayTypeClass const Sandbag(OVERLAY_SANDBAG_WALL, // Overlay type number.
                                       "SBAG",               // INI name of overlay.
+                                      "SBAG",               // Image name of overlay.
                                       TXT_SANDBAG_WALL,     // Full name of overlay.
                                       LAND_WALL,            // What kind of ground is it?
                                       1,                    // If this is a wall, how many damage levels?
@@ -97,6 +102,7 @@ static OverlayTypeClass const Sandbag(OVERLAY_SANDBAG_WALL, // Overlay type numb
 );
 static OverlayTypeClass const Cyclone(OVERLAY_CYCLONE_WALL, // Overlay type number.
                                       "CYCL",               // INI name of overlay.
+                                      "CYCL",               // Image name of overlay.
                                       TXT_CYCLONE_WALL,     // Full name of overlay.
                                       LAND_WALL,            // What kind of ground is it?
                                       2,                    // If this is a wall, how many damage levels?
@@ -113,6 +119,7 @@ static OverlayTypeClass const Cyclone(OVERLAY_CYCLONE_WALL, // Overlay type numb
 );
 static OverlayTypeClass const Brick(OVERLAY_BRICK_WALL, // Overlay type number.
                                     "BRIK",             // INI name of overlay.
+                                    "BRIK",             // Image name of overlay.
                                     TXT_BRICK_WALL,     // Full name of overlay.
                                     LAND_WALL,          // What kind of ground is it?
                                     3,                  // If this is a wall, how many damage levels?
@@ -129,6 +136,7 @@ static OverlayTypeClass const Brick(OVERLAY_BRICK_WALL, // Overlay type number.
 );
 static OverlayTypeClass const Barbwire(OVERLAY_BARBWIRE_WALL, // Overlay type number.
                                        "BARB",                // INI name of overlay.
+                                       "BARB",                // Image name of overlay.
                                        TXT_BARBWIRE_WALL,     // Full name of overlay.
                                        LAND_WALL,             // What kind of ground is it?
                                        1,                     // If this is a wall, how many damage levels?
@@ -145,6 +153,7 @@ static OverlayTypeClass const Barbwire(OVERLAY_BARBWIRE_WALL, // Overlay type nu
 );
 static OverlayTypeClass const Wood(OVERLAY_WOOD_WALL, // Overlay type number.
                                    "WOOD",            // INI name of overlay.
+                                   "WOOD",            // Image name of overlay.
                                    TXT_WOOD_WALL,     // Full name of overlay.
                                    LAND_WALL,         // What kind of ground is it?
                                    1,                 // If this is a wall, how many damage levels?
@@ -161,6 +170,7 @@ static OverlayTypeClass const Wood(OVERLAY_WOOD_WALL, // Overlay type number.
 );
 static OverlayTypeClass const Tiberium1(OVERLAY_TIBERIUM1, // Overlay type number.
                                         "TI1",             // INI name of overlay.
+                                        "TI1",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -177,6 +187,7 @@ static OverlayTypeClass const Tiberium1(OVERLAY_TIBERIUM1, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium2(OVERLAY_TIBERIUM2, // Overlay type number.
                                         "TI2",             // INI name of overlay.
+                                        "TI2",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -193,6 +204,7 @@ static OverlayTypeClass const Tiberium2(OVERLAY_TIBERIUM2, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium3(OVERLAY_TIBERIUM3, // Overlay type number.
                                         "TI3",             // INI name of overlay.
+                                        "TI3",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -209,6 +221,7 @@ static OverlayTypeClass const Tiberium3(OVERLAY_TIBERIUM3, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium4(OVERLAY_TIBERIUM4, // Overlay type number.
                                         "TI4",             // INI name of overlay.
+                                        "TI4",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -225,6 +238,7 @@ static OverlayTypeClass const Tiberium4(OVERLAY_TIBERIUM4, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium5(OVERLAY_TIBERIUM5, // Overlay type number.
                                         "TI5",             // INI name of overlay.
+                                        "TI5",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -241,6 +255,7 @@ static OverlayTypeClass const Tiberium5(OVERLAY_TIBERIUM5, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium6(OVERLAY_TIBERIUM6, // Overlay type number.
                                         "TI6",             // INI name of overlay.
+                                        "TI6",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -257,6 +272,7 @@ static OverlayTypeClass const Tiberium6(OVERLAY_TIBERIUM6, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium7(OVERLAY_TIBERIUM7, // Overlay type number.
                                         "TI7",             // INI name of overlay.
+                                        "TI7",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -273,6 +289,7 @@ static OverlayTypeClass const Tiberium7(OVERLAY_TIBERIUM7, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium8(OVERLAY_TIBERIUM8, // Overlay type number.
                                         "TI8",             // INI name of overlay.
+                                        "TI8",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -289,6 +306,7 @@ static OverlayTypeClass const Tiberium8(OVERLAY_TIBERIUM8, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium9(OVERLAY_TIBERIUM9, // Overlay type number.
                                         "TI9",             // INI name of overlay.
+                                        "TI9",             // Image name of overlay.
                                         TXT_TIBERIUM,      // Full name of overlay.
                                         LAND_TIBERIUM,     // What kind of ground is it?
                                         0,                 // If this is a wall, how many damage levels?
@@ -305,6 +323,7 @@ static OverlayTypeClass const Tiberium9(OVERLAY_TIBERIUM9, // Overlay type numbe
 );
 static OverlayTypeClass const Tiberium10(OVERLAY_TIBERIUM10, // Overlay type number.
                                          "TI10",             // INI name of overlay.
+                                         "TI10",             // Image name of overlay.
                                          TXT_TIBERIUM,       // Full name of overlay.
                                          LAND_TIBERIUM,      // What kind of ground is it?
                                          0,                  // If this is a wall, how many damage levels?
@@ -321,6 +340,7 @@ static OverlayTypeClass const Tiberium10(OVERLAY_TIBERIUM10, // Overlay type num
 );
 static OverlayTypeClass const Tiberium11(OVERLAY_TIBERIUM11, // Overlay type number.
                                          "TI11",             // INI name of overlay.
+                                         "TI11",             // Image name of overlay.
                                          TXT_TIBERIUM,       // Full name of overlay.
                                          LAND_TIBERIUM,      // What kind of ground is it?
                                          0,                  // If this is a wall, how many damage levels?
@@ -337,6 +357,7 @@ static OverlayTypeClass const Tiberium11(OVERLAY_TIBERIUM11, // Overlay type num
 );
 static OverlayTypeClass const Tiberium12(OVERLAY_TIBERIUM12, // Overlay type number.
                                          "TI12",             // INI name of overlay.
+                                         "TI12",             // Image name of overlay.
                                          TXT_TIBERIUM,       // Full name of overlay.
                                          LAND_TIBERIUM,      // What kind of ground is it?
                                          0,                  // If this is a wall, how many damage levels?
@@ -353,6 +374,7 @@ static OverlayTypeClass const Tiberium12(OVERLAY_TIBERIUM12, // Overlay type num
 );
 static OverlayTypeClass const Squish(OVERLAY_SQUISH, // Overlay type number.
                                      "SQUISH",       // INI name of overlay.
+                                     "SQUISH",       // Image name of overlay.
                                      TXT_SQUISH,     // Full name of overlay.
                                      LAND_CLEAR,     // What kind of ground is it?
                                      0,              // If this is a wall, how many damage levels?
@@ -370,6 +392,7 @@ static OverlayTypeClass const Squish(OVERLAY_SQUISH, // Overlay type number.
 
 static OverlayTypeClass const V12(OVERLAY_V12, // Overlay type number.
                                   "V12",       // INI name of overlay.
+                                  "V12",       // Image name of overlay.
                                   TXT_CIV12,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -386,6 +409,7 @@ static OverlayTypeClass const V12(OVERLAY_V12, // Overlay type number.
 );
 static OverlayTypeClass const V13(OVERLAY_V13, // Overlay type number.
                                   "V13",       // INI name of overlay.
+                                  "V13",       // Image name of overlay.
                                   TXT_CIV13,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -402,6 +426,7 @@ static OverlayTypeClass const V13(OVERLAY_V13, // Overlay type number.
 );
 static OverlayTypeClass const V14(OVERLAY_V14, // Overlay type number.
                                   "V14",       // INI name of overlay.
+                                  "V14",       // Image name of overlay.
                                   TXT_CIV14,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -418,6 +443,7 @@ static OverlayTypeClass const V14(OVERLAY_V14, // Overlay type number.
 );
 static OverlayTypeClass const V15(OVERLAY_V15, // Overlay type number.
                                   "V15",       // INI name of overlay.
+                                  "V15",       // Image name of overlay.
                                   TXT_CIV15,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -434,6 +460,7 @@ static OverlayTypeClass const V15(OVERLAY_V15, // Overlay type number.
 );
 static OverlayTypeClass const V16(OVERLAY_V16, // Overlay type number.
                                   "V16",       // INI name of overlay.
+                                  "V16",       // Image name of overlay.
                                   TXT_CIV16,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -450,6 +477,7 @@ static OverlayTypeClass const V16(OVERLAY_V16, // Overlay type number.
 );
 static OverlayTypeClass const V17(OVERLAY_V17, // Overlay type number.
                                   "V17",       // INI name of overlay.
+                                  "V17",       // Image name of overlay.
                                   TXT_CIV17,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -466,6 +494,7 @@ static OverlayTypeClass const V17(OVERLAY_V17, // Overlay type number.
 );
 static OverlayTypeClass const V18(OVERLAY_V18, // Overlay type number.
                                   "V18",       // INI name of overlay.
+                                  "V18",       // Image name of overlay.
                                   TXT_CIV18,   // Full name of overlay.
                                   LAND_ROCK,   // What kind of ground is it?
                                   0,           // If this is a wall, how many damage levels?
@@ -482,6 +511,7 @@ static OverlayTypeClass const V18(OVERLAY_V18, // Overlay type number.
 );
 static OverlayTypeClass const FlagSpot(OVERLAY_FLAG_SPOT, // Overlay type number.
                                        "FPLS",            // INI name of overlay.
+                                       "FPLS",            // Image name of overlay.
                                        TXT_FLAG_SPOT,     // Full name of overlay.
                                        LAND_CLEAR,        // What kind of ground is it?
                                        0,                 // If this is a wall, how many damage levels?
@@ -498,6 +528,7 @@ static OverlayTypeClass const FlagSpot(OVERLAY_FLAG_SPOT, // Overlay type number
 );
 static OverlayTypeClass const WoodCrate(OVERLAY_WOOD_CRATE, // Overlay type number.
                                         "WCRATE",           // INI name of overlay.
+                                        "WCRATE",           // Image name of overlay.
                                         TXT_WOOD_CRATE,     // Full name of overlay.
                                         LAND_CLEAR,         // What kind of ground is it?
                                         0,                  // If this is a wall, how many damage levels?
@@ -514,6 +545,7 @@ static OverlayTypeClass const WoodCrate(OVERLAY_WOOD_CRATE, // Overlay type numb
 );
 static OverlayTypeClass const SteelCrate(OVERLAY_STEEL_CRATE, // Overlay type number.
                                          "SCRATE",            // INI name of overlay.
+                                         "SCRATE",            // Image name of overlay.
                                          TXT_STEEL_CRATE,     // Full name of overlay.
                                          LAND_CLEAR,          // What kind of ground is it?
                                          0,                   // If this is a wall, how many damage levels?
@@ -578,6 +610,7 @@ OverlayTypeClass const* const OverlayTypeClass::Pointers[OVERLAY_COUNT] = {
  *=============================================================================================*/
 OverlayTypeClass::OverlayTypeClass(OverlayType iconset,
                                    char const* ininame,
+                                   std::string image_name,
                                    int fullname,
                                    LandType ground,
                                    int damagelevels,
@@ -591,7 +624,7 @@ OverlayTypeClass::OverlayTypeClass(OverlayType iconset,
                                    bool theater,
                                    bool walltype,
                                    bool iscrate)
-    : ObjectTypeClass(false, false, iscrushable, true, false, istarget, true, false, fullname, ininame, ARMOR_NONE, 0)
+    : ObjectTypeClass(false, false, iscrushable, true, false, istarget, true, false, fullname, ininame, std::move(image_name), ARMOR_NONE, 0)
 {
     IsRadarVisible = isradarvisible;
     IsCrate = iscrate;

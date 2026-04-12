@@ -34,6 +34,8 @@
  *   AnimTypeClass::AnimTypeClass -- Constructor for animation types.                          *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#include <utility>
+
 #include "function.h"
 #include "typeconverter.h"
 
@@ -2393,7 +2395,7 @@ AnimTypeClass const* const AnimTypeClass::Pointers[ANIM_COUNT] = {
  *=============================================================================================*/
 AnimTypeClass::AnimTypeClass(AnimType anim,
                              char const* name,
-                             std::string_view image_name,
+                             std::string image_name,
                              int size,
                              int biggest,
                              bool isnormal,
@@ -2416,7 +2418,7 @@ AnimTypeClass::AnimTypeClass(AnimType anim,
                              int virtualstages,
                              int virtualscale,
                              AnimType virtualanim)
-    : ObjectTypeClass(true, false, false, true, false, false, true, true, TXT_NONE, name, ARMOR_NONE, 0)
+    : ObjectTypeClass(true, false, false, true, false, false, true, true, TXT_NONE, name, std::move(image_name), ARMOR_NONE, 0)
 {
     Biggest = biggest;
     ChainTo = chainto;
@@ -2441,7 +2443,6 @@ AnimTypeClass::AnimTypeClass(AnimType anim,
     VirtualStages = virtualstages;
     VirtualScale = virtualscale;
     VirtualAnim = virtualanim;
-    ImageName = image_name;
 }
 
 /***********************************************************************************************

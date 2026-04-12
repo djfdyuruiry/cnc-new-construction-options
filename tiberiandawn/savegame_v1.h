@@ -80,7 +80,7 @@ public:
     )
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGameScenarioState);
+    static inline const auto& Logger = CncLogger::For(SaveGameScenarioState_v1);
     static inline const std::map<std::string, int> GlobalBufferSizes = {
         { NAMEOF(ScenarioFileName), std::size(Scen.FileName) },
         { NAMEOF(BriefText), std::size(Scen.BriefingText) },
@@ -139,8 +139,70 @@ public:
     )
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps);
+    static inline const auto& Logger = CncLogger::For(SaveGameObjectHeaps_v1);
 };
+
+#ifdef REMASTER_BUILD
+/**
+ * C&C remastered uses the DLLExportClass Save/Load methods to write extra data to binary save.
+ * This class is to model and replicate this logic for the new JSON save format.
+ */
+class SaveGameRemasterState_v1
+{
+public:
+    nlohmann::json MultiplayerStartPositions;
+    nlohmann::json RemasterPlayerIDs;
+    int RemasterClientSidebarWidthInLeptons;
+    nlohmann::json RemasterMPlayerIsHuman;
+    nlohmann::json PlacementType;
+    int RemasterMPlayerCount;
+    bool RemasterMPlayerBases;
+    int RemasterMPlayerCredits;
+    int RemasterMPlayerTiberium;
+    int RemasterMPlayerGoodies;
+    int RemasterMPlayerGhosts;
+    int RemasterMPlayerSolo;
+    int RemasterMPlayerUnitCount;
+    unsigned char RemasterMPlayerLocalID;
+    nlohmann::json RemasterMPlayerHouses;
+    nlohmann::json RemasterMPlayerNames;
+    nlohmann::json RemasterMPlayerID;
+    nlohmann::json MultiplayerSidebars;
+    nlohmann::json RemasterSpecial;
+    bool NotAllowSuperWeapons;
+
+    void Read_Dll_State();
+    bool Validate() const;
+    bool Write_Dll_State() const;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        SaveGameRemasterState_v1,
+        MultiplayerStartPositions,
+        RemasterPlayerIDs,
+        RemasterClientSidebarWidthInLeptons,
+        RemasterMPlayerIsHuman,
+        PlacementType,
+        RemasterMPlayerCount,
+        RemasterMPlayerBases,
+        RemasterMPlayerCredits,
+        RemasterMPlayerTiberium,
+        RemasterMPlayerGoodies,
+        RemasterMPlayerGhosts,
+        RemasterMPlayerSolo,
+        RemasterMPlayerUnitCount,
+        RemasterMPlayerLocalID,
+        RemasterMPlayerHouses,
+        RemasterMPlayerNames,
+        RemasterMPlayerID,
+        MultiplayerSidebars,
+        RemasterSpecial,
+        NotAllowSuperWeapons
+    )
+
+private:
+    static inline const auto& Logger = CncLogger::For(SaveGameRemasterState_v1);
+};
+#endif
 
 /**
  * Version 1 of the JSON save game format. New versions should inherit this class. New versions should provide sane
@@ -170,6 +232,10 @@ public:
     // score tracking
     nlohmann::json GameScore;
 
+#ifdef REMASTER_BUILD
+    SaveGameRemasterState_v1 RemasterState;
+#endif
+
     bool Load_From_File(const std::string& path);
     void Read_Globals();
     bool Validate() const;
@@ -181,6 +247,7 @@ public:
      * Header is stored separately from main JSON object to allow reading header
      * info without parsing entire JSON structure.
      */
+#ifndef REMASTER_BUILD
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGame_v1,
         ScenarioState,
@@ -194,7 +261,23 @@ public:
         AiBase,
         GameScore
     )
+#else
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        SaveGame_v1,
+        ScenarioState,
+        Objects,
+        GameCellTriggers,
+        GameHouseTriggers,
+        RemovedTriggers,
+        GameMap,
+        GameLogic,
+        Layers,
+        AiBase,
+        GameScore,
+        RemasterState
+    )
+#endif
 
 private:
-    static inline const auto& Logger = CncLogger::For(SaveGame);
+    static inline const auto& Logger = CncLogger::For(SaveGame_v1);
 };

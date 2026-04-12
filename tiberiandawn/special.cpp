@@ -417,3 +417,102 @@ int Fetch_Difficulty(void)
 
     return (slider.Get_Value() * (Rule.IsFineDifficulty ? 1 : 2));
 }
+
+TO_JSON(SpecialClass)
+{
+    BITFIELD_TO_JSON(IsEasy);
+    BITFIELD_TO_JSON(IsDifficult);
+    BITFIELD_TO_JSON(IsSpeedBuild);
+    BITFIELD_TO_JSON(IsSeparate);
+    BITFIELD_TO_JSON(IsDefenderAdvantage);
+    BITFIELD_TO_JSON(IsNamed);
+    BITFIELD_TO_JSON(IsFromInstall);
+    BITFIELD_TO_JSON(IsCaptureTheFlag);
+    BITFIELD_TO_JSON(IsVisibleTarget);
+    BITFIELD_TO_JSON(IsJuvenile);
+    BITFIELD_TO_JSON(IsSmartDefense);
+    BITFIELD_TO_JSON(IsTreeTarget);
+    BITFIELD_TO_JSON(IsMCVDeploy);
+    BITFIELD_TO_JSON(IsVisceroids);
+    BITFIELD_TO_JSON(IsMonoEnabled);
+    BITFIELD_TO_JSON(IsInert);
+    BITFIELD_TO_JSON(IsShowPath);
+    BITFIELD_TO_JSON(IsThreePoint);
+    BITFIELD_TO_JSON(IsTGrowth);
+    BITFIELD_TO_JSON(IsTSpread);
+    BITFIELD_TO_JSON(IsTFast);
+    BITFIELD_TO_JSON(IsRoad);
+    BITFIELD_TO_JSON(IsScatter);
+    BITFIELD_TO_JSON(IsJurassic);
+    BITFIELD_TO_JSON(IsVariation);
+    BITFIELD_TO_JSON(IsGross);
+    BITFIELD_TO_JSON(IsScrollMod);
+    BITFIELD_TO_JSON(IsEarlyWin);
+    FIELD_VALUE_TO_JSON(HealthBarDisplayMode, static_cast<int>(p.HealthBarDisplayMode));
+    FIELD_VALUE_TO_JSON(ResourceBarDisplayMode, static_cast<int>(p.ResourceBarDisplayMode));
+    BITFIELD_TO_JSON(ModernBalance);
+}
+
+FROM_JSON(SpecialClass)
+{
+    BITFIELD_FROM_JSON(IsEasy);
+    BITFIELD_FROM_JSON(IsDifficult);
+    BITFIELD_FROM_JSON(IsSpeedBuild);
+    BITFIELD_FROM_JSON(IsSeparate);
+    BITFIELD_FROM_JSON(IsDefenderAdvantage);
+    BITFIELD_FROM_JSON(IsNamed);
+    BITFIELD_FROM_JSON(IsFromInstall);
+    BITFIELD_FROM_JSON(IsCaptureTheFlag);
+    BITFIELD_FROM_JSON(IsVisibleTarget);
+    BITFIELD_FROM_JSON(IsJuvenile);
+    BITFIELD_FROM_JSON(IsSmartDefense);
+    BITFIELD_FROM_JSON(IsTreeTarget);
+    BITFIELD_FROM_JSON(IsMCVDeploy);
+    BITFIELD_FROM_JSON(IsVisceroids);
+    BITFIELD_FROM_JSON(IsMonoEnabled);
+    BITFIELD_FROM_JSON(IsInert);
+    BITFIELD_FROM_JSON(IsShowPath);
+    BITFIELD_FROM_JSON(IsThreePoint);
+    BITFIELD_FROM_JSON(IsTGrowth);
+    BITFIELD_FROM_JSON(IsTSpread);
+    BITFIELD_FROM_JSON(IsTFast);
+    BITFIELD_FROM_JSON(IsRoad);
+    BITFIELD_FROM_JSON(IsScatter);
+    BITFIELD_FROM_JSON(IsJurassic);
+    BITFIELD_FROM_JSON(IsVariation);
+    BITFIELD_FROM_JSON(IsGross);
+    BITFIELD_FROM_JSON(IsScrollMod);
+    BITFIELD_FROM_JSON(IsEarlyWin);
+
+    // HealthBarDisplayMode
+    int healthBarDisplayMode;
+    FIELD_FROM_JSON_TO_VALUE(HealthBarDisplayMode, healthBarDisplayMode);
+
+    if (
+        healthBarDisplayMode < SpecialClass::eHealthBarDisplayMode::HB_DAMAGED
+        || healthBarDisplayMode > SpecialClass::eHealthBarDisplayMode::HB_SELECTED
+    ) {
+        throw CncJsonException("Invalid HealthBarDisplayMode field value");
+    }
+
+    p.HealthBarDisplayMode = static_cast<SpecialClass::eHealthBarDisplayMode>(
+        healthBarDisplayMode
+    );
+
+    // ResourceBarDisplayMode
+    int resourceBarDisplayMode;
+    FIELD_FROM_JSON_TO_VALUE(ResourceBarDisplayMode, resourceBarDisplayMode);
+
+    if (
+        resourceBarDisplayMode < SpecialClass::eResourceBarDisplayMode::RB_SELECTED
+        || resourceBarDisplayMode > SpecialClass::eResourceBarDisplayMode::RB_ALWAYS
+    ) {
+        throw CncJsonException("Invalid ResourceBarDisplayMode field value");
+    }
+
+    p.ResourceBarDisplayMode = static_cast<SpecialClass::eResourceBarDisplayMode>(
+        resourceBarDisplayMode
+    );
+
+    BITFIELD_FROM_JSON(ModernBalance);
+}

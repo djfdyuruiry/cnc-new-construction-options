@@ -39,6 +39,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "cdfile.h"
+#include "logger.h"
 #include "paths.h"
 #include <stdio.h>
 #include <string.h>
@@ -115,15 +116,19 @@ int Is_Disk_Inserted(int disk)
  *=============================================================================================*/
 int CDFileClass::Open(int rights)
 {
-    std::string path = File_Name();
+    const auto path = File_Name();
     /*
     ** If we are wanting a writeable file and the path is not based off of the User_Path
     ** then we might have a problem. If the filename is relative then just append to User_Path.
     ** Otherwise it will try and write it to the working directory, probably the binary dir.
     */
-    if ((rights & WRITE) && !PathsClass::Is_Absolute(File_Name())) {
-        path = Paths.Concatenate_Paths(Paths.User_Path(), File_Name());
-        BufferIOFileClass::Set_Name(path.c_str());
+    if ((rights & WRITE) && !PathsClass::Is_Absolute(path)) {
+        CNC_LOGGER_DEBUG("Appending User_Path to filename: {}", path);
+
+        const auto user_file_path = PathsClass::Concatenate_Paths(Paths.User_Path(), path);
+        BufferIOFileClass::Set_Name(user_file_path.c_str());
+    } else {
+        CNC_LOGGER_DEBUG("Using filename directly: {}", path);
     }
 
     return (BufferIOFileClass::Open(rights));
@@ -420,6 +425,13 @@ int CDFileClass::Is_Available(int forced)
     std::string filename = RawFileClass::File_Name();
 
     if (IsDisabled || !First || PathsClass::Is_Absolute(filename.c_str())) {
+        CNC_LOGGER_DEBUG(
+            "Deferring to BufferIOFileClass::Is_Available for file: {} (IsDisabled={} !First={} PathsClass::Is_Absolute={})",
+            filename,
+            static_cast<bool>(IsDisabled),
+            !First,
+            PathsClass::Is_Absolute(filename.c_str())
+        );
         return BufferIOFileClass::Is_Available(forced);
     }
 
@@ -431,6 +443,8 @@ int CDFileClass::Is_Available(int forced)
     SearchDriveType* srch = First;
 
     while (srch) {
+        CNC_LOGGER_DEBUG("Searching for file '{}' in search path: {}", filename, srch->Path);
+
         /*
         **	Build a pathname to search for.
         */
@@ -442,14 +456,17 @@ int CDFileClass::Is_Available(int forced)
         **	it will return false and the search process will continue.
         */
         if (RawFileClass(path.c_str()).Is_Available()) {
+            CNC_LOGGER_DEBUG("Found file at path: {}", path);
             return true;
         }
 
         /*
         **	It wasn't found, so try the next path entry.
         */
-        srch = (SearchDriveType*)srch->Next;
+        srch = static_cast<SearchDriveType*>(srch->Next);
     }
+
+    CNC_LOGGER_DEBUG("File search failed, deferring to BufferIOFileClass::Is_Available for file: {}", filename);
 
     /*
     **	At this point, all path searching has failed. Just set the file name to the

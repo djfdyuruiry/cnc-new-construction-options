@@ -395,6 +395,7 @@ void Clear_Scenario(void)
      * Reset all rules to the default found in INI files, they might have been changed
      * by a Lua script call or loaded from the scenario file.
      */
+    CNC_LOG_DEBUG("Initialising RulesClass global instance: Rule");
     Rule.Init();
 
     // Tear down Lua runtime

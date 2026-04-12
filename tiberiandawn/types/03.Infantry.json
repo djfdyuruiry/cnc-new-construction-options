@@ -44,16 +44,6 @@
       "requires_converter": true,
       "valid_values": "NONE, E1, E2, E3, E4, E5, E6, RAMBO, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, MOEBIUS, DELPHI, CHAN",
       "comment": "This value represents the infantry class. It can serve as unique identification for this infantry class."
-    },
-    {
-      "name": "CameoName",
-      "type": "String",
-      "comment": "The name of the .SHP file (without the .SHP extension) that holds sidebar image data for this infantry. (not supported in Lua)"
-    },
-    {
-      "name": "ImageName",
-      "type": "String",
-      "comment": "The name of the .SHP file (without the .SHP extension) that holds image data for this infantry. (not supported in Lua)"
     }
   ]
 }

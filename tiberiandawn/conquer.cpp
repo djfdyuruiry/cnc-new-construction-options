@@ -3538,6 +3538,7 @@ static bool Change_Local_Dir(int cd)
                 RawFileClass vol(path.c_str());
 
                 if (vol.Is_Directory()) {
+                    Paths.Init("tiberian-dawn", "CONQUER.INI", "CONQUER.MIX", nullptr);
                     CDFileClass::Refresh_Search_Drives();
                     path += PathsClass::SEP;
                     CDFileClass::Add_Search_Drive(path.c_str());
@@ -3595,6 +3596,7 @@ static bool Change_Local_Dir(int cd)
             RawFileClass vol(path.c_str());
 
             if (vol.Is_Directory()) {
+                Paths.Init("tiberian-dawn", "CONQUER.INI", "CONQUER.MIX", nullptr);
                 CDFileClass::Refresh_Search_Drives();
                 path += PathsClass::SEP;
                 CDFileClass::Add_Search_Drive(path.c_str());

@@ -374,9 +374,21 @@ int INIClass::Save(Pipe& pipe) const
         */
         INIEntry* entryptr = secptr->EntryList.First();
         while (entryptr && entryptr->Is_Valid()) {
+            /*
+            **	Output the entry comment (if present).
+            */
+            if (entryptr->comment.has_value()) {
+                const auto entry_comment = entryptr->comment->c_str();
+
+                total += pipe.Put(";  ", 2);
+                total += pipe.Put(entry_comment, static_cast<int>(strlen(entry_comment)));
+                total += pipe.Put("\r\n", (int)strlen("\r\n"));
+            }
+
             total += pipe.Put(entryptr->Entry, (int)strlen(entryptr->Entry));
             total += pipe.Put("=", 1);
             total += pipe.Put(entryptr->Value, (int)strlen(entryptr->Value));
+
             total += pipe.Put("\r\n", (int)strlen("\r\n"));
 
             entryptr = entryptr->Next();
@@ -936,7 +948,7 @@ int INIClass::Get_Hex(char const* section, char const* entry, int defvalue) cons
  *   07/02/1996 JLB : Created.                                                                 *
  *   11/02/1996 JLB : Uses index handler.                                                      *
  *=============================================================================================*/
-bool INIClass::Put_String(char const* section, char const* entry, char const* string)
+bool INIClass::Put_String(char const* section, char const* entry, char const* string, std::optional<std::string> comment)
 {
     if (section == NULL || entry == NULL)
         return (false);
@@ -969,15 +981,18 @@ bool INIClass::Put_String(char const* section, char const* entry, char const* st
         if (entryptr == NULL) {
             return (false);
         }
+
+        entryptr->comment = std::move(comment);
+
         secptr->EntryList.Add_Tail(entryptr);
         secptr->EntryIndex.Add_Index(entryptr->Index_ID(), entryptr);
     }
     return (true);
 }
 
-bool INIClass::Put_String(char const* section, char const* entry, std::string const& string)
+bool INIClass::Put_String(char const* section, char const* entry, std::string const& string, std::optional<std::string> comment)
 {
-    return Put_String(section, entry, string.c_str());
+    return Put_String(section, entry, string.c_str(), std::move(comment));
 }
 
 /***********************************************************************************************
@@ -1078,12 +1093,12 @@ std::string INIClass::Get_String(char const* section, char const* entry, const s
  * HISTORY:                                                                                    *
  *   07/03/1996 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool INIClass::Put_Bool(char const* section, char const* entry, bool value)
+bool INIClass::Put_Bool(char const* section, char const* entry, bool value, std::optional<std::string> comment)
 {
     if (value) {
-        return (Put_String(section, entry, "yes"));
+        return (Put_String(section, entry, "yes", std::move(comment)));
     } else {
-        return (Put_String(section, entry, "no"));
+        return (Put_String(section, entry, "no", std::move(comment)));
     }
 }
 
@@ -1293,7 +1308,7 @@ bool INIClass::Put_Fixed(char const* section, char const* entry, fixed value)
     return (Put_String(section, entry, value.As_ASCII()));
 }
 
-void INIClass::Put_Comment(char const* section, const std::string& comment)
+void INIClass::Put_Section(char const* section, std::optional<std::string> comment)
 {
     if (section == NULL)
         return;
@@ -1308,7 +1323,7 @@ void INIClass::Put_Comment(char const* section, const std::string& comment)
         SectionIndex.Add_Index(secptr->Index_ID(), secptr);
     }
 
-    secptr->comment = comment;
+    secptr->comment = std::move(comment);
 }
 
 /***********************************************************************************************

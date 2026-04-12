@@ -6,7 +6,7 @@ NCO:
     Owner: djfdyuruiry
     Name: cnc-new-construction-options
   Release: latest
-  AssetPrefix: nco-${OS}
+  AssetPrefix: nco-release-${OS}
   MsvcRuntimeUrl: https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 # TODO: Read ICO files and add to UI as we install
@@ -24,11 +24,11 @@ TiberianDawn:
       Name: GDI
       Required: true
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_GDI.zip
-          File: CNC95_GDI.iso
-          Checksum: d5382a8f2cb4c60c5cc70fb79169f5e942d1eeb51cba157b695c0dc63cbc8c21
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerUSAWindows95Rerelease/Command%20%26%20Conquer%20%28USA%29%20%28Disc%201%29%20%28Windows%2095%29%20%28Rerelease%29.zip
+          File: Command & Conquer (USA) (Disc 1) (Windows 95) (Rerelease).bin
+          Checksum: 245847b1b76b0b1d04edda360ece732430158b774f5cecffd492bbf95ae96f62
       SplashScreenFile: SETUP.BMP
       SetupPackageFile: INSTALL\\SETUP.Z
       Provides:
@@ -53,11 +53,11 @@ TiberianDawn:
     - SortOrder: 2
       Name: NOD
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC95_Nod.zip
-          File: CNC95_Nod.iso
-          Checksum: cf935c0b107518654cd14ba191dc8672f4e5759e035f24c341787f2133d12764
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerUSAWindows95Rerelease/Command%20%26%20Conquer%20%28USA%29%20%28Disc%202%29%20%28Windows%2095%29%20%28Rerelease%29%20%28Rev%201%29.zip
+          File: Command & Conquer (USA) (Disc 2) (Windows 95) (Rerelease) (Rev 1).bin
+          Checksum: ed12239cd39c31036cf93cb75bf9584726a3ab8b78304a0d5ac075cd75283e3c
       SplashScreenFile: SETUP.BMP
       SetupPackageFile: INSTALL\\SETUP.Z
       Provides:
@@ -70,11 +70,11 @@ TiberianDawn:
       DisplayName: >-
         Covert Operations (Expansion)
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/cnc1/CNC_Covertops.zip
-          File: CD3_Covertops.bin
-          Checksum: 3b9e0ccb7c66e5d023382d48116d64e05a8c3f6bb16af009c3b38d04be649c26
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerTheCovertOperationsUSA/Command%20%26%20Conquer%20-%20The%20Covert%20Operations%20%28USA%29.zip
+          File: Command & Conquer - The Covert Operations (USA) (Track 1).bin
+          Checksum: c5f6a8245063b7ddde9b0290c4da62bdfd83f8a326191d12a66a95db55593280
       Provides:
         _root:
           - INSTALL\\SC-000.MIX
@@ -100,11 +100,11 @@ RedAlert:
       DisplayName: Allies
       Required: true
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/ra/RA_Allies.zip
-          File: CD1_ALLIES.iso
-          Checksum: c52767a770d1bdf74922cbec13f003cc9ff56514f1127517c56d8fb0bc3033d2
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/command-conquer-red-alert-1/C%26C-RA-CD1.bin
+          File: C&C-RA-CD1.bin
+          Checksum: a0d9a766857b9e6cbfffbf9371879df55d7609baadd739330271821323a1b886
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         _root:
@@ -115,11 +115,11 @@ RedAlert:
       Name: SOVIET
       DisplayName: Soviet
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/ra/RA_Soviet.zip
-          File: CD2_Soviet.iso
-          Checksum: 1127d6f013a4ae7596f19dce5e6ed5b235e0f837849b593dd97a455d4cbcc986
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/command-conquer-red-alert-1/C%26C-RA-CD2.bin
+          File: C&C-RA-CD2.bin
+          Checksum: 0018a1a2734b24abb64e86fcfea207e227bd2e30046b92860bbc071e80dfabd2
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         _root:
@@ -130,11 +130,11 @@ RedAlert:
       Name: COUNTERSTRIKE
       DisplayName: Counterstrike (Expansion)
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/ra/RA_Counterstrike.zip
-          File: CD3_Counterstrike.bin
-          Checksum: 27e8eb048ad39adb3e541ce809f95e9c684e9819f62243ac2d0acfc567660b01
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerRedAlertCounterstrikeUSA/Command%20%26%20Conquer%20-%20Red%20Alert%20-%20Counterstrike%20%28USA%29.zip
+          File: Command & Conquer - Red Alert - Counterstrike (USA) (Track 1).bin
+          Checksum: fdc6ff60c52502d722491d37858dda01315e018fbf6caace21e11d129e48b1e1
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         COUNTERSTRIKE:
@@ -143,11 +143,11 @@ RedAlert:
       Name: AFTERMATH
       DisplayName: The Aftermath (Expansion)
       Sources:
-        - Name: cnc-comm
-          DisplayName: C&C Communications Center
-          Url: https://bigdownloads.cnc-comm.com/ra/RA_Aftermath.zip
-          File: CD4_Aftermath.bin
-          Checksum: 04704dffe5a889d9cc4c784b0e3012a2af112e494177e064d2b2e493a624671e
+        - Name: internet-archive
+          DisplayName: Internet Archive
+          Url: https://archive.org/download/CommandConquerRedAlertTheAftermathUSA/Command%20%26%20Conquer%20-%20Red%20Alert%20-%20The%20Aftermath%20%28USA%29.zip
+          File: Command & Conquer - Red Alert - The Aftermath (USA) (Track 1).bin
+          Checksum: c16c9cd5f893b1790a735fbcffd48e4ffeeb9665515cdc64b6b903c8818ab568
       SplashScreenFile: SETUP95\\SETUP.BMP
       Provides:
         AFTERMATH:

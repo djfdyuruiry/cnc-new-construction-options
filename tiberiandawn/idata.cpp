@@ -1468,8 +1468,8 @@ InfantryTypeClass const* const InfantryTypeClass::Pointers[INFANTRY_COUNT] = {&E
 InfantryTypeClass::InfantryTypeClass(InfantryType type,
                                      int name,
                                      char const* ininame,
-                                     std::string_view cameo_name,
-                                     std::string_view image_name,
+                                     std::string cameo_name,
+                                     std::string image_name,
                                      unsigned char level,
                                      StructType prereq,
                                      bool is_female,
@@ -1496,6 +1496,8 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
                                      MPHType maxspeed)
     : TechnoTypeClass(name,
                       ininame,
+                      std::move(cameo_name),
+                      std::move(image_name),
                       level,
                       prereq,
                       is_leader,
@@ -1537,8 +1539,6 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
     Type = type;
     FireLaunch = firelaunch;
     ProneLaunch = pronelaunch;
-    CameoName = cameo_name;
-    ImageName = image_name;
 
     /*
     **	Set the animation sequence custom values.

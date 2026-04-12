@@ -41,6 +41,7 @@
         "wayland",
         "x11"
       ],
+      "default-features": false,
       "platform": "linux"
     },
     {

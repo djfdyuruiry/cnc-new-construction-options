@@ -3641,8 +3641,8 @@ void const* WarFactoryOverlay;
 BuildingTypeClass::BuildingTypeClass(StructType type,
                                      int name,
                                      char const* ininame,
-                                     std::string_view cameo_name,
-                                     std::string_view image_name,
+                                     std::string cameo_name,
+                                     std::string image_name,
                                      COORDINATE exitpoint,
                                      unsigned char level,
                                      StructType prereq,
@@ -3690,6 +3690,8 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                                      bool is_unsellable)
     : TechnoTypeClass(name,
                       ininame,
+                      std::move(cameo_name),
+                      std::move(image_name),
                       level,
                       prereq,
                       false,
@@ -3762,9 +3764,6 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
     Anims[BSTATE_AUX2].Start = 0;
     Anims[BSTATE_AUX2].Count = 1;
     Anims[BSTATE_AUX2].Rate = 0;
-
-    CameoName = cameo_name;
-    ImageName = image_name;
 }
 
 /***********************************************************************************************
@@ -3865,9 +3864,11 @@ void BuildingTypeClass::One_Time(void)
     }
 
     // Try to load weap2.shp
-    char fullname[_MAX_FNAME + _MAX_EXT];
-    _makepath(fullname, NULL, NULL, (char const*)"WEAP2", ".SHP");
-    WarFactoryOverlay = MFCD::Retrieve(fullname);
+    if (WarFactoryOverlay == nullptr) {
+        char fullname[_MAX_FNAME + _MAX_EXT];
+        _makepath(fullname, NULL, NULL, (char const*)"WEAP2", ".SHP");
+        WarFactoryOverlay = MFCD::Retrieve(fullname);
+    }
 
     /*
     **	Install all the special animation sequences for the different building types.
@@ -4311,6 +4312,11 @@ short const* BuildingTypeClass::Occupy_List(bool placement) const
 
         SmudgeTypeClass const& smudge = SmudgeTypeClass::As_Reference(bib);
         static short _list[50];
+
+        for (auto& i : _list) {
+            i = REFRESH_EOL;
+        }
+
         short* dest = &_list[0];
 
         /*
@@ -4337,7 +4343,7 @@ short const* BuildingTypeClass::Occupy_List(bool placement) const
         return (OccupyList);
     }
 
-    static short const _templap[] = {REFRESH_EOL};
+    static constexpr short _templap[] = {REFRESH_EOL};
     return (&_templap[0]);
 }
 

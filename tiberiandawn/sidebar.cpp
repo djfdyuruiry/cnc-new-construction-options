@@ -2680,8 +2680,6 @@ TO_JSON(SidebarClass::StripClass::BuildType)
 
 FROM_JSON(SidebarClass::StripClass::BuildType)
 {
-    static const auto& Logger = CncLogger::For(SidebarClass::StripClass::BuildType);
-
     PARSE_TD_FIELD_FROM_JSON(SidebarClass::StripClass::BuildType, BuildableType, RTTIType);
     FIELD_FROM_JSON(Factory);
     FIELD_FROM_JSON(BuildableViaCapture);

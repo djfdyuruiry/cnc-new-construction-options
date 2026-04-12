@@ -2,7 +2,7 @@
 # This Dockerfile is used to test a clean environment build, ensuring that
 # all build dependencies are documented and understood. 
 #
-# - C++ toolchain used it clang
+# - C++ toolchain used is clang
 # - Mirrors CI build defined in .github/workflows/linux.yml
 # - See wiki page: wiki/5.Building.md
 ##
@@ -58,6 +58,8 @@ USER ubuntu
 
 ENV CC="clang"
 ENV CXX="clang++"
+ENV CMAKE_C_COMPILER="clang"
+ENV CMAKE_CXX_COMPILER="clang++"
 ENV CMAKE_MAKE_PROGRAM="ninja"
 ENV VC_CXX_FLAGS="-w;-Wwrite-strings;-Werror=write-strings"
 

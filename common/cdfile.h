@@ -38,6 +38,8 @@
 #include "bfiofile.h"
 #include <string.h>
 
+#include "logger.h"
+
 /*
 **	This class is derived from the BufferIOFileClass. This class adds the functionality of searching
 **	across multiple directories or drives. It is designed for the typical case of a CD-ROM game
@@ -98,6 +100,8 @@ public:
     static const char* Get_Search_Path(int index);
 
 private:
+    static inline const CncLogger Logger = CncLogger::For(CDFileClass);
+
     /*
     **	Is multi-drive searching disabled for this file object?
     */

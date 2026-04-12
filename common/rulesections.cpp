@@ -179,7 +179,12 @@ RuleSection& RuleSection::Set_Ini_Comment(INIClass& ini, const std::string& comm
         return *this;
     }
 
-    ini.Put_Comment(SectionName.c_str(), comment);
+    if (ini.Section_Present(SectionName.c_str())) {
+        CNC_LOGGER_DEBUG("Ignoring INI comment call for already existing section: {}", SectionName);
+        return *this;
+    }
+
+    ini.Put_Section(SectionName.c_str(), comment);
 
     return *this;
 }

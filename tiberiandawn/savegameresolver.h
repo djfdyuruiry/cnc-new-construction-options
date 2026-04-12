@@ -46,7 +46,7 @@ public:
 
     /**
      * Attempt to load a save game from a file path. The save game version in the header
-     * will determine load behaviour.
+     * will determine load behavior.
      */
     static std::optional<SaveGameHeader> Load(const std::string& path);
 
@@ -54,5 +54,4 @@ private:
     static inline const CncLogger Logger = CncLogger::For(SaveGameResolver);
 
     SaveGameResolver() = delete;
-
 };

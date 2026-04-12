@@ -1,4 +1,7 @@
+#include <filesystem>
+
 #include "logger.h"
+#include "paths.h"
 
 const CncLogger& CncLogger::Default()
 {
@@ -20,12 +23,19 @@ void CncLogger::On_Fatal_Error(std::string errorMessage)
 void CncLogger::Fatal(const std::string_view message) const
 {
     spdlog::get(Name)->critical(message);
+    spdlog::shutdown();
     exit(1);
 }
 
 std::shared_ptr<spdlog::logger> CncLogger::operator()() const
 {
-    return spdlog::get(Name);
+    auto logger = spdlog::get(Name);
+
+#ifdef REMASTER_BUILD
+    logger->flush();
+#endif
+
+    return logger;
 }
 
 bool CncLogger::Load_Env_Log_Levels()
@@ -66,20 +76,41 @@ void CncLogger::Init_SpdLog()
 
     spdlog::init_thread_pool(8192, 1);
 
-    auto log_file = std::format("{}.log", CncLogger::DefaultLoggerName);
+    Sinks = std::vector<spdlog::sink_ptr>();
 
+    // console logging
     StdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    RotatingSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file, 1024 * 1024 * 10, 3);
-    Sinks = std::vector<spdlog::sink_ptr>{StdoutSink, RotatingSink};
+    StdoutSink->set_pattern("%^%L [%!]%$ %v");
 
-    StdoutSink.get()->set_pattern("%^%L [%!]%$ %v");
-    // BUG: Newlines in message strings break JSONL format
-    RotatingSink.get()->set_pattern(
+    Sinks.emplace_back(StdoutSink);
+
+    const auto log_file_name = std::format("{}.log", DefaultLoggerName);
+#ifndef __APPLE__
+    // crate log file beside game exe/binary/dll
+    const auto log_file = std::filesystem::path(PathsClass::Try_Get_Program_Path())
+        .append(log_file_name)
+        .string();
+#else
+    // create log file in user path (app bundle is read-only in macos)
+    const auto log_file = std::filesystem::path(Paths.User_Path())
+        .append(log_file_name)
+        .string();
+#endif
+
+    RotatingSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        log_file,
+        1024 * 1024 * 10,
+        3
+    );
+    RotatingSink->set_pattern( // BUG: Newlines in message strings break JSONL format
         R"({ "time": "%Y-%m-%dT%H:%M:%S.%f%z", "name": "%n", "level": "%^%l%$", "at": "%@", "in": "%!", "process": %P, "thread": %t, "message": "%v" })"
     );
 
+    Sinks.emplace_back(RotatingSink);
+
+    // default logger for Debug_String_Log legacy support
     spdlog::set_default_logger(
-        Build_Logger(CncLogger::DefaultLoggerName)
+        Build_Logger(DefaultLoggerName)
     );
 }
 

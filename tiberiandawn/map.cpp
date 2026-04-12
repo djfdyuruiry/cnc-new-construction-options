@@ -2088,7 +2088,9 @@ TO_JSON(MapClass)
     FIELD_TO_JSON(MapCellWidth);
     FIELD_TO_JSON(MapCellHeight);
     FIELD_TO_JSON(TotalValue);
+#ifdef MEGAMAPS
     FIELD_TO_JSON(MapBinaryVersion);
+#endif
     FIELD_TO_JSON(XSize);
     FIELD_TO_JSON(YSize);
     FIELD_TO_JSON(Size);
@@ -2125,7 +2127,21 @@ FROM_JSON(MapClass)
     FIELD_FROM_JSON(MapCellWidth);
     FIELD_FROM_JSON(MapCellHeight);
     FIELD_FROM_JSON(TotalValue);
+
+    // TODO: Revisit when doing backwards compatibility/loading of old save games and non-megamap save games (to support old mods distributed as saves)
+    //       May need to have the normal map binary routines included and only invoke them if a non-megamap save is detected. (See MapClass::Read_Binary_Big)
+#ifdef MEGAMAPS
+    if (!j.contains(NAMEOF(MapBinaryVersion))) {
+        throw CncJsonException("Attempted to load a non-megamap save game. Only megamap saves are supported by this version of Tiberian Dawn");
+    }
+
     FIELD_FROM_JSON(MapBinaryVersion);
+#else
+    if (j.contains(NAMEOF(MapBinaryVersion))) {
+        throw CncJsonException("Attempted to load a megamap save game. Megamaps are not supported by this version of Tiberian Dawn");
+    }
+#endif
+
     FIELD_FROM_JSON(XSize);
     FIELD_FROM_JSON(YSize);
     FIELD_FROM_JSON(Size);

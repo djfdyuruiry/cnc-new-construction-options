@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <GameConstants>
     <GameConstantsClass>
-        <CNCTDSupportMegamaps network="client" overwrite="true"> true </CNCTDSupportMegamaps>
+        <!-- BUG: Adding MEGAMAPS define to remaster build and enabling this causes blank lines of cells to appear when placing buildings down -->
+        <!-- If MEGAMAPS def is added back to remaster build, this needs set to true -->
+        <CNCTDSupportMegamaps network="client" overwrite="true"> false </CNCTDSupportMegamaps>
     </GameConstantsClass>
 </GameConstants>

@@ -58,7 +58,7 @@ jobs:
 
     - name: Install homebrew deps
       run: |
-        brew install dylibbundler imagemagick jinja2-cli mono
+        brew install dylibbundler imagemagick-full jinja2-cli mono
 
     - name: Scan for Preset Files in Changes
       uses: dorny/paths-filter@v3
@@ -157,13 +157,15 @@ jobs:
         VC_CXX_FLAGS: "-w;-Wwrite-strings;-Werror=write-strings"
         VCPKG_BINARY_SOURCES: "clear;nuget,${{ env.NUGET_URL }},readwrite"
       run: |
-        export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+        export PATH="/opt/local/bin:/opt/local/sbin:/opt/homebrew/opt/imagemagick-full/bin:$PATH"
 
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_TARGET_TRIPLET"] = "uni-osx14"' CMakePresets.json > /tmp/CMakePresets.json
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["VCPKG_MANIFEST_INSTALL"] = "OFF"' /tmp/CMakePresets.json > /tmp/CMakePresets1.json
         jq '(.configurePresets[] | select(.name == "release")).cacheVariables["CMAKE_OSX_DEPLOYMENT_TARGET"] = "14.0"' /tmp/CMakePresets1.json > CMakePresets.json
-  
+
         cp cmake/vcpkg/triplets/uni-osx14.cmake .vcpkg/triplets
+
+        magick --version || echo "Failed to resolve magick command"
 
         # build using universal triplet
         cmake --workflow --preset ${{ steps.set_preset.outputs.preset }}

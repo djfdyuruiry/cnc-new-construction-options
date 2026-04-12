@@ -41,7 +41,16 @@
                 "BUILD_NCO_RA": "OFF",
                 "MAP_EDITOR_TD": "OFF",
                 "MAP_EDITOR_RA": "OFF",
-                "BUILD_TOOLS": "OFF"
+                "BUILD_TOOLS": "OFF",
+                "VCPKG_TARGET_TRIPLET": "x86-windows-static-md"
+            }
+        },
+        {
+            "name": "remaster-debug",
+            "inherits": "remaster",
+            "displayName": "NCO Remaster debug build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
@@ -73,6 +82,22 @@
         {
             "name": "red-alert-remaster",
             "inherits": "remaster",
+            "displayName": "NCO Remaster build (RA)",
+            "cacheVariables": {
+                "BUILD_REMASTER_TD": "OFF"
+            }
+        },
+        {
+            "name": "tiberian-dawn-remaster-debug",
+            "inherits": "remaster-debug",
+            "displayName": "NCO Remaster build (TD)",
+            "cacheVariables": {
+                "BUILD_REMASTER_RA": "OFF"
+            }
+        },
+        {
+            "name": "red-alert-remaster-debug",
+            "inherits": "remaster-debug",
             "displayName": "NCO Remaster build (RA)",
             "cacheVariables": {
                 "BUILD_REMASTER_TD": "OFF"
@@ -119,6 +144,13 @@
             "configuration": "RelWithDebInfo"
         },
         {
+            "name": "remaster-debug",
+            "configurePreset": "remaster-debug",
+            "displayName": "NCO Debug Build",
+            "description": "NCO Debug Build",
+            "configuration": "Debug"
+        },
+        {
             "name": "debug",
             "configurePreset": "debug",
             "displayName": "NCO Debug Build",
@@ -161,11 +193,25 @@
             "configuration": "RelWithDebInfo"
         },
         {
+            "name": "red-alert-remaster-debug",
+            "configurePreset": "red-alert-remaster-debug",
+            "displayName": "NCO Red Alert Debug Build (remaster)",
+            "description": "NCO Red Alert Debug Build (remaster)",
+            "configuration": "Debug"
+        },
+        {
             "name": "tiberian-dawn-remaster",
             "configurePreset": "tiberian-dawn-remaster",
             "displayName": "NCO Tiberian Dawn Build (remaster)",
             "description": "NCO Tiberian Dawn Build (remaster)",
             "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "tiberian-dawn-remaster-debug",
+            "configurePreset": "tiberian-dawn-remaster-debug",
+            "displayName": "NCO Tiberian Dawn Debug Build (remaster)",
+            "description": "NCO Tiberian Dawn Debug Build (remaster)",
+            "configuration": "Debug"
         }
     ],
     "testPresets": [
@@ -201,6 +247,19 @@
             ]
         },
         {
+            "name": "debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug"
+                },
+                {
+                    "type": "build",
+                    "name": "debug"
+                }
+            ]
+        },
+        {
             "name": "remaster",
             "steps": [
                 {
@@ -214,15 +273,15 @@
             ]
         },
         {
-            "name": "debug",
+            "name": "remaster-debug",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "debug"
+                    "name": "remaster-debug"
                 },
                 {
                     "type": "build",
-                    "name": "debug"
+                    "name": "remaster-debug"
                 }
             ]
         },
@@ -249,6 +308,58 @@
                 {
                     "type": "build",
                     "name": "red-alert-debug"
+                }
+            ]
+        },
+        {
+            "name": "tiberian-dawn-remaster",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "tiberian-dawn-remaster"
+                },
+                {
+                    "type": "build",
+                    "name": "tiberian-dawn-remaster"
+                }
+            ]
+        },
+        {
+            "name": "red-alert-remaster",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "red-alert-remaster"
+                },
+                {
+                    "type": "build",
+                    "name": "red-alert-remaster"
+                }
+            ]
+        },
+        {
+            "name": "red-alert-remaster-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "red-alert-remaster-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "red-alert-remaster-debug"
+                }
+            ]
+        },
+        {
+            "name": "tiberian-dawn-remaster-debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "tiberian-dawn-remaster-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "tiberian-dawn-remaster-debug"
                 }
             ]
         }

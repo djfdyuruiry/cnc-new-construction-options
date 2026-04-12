@@ -25,4 +25,15 @@ private:
 #else
     static constexpr bool IsWindows = false;
 #endif
+#ifdef __APPLE__
+    static constexpr bool IsMacOS = true;
+#else
+    static constexpr bool IsMacOS = false;
+#endif
+    static constexpr bool IsUnix = !IsWindows && !IsMacOS;
+#ifdef REMASTER_BUILD
+    static constexpr bool IsRemasteredMod = true;
+#else
+    static constexpr bool IsRemasteredMod = false;
+#endif
 };

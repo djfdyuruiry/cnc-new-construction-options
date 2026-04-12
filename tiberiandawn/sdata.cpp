@@ -49,6 +49,7 @@ static SmudgeTypeClass const Crater1(
 
     SMUDGE_CRATER1,
     "CR1",
+    "CR1",
     TXT_CRATER,
     1,
     1,     // Width and height of smudge (in icons).
@@ -56,6 +57,7 @@ static SmudgeTypeClass const Crater1(
     true   // Is this a crater smudge?
 );
 static SmudgeTypeClass const Crater2(SMUDGE_CRATER2,
+                                     "CR2",
                                      "CR2",
                                      TXT_CRATER,
                                      1,
@@ -65,6 +67,7 @@ static SmudgeTypeClass const Crater2(SMUDGE_CRATER2,
 );
 static SmudgeTypeClass const Crater3(SMUDGE_CRATER3,
                                      "CR3",
+                                     "CR3",
                                      TXT_CRATER,
                                      1,
                                      1,     // Width and height of smudge (in icons).
@@ -72,6 +75,7 @@ static SmudgeTypeClass const Crater3(SMUDGE_CRATER3,
                                      true   // Is this a crater smudge?
 );
 static SmudgeTypeClass const Crater4(SMUDGE_CRATER4,
+                                     "CR4",
                                      "CR4",
                                      TXT_CRATER,
                                      1,
@@ -81,6 +85,7 @@ static SmudgeTypeClass const Crater4(SMUDGE_CRATER4,
 );
 static SmudgeTypeClass const Crater5(SMUDGE_CRATER5,
                                      "CR5",
+                                     "CR5",
                                      TXT_CRATER,
                                      1,
                                      1,     // Width and height of smudge (in icons).
@@ -88,6 +93,7 @@ static SmudgeTypeClass const Crater5(SMUDGE_CRATER5,
                                      true   // Is this a crater smudge?
 );
 static SmudgeTypeClass const Crater6(SMUDGE_CRATER6,
+                                     "CR6",
                                      "CR6",
                                      TXT_CRATER,
                                      1,
@@ -97,6 +103,7 @@ static SmudgeTypeClass const Crater6(SMUDGE_CRATER6,
 );
 static SmudgeTypeClass const Scorch1(SMUDGE_SCORCH1,
                                      "SC1",
+                                     "SC1",
                                      TXT_SCORCH,
                                      1,
                                      1,     // Width and height of smudge (in icons).
@@ -104,6 +111,7 @@ static SmudgeTypeClass const Scorch1(SMUDGE_SCORCH1,
                                      false  // Is this a crater smudge?
 );
 static SmudgeTypeClass const Scorch2(SMUDGE_SCORCH2,
+                                     "SC2",
                                      "SC2",
                                      TXT_SCORCH,
                                      1,
@@ -113,6 +121,7 @@ static SmudgeTypeClass const Scorch2(SMUDGE_SCORCH2,
 );
 static SmudgeTypeClass const Scorch3(SMUDGE_SCORCH3,
                                      "SC3",
+                                     "SC3",
                                      TXT_SCORCH,
                                      1,
                                      1,     // Width and height of smudge (in icons).
@@ -120,6 +129,7 @@ static SmudgeTypeClass const Scorch3(SMUDGE_SCORCH3,
                                      false  // Is this a crater smudge?
 );
 static SmudgeTypeClass const Scorch4(SMUDGE_SCORCH4,
+                                     "SC4",
                                      "SC4",
                                      TXT_SCORCH,
                                      1,
@@ -129,6 +139,7 @@ static SmudgeTypeClass const Scorch4(SMUDGE_SCORCH4,
 );
 static SmudgeTypeClass const Scorch5(SMUDGE_SCORCH5,
                                      "SC5",
+                                     "SC5",
                                      TXT_SCORCH,
                                      1,
                                      1,     // Width and height of smudge (in icons).
@@ -136,6 +147,7 @@ static SmudgeTypeClass const Scorch5(SMUDGE_SCORCH5,
                                      false  // Is this a crater smudge?
 );
 static SmudgeTypeClass const Scorch6(SMUDGE_SCORCH6,
+                                     "SC6",
                                      "SC6",
                                      TXT_SCORCH,
                                      1,
@@ -146,6 +158,7 @@ static SmudgeTypeClass const Scorch6(SMUDGE_SCORCH6,
 
 static SmudgeTypeClass const Bibx1(SMUDGE_BIB1,
                                    "BIB1",
+                                   "BIB1",
                                    TXT_BIB,
                                    4,
                                    2,    // Width and height of smudge (in icons).
@@ -153,6 +166,7 @@ static SmudgeTypeClass const Bibx1(SMUDGE_BIB1,
                                    false // Is this a crater smudge?
 );
 static SmudgeTypeClass const Bibx2(SMUDGE_BIB2,
+                                   "BIB2",
                                    "BIB2",
                                    TXT_BIB,
                                    3,
@@ -166,6 +180,7 @@ static SmudgeTypeClass const Bibx2(SMUDGE_BIB2,
 ** level of optimisation enough for the problem not to manifest.
 */
 volatile SmudgeTypeClass const Bibx3(SMUDGE_BIB3,
+                                     "BIB3",
                                      "BIB3",
                                      TXT_BIB,
                                      2,
@@ -214,12 +229,13 @@ SmudgeTypeClass const* const SmudgeTypeClass::Pointers[SMUDGE_COUNT] = {
  *=============================================================================================*/
 SmudgeTypeClass::SmudgeTypeClass(SmudgeType smudge,
                                  char const* ininame,
+                                 std::string image_name,
                                  int fullname,
                                  int width,
                                  int height,
                                  bool isbib,
                                  bool iscrater)
-    : ObjectTypeClass(false, false, false, true, false, false, true, true, fullname, ininame, ARMOR_NONE, 0)
+    : ObjectTypeClass(false, false, false, true, false, false, true, true, fullname, ininame, std::move(image_name), ARMOR_NONE, 0)
 {
     IsBib = isbib;
     Width = width;

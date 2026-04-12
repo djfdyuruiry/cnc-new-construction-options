@@ -10,8 +10,6 @@
 
 void RulesClass::Init_Sections(CCINIClass& ini)
 {
-    Sections = RuleSections();
-
     // generated code START@RULE_PROCESS_CODE@
 
     // generated code END
@@ -33,7 +31,7 @@ void RulesClass::Apply_Special_Properties() {
     Special.IsMCVDeploy = Get_Bool_Rule(GAME_MISC_SECTION, MCV_REDEPLOYABLE_RULE);
     Special.IsVisceroids = Get_Bool_Rule(GAME_MISC_SECTION, SPAWN_VISCEROIDS_RULE);
     Special.IsThreePoint = Get_Bool_Rule(GAME_MISC_SECTION, VEHICLES_DO_THREE_POINT_TURNS_RULE);
-    Special.IsRoad = Get_Bool_Rule(GAME_MISC_SECTION, SHOW_BIBS_ON_BUILDINGS_RULE);
+    Special.IsRoad = !Get_Bool_Rule(GAME_MISC_SECTION, SHOW_BIBS_ON_BUILDINGS_RULE);
     Special.IsNamed = Get_Bool_Rule(GAME_MISC_SECTION, SHOW_CIVILIAN_NAMES_RULE);
     Special.IsSeparate = Get_Bool_Rule(GAME_MISC_SECTION, HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE);
 

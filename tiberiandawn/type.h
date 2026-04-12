@@ -432,6 +432,8 @@ public:
     */
     void const* RadarIcon;
 
+    std::string ImageName;
+
     //--------------------------------------------------------------------
     ObjectTypeClass(bool is_sentient,
                     bool is_flammable,
@@ -443,6 +445,7 @@ public:
                     bool is_immune,
                     int fullname,
                     char const* name,
+                    std::string image_name,
                     ArmorType armor,
                     unsigned short strength);
     ObjectTypeClass(NoInitClass const& x)
@@ -629,6 +632,11 @@ public:
     WeaponType Primary;
     WeaponType Secondary;
 
+    /*
+    ** Name of the data file that holds sidebar image data for building.
+    */
+    std::string CameoName;
+
     //--------------------------------------------------------------------
     TechnoTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -636,6 +644,8 @@ public:
     }
     TechnoTypeClass(int name,
                     char const* ininame,
+                    std::string cameo_name,
+                    std::string image_name,
                     unsigned char level,
                     StructType prereq,
                     bool is_leader,
@@ -850,16 +860,6 @@ public:
     */
     //		int Prerequisite;
 
-    /*
-    ** Name of the data file that holds sidebar image data for building.
-    */
-    std::string CameoName;
-
-    /*
-    ** Name of the data file that holds image data for building.
-    */
-    std::string ImageName;
-
     /*---------------------------------------------------------------------------
     **	This is the building type explicit constructor.
     */
@@ -870,8 +870,8 @@ public:
     BuildingTypeClass(StructType type,
                       int name,
                       char const* ininame,
-                      std::string_view cameo_name,
-                      std::string_view image_name,
+                      std::string cameo_name,
+                      std::string image_name,
                       COORDINATE exitpoint,
                       unsigned char level,
                       StructType prereq,
@@ -1131,16 +1131,6 @@ public:
     int MaxSize;
 
     /*
-    ** Name of the data file that holds sidebar image data for aircraft.
-    */
-    std::string CameoName;
-
-    /*
-    ** Name of the data file that holds image data for aircraft.
-    */
-    std::string ImageName;
-
-    /*
     **	This is the explicit unit class constructor.
     */
     UnitTypeClass(NoInitClass const& x)
@@ -1150,8 +1140,8 @@ public:
     UnitTypeClass(UnitType type,
                   int name,
                   char const* ininame,
-                  std::string_view cameo_name,
-                  std::string_view image_name,
+                  std::string cameo_name,
+                  std::string image_name,
                   AnimType exp,
                   unsigned char level,
                   StructType prereq,
@@ -1310,16 +1300,6 @@ public:
     char FireLaunch;
     char ProneLaunch;
 
-    /*
-    ** Name of the data file that holds sidebar image data for infantry.
-    */
-    std::string CameoName;
-
-    /*
-    ** Name of the data file that holds image data for infantry.
-    */
-    std::string ImageName;
-    
     // TODO: Implement NCO logic and new fields
     //bool IsImmuneToTiberium;
     //bool HasC4Charges;
@@ -1334,8 +1314,8 @@ public:
     InfantryTypeClass(InfantryType type,
                       int name,
                       char const* ininame,
-                      std::string_view cameo_name,
-                      std::string_view image_name,
+                      std::string cameo_name,
+                      std::string image_name,
                       unsigned char level,
                       StructType prereq,
                       bool is_female,
@@ -1527,11 +1507,6 @@ public:
     */
     int Range;
 
-    /*
-    ** Name of the data file that holds image data of bullet.
-    */
-    std::string ImageName;
-
     //---------------------------------------------------------------------
     BulletTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -1539,7 +1514,7 @@ public:
     }
     BulletTypeClass(BulletType type,
                     char const* ininame,
-                    std::string_view image_name,
+                    std::string image_name,
                     bool is_high,
                     bool is_homing,
                     bool is_arcing,
@@ -1662,6 +1637,7 @@ public:
                      bool is_insignificant,
                      bool is_immune,
                      char const* ininame,
+                     std::string image_name,
                      int fullname,
                      unsigned short strength,
                      ArmorType armor,
@@ -1744,6 +1720,7 @@ public:
     TemplateTypeClass(TemplateType iconset,
                       int theater,
                       char const* ininame,
+                      std::string image_name,
                       int fullname,
                       LandType land,
                       int width,
@@ -1933,11 +1910,6 @@ public:
     */
     AnimType VirtualAnim;
 
-    /*
-    ** Name of the data file that holds image data for this animation.
-    */
-    std::string ImageName;
-
     //---------------------------------------------------------------------------
     AnimTypeClass(NoInitClass const& x)
         : ObjectTypeClass(x)
@@ -1945,7 +1917,7 @@ public:
     }
     AnimTypeClass(AnimType anim,
                   char const* name,
-                  std::string_view image_name,
+                  std::string image_name,
                   int size,
                   int biggest,
                   bool isnormal,
@@ -2040,16 +2012,6 @@ public:
     unsigned char ROT;
     MissionType Mission;
 
-    /*
-    ** Name of the data file that holds sidebar image data for aircraft.
-    */
-    std::string CameoName;
-
-    /*
-    ** Name of the data file that holds image data for aircraft.
-    */
-    std::string ImageName;
-
     AircraftTypeClass(NoInitClass const& x)
         : TechnoTypeClass(x)
     {
@@ -2057,8 +2019,8 @@ public:
     AircraftTypeClass(AircraftType airtype,
                       int name,
                       char const* ininame,
-                      std::string_view cameo_name,
-                      std::string_view image_name,
+                      std::string cameo_name,
+                      std::string image_name,
                       unsigned char level,
                       StructType prereq,
                       bool is_leader,
@@ -2221,6 +2183,7 @@ public:
     }
     OverlayTypeClass(OverlayType iconset,
                      char const* ininame,
+                     std::string image_name,
                      int fullname,
                      LandType ground,
                      int damagelevels,
@@ -2309,6 +2272,7 @@ public:
     }
     SmudgeTypeClass(SmudgeType smudge,
                     char const* ininame,
+                    std::string image_name,
                     int fullname,
                     int width,
                     int height,

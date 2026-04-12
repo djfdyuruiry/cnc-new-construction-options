@@ -592,7 +592,7 @@ enum EventCallbackMessageEnum
 struct EventCallbackStruct
 {
 
-    EventCallbackStruct::EventCallbackStruct(void)
+    EventCallbackStruct(void)
         : EventType(CALLBACK_EVENT_INVALID)
         , GlyphXPlayerID(0)
     {
