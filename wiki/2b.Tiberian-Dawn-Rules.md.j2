@@ -4,7 +4,6 @@ Rules files:
 {% for type in concrete_types %}- [{{ type.name | lower }}.ini](#{{ type.name | lower }}ini)
 {% endfor %} - [Scenario INI](#scenario-ini)
 
-<!-- TODO: Expand guidance and correct default location in code -->
 All rules files are created for you when you first run the game, so run the game once before trying to edit the files.
 
 ### Finding Rules Files
@@ -21,11 +20,13 @@ Here are the full paths for reference (these are inside your user folder):
 - **macOS**: `Library/Application Support/nco/tiberian-dawn`
 - **Linux**: `.config/nco/tiberian-dawn`
 
+> Note: You can also install custom scenario files in here (ini and bin files)
+
 ---
 
 ## rules.ini
 
-`rules.ini` is a simple text file that controls game engine behaviour. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
+`rules.ini` is a simple text file that controls game engine behavior. This was included by default by Westwood in Red Alert onward. Below is a explanation of the sections in this file and different values that can be set.
 
 > **NOTE**: Unlike Red Alert, the `rules.ini` for NCO Tiberian Dawn does not contain units, infantry etc. - see the top of this page for the individual files
 
