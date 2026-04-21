@@ -37,7 +37,7 @@ local TypeApiProxy = require("nco.TiberianDawn.lib.TypeApiProxy")
       local costType = Types.Infantry.E1.getPropertyType("Cost") -- 'number'
 
       -- get the names of all Infantry types in the game
-      local infantryNames = Types.Infantry.getInstanceNames() -- { 'E1', 'E2', 'E2', ... }
+      local infantryNames = Types.Infantry.getInstanceNames() -- { 'E1', 'E2', 'RMBO', ... }
     ```
 
 ]]
