@@ -25,19 +25,19 @@ local TypeApiProxy = require("nco.TiberianDawn.lib.TypeApiProxy")
   - You can access this by:
     ```lua
       -- get a property
-      local armor = Type.Infantry.E1.Armor -- 'NONE'
+      local armor = Types.Infantry.E1.Armor -- 'NONE'
 
       -- set a property
-      Type.Infantry.E1.Primary = "CHAIN_GUN"
+      Types.Infantry.E1.Primary = "CHAIN_GUN"
 
       -- get the names of all properties for a type
-      local infantryProperties = Type.Infantry.getPropertyNames() -- { 'Armor', 'Cost', ... }
+      local infantryProperties = Types.Infantry.getPropertyNames() -- { 'Armor', 'Cost', ... }
 
       -- get the lua type for a given property
-      local costType = Type.Infantry.E1.getPropertyType("Cost") -- 'number'
+      local costType = Types.Infantry.E1.getPropertyType("Cost") -- 'number'
 
       -- get the names of all Infantry types in the game
-      local infantryNames = Type.Infantry.getInstanceNames() -- { 'E1', 'E2', 'E2', ... }
+      local infantryNames = Types.Infantry.getInstanceNames() -- { 'E1', 'E2', 'RMBO', ... }
     ```
 
 ]]

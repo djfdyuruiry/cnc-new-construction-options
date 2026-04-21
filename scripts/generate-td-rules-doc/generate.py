@@ -113,7 +113,7 @@ def main():
                     prop['example_value'] = prop.get('example_value', 10)
                     prop['valid_values'] = prop.get('valid_values', "Range: -128 to 127")
                 case 'String':
-                    prop['example_value'] = prop.get('example_value', "'a string'")
+                    prop['example_value'] = prop.get('example_value', "example string")
                     prop['valid_values'] = prop.get('valid_values', "anything")
 
         if not game_type.get('base_class', False):
