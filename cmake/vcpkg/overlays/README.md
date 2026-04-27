@@ -6,4 +6,11 @@
 
 ## Overlays
 
+<<<<<<< HEAD
 *None*
+=======
+- `pipewire` - There is a bug fix that hasn't been backported to the 1.4 branch (the current version used by vcpkg), so we just install the latest 1.6 release
+  - This should be reverted if someone backports the fix to the 1.4 branch in the pipewire repo, as many linux distro's use the older version
+  - A better fix would be to update our overlay to apply git patches to make 1.4 build correctly
+  - Repo issue can be found [here](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/5141)
+>>>>>>> fc09e14 (feat(td): WIP experimenting with doubling res (640 -> 1280))
