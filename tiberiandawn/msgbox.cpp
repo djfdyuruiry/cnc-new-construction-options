@@ -93,7 +93,7 @@ int WWMessageBox::Process(const char* msg, const char* b1txt, const char* b2txt,
 
     GraphicBufferClass seen_buff_save(VisiblePage.Get_Width(), VisiblePage.Get_Height(), (void*)NULL);
 
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     if (b1txt != NULL && *b1txt == '\0')
         b1txt = NULL;

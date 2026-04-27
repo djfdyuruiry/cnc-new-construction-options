@@ -254,7 +254,7 @@ void TabClass::Set_Active(int select)
 
 void TabClass::One_Time(void)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
     Eva_Width = 80 * factor;
 
 #ifdef REMASTER_BUILD

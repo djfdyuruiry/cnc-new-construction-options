@@ -65,8 +65,8 @@
 #define GBUFF_INIT_HEIGHT 1536
 #endif
 #else
-#define GBUFF_INIT_WIDTH  640
-#define GBUFF_INIT_HEIGHT 400
+#define GBUFF_INIT_WIDTH  1280
+#define GBUFF_INIT_HEIGHT 800
 #endif
 
 #ifdef JAPANESE

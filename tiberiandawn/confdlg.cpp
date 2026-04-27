@@ -55,7 +55,7 @@ bool ConfirmationClass::Process(int text)
  *=============================================================================================*/
 bool ConfirmationClass::Process(char const* string)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     enum
     {

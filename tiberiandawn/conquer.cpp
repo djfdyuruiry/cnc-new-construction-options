@@ -862,7 +862,7 @@ static void Message_Input(KeyNumType& input)
     unsigned short magic_number;
     unsigned short crc;
 #endif
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     /*
     **	Check keyboard input for a request to send a message.

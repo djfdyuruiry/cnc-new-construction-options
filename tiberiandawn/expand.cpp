@@ -79,7 +79,7 @@ void EListClass::Draw_Entry(int index, int x, int y, int width, int selected)
 
 bool Expansion_Dialog(void)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     int option_width = 236 * factor;
     int option_height = 162 * factor;
@@ -263,7 +263,7 @@ bool Expansion_Dialog(void)
  *=============================================================================================*/
 bool Bonus_Dialog(void)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     int option_width = 236 * factor;
     int option_height = 162 * factor;

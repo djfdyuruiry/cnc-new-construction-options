@@ -295,6 +295,9 @@ int main(int argc, char** argv)
             ScreenWidth = 320;
             ScreenHeight = 200;
         }
+
+        ScreenWidth = 1280;
+        ScreenHeight = 800;
 #endif
 
 #if defined(_WIN32) && !defined(SDL_BUILD)

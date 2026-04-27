@@ -280,7 +280,7 @@ int Fetch_Difficulty(void)
     static const char TXT_HARD[] = "Hard";
     static const char TXT_DIFFICULTY[] = "Difficulty";
 
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
     int const w = 250 * factor;
     int const h = 70 * factor;
     int const x = ((320 * factor) / 2) - w / 2;

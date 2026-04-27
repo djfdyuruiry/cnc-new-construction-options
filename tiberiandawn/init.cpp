@@ -1425,7 +1425,7 @@ bool Select_Game(bool fade)
     **	properly set.
     */
     CCDebugString("C&C95 - Initialising message system.\n");
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
     Messages.Init(Map.TacPixelX, Map.TacPixelY, 6, MAX_MESSAGE_LENGTH, 6 * factor + 1);
 
     /*

@@ -1859,7 +1859,7 @@ void RadarClass::Draw_Names(void)
     int kills;
     int color;
     TextPrintType style;
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     /*
     ** Do nothing if the sidebar isn't there

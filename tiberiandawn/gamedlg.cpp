@@ -53,7 +53,7 @@
  *=============================================================================================*/
 void GameControlsClass::Process(void)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     /*
     **	Dialog & button dimensions

@@ -146,7 +146,7 @@ void DropListClass::Peer_To_Peer(unsigned flags, KeyNumType& key, ControlClass& 
 
 void DropListClass::Expand(void)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
 
     if (!IsDropped) {
         List.X = X;

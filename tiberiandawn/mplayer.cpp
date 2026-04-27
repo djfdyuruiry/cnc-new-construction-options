@@ -74,7 +74,7 @@ GameType Select_MPlayer_Game(void)
     return GAME_NORMAL;
 #else
     static const char TXT_SKIRMISH[] = "Skirmish";
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
     bool ipx_avail = false;
     int number_of_buttons;
     /*........................................................................
@@ -885,7 +885,7 @@ static void Garble_Message(char* buf)
  *=========================================================================*/
 int Surrender_Dialog(void)
 {
-    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    int factor = SeenBuff.Get_Width() / 320;
     /*........................................................................
     Dialog & button dimensions
     ........................................................................*/
