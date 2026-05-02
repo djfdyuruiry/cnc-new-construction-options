@@ -120,3 +120,37 @@ private:
 
     std::optional<T> ValueSource;
 };
+
+
+/**
+ * Models the result of evaluating a lua expression.
+ */
+class LuaEvalResult : public LuaResult
+{
+public:
+    LuaEvalResult(const LuaResult& result) : LuaResult(result), ReturnedValue(false) {}
+
+    LuaEvalResult(const LuaResult& result, const bool eval_returned_value) : LuaResult(result)
+    {
+        ReturnedValue = eval_returned_value;
+    }
+
+    const LuaEvalResult& If_Value(const std::function<void()>& action) const
+    {
+        if (Returned_Value()) {
+            action();
+        }
+
+        return *this;
+    }
+
+    bool Returned_Value() const
+    {
+        return ReturnedValue;
+    }
+
+private:
+    static inline const auto& Logger = CncLogger::For(LuaResultWithValue);
+
+    bool ReturnedValue;
+};

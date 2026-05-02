@@ -3,6 +3,7 @@
 #include <string>
 
 #include "logger.h"
+#include "luaengine.h"
 
 /**
  * Encapsulates a piece of discrete logic that a Lua
@@ -18,7 +19,12 @@ public:
     virtual void Execute() const
     {
         CNC_LOGGER_DEBUG("Executing lua event of type: {}", EventType);
-    };
+    }
+
+    virtual void Execute(const LuaEngine& engine) const
+    {
+        Execute();
+    }
 
 protected:
     static inline const auto& Logger = CncLogger::For(LuaEvent);
