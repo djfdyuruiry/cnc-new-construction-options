@@ -876,7 +876,7 @@ static void Message_Input(KeyNumType& input)
         Messages.Add_Edit(YELLOW,
                           TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
                           txt,
-                          180 * factor);
+                          300 * factor);
 
         Map.Flag_To_Redraw(false);
     }
@@ -986,8 +986,11 @@ static void Message_Input(KeyNumType& input)
     ** Evaluate lua console input, the outcome (result value/error) is shown to the player as a message.
     */
     if (rc == 3 && (GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH)) {
-        ScenarioLua::Get_Engine().Eval_To_String(Messages.Get_Edit_Buf())
-            .If_Value([](const auto& r) {
+        const auto console_line = Messages.Get_Edit_Buf();
+
+        ScenarioLua::Get_Engine().Eval_To_String(console_line)
+            .If_Value([&console_line](const auto& r) {
+                LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", console_line));
                 LuaList.Push<AddMessageLuaEvent>(r);
             }).On_Error([](const auto& r) {
                 LuaList.Push<AddMessageLuaEvent>(r.Error_Message());
