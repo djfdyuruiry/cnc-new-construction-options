@@ -69,6 +69,8 @@
 #include "common/vqaloader.h"
 #include "common/settings.h"
 #include "common/winasm.h"
+#include "lua/scenariolua.h"
+#include "lua/events/addmessage_luaevent.h"
 
 #define SHAPE_TRANS 0x40
 
@@ -865,6 +867,21 @@ static void Message_Input(KeyNumType& input)
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
 
     /*
+    ** Trigger Lua console entry on F1 key, for single player missions only.
+    */
+    if ((GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH) && input == KN_F1) {
+        memset(txt, 0, 40);
+        strcpy(txt, "Lua Console: ");
+
+        Messages.Add_Edit(YELLOW,
+                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
+                          txt,
+                          180 * factor);
+
+        Map.Flag_To_Redraw(false);
+    }
+
+    /*
     **	Check keyboard input for a request to send a message.
     **	The 'to' argument for Add_Edit is prefixed to the message buffer; the
     **	message buffer is big enough for the 'to' field plus MAX_MESSAGE_LENGTH.
@@ -963,6 +980,18 @@ static void Message_Input(KeyNumType& input)
     if (rc == 2) {
         Map.Flag_To_Redraw(false);
         Map.DisplayClass::IsToRedraw = true;
+    }
+
+    /*
+    ** Evaluate lua console input, the outcome (result value/error) is shown to the player as a message.
+    */
+    if (rc == 3 && (GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH)) {
+        ScenarioLua::Get_Engine().Eval_To_String(Messages.Get_Edit_Buf())
+            .If_Value([](const auto& r) {
+                LuaList.Push<AddMessageLuaEvent>(r);
+            }).On_Error([](const auto& r) {
+                LuaList.Push<AddMessageLuaEvent>(r.Error_Message());
+            });
     }
 
     /*
