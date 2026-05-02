@@ -167,19 +167,21 @@ void ScenarioLua::On_Clear_Scenario()
 void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
 {
     events.Access([](auto& q) {
-       if (q->size() == 0) {
+        if (q->size() == 0) {
             CNC_LOGGER_TRACE("No Lua Events to process");
             return;
-       }
+        }
 
-       CNC_LOGGER_DEBUG("Processing Lua Events");
+        CNC_LOGGER_DEBUG("Processing Lua Events");
 
-       while (!q->empty()) {
-            q->front()->Execute();
+        const auto& engine = Get_Engine();
+
+        while (!q->empty()) {
+            q->front()->Execute(engine);
             q->pop();
-       }
+        }
     });
-    }
+}
 
 void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(std::string& scenario_name, std::string& scenario_type_name, std::string& faction, std::string& house_name)
 {
