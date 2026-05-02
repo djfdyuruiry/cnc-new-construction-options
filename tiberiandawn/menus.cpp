@@ -624,7 +624,7 @@ int Main_Menu(unsigned int timeout)
     starty += ystep;
 
     TextButtonClass editorbtn(BUTTON_MAPEDITOR,
-                             TXT_EDIT,
+                             "Scenario Editor", // TODO: Add mechanism for extending existing locale strings (support non-english)
                              TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                              D_MAPEDITOR_X,
                              starty,
