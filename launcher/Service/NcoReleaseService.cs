@@ -203,7 +203,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
     // process release zip
     await using var stream = await response.Content.ReadAsStreamAsync();
-    using var zipReader = ReaderFactory.Open(stream);
+    using var zipReader = ReaderFactory.OpenReader(stream);
 
     while (zipReader.MoveToNextEntry())
     {

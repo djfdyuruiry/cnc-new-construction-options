@@ -13,6 +13,7 @@ public interface IDownloadEventVisitor : IVisitor
   void Visit(WriteGameDataFileEvent e);
   void Visit(FinishDiscImageFileScanEvent e);
   void Visit(FinishDownloadGameDataEvent e);
+  void Visit(DownloadFallbackEvent downloadFallbackEvent);
   void Visit(DownloadGameDataErrorEvent e);
 
   // Mods/addons install
