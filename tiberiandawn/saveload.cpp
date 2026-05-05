@@ -124,7 +124,11 @@ bool Save_Game(const char* file_name, const char* descr)
 {
     CDFileClass save_file;
 
+#ifndef REMASTER_BUILD
+    if (!save_file.Open(Paths.Concatenate_Paths(Paths.User_Save_Path(), file_name).c_str(), WRITE)) {
+#else
     if (!save_file.Open(file_name, WRITE)) {
+#endif
         return false;
     }
 
@@ -154,7 +158,11 @@ bool Save_Game_Binary(const char* file_name, const char* descr)
     /*
     **	Open the file
     */
-    if (!file.Open(file_name, WRITE)) {
+#ifndef REMASTER_BUILD
+    if (!file.Open(Paths.Concatenate_Paths(Paths.User_Save_Path(), file_name).c_str(), WRITE)) {
+#else
+    if (!save_file.Open(file_name, WRITE)) {
+#endif
         Decode_All_Pointers_Binary();
         return (false);
     }
@@ -361,7 +369,11 @@ bool Load_Game(const char* file_name)
 
     Call_Back();
 
+#ifndef REMASTER_BUILD
+    const auto save_header = SaveGameResolver::Load(Paths.Concatenate_Paths(Paths.User_Save_Path(), file_name));
+#else
     const auto save_header = SaveGameResolver::Load(file_name);
+#endif
 
     if (!save_header.has_value()) {
         return false;
@@ -378,7 +390,7 @@ bool Load_Game(const char* file_name)
     */
     if (RequiredCD != -2) {
         if (scenario >= 20 && scenario < 60 && GameToPlay == GAME_NORMAL) {
-            RequiredCD = 2;
+            RequiredCD = Options.SkipExpansionCdCheck ? -1 : 2;
         } else {
             if (scenario >= 60) {
                 /*
@@ -478,7 +490,11 @@ bool Load_Game_Binary(const char* file_name)
     /*
     **	Open the file
     */
+#ifndef REMASTER_BUILD
+    if (!file.Open(Paths.Concatenate_Paths(Paths.User_Save_Path(), file_name).c_str(), READ)) {
+#else
     if (!file.Open(file_name, READ)) {
+#endif
         return (false);
     }
 #ifdef REMASTER_BUILD
@@ -544,7 +560,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (RequiredCD != -2) {
         if (scenario >= 20 && scenario < 60 && GameToPlay == GAME_NORMAL) {
-            RequiredCD = 2;
+            RequiredCD = Options.SkipExpansionCdCheck ? -1 : 2;
         } else {
             if (scenario >= 60) {
                 /*
@@ -1255,7 +1271,9 @@ bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& ho
 {
     const auto file_name = std::format("SAVEGAME.{:03d}", id);
 
-    const auto header = SaveGameResolver::Load_Header(file_name);
+    const auto header = SaveGameResolver::Load_Header(
+        Paths.Concatenate_Paths(Paths.User_Save_Path(), file_name.c_str())
+    );
 
     if (!header.has_value()) {
         return false;
@@ -1284,7 +1302,11 @@ bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* ho
     /*
     **	If the file opens OK, read the file
     */
+#ifndef REMASTER_BUILD
+    if (file.Open(Paths.Concatenate_Paths(Paths.User_Save_Path(), name).c_str(), READ)) {
+#else
     if (file.Open(name, READ)) {
+#endif
 
         /*
         **	Read in the description, scenario #, and the house

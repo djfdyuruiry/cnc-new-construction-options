@@ -47,6 +47,7 @@ public:
     const char* Data_Path();
     const char* User_Path();
     const char* User_Lua_Path();
+    const char* User_Save_Path();
 
 private:
     std::string Suffix;
@@ -55,6 +56,7 @@ private:
     std::string DataPath;
     std::string UserPath;
     std::string UserLuaPath;
+    std::string UserSavePath;
 
     static std::string Argv_Path(const char* cmd_arg);
 };
