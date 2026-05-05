@@ -456,10 +456,11 @@ int main(int argc, char** argv)
         }
 
         /*
-        ** Save settings if they were changed during gameplay.
+        ** Save settings and options if they were changed during gameplay.
         */
         ini.Load(cfile);
         Settings.Save(ini);
+        Options.Save_Settings(ini);
         ini.Save(cfile);
 
         VisiblePage.Clear();

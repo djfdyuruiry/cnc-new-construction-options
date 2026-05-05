@@ -796,7 +796,7 @@ void OptionsClass::Load_Settings(void)
  * OptionsClass::Save_Settings -- writes options settings to the INI file                      *
  *                                                                                             *
  * INPUT:                                                                                      *
- *      none.                                                                                  *
+ *      ini -- config file ini instance.                                                       *
  *                                                                                             *
  * OUTPUT:                                                                                     *
  *      none.                                                                                  *
@@ -807,15 +807,8 @@ void OptionsClass::Load_Settings(void)
  * HISTORY:                                                                                    *
  *   02/14/1995 BR : Created.                                                                  *
  *=============================================================================================*/
-void OptionsClass::Save_Settings(void)
+void OptionsClass::Save_Settings(INIClass& ini)
 {
-    /*
-    **	Create filename and read the file.
-    */
-    CCFileClass file(CONFIG_FILE_NAME);
-    INIClass ini;
-    ini.Load(file);
-
     /*
     **	Save Options settings
     */
@@ -884,6 +877,18 @@ void OptionsClass::Save_Settings(void)
     ini.Put_Int(HotkeyName, "KeyTeam8", KeyTeam8);
     ini.Put_Int(HotkeyName, "KeyTeam9", KeyTeam9);
     ini.Put_Int(HotkeyName, "KeyTeam10", KeyTeam10);
+}
+
+void OptionsClass::Save_Settings()
+{
+    /*
+    **	Create filename and read the file.
+    */
+    CCFileClass file(CONFIG_FILE_NAME);
+    INIClass ini;
+    ini.Load(file);
+
+    Save_Settings(ini);
 
     /*
     **	Write the INI data out to a file.

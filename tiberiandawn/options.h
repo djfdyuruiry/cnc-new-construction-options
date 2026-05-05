@@ -69,6 +69,7 @@ public:
     ** File I/O routines
     */
     void Load_Settings(void);
+    void Save_Settings(INIClass& ini);
     void Save_Settings(void);
 
     void Set(void);
