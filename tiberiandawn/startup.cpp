@@ -533,11 +533,15 @@ void Prog_End(const char* why, bool fatal) // Added why and fatal parameters. ST
 {
     GlyphX_Debug_Print("Prog_End()");
 
-    if (why) {
-        GlyphX_Debug_Print(why);
-    }
     if (fatal) {
+        if (why) {
+            GlyphX_Debug_Print(why);
+        }
+
+        CNC_LOG_FATAL(why == nullptr ? "Unknown fatal error" : why);
         *((int*)0) = 0;
+    } else if (why) {
+        GlyphX_Debug_Print(why);
     }
 
 #ifndef DEMO

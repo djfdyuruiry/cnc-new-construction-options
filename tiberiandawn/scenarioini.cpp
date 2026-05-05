@@ -253,8 +253,19 @@ bool Read_Scenario_Ini(char* root, bool fresh)
             }
         }
     }
+
     if (!Force_CD_Available(RequiredCD)) {
-        Prog_End("Read_Scenario_Ini - CD not found", true);
+        static const std::string cd_display_names[] = {"GDI", "NOD", "Covert Operations"};
+        std::string install_message = "";
+
+        if (RequiredCD > -1 || RequiredCD < 2) {
+            install_message = std::format(
+                " Install {} files to play this scenario",
+                cd_display_names[RequiredCD]
+            );
+        }
+
+        CNC_LOG_FATAL("Required game files missing!{}", install_message);
         if (!RunningAsDLL) {
             exit(EXIT_FAILURE);
         }

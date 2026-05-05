@@ -117,7 +117,7 @@ bool Init_Game(int, char*[])
         // If a debugger is attached, trigger a breakpoint
         TRIGGER_DEBUGGER;
 
-        Prog_End(err.c_str());
+        Prog_End(err.c_str(), false);
         if (!RunningAsDLL) {
             exit(1);
         }
