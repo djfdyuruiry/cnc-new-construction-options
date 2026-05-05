@@ -128,11 +128,12 @@ void Choose_Side(void)
     //	speechg = MFCD::Retrieve("GDI_SLCT.AUD");
     //	speechn = MFCD::Retrieve("NOD_SLCT.AUD");
 
+    BreakoutAllowed = true;
+
     if (Special.IsFromInstall) {
         VisiblePage.Clear();
         PreserveVQAScreen = 1;
         Play_Movie("INTRO2", THEME_NONE, false);
-        BreakoutAllowed = true;
     }
 
     // anim = Open_Animation("CHOOSE.WSA",NULL,0L,(WSAOpenType)(WSA_OPEN_FROM_MEM | WSA_OPEN_TO_PAGE),Palette);
