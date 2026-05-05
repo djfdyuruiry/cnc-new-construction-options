@@ -3777,7 +3777,7 @@ bool Force_CD_Available(int cd)
 void Raise_Fatal_CD_Error(const char* caller, const int cd)
 {
     static const std::string cd_display_names[] = {"GDI", "NOD", "Covert Operations"};
-    std::string install_message = "";
+    std::string install_message;
 
     if (cd >= CD_GDI || cd <= CD_COVERTOPS) {
         install_message = std::format(
