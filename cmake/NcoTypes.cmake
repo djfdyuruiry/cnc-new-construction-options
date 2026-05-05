@@ -37,10 +37,11 @@ endmacro()
 CHECK_REQUIRED_VARIABLE(TYPES_PATH)
 CHECK_REQUIRED_VARIABLE(TYPES_TEMPLATE_PATH)
 
-function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CONVERTER _REQ_CSV_CONVERTER _TEMPLATE_IGNORE)
+function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_COMMENT _PROP_TYPE _REQ_CONVERTER _REQ_CSV_CONVERTER _TEMPLATE_IGNORE)
   string(JSON TYPE_OBJECT_JSON GET "${_TYPE_JSON}" properties "${_PROP_INDEX}")
 
   string(JSON PROP_NAME GET "${TYPE_OBJECT_JSON}" name)
+  string(JSON PROP_COMMENT GET "${TYPE_OBJECT_JSON}" comment)
   string(JSON PROP_TYPE GET "${TYPE_OBJECT_JSON}" type)
 
   string(JSON REQ_CONVERTER ERROR_VARIABLE JSON_ERROR GET "${TYPE_OBJECT_JSON}" requires_converter)
@@ -65,6 +66,7 @@ function(LoadTypeProperties _TYPE_JSON _PROP_INDEX _PROP_NAME _PROP_TYPE _REQ_CO
   endif()
 
   set("${_PROP_NAME}" ${PROP_NAME} PARENT_SCOPE)
+  set("${_PROP_COMMENT}" ${PROP_COMMENT} PARENT_SCOPE)
   set("${_PROP_TYPE}" ${PROP_TYPE} PARENT_SCOPE)
   set("${_REQ_CONVERTER}" ${REQ_CONVERTER} PARENT_SCOPE)
   set("${_REQ_CSV_CONVERTER}" ${REQ_CSV_CONVERTER} PARENT_SCOPE)
@@ -148,10 +150,17 @@ function(ScanForTypeFiles _TYPE_STATE_FILE _TYPES_FILES _TYPES_HASH _FILES_HAVE_
     WatchFileForChanges("${TYPE_FILE}")
   endforeach()
 
+  # ensure templates is included in hash so code is generated if changed
   file(SHA256 "${TYPES_TEMPLATE_PATH}" FILE_HASH)
   string(SHA256 TYPES_HASH "${TYPES_HASH}${FILE_HASH}")
 
   WatchFileForChanges("${TYPES_TEMPLATE_PATH}")
+
+  # watch this cmake script so changes to template rendering are detected
+  file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" FILE_HASH)
+  string(SHA256 TYPES_HASH "${TYPES_HASH}${FILE_HASH}")
+
+  WatchFileForChanges("${CMAKE_CURRENT_LIST_FILE}")
 
   # If a previous hash was calculated, and does not match the
   # hash we just calculated, then flag that files have changed.
@@ -196,11 +205,12 @@ function(Main)
     ExtractTypeInfoFromJson("${TYPE_JSON}" TYPE_NAME PROP_COUNT)
 
     message(STATUS "[NcoTypeRules] Generating code for type: ${TYPE_NAME}")
+    SET(LOAD_COMMENTS_CODE "")
     SET(LOAD_RULES_CODE "")
     SET(READ_RULES_CODE "")
 
     foreach(PROP_INDEX RANGE ${PROP_COUNT})
-      LoadTypeProperties("${TYPE_JSON}" "${PROP_INDEX}" PROP_NAME PROP_TYPE REQ_CONVERTER REQ_CSV_CONVERTER TEMPLATE_IGNORE)
+      LoadTypeProperties("${TYPE_JSON}" "${PROP_INDEX}" PROP_NAME PROP_COMMENT PROP_TYPE REQ_CONVERTER REQ_CSV_CONVERTER TEMPLATE_IGNORE)
 
       if(${TEMPLATE_IGNORE} STREQUAL "ON")
         continue()
@@ -212,6 +222,11 @@ function(Main)
       endif()
 
       message(STATUS "[NcoTypeRules] Processing property #${PROP_INDEX}: ${PROP_NAME} (type=${PROP_TYPE})")
+
+      if (NOT ${PROP_COMMENT} STREQUAL "-") # ignore placeholder comments
+        string(APPEND LOAD_COMMENTS_CODE "\n        ")
+        string(APPEND LOAD_COMMENTS_CODE ".Set_Var_Comment(${PROP_NAME}, \"${PROP_COMMENT}\")")
+      endif()
 
       if(${REQ_CONVERTER} STREQUAL "OFF" AND ${REQ_CSV_CONVERTER} STREQUAL "OFF")
         string(APPEND LOAD_RULES_CODE ".Load_${PROP_TYPE}_Var(${PROP_NAME})")
@@ -231,6 +246,7 @@ function(Main)
 
     string(TOUPPER ${TYPE_NAME} TYPE_NAME)
 
+    SET("LOAD_${TYPE_NAME}_COMMENTS_CODE" "${LOAD_COMMENTS_CODE}")
     SET("LOAD_${TYPE_NAME}_RULES_CODE" "${LOAD_RULES_CODE}")
     SET("READ_${TYPE_NAME}_RULES_CODE" "${READ_RULES_CODE}")
     SET(RELATIVE_TYPE_FILES "${RELATIVE_TYPE_FILES} ${RELATIVE_TYPE_FILE}")

@@ -31,7 +31,7 @@
     {
       "name": "IsChunkyShape",
       "type": "Bool",
-      "comment": "Does this unit's shape data consist of \"chunky\" facings? This kind of unit art has the unit in only 4 facings (N, W, S, and E) and in each of those directions, the unit's turrets rotates 32 facings (counter clockwise from north). This will result in 32 x 4 = 128 unit shapes in the shape data file."
+      "comment": "Does this unit's shape data consist of 'chunky' facings? This kind of unit art has the unit in only 4 facings (N, W, S, and E) and in each of those directions, the unit's turrets rotates 32 facings (counter clockwise from north). This will result in 32 x 4 = 128 unit shapes in the shape data file."
     },
     {
       "name": "IsRadarEquipped",
@@ -56,7 +56,7 @@
     {
       "name": "IsGigundo",
       "type": "Bool",
-      "comment": "Is this unit of the humongous size? Harvesters and mobile construction vehicles are of this size. If the vehicle is greater than 24 x 24 but less than 48 x 48, it is considered \"Gigundo\"."
+      "comment": "Is this unit of the humongous size? Harvesters and mobile construction vehicles are of this size. If the vehicle is greater than 24 x 24 but less than 48 x 48, it is considered 'Gigundo'."
     },
     {
       "name": "IsCloakable",

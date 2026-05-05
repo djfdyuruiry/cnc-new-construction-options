@@ -200,7 +200,7 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
         Variant_To_String(value_variant)
     );
 
-    const auto comment = Try_Get_Comment(name);
+    const auto comment = Try_Get_Rule_Comment(name);
 
     if (const auto value = std::get_if<int>(&value_variant)) {
         ini.Put_Int(SectionName.data(), name.data(), *value, 0, comment);
@@ -271,12 +271,14 @@ std::optional<std::string_view>& RuleSection::Get_Converter_Section_Type_Name()
     return ConverterSectionTypeName;
 }
 
-void RuleSection::Set_Comment(const std::string_view name, std::string comment)
+RuleSection& RuleSection::Set_Rule_Comment(const std::string_view name, std::string comment)
 {
     RuleComments[name.data()] = std::move(comment);
+
+    return *this;
 }
 
-std::optional<std::string> RuleSection::Try_Get_Comment(const std::string_view name) const
+std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_view name) const
 {
     if (RuleComments.contains(name.data())) {
         return RuleComments.at(name.data());
