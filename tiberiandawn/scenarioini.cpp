@@ -255,6 +255,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     }
 
     if (!Force_CD_Available(RequiredCD)) {
+        // TODO: Roll fatal log logic into Force_CD_Available calls (ensure game is consistent in error messages)
         static const std::string cd_display_names[] = {"GDI", "NOD", "Covert Operations"};
         std::string install_message = "";
 
