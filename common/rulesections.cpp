@@ -200,25 +200,27 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
         Variant_To_String(value_variant)
     );
 
+    const auto comment = Try_Get_Comment(name);
+
     if (const auto value = std::get_if<int>(&value_variant)) {
-        ini.Put_Int(SectionName.data(), name.data(), *value);
+        ini.Put_Int(SectionName.data(), name.data(), *value, 0, comment);
     } else if (const auto value = std::get_if<bool>(&value_variant)) {
-        ini.Put_Bool(SectionName.data(), name.data(), *value);
+        ini.Put_Bool(SectionName.data(), name.data(), *value, comment);
     } else if (const auto value = std::get_if<float>(&value_variant)) {
         const auto value_str = std::format("{}", *value);
-        ini.Put_String(SectionName.data(), name.data(), value_str);
+        ini.Put_String(SectionName.data(), name.data(), value_str, comment);
     } else if (const auto value = std::get_if<ushort>(&value_variant)) {
         const auto value_str = std::format("{}", static_cast<int>(*value));
-        ini.Put_String(SectionName.data(), name.data(), value_str);
+        ini.Put_String(SectionName.data(), name.data(), value_str, comment);
     } else if (const auto value = std::get_if<uint>(&value_variant)) {
         const auto value_str = std::format("{}", *value);
-        ini.Put_String(SectionName.data(), name.data(), value_str);
+        ini.Put_String(SectionName.data(), name.data(), value_str, comment);
     } else if (const auto value = std::get_if<char>(&value_variant)) {
-        ini.Put_Int(SectionName.data(), name.data(), *value);
+        ini.Put_Int(SectionName.data(), name.data(), *value, 0, comment);
     } else if (const auto value = std::get_if<uchar>(&value_variant)) {
-        ini.Put_Int(SectionName.data(), name.data(), *value);
+        ini.Put_Int(SectionName.data(), name.data(), *value, 0, comment);
     } else if (const auto value = std::get_if<std::string>(&value_variant)) {
-        ini.Put_String(SectionName.data(), name.data(), *value);
+        ini.Put_String(SectionName.data(), name.data(), *value, comment);
     } else {
         throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
     }
@@ -267,6 +269,20 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
 std::optional<std::string_view>& RuleSection::Get_Converter_Section_Type_Name()
 {
     return ConverterSectionTypeName;
+}
+
+void RuleSection::Set_Comment(const std::string_view name, std::string comment)
+{
+    RuleComments[name.data()] = std::move(comment);
+}
+
+std::optional<std::string> RuleSection::Try_Get_Comment(const std::string_view name) const
+{
+    if (RuleComments.contains(name.data())) {
+        return RuleComments.at(name.data());
+    }
+
+    return std::nullopt;
 }
 
 //IniRuleContext

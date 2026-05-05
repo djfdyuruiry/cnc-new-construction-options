@@ -77,11 +77,12 @@ function(TransformRuleNameToUpperSnakecase _RULE_NAME _RULE_NAME_SNAKE_CASE)
   set("${_RULE_NAME_SNAKE_CASE}" ${RULE_NAME_SNAKE_CASE} PARENT_SCOPE)
 endfunction()
 
-function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_DEFAULT)
+function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_COMMENT _RULE_DEFAULT)
   string(JSON RULE_OBJECT_JSON GET "${_RULES_JSON}" rules "${_RULE_INDEX}")
 
   string(JSON RULE_NAME GET "${RULE_OBJECT_JSON}" name)
   string(JSON RULE_TYPE GET "${RULE_OBJECT_JSON}" type)
+  string(JSON RULE_COMMENT GET "${RULE_OBJECT_JSON}" comment)
   string(JSON RULE_DEFAULT GET "${RULE_OBJECT_JSON}" default)
 
   string(JSON IS_IMPLEMENTED ERROR_VARIABLE JSON_ERROR GET "${RULE_OBJECT_JSON}" implemented)
@@ -93,6 +94,7 @@ function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_
 
   set(RULE_NAME ${RULE_NAME} PARENT_SCOPE)
   set(RULE_TYPE ${RULE_TYPE} PARENT_SCOPE)
+  set(RULE_TYPE ${RULE_COMMENT} PARENT_SCOPE)
   set(RULE_DEFAULT ${RULE_DEFAULT} PARENT_SCOPE)
   set(IS_IMPLEMENTED ${IS_IMPLEMENTED} PARENT_SCOPE)
 endfunction()
@@ -268,7 +270,7 @@ function(Main)
         string(APPEND RULE_PROCESS_CODE "\n             ")
       endif()
 
-      LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_DEFAULT)
+      LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_COMMENT RULE_DEFAULT)
 
       TransformRuleNameToUpperSnakecase("${RULE_NAME}" RULE_NAME_SNAKE_CASE)
       set(RULE_DEFINE "${RULE_NAME_SNAKE_CASE}_RULE")
@@ -276,7 +278,7 @@ function(Main)
       # rules-nco.cpp
       ResolveRuleValue("${RULE_DEFAULT}" RULE_VALUE)
 
-      string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Default(${RULE_VALUE})")
+      string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Comment(${RULE_COMMENT}).With_Default(${RULE_VALUE})")
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close call chain for section

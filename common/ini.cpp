@@ -798,7 +798,13 @@ int INIClass::Get_TextBlock(char const* section, char* buffer, int len) const
  *   07/03/1996 JLB : Created.                                                                 *
  *   07/10/1996 JLB : Handles multiple integer formats.                                        *
  *=============================================================================================*/
-bool INIClass::Put_Int(char const* section, char const* entry, int number, int format)
+bool INIClass::Put_Int(
+    char const* section,
+    char const* entry,
+    int number,
+    int format,
+    std::optional<std::string> comment
+)
 {
     char buffer[MAX_LINE_LENGTH];
 
@@ -816,7 +822,7 @@ bool INIClass::Put_Int(char const* section, char const* entry, int number, int f
         sprintf(buffer, "$%X", number);
         break;
     }
-    return (Put_String(section, entry, buffer));
+    return (Put_String(section, entry, buffer, std::move(comment)));
 }
 
 /***********************************************************************************************

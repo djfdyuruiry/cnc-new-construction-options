@@ -390,6 +390,9 @@ public:
         return Set(name, instances_csv);
     }
 
+    void Set_Comment(std::string_view name, std::string comment);
+    std::optional<std::string> Try_Get_Comment(std::string_view name) const;
+
     // TODO: Handle OnRulesChanged, if needed
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName)
 private:
@@ -404,6 +407,7 @@ private:
     static inline const std::function<bool(int)> ValidateUChar = [](auto v) { return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max(); };
 
     std::map<std::string, RuleValueVariant> Rules;
+    std::map<std::string, std::string> RuleComments;
     std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
     std::optional<std::string_view> ConverterSectionTypeName;
 
@@ -602,6 +606,18 @@ public:
     const IniRuleContext& Save(std::string_view name) const;
 
     IniRuleContext& Load(std::string_view name);
+
+    template<RuleValueVariantCompatible T>
+    IniRuleContext& With_Comment(std::string comment)
+    {
+        if (!NameInStream.has_value()) {
+            CNC_LOGGER_FATAL("Load(..) must be called before With_Comment(..)");
+        }
+
+        Section.Set_Comment(NameInStream.value(), std::move(comment));
+
+        return *this;
+    }
 
     template<RuleValueVariantCompatible T>
     IniRuleContext& With_Default(T default_value)
