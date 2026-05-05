@@ -230,7 +230,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     */
     if (RequiredCD != -2) {
         if (Scen.Scenario >= 20 && Scen.Scenario < 60 && GameToPlay == GAME_NORMAL) {
-            RequiredCD = 2;
+            RequiredCD = Options.SkipExpansionCdCheck ? -1 : 2;
         } else {
             if (Scen.Scenario != 1) {
                 if (Scen.Scenario >= 60) {

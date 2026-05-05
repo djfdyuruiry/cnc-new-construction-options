@@ -91,6 +91,7 @@ public:
     unsigned IsScoreShuffle : 1;  // Score list should shuffle?
     unsigned IsDeathAnnounce : 1; // Announce enemy deaths?
     unsigned IsFreeScroll : 1;    // Allow free direction scrolling?
+    unsigned SkipExpansionCdCheck : 1; // Skip the CD check for Covert Operations and Console scenarios?
 
     /*
     **	These are the hotkeys used for keyboard control.

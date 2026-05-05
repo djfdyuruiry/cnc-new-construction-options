@@ -151,6 +151,7 @@ OptionsClass::OptionsClass(void)
     IsScoreRepeat = false;
     IsScoreShuffle = false;
     IsFreeScroll = false;
+    SkipExpansionCdCheck = true;
 }
 
 /***********************************************************************************************
@@ -578,6 +579,7 @@ void OptionsClass::Load_Settings(void)
     Set_Shuffle(ini.Get_Int(OPTIONS, "IsScoreShuffle", 0));
     IsDeathAnnounce = ini.Get_Int(OPTIONS, "DeathAnnounce", 0);
     IsFreeScroll = ini.Get_Int(OPTIONS, "FreeScrolling", 0);
+    SkipExpansionCdCheck = ini.Get_Bool(OPTIONS, "SkipExpansionCdCheck", true);
     SlowPalette = ini.Get_Int(OPTIONS, "SlowPalette", 1);
 
     KeyForceMove1 = (KeyNumType)ini.Get_Int(HotkeyName, "KeyForceMove1", KeyForceMove1);
@@ -831,6 +833,7 @@ void OptionsClass::Save_Settings(void)
     ini.Put_Int(OPTIONS, "IsScoreShuffle", IsScoreShuffle);
     ini.Put_Int(OPTIONS, "DeathAnnounce", IsDeathAnnounce);
     ini.Put_Int(OPTIONS, "FreeScrolling", IsFreeScroll);
+    ini.Put_Bool(OPTIONS, NAMEOF(SkipExpansionCdCheck), SkipExpansionCdCheck);
 
     ini.Put_Int(HotkeyName, "KeyForceMove1", KeyForceMove1);
     ini.Put_Int(HotkeyName, "KeyForceMove2", KeyForceMove2);
