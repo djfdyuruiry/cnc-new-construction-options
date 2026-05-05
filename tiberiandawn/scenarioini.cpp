@@ -255,21 +255,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     }
 
     if (!Force_CD_Available(RequiredCD)) {
-        // TODO: Roll fatal log logic into Force_CD_Available calls (ensure game is consistent in error messages)
-        static const std::string cd_display_names[] = {"GDI", "NOD", "Covert Operations"};
-        std::string install_message = "";
-
-        if (RequiredCD > -1 || RequiredCD < 2) {
-            install_message = std::format(
-                " Install {} files to play this scenario",
-                cd_display_names[RequiredCD]
-            );
-        }
-
-        CNC_LOG_FATAL("Required game files missing!{}", install_message);
-        if (!RunningAsDLL) {
-            exit(EXIT_FAILURE);
-        }
+        Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), RequiredCD);
     }
 
     /*
@@ -1058,10 +1044,7 @@ bool Read_Movies_From_Scenario_Ini(char* root, bool fresh)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
-        Prog_End("Read_Scenario_Ini - CD not found", true);
-        if (!RunningAsDLL) {
-            exit(EXIT_FAILURE);
-        }
+        Raise_Fatal_CD_Error(NAMEOF(Read_Movies_From_Scenario_Ini), RequiredCD);
     }
 
     /*

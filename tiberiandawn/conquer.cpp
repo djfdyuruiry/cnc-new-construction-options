@@ -3774,6 +3774,26 @@ bool Force_CD_Available(int cd)
 #endif
 }
 
+void Raise_Fatal_CD_Error(const char* caller, const int cd)
+{
+    static const std::string cd_display_names[] = {"GDI", "NOD", "Covert Operations"};
+    std::string install_message = "";
+
+    if (cd >= CD_GDI || cd <= CD_COVERTOPS) {
+        install_message = std::format(
+            " Install {} files to play this scenario",
+            cd_display_names[cd]
+        );
+    }
+
+    CNC_LOG_ERROR("CD check failed in function: {} (cd={})", caller, cd);
+    CNC_LOG_FATAL("Required game files missing!{}", install_message);
+
+    if (!RunningAsDLL) {
+        exit(EXIT_FAILURE);
+    }
+}
+
 /***************************************************************************
  * DISK_SPACE_AVAILABLE -- returns bytes of free disk space                *
  *                                                                         *

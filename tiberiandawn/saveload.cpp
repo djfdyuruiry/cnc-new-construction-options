@@ -407,10 +407,7 @@ bool Load_Game(const char* file_name)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
-        Prog_End("Load_Game - CD not found", true);
-        if (!RunningAsDLL) {
-            exit(EXIT_FAILURE);
-        }
+        Raise_Fatal_CD_Error(NAMEOF(Load_Game), RequiredCD);
         return false;
     }
 
@@ -577,10 +574,7 @@ bool Load_Game_Binary(const char* file_name)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
-        Prog_End("Load_Game - CD not found", true);
-        if (!RunningAsDLL) {
-            exit(EXIT_FAILURE);
-        }
+        Raise_Fatal_CD_Error(NAMEOF(Load_Game_Binary), RequiredCD);
         return false;
     }
 
