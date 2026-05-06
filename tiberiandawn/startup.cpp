@@ -541,8 +541,10 @@ void Prog_End(const char* why, bool fatal) // Added why and fatal parameters. ST
         }
 
         CNC_LOG_FATAL(why == nullptr ? "Unknown fatal error" : why);
-        *((int*)0) = 0;
-    } else if (why) {
+        throw std::runtime_error(why);
+    }
+
+    if (why) {
         GlyphX_Debug_Print(why);
     }
 

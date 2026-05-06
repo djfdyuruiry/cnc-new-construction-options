@@ -3787,11 +3787,7 @@ void Raise_Fatal_CD_Error(const char* caller, const int cd)
     }
 
     CNC_LOG_ERROR("CD check failed in function: {} (cd={})", caller, cd);
-    CNC_LOG_FATAL("Required game files missing!{}", install_message);
-
-    if (!RunningAsDLL) {
-        exit(EXIT_FAILURE);
-    }
+    CNC_LOG_FATAL("Required game files missing!{}", install_message); // see Init_Game in init.cpp (calls exit process)
 }
 
 /***************************************************************************

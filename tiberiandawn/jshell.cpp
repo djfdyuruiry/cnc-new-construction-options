@@ -152,9 +152,9 @@ void Fatal(char const* message, ...)
 
     if (!RunningAsDLL) {
         exit(EXIT_FAILURE);
-    } else {
-        *((int*)0) = 0;
     }
+
+    throw std::runtime_error(message);
 }
 
 #ifdef NEVER
