@@ -111,6 +111,8 @@ bool Init_Game(int, char*[])
         Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
         Show_Mouse();
 
+        Speak(VOX_FAIL);
+
         // TODO: Play commando death sound before this or mission failure message :D
         WWMessageBox().Process(err.c_str());
 
@@ -118,6 +120,7 @@ bool Init_Game(int, char*[])
         TRIGGER_DEBUGGER;
 
         Prog_End(err.c_str(), false);
+
         if (!RunningAsDLL) {
             exit(1);
         }

@@ -52,6 +52,9 @@ public:
     static inline const auto DefaultLoggerName = std::string("nco");
     static inline std::function<void(std::string)> OnFatalError = [](const auto& e) {
         TRIGGER_DEBUGGER;
+
+        spdlog::shutdown();
+
         throw std::runtime_error(e);
     };
 
@@ -70,7 +73,6 @@ public:
     static void On_Fatal_Error(std::string errorMessage);
 
     // TODO: Add PII level/log method to require a special flag or runtime arg to force print them (paths containing usernames etc.)
-    void Fatal(const std::string_view message) const;
 
     std::shared_ptr<spdlog::logger> operator()() const;
 

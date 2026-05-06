@@ -567,6 +567,8 @@ void Prog_End(const char* why, bool fatal) // Added why and fatal parameters. ST
         Palette = NULL;
     }
 
+    spdlog::shutdown();
+
     ProgEndCalled = true;
 }
 
