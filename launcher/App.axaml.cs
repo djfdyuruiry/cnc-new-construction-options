@@ -21,7 +21,7 @@ public partial class App : Application
     if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
     {
       desktop.Exit += OnExit;
-      desktop.MainWindow = new MainWindow();
+      desktop.MainWindow = Locator.Current.GetService<MainWindow>();
     }
 
     base.OnFrameworkInitializationCompleted();
