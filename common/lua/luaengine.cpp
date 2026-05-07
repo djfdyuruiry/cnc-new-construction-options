@@ -429,7 +429,10 @@ LuaResultWithValue<std::string> LuaEngine::Eval_To_String(const std::string& exp
     auto eval_result = Get_Value_From_State<LuaEvalResult>([&expression](auto L)
     {
         // attempt to compile an evaluation first
-        const auto return_expression = std::format("return tostring({})", expression);
+        const auto return_expression = std::format(
+            "local ___r = {}; return tostring(___r == nil and 'nil' or ___r)", // tostring errors with nil arg
+            expression
+        );
 
         auto status = luaL_loadstring(L, return_expression.c_str());
         const auto eval_returns_value = status == LUA_OK;

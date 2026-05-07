@@ -871,12 +871,13 @@ static void Message_Input(KeyNumType& input)
     */
     if ((GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH) && input == KN_F1) {
         memset(txt, 0, 40);
-        strcpy(txt, "Lua Console: ");
+        strcpy(txt, MessageListClass::LuaConsolePrefix.data());
 
         Messages.Add_Edit(YELLOW,
                           TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
                           txt,
-                          300 * factor);
+                          300 * factor,
+                          true);
 
         Map.Flag_To_Redraw(false);
     }
@@ -986,15 +987,9 @@ static void Message_Input(KeyNumType& input)
     ** Evaluate lua console input, the outcome (result value/error) is shown to the player as a message.
     */
     if (rc == 3 && (GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH)) {
-        const auto console_line = Messages.Get_Edit_Buf();
+        const auto console_line = std::string(Messages.Get_Edit_Buf());
 
-        ScenarioLua::Get_Engine().Eval_To_String(console_line)
-            .If_Value([&console_line](const auto& r) {
-                LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", console_line));
-                LuaList.Push<AddMessageLuaEvent>(r);
-            }).On_Error([](const auto& r) {
-                LuaList.Push<AddMessageLuaEvent>(r.Error_Message());
-            });
+        ScenarioLua::Eval_Lua_Console_Input(console_line);
     }
 
     /*

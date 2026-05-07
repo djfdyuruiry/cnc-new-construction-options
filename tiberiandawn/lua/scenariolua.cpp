@@ -16,6 +16,7 @@
 #include "scenariolua.h"
 #include "tdtypes_luaapi.h"
 #include "ui_luaapi.h"
+#include "events/addmessage_luaevent.h"
 
 RuleSections& TdRuleSectionsProvider::Sections()
 {
@@ -113,6 +114,29 @@ void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClas
     CNC_LOGGER_INFO("Checking scenario INI file for lua scripts: {}", scenario_ini_file);
 
     On_Scenario_Load(game_type, scenario, player, ini);
+}
+
+LuaResultWithValue<std::string> ScenarioLua::Eval_Lua_Console_Input(std::string input_line)
+{
+    LuaConsoleInputHistory.push_back(input_line);
+
+    // TODO: non-lua commands, /help etc.
+
+    return Get_Engine().Eval_To_String(input_line)
+        .If_Value([&input_line](const auto& r) {
+            // output console input and result on separate lines
+            LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", input_line));
+            LuaList.Push<AddMessageLuaEvent>(r);
+        }).On_Error([&input_line](const auto& r) {
+            // output console error and result on separate lines
+            LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", input_line), RED);
+            LuaList.Push<AddMessageLuaEvent>(r.Error_Message(), RED);
+        });
+}
+
+const std::vector<std::string>& ScenarioLua::Get_Lua_Console_Input_History()
+{
+    return LuaConsoleInputHistory;
 }
 
 bool ScenarioLua::Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name)

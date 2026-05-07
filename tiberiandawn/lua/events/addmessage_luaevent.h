@@ -5,11 +5,12 @@
 class AddMessageLuaEvent : public LuaEvent
 {
 public:
-    AddMessageLuaEvent(std::string message);
+    AddMessageLuaEvent(std::string message, ColorType colour = GREEN);
 
     void Execute() const override;
 
 private:
     // event data
     std::string Message;
+    ColorType Colour;
 };

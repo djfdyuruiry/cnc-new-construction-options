@@ -2,9 +2,10 @@
 
 #include "addmessage_luaevent.h"
 
-AddMessageLuaEvent::AddMessageLuaEvent(std::string message): LuaEvent("AddMessage")
+AddMessageLuaEvent::AddMessageLuaEvent(std::string message, const ColorType colour): LuaEvent("AddMessage")
 {
     Message = std::move(message);
+    Colour = colour;
 }
 
 void AddMessageLuaEvent::Execute() const
@@ -18,7 +19,7 @@ void AddMessageLuaEvent::Execute() const
     // ripped off from netdlg.cpp
     Messages.Add_Message(
         message.data(),
-        CC_GREEN,
+        Colour,
         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
         600,
         0,

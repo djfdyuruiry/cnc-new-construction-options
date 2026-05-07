@@ -54,6 +54,8 @@
 class MessageListClass
 {
 public:
+    static constexpr std::string_view LuaConsolePrefix = "Lua Console: ";
+
     /*
     **	Constructor/Destructor
     */
@@ -74,7 +76,7 @@ public:
     /*
     **	Message-editing routines
     */
-    TextLabelClass* Add_Edit(int color, TextPrintType style, char* to, int width);
+    TextLabelClass* Add_Edit(int color, TextPrintType style, char* to, int width, bool lua_console_mode = false);
     char* Get_Edit_Buf(void);
 
     /*
@@ -98,6 +100,8 @@ private:
     int EditCurPos;              // current edit position
     int EditInitPos;             // initial edit position
     int Width;                   // Maximum width in pixels of editable string
+    bool InLuaConsoleMode;       // message being edited is for lua console processing
+    int LuaConsoleHistoryPos;    // position in lua console history, i.e. user has pressed UP n times in a row
 
     /*
     ** Static buffers provided for messages.  They must be long enough for

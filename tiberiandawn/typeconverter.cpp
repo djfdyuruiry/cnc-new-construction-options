@@ -22,6 +22,7 @@ static const TwoWayMap<StructType, std::string> StructPatchTable = {{ STRUCT_GTO
 static const TwoWayMap<UnitType, std::string> UnitPatchTable = {{ UNIT_HTANK, "HTNK" }, { UNIT_MTANK, "MTNK" }, { UNIT_LTANK, "LTNK" }, { UNIT_STANK, "STNK" }, { UNIT_FTANK, "FTNK" }, { UNIT_MLRS, "MSAM" }, { UNIT_BUGGY, "BGGY" }, { UNIT_HARVESTER, "HARV" }, { UNIT_MSAM, "MLRS" }, { UNIT_HOVER, "LST" }, { UNIT_GUNBOAT, "BOAT" }};
 static const TwoWayMap<WarheadType, std::string> WarheadPatchTable = {{ WARHEAD_HE, "HE_WARHEAD" }, { WARHEAD_LASER, "LASER_WARHEAD" }};
 static const TwoWayMap<WeaponType, std::string> WeaponPatchTable = {{ WEAPON_GRENADE, "GRENADE_WEAPON" }, { WEAPON_MLRS, "WEAPON_MLRS" }, { WEAPON_NAPALM, "NAPALM_WEAPON" }, { WEAPON_STEG, "STEG_WEAPON" }, { WEAPON_TREX, "TREX_WEAPON" }};
+static const TwoWayMap<HousesType, std::string> HousesPatchTable = {{ HOUSE_GOOD, "GOODGUY" }, { HOUSE_BAD, "BADGUY" }};
 
 /**
  * Internal enum values that should not be used in INI or Lua APIs.
@@ -35,11 +36,11 @@ static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 
 // Info about each enum supported type, indexed against it's typename
 const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
-    //             [Typename]                     [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]   [Excluded Vals]      [Allow non-enum values?]
+    //                [Typename]                    [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]   [Excluded Vals]      [Allow non-enum values?]
     ENUM_TYPE_PAIR(ArmorType,                    "ARMOR_",       ARMOR_NONE,                             ARMOR_LAST,                               {},                 {},                  false),
     ENUM_TYPE_PAIR(MPHType,                      "MPH_",         MPH_IMMOBILE,                           MPH_LIGHT_SPEED,                          {},                 {},                  true),
     ENUM_TYPE_PAIR(WeaponType,                   "WEAPON_",      WEAPON_NONE,                            WEAPON_LAST,                              WeaponPatchTable,   {},                  false),
-    ENUM_TYPE_PAIR(HousesType,                   "HOUSE_",       HOUSE_NONE,                             HOUSE_LAST,                               {},                 {},                  false),
+    ENUM_TYPE_PAIR(HousesType,                   "HOUSE_",       HOUSE_NONE,                             HOUSE_LAST,                               HousesPatchTable,   {},                  false),
     ENUM_TYPE_PAIR(StructType,                   "STRUCT_",      STRUCT_NONE,                            STRUCT_LAST,                              StructPatchTable,   {},                  false),
     ENUM_TYPE_PAIR(FactoryType,                  "FACTORY_",     FACTORY_TYPE_NONE,                      FACTORY_TYPE_BUILDING,                    {},                 {},                  false),
     ENUM_TYPE_PAIR(DirType,                      "DIR_",         DIR_MIN,                                DIR_MAX,                                  {},                 {},                  true),
@@ -84,7 +85,8 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(TerrainType,                  "TERRAIN_",     TERRAIN_NONE,                           TERRAIN_LAST,                             {},                 {},                  false),
     ENUM_TYPE_PAIR(ScenarioPlayerType,           "SCEN_PLAYER_", SCEN_PLAYER_NONE,                       SCEN_PLAYER_LAST,                         {},                 {},                  false),
     ENUM_TYPE_PAIR(LayerType,                    "LAYER_",       LAYER_NONE,                             LAYER_LAST,                               {},                 {},                  false),
-    ENUM_TYPE_PAIR(UrgencyType,                  "URGENCY_",     URGENCY_NONE,                           URGENCY_FIRST,                            {},                 {},                  false)
+    ENUM_TYPE_PAIR(UrgencyType,                  "URGENCY_",     URGENCY_NONE,                           URGENCY_FIRST,                            {},                 {},                  false),
+    ENUM_TYPE_PAIR(ColorType,                    "",             TBLACK,                                 WHITE,                                    {},                 {},                  false)
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(
@@ -181,6 +183,7 @@ void TdTypeConverter::Set_Rule_With_Variant(
     RULE_VARIANT(ScenarioPlayerType)
     RULE_VARIANT(LayerType)
     RULE_VARIANT(UrgencyType)
+    RULE_VARIANT(ColorType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -246,6 +249,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(
     CSV_RULE_VARIANT(ScenarioPlayerType)
     CSV_RULE_VARIANT(LayerType)
     CSV_RULE_VARIANT(UrgencyType)
+    CSV_RULE_VARIANT(ColorType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -304,6 +308,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVaria
     TYPE_NAME_VARIANT(ScenarioPlayerType)
     TYPE_NAME_VARIANT(LayerType)
     TYPE_NAME_VARIANT(UrgencyType)
+    TYPE_NAME_VARIANT(ColorType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -363,6 +368,7 @@ std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& varia
     TO_STRING_VARIANT(ScenarioPlayerType)
     TO_STRING_VARIANT(LayerType)
     TO_STRING_VARIANT(UrgencyType)
+    TO_STRING_VARIANT(ColorType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }

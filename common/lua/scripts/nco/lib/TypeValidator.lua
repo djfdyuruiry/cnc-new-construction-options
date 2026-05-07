@@ -75,27 +75,58 @@ end
 ---@param argumentName string
 ---@param value table|string
 local function isNotEmpty(functionName, argumentName, value)
-  if type(value) == "table" then
-    assert(
-      next(value) ~= nil,
-      string.format("%s: argument %s must not be empty", functionName, argumentName)
+    if type(value) == "table" then
+        assert(
+            next(value) ~= nil,
+            string.format("%s: argument %s must not be empty", functionName, argumentName)
+        )
+        return
+    elseif type(value) == "string" then
+        assert(
+            (#value) > 0,
+            string.format("%s: argument %s must not be empty", functionName, argumentName)
+        )
+        return
+    end
+
+    error(
+        string.format(
+            "%s: invalid 'isNotEmpty' for argument %s (must be of type: table OR string)",
+            functionName,
+            argumentName
+        )
     )
-    return
-  elseif type(value) == "string" then
-    assert(
-      (#value) > 0,
-      string.format("%s: argument %s must not be empty", functionName, argumentName)
-    )
-    return
+end
+
+---@param validValues table
+local function isOneOf(validValues)
+  local valuesString = ""
+
+  for i, validValue in ipairs(validValues) do
+    if i == 1 then
+      valuesString = valuesString .. "|"
+    end
+
+    valuesString = valuesString .. validValue
   end
 
-  error(
-    string.format(
-      "%s: invalid 'isNotEmpty' for argument %s (must be of type: table OR string)",
-      functionName,
-      argumentName
+  ---@param functionName string
+  ---@param argumentName string
+  ---@param value any
+  return function(functionName, argumentName, value)
+    local valueIsValid = false
+
+    for _, validValue in ipairs(valuesString) do
+      if value == validValue then
+        valueIsValid = true
+      end
+    end
+
+    assert(
+      valueIsValid,
+      string.format("%s: argument %s must be equal to value(s) %s", functionName, argumentName, valuesString)
     )
-  )
+  end
 end
 
 ---@param functionName string
@@ -143,7 +174,8 @@ return {
     isType = isType,
     isNotNil = isNotNil,
     isNotBlank = isNotBlank,
-    isNotEmpty = isNotEmpty
+    isNotEmpty = isNotEmpty,
+    isOneOf = isOneOf
   },
   validateCall = validateCall
 }

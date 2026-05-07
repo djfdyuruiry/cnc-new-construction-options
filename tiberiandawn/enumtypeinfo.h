@@ -142,5 +142,6 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<TerrainType>,
     EnumTypeInfo<ScenarioPlayerType>,
     EnumTypeInfo<LayerType>,
-    EnumTypeInfo<UrgencyType>
+    EnumTypeInfo<UrgencyType>,
+    EnumTypeInfo<ColorType>
 >;
