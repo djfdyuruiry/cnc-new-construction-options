@@ -2,10 +2,15 @@
 
 #include "addmessage_luaevent.h"
 
-AddMessageLuaEvent::AddMessageLuaEvent(std::string message, const ColorType colour): LuaEvent("AddMessage")
+AddMessageLuaEvent::AddMessageLuaEvent(
+    std::string message,
+    const CCPaletteType colour,
+    const int timeoutInTicks
+): LuaEvent("AddMessage")
 {
     Message = std::move(message);
     Colour = colour;
+    TimeoutInTicks = timeoutInTicks;
 }
 
 void AddMessageLuaEvent::Execute() const
@@ -21,7 +26,7 @@ void AddMessageLuaEvent::Execute() const
         message.data(),
         Colour,
         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
-        600,
+        TimeoutInTicks,
         0,
         0
     );

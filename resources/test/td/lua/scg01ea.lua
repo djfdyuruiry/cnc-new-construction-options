@@ -40,6 +40,10 @@ local function timerTriggerSetup()
   Event.handlers.onTimerTrigger = function(triggerName)
     Logger.debug("Handling trigger %s", triggerName)
 
+    Messages.setMessageTimeout(5)
+    Messages.setColour("BROWN")
+    Messages.sendToPlayer("Handling trigger %s", triggerName)
+
     if triggerName == "TMR1" then
       Logger.debug("5 second trigger execute")
     elseif triggerName == "TMR2" then
@@ -81,6 +85,7 @@ end
 
 xpcall(main, function(error)
   -- show the error to the player
+  Messages.setColour("RED")
   Messages.sendToPlayer("LUA ERROR: %s", error)
 
   -- log for debugging later

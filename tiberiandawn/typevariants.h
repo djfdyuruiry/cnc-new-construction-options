@@ -56,7 +56,7 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, ScenarioPlayerType> ||
     std::is_same_v<T, LayerType> ||
     std::is_same_v<T, UrgencyType> ||
-    std::is_same_v<T, ColorType>
+    std::is_same_v<T, CCPaletteType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -110,5 +110,5 @@ using ConverterTypeVariant = std::variant<
     ScenarioPlayerType,
     LayerType,
     UrgencyType,
-    ColorType
+    CCPaletteType
 >;

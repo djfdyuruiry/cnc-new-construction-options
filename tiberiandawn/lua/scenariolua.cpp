@@ -129,8 +129,8 @@ LuaResultWithValue<std::string> ScenarioLua::Eval_Lua_Console_Input(std::string 
             LuaList.Push<AddMessageLuaEvent>(r);
         }).On_Error([&input_line](const auto& r) {
             // output console error and result on separate lines
-            LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", input_line), RED);
-            LuaList.Push<AddMessageLuaEvent>(r.Error_Message(), RED);
+            LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", input_line), CC_NOD_COLOR);
+            LuaList.Push<AddMessageLuaEvent>(r.Error_Message(), CC_NOD_COLOR);
         });
 }
 

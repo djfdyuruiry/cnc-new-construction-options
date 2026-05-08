@@ -10,6 +10,7 @@
 #include "common/twowaymap.h"
 #include "common/rulesections.h"
 #include "common/stringutils.h"
+#include "common/lua/luaengine.h"
 
 #include "enumtypeinfo.h"
 #include "target.h"
@@ -243,6 +244,19 @@ public:
         }
 
         return *result;
+    }
+
+    template<class T>
+    requires SupportedByTdTypeConverter<T>
+    static T Assert_Parse_Lua_String(const SharedLuaEngine& engine, std::string instance_string)
+    {
+        const auto instance = Try_Parse<T>(instance_string);
+
+        if (!instance.has_value()) {
+            engine.Raise_Error_Format("Failed to parse {} from string: {}", Get_Type_Name<T>(), instance_string);
+        }
+
+        return *instance;
     }
 
     template<class T>
