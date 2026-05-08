@@ -435,13 +435,12 @@ int main(int argc, char** argv)
         }
         SlowPalette = ini.Get_Bool("Options", "SlowPalette", false);
 
-        BreakoutAllowed = true;
-
         /*
         ** Regardless of whether we should run it or not, here we're
         ** gonna change it to say "no" in the future.
         */
         if (Special.IsFromInstall) {
+            BreakoutAllowed = true;
             ini.Put_Bool("Intro", "PlayIntro", false);
             ini.Save(cfile);
         }
