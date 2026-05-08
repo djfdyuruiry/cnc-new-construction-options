@@ -51,7 +51,7 @@
       "name": "Prefix",
       "type": "String",
       "template_ignore": true,
-      "comment": "This is a unique ASCII character used when constructing filenames. It serves a similar purpose as the \"Suffix\" element, but is only one character long.",
+      "comment": "This is a unique ASCII character used when constructing filenames. It serves a similar purpose as the 'Suffix' element, but is only one character long.",
       "example_value": "G",
       "valid_values": "One character maximum, in uppercase"
     },

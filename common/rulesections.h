@@ -390,6 +390,9 @@ public:
         return Set(name, instances_csv);
     }
 
+    RuleSection& Set_Rule_Comment(std::string_view name, std::string comment);
+    std::optional<std::string> Try_Get_Rule_Comment(std::string_view name) const;
+
     // TODO: Handle OnRulesChanged, if needed
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName)
 private:
@@ -404,6 +407,7 @@ private:
     static inline const std::function<bool(int)> ValidateUChar = [](auto v) { return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max(); };
 
     std::map<std::string, RuleValueVariant> Rules;
+    std::map<std::string, std::string> RuleComments;
     std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
     std::optional<std::string_view> ConverterSectionTypeName;
 
@@ -467,6 +471,8 @@ private:
     }
 };
 
+// RuleSection macro 'methods' - useful for setting variables and class members from rules
+
 #define Read_Var_With_Type(VAR, T) Get_With_Callback<T>(#VAR, [&](const auto v) { VAR = v; })
 
 // Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
@@ -478,6 +484,8 @@ private:
 #define Read_Char_Var(VAR) Read_Var_With_Type(VAR, char)
 #define Read_UChar_Var(VAR) Read_Var_With_Type(VAR, uchar)
 #define Read_String_Var(VAR) Read_Var_With_Type(VAR, std::string)
+
+#define Set_Var_Comment(VAR, COMMENT) Set_Rule_Comment(#VAR, COMMENT)
 
 class IniRuleContext
 {
@@ -603,6 +611,17 @@ public:
 
     IniRuleContext& Load(std::string_view name);
 
+    IniRuleContext& With_Comment(std::string comment)
+    {
+        if (!NameInStream.has_value()) {
+            CNC_LOGGER_FATAL("Load(..) must be called before With_Comment(..)");
+        }
+
+        Section.Set_Rule_Comment(NameInStream.value(), std::move(comment));
+
+        return *this;
+    }
+
     template<RuleValueVariantCompatible T>
     IniRuleContext& With_Default(T default_value)
     {
@@ -615,6 +634,11 @@ public:
         NameInStream = std::nullopt;
 
         return *this;
+    }
+
+    RuleSection& Get_Section() const
+    {
+        return Section;
     }
 
 private:

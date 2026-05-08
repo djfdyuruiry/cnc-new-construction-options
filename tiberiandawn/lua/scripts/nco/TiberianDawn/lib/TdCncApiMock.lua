@@ -7,6 +7,10 @@ local function extendCallsTable(calls)
   }
 
   calls.Messages = {
+    setColour = {},
+    resetColour = {},
+    setMessageTimeout = {},
+    resetMessageTimeout = {},
     sendToPlayer = {}
   }
 
@@ -55,7 +59,23 @@ local function extendMockTable(getCalls, mock)
     {},
     {
       __index = function (_, k)
-        if k == "sendToPlayer" then
+        if k == "setColour" then
+          return function(...)
+            table.insert(getCalls().Messages.setColour, {...})
+          end
+        elseif k == "resetColour" then
+          return function(...)
+            table.insert(getCalls().Messages.resetColour, {...})
+          end
+        elseif k == "setMessageTimeout" then
+          return function(...)
+            table.insert(getCalls().Messages.setMessageTimeout, {...})
+          end
+        elseif k == "resetMessageTimeout" then
+          return function(...)
+            table.insert(getCalls().Messages.resetMessageTimeout, {...})
+          end
+        elseif k == "sendToPlayer" then
           return function(...)
             table.insert(getCalls().Messages.sendToPlayer, {...})
           end

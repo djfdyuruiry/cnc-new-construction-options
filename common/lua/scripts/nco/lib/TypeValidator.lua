@@ -98,6 +98,37 @@ local function isNotEmpty(functionName, argumentName, value)
   )
 end
 
+---@param validValues table
+local function isOneOf(validValues)
+  local valuesString = ""
+
+  for i, validValue in ipairs(validValues) do
+    if i == 1 then
+      valuesString = valuesString .. "|"
+    end
+
+    valuesString = valuesString .. validValue
+  end
+
+  ---@param functionName string
+  ---@param argumentName string
+  ---@param value any
+  return function(functionName, argumentName, value)
+    local valueIsValid = false
+
+    for _, validValue in ipairs(valuesString) do
+      if value == validValue then
+        valueIsValid = true
+      end
+    end
+
+    assert(
+      valueIsValid,
+      string.format("%s: argument %s must be equal to value(s) %s", functionName, argumentName, valuesString)
+    )
+  end
+end
+
 ---@param functionName string
 ---@param argumentsMap { [string]: any[] }
 ---@param callingSelf boolean?
@@ -143,7 +174,8 @@ return {
     isType = isType,
     isNotNil = isNotNil,
     isNotBlank = isNotBlank,
-    isNotEmpty = isNotEmpty
+    isNotEmpty = isNotEmpty,
+    isOneOf = isOneOf
   },
   validateCall = validateCall
 }

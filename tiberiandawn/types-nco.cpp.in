@@ -10,6 +10,8 @@
 
 const IniRuleContext& BulletTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_BULLET_COMMENTS_CODE@;
+
     return ObjectTypeClass::Read_INI(ini)
         @LOAD_BULLET_RULES_CODE@;
 }
@@ -22,6 +24,8 @@ const RuleSection& BulletTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& BuildingTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_BUILDING_COMMENTS_CODE@;
+
     return TechnoTypeClass::Read_INI(ini)
         @LOAD_BUILDING_RULES_CODE@;
 }
@@ -34,6 +38,8 @@ const RuleSection& BuildingTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& HouseTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_HOUSE_COMMENTS_CODE@;
+
     auto set_suffix = std::bind(&HouseTypeClass::Set_Suffix, this, std::placeholders::_1);
     auto set_prefix = std::bind(&HouseTypeClass::Set_Prefix, this, std::placeholders::_1);
 
@@ -65,6 +71,8 @@ const RuleSection& HouseTypeClass::Read_Rules(const RuleSection& rules)
 // TODO: IsImmuneToTiberium and HasC4Charges
 const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_INFANTRY_COMMENTS_CODE@;
+
     return TechnoTypeClass::Read_INI(ini)
         @LOAD_INFANTRY_RULES_CODE@;
 }
@@ -77,6 +85,8 @@ const RuleSection& InfantryTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& AnimTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_ANIMATION_COMMENTS_CODE@;
+
     // TODO: Consider removing ObjectTypeClass::Read_INI as those values are the same for all instances
     // (or move to dedicated section in main rules file)
     return ObjectTypeClass::Read_INI(ini)
@@ -91,6 +101,8 @@ const RuleSection& AnimTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& AircraftTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_AIRCRAFT_COMMENTS_CODE@;
+
     return TechnoTypeClass::Read_INI(ini)
         @LOAD_AIRCRAFT_RULES_CODE@;
 }
@@ -104,6 +116,8 @@ const RuleSection& AircraftTypeClass::Read_Rules(const RuleSection& rules)
 // TODO: Logic to allow selecting FullName by text file const name (or wait until lang file refactored into text format)
 const IniRuleContext& ObjectTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_OBJECT_COMMENTS_CODE@;
+
     return ini@LOAD_OBJECT_RULES_CODE@;
 }
 
@@ -114,6 +128,8 @@ const RuleSection& ObjectTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& TechnoTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_TECHNO_COMMENTS_CODE@;
+
     ObjectTypeClass::Read_INI(ini)
         @LOAD_TECHNO_RULES_CODE@;
 
@@ -140,6 +156,8 @@ const RuleSection& TechnoTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& UnitTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_UNIT_COMMENTS_CODE@;
+
     return TechnoTypeClass::Read_INI(ini)
         @LOAD_UNIT_RULES_CODE@; // TODO: IsImmuneToTiberium and HasC4Charges
 }
@@ -152,6 +170,8 @@ const RuleSection& UnitTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& WeaponTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_WEAPON_COMMENTS_CODE@;
+
     return ini@LOAD_WEAPON_RULES_CODE@;
 }
 
@@ -162,6 +182,8 @@ const RuleSection& WeaponTypeClass::Read_Rules(const RuleSection& rules)
 
 const IniRuleContext& WarheadTypeClass::Read_INI(const IniRuleContext& ini)
 {
+    ini.Get_Section()@LOAD_WARHEAD_COMMENTS_CODE@;
+
     return ini@LOAD_WARHEAD_RULES_CODE@;
 }
 

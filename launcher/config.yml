@@ -24,7 +24,14 @@ TiberianDawn:
       Name: GDI
       Required: true
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/command-and-conquer/iso/CNC95_GDI.zip
+          File: CNC95_GDI.iso
+          Checksum: d5382a8f2cb4c60c5cc70fb79169f5e942d1eeb51cba157b695c0dc63cbc8c21
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/CommandConquerUSAWindows95Rerelease/Command%20%26%20Conquer%20%28USA%29%20%28Disc%201%29%20%28Windows%2095%29%20%28Rerelease%29.zip
           File: Command & Conquer (USA) (Disc 1) (Windows 95) (Rerelease).bin
@@ -53,7 +60,14 @@ TiberianDawn:
     - SortOrder: 2
       Name: NOD
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/command-and-conquer/iso/CNC95_Nod.zip
+          File: CNC95_Nod.iso
+          Checksum: cf935c0b107518654cd14ba191dc8672f4e5759e035f24c341787f2133d12764
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/CommandConquerUSAWindows95Rerelease/Command%20%26%20Conquer%20%28USA%29%20%28Disc%202%29%20%28Windows%2095%29%20%28Rerelease%29%20%28Rev%201%29.zip
           File: Command & Conquer (USA) (Disc 2) (Windows 95) (Rerelease) (Rev 1).bin
@@ -70,7 +84,14 @@ TiberianDawn:
       DisplayName: >-
         Covert Operations (Expansion)
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/command-and-conquer/iso/CNC_Covertops.zip
+          File: CD3_Covertops.bin
+          Checksum: 3b9e0ccb7c66e5d023382d48116d64e05a8c3f6bb16af009c3b38d04be649c26
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/CommandConquerTheCovertOperationsUSA/Command%20%26%20Conquer%20-%20The%20Covert%20Operations%20%28USA%29.zip
           File: Command & Conquer - The Covert Operations (USA) (Track 1).bin
@@ -100,7 +121,14 @@ RedAlert:
       DisplayName: Allies
       Required: true
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/red-alert/iso/RA_Allies.zip
+          File: CD1_ALLIES.iso
+          Checksum: c52767a770d1bdf74922cbec13f003cc9ff56514f1127517c56d8fb0bc3033d2
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/command-conquer-red-alert-1/C%26C-RA-CD1.bin
           File: C&C-RA-CD1.bin
@@ -115,7 +143,14 @@ RedAlert:
       Name: SOVIET
       DisplayName: Soviet
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/red-alert/iso/RA_Soviet.zip
+          File: CD2_Soviet.iso
+          Checksum: 1127d6f013a4ae7596f19dce5e6ed5b235e0f837849b593dd97a455d4cbcc986
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/command-conquer-red-alert-1/C%26C-RA-CD2.bin
           File: C&C-RA-CD2.bin
@@ -130,7 +165,14 @@ RedAlert:
       Name: COUNTERSTRIKE
       DisplayName: Counterstrike (Expansion)
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/red-alert/iso/RA_Counterstrike.zip
+          File: CD3_Counterstrike.bin
+          Checksum: 27e8eb048ad39adb3e541ce809f95e9c684e9819f62243ac2d0acfc567660b01
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/CommandConquerRedAlertCounterstrikeUSA/Command%20%26%20Conquer%20-%20Red%20Alert%20-%20Counterstrike%20%28USA%29.zip
           File: Command & Conquer - Red Alert - Counterstrike (USA) (Track 1).bin
@@ -143,7 +185,14 @@ RedAlert:
       Name: AFTERMATH
       DisplayName: The Aftermath (Expansion)
       Sources:
-        - Name: internet-archive
+        - SortOrder: 1
+          Name: cnc-comm
+          DisplayName: C&C Communications Center
+          Url: https://downloads.cnc-comm.com/red-alert/iso/RA_Aftermath.zip
+          File: CD4_Aftermath.bin
+          Checksum: 04704dffe5a889d9cc4c784b0e3012a2af112e494177e064d2b2e493a624671e
+        - SortOrder: 2
+          Name: internet-archive
           DisplayName: Internet Archive
           Url: https://archive.org/download/CommandConquerRedAlertTheAftermathUSA/Command%20%26%20Conquer%20-%20Red%20Alert%20-%20The%20Aftermath%20%28USA%29.zip
           File: Command & Conquer - Red Alert - The Aftermath (USA) (Track 1).bin

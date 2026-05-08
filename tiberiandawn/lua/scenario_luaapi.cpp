@@ -59,7 +59,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             const auto name = arguments.Read_First<std::string>().Unpack();
 
             const auto house = HouseClass::As_Pointer(
-                Parse_House_Name(engine, name)
+                TdTypeConverter::Assert_Parse_Lua_String<HousesType>(engine, name)
             );
 
             engine.Push_Value(
@@ -80,7 +80,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             const auto name = arguments.Read_First<std::string>().Unpack();
             const auto money_modifier = arguments.Read_Next<int>().Unpack();
 
-            const auto house = Parse_House_Name(engine, name);
+            const auto house = TdTypeConverter::Assert_Parse_Lua_String<HousesType>(engine, name);
 
             LuaList.Push<ModifyHouseMoneyLuaEvent>(house, money_modifier);
 
@@ -231,18 +231,4 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
             return 1;
         });
     });
-}
-
-HousesType ScenarioLuaApi::Parse_House_Name(const LuaEngine& engine, std::string name)
-{
-    const auto houseType = TdTypeConverter::Try_Parse<HousesType>(name);
-
-    if (!houseType.has_value()) {
-        engine.Raise_Error_Format(
-            "Failed to parse house name from string: {}",
-            name
-        );
-    }
-
-    return *houseType;
 }

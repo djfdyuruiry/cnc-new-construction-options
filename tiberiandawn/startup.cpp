@@ -455,10 +455,11 @@ int main(int argc, char** argv)
         }
 
         /*
-        ** Save settings if they were changed during gameplay.
+        ** Save settings and options if they were changed during gameplay.
         */
         ini.Load(cfile);
         Settings.Save(ini);
+        Options.Save_Settings(ini);
         ini.Save(cfile);
 
         VisiblePage.Clear();
@@ -533,11 +534,17 @@ void Prog_End(const char* why, bool fatal) // Added why and fatal parameters. ST
 {
     GlyphX_Debug_Print("Prog_End()");
 
+    if (fatal) {
+        if (why) {
+            GlyphX_Debug_Print(why);
+        }
+
+        CNC_LOG_FATAL(why == nullptr ? "Unknown fatal error" : why);
+        throw std::runtime_error(why);
+    }
+
     if (why) {
         GlyphX_Debug_Print(why);
-    }
-    if (fatal) {
-        *((int*)0) = 0;
     }
 
 #ifndef DEMO
@@ -558,6 +565,8 @@ void Prog_End(const char* why, bool fatal) // Added why and fatal parameters. ST
         delete[] Palette;
         Palette = NULL;
     }
+
+    spdlog::shutdown();
 
     ProgEndCalled = true;
 }
