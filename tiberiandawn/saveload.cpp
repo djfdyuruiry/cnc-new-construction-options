@@ -161,7 +161,7 @@ bool Save_Game_Binary(const char* file_name, const char* descr)
 #ifndef REMASTER_BUILD
     if (!file.Open(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name).c_str(), WRITE)) {
 #else
-    if (!save_file.Open(file_name, WRITE)) {
+    if (!file.Open(file_name, WRITE)) {
 #endif
         Decode_All_Pointers_Binary();
         return (false);
