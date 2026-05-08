@@ -75,27 +75,27 @@ end
 ---@param argumentName string
 ---@param value table|string
 local function isNotEmpty(functionName, argumentName, value)
-    if type(value) == "table" then
-        assert(
-            next(value) ~= nil,
-            string.format("%s: argument %s must not be empty", functionName, argumentName)
-        )
-        return
-    elseif type(value) == "string" then
-        assert(
-            (#value) > 0,
-            string.format("%s: argument %s must not be empty", functionName, argumentName)
-        )
-        return
-    end
-
-    error(
-        string.format(
-            "%s: invalid 'isNotEmpty' for argument %s (must be of type: table OR string)",
-            functionName,
-            argumentName
-        )
+  if type(value) == "table" then
+    assert(
+      next(value) ~= nil,
+      string.format("%s: argument %s must not be empty", functionName, argumentName)
     )
+    return
+  elseif type(value) == "string" then
+    assert(
+      (#value) > 0,
+      string.format("%s: argument %s must not be empty", functionName, argumentName)
+    )
+    return
+  end
+
+  error(
+    string.format(
+      "%s: invalid 'isNotEmpty' for argument %s (must be of type: table OR string)",
+      functionName,
+      argumentName
+    )
+  )
 end
 
 ---@param validValues table
