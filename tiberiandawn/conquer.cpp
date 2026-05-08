@@ -69,6 +69,8 @@
 #include "common/vqaloader.h"
 #include "common/settings.h"
 #include "common/winasm.h"
+#include "lua/scenariolua.h"
+#include "lua/events/addmessage_luaevent.h"
 
 #define SHAPE_TRANS 0x40
 
@@ -865,6 +867,22 @@ static void Message_Input(KeyNumType& input)
     int factor = SeenBuff.Get_Width() / 320;
 
     /*
+    ** Trigger Lua console entry on F1 key, for single player missions only.
+    */
+    if ((GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH) && input == KN_F1) {
+        memset(txt, 0, 40);
+        strcpy(txt, MessageListClass::LuaConsolePrefix.data());
+
+        Messages.Add_Edit(YELLOW,
+                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW,
+                          txt,
+                          300 * factor,
+                          true);
+
+        Map.Flag_To_Redraw(false);
+    }
+
+    /*
     **	Check keyboard input for a request to send a message.
     **	The 'to' argument for Add_Edit is prefixed to the message buffer; the
     **	message buffer is big enough for the 'to' field plus MAX_MESSAGE_LENGTH.
@@ -963,6 +981,15 @@ static void Message_Input(KeyNumType& input)
     if (rc == 2) {
         Map.Flag_To_Redraw(false);
         Map.DisplayClass::IsToRedraw = true;
+    }
+
+    /*
+    ** Evaluate lua console input, the outcome (result value/error) is shown to the player as a message.
+    */
+    if (rc == 3 && (GameToPlay == GAME_NORMAL || GameToPlay == GAME_SKIRMISH)) {
+        const auto console_line = std::string(Messages.Get_Edit_Buf());
+
+        ScenarioLua::Eval_Lua_Console_Input(console_line);
     }
 
     /*
@@ -3740,6 +3767,22 @@ bool Force_CD_Available(int cd)
 
     return (false);
 #endif
+}
+
+void Raise_Fatal_CD_Error(const char* caller, const int cd)
+{
+    static const std::string cd_display_names[] = {"GDI", "NOD", "Covert Operations"};
+    std::string install_message;
+
+    if (cd >= CD_GDI || cd <= CD_COVERTOPS) {
+        install_message = std::format(
+            " Install {} files to play this scenario",
+            cd_display_names[cd]
+        );
+    }
+
+    CNC_LOG_ERROR("CD check failed in function: {} (cd={})", caller, cd);
+    CNC_LOG_FATAL("Required game files missing!{}", install_message); // see Init_Game in init.cpp (calls exit process)
 }
 
 /***************************************************************************

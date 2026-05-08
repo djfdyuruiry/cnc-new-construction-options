@@ -21,7 +21,7 @@ local isType = TypeValidator.Validators.isType
 ---@field getInstanceNames fun(): string[]
 ---@field getPropertyNames fun(): string[]
 
----@alias TypeApiProxy TypeApi | { [string]: TypeInstanceApi }
+---@alias TypeApiProxy TypeApi | { [string]: TypeInstanceApiProxy }
 
 ---@param api CppTypeApi
 ---@param typeName string

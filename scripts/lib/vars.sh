@@ -20,4 +20,7 @@ test_lua_scripts_path="${repo_path}/tests/lua/scripts"
 td_resources_path="${repo_path}/resources/data/td"
 td_test_resources_path="${repo_path}/resources/test/td"
 
+nco_user_path=~/.config/nco
+td_user_path="${nco_user_path}/tiberian-dawn"
+
 remaster_steam_id="1213210"

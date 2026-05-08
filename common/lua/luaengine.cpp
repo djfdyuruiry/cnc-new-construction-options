@@ -362,7 +362,7 @@ const std::string_view LuaEngine::Get_Variant_Type(const LuaVariant& lua_variant
 LuaResultWithValue<std::string> LuaEngine::To_String(int stack_index) const
 {
     return Get_Value_From_State<LuaResultWithValue<std::string>>([&](auto L) {
-        return LuaResultWithValue<std::string>(
+        return LuaResultWithValue(
             std::string(lua_tostring(L, stack_index))
         );
     });
@@ -383,6 +383,89 @@ void LuaEngine::Push_Nil() const
 bool LuaEngine::Iterate_Over_Table(int stack_index) const
 {
     return Get_Value_From_State<bool>([&](auto L){ return lua_next(L, stack_index) != 0; });
+}
+
+LuaEvalResult LuaEngine::Eval(const std::string& expression) const
+{
+    CNC_LOGGER_TRACE("Attempting to evaluate lua expression: {}", expression);
+
+    return Get_Value_From_State<LuaEvalResult>([&expression](auto L)
+    {
+        // attempt to compile an evaluation first
+        const auto return_expression = std::format("return {}", expression);
+
+        auto status = luaL_loadstring(L, return_expression.c_str());
+        const auto eval_returns_value = status == LUA_OK;
+
+        if (!eval_returns_value) {
+            // expression cannot be evaluated, just compile for execution instead
+            status = luaL_loadstring(L, expression.c_str());
+        }
+
+        if (status != LUA_OK) {
+            auto result = LuaResult(L, status);
+
+            CNC_LOGGER_TRACE(
+                "Error loading lua script due to '{}' error: {}",
+                result.Code_As_String(),
+                result.Error_Message()
+            );
+            return LuaEvalResult(result, eval_returns_value);
+        }
+
+        const auto eval_result = LuaResult(
+            L,
+            lua_pcall(L, 0, LUA_MULTRET, 0)
+        );
+
+        return LuaEvalResult(eval_result, eval_returns_value);
+    });
+}
+
+LuaResultWithValue<std::string> LuaEngine::Eval_To_String(const std::string& expression) const
+{
+    CNC_LOGGER_TRACE("Attempting to evaluate lua expression as string: {}", expression);
+
+    auto eval_result = Get_Value_From_State<LuaEvalResult>([&expression](auto L)
+    {
+        // attempt to compile an evaluation first
+        const auto return_expression = std::format(
+            "local ___r = {}; return tostring(___r == nil and 'nil' or ___r)", // tostring errors with nil arg
+            expression
+        );
+
+        auto status = luaL_loadstring(L, return_expression.c_str());
+        const auto eval_returns_value = status == LUA_OK;
+
+        if (!eval_returns_value) {
+            // expression cannot be evaluated, just compile for execution instead
+            status = luaL_loadstring(L, expression.c_str());
+        }
+
+        if (status != LUA_OK) {
+            auto result = LuaResult(L, status);
+
+            CNC_LOGGER_TRACE(
+                "Error loading lua script due to '{}' error: {}",
+                result.Code_As_String(),
+                result.Error_Message()
+            );
+            return LuaEvalResult(result, eval_returns_value);
+        }
+
+        const auto eval_result = LuaResult(
+            L,
+            lua_pcall(L, 0, LUA_MULTRET, 0)
+        );
+
+        return LuaEvalResult(eval_result, eval_returns_value);
+    });
+
+    if (!eval_result.Is_Ok() || !eval_result.Returned_Value()) {
+        return { eval_result };
+    }
+
+    return To_String();
 }
 
 luabridge::Namespace LuaEngine::Bridge() const

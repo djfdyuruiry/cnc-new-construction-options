@@ -151,6 +151,12 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     AppendToInstallLog($"Created desktop shortcut for game '{e.game.DisplayName}'");
 
   // error handling
+  public void Visit(DownloadFallbackEvent e)
+  {
+    AppendToInstallLog($"Primary game data source '{e.FailedSource.DisplayName}' failed, falling back to " +
+                       $"secondary source '{e.FallbackSource.DisplayName}': {e.Error}");
+  }
+
   public void Visit(DownloadGameDataErrorEvent e)
   {
     var gamePlaceholder = e.GameData is not null ? $" '{e.GameData!.DisplayName}'" : string.Empty;

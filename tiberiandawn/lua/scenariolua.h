@@ -62,6 +62,10 @@ public:
         const HouseClass& player
     );
 
+    static LuaResultWithValue<std::string> Eval_Lua_Console_Input(std::string input_line);
+
+    static const std::vector<std::string>& Get_Lua_Console_Input_History();
+
     /**
      * Scenario state is being reset, so we need to ensure
      * any existing Lua runtime state is destroyed.
@@ -90,6 +94,7 @@ private:
     static constexpr std::string_view NotFoundStr = "__NOT_FOUND__";
     static inline const auto& Logger = CncLogger::For(ScenarioLua);
     static inline std::optional<UniqueLuaEngine> Engine;
+    static inline std::vector<std::string> LuaConsoleInputHistory;
 
     /**
      * API management for TD Lua; think of this like

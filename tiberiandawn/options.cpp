@@ -151,6 +151,7 @@ OptionsClass::OptionsClass(void)
     IsScoreRepeat = false;
     IsScoreShuffle = false;
     IsFreeScroll = false;
+    SkipExpansionCdCheck = true;
 }
 
 /***********************************************************************************************
@@ -578,6 +579,7 @@ void OptionsClass::Load_Settings(void)
     Set_Shuffle(ini.Get_Int(OPTIONS, "IsScoreShuffle", 0));
     IsDeathAnnounce = ini.Get_Int(OPTIONS, "DeathAnnounce", 0);
     IsFreeScroll = ini.Get_Int(OPTIONS, "FreeScrolling", 0);
+    SkipExpansionCdCheck = ini.Get_Bool(OPTIONS, "SkipExpansionCdCheck", true);
     SlowPalette = ini.Get_Int(OPTIONS, "SlowPalette", 1);
 
     KeyForceMove1 = (KeyNumType)ini.Get_Int(HotkeyName, "KeyForceMove1", KeyForceMove1);
@@ -794,7 +796,7 @@ void OptionsClass::Load_Settings(void)
  * OptionsClass::Save_Settings -- writes options settings to the INI file                      *
  *                                                                                             *
  * INPUT:                                                                                      *
- *      none.                                                                                  *
+ *      ini -- config file ini instance.                                                       *
  *                                                                                             *
  * OUTPUT:                                                                                     *
  *      none.                                                                                  *
@@ -805,15 +807,8 @@ void OptionsClass::Load_Settings(void)
  * HISTORY:                                                                                    *
  *   02/14/1995 BR : Created.                                                                  *
  *=============================================================================================*/
-void OptionsClass::Save_Settings(void)
+void OptionsClass::Save_Settings(INIClass& ini)
 {
-    /*
-    **	Create filename and read the file.
-    */
-    CCFileClass file(CONFIG_FILE_NAME);
-    INIClass ini;
-    ini.Load(file);
-
     /*
     **	Save Options settings
     */
@@ -831,6 +826,7 @@ void OptionsClass::Save_Settings(void)
     ini.Put_Int(OPTIONS, "IsScoreShuffle", IsScoreShuffle);
     ini.Put_Int(OPTIONS, "DeathAnnounce", IsDeathAnnounce);
     ini.Put_Int(OPTIONS, "FreeScrolling", IsFreeScroll);
+    ini.Put_Bool(OPTIONS, NAMEOF(SkipExpansionCdCheck), SkipExpansionCdCheck);
 
     ini.Put_Int(HotkeyName, "KeyForceMove1", KeyForceMove1);
     ini.Put_Int(HotkeyName, "KeyForceMove2", KeyForceMove2);
@@ -881,6 +877,18 @@ void OptionsClass::Save_Settings(void)
     ini.Put_Int(HotkeyName, "KeyTeam8", KeyTeam8);
     ini.Put_Int(HotkeyName, "KeyTeam9", KeyTeam9);
     ini.Put_Int(HotkeyName, "KeyTeam10", KeyTeam10);
+}
+
+void OptionsClass::Save_Settings()
+{
+    /*
+    **	Create filename and read the file.
+    */
+    CCFileClass file(CONFIG_FILE_NAME);
+    INIClass ini;
+    ini.Load(file);
+
+    Save_Settings(ini);
 
     /*
     **	Write the INI data out to a file.

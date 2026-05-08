@@ -3,9 +3,9 @@
 /**
  * C++ API for working with Lua. Uses LuaBridge to provide a
  * fluent interface for declaring classes, functions and variables.
- * 
+ *
  * Class hierarchy:
- * 
+ *
  *   LuaEngine --[uses]--> LuaResult --[uses]--> LuaResultWithValue
  *   LuaArguments --[uses]--> LuaEngine
  *   UniqueLuaEngine --[extends]--> LuaEngine
@@ -295,7 +295,7 @@ public:
     ) const
     {
         auto expected_type = LUA_TNONE;
-        
+
         if constexpr (std::is_same_v<T, bool>) {
             expected_type = LUA_TBOOLEAN;
         } else if constexpr (std::is_same_v<T, int> || std::is_same_v<T, float> || std::is_same_v<T, double>) {
@@ -379,7 +379,7 @@ public:
                     "Unable to set field '{}' as target '{}' is not a table",
                     name,
                     table_expression
-                )  
+                )
             };
         }
 
@@ -396,11 +396,14 @@ public:
 
     #pragma region Expressions
 
+    LuaEvalResult Eval(const std::string& expression) const;
+    LuaResultWithValue<std::string> Eval_To_String(const std::string& expression) const;
+
     template<LuaVariantCompatible T>
-    LuaResultWithValue<T> Eval(const std::string& expression) const
+    LuaResultWithValue<T> Eval_As(const std::string& expression) const
     {
-        if (const auto result = Exec(std::format("return {}", expression)); !result.Is_Ok()) {
-            return LuaResultWithValue<T>(result);
+        if (const auto eval_result = Eval(expression); !eval_result.Is_Ok() || !eval_result.Returned_Value()) {
+            return LuaResultWithValue<T>(eval_result);
         }
 
         return Try_Read<T>();
@@ -414,7 +417,7 @@ public:
 
         std::thread([this, expression, promise]() {
             promise->set_value(
-                Eval<T>(expression)
+                Eval_As<T>(expression)
             );
         }).detach();
 
@@ -461,7 +464,7 @@ private:
  * Instances of this LuaEngine should be created for the lifecycle of a
  * given context to ensure clean state when starting a new context
  * (scenario/screen/thread etc.).
- * 
+ *
  * Aligns with smart pointer unique logic.
  */
 class UniqueLuaEngine final : public LuaEngine
@@ -491,7 +494,7 @@ private:
  * Instances of this LuaEngine should be created to wrap around
  * a state that isn't owned by the current context, e.x. in a
  * Lua CFunction.
- * 
+ *
  * Aligns with smart pointer shared logic.
  */
 class SharedLuaEngine final : public LuaEngine

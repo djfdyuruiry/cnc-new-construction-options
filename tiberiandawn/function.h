@@ -304,6 +304,7 @@ void Explosion_Damage(COORDINATE coord, unsigned strength, TechnoClass* source, 
 */
 void Center_About_Objects(void);
 bool Force_CD_Available(int cd);
+void Raise_Fatal_CD_Error(const char* caller, int cd);
 void Handle_View(int view, int action = 0);
 void Handle_Team(int team, int action = 0);
 TechnoTypeClass const* Fetch_Techno_Type(RTTIType type, int id);

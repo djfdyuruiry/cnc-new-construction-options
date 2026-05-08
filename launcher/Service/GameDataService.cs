@@ -31,7 +31,7 @@ public class GameDataService(
     Stream downloadStream
   )
   {
-    using var zipReader = ReaderFactory.Open(downloadStream);
+    using var zipReader = ReaderFactory.OpenReader(downloadStream);
 
     while (zipReader.MoveToNextEntry())
     {
@@ -153,7 +153,7 @@ public class GameDataService(
       return true;
     }
 
-    using var zipReader = ReaderFactory.Open(responseStream);
+    using var zipReader = ReaderFactory.OpenReader(responseStream);
 
     while (zipReader.MoveToNextEntry())
     {
@@ -253,15 +253,42 @@ public class GameDataService(
   )
   {
     // TODO: Allow user to select source and pass into this method to filter (instead of first)
-    foreach (var imageSource in dataConfig.EnabledDiscImagesBySource.First().Value)
+    var imagesBySource = dataConfig.EnabledDiscImagesBySource;
+    var primarySources = 
+      imagesBySource.First(i => i.Value.All(s => s.Config.SortOrder == 1));
+    var fallbackSources = 
+      imagesBySource.First(i => i.Value.All(s => s.Config.SortOrder > 1));
+
+    for (var idx = 0; idx < imagesBySource.Count; idx++)
     {
-      await ExtractGameDataFromDiscImage(
-        imageSource,
-        downloadEventVisitor,
-        bin2IsoService,
-        installPath,
-        i => OnIsoOpen(imageSource, i)
-      );
+      var primarySource = primarySources.Value[idx];
+      var fallbackSource = fallbackSources.Value[idx];
+
+      try
+      {
+        // attempt to source game data from primary source first
+        await ExtractGameDataFromDiscImage(
+          primarySource,
+          downloadEventVisitor,
+          bin2IsoService,
+          installPath,
+          i => OnIsoOpen(primarySource, i)
+        );
+      }
+      catch (GameDataDownloadException e)
+      {
+        downloadEventVisitor.Visit(
+          new DownloadFallbackEvent(dataConfig, primarySource.Config, fallbackSource.Config, e)
+        );
+
+        await ExtractGameDataFromDiscImage(
+          fallbackSource,
+          downloadEventVisitor,
+          bin2IsoService,
+          installPath,
+          i => OnIsoOpen(fallbackSource, i)
+        );
+      }
     }
 
     return;

@@ -10,7 +10,10 @@ script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 function deploy_test_files() {
   if [ "${cmake_preset}" == "tiberian-dawn-debug" ]; then
     log_info "Deploying TD test files"
-    cp -rfv "${td_test_resources_path}"/* "${target_dir}"
+
+    mkdir -p "${td_user_path}/lua"
+
+    cp -rfv "${td_test_resources_path}"/* "${td_user_path}"
   fi
 }
 

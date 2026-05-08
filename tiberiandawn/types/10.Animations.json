@@ -71,12 +71,12 @@
     {
       "name": "Size",
       "type": "Int",
-      "comment": "This is the frame that the animation is biggest. The biggest frame of animation will hide any changes to underlying ground (e.g., craters) that the animation causes, so these effects are delayed until this frame is reached. The end result is to prevent the player from seeing craters \"pop\" into existence."
+      "comment": "This is the frame that the animation is biggest. The biggest frame of animation will hide any changes to underlying ground (e.g., craters) that the animation causes, so these effects are delayed until this frame is reached. The end result is to prevent the player from seeing craters 'pop' into existence."
     },
     {
       "name": "Biggest",
       "type": "Int",
-      "comment": "This is the frame that the animation is biggest. The biggest frame of animation will hide any changes to underlying ground (e.g., craters) that the animation causes, so these effects are delayed until this frame is reached. The end result is to prevent the player from seeing craters \"pop\" into existence."
+      "comment": "This is the frame that the animation is biggest. The biggest frame of animation will hide any changes to underlying ground (e.g., craters) that the animation causes, so these effects are delayed until this frame is reached. The end result is to prevent the player from seeing craters 'pop' into existence."
     },
     {
       "name": "Damage",

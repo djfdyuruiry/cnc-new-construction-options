@@ -42,6 +42,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "lua/scenariolua.h"
 
 // ST = 12/17/2018 5:44PM
 #ifndef WinTickCount
@@ -454,13 +455,16 @@ TextLabelClass* MessageListClass::Add_Message(char* txt,
  * HISTORY:                                                                *
  *   05/22/1995 BRR : Created.                                             *
  *=========================================================================*/
-TextLabelClass* MessageListClass::Add_Edit(int color, TextPrintType style, char* to, int width)
+TextLabelClass* MessageListClass::Add_Edit(int color, TextPrintType style, char* to, int width, bool lua_console_mode)
 {
     /*------------------------------------------------------------------------
     Do nothing if we're already in "edit" mode
     ------------------------------------------------------------------------*/
     if (EditLabel)
         return (NULL);
+
+    InLuaConsoleMode = lua_console_mode;
+    LuaConsoleHistoryPos = 0;
 
     /*------------------------------------------------------------------------
     Initialize the buffer positions; add a new label to the label list.
@@ -623,6 +627,39 @@ int MessageListClass::Input(KeyNumType& input)
     ------------------------------------------------------------------------*/
     if (EditLabel) {
         ascii = (KeyASCIIType)(Keyboard->To_ASCII(input) & 0x00ff);
+
+        /*------------------------------------------------------------------
+        UP/DOWN = fill edit buffer with a previous lua console line (if in console mode)
+        ------------------------------------------------------------------*/
+        if ((input == KN_UP || input == KN_DOWN) && InLuaConsoleMode) {
+            const auto& console_history = ScenarioLua::Get_Lua_Console_Input_History();
+
+            if (console_history.empty()) {
+                input = KN_NONE;
+                return 0;
+            }
+
+            // clear edit string
+            while (EditCurPos >= 1) {
+                EditCurPos--;
+                EditBuf[EditCurPos] = 0;
+            }
+
+            // fetch a previous console line based on history position
+            const auto history_index =
+                console_history.size() - (LuaConsoleHistoryPos % console_history.size() + 1);
+            const auto new_console_line = std::string(LuaConsolePrefix) + console_history.at(history_index);
+
+            // update edit state
+            strcpy(EditBuf, new_console_line.c_str());
+            EditInitPos = static_cast<int>(LuaConsolePrefix.length());
+            EditCurPos = static_cast<int>(strlen(new_console_line.c_str()));
+            input == KN_UP ? LuaConsoleHistoryPos++ : LuaConsoleHistoryPos--;
+
+            input = KN_NONE;
+
+            return 2;
+        }
 
         /*
         ** Allow numeric keypad presses to map to ascii numbers

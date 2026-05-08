@@ -111,13 +111,16 @@ bool Init_Game(int, char*[])
         Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
         Show_Mouse();
 
+        Speak(VOX_FAIL);
+
         // TODO: Play commando death sound before this or mission failure message :D
         WWMessageBox().Process(err.c_str());
 
         // If a debugger is attached, trigger a breakpoint
         TRIGGER_DEBUGGER;
 
-        Prog_End(err.c_str());
+        Prog_End(err.c_str(), false);
+
         if (!RunningAsDLL) {
             exit(1);
         }
@@ -952,8 +955,7 @@ bool Select_Game(bool fade)
                 if (cd_index == 2) {
                     RequiredCD = 0;
                     if (!Force_CD_Available(RequiredCD)) {
-                        Prog_End("Select_Game - CD not found", true);
-                        exit(EXIT_FAILURE);
+                        Raise_Fatal_CD_Error(NAMEOF(Select_Game), RequiredCD);
                     }
                 }
 

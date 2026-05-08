@@ -47,20 +47,20 @@ CHECK_REQUIRED_VARIABLE(RULES_NCO_PATH)
 CHECK_REQUIRED_VARIABLE(RULE_KEYS_TEMPLATE_PATH)
 CHECK_REQUIRED_VARIABLE(RULE_KEYS_PATH)
 
-function(ResolveRuleValue _RULE_DEFAULT _RULE_VALUE)
+function(ResolveRuleValue _RULE_TYPE _RULE_DEFAULT _RULE_VALUE)
   set(RULE_VALUE "${_RULE_DEFAULT}")
 
-  if(${RULE_TYPE} STREQUAL "bool")
+  if(${_RULE_TYPE} STREQUAL "bool")
     # convert ON/OFF to C boolean literals
     if(${_RULE_DEFAULT})
       set(RULE_VALUE "true")
     else()
       set(RULE_VALUE "false")
     endif()
-  elseif(${RULE_TYPE} STREQUAL "float")
+  elseif(${_RULE_TYPE} STREQUAL "float")
       # ensure value is denoted as a float
       set(RULE_VALUE "${RULE_VALUE}f")
-  elseif(${RULE_TYPE} STREQUAL "fixed")
+  elseif(${_RULE_TYPE} STREQUAL "fixed")
       # ensure value wrapped in a fixed class constructor call
       set(RULE_VALUE "fixed(${RULE_VALUE}f)")
   endif()
@@ -77,11 +77,12 @@ function(TransformRuleNameToUpperSnakecase _RULE_NAME _RULE_NAME_SNAKE_CASE)
   set("${_RULE_NAME_SNAKE_CASE}" ${RULE_NAME_SNAKE_CASE} PARENT_SCOPE)
 endfunction()
 
-function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_DEFAULT)
+function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_COMMENT _RULE_DEFAULT _IS_IMPLEMENTED)
   string(JSON RULE_OBJECT_JSON GET "${_RULES_JSON}" rules "${_RULE_INDEX}")
 
   string(JSON RULE_NAME GET "${RULE_OBJECT_JSON}" name)
   string(JSON RULE_TYPE GET "${RULE_OBJECT_JSON}" type)
+  string(JSON RULE_COMMENT GET "${RULE_OBJECT_JSON}" comment)
   string(JSON RULE_DEFAULT GET "${RULE_OBJECT_JSON}" default)
 
   string(JSON IS_IMPLEMENTED ERROR_VARIABLE JSON_ERROR GET "${RULE_OBJECT_JSON}" implemented)
@@ -91,10 +92,11 @@ function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_
     set(IS_IMPLEMENTED "ON")
   endif()
 
-  set(RULE_NAME ${RULE_NAME} PARENT_SCOPE)
-  set(RULE_TYPE ${RULE_TYPE} PARENT_SCOPE)
-  set(RULE_DEFAULT ${RULE_DEFAULT} PARENT_SCOPE)
-  set(IS_IMPLEMENTED ${IS_IMPLEMENTED} PARENT_SCOPE)
+  set("${_RULE_NAME}" ${RULE_NAME} PARENT_SCOPE)
+  set("${_RULE_TYPE}" ${RULE_TYPE} PARENT_SCOPE)
+  set("${_RULE_COMMENT}" ${RULE_COMMENT} PARENT_SCOPE)
+  set("${_RULE_DEFAULT}" ${RULE_DEFAULT} PARENT_SCOPE)
+  set("${_IS_IMPLEMENTED}" ${IS_IMPLEMENTED} PARENT_SCOPE)
 endfunction()
 
 function (ExtractSectionIniCommentFromJson _RULES_JSON _INI_COMMENT)
@@ -190,6 +192,12 @@ function(ScanForRuleFiles _RULES_STATE_FILE _RULES_FILES _RULES_HASH _FILES_HAVE
   WatchFileForChanges("${RULES_NCO_TEMPLATE_PATH}")
   WatchFileForChanges("${RULE_KEYS_TEMPLATE_PATH}")
 
+  # watch this cmake script so changes to template rendering are detected
+  file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" FILE_HASH)
+  string(SHA256 RULES_HASH "${RULES_HASH}${FILE_HASH}")
+
+  WatchFileForChanges("${CMAKE_CURRENT_LIST_FILE}")
+
   # If a previous hash was calculated, and does not match the
   # hash we just calculated, then flag that files have changed.
   set(FILES_HAVE_CHANGED true)
@@ -268,15 +276,15 @@ function(Main)
         string(APPEND RULE_PROCESS_CODE "\n             ")
       endif()
 
-      LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_DEFAULT)
+      LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_COMMENT RULE_DEFAULT IS_IMPLEMENTED)
 
       TransformRuleNameToUpperSnakecase("${RULE_NAME}" RULE_NAME_SNAKE_CASE)
       set(RULE_DEFINE "${RULE_NAME_SNAKE_CASE}_RULE")
 
       # rules-nco.cpp
-      ResolveRuleValue("${RULE_DEFAULT}" RULE_VALUE)
+      ResolveRuleValue("${RULE_TYPE}" "${RULE_DEFAULT}" RULE_VALUE)
 
-      string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Default(${RULE_VALUE})")
+      string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Comment(\"${RULE_COMMENT}\").With_Default(${RULE_VALUE})")
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close call chain for section

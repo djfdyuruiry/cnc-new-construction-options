@@ -16,6 +16,7 @@
 #include "scenariolua.h"
 #include "tdtypes_luaapi.h"
 #include "ui_luaapi.h"
+#include "events/addmessage_luaevent.h"
 
 RuleSections& TdRuleSectionsProvider::Sections()
 {
@@ -115,6 +116,29 @@ void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClas
     On_Scenario_Load(game_type, scenario, player, ini);
 }
 
+LuaResultWithValue<std::string> ScenarioLua::Eval_Lua_Console_Input(std::string input_line)
+{
+    LuaConsoleInputHistory.push_back(input_line);
+
+    // TODO: non-lua commands, /help etc.
+
+    return Get_Engine().Eval_To_String(input_line)
+        .If_Value([&input_line](const auto& r) {
+            // output console input and result on separate lines
+            LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", input_line));
+            LuaList.Push<AddMessageLuaEvent>(r);
+        }).On_Error([&input_line](const auto& r) {
+            // output console error and result on separate lines
+            LuaList.Push<AddMessageLuaEvent>(std::format(">> {}", input_line), CC_NOD_COLOR);
+            LuaList.Push<AddMessageLuaEvent>(r.Error_Message(), CC_NOD_COLOR);
+        });
+}
+
+const std::vector<std::string>& ScenarioLua::Get_Lua_Console_Input_History()
+{
+    return LuaConsoleInputHistory;
+}
+
 bool ScenarioLua::Exec_Event_Trigger(std::string_view trigger_name, std::string_view event_name)
 {
     auto status = false;
@@ -167,19 +191,21 @@ void ScenarioLua::On_Clear_Scenario()
 void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
 {
     events.Access([](auto& q) {
-       if (q->size() == 0) {
+        if (q->size() == 0) {
             CNC_LOGGER_TRACE("No Lua Events to process");
             return;
-       }
+        }
 
-       CNC_LOGGER_DEBUG("Processing Lua Events");
+        CNC_LOGGER_DEBUG("Processing Lua Events");
 
-       while (!q->empty()) {
-            q->front()->Execute();
+        const auto& engine = Get_Engine();
+
+        while (!q->empty()) {
+            q->front()->Execute(engine);
             q->pop();
-       }
+        }
     });
-    }
+}
 
 void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(std::string& scenario_name, std::string& scenario_type_name, std::string& faction, std::string& house_name)
 {

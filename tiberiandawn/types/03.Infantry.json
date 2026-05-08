@@ -16,7 +16,7 @@
     {
       "name": "IsCrawling",
       "type": "Bool",
-      "comment": "Does this infantry unit have crawling animation? If not, then this means that the \"crawling\" frames are actually running animation frames."
+      "comment": "Does this infantry unit have crawling animation? If not, then this means that the 'crawling' frames are actually running animation frames."
     },
     {
       "name": "IsCapture",
@@ -36,7 +36,7 @@
     {
       "name": "IsAvoidingTiberium",
       "type": "Bool",
-      "comment": "For \"fraidycat\" infantry types that will run away from any damage causing events, this controls whether they avoid wandering into Tiberium."
+      "comment": "For 'fraidycat' infantry types that will run away from any damage causing events, this controls whether they avoid wandering into Tiberium."
     },
     {
       "name": "Type",

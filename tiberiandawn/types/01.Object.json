@@ -18,7 +18,7 @@
     {
       "name": "IsSelectable",
       "type": "Bool",
-      "comment": "It is legal to \"select\" some objects in the game. If it is legal to select this object type then this flag will be true. Selected game objects typically display a floating health bar and allows special user I/O control."
+      "comment": "It is legal to 'select' some objects in the game. If it is legal to select this object type then this flag will be true. Selected game objects typically display a floating health bar and allows special user I/O control."
     },
     {
       "name": "IsLegalTarget",
@@ -28,7 +28,7 @@
     {
       "name": "IsInsignificant",
       "type": "Bool",
-      "comment": "\"Insignificant\" objects will not be announced when they are destroyed or when they appear. Terrain elements and some lesser vehicles have this characteristic."
+      "comment": "'Insignificant' objects will not be announced when they are destroyed or when they appear. Terrain elements and some lesser vehicles have this characteristic."
     },
     {
       "name": "IsImmune",
@@ -43,7 +43,7 @@
     {
       "name": "IsSentient",
       "type": "Bool",
-      "comment": "\"Sentient\" objects are ones that have logic AI processing performed on them. All vehicles, buildings, infantry, and aircraft are so flagged. Terrain elements also fall under this category, but only because certain animation effects require this."
+      "comment": "'Sentient' objects are ones that have logic AI processing performed on them. All vehicles, buildings, infantry, and aircraft are so flagged. Terrain elements also fall under this category, but only because certain animation effects require this."
     },
     {
       "name": "Armor",

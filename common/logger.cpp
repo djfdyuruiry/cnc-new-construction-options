@@ -20,13 +20,6 @@ void CncLogger::On_Fatal_Error(std::string errorMessage)
     OnFatalError(std::move(errorMessage));
 }
 
-void CncLogger::Fatal(const std::string_view message) const
-{
-    spdlog::get(Name)->critical(message);
-    spdlog::shutdown();
-    exit(1);
-}
-
 std::shared_ptr<spdlog::logger> CncLogger::operator()() const
 {
     auto logger = spdlog::get(Name);
@@ -84,18 +77,12 @@ void CncLogger::Init_SpdLog()
 
     Sinks.emplace_back(StdoutSink);
 
+    // create log file in user path
     const auto log_file_name = std::format("{}.log", DefaultLoggerName);
-#ifndef __APPLE__
-    // crate log file beside game exe/binary/dll
-    const auto log_file = std::filesystem::path(PathsClass::Try_Get_Program_Path())
-        .append(log_file_name)
-        .string();
-#else
-    // create log file in user path (app bundle is read-only in macos)
+
     const auto log_file = std::filesystem::path(Paths.User_Path())
         .append(log_file_name)
         .string();
-#endif
 
     RotatingSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
         log_file,

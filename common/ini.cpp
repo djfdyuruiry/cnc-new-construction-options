@@ -374,20 +374,19 @@ int INIClass::Save(Pipe& pipe) const
         */
         INIEntry* entryptr = secptr->EntryList.First();
         while (entryptr && entryptr->Is_Valid()) {
+            total += pipe.Put(entryptr->Entry, (int)strlen(entryptr->Entry));
+            total += pipe.Put("=", 1);
+            total += pipe.Put(entryptr->Value, (int)strlen(entryptr->Value));
+
             /*
             **	Output the entry comment (if present).
             */
             if (entryptr->comment.has_value()) {
                 const auto entry_comment = entryptr->comment->c_str();
 
-                total += pipe.Put(";  ", 2);
+                total += pipe.Put(" ; ", 3);
                 total += pipe.Put(entry_comment, static_cast<int>(strlen(entry_comment)));
-                total += pipe.Put("\r\n", (int)strlen("\r\n"));
             }
-
-            total += pipe.Put(entryptr->Entry, (int)strlen(entryptr->Entry));
-            total += pipe.Put("=", 1);
-            total += pipe.Put(entryptr->Value, (int)strlen(entryptr->Value));
 
             total += pipe.Put("\r\n", (int)strlen("\r\n"));
 
@@ -798,7 +797,13 @@ int INIClass::Get_TextBlock(char const* section, char* buffer, int len) const
  *   07/03/1996 JLB : Created.                                                                 *
  *   07/10/1996 JLB : Handles multiple integer formats.                                        *
  *=============================================================================================*/
-bool INIClass::Put_Int(char const* section, char const* entry, int number, int format)
+bool INIClass::Put_Int(
+    char const* section,
+    char const* entry,
+    int number,
+    int format,
+    std::optional<std::string> comment
+)
 {
     char buffer[MAX_LINE_LENGTH];
 
@@ -816,7 +821,7 @@ bool INIClass::Put_Int(char const* section, char const* entry, int number, int f
         sprintf(buffer, "$%X", number);
         break;
     }
-    return (Put_String(section, entry, buffer));
+    return (Put_String(section, entry, buffer, std::move(comment)));
 }
 
 /***********************************************************************************************

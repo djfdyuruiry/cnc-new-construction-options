@@ -138,3 +138,15 @@ const char* PathsClass::User_Lua_Path()
 
     return UserLuaPath.c_str();
 }
+
+const char* PathsClass::User_Save_Path()
+{
+    if (UserSavePath.empty()) {
+        UserSavePath = Concatenate_Paths(User_Path(), "save");
+
+        // ensure lua directory exists in game directory inside user path
+        Create_Directory(UserSavePath.c_str());
+    }
+
+    return UserSavePath.c_str();
+}
