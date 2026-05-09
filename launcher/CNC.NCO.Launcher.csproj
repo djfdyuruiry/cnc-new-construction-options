@@ -50,7 +50,7 @@
     <PackageReference Include="DiscUtils" Version="0.16.13" />
     <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
     <PackageReference Include="GitHub.Octokit.SDK" Version="0.0.31" />
-    <PackageReference Include="SharpCompress" Version="0.47.4" />
+    <PackageReference Include="SharpCompress" Version="0.48.0" />
     <PackageReference Include="Splat.Avalonia.Autofac" Version="15.5.3" />
     <PackageReference Include="YamlDotNet" Version="17.1.0" />
   </ItemGroup>
