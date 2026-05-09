@@ -16,7 +16,7 @@ Grab the latest launcher for your system [here](https://github.com/djfdyuruiry/c
 
 ![Launcher Downloads](wiki/img/launcher-download.png)
 
-Full guide on how use the launcher can be found [here](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/1.Launcher)
+Full launcher guide can be found [here](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/1.Launcher)
 
 ### Remastered Collection
 
