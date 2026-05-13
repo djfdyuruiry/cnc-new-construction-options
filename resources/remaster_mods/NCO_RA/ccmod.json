@@ -1,6 +1,6 @@
 {
     "name": "NCO RA",
-    "description": "Default changes from New Construction Options.",
+    "description": "New Construction Options",
     "author": "NCO",
     "load_order": 1,
     "version_high": 1,
