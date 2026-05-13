@@ -4,8 +4,8 @@ local System = require("nco.System")
 ---@alias LogLevel "trace"|"debug"|"info"|"warning"|"error"|"critical"
 
 --[[
-  API that writes to game engine logs. You can view these logs by opening `nco.log`
-  file in the game folder.
+  API that writes to game engine logs. You can view these logs by opening the NCO log file.
+  See: https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/3b.Lua-Advanced-Guide#logging
 
   - Methods will capture the call stack of the caller automatically
   - Methods support printf style formatting for ease of use:
