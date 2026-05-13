@@ -22,6 +22,8 @@ public:
     static constexpr char SEP = std::filesystem::path::preferred_separator;
 
     static std::string Try_Get_Program_Path();
+    static std::string Try_Get_Program_Binary_Name();
+    static std::string Try_Get_User_Path_Root();
     static bool Create_Directory(const char* path);
     static bool Is_Absolute(const char* path);
     static std::string Concatenate_Paths(const char* path1, const char* path2);

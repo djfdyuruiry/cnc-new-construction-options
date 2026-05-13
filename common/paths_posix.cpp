@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <errno.h>
+#include <iostream>
 #include <pwd.h>
 #include <stdexcept>
 #include <sys/stat.h>
@@ -97,22 +98,17 @@ namespace
 
     std::string Get_Posix_Default(const char* env_var, const char* relative_path)
     {
-        const char* tmp = std::getenv(env_var);
-
-        if (tmp != nullptr && tmp[0] != '\0') {
-            if (tmp[0] != '/') {
-                char buffer[200];
-                std::snprintf(buffer,
-                              sizeof(buffer),
-                              "'%s' should start with '/' as per XDG specification that the value must be absolute. "
-                              "The current value is: "
-                              "'%s'.",
-                              tmp,
-                              env_var);
-                CNC_LOG_WARN(buffer);
-            } else {
+        if (const auto tmp = std::getenv(env_var); tmp != nullptr && tmp[0] != '\0') {
+            if (tmp[0] == '/') {
                 return tmp;
             }
+
+            std::cout << std::format(
+                "'{}' should start with '/' as per XDG specification (the value must be absolute). "
+                "The current value is: '{}'.",
+                tmp,
+                env_var
+            );
         }
 
         return User_Home() + "/" + relative_path;
@@ -131,7 +127,6 @@ std::string PathsClass::Try_Get_Program_Path()
     ** Adapted from https://github.com/gpakosz/whereami
     ** dual licensed under the WTFPL v2 and MIT licenses without any warranty. by Gregory Pakosz (@gpakosz)
     */
-    std::string tmp;
     char buffer[PATH_MAX];
     char* resolved = nullptr;
 #if defined(__linux__) || defined(__CYGWIN__) || defined(__sun)
@@ -175,14 +170,20 @@ std::string PathsClass::Try_Get_Program_Path()
         throw std::runtime_error("Failed to get game binary path");
     }
 
-    tmp = resolved;
-    return tmp.substr(0, tmp.find_last_of("/"));
+    return resolved;
+}
+
+std::string PathsClass::Try_Get_Program_Binary_Name()
+{
+    const auto program_path = Try_Get_Program_Path();
+    return program_path.substr(program_path.find_last_of(SEP) + 1);
 }
 
 const char* PathsClass::Program_Path()
 {
     if (ProgramPath.empty()) {
-        ProgramPath = Try_Get_Program_Path();
+        const auto program_path = Try_Get_Program_Path();
+        ProgramPath = program_path.substr(0, program_path.find_last_of(SEP));
     }
 
     return ProgramPath.c_str();
@@ -206,14 +207,19 @@ const char* PathsClass::Data_Path()
     return DataPath.c_str();
 }
 
+std::string PathsClass::Try_Get_User_Path_Root()
+{
+#ifdef __APPLE__
+    return User_Home() + "/Library/Application Support/nco";
+#else
+    return Get_Posix_Default("XDG_CONFIG_HOME", ".config") + SEP + "nco";
+#endif
+}
+
 const char* PathsClass::User_Path()
 {
     if (UserPath.empty()) {
-#ifdef __APPLE__
-        UserPath = User_Home() + "/Library/Application Support/nco";
-#else
-        UserPath = Get_Posix_Default("XDG_CONFIG_HOME", ".config") + "/nco";
-#endif
+        UserPath = Try_Get_User_Path_Root();
 
         if (!Suffix.empty()) {
             UserPath += SEP + Suffix;
