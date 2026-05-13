@@ -72,7 +72,7 @@ std::string PathsClass::Try_Get_Program_Path()
                 free(path);
             }
 
-            return tmp.substr(0, tmp.find_last_of("\\/"));
+            return tmp;
         }
 #else
         TCHAR path[MAX_PATH];
@@ -89,16 +89,22 @@ std::string PathsClass::Try_Get_Program_Path()
             throw std::runtime_error(std::format("Failed to get DLL filename: {}", GetLastError()));
         }
 
-        const std::string tmp((TCHARToUTF8(path)));
-        return tmp.substr(0, tmp.find_last_of('\\'));
+        return std::string((TCHARToUTF8(path)));
 #endif
+}
+
+std::string PathsClass::Try_Get_Program_Binary_Name()
+{
+    const auto program_path = Try_Get_Program_Path();
+    return program_path.substr(program_path.find_last_of("\\/") + 1);
 }
 
 const char* PathsClass::Program_Path()
 {
     if (ProgramPath.empty()) {
         try {
-            ProgramPath = Try_Get_Program_Path();
+            const auto program_path = Try_Get_Program_Path();
+            ProgramPath = program_path.substr(0, program_path.find_last_of("\\/"));
             CNC_LOGGER_INFO("Resolved ProgramPath: {}", ProgramPath);
         } catch (const std::runtime_error& e) {
             CNC_LOGGER_FATAL("Failed to resolve ProgramPath: {}", e.what());
@@ -133,16 +139,26 @@ const char* PathsClass::Data_Path()
     return DataPath.c_str();
 }
 
+std::string PathsClass::Try_Get_User_Path_Root()
+{
+    TCHAR path[MAX_PATH];
+
+    if (!SHGetSpecialFolderPath(nullptr, path, CSIDL_APPDATA, TRUE)) {
+        throw std::runtime_error(
+            std::format(
+                "Failed to retrieve FOLDERID_RoamingAppData for PathsClass::Get_User_Path_Root(): {}",
+                GetLastError()
+            )
+        );
+    }
+
+    return std::string(TCHARToUTF8(path)) + SEP + "nco";
+}
+
 const char* PathsClass::User_Path()
 {
     if (UserPath.empty()) {
-        TCHAR path[MAX_PATH];
-
-        if (!SHGetSpecialFolderPath(nullptr, path, CSIDL_APPDATA, TRUE)) {
-            CNC_LOGGER_FATAL("Failed to retrieve FOLDERID_RoamingAppData for PathsClass::User_Path(): {}", GetLastError());
-        }
-
-        UserPath = std::format("{}{}{}", static_cast<const char*>(TCHARToUTF8(path)), SEP, "nco");
+        UserPath = Try_Get_User_Path_Root();
 
         if (!Suffix.empty()) {
             UserPath += SEP + Suffix;
