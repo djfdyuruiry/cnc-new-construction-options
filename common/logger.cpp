@@ -77,10 +77,10 @@ void CncLogger::Init_SpdLog()
 
     Sinks.emplace_back(StdoutSink);
 
-    // create log file in user path
-    const auto log_file_name = std::format("{}.log", DefaultLoggerName);
+    // create log file in user path, filename matches program binary (nco-td.log, TIBERIANDAWN.DLL.log etc.)
+    const auto log_file_name = std::format("{}.log", PathsClass::Try_Get_Program_Binary_Name());
 
-    const auto log_file = std::filesystem::path(Paths.User_Path())
+    const auto log_file = std::filesystem::path(PathsClass::Try_Get_User_Path_Root())
         .append(log_file_name)
         .string();
 
