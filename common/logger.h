@@ -77,8 +77,6 @@ public:
     std::shared_ptr<spdlog::logger> operator()() const;
 
 private:
-    static inline std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> StdoutSink;
-    static inline std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> RotatingSink;
     static inline std::vector<spdlog::sink_ptr> Sinks;
 
     const std::string Name;
