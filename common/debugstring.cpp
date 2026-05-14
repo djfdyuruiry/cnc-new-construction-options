@@ -5,7 +5,6 @@
 #include <ranges>
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "logger.h"
 
@@ -16,17 +15,19 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
 {
     assert(level <= 6);
 
-    static std::vector levels SPDLOG_LEVEL_NAMES;
+    static spdlog::level::level_enum level_to_spdlog[spdlog::level::level_enum::n_levels];
     static std::once_flag levels_init;
 
     std::call_once(levels_init, []() {
-        // reverse to match level param logic ( level indicates (0)off->trace(6), but SPDLOG_LEVEL_NAMES is (0)trace->off(6))
-        std::ranges::reverse(levels);
+        // create lookup table for level param to spdlog enum value
+        for (auto i = 0u; i < spdlog::level::level_enum::n_levels; i++) {
+            // Reverse the level_enum value order to match level param logic
+            // ( level indicates (0)off->trace(6), but SPDLOG_LEVEL_NAMES is (0)trace->off(6))
+            level_to_spdlog[i] = static_cast<spdlog::level::level_enum>(spdlog::level::level_enum::n_levels - i - 1);
+        }
     });
 
-    auto spd_level = spdlog::level::from_str(
-        levels.at(level).data()
-    );
+    const auto& spd_level = level_to_spdlog[level];
 
     if (!CncLogger::Default()()->should_log(spd_level)) {
         return;
@@ -36,7 +37,7 @@ void Debug_String_Log(unsigned level, const char* file, int line, const char* fu
 
     // get message_size
     va_start(args, fmt);
-    const auto message_size = vsnprintf(NULL, 0, fmt, args);
+    const auto message_size = vsnprintf(nullptr, 0, fmt, args);
     va_end(args);
 
     if (message_size < 0) {
