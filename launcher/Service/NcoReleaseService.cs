@@ -1,12 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
-using GitHub;
+using RestSharp;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
@@ -17,7 +18,7 @@ using CNC.NCO.Launcher.Util;
 
 namespace CNC.NCO.Launcher.Service;
 
-public class NcoReleaseService(LauncherConfigService configService, GitHubClient gitHubClient, PathsConfig pathsConfig)
+public class NcoReleaseService(LauncherConfigService configService, IRestClient githubClient, PathsConfig pathsConfig)
 {
   [SupportedOSPlatform("windows")]
   public async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
@@ -161,10 +162,14 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
   private async Task<string> GetAssetForNcoRelease()
   {
     var ncoConfig = configService.Config.Nco;
-    var ncoRelease = await gitHubClient.Repos[ncoConfig.GitHubRepo.Owner][ncoConfig.GitHubRepo.Name]
-      .Releases
-      .Tags[ncoConfig.Release]
-      .GetAsync() ?? throw new Exception($"Failed to resolve NCO release: {ncoConfig.Release}");
+    var ncoRelease = await githubClient.ExecuteGetAsync<GitHubApiRelease>(
+      $"/repos/{ncoConfig.GitHubRepo.Owner}/{ncoConfig.GitHubRepo.Name}/releases/tags/{ncoConfig.Release}"
+    );
+
+    if (ncoRelease.StatusCode != HttpStatusCode.OK || ncoRelease.Data is null)
+    {
+      throw new Exception($"Failed to resolve NCO release: {ncoConfig.Release}", ncoRelease.ErrorException);
+    }
 
     var osName = OperatingSystem.IsWindows()
       ? "win"
@@ -172,7 +177,7 @@ public class NcoReleaseService(LauncherConfigService configService, GitHubClient
 
     var osAssetPrefix = ncoConfig.AssetPrefix.Replace("${OS}", osName);
 
-    return ncoRelease.Assets?.Where(a =>
+    return ncoRelease.Data.Assets?.Where(a =>
         (a.Name?.StartsWith(osAssetPrefix) ?? false) && !a.Name.Contains("-debug")
       )
       .Select(a => a.BrowserDownloadUrl)
