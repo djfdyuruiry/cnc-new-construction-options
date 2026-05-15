@@ -40,6 +40,7 @@
 #include "common/rawfile.h"
 
 #include "lua/scenariolua.h"
+#include "lua/events/addmessage_luaevent.h"
 
 #ifdef CHEAT_KEYS
 
@@ -558,7 +559,15 @@ void Debug_Key(unsigned input)
 #endif
 
         case KN_F5:
-            ScenarioLua::Get_Engine().Exec_File_If_Exists("__debug.lua");
+            ScenarioLua::Get_Engine()
+                .Exec_File_If_Exists("__debug.lua")
+                .If_Ok([] (const auto& r) {
+                    LuaList.Push<AddMessageLuaEvent>("Executed __debug.lua script OK");
+                })
+                .On_Error([] (const auto& r) {
+                    CNC_LOG_ERROR(r.Error_Message());
+                    LuaList.Push<AddMessageLuaEvent>("Error running __debug.lua script, check log file", CC_NOD_COLOR);
+                });
             break;
 
         case KN_F3:
