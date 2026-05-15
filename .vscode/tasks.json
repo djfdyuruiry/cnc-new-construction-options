@@ -16,7 +16,7 @@
     {
       "label": "Deploy TD",
       "type": "shell",
-      "command": "./scripts/2.deploy.sh 'nco-tiberian-dawn-debug' 'td' 'vanillatd' '$TD_DATA_PATH/vanillatd-dev'",
+      "command": "./scripts/2.deploy.sh 'nco-tiberian-dawn-debug' 'td' 'nco-td' '$TD_DATA_PATH/nco-td'",
       "group": "build"
     },
     {
