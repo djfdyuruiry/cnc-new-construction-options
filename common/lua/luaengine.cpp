@@ -27,7 +27,7 @@ std::filesystem::path LuaEngine::Resolve_Script_Path(const std::filesystem::path
 
         CNC_LOGGER_DEBUG("Checking for Lua script '{}' at path: {}", script_path.string(), potential_path.string());
 
-        if (std::filesystem::is_regular_file(potential_path)) {
+        if (std::filesystem::exists(potential_path) && !std::filesystem::is_directory(potential_path)) {
             CNC_LOGGER_DEBUG("Found Lua script '{}' at path: {}", script_path.string(), potential_path.string());
             return potential_path;
         }
@@ -156,7 +156,7 @@ LuaResult LuaEngine::Exec_File_If_Exists(const std::filesystem::path& script_pat
 {
     const auto full_script_path = Resolve_Script_Path(script_path);
 
-    if (!std::filesystem::is_regular_file(full_script_path)) {
+    if (!std::filesystem::exists(full_script_path) || std::filesystem::is_directory(full_script_path)) {
         CNC_LOGGER_WARN("Skipping lua file execution as it does not exist: {}", full_script_path.string());
         return {LUA_OK};
     }
