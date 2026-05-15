@@ -253,16 +253,26 @@ public class GameDataService(
   )
   {
     // TODO: Allow user to select source and pass into this method to filter (instead of first)
-    var imagesBySource = dataConfig.EnabledDiscImagesBySource;
-    var primarySources = 
-      imagesBySource.First(i => i.Value.All(s => s.Config.SortOrder == 1));
-    var fallbackSources = 
-      imagesBySource.First(i => i.Value.All(s => s.Config.SortOrder > 1));
+    var primarySources = dataConfig.EnabledPrimaryDiscImages;
+    var fallbackSourcesByDiscName = dataConfig.EnabledFallbackDiscImages;
 
-    for (var idx = 0; idx < imagesBySource.Count; idx++)
+    // validate we have a primary source for all enabled images
+    var discImagesMissingSources = dataConfig.EnabledDiscImages
+      .Where(e => primarySources.All(s => s.Name != e.Name))
+      .Select(e => e.Name)
+      .ToList();
+
+    if (discImagesMissingSources.Count > 0)
     {
-      var primarySource = primarySources.Value[idx];
-      var fallbackSource = fallbackSources.Value[idx];
+      throw new GameDataDownloadException(
+        $"Launcher config is invalid, the following disc image(s) have no source defined: " +
+        $"{string.Join(",", discImagesMissingSources)}"
+      );
+    }
+
+    for (var discImageIdx = 0; discImageIdx < dataConfig.EnabledDiscImages.Count; discImageIdx++)
+    {
+      var primarySource = primarySources[discImageIdx];
 
       try
       {
@@ -275,19 +285,59 @@ public class GameDataService(
           i => OnIsoOpen(primarySource, i)
         );
       }
-      catch (GameDataDownloadException e)
+      catch (GameDataDownloadException primaryException)
       {
+        if (!fallbackSourcesByDiscName.TryGetValue(primarySource.Name, out var fallbackSources)
+            || fallbackSources.Count < 1)
+        {
+          // no fallback source available
+          throw;
+        }
+
+        // there is at least one fallback source, let the installer know we are attempting it
         downloadEventVisitor.Visit(
-          new DownloadFallbackEvent(dataConfig, primarySource.Config, fallbackSource.Config, e)
+          new DownloadFallbackEvent(
+            dataConfig,
+            primarySource.Config,
+            fallbackSources.First().Config,
+            primaryException)
         );
 
-        await ExtractGameDataFromDiscImage(
-          fallbackSource,
-          downloadEventVisitor,
-          bin2IsoService,
-          installPath,
-          i => OnIsoOpen(fallbackSource, i)
-        );
+        // try all fallback sources
+        for (var fallbackIdx = 0; fallbackIdx < fallbackSources.Count; fallbackIdx++)
+        {
+          var fallbackSource = fallbackSources[fallbackIdx];
+          var nextFallbackSource = fallbackSources.ElementAtOrDefault(fallbackIdx + 1);
+
+          try
+          {
+            await ExtractGameDataFromDiscImage(
+              fallbackSource,
+              downloadEventVisitor,
+              bin2IsoService,
+              installPath,
+              i => OnIsoOpen(fallbackSource, i)
+            );
+
+            break;
+          }
+          catch (GameDataDownloadException fallbackException)
+          {
+            if (nextFallbackSource is null)
+            {
+              // no more fallbacks, so just throw error
+              throw;
+            }
+
+            downloadEventVisitor.Visit(
+              new DownloadFallbackEvent(
+                dataConfig,
+                fallbackSource.Config,
+                nextFallbackSource.Config,
+                fallbackException)
+            );
+          }
+        }
       }
     }
 

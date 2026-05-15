@@ -1,6 +1,4 @@
-using GitHub;
-using GitHub.Octokit.Client;
-using Microsoft.Kiota.Abstractions.Authentication;
+using RestSharp;
 
 namespace CNC.NCO.Launcher.Service;
 
@@ -13,13 +11,9 @@ public class ServicesModule : Module
     // needs called once per application lifetime
     DiscUtils.Complete.SetupHelper.SetupComplete();
 
-    // BUG: without singleton scope RequestAdapter throws error on second instantiation
-    //      (even if previous instance is disposed)
-    var gitHubClient = new GitHubClient(
-      RequestAdapter.Create(new AnonymousAuthenticationProvider())
-    );
+    var gitHubClient = new RestClient("https://api.github.com");;
 
-    builder.RegisterInstance(gitHubClient).SingleInstance().AsSelf();
+    builder.RegisterInstance(gitHubClient).SingleInstance().As<IRestClient>();
 
     builder.RegisterAssemblyTypes(ThisAssembly)
       .Where(t =>

@@ -20,33 +20,10 @@ public class LauncherConfig
     new List<GameDataConfig> { TiberianDawn, RedAlert }.OrderBy(g => g.SortOrder);
 
   [YamlIgnore]
-  public IEnumerable<DiscImage> DiscImages => Games.SelectMany(g => g.OrderedDiscImages);
-
-  [YamlIgnore]
-  public IEnumerable<DiscImageSource> DiscImageSources =>
-    Games.SelectMany(g =>
-      g.DiscImagesBySource
-        .First()
-        .Value
-    );
-
-  [YamlIgnore]
-  public IEnumerable<ZipUrlSpec> ZipUrlSpecs => Games.SelectMany(g => g.ZipUrlSpecs);
-
-  [YamlIgnore]
   public IEnumerable<GameDataConfig> EnabledGames => Games.Where(g => g.Enabled);
 
   [YamlIgnore]
-  public IEnumerable<DiscImage> EnabledDiscImages => EnabledGames.SelectMany(g => g.EnabledDiscImages);
-
-  [YamlIgnore]
-  public IEnumerable<DiscImageSource> EnabledDiscImageSources =>
-    EnabledGames
-      .SelectMany(g =>
-        g.EnabledDiscImagesBySource
-          .First()
-          .Value
-      );
+  public IEnumerable<DiscImageSource> EnabledDiscImages => EnabledGames.SelectMany(g => g.EnabledPrimaryDiscImages);
 
   [YamlIgnore]
   public IEnumerable<ZipUrlSpec> EnabledZipUrlSpecs => EnabledGames.SelectMany(g => g.EnabledZipUrlSpecs);
