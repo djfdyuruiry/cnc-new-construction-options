@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "preLaunchTask": "Build & Deploy TD",
-      "program": "${env:HOME}/Games/cnc-tiberian-dawn/vanillatd-dev",
+      "program": "${env:HOME}/Games/cnc-tiberian-dawn/nco-td",
       "args": [
         "-CHEAT"
       ],
