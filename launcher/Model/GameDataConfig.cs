@@ -53,31 +53,36 @@ public class GameDataConfig : INotifyPropertyChanged
   public IList<DiscImage> EnabledDiscImages => OrderedDiscImages.Where(d => d.Enabled).ToList();
 
   [YamlIgnore]
-  public IDictionary<string, IList<DiscImageSource>> DiscImagesBySource => DiscImages
-    .SelectMany(x => x.Sources.Select(s => s.Name))
-    .Distinct()
-    .ToDictionary(
-      p => p,
-      IList<DiscImageSource> (p) => OrderedDiscImages
-        .Select(d => d.BuildSources(this).GetValueOrDefault(p))
-        .Where(d => d is not null)
-        .Select(d => d!)
-        .OrderBy(d => d.SortOrder)
-        .ToList()
-    );
+  public IList<DiscImageSource> PrimaryDiscImages => DiscImages
+    .Select(d =>
+      new DiscImageSource(d)
+      {
+        Config = d.Sources.OrderBy(s => s.SortOrder).First()
+      }
+    )
+    .ToList();
+
 
   [YamlIgnore]
-  public IDictionary<string, IList<DiscImageSource>> EnabledDiscImagesBySource => EnabledDiscImages
-    .SelectMany(x => x.Sources.Select(s => s.Name))
-    .Distinct()
+  public IList<DiscImageSource> EnabledPrimaryDiscImages => PrimaryDiscImages
+    .Where(d => d.Enabled)
+    .ToList();
+
+  [YamlIgnore]
+  public IDictionary<string, List<DiscImageSource>> EnabledFallbackDiscImages => EnabledDiscImages
     .ToDictionary(
-      p => p,
-      IList<DiscImageSource> (p) => EnabledDiscImages
-        .Select(d => d.BuildSources(this).GetValueOrDefault(p))
-        .Where(d => d is not null)
-        .Select(d => d!)
-        .OrderBy(d => d.SortOrder)
-        .ToList()
+      d => d.Name,
+      d => 
+        d.Sources
+          .OrderBy(s => s.SortOrder)
+          .Skip(1)
+          .Select(s =>
+            new DiscImageSource(d)
+            {
+              Config = s
+            }
+          )
+          .ToList()
     );
 
   [YamlIgnore]

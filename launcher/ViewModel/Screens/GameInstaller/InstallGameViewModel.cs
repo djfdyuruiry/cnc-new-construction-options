@@ -101,7 +101,7 @@ public class InstallGameViewModel : ScreenViewModelBase
     SafeWhenNavigatedTo(() =>
     {
       DiscImages = configService.Config
-        .EnabledDiscImageSources
+        .EnabledDiscImages
         .Select(ItemToBeInstalled<DiscImageSource>.Build)
         .ToList();
 
