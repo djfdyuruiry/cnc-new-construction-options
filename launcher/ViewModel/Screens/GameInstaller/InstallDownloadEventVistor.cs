@@ -123,33 +123,6 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     _currentZip.Errored = false;
   }
 
-  // nco install
-  public void Visit(FetchNcoReleaseEvent e)
-  {
-    AppendToInstallLog($"Fetching info on the latest version of NCO game engine");
-
-    host.Nco!.Installing = true;
-  }
-
-  public void Visit(StartNcoReleaseDownloadEvent e) =>
-    AppendToInstallLog($"Downloading NCO game engine");
-
-  public void Visit(FinishNcoReleaseDownloadEvent e)
-  {
-    AppendToInstallLog($"NCO game engine installed");
-
-    host.Nco!.Installed = true;
-    host.Nco.Installing = false;
-    host.Nco.Errored = false;
-  }
-
-  [SupportedOSPlatform("windows")]
-  public void Visit(FetchMsvcRuntimeEvent e) =>
-    AppendToInstallLog("Ensuring MSVC runtime is installed - please accept any UAC prompts");
-
-  public void Visit(ShortcutCreatedEvent e) =>
-    AppendToInstallLog($"Created desktop shortcut for game '{e.game.DisplayName}'");
-
   // error handling
   public void Visit(DownloadFallbackEvent e)
   {
@@ -185,6 +158,38 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     _currentDiscImage.Errored = true;
   }
 
+  // nco github release lookup
+  public void Visit(FetchNcoReleaseEvent e)
+  {
+    AppendToInstallLog($"Fetching info on the latest version of NCO game engine");
+  }
+
+  // game engine install
+  public void Visit(StartNcoReleaseDownloadEvent e)
+  {
+    AppendToInstallLog($"Downloading NCO game engine");
+
+    host.Nco!.Installed = false;
+    host.Nco.Installing = true;
+    host.Nco.Errored = false;
+  }
+
+  [SupportedOSPlatform("windows")]
+  public void Visit(FetchMsvcRuntimeEvent e) =>
+    AppendToInstallLog("Ensuring MSVC runtime is installed - please accept any UAC prompts");
+
+  public void Visit(ShortcutCreatedEvent e) =>
+    AppendToInstallLog($"Created desktop shortcut for game '{e.game.DisplayName}'");
+
+  public void Visit(FinishNcoReleaseDownloadEvent e)
+  {
+    AppendToInstallLog($"NCO game engine installed");
+
+    host.Nco!.Installed = true;
+    host.Nco.Installing = false;
+    host.Nco.Errored = false;
+  }
+
   public void Visit(DownloadNcoReleaseErrorEvent e)
   {
     AppendToInstallLog($"Error installing NCO game engine: {e.Error}");
@@ -194,5 +199,35 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     host.Nco!.Errored = true;
     host.Nco.Installing = false;
     host.Nco.Installed = false;
+  }
+
+  // launcher install
+  public void Visit(StartNcoLauncherDownloadEvent e)
+  {
+    AppendToInstallLog($"Downloading NCO Launcher");
+
+    host.NcoLauncher!.Installing = true;
+    host.NcoLauncher.Installed = false;
+    host.NcoLauncher.Errored = false;
+  }
+
+  public void Visit(FinishNcoLauncherDownloadEvent e)
+  {
+    AppendToInstallLog($"NCO Launcher installed");
+
+    host.NcoLauncher!.Installed = true;
+    host.NcoLauncher.Installing = false;
+    host.NcoLauncher.Errored = false;
+  }
+
+  public void Visit(DownloadNcoLauncherErrorEvent e)
+  {
+    AppendToInstallLog($"Error installing NCO Launcher: {e.Error}");
+
+    host.HasErrored = true;
+
+    host.NcoLauncher!.Errored = true;
+    host.NcoLauncher.Installing = false;
+    host.NcoLauncher.Installed = false;
   }
 }

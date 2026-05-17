@@ -80,6 +80,12 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _nco, value);
   }
 
+  public ItemToBeInstalled<NewConstructionOptions>? NcoLauncher
+  {
+    get => _nco;
+    set => this.RaiseAndSetIfChanged(ref _nco, value);
+  }
+
   public InstallGameViewModel(
     IScreen hostScreen,
     LauncherConfigService configService,
@@ -110,7 +116,8 @@ public class InstallGameViewModel : ScreenViewModelBase
         .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
         .ToList();
 
-      Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.Nco);
+      Nco = ItemToBeInstalled<NewConstructionOptions>.Build(configService.Config.Nco);
+      NcoLauncher = ItemToBeInstalled<NewConstructionOptions>.Build(new NewConstructionOptions());
 
       return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)

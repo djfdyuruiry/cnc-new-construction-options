@@ -21,7 +21,10 @@
           "Release": {
             "type": "string"
           },
-          "AssetPrefix": {
+          "GameBinaryAssetPrefix": {
+            "type": "string"
+          },
+          "LauncherAssetPrefix": {
             "type": "string"
           },
           "MsvcRuntimeUrl": {
