@@ -27,6 +27,9 @@
           "LauncherAssetPrefix": {
             "type": "string"
           },
+          "LauncherBinary": {
+            "type": "string"
+          },
           "MsvcRuntimeUrl": {
             "type": "string"
           },
@@ -37,7 +40,7 @@
             "type": "boolean"
           }
         },
-        "required": ["GitHubRepo", "Release", "AssetPrefix", "MsvcRuntimeUrl"]
+        "required": ["GitHubRepo", "Release", "GameBinaryAssetPrefix", "LauncherAssetPrefix", "LauncherBinary", "MsvcRuntimeUrl"]
       },
       "TiberianDawn": {
         "$ref": "#/definitions/GameDataConfig"

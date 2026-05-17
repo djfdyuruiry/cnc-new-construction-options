@@ -14,7 +14,6 @@ using SharpCompress.Readers;
 
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
-using CNC.NCO.Launcher.Model.Events;
 using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Util;
 
@@ -23,10 +22,11 @@ namespace CNC.NCO.Launcher.Service;
 public class NcoReleaseService(LauncherConfigService configService, IRestClient githubClient, PathsConfig pathsConfig)
 {
   [SupportedOSPlatform("windows")]
-  public async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
+  private async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
   {
     var winUtils = new WindowsUtils(pathsConfig);
 
+    // game engine shortcuts
     foreach (var game in configService.Config.EnabledGames)
     {
       var gameBinaryPath = $"{Path.Join(installRoot, game.InstallPostfix, game.Binary)}.exe";
@@ -36,8 +36,16 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
         gameBinaryPath
       );
 
-      eventVisitor.Visit(new ShortcutCreatedEvent(game));
+      eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
+
+    // launcher shortcut
+    var launcherBinary = configService.Config.Nco.LauncherBinary;
+    var launcherBinaryPath = $"{Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary)}.exe";
+
+    await winUtils.CreateShortcut("NCO Launcher", launcherBinaryPath);
+
+    eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
   }
 
   /**
@@ -63,13 +71,14 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
   [SupportedOSPlatform("linux")]
   private async Task GenerateDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
   {
-    var desktopTemplate = await File.ReadAllTextAsync(
+    var engineTemplate = await File.ReadAllTextAsync(
       Path.Join(pathsConfig.ToolsPath, "nco.desktop")
     );
     var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
 
     Directory.CreateDirectory(appsPath);
 
+    // game engine shortcuts
     foreach (var game in configService.Config.EnabledGames)
     {
       var gamePath = Path.Join(installRoot, game.InstallPostfix);
@@ -78,27 +87,46 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
 
       await File.WriteAllTextAsync(
         $"{Path.Join(appsPath, desktopName)}.desktop",
-        desktopTemplate.Replace("BINARY", binaryPath)
+        engineTemplate.Replace("BINARY", binaryPath)
           .Replace("DISPLAY_NAME", $"{game.DisplayName.Replace("Command & Conquer: ", string.Empty)} (NCO)")
           .Replace("/INSTALL_PATH", gamePath)
       );
 
-      eventVisitor.Visit(new ShortcutCreatedEvent(game));
+      eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
 
-    // TODO: launcher shortcut
+    // launcher shortcut
+    var launcherTemplate = await File.ReadAllTextAsync(
+      Path.Join(pathsConfig.ToolsPath, "nco-launcher.desktop")
+    );
+
+    var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory);
+
+    await File.WriteAllTextAsync(
+      $"{Path.Join(appsPath, "nco-launcher")}.desktop",
+      launcherTemplate.Replace("BINARY", $"'{Path.Join(launcherPath, configService.Config.Nco.LauncherBinary)}'")
+        .Replace("/INSTALL_PATH", $"{launcherPath}")
+    );
+
+    eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
   }
 
-  // TODO: Remove once linux releases use .tar.gz to preserve executable bit
   [SupportedOSPlatform("linux")]
   private void MakeEngineBinariesExecutable(string installRoot)
   {
+    // game engine binaries
     foreach (var game in configService.Config.EnabledGames)
     {
       var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
 
       File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
     }
+
+    // launcher binary
+    var launcherBinary = configService.Config.Nco.LauncherBinary;
+    var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary);
+
+    File.SetUnixFileMode(launcherPath, File.GetUnixFileMode(launcherPath) | UnixFileMode.UserExecute);
   }
 
   private async Task RunPostInstallConfig(string installRoot, IDownloadEventVisitor eventVisitor)
@@ -187,7 +215,7 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       ? "win"
       : (OperatingSystem.IsMacOS() ? "macos" : "linux");
 
-    if (assetPrefix.ToLowerInvariant().Contains("launcher") && OperatingSystem.IsMacOS())
+    if (assetPrefix.Contains("launcher", StringComparison.InvariantCultureIgnoreCase) && OperatingSystem.IsMacOS())
     {
       // separate launcher archives for different macOS processor types
       var arch = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "arm64" : "x64";
@@ -218,7 +246,7 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
     ExtractNcoFileFromZip(
       zipReader,
       installRoot,
-      p => Path.Join("launcher", p),
+      p => Path.Join(LauncherConfig.LauncherDirectory, p),
       downloadEventVisitor
     );
   }

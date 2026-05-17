@@ -179,7 +179,7 @@ internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : I
     AppendToInstallLog("Ensuring MSVC runtime is installed - please accept any UAC prompts");
 
   public void Visit(ShortcutCreatedEvent e) =>
-    AppendToInstallLog($"Created desktop shortcut for game '{e.game.DisplayName}'");
+    AppendToInstallLog($"Created desktop shortcut for '{e.Name}'");
 
   public void Visit(FinishNcoReleaseDownloadEvent e)
   {

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Categories=Game
+Exec=BINARY
+Name=NCO Launcher
+Comment=New Construction Options Launcher
+NoDisplay=false
+Path=/INSTALL_PATH
+Terminal=false
