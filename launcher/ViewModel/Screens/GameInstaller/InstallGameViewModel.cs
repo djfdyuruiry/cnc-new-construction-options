@@ -31,6 +31,7 @@ public class InstallGameViewModel : ScreenViewModelBase
   private IList<ItemToBeInstalled<DiscImageSource>>? _discImages;
   private IList<ItemToBeInstalled<ZipUrlSpec>>? _modsAndAddons;
   private ItemToBeInstalled<NewConstructionOptions>? _nco;
+  private ItemToBeInstalled<NewConstructionOptions>? _ncoLauncher;
 
   public bool IsInstalling
   {
@@ -82,8 +83,8 @@ public class InstallGameViewModel : ScreenViewModelBase
 
   public ItemToBeInstalled<NewConstructionOptions>? NcoLauncher
   {
-    get => _nco;
-    set => this.RaiseAndSetIfChanged(ref _nco, value);
+    get => _ncoLauncher;
+    set => this.RaiseAndSetIfChanged(ref _ncoLauncher, value);
   }
 
   public InstallGameViewModel(
