@@ -176,7 +176,7 @@ jobs:
         mkdir artifact
         
         # ninja build log (useful for profiling compilation)
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ steps.set_preset.outputs.preset }}/.ninja_log
+        tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.tar build/${{ steps.set_preset.outputs.preset }}/.ninja_log
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           # prep debug symbols
@@ -185,10 +185,10 @@ jobs:
           dylibbundler --create-dir --bundle-deps --overwrite-files --dest-dir ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.app/Contents/libs --fix-file build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra/nco-ra.app/Contents/MacOS/nco-ra
 
           # ra bundle
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.tar ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
 
           # debug symbols
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dSYM
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.tar ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dSYM
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "red-alert" ]; then
@@ -199,18 +199,19 @@ jobs:
 
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.tar ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
 
           # debug symbols
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dSYM
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.tar ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dSYM
         fi
 
     - name: Add internal tools to archive
       run: |
         dsymutil build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix -o build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
         strip -Sx build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
+        tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}.tar ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
+        tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-macos-clang-universal2-${{ steps.gitinfo.outputs.sha_short }}-debug.tar ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dSYM
+        gzip artifact/*.tar
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
