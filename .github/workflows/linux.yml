@@ -191,23 +191,23 @@ jobs:
         mkdir artifact
 
         # ninja build log (useful for profiling compilation)
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip build/${{ steps.set_preset.outputs.preset }}/.ninja_log
+        tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.tar -C build/${{ steps.set_preset.outputs.preset }} .ninja_log
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "tiberian-dawn" ]; then
           # ra bundle
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/ra
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.tar -C ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo ra
 
           # debug symbols
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-ra.dbg
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.tar -C ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo nco-ra.dbg
         fi
 
         if [ "${{ steps.set_preset.outputs.preset }}" != "red-alert" ]; then
           # td bundle
           rm -f build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td/*.bat
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/td
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.tar -C ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo td
 
           # debug symbols
-          7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-td.dbg
+           tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.tar -C ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo nco-td.dbg
         fi
 
     - name: Add internal tools to archive
@@ -216,8 +216,9 @@ jobs:
         objcopy --add-gnu-debuglink=./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dbg ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
         strip --strip-all ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
 
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix
-        7z a artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.zip ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo/nco-mix.dbg
+        tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}.tar -C ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo nco-mix
+        tar -rf artifact/nco-${{ steps.set_preset.outputs.preset }}-linux-${{ matrix.compiler.cc }}-${{ matrix.os }}-x86_64-${{ steps.gitinfo.outputs.sha_short }}-debug.tar -C ./build/${{ steps.set_preset.outputs.preset }}/RelWithDebInfo nco-mix.dbg
+        gzip artifact/*.tar
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
