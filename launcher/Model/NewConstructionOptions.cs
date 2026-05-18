@@ -15,7 +15,9 @@ public class NewConstructionOptions : INotifyPropertyChanged
 
   public GitHubRepo GitHubRepo { get; set; }
   public string Release { get; set; }
-  public string AssetPrefix { get; set; }
+  public string GameBinaryAssetPrefix { get; set; }
+  public string LauncherAssetPrefix { get; set; }
+  public string LauncherBinary { get; set; }
   public string InstallPath
   {
     get => _installPath;

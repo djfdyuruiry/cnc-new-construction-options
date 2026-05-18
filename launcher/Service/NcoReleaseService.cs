@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,10 +22,11 @@ namespace CNC.NCO.Launcher.Service;
 public class NcoReleaseService(LauncherConfigService configService, IRestClient githubClient, PathsConfig pathsConfig)
 {
   [SupportedOSPlatform("windows")]
-  public async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
+  private async Task GenerateWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
   {
     var winUtils = new WindowsUtils(pathsConfig);
 
+    // game engine shortcuts
     foreach (var game in configService.Config.EnabledGames)
     {
       var gameBinaryPath = $"{Path.Join(installRoot, game.InstallPostfix, game.Binary)}.exe";
@@ -34,8 +36,16 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
         gameBinaryPath
       );
 
-      eventVisitor.Visit(new ShortcutCreatedEvent(game));
+      eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
+
+    // launcher shortcut
+    var launcherBinary = configService.Config.Nco.LauncherBinary;
+    var launcherBinaryPath = $"{Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary)}.exe";
+
+    await winUtils.CreateShortcut("NCO Launcher", launcherBinaryPath);
+
+    eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
   }
 
   /**
@@ -61,13 +71,14 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
   [SupportedOSPlatform("linux")]
   private async Task GenerateDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
   {
-    var desktopTemplate = await File.ReadAllTextAsync(
+    var engineTemplate = await File.ReadAllTextAsync(
       Path.Join(pathsConfig.ToolsPath, "nco.desktop")
     );
     var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
 
     Directory.CreateDirectory(appsPath);
 
+    // game engine shortcuts
     foreach (var game in configService.Config.EnabledGames)
     {
       var gamePath = Path.Join(installRoot, game.InstallPostfix);
@@ -76,25 +87,46 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
 
       await File.WriteAllTextAsync(
         $"{Path.Join(appsPath, desktopName)}.desktop",
-        desktopTemplate.Replace("BINARY", binaryPath)
+        engineTemplate.Replace("BINARY", binaryPath)
           .Replace("DISPLAY_NAME", $"{game.DisplayName.Replace("Command & Conquer: ", string.Empty)} (NCO)")
           .Replace("/INSTALL_PATH", gamePath)
       );
 
-      eventVisitor.Visit(new ShortcutCreatedEvent(game));
+      eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
+
+    // launcher shortcut
+    var launcherTemplate = await File.ReadAllTextAsync(
+      Path.Join(pathsConfig.ToolsPath, "nco-launcher.desktop")
+    );
+
+    var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory);
+
+    await File.WriteAllTextAsync(
+      $"{Path.Join(appsPath, "nco-launcher")}.desktop",
+      launcherTemplate.Replace("BINARY", $"'{Path.Join(launcherPath, configService.Config.Nco.LauncherBinary)}'")
+        .Replace("/INSTALL_PATH", $"{launcherPath}")
+    );
+
+    eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
   }
 
-  // TODO: Remove once linux releases use .tar.gz to preserve executable bit
   [SupportedOSPlatform("linux")]
   private void MakeEngineBinariesExecutable(string installRoot)
   {
+    // game engine binaries
     foreach (var game in configService.Config.EnabledGames)
     {
       var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
 
       File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
     }
+
+    // launcher binary
+    var launcherBinary = configService.Config.Nco.LauncherBinary;
+    var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary);
+
+    File.SetUnixFileMode(launcherPath, File.GetUnixFileMode(launcherPath) | UnixFileMode.UserExecute);
   }
 
   private async Task RunPostInstallConfig(string installRoot, IDownloadEventVisitor eventVisitor)
@@ -117,13 +149,14 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
   private void ExtractNcoFileFromZip(
     IReader zipReader,
     string downloadPath,
-    GameDataConfig gameConfig,
+    Func<string, string> pathTransformer,
     IDownloadEventVisitor downloadEventVisitor
   )
   {
+    var entryFile = zipReader.Entry.Key!;
     var outputPath = Path.Join(
       downloadPath,
-      zipReader.Entry!.Key!.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/")
+      pathTransformer(entryFile)
     );
     var outputPathDir = Path.GetDirectoryName(outputPath);
 
@@ -133,7 +166,7 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
     }
 
     zipReader.WriteEntryToFile(outputPath, new ExtractionOptions() { Overwrite = true });
-    downloadEventVisitor.Visit(new WriteGameDataFileEvent(zipReader.Entry.Key, outputPath));
+    downloadEventVisitor.Visit(new WriteGameDataFileEvent(entryFile, outputPath));
   }
 
   private void ExtractGameFiles(
@@ -148,19 +181,26 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       return;
     }
 
-    foreach (var dataConfig in configService.Config.EnabledGames)
+    foreach (var gameConfig in configService.Config.EnabledGames)
     {
       if (
-        entry.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
+        entry.Key?.StartsWith(gameConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? false
       )
       {
-        ExtractNcoFileFromZip(zipReader, installRoot, dataConfig, eventVisitor);
+        ExtractNcoFileFromZip(
+          zipReader,
+          installRoot,
+          p => p.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/"),
+          eventVisitor
+        );
       }
     }
   }
 
-  private async Task<string> GetAssetForNcoRelease()
+  private async Task<string> GetAssetUrlForNcoRelease(IDownloadEventVisitor eventVisitor, string assetPrefix)
   {
+    eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.Nco));
+    
     var ncoConfig = configService.Config.Nco;
     var ncoRelease = await githubClient.ExecuteGetAsync<GitHubApiRelease>(
       $"/repos/{ncoConfig.GitHubRepo.Owner}/{ncoConfig.GitHubRepo.Name}/releases/tags/{ncoConfig.Release}"
@@ -175,7 +215,14 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       ? "win"
       : (OperatingSystem.IsMacOS() ? "macos" : "linux");
 
-    var osAssetPrefix = ncoConfig.AssetPrefix.Replace("${OS}", osName);
+    if (assetPrefix.Contains("launcher", StringComparison.InvariantCultureIgnoreCase) && OperatingSystem.IsMacOS())
+    {
+      // separate launcher archives for different macOS processor types
+      var arch = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "arm64" : "x64";
+      osName = $"{osName}-{arch}";
+    }
+
+    var osAssetPrefix = assetPrefix.Replace("${OS}", osName);
 
     return ncoRelease.Data.Assets?.Where(a =>
         (a.Name?.StartsWith(osAssetPrefix) ?? false) && !a.Name.Contains("-debug")
@@ -184,17 +231,79 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       .FirstOrDefault() ?? throw new Exception($"Failed to resolve NCO zip, release '{ncoConfig.Release}' and OS: {osName}");
   }
 
-  private async Task WithNcoReleaseArchive(
+  private void ExtractLauncherFiles(
+    IReader zipReader,
+    IEntry entry,
+    string installRoot,
+    IDownloadEventVisitor downloadEventVisitor
+  )
+  {
+    if (entry.IsDirectory)
+    {
+      return;
+    }
+
+    ExtractNcoFileFromZip(
+      zipReader,
+      installRoot,
+      p => Path.Join(LauncherConfig.LauncherDirectory, p),
+      downloadEventVisitor
+    );
+  }
+
+  private async Task DownloadLauncher(IDownloadEventVisitor eventVisitor)
+  {
+    try
+    {
+      var installRoot = configService.Config.Nco.PendingInstallPath;
+      await WithNcoArchive(
+        eventVisitor,
+        configService.Config.Nco.LauncherAssetPrefix,
+        url => eventVisitor.Visit(new StartNcoLauncherDownloadEvent(url)),
+        (r, e) => ExtractLauncherFiles(r, e, installRoot, eventVisitor)
+      );
+
+      eventVisitor.Visit(new FinishNcoLauncherDownloadEvent());
+    }
+    catch (Exception e)
+    {
+      eventVisitor.Visit(new DownloadNcoLauncherErrorEvent(e));
+    }
+  }
+
+  private async Task DownloadMacOsLauncher(IDownloadEventVisitor eventVisitor)
+  {
+    await WithNcoArchive(
+      eventVisitor,
+      configService.Config.Nco.LauncherAssetPrefix,
+      url => eventVisitor.Visit(new StartNcoLauncherDownloadEvent(url)),
+      (r, e) =>
+      {
+        if (e.IsDirectory || !string.Equals(Path.GetExtension(e.Key), ".app", StringComparison.OrdinalIgnoreCase))
+        {
+          return;
+        }
+
+        // put app bundle on desktop for user
+        var outputPath = Path.Join(pathsConfig.UserDesktopPath, Path.GetFileName(e.Key));
+
+        r.WriteEntryToFile(outputPath, new ExtractionOptions() { Overwrite = true });
+        eventVisitor.Visit(new WriteGameDataFileEvent(e.Key!, outputPath));
+      }
+    );
+  }
+
+  private async Task WithNcoArchive(
     IDownloadEventVisitor eventVisitor,
+    string assetPrefix,
+    Action<string> downloadStartCallback,
     Action<IReader, IEntry> entryHandler
   )
   {
-    // fetch release zip url
-    eventVisitor.Visit(new FetchNcoReleaseEvent(configService.Config.Nco));
+    // fetch archive zip url
+    var assetUrl = await GetAssetUrlForNcoRelease(eventVisitor, assetPrefix);
 
-    var assetUrl = await GetAssetForNcoRelease();
-
-    eventVisitor.Visit(new StartNcoReleaseDownloadEvent(assetUrl));
+    downloadStartCallback(assetUrl);
 
     // request release zip
     using var client = new HttpClient();
@@ -217,10 +326,12 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
   }
 
   [SupportedOSPlatform("macos")]
-  private async Task DownloadMacOs(IDownloadEventVisitor eventVisitor)
+  private async Task DownloadGameEngineMacOs(IDownloadEventVisitor eventVisitor)
   {        
-    await WithNcoReleaseArchive(
+    await WithNcoArchive(
       eventVisitor,
+      configService.Config.Nco.GameBinaryAssetPrefix,
+      url => eventVisitor.Visit(new StartNcoReleaseDownloadEvent(url)),
       (r, e) =>
       {
         if (e.IsDirectory)
@@ -228,9 +339,9 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
           return;
         }
 
-        foreach (var dataConfig in configService.Config.EnabledGames)
+        foreach (var gameConfig in configService.Config.EnabledGames)
         {
-          if (!e.Key?.StartsWith(dataConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? true)
+          if (!e.Key?.StartsWith(gameConfig.NcoZipPath, StringComparison.OrdinalIgnoreCase) ?? true)
           {
             continue;
           }
@@ -246,7 +357,12 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
             continue;
           }
 
-          ExtractNcoFileFromZip(r, pathsConfig.AppDataDirectoryPath, dataConfig, eventVisitor);
+          ExtractNcoFileFromZip(
+            r,
+            pathsConfig.AppDataDirectoryPath, 
+            p => p.Replace($"{gameConfig.NcoZipPath}/", $"{gameConfig.InstallPostfix}/"),
+            eventVisitor
+          );
         }
       }
     );
@@ -258,25 +374,32 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
     {
       if (OperatingSystem.IsMacOS())
       {
-        await DownloadMacOs(eventVisitor);
-      }
-      else
-      {
-        var installRoot = configService.Config.Nco.PendingInstallPath;
+        await DownloadGameEngineMacOs(eventVisitor);
+        eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
+        await DownloadMacOsLauncher(eventVisitor);
 
-        await WithNcoReleaseArchive(
-          eventVisitor,
-          (r, e) => ExtractGameFiles(r, e, installRoot, eventVisitor)
-        );
-
-        await RunPostInstallConfig(installRoot, eventVisitor);
+        return;
       }
+
+      var installRoot = configService.Config.Nco.PendingInstallPath;
+
+      await WithNcoArchive(
+        eventVisitor,
+        configService.Config.Nco.GameBinaryAssetPrefix,
+        url => eventVisitor.Visit(new StartNcoReleaseDownloadEvent(url)),
+        (r, e) => ExtractGameFiles(r, e, installRoot, eventVisitor)
+      );
+
+      await RunPostInstallConfig(installRoot, eventVisitor);
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
+
+      await DownloadLauncher(eventVisitor);
     }
     catch (Exception e)
     {
       eventVisitor.Visit(new DownloadNcoReleaseErrorEvent(e));
     }
   }
+
 }

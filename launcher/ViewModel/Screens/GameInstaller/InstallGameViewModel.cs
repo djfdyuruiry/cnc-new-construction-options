@@ -31,6 +31,7 @@ public class InstallGameViewModel : ScreenViewModelBase
   private IList<ItemToBeInstalled<DiscImageSource>>? _discImages;
   private IList<ItemToBeInstalled<ZipUrlSpec>>? _modsAndAddons;
   private ItemToBeInstalled<NewConstructionOptions>? _nco;
+  private ItemToBeInstalled<NewConstructionOptions>? _ncoLauncher;
 
   public bool IsInstalling
   {
@@ -80,6 +81,12 @@ public class InstallGameViewModel : ScreenViewModelBase
     set => this.RaiseAndSetIfChanged(ref _nco, value);
   }
 
+  public ItemToBeInstalled<NewConstructionOptions>? NcoLauncher
+  {
+    get => _ncoLauncher;
+    set => this.RaiseAndSetIfChanged(ref _ncoLauncher, value);
+  }
+
   public InstallGameViewModel(
     IScreen hostScreen,
     LauncherConfigService configService,
@@ -110,7 +117,8 @@ public class InstallGameViewModel : ScreenViewModelBase
         .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
         .ToList();
 
-      Nco = new ItemToBeInstalled<NewConstructionOptions>(configService.Config.Nco);
+      Nco = ItemToBeInstalled<NewConstructionOptions>.Build(configService.Config.Nco);
+      NcoLauncher = ItemToBeInstalled<NewConstructionOptions>.Build(new NewConstructionOptions());
 
       return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)

@@ -91,22 +91,41 @@
               NCO
             </TextBlock>
 
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Classes="p" Text="•"/>
-              <TextBlock Classes="p" Text="Game Engine" Margin="0,0,5,0"/>
-              <Image IsVisible="{Binding Nco.Installing}"
-                     anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
-                     anim:ImageBehavior.RepeatBehavior="0x"
-                     Width="20"
-                     Height="20"/>
-              <Image IsVisible="{Binding Nco.Installed}"
-                     Source="avares://NCO Launcher/img/tick.png"
-                     Width="20"
-                     Height="20"/>
-              <Image IsVisible="{Binding Nco.Errored}"
-                     Source="avares://NCO Launcher/img/error.png"
-                     Width="20"
-                     Height="20"/>
+            <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="p" Text="•"/>
+                <TextBlock Classes="p" Text="Game Engine" Margin="0,0,5,0"/>
+                <Image IsVisible="{Binding Nco.Installing}"
+                       anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
+                       anim:ImageBehavior.RepeatBehavior="0x"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding Nco.Installed}"
+                       Source="avares://NCO Launcher/img/tick.png"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding Nco.Errored}"
+                       Source="avares://NCO Launcher/img/error.png"
+                       Width="20"
+                       Height="20"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Classes="p" Text="•"/>
+                <TextBlock Classes="p" Text="Launcher" Margin="0,0,5,0"/>
+                <Image IsVisible="{Binding NcoLauncher.Installing}"
+                       anim:ImageBehavior.AnimatedSource="avares://NCO Launcher/img/install.gif"
+                       anim:ImageBehavior.RepeatBehavior="0x"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding NcoLauncher.Installed}"
+                       Source="avares://NCO Launcher/img/tick.png"
+                       Width="20"
+                       Height="20"/>
+                <Image IsVisible="{Binding NcoLauncher.Errored}"
+                       Source="avares://NCO Launcher/img/error.png"
+                       Width="20"
+                       Height="20"/>
+              </StackPanel>
             </StackPanel>
           </StackPanel>
         </Grid>
