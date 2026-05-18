@@ -7,6 +7,8 @@ namespace CNC.NCO.Launcher.Model;
 #pragma warning disable CS8618 // YAML deserialization populates these members
 public class LauncherConfig
 {
+  public const string LauncherDirectory = "launcher";
+
   [YamlMember(Alias = "$schema")]
   public string Schema { get; set; }
   [YamlMember(Alias = "NCO")]

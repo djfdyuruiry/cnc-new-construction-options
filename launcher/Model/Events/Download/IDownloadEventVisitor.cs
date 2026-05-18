@@ -20,12 +20,19 @@ public interface IDownloadEventVisitor : IVisitor
   void Visit(StartZipUrlDownloadEvent e);
   void Visit(FinishZipUrlDownloadEvent e);
 
-  // NCO game engine install events, see: launcher/Service/NcoReleaseService.cs
+  // see: launcher/Service/NcoReleaseService.cs
   void Visit(FetchNcoReleaseEvent e);
+
+  // NCO game engine install events
   void Visit(StartNcoReleaseDownloadEvent e);
   void Visit(FinishNcoReleaseDownloadEvent e);
   [SupportedOSPlatform("windows")]
   void Visit(FetchMsvcRuntimeEvent e);
   void Visit(ShortcutCreatedEvent e);
   void Visit(DownloadNcoReleaseErrorEvent e);
+
+  // NCO launcher install events
+  void Visit(StartNcoLauncherDownloadEvent e);
+  void Visit(FinishNcoLauncherDownloadEvent e);
+  void Visit(DownloadNcoLauncherErrorEvent e);
 }
