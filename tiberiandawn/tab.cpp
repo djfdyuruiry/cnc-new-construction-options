@@ -127,7 +127,7 @@ void TabClass::Draw_It(bool complete)
 
 void TabClass::Draw_Credits_Tab(void)
 {
-    unsigned x = Get_Resolution_Factor() ? 320 : 160;
+    const unsigned x = Get_Resolution_Factor() ? Map.SideX - Get_Shape_Size(TabShape) : 160;
     CC_Draw_Shape(TabShape, 0, x, 0, WINDOW_MAIN, SHAPE_NORMAL);
 }
 
