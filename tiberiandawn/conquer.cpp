@@ -316,6 +316,7 @@ void Main_Game(int argc, char* argv[])
         **	Scenario is done; fade palette to black
         */
         Fade_Palette_To(BlackPalette, FADE_PALETTE_SLOW, NULL);
+        HiddenPage.Clear(); // ensure anything previously drawn is purged (might be beyond the bounds of the next screen)
         VisiblePage.Clear();
 
 #ifndef DEMO
