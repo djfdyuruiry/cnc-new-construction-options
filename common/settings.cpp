@@ -24,8 +24,8 @@ SettingsClass::SettingsClass()
     Video.WindowHeight = 800;
     Video.Windowed = false;
     Video.Display = 1;
-    Video.Width = 0;
-    Video.Height = 0;
+    Video.Width = 1280;
+    Video.Height = 800;
     Video.Boxing = true;
     Video.BoxingAspectRatio = "4:3";
     Video.FrameLimit = 120;
