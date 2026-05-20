@@ -48,6 +48,10 @@
 
 #include <SDL.h>
 
+extern int ScreenWidth;
+extern int ScreenHeight;
+ResolutionMode CurrentResolutionMode = MODE_HIGH_RES;
+
 extern WWKeyboardClass* Keyboard;
 static SDL_Window* window;
 static SDL_Renderer* renderer;
@@ -127,6 +131,18 @@ static void Update_HWCursor_Settings()
     */
     int win_w, win_h;
     SDL_GetRendererOutputSize(renderer, &win_w, &win_h);
+
+    if (CurrentResolutionMode == MODE_HIGH_RES) {
+        hwcursor.GameW = win_w;
+        hwcursor.GameH = win_h;
+    } else if (CurrentResolutionMode == MODE_SCALED) {
+        hwcursor.GameW = 640;
+        hwcursor.GameH = 400;
+    } else if (CurrentResolutionMode == MODE_DOS) {
+        hwcursor.GameW = 320;
+        hwcursor.GameH = 200;
+    }
+
     hwcursor.ScaleX = win_w / (float)hwcursor.GameW;
     hwcursor.ScaleY = win_h / (float)hwcursor.GameH;
 
@@ -290,14 +306,19 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
     }
 
     window = SDL_CreateWindow("CNC: New Construction Options", x, y, win_w, win_h, win_flags);
-
+ 
     if (window == nullptr) {
         DBG_ERROR("SDL_CreateWindow failed: %s", SDL_GetError());
         Reset_Video_Mode();
         return false;
     }
 
+    SDL_GetWindowSize(window, &win_w, &win_h);
+    ScreenWidth = win_w;
+    ScreenHeight = win_h;
+ 
     DBG_INFO("Created SDL2 %s window in %dx%d", (win_flags ? "fullscreen" : "windowed"), win_w, win_h);
+
 
     pixel_format = SDL_GetWindowPixelFormat(window);
     if (pixel_format == SDL_PIXELFORMAT_UNKNOWN || SDL_BITSPERPIXEL(pixel_format) < 16) {
@@ -390,11 +411,9 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
     /*
     ** Set mouse scaling options.
     */
-    hwcursor.GameW = w;
-    hwcursor.GameH = h;
-    hwcursor.X = w / 2;
-    hwcursor.Y = h / 2;
     Update_HWCursor_Settings();
+    hwcursor.X = hwcursor.GameW / 2;
+    hwcursor.Y = hwcursor.GameH / 2;
 
     /*
     ** Init gamepad.

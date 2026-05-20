@@ -11,6 +11,15 @@ enum GBC_Enum
     GBC_VISIBLE = 2,
 };
 
+enum ResolutionMode
+{
+    MODE_HIGH_RES,
+    MODE_SCALED,
+    MODE_DOS,
+};
+
+extern ResolutionMode CurrentResolutionMode;
+
 class VideoSurface;
 
 class Video
