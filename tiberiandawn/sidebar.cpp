@@ -342,18 +342,25 @@ void SidebarClass::Init_IO(void)
             ShapeButtonClass* SBCUpgrade = (ShapeButtonClass*)Upgrade;
             ShapeButtonClass* SBCZoom = (ShapeButtonClass*)Zoom;
 
-            Repair->X = 484;
-            Repair->Y = 160;
+            auto placement_x = SideX + buttonspacing - 2;
+            constexpr auto placement_y = 160;
+
+            Repair->X = placement_x;
+            Repair->Y = placement_y;
             SBCRepair->ReflectButtonState = true;
             SBCRepair->Set_Shape(Hires_Retrieve(repair_shp));
 
-            Upgrade->X = 480 + 57;
-            Upgrade->Y = 160;
+            placement_x += Repair->Width + buttonspacing - 2;
+
+            Upgrade->X = placement_x;
+            Upgrade->Y = placement_y;
             SBCUpgrade->ReflectButtonState = true;
             SBCUpgrade->Set_Shape(Hires_Retrieve(sell_shp));
 
-            Zoom->X = 480 + 110;
-            Zoom->Y = 160;
+            placement_x += Upgrade->Width + buttonspacing - 4;
+
+            Zoom->X = placement_x;
+            Zoom->Y = placement_y;
             SBCZoom->Set_Shape(Hires_Retrieve(map_shp));
         } else {
             TextButtonClass* TBCRepair = (TextButtonClass*)Repair;
@@ -1085,7 +1092,9 @@ bool SidebarClass::Activate(int control)
         **	Since the sidebar status has changed, update the map so that the graphics
         **	will be rendered correctly.
         */
-        Flag_To_Redraw(true);
+        HiddenPage.Clear();
+        Map.Flag_To_Redraw(true);
+        Map.Render();
     }
 
     return (old);
