@@ -842,6 +842,10 @@ bool Select_Game(bool fade)
                 **	Display the title page; fade it in if this is the first time
                 **	through the loop, and the 'fade' flag is true
                 */
+                if (fade) {
+                    Enter_Standard_Resolution_Mode();
+                }
+
                 Load_Title_Screen(TitlePicture, &HidPage, Palette);
                 memcpy(GamePalette, Palette, 768);
                 Blit_Hid_Page_To_Seen_Buff();

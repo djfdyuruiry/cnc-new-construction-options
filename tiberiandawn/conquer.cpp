@@ -2175,11 +2175,11 @@ extern void Play_Movie_GlyphX(const char* movie_name, ThemeType theme);
 
 void Play_Movie(char const* name, ThemeType theme, bool clrscrn)
 {
-#if REMASTER_BUILD
     if (strcmp(name, "x") == 0 || strcmp(name, "X") == 0) {
         return;
     }
 
+#if REMASTER_BUILD
     Play_Movie_GlyphX(name, theme);
     return;
 #else
@@ -2236,6 +2236,8 @@ void Play_Movie(char const* name, ThemeType theme, bool clrscrn)
         }
         PreserveVQAScreen = 0;
         Keyboard->Clear();
+
+        Enter_Standard_Resolution_Mode();
 
         VQAHandle* vqa = NULL;
 

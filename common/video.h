@@ -11,15 +11,6 @@ enum GBC_Enum
     GBC_VISIBLE = 2,
 };
 
-enum ResolutionMode
-{
-    MODE_HIGH_RES,
-    MODE_SCALED,
-    MODE_DOS,
-};
-
-extern ResolutionMode CurrentResolutionMode;
-
 class VideoSurface;
 
 class Video
@@ -73,6 +64,7 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel);
 void Get_Video_Scale(float& x, float& y);
 void Set_Video_Cursor_Clip(bool clipped);
 void Move_Video_Mouse(float xrel, float yrel);
+void Move_Video_Mouse_Absolute(int x, int y);
 void Get_Video_Mouse(int& x, int& y);
 void Toggle_Video_Fullscreen();
 void Reset_Video_Mode();
@@ -109,5 +101,22 @@ unsigned Get_Video_Hardware_Capabilities();
 
 void Wait_Vert_Blank();
 void Set_DD_Palette(void* palette);
+
+/* Resolution mode control */
+
+enum ResolutionMode
+{
+    MODE_HIGH_RES,
+    MODE_SCALED,
+    MODE_DOS,
+    MODE_STRETCH
+};
+
+extern ResolutionMode CurrentResolutionMode;
+
+int Get_Resolution_Mode_Width(int fallback_value);
+int Get_Resolution_Mode_Height(int fallback_value);
+void Enter_Standard_Resolution_Mode();
+void Enter_High_Resolution_Mode();
 
 #endif // VIDEO_H

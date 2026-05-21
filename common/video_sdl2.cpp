@@ -508,6 +508,25 @@ void Move_Video_Mouse(float xrel, float yrel)
     }
 }
 
+void Move_Video_Mouse_Absolute(const int x, const int y)
+{
+    if (x == 0 && y == 0) {
+        hwcursor.X = x;
+        hwcursor.Y = y;
+        return;
+    }
+
+    Move_Video_Mouse_Absolute(0, 0);
+
+    for (auto i = 0; i < x; i++) {
+        Move_Video_Mouse(i, 0);
+    }
+
+    for (auto j = 0; j < y; j++) {
+        Move_Video_Mouse(x, j);
+    }
+}
+
 void Get_Video_Mouse(int& x, int& y)
 {
     if (Keyboard->Is_Gamepad_Active() || (Settings.Mouse.RawInput && (hwcursor.Clip || !Settings.Video.Windowed))) {
@@ -903,8 +922,30 @@ public:
 
         SDL_UpdateTexture(texture, NULL, windowSurface->pixels, windowSurface->pitch);
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, &render_dst);
+
+        std::unique_ptr<SDL_Rect> src_rect;
+
+        if (CurrentResolutionMode == MODE_SCALED) {
+            src_rect = std::make_unique<SDL_Rect>();
+
+            src_rect->x = 0;
+            src_rect->y = 0;
+            src_rect->w = 640;
+            src_rect->h = 400;
+        }
+
+        SDL_RenderCopy(renderer, texture, src_rect.get(), &render_dst);
         SDL_RenderPresent(renderer);
+    }
+
+    int GetWidth()
+    {
+        return surface == nullptr ? 0 : surface->w;
+    }
+
+    int GetHeight()
+    {
+        return surface == nullptr ? 0 : surface->h;
     }
 
 private:
@@ -942,4 +983,75 @@ Video& Video::Shared()
 VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
 {
     return new VideoSurfaceSDL2(w, h, flags);
+}
+
+int Get_Resolution_Mode_Width(const int fallback_value)
+{
+    if (frontSurface == nullptr) {
+        return fallback_value;
+    }
+
+    switch (CurrentResolutionMode) {
+        case MODE_DOS:
+            return 320;
+
+        case MODE_SCALED:
+            return 640;
+
+        default:
+            return frontSurface->GetWidth();
+    }
+}
+
+int Get_Resolution_Mode_Height(const int fallback_value)
+{
+    if (frontSurface == nullptr) {
+        return fallback_value;
+    }
+
+    switch (CurrentResolutionMode) {
+        case MODE_DOS:
+            return 200;
+
+        case MODE_SCALED:
+            return 400;
+
+        default:
+            return frontSurface->GetHeight();
+    }
+}
+
+/**
+ * Enter the standard resolution mode for the game engine, if current resolution mode supports it.
+ *
+ * Generally this should be called after clearing the screen to prevent zoom in artifacts.
+ *
+ * This mode is currently used for menus, videos, CPS animations and score screens.
+ */
+void Enter_Standard_Resolution_Mode()
+{
+    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_STRETCH) {
+        // these modes never change resolution
+        return;
+    }
+
+    CurrentResolutionMode = MODE_SCALED;
+    Move_Video_Mouse_Absolute(0, 0);
+}
+
+/**
+ * Enter the dynamic high resolution mode for the game engine, if current resolution mode supports it.
+ *
+ * Call this to reset calls to Enter_Standard_Resolution_Mode().
+ *
+ * This mode is currently only used when playing a scenario.
+ */
+void Enter_High_Resolution_Mode()
+{
+    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_STRETCH) {
+        // these modes never change resolution
+        return;
+    }
+
+    CurrentResolutionMode = MODE_HIGH_RES;
 }

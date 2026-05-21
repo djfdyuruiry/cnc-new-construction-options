@@ -489,6 +489,7 @@ void LuaStateDeleter::operator()(lua_State* L) const
 {
     if (L)
     {
+        // BUG: Exiting a scenario editor crashes here due to formatting error (do we even want Lua to execute for editor?)
         CNC_LOGGER_INFO("Destroying Lua state: {}", static_cast<void*>(L));
         lua_close(L);
     }

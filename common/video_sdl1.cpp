@@ -519,3 +519,25 @@ VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
 {
     return new VideoSurfaceSDL1(w, h, flags);
 }
+
+int Get_Resolution_Mode_Width(const int fallback_value)
+{
+    // TODO: Resolution mode support not implemented
+    return fallback_value;
+}
+
+int Get_Resolution_Mode_Height(const int fallback_value)
+{
+    // TODO: Resolution mode support not implemented
+    return fallback_value;
+}
+
+void Enter_Standard_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+}
+
+void Enter_High_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+}

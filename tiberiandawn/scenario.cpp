@@ -144,10 +144,13 @@ bool Start_Scenario(char* root, bool briefing)
             if (Scen.TransitTheme == THEME_NONE) {
                 Theme.Queue_Song(THEME_AOI);
             }
+
+            Enter_High_Resolution_Mode();
         } else {
             Play_Movie(BriefMovie);
             Play_Movie(ActionMovie, Scen.TransitTheme);
 
+            Enter_High_Resolution_Mode();
 #ifdef NEWMENU
 
             char buffer[_MAX_FNAME + _MAX_EXT + 4];

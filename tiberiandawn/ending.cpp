@@ -67,6 +67,8 @@ void GDI_Ending(void)
     CountDownTimerClass count;
     if (CCFileClass("TRAILER.VQA").Is_Available()) {
         Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+        Enter_Standard_Resolution_Mode();
+
         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
         SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
         Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
@@ -81,6 +83,8 @@ void GDI_Ending(void)
     }
 
     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+    Enter_Standard_Resolution_Mode();
+
     Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
     SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
     Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
