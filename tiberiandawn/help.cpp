@@ -215,7 +215,7 @@ void HelpClass::Help_Text(int text, int x, int y, int color, bool quick, int cos
         **	icons so that the text message is erased.
         */
         if (Text != TXT_NONE) {
-            Refresh_Cells(Coord_Cell(TacticalCoord), &OverlapList[0]);
+            Flag_To_Redraw(true);
         }
 
         /*
