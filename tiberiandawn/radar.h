@@ -65,7 +65,7 @@ public:
     /*
     ** Initialization
     */
-    virtual void One_Time(void);   // One-time inits
+    virtual void One_Time(bool on_save = false);   // One-time inits
     virtual void Init_Clear(void); // Clears all to known state
 
     virtual bool Map_Cell(CELL cell, HouseClass* house, bool and_for_allies);

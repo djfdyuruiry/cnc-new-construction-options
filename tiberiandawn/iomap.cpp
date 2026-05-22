@@ -384,6 +384,8 @@ bool MouseClass::Load(FileClass& file)
             return (false);
     }
 
+    SidebarClass::One_Time(true);
+
     return (true);
 }
 

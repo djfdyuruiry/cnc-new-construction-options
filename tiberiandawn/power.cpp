@@ -124,9 +124,9 @@ void PowerClass::Init_Clear(void)
  * HISTORY:                                                                                    *
  *   12/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void PowerClass::One_Time(void)
+void PowerClass::One_Time(const bool on_save)
 {
-    RadarClass::One_Time();
+    RadarClass::One_Time(on_save);
 
     int factor = Get_Resolution_Factor();
     PowX = SeenBuff.Get_Width() - Map.RadWidth;
@@ -144,6 +144,10 @@ void PowerClass::One_Time(void)
     PowerButton.Y = PowY;
     PowerButton.Width = PowWidth - 1;
     PowerButton.Height = PowHeight;
+
+    if (on_save) {
+        return;
+    }
 
     PowerShape = MFCD::Retrieve((factor) ? "HPOWER.SHP" : "POWER.SHP");
     PowerBarShape = Hires_Retrieve("PWRBAR.SHP");

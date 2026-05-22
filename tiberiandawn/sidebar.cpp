@@ -169,9 +169,10 @@ SidebarClass::SidebarClass(void)
  * HISTORY:                                                                                    *
  *   10/28/94   JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::One_Time(void)
+void SidebarClass::One_Time(const bool on_save)
 {
-    PowerClass::One_Time();
+    PowerClass::One_Time(on_save);
+
     /*
     ** Set up the pixel offsets and widths and heights used to render the
     ** sidebar.  They are now variables because we need to change them for
@@ -217,8 +218,12 @@ void SidebarClass::One_Time(void)
     Column[1].X = Column[0].X + (StripClass::STRIP_WIDTH * factor) + spacing - 1;
     Column[1].Y = SideY + TopHeight + 1;
 
-    Column[0].One_Time(0);
-    Column[1].One_Time(1);
+    Column[0].One_Time(0, on_save);
+    Column[1].One_Time(1, on_save);
+
+    if (!on_save) {
+        return;
+    }
 
     /*
     **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
@@ -1164,7 +1169,7 @@ SidebarClass::StripClass::StripClass(InitClass const&)
  * HISTORY:                                                                                    *
  *   12/31/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::StripClass::One_Time(int)
+void SidebarClass::StripClass::One_Time(int, const bool on_save)
 {
     static const char* _file[3] = {"ION", "ATOM", "BOMB"};
     int factor = Get_Resolution_Factor();
@@ -1174,6 +1179,10 @@ void SidebarClass::StripClass::One_Time(int)
     StripWidth = STRIP_WIDTH << factor;
     LeftEdgeOffset = (StripWidth - ObjectWidth) >> 1;
     ButtonSpacingOffset = (StripWidth - ((BUTTON_WIDTH << factor) << 1)) / 3;
+
+    if (on_save) {
+        return;
+    }
 
     /*
     ** Sidebar is player team specific in Hires
@@ -2819,4 +2828,6 @@ FROM_JSON(SidebarClass)
     BITFIELD_FROM_JSON(IsRepairActive);
     BITFIELD_FROM_JSON(IsUpgradeActive);
     BITFIELD_FROM_JSON(IsDemolishActive);
+
+    p.One_Time(true);
 }
