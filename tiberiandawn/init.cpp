@@ -109,6 +109,7 @@ bool Init_Game(int, char*[])
      */
     CncLogger::OnFatalError = [](const auto& err) {
         Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
+        Leave_Zoomed_Resolution_Mode();
         Show_Mouse();
 
         Speak(VOX_FAIL);

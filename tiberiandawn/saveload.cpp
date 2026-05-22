@@ -367,6 +367,7 @@ bool Load_Game(const char* file_name)
 {
     Clear_Scenario();
 
+    Leave_Zoomed_Resolution_Mode();
     Call_Back();
 
 #ifndef REMASTER_BUILD
@@ -550,6 +551,8 @@ bool Load_Game_Binary(const char* file_name)
         file.Close();
         return (false);
     }
+
+    Leave_Zoomed_Resolution_Mode();
 
     Call_Back();
     /*

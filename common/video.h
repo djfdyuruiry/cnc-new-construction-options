@@ -107,17 +107,19 @@ void Set_DD_Palette(void* palette);
 
 enum ResolutionMode
 {
+    // original resolution (640x400)
+    MODE_DEFAULT,
+    // original DOS resolution (300x200)
+    MODE_DOS,
     // custom resolution
     MODE_HIGH_RES,
-    // zoom into original resolution
-    MODE_ZOOM,
-    // original resolution
-    MODE_SCALED,
-    // original DOS resolution
-    MODE_DOS
+    // zoom into default resolution
+    MODE_ZOOM
 };
 
-extern ResolutionMode CurrentResolutionMode;
+ResolutionMode Get_Current_Resolution_Mode();
+
+void Set_Current_Resolution_Mode(ResolutionMode resolution_mode);
 
 /**
  * Lookup the width for the current resolution mode. This can be a subset of the current

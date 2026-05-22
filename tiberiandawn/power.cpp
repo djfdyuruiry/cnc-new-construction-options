@@ -136,7 +136,7 @@ void PowerClass::One_Time(void)
         PowY = Map.RadY + Map.RadHeight + (13 << factor);
     }
     PowWidth = 8 << factor;
-    PowHeight = SeenBuff.Get_Height() - PowY;
+    PowHeight = (factor ? 400 : 200) - PowY;
     PowLineSpace = 5 << factor;
     PowLineWidth = PowWidth - 4;
 

@@ -699,6 +699,7 @@ void Do_Lose(void)
     }
 
     Play_Movie(LoseMovie);
+    Leave_Zoomed_Resolution_Mode();
 
     /*
     ** Start same scenario again

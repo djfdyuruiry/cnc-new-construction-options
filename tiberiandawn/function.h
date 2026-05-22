@@ -1130,4 +1130,6 @@ void On_Achievement_Event(const HouseClass* player_ptr, const char* achievement_
 /* Holds the title filename. On 320x200, set to TITLE.CPS, else HTITLE.PCX. */
 extern char* TitlePicture;
 
+void CC_Texture_Fill(void const* shapefile, int shapenum, int xpos, int ypos, int width, int height);
+
 #include "rulekeys-nco.h"

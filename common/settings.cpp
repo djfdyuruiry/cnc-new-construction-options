@@ -21,13 +21,13 @@ SettingsClass::SettingsClass()
     */
     // TODO: Could offer presets through the launcher or a ini setting (retro, modern etc.)
     Video.Width = 640;
-    Video.Height = 480;
+    Video.Height = 400;
     Video.StretchWidth = 0;
     Video.StretchHeight = 0;
     Video.Windowed = false;
     Video.Display = 1;
     Video.Boxing = true;
-    Video.BoxingAspectRatio = "4:3";
+    Video.BoxingAspectRatio = "16:10";
     Video.FrameLimit = 120;
     Video.InterpolationMode = 2;
     Video.HardwareCursor = false;

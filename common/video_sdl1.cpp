@@ -520,6 +520,17 @@ VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
     return new VideoSurfaceSDL1(w, h, flags);
 }
 
+ResolutionMode Get_Current_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+    return MODE_DEFAULT;
+}
+
+void Set_Current_Resolution_Mode(const ResolutionMode)
+{
+    // TODO: Resolution mode support not implemented
+}
+
 std::optional<int> Try_Get_Resolution_Mode_Width()
 {
     // TODO: Resolution mode support not implemented

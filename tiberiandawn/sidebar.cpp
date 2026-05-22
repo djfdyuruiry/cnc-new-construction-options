@@ -809,6 +809,19 @@ void SidebarClass::Draw_It(bool complete)
                 LogicPage->Draw_Line(SideX, 157, SeenBuff.Get_Width() - 1, 157, 0);
                 CC_Draw_Shape(SidebarShape1, 0, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
                 CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
+
+                if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                    // current resolution will exceed the default, so fill in the blank space below the sidebar with
+                    // the dialog texture
+                    CC_Texture_Fill(
+                        MFCD::Retrieve("BTEXTURE.SHP"),
+                        InMainLoop,
+                        SideX,
+                        GBUFF_INIT_HEIGHT,
+                        SideBarWidth,
+                        SeenBuff.Get_Width() - GBUFF_INIT_HEIGHT
+                    );
+                }
             }
 
             //  Repair.Draw_Me(true);

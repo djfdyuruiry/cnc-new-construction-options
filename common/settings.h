@@ -23,10 +23,10 @@ public:
 
     struct
     {
-        int StretchWidth;
-        int StretchHeight;
         int Width;
         int Height;
+        int StretchWidth;
+        int StretchHeight;
         bool Windowed;
         bool Boxing;
         std::string BoxingAspectRatio;

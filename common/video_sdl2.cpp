@@ -50,7 +50,6 @@
 
 extern int ScreenWidth;
 extern int ScreenHeight;
-ResolutionMode CurrentResolutionMode = MODE_HIGH_RES;
 
 extern WWKeyboardClass* Keyboard;
 static SDL_Window* window;
@@ -58,6 +57,7 @@ static SDL_Renderer* renderer;
 static SDL_Palette* palette;
 static Uint32 pixel_format;
 static SDL_Rect render_dst;
+static ResolutionMode CurrentResolutionMode = MODE_DEFAULT;
 
 static struct
 {
@@ -132,13 +132,15 @@ static void Update_HWCursor_Settings()
     int win_w, win_h;
     SDL_GetRendererOutputSize(renderer, &win_w, &win_h);
 
-    if (CurrentResolutionMode == MODE_HIGH_RES) {
-        hwcursor.GameW = win_w;
-        hwcursor.GameH = win_h;
-    } else if (CurrentResolutionMode == MODE_SCALED) {
+    const auto resolution_mode = Get_Current_Resolution_Mode();
+
+    if (resolution_mode == MODE_HIGH_RES) {
+        hwcursor.GameW = Settings.Video.Width;
+        hwcursor.GameH = Settings.Video.Height;
+    } else if (resolution_mode == MODE_DEFAULT) {
         hwcursor.GameW = 640;
         hwcursor.GameH = 400;
-    } else if (CurrentResolutionMode == MODE_DOS) {
+    } else if (resolution_mode == MODE_DOS) {
         hwcursor.GameW = 320;
         hwcursor.GameH = 200;
     }
@@ -991,10 +993,26 @@ VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
     return new VideoSurfaceSDL2(w, h, flags);
 }
 
+/* Resolution mode API */
+
+ResolutionMode Get_Current_Resolution_Mode()
+{
+    return CurrentResolutionMode;
+}
+
+void Set_Current_Resolution_Mode(const ResolutionMode resolution_mode)
+{
+    CurrentResolutionMode = resolution_mode;
+}
+
 std::optional<int> Try_Get_Resolution_Mode_Width()
 {
     if (frontSurface == nullptr) {
         return std::nullopt;
+    }
+
+    if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
+        return 640;
     }
 
     return frontSurface->GetWidth();
@@ -1006,26 +1024,34 @@ std::optional<int> Try_Get_Resolution_Mode_Height()
         return std::nullopt;
     }
 
+    if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
+        return 400;
+    }
+
     return frontSurface->GetHeight();
 }
 
 void Enter_Zoomed_Resolution_Mode()
 {
-    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_SCALED) {
+    const auto resolution_mode = Get_Current_Resolution_Mode();
+
+    if (resolution_mode == MODE_DOS || resolution_mode == MODE_DEFAULT) {
         // these modes never zoom in
         return;
     }
 
-    CurrentResolutionMode = MODE_ZOOM;
+    Set_Current_Resolution_Mode(MODE_ZOOM);
     Move_Video_Mouse_Absolute(0, 0);
 }
 
 void Leave_Zoomed_Resolution_Mode()
 {
-    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_SCALED) {
-        // these modes never zoom in
+    const auto resolution_mode = Get_Current_Resolution_Mode();
+
+    if (resolution_mode == MODE_DOS || resolution_mode == MODE_DEFAULT) {
+        // these modes never zoom out
         return;
     }
 
-    CurrentResolutionMode = MODE_HIGH_RES;
+    Set_Current_Resolution_Mode(MODE_HIGH_RES);
 }

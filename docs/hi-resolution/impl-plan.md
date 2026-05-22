@@ -1,39 +1,58 @@
-# High Resolution Implementation Plan
+## Resolution Modes
 
-This plan describes the transition from a simple scaling-factor approach to a hybrid system that supports true high-resolution rendering for the map and a scaled, centered approach for menus and FMVs.
+A mode system will be implemented to compliment the existing video subsystem, aiming to only target the SDL2 backend.
 
-## Phase 1: Foundation & Dynamic Resolution
-- **Dynamic Resolution Setup:** Modify `GraphicBufferClass` and `VideoSurface` to initialize resolution based on the SDL2 window size instead of fixed constants.
-- **Resolution State Management:** Implement a state system to track the current mode:
-    - `MODE_HIGH_RES`: Active gameplay (true high-res).
-    - `MODE_SCALED`: Menus/FMVs (base resolution scaled to fit).
-    - `MODE_DOS`: Scaling from 320x200.
-- **Coordinate Mapping:** Update `GraphicViewPortClass` to handle the translation between logical game coordinates and the dynamic screen resolution.
+- `SCALED` - current mode, where the game always runs at 640x400 internally but scales to the native fullscreen resolution or has a stretch resolution for a window
+- `DOS` - existing mode for DOS graphics, same as `SCALED` but uses 300x200
+- `HI_RES` - new mode, that will support internal resolutions above 640x400. Can scale to a native fullscreen/stretch resolution for window
+- `ZOOM` - temporary mode that can be entered at runtime to tell backend to zoom to 640x400 (for graphics that are fixed to 640x400 - videos, score screens etc.)
 
-Changes made:
-1. Resolution State Management:
-- Added ResolutionMode enum (MODE_HIGH_RES, MODE_SCALED, MODE_DOS) to common/video.h.
-- Added a global CurrentResolutionMode in common/video_sdl2.cpp, defaulting to MODE_HIGH_RES.
-2. Dynamic Resolution Setup:
-- Modified Set_Video_Mode in common/video_sdl2.cpp to update the global ScreenWidth and ScreenHeight based on the actual SDL2 window size after creation.
-- Updated tiberiandawn/startup.cpp to use the updated ScreenWidth and ScreenHeight when attaching SeenBuff and HidPage, ensuring they match the window resolution instead of using fixed constants.
+### Initialisation
 
-## Phase 2: In-Game Map & Rendering
-- **True High-Res Rendering:** Update the map rendering pipeline to utilize the full dynamic resolution.
-- **Buffer Clearing:** Implement a black-fill for areas beyond the map boundaries to remove visual artifacts.
-- **Dynamic Viewport:** Ensure the map camera and viewport adapt to the current window aspect ratio.
+The game engine will read the below config from `CONQUER.INI` to determine the correct resolution mode:
 
-## Phase la: UI, Menus & FMVs
-- **Centering Logic:** Refactor menu and dialog placement to be relative to the screen center rather than fixed offsets.
-- **The "Zoom" Implementation:** Implement logic to render menus/FMVs at a base resolution (640x400) and scale them to the center of the window, preserving the aspect ratio.
-- **Asset Scaling:** Maintain the existing resolution factor for UI control placement to keep assets crisp while relocating them.
+- `Width`/`Height` - internal resolution
+- `StretchWidth`/`StretchHeight` - window/fullscreen resolution, renamed from `WindowWidth`/`WindowHeight`. If set to 0, native fullscreen will be used or window will be the same size as the internal resolution
+- `DOSMode` - use DOS graphics at a fixed 320x200 internal resolution
 
-## Phase 4: Sidebar Overhaul
-- **Height Adaptation:** Modify the sidebar to occupy 100% of the screen height.
-- **Background Tiling:** Implement tiling/stretching for sidebar background assets to fill the vertical space.
-- **Power Meter Scaling:** Update the power meter to scale proportionally to the screen height.
+The mode is then mapped based on:
 
-## Phase 5: DOS Mode & Final Integration
-- **DOS Scaling:** Handle 320x200 DOS mode as a scaled version of the base resolution.
-- **Config Options:** Implement a configuration setting to choose between dynamic resolution and a doubling strategy (e.g., 1280x800).
-- **Verification:** Validate across multiple aspect ratios (4:3, 16:9, 21:9).
+- `DOSMode` -> `DOS`
+- `Width`/`Height` < 640x400 -> `SCALED` (Forces resolution to 640x400)
+- `Width`/`Height` == 640x400 -> `SCALED`
+- `Width`/`Height` > 640x400 -> `HI_RES`
+
+### Zooming
+
+At several points in the game logic we will ensure that the resolution mode is set to `ZOOM`. We will update the SDL2 
+backend to change the area that is rendered to the output, cropping it to 640x400 to effectively 'zoom' in on the 
+original screens and graphics.
+
+This covers:
+
+- Videos (already interpolated from 320x200 to 640x400)
+- Main Menu
+- Game Score Screen
+- Interactive videos (CPS format - GDI/NOD selection screen for example)
+
+When entering a scenario the game will 'zoom' out to show the entire internal resolution that can utilized by the map 
+and sidebar.
+
+### Scenario View
+
+The main view of the map and sidebar will have several changes made to support high resolution mode:
+
+- Sidebar will remain at the default width, with the background tiled to fill the entire height
+- Power meter on sidebar will fill the entire height with tiling graphics as needed
+- Credits tab and sidebar buttons will be 'anchored' to the sidebar location, making placement relative to that control
+- Graphics outside the current map width/height will not be rendered (they are still in the game engine state, just not visible)
+
+---
+
+Known issues:
+
+- Parts of the sidebar power meter can disappear during gameplay (requires sidebar to be hidden/shown to fix)
+- Small parts of shadows and effects outside the map still render very briefly (tree shadows, ship's wake in the water)
+- Small parts of objects coming from outside the map (reinforcements) linger very briefly (hovercraft for example)
+- First campaign mission 'snaps' the map view after moving the mouse for the first time (this map is smaller than even 800x600 resolution)
+- Save/Load between different resolutions breaks sidebar/credits tab rendering (works if resolution is same in save and load contexts)
