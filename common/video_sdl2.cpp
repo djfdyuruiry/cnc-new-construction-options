@@ -985,10 +985,10 @@ VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
     return new VideoSurfaceSDL2(w, h, flags);
 }
 
-int Get_Resolution_Mode_Width(const int fallback_value)
+std::optional<int> Try_Get_Resolution_Mode_Width()
 {
     if (frontSurface == nullptr) {
-        return fallback_value;
+        return std::nullopt;
     }
 
     switch (CurrentResolutionMode) {
@@ -1003,10 +1003,10 @@ int Get_Resolution_Mode_Width(const int fallback_value)
     }
 }
 
-int Get_Resolution_Mode_Height(const int fallback_value)
+std::optional<int> Try_Get_Resolution_Mode_Height()
 {
     if (frontSurface == nullptr) {
-        return fallback_value;
+        return std::nullopt;
     }
 
     switch (CurrentResolutionMode) {
@@ -1021,13 +1021,6 @@ int Get_Resolution_Mode_Height(const int fallback_value)
     }
 }
 
-/**
- * Enter the standard resolution mode for the game engine, if current resolution mode supports it.
- *
- * Generally this should be called after clearing the screen to prevent zoom in artifacts.
- *
- * This mode is currently used for menus, videos, CPS animations and score screens.
- */
 void Enter_Standard_Resolution_Mode()
 {
     if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_STRETCH) {
@@ -1039,13 +1032,6 @@ void Enter_Standard_Resolution_Mode()
     Move_Video_Mouse_Absolute(0, 0);
 }
 
-/**
- * Enter the dynamic high resolution mode for the game engine, if current resolution mode supports it.
- *
- * Call this to reset calls to Enter_Standard_Resolution_Mode().
- *
- * This mode is currently only used when playing a scenario.
- */
 void Enter_High_Resolution_Mode()
 {
     if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_STRETCH) {

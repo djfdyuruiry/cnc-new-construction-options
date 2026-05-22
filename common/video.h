@@ -3,6 +3,7 @@
 
 #include "rect.h"
 #include <cstdint>
+#include <optional>
 
 enum GBC_Enum
 {
@@ -114,9 +115,50 @@ enum ResolutionMode
 
 extern ResolutionMode CurrentResolutionMode;
 
-int Get_Resolution_Mode_Width(int fallback_value);
-int Get_Resolution_Mode_Height(int fallback_value);
+/**
+ * Lookup the width for the current resolution mode. This can be a subset of the current
+ * internal resolution (640x400) or the full resolution. Useful to ensure a relative point
+ * on the screen is in the correct position of the currently viewed screen portion.
+ *
+ * Supported video backends: sdl2
+ *
+ * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed, this value
+ *         will be returned
+ */
+std::optional<int> Try_Get_Resolution_Mode_Width();
+
+/**
+ * Lookup the height for the current resolution mode. This can be a subset of the current
+ * internal resolution (640x400) or the full resolution. Useful to ensure a relative point
+ * on the screen is in the correct position of the currently viewed screen portion.
+ *
+ * Supported video backends: sdl2
+ *
+ * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed, this value
+ *         will be returned
+ */
+std::optional<int> Try_Get_Resolution_Mode_Height();
+
+/**
+ * Enter the standard resolution mode for the game engine, if current resolution mode supports it.
+ *
+ * Generally this should be called after clearing the screen to prevent zoom in artifacts.
+ *
+ * This mode is currently used for menus, videos, CPS animations and score screens.
+ *
+ * Supported video backends: sdl2
+*/
 void Enter_Standard_Resolution_Mode();
+
+/**
+ * Enter the dynamic high resolution mode for the game engine, if current resolution mode supports it.
+ *
+ * Call this to reset calls to Enter_Standard_Resolution_Mode().
+ *
+ * This mode is currently only used when playing a scenario.
+ *
+ * Supported video backends: sdl2
+ */
 void Enter_High_Resolution_Mode();
 
 #endif // VIDEO_H

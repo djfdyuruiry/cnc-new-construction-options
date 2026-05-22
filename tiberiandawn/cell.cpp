@@ -368,7 +368,7 @@ void CellClass::Redraw_Objects(bool forced)
     Validate();
     CELL cell = Cell_Number();
 
-    if (Map.In_View(cell) && (forced || !Map.Is_Cell_Flagged(cell))) {
+    if (Map.In_View(cell) && Map.In_Radar(cell) && (forced || !Map.Is_Cell_Flagged(cell))) {
 
         /*
         **	Flag the icon to be redrawn.
@@ -911,6 +911,15 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
     int i;
     char waypt[2];
 #endif
+
+    if (!Debug_Map && !Map.In_Radar(cell)) {
+        LogicPage->Fill_Rect(x + Map.TacPixelX,
+                             y + Map.TacPixelY,
+                             Map.TacPixelX + x + CELL_PIXEL_W - 1,
+                             Map.TacPixelY + y + CELL_PIXEL_H - 1,
+                             TBLACK);
+        return;
+    }
 
     /*
     **	Fetch a pointer to the template type associated with this cell.

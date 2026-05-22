@@ -920,6 +920,10 @@ bool ObjectClass::Render(bool forced)
     COORDINATE coord = Render_Coord();
     CELL cell = Coord_Cell(coord);
 
+    if (!Debug_Map && !Map.In_Radar(cell)) {
+        return false;
+    }
+
     if (Debug_Map || Debug_Unshroud || ((forced || IsToDisplay) && IsDown && !IsInLimbo)) {
         IsToDisplay = false;
 
