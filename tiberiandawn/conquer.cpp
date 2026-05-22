@@ -2237,7 +2237,7 @@ void Play_Movie(char const* name, ThemeType theme, bool clrscrn)
         PreserveVQAScreen = 0;
         Keyboard->Clear();
 
-        Enter_Standard_Resolution_Mode();
+        Enter_Zoomed_Resolution_Mode();
 
         VQAHandle* vqa = NULL;
 

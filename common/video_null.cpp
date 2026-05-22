@@ -309,7 +309,7 @@ std::optional<int> Try_Get_Resolution_Mode_Height()
     return std::nullopt;
 }
 
-void Enter_Standard_Resolution_Mode()
+void Enter_Zoomed_Resolution_Mode()
 {
     // TODO: Resolution mode support not implemented
 }

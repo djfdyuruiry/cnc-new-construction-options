@@ -107,10 +107,14 @@ void Set_DD_Palette(void* palette);
 
 enum ResolutionMode
 {
+    // custom resolution
     MODE_HIGH_RES,
+    // zoom into original resolution
+    MODE_ZOOM,
+    // original resolution
     MODE_SCALED,
-    MODE_DOS,
-    MODE_STRETCH
+    // original DOS resolution
+    MODE_DOS
 };
 
 extern ResolutionMode CurrentResolutionMode;
@@ -148,7 +152,7 @@ std::optional<int> Try_Get_Resolution_Mode_Height();
  *
  * Supported video backends: sdl2
 */
-void Enter_Standard_Resolution_Mode();
+void Enter_Zoomed_Resolution_Mode();
 
 /**
  * Enter the dynamic high resolution mode for the game engine, if current resolution mode supports it.
@@ -159,6 +163,6 @@ void Enter_Standard_Resolution_Mode();
  *
  * Supported video backends: sdl2
  */
-void Enter_High_Resolution_Mode();
+void Leave_Zoomed_Resolution_Mode();
 
 #endif // VIDEO_H

@@ -843,7 +843,7 @@ bool Select_Game(bool fade)
                 **	through the loop, and the 'fade' flag is true
                 */
                 if (fade) {
-                    Enter_Standard_Resolution_Mode();
+                    Enter_Zoomed_Resolution_Mode();
                 }
 
                 Load_Title_Screen(TitlePicture, &HidPage, Palette);

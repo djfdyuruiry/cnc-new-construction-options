@@ -10,6 +10,7 @@ public:
     SettingsClass();
 
     void Load(INIClass& ini);
+    void Load_Hi_Res(INIClass& ini);
     void Save(INIClass& ini);
 
     struct
@@ -22,14 +23,14 @@ public:
 
     struct
     {
-        int WindowWidth;
-        int WindowHeight;
+        int StretchWidth;
+        int StretchHeight;
+        int Width;
+        int Height;
         bool Windowed;
         bool Boxing;
         std::string BoxingAspectRatio;
         int Display;
-        int Width;
-        int Height;
         int FrameLimit;
         int InterpolationMode;
         bool HardwareCursor;

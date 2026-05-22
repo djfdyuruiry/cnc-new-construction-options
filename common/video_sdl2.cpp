@@ -285,24 +285,24 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
         /*
         ** Native fullscreen if no proper width and height set.
         */
-        if (Settings.Video.Width < w || Settings.Video.Height < h) {
-            win_w = Settings.Video.Width = 0;
-            win_h = Settings.Video.Height = 0;
+        if (Settings.Video.StretchWidth < w || Settings.Video.StretchHeight < h) {
+            win_w = Settings.Video.StretchWidth = 0;
+            win_h = Settings.Video.StretchHeight = 0;
             win_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
         } else {
-            win_w = Settings.Video.Width;
-            win_h = Settings.Video.Height;
+            win_w = Settings.Video.StretchWidth;
+            win_h = Settings.Video.StretchHeight;
             win_flags |= SDL_WINDOW_FULLSCREEN;
         }
 
         x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
         y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
-    } else if (Settings.Video.WindowWidth > w || Settings.Video.WindowHeight > h) {
-        win_w = Settings.Video.WindowWidth;
-        win_h = Settings.Video.WindowHeight;
+    } else if (Settings.Video.StretchWidth > w || Settings.Video.StretchHeight > h) {
+        win_w = Settings.Video.StretchWidth;
+        win_h = Settings.Video.StretchHeight;
     } else {
-        Settings.Video.WindowWidth = win_w;
-        Settings.Video.WindowHeight = win_h;
+        Settings.Video.Width = win_w;
+        Settings.Video.Height = win_h;
     }
 
     window = SDL_CreateWindow("CNC: New Construction Options", x, y, win_w, win_h, win_flags);
@@ -314,8 +314,8 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
     }
 
     SDL_GetWindowSize(window, &win_w, &win_h);
-    ScreenWidth = win_w;
-    ScreenHeight = win_h;
+    ScreenWidth = Settings.Video.Width;
+    ScreenHeight = Settings.Video.Height;
  
     DBG_INFO("Created SDL2 %s window in %dx%d", (win_flags ? "fullscreen" : "windowed"), win_w, win_h);
 
@@ -431,18 +431,24 @@ void Toggle_Video_Fullscreen()
     Settings.Video.Windowed = !Settings.Video.Windowed;
 
     if (!Settings.Video.Windowed) {
-        if (Settings.Video.Width == 0 || Settings.Video.Height == 0) {
+        if (Settings.Video.StretchWidth == 0 || Settings.Video.StretchHeight == 0) {
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         } else {
-            SDL_SetWindowSize(window, Settings.Video.Width, Settings.Video.Height);
+            SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchHeight);
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         }
     } else {
         SDL_SetWindowFullscreen(window, 0);
-        SDL_SetWindowSize(window, Settings.Video.WindowWidth, Settings.Video.WindowHeight);
+
+        if (Settings.Video.StretchWidth == 0 || Settings.Video.StretchHeight == 0) {
+            SDL_SetWindowSize(window, Settings.Video.Width, Settings.Video.StretchHeight);
+        } else {
+            SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchHeight);
+        }
     }
 
     Update_HWCursor_Settings();
+            SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchWidth);
 }
 
 void Get_Video_Scale(float& x, float& y)
@@ -925,7 +931,7 @@ public:
 
         std::unique_ptr<SDL_Rect> src_rect;
 
-        if (CurrentResolutionMode == MODE_SCALED) {
+        if (CurrentResolutionMode == MODE_ZOOM) {
             src_rect = std::make_unique<SDL_Rect>();
 
             src_rect->x = 0;
@@ -991,16 +997,7 @@ std::optional<int> Try_Get_Resolution_Mode_Width()
         return std::nullopt;
     }
 
-    switch (CurrentResolutionMode) {
-        case MODE_DOS:
-            return 320;
-
-        case MODE_SCALED:
-            return 640;
-
-        default:
-            return frontSurface->GetWidth();
-    }
+    return frontSurface->GetWidth();
 }
 
 std::optional<int> Try_Get_Resolution_Mode_Height()
@@ -1009,33 +1006,24 @@ std::optional<int> Try_Get_Resolution_Mode_Height()
         return std::nullopt;
     }
 
-    switch (CurrentResolutionMode) {
-        case MODE_DOS:
-            return 200;
-
-        case MODE_SCALED:
-            return 400;
-
-        default:
-            return frontSurface->GetHeight();
-    }
+    return frontSurface->GetHeight();
 }
 
-void Enter_Standard_Resolution_Mode()
+void Enter_Zoomed_Resolution_Mode()
 {
-    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_STRETCH) {
-        // these modes never change resolution
+    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_SCALED) {
+        // these modes never zoom in
         return;
     }
 
-    CurrentResolutionMode = MODE_SCALED;
+    CurrentResolutionMode = MODE_ZOOM;
     Move_Video_Mouse_Absolute(0, 0);
 }
 
-void Enter_High_Resolution_Mode()
+void Leave_Zoomed_Resolution_Mode()
 {
-    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_STRETCH) {
-        // these modes never change resolution
+    if (CurrentResolutionMode == MODE_DOS || CurrentResolutionMode == MODE_SCALED) {
+        // these modes never zoom in
         return;
     }
 

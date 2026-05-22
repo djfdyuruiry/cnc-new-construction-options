@@ -294,6 +294,13 @@ int main(int argc, char** argv)
         if (Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files()) {
             ScreenWidth = 320;
             ScreenHeight = 200;
+            CurrentResolutionMode = MODE_DOS;
+        } else if (Settings.Video.Width == 640 || Settings.Video.Height == 400) {
+            CurrentResolutionMode = MODE_SCALED;
+        } else {
+            ScreenWidth = Settings.Video.Width;
+            ScreenHeight = Settings.Video.Height;
+            CurrentResolutionMode = MODE_HIGH_RES;
         }
 #endif
 
@@ -613,7 +620,7 @@ void Read_Setup_Options(RawFileClass* config_file)
     /*
     ** Read in global settings
     */
-    Settings.Load(ini);
+    Settings.Load_Hi_Res(ini);
 
     /*
     ** Read in the boolean options

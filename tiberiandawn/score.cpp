@@ -644,7 +644,7 @@ void ScoreClass::Presentation(void)
     WWMouse->Erase_Mouse(&HidPage, true);
     HiddenPage.Clear();
     Set_Palette(BlackPalette);
-    Enter_Standard_Resolution_Mode();
+    Enter_Zoomed_Resolution_Mode();
 
     Set_Logic_Page(SysMemPage);
 
@@ -2037,7 +2037,7 @@ void Multi_Score_Presentation(void)
     TextPrintBuffer->Clear();
 
     Set_Palette(BlackPalette);
-    Enter_Standard_Resolution_Mode();
+    Enter_Zoomed_Resolution_Mode();
 
     anim = Open_Animation("MLTIPLYR.WSA", NULL, 0L, (WSAOpenType)(WSA_OPEN_FROM_MEM | WSA_OPEN_TO_PAGE), Palette);
     Hide_Mouse();
