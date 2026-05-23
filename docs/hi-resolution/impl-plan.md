@@ -55,3 +55,4 @@ Known issues:
 - Small parts of shadows and effects outside the map still render very briefly (tree shadows, ship's wake in the water)
 - Small parts of objects coming from outside the map (reinforcements) linger very briefly (hovercraft for example)
 - First campaign mission 'snaps' the map view after moving the mouse for the first time (this map is smaller than even 800x600 resolution)
+- Loading saves for smaller maps results in glitches until sidebar is activated

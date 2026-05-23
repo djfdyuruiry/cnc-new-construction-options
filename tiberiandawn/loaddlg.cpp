@@ -453,7 +453,13 @@ int LoadOptionsClass::Process(void)
             game_num = Files[game_idx]->Num;
             if (WWMessageBox().Process(TXT_DELETE_FILE_QUERY, TXT_YES, TXT_NO) == 0) {
                 sprintf(fname, "savegame.%03d", game_num);
-                Delete_File(fname);
+                const auto save_full_path = PathsClass::Concatenate_Paths(Paths.User_Save_Path(), fname);
+
+                if (!Delete_File(save_full_path.c_str())) {
+                    // TODO: locale file entry
+                    WWMessageBox().Process("Error deleting save game", TXT_OK);
+                }
+
                 Clear_List(&listbtn);
                 Fill_List(&listbtn);
                 if (listbtn.Count() == 0) {
