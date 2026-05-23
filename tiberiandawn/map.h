@@ -163,6 +163,8 @@ public:
         return (Array.ID(ptr));
     };
 
+    bool Is_Smaller_Than_Screen() const;
+
 protected:
     /*
     **	This is the array of cell objects.

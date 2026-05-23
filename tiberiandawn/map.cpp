@@ -2079,6 +2079,12 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 
 #endif // USE_RA_AI
 
+bool MapClass::Is_Smaller_Than_Screen() const
+{
+    return MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width()
+        || MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+}
+
 TO_JSON(MapClass)
 {
     BASE_CLASS_TO_JSON(GScreenClass);

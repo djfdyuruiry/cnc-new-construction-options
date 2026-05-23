@@ -187,6 +187,11 @@ void Main_Game(int argc, char* argv[])
         InMainLoop = true;
         Set_Video_Cursor_Clip(true);
 
+        if (Map.Is_Smaller_Than_Screen()) {
+            // BUG: Re-init map view to fix map rendering for small maps (looks glitchy on screen)
+            Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
+        }
+
 #ifdef SCENARIO_EDITOR
         /*
         **	Scenario-editor version of main-loop processing

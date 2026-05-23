@@ -2829,5 +2829,6 @@ FROM_JSON(SidebarClass)
     BITFIELD_FROM_JSON(IsUpgradeActive);
     BITFIELD_FROM_JSON(IsDemolishActive);
 
+    // ensure calculated constants are correct for current resolution
     p.One_Time(true);
 }
