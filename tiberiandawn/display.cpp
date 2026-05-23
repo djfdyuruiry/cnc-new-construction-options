@@ -4622,4 +4622,7 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(NewX);
     FIELD_FROM_JSON(NewY);
     FIELD_FROM_JSON(CursorShapeSave);
+
+    // ensure calculated constants are correct for current resolution
+    p.Set_View_Dimensions(0, Map.Get_Tab_Height());
 }
