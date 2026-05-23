@@ -51,9 +51,7 @@ The main view of the map and sidebar will have several changes made to support h
 
 Known issues:
 
-- Parts of the sidebar power meter can disappear during gameplay (requires sidebar to be hidden/shown to fix)
-  - Only happens on maps smaller than current resolution
-  - Feels like this is the black squares I prevent unit bleed (on edge of map) fighting with power bar
+- Sidebar strips background has stopped rendering correctly
 - Small parts of shadows and effects outside the map still render very briefly (tree shadows, ship's wake in the water)
 - Small parts of objects coming from outside the map (reinforcements) linger very briefly (hovercraft for example)
 - First campaign mission 'snaps' the map view after moving the mouse for the first time (this map is smaller than even 800x600 resolution)
