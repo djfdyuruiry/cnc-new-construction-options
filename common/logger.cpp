@@ -138,7 +138,7 @@ void CncLogger::Init_SpdLog()
 
     // console logging
     auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    stdout_sink->set_pattern("%^%L [%=10!n] %v%$");
+    stdout_sink->set_pattern("%^%L [%=15!n] %v%$");
 
     Sinks.emplace_back(std::move(stdout_sink));
 

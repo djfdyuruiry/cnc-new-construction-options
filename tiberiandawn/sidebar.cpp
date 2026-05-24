@@ -221,7 +221,7 @@ void SidebarClass::One_Time(const bool on_save)
     Column[0].One_Time(0, on_save);
     Column[1].One_Time(1, on_save);
 
-    if (!on_save) {
+    if (on_save) {
         return;
     }
 
@@ -1110,9 +1110,7 @@ bool SidebarClass::Activate(int control)
         **	Since the sidebar status has changed, update the map so that the graphics
         **	will be rendered correctly.
         */
-        HiddenPage.Clear();
-        Map.Flag_To_Redraw(true);
-        Map.Render();
+        Flag_To_Redraw(true);
     }
 
     return (old);
@@ -1795,6 +1793,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         if (RunningAsDLL) {
             return;
         }
+
         /*
         **	Fills the background to the side strip. We shouldnt need to do this if the strip
         ** has a full complement of icons.

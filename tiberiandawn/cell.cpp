@@ -921,7 +921,7 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                                  Map.TacPixelX + x + CELL_PIXEL_W - 1,
                                  Map.TacPixelY + y + CELL_PIXEL_H - 1,
                                  TBLACK);
-        // and the cell overlaps the sidebar area - draw a black square up to the sidebar boundary
+        // or the cell overlaps the sidebar area - draw a black square up to the sidebar boundary
         } else if (Map.IsSidebarActive && (Map.TacPixelX + x + CELL_PIXEL_W - 1) >= Map.SideX) {
             LogicPage->Fill_Rect(Map.TacPixelX + x ,
                                  Map.TacPixelY + y,
@@ -930,7 +930,7 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                                  TBLACK);
         }
 
-        // skip rendering
+        // skip further rendering
         return;
     }
 
