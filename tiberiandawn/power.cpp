@@ -124,9 +124,9 @@ void PowerClass::Init_Clear(void)
  * HISTORY:                                                                                    *
  *   12/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void PowerClass::One_Time(const bool on_save)
+void PowerClass::One_Time(const bool on_save_load)
 {
-    RadarClass::One_Time(on_save);
+    RadarClass::One_Time(on_save_load);
 
     int factor = Get_Resolution_Factor();
     PowX = SeenBuff.Get_Width() - Map.RadWidth;
@@ -145,7 +145,7 @@ void PowerClass::One_Time(const bool on_save)
     PowerButton.Width = PowWidth - 1;
     PowerButton.Height = PowHeight;
 
-    if (on_save) {
+    if (on_save_load) {
         return;
     }
 

@@ -252,7 +252,7 @@ void TabClass::Set_Active(int select)
     }
 }
 
-void TabClass::One_Time(const bool on_save)
+void TabClass::One_Time(const bool on_save_load)
 {
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     Eva_Width = 80 * factor;
@@ -263,9 +263,9 @@ void TabClass::One_Time(const bool on_save)
     Tab_Height = 8 * factor;
 #endif
 
-    SidebarClass::One_Time(on_save);
+    SidebarClass::One_Time(on_save_load);
 
-    if (on_save) {
+    if (on_save_load) {
         return;
     }
 

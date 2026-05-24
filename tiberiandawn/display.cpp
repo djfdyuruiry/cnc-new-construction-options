@@ -193,11 +193,11 @@ DisplayClass::DisplayClass(void)
  *   05/31/1994 JLB : Handles layer system now.                                                *
  *   06/02/1994 JLB : Takes care of misc display tables and data allocation.                   *
  *=============================================================================================*/
-void DisplayClass::One_Time(const bool on_save)
+void DisplayClass::One_Time(const bool on_save_load)
 {
     Set_View_Dimensions(0, Map.Get_Tab_Height());
 
-    if (on_save) {
+    if (on_save_load) {
         return;
     }
 

@@ -384,7 +384,8 @@ bool MouseClass::Load(FileClass& file)
             return (false);
     }
 
-    SidebarClass::One_Time(true);
+    // ensure calculated constants are correct for current resolution
+    TabClass::One_Time(true);
 
     return (true);
 }

@@ -122,7 +122,7 @@ RadarClass::RadarClass(void)
  * HISTORY:                                                                                    *
  *   12/22/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void RadarClass::One_Time(const bool on_save)
+void RadarClass::One_Time(const bool on_save_load)
 {
     int factor = Get_Resolution_Factor();
     RadWidth = 80 << factor;
@@ -144,7 +144,7 @@ void RadarClass::One_Time(const bool on_save)
         RadIHeight = 69 << factor;
     }
 
-    DisplayClass::One_Time(on_save);
+    DisplayClass::One_Time(on_save_load);
 
     RadarButton.X = RadX + RadOffX;
     RadarButton.Y = RadY + RadOffY;
