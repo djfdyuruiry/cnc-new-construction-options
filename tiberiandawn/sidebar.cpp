@@ -2781,6 +2781,9 @@ FROM_JSON(SidebarClass::StripClass)
     FIELD_FROM_JSON(Slid); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(BuildableCount);
     FIELD_FROM_JSON(Buildables);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }
 
 TO_JSON(SidebarClass)

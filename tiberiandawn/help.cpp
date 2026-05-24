@@ -431,4 +431,7 @@ FROM_JSON(HelpClass)
     FIELD_FROM_JSON(Width);  // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(Text);
     FIELD_FROM_JSON(Color);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }
