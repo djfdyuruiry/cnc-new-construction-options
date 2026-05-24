@@ -534,4 +534,7 @@ FROM_JSON(PowerClass)
     FIELD_FROM_JSON(PowerBounce);
     FIELD_FROM_JSON(PowerDir);
     FIELD_FROM_JSON(DrainDir);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

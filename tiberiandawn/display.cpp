@@ -193,9 +193,13 @@ DisplayClass::DisplayClass(void)
  *   05/31/1994 JLB : Handles layer system now.                                                *
  *   06/02/1994 JLB : Takes care of misc display tables and data allocation.                   *
  *=============================================================================================*/
-void DisplayClass::One_Time(void)
+void DisplayClass::One_Time(const bool on_save)
 {
     Set_View_Dimensions(0, Map.Get_Tab_Height());
+
+    if (on_save) {
+        return;
+    }
 
     MapClass::One_Time();
 
@@ -2442,6 +2446,37 @@ void DisplayClass::Draw_It(bool forced)
         if (IsRubberBand) {
             LogicPage->Draw_Rect(BandX + TacPixelX, BandY + TacPixelY, NewX + TacPixelX, NewY + TacPixelY, WHITE);
         }
+
+        // If resolution is larger than map size, fill areas outside the map in black
+        if (Is_Smaller_Than_Screen()) {
+            if (Map.IsSidebarActive) {
+                // fill all space outside the map, except the sidebar and tabs
+                LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                     Map.Get_Tab_Height(),
+                                     Map.SideX - 1,
+                                     SeenBuff.Get_Height(),
+                                     TBLACK);
+
+                LogicPage->Fill_Rect(0,
+                                     MapCellHeight * CELL_PIXEL_H,
+                                     Map.SideX - 1,
+                                     SeenBuff.Get_Height(),
+                                     TBLACK);
+            } else {
+                // fill all space outside the map, except the tabs
+                LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                     Map.Get_Tab_Height(),
+                                     SeenBuff.Get_Width(),
+                                     SeenBuff.Get_Height(),
+                                     TBLACK);
+                LogicPage->Fill_Rect(0,
+                                     MapCellHeight * CELL_PIXEL_H,
+                                     SeenBuff.Get_Width(),
+                                     SeenBuff.Get_Height(),
+                                     TBLACK);
+            }
+        }
+
         /*
         **	Clear the redraw flags so that normal redraw flag setting can resume.
         */
@@ -4624,5 +4659,5 @@ FROM_JSON(DisplayClass)
     FIELD_FROM_JSON(CursorShapeSave);
 
     // ensure calculated constants are correct for current resolution
-    p.Set_View_Dimensions(0, Map.Get_Tab_Height());
+    p.One_Time(true);
 }

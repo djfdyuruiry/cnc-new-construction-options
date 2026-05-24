@@ -1791,6 +1791,11 @@ bool Main_Loop()
         Set_Video_Cursor_Clip(false);
         Do_Restart();
         Set_Video_Cursor_Clip(true);
+
+        if (Map.Is_Smaller_Than_Screen()) {
+            // BUG: Re-init map view to fix map rendering for small maps (looks glitchy on screen)
+            Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
+        }
     }
 
     /*

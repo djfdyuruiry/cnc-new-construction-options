@@ -144,9 +144,7 @@ void RadarClass::One_Time(const bool on_save)
         RadIHeight = 69 << factor;
     }
 
-    if (!on_save) {
-        DisplayClass::One_Time();
-    }
+    DisplayClass::One_Time(on_save);
 
     RadarButton.X = RadX + RadOffX;
     RadarButton.Y = RadY + RadOffY;
@@ -2034,4 +2032,7 @@ FROM_JSON(RadarClass)
     FIELD_FROM_JSON(PixelPtr);
     FIELD_FROM_JSON(ZoomFactor);
     FIELD_FROM_JSON(PixelStack);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

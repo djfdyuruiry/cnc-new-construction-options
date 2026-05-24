@@ -252,7 +252,7 @@ void TabClass::Set_Active(int select)
     }
 }
 
-void TabClass::One_Time(void)
+void TabClass::One_Time(const bool on_save)
 {
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     Eva_Width = 80 * factor;
@@ -263,7 +263,12 @@ void TabClass::One_Time(void)
     Tab_Height = 8 * factor;
 #endif
 
-    SidebarClass::One_Time();
+    SidebarClass::One_Time(on_save);
+
+    if (on_save) {
+        return;
+    }
+
     TabShape = Hires_Retrieve("TABS.SHP");
 }
 
@@ -291,4 +296,7 @@ FROM_JSON(TabClass)
     BITFIELD_FROM_JSON(IsToRedraw);
     FIELD_FROM_JSON(Eva_Width);
     FIELD_FROM_JSON(Tab_Height);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

@@ -51,7 +51,6 @@ The main view of the map and sidebar will have several changes made to support h
 
 Known issues:
 
-- Small parts of shadows and effects outside the map still render very briefly (tree shadows, ship's wake in the water)
-- Small parts of objects coming from outside the map (reinforcements) linger very briefly (hovercraft for example)
-- First campaign mission 'snaps' the map view after moving the mouse for the first time (this map is smaller than even 800x600 resolution)
+- Small maps 'snaps' the view after moving the mouse for the first time (e.x. first GDI mission is smaller than even 800x600 resolution)
   - Added a sort-of 'fix' for this, which is just to force the snap-in if map is detected to be smaller than current resolution
+- Need to review FROM_JSON methods to ensure that any calculated constants or variables tied to game resolution are refreshed on save load (calling One_Time with a flag to partially reset object)

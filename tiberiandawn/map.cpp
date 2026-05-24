@@ -2081,8 +2081,13 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 
 bool MapClass::Is_Smaller_Than_Screen() const
 {
+#ifdef REMASTER_BUILD
+    // disable small map detection in remaster
+    return false
+#else
     return MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width()
         || MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+#endif
 }
 
 TO_JSON(MapClass)

@@ -914,22 +914,6 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
 
     // if we are not in editor mode, the cell is outside the bounds of the map...
     if (!Debug_Map && !Map.In_Radar(cell)) {
-        // and the cell doesn't overlap the sidebar area - draw a black square
-        if (!Map.IsSidebarActive || (Map.TacPixelX + x + CELL_PIXEL_W - 1) < Map.SideX) {
-            LogicPage->Fill_Rect(Map.TacPixelX + x ,
-                                 Map.TacPixelY + y,
-                                 Map.TacPixelX + x + CELL_PIXEL_W - 1,
-                                 Map.TacPixelY + y + CELL_PIXEL_H - 1,
-                                 TBLACK);
-        // or the cell overlaps the sidebar area - draw a black square up to the sidebar boundary
-        } else if (Map.IsSidebarActive && (Map.TacPixelX + x + CELL_PIXEL_W - 1) >= Map.SideX) {
-            LogicPage->Fill_Rect(Map.TacPixelX + x ,
-                                 Map.TacPixelY + y,
-                                 Map.SideX - 1,
-                                 Map.TacPixelY + y + CELL_PIXEL_H - 1,
-                                 TBLACK);
-        }
-
         // skip further rendering
         return;
     }
