@@ -54,3 +54,4 @@ Known issues:
 - Small maps 'snaps' the view after moving the mouse for the first time (e.x. first GDI mission is smaller than even 800x600 resolution)
   - Added a sort-of 'fix' for this, which is just to force the snap-in if map is detected to be smaller than current resolution
 - Need to review FROM_JSON methods to ensure that any calculated constants or variables tied to game resolution are refreshed on save load (calling One_Time with a flag to partially reset object)
+  - I have added ` // TODO: Remove and test, as it is calculated from resolution` to fields of interest

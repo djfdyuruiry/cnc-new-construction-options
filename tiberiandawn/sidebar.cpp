@@ -2763,13 +2763,13 @@ FROM_JSON(SidebarClass::StripClass)
 {
     BASE_CLASS_FROM_JSON(StageClass);
 
-    FIELD_FROM_JSON(ObjectWidth);
-    FIELD_FROM_JSON(ObjectHeight);
-    FIELD_FROM_JSON(StripWidth);
-    FIELD_FROM_JSON(LeftEdgeOffset);
-    FIELD_FROM_JSON(ButtonSpacingOffset);
-    FIELD_FROM_JSON(X);
-    FIELD_FROM_JSON(Y);
+    FIELD_FROM_JSON(ObjectWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ObjectHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(StripWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(LeftEdgeOffset); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonSpacingOffset); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(X); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(Y); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(ID);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsBuilding);
@@ -2778,7 +2778,7 @@ FROM_JSON(SidebarClass::StripClass)
     FIELD_FROM_JSON(Flasher);
     FIELD_FROM_JSON(TopIndex);
     FIELD_FROM_JSON(Scroller);
-    FIELD_FROM_JSON(Slid);
+    FIELD_FROM_JSON(Slid); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(BuildableCount);
     FIELD_FROM_JSON(Buildables);
 }
@@ -2810,17 +2810,17 @@ FROM_JSON(SidebarClass)
 {
     BASE_CLASS_FROM_JSON(PowerClass);
 
-    FIELD_FROM_JSON(SideX);
-    FIELD_FROM_JSON(SideY);
-    FIELD_FROM_JSON(SideBarWidth);
-    FIELD_FROM_JSON(SideWidth);
-    FIELD_FROM_JSON(SideHeight);
-    FIELD_FROM_JSON(TopHeight);
+    FIELD_FROM_JSON(SideX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideBarWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(TopHeight); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(MaxVisible);
-    FIELD_FROM_JSON(ButtonOneWidth);
-    FIELD_FROM_JSON(ButtonTwoWidth);
-    FIELD_FROM_JSON(ButtonThreeWidth);
-    FIELD_FROM_JSON(ButtonHeight);
+    FIELD_FROM_JSON(ButtonOneWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonTwoWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonThreeWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonHeight); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(Column);
     BITFIELD_FROM_JSON(IsSidebarActive);
     BITFIELD_FROM_JSON(IsToRedraw);

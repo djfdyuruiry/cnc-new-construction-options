@@ -516,20 +516,22 @@ FROM_JSON(PowerClass)
 {
     BASE_CLASS_FROM_JSON(RadarClass);
 
-    FIELD_FROM_JSON(PowX);
-    FIELD_FROM_JSON(PowY);
-    FIELD_FROM_JSON(PowWidth);
-    FIELD_FROM_JSON(PowHeight);
-    FIELD_FROM_JSON(PowLineSpace);
-    FIELD_FROM_JSON(PowLineWidth);
+    // TODO: any changes here may break the power bar, consider resetting/refreshing it
+
+    FIELD_FROM_JSON(PowX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowLineSpace); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowLineWidth); // TODO: Remove and test, as it is calculated from resolution
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsActive);
     FIELD_FROM_JSON(RecordedDrain);
     FIELD_FROM_JSON(RecordedPower);
-    FIELD_FROM_JSON(DesiredDrainHeight);
-    FIELD_FROM_JSON(DesiredPowerHeight);
-    FIELD_FROM_JSON(DrainHeight);
-    FIELD_FROM_JSON(PowerHeight);
+    FIELD_FROM_JSON(DesiredDrainHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(DesiredPowerHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(DrainHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowerHeight); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(DrainBounce);
     FIELD_FROM_JSON(PowerBounce);
     FIELD_FROM_JSON(PowerDir);

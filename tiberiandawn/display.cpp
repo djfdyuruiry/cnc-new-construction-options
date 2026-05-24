@@ -4642,8 +4642,8 @@ FROM_JSON(DisplayClass)
     OBJECT_TARGET_PTR_FROM_JSON(PendingObjectPtr);
     // NOTE: PendingObject is handled in saveload.cpp, see: DisplayClass::Decode_Pointers
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
-    FIELD_FROM_JSON(TacPixelX);
-    FIELD_FROM_JSON(TacPixelY);
+    FIELD_FROM_JSON(TacPixelX);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(TacPixelY);  // TODO: Remove and test, as it is calculated from resolution?
     FIELD_FROM_JSON(DesiredTacticalCoord);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsRepairMode);
@@ -4652,10 +4652,10 @@ FROM_JSON(DisplayClass)
     BITFIELD_FROM_JSON(IsRubberBand);
     BITFIELD_FROM_JSON(IsTentative);
     BITFIELD_FROM_JSON(IsShadowPresent);
-    FIELD_FROM_JSON(BandX);
-    FIELD_FROM_JSON(BandY);
-    FIELD_FROM_JSON(NewX);
-    FIELD_FROM_JSON(NewY);
+    FIELD_FROM_JSON(BandX); // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(BandY); // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(NewX); // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(NewY); // TODO: Remove and test, as it is calculated from resolution?
     FIELD_FROM_JSON(CursorShapeSave);
 
     // ensure calculated constants are correct for current resolution

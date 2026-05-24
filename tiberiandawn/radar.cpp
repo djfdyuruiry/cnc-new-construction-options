@@ -2000,16 +2000,18 @@ FROM_JSON(RadarClass)
 {
     BASE_CLASS_FROM_JSON(DisplayClass);
 
-    FIELD_FROM_JSON(RadX);
-    FIELD_FROM_JSON(RadOffX);
-    FIELD_FROM_JSON(RadY);
-    FIELD_FROM_JSON(RadOffY);
-    FIELD_FROM_JSON(RadWidth);
-    FIELD_FROM_JSON(RadHeight);
-    FIELD_FROM_JSON(RadIWidth);
-    FIELD_FROM_JSON(RadIHeight);
-    FIELD_FROM_JSON(RadPWidth);
-    FIELD_FROM_JSON(RadPHeight);
+    // TODO: any changes here may break the radar, so may need reset or restored in some way
+
+    FIELD_FROM_JSON(RadX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadOffX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadOffY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadIWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadIHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadPWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadPHeight); // TODO: Remove and test, as it is calculated from resolution
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(RadarCursorRedraw);
     BITFIELD_FROM_JSON(DoesRadarExist);
@@ -2018,15 +2020,15 @@ FROM_JSON(RadarClass)
     BITFIELD_FROM_JSON(IsRadarDeactivating);
     BITFIELD_OF_WIDTH_FROM_JSON(RadarClass, SpecialRadarFrame, 3);
     BITFIELD_OF_WIDTH_FROM_JSON(RadarClass, RadarAnimFrame, 6);
-    FIELD_FROM_JSON(RadarX);
-    FIELD_FROM_JSON(RadarY);
+    FIELD_FROM_JSON(RadarX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadarY); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(RadarCell);
-    FIELD_FROM_JSON(BaseX);
-    FIELD_FROM_JSON(BaseY);
-    FIELD_FROM_JSON(RadarWidth);
-    FIELD_FROM_JSON(RadarCellWidth);
-    FIELD_FROM_JSON(RadarHeight);
-    FIELD_FROM_JSON(RadarCellHeight);
+    FIELD_FROM_JSON(BaseX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(BaseY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadarWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadarCellWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadarHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(RadarCellHeight); // TODO: Remove and test, as it is calculated from resolution
     BITFIELD_FROM_JSON(IsZoomed);
     BITFIELD_FROM_JSON(IsPlayerNames);
     FIELD_FROM_JSON(PixelPtr);

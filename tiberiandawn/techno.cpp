@@ -4998,7 +4998,7 @@ FROM_JSON(TechnoClass)
     FIELD_FROM_JSON(PrimaryFacing);
     FIELD_FROM_JSON(Arm);
     FIELD_FROM_JSON(Ammo);
-    FIELD_FROM_JSON(Lines);
+    FIELD_FROM_JSON(Lines); // TODO: Consider if this breaks when saving and loading from different resolutions
     FIELD_FROM_JSON(LineCount);
     FIELD_FROM_JSON(LineFrame);
     FIELD_FROM_JSON(LineMaxFrames);

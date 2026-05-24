@@ -284,8 +284,8 @@ TO_JSON(TabClass)
 
     FIELD_TO_JSON(Credits);
     BITFIELD_TO_JSON(IsToRedraw);
-    FIELD_TO_JSON(Eva_Width);
-    FIELD_TO_JSON(Tab_Height);
+    FIELD_TO_JSON(Eva_Width); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_TO_JSON(Tab_Height); // TODO: Remove and test, as it is calculated from resolution
 }
 
 FROM_JSON(TabClass)
