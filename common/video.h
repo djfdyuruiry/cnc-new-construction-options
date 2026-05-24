@@ -61,7 +61,7 @@ public:
 
 extern SurfaceMonitorClass& AllSurfaces; // List of all surfaces
 
-bool Set_Video_Mode(int w, int h, int bits_per_pixel);
+bool Set_Video_Mode(int& w, int& h, int bits_per_pixel);
 void Get_Video_Scale(float& x, float& y);
 void Set_Video_Cursor_Clip(bool clipped);
 void Move_Video_Mouse(float xrel, float yrel);
@@ -124,24 +124,24 @@ void Set_Current_Resolution_Mode(ResolutionMode resolution_mode);
 /**
  * Lookup the width for the current resolution mode. This can be a subset of the current
  * internal resolution (640x400) or the full resolution. Useful to ensure a relative point
- * on the screen is in the correct position of the currently viewed screen portion.
+ * on the screen is in the correct position of the currently viewed screen portion. Used
+ * for dialogs that can be shown on 640x400 screen and in scenario gameplay (save/load etc.).
  *
  * Supported video backends: sdl2
  *
- * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed, this value
- *         will be returned
+ * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed.
  */
 std::optional<int> Try_Get_Resolution_Mode_Width();
 
 /**
  * Lookup the height for the current resolution mode. This can be a subset of the current
  * internal resolution (640x400) or the full resolution. Useful to ensure a relative point
- * on the screen is in the correct position of the currently viewed screen portion.
+ * on the screen is in the correct position of the currently viewed screen portion. Used
+ * for dialogs that can be shown on 640x400 screen and in scenario gameplay (save/load etc.).
  *
  * Supported video backends: sdl2
  *
- * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed, this value
- *         will be returned
+ * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed.
  */
 std::optional<int> Try_Get_Resolution_Mode_Height();
 

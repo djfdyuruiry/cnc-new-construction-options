@@ -48,9 +48,6 @@
 
 #include <SDL.h>
 
-extern int ScreenWidth;
-extern int ScreenHeight;
-
 extern WWKeyboardClass* Keyboard;
 static SDL_Window* window;
 static SDL_Renderer* renderer;
@@ -233,7 +230,7 @@ SurfaceMonitorClass& AllSurfaces = AllSurfacesDummy; // List of all direct draw 
  * HISTORY:                                                                                    *
  *   09/26/1995 PWG : Created.                                                                 *
  *=============================================================================================*/
-bool Set_Video_Mode(int w, int h, int bits_per_pixel)
+bool Set_Video_Mode(int& w, int& h, int bits_per_pixel)
 {
     if (Settings.Video.VideoDriver != "default") {
         CNC_LOG_INFO("Using SDL video driver hint: {}", Settings.Video.VideoDriver);
@@ -316,9 +313,10 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
     }
 
     SDL_GetWindowSize(window, &win_w, &win_h);
-    ScreenWidth = Settings.Video.Width;
-    ScreenHeight = Settings.Video.Height;
- 
+
+    w = Settings.Video.Width;
+    h = Settings.Video.Height;
+
     DBG_INFO("Created SDL2 %s window in %dx%d", (win_flags ? "fullscreen" : "windowed"), win_w, win_h);
 
 

@@ -2083,7 +2083,7 @@ bool MapClass::Is_Smaller_Than_Screen() const
 {
 #ifdef REMASTER_BUILD
     // disable small map detection in remaster
-    return false
+    return false;
 #else
     return MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width()
         || MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();

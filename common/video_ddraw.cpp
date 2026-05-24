@@ -646,7 +646,7 @@ void Check_Overlapped_Blit_Capability(void)
  * HISTORY:                                                                                    *
  *   09/26/1995 PWG : Created.                                                                 *
  *=============================================================================================*/
-bool Set_Video_Mode(int w, int h, int bits_per_pixel)
+bool Set_Video_Mode(int& w, int& h, int bits_per_pixel)
 {
     HRESULT result;
     //
@@ -1386,7 +1386,7 @@ void Enter_Zoomed_Resolution_Mode()
     // TODO: Resolution mode support not implemented
 }
 
-void Enter_High_Resolution_Mode()
+void Leave_Zoomed_Resolution_Mode()
 {
     // TODO: Resolution mode support not implemented
 }
