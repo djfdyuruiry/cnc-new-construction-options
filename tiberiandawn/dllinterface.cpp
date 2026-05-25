@@ -374,7 +374,7 @@ public:
     }
 
 private:
-    static inline const auto Logger = CncLogger::For(DLLExportClass);
+    static inline const auto& Logger = CncLogger::For(DLLExportClass);
 
     static void Calculate_Single_Player_Score(EventCallbackStruct&);
 

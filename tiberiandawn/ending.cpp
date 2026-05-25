@@ -67,10 +67,11 @@ void GDI_Ending(void)
     CountDownTimerClass count;
     if (CCFileClass("TRAILER.VQA").Is_Available()) {
         Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
-        Enter_Zoomed_Resolution_Mode();
+        // we are about to show a CPS scaled to full resolution, so zoom out
+        Leave_Zoomed_Resolution_Mode();
 
         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
         Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
         Keyboard->Clear();
         count.Set(TIMER_SECOND * 3);
@@ -83,10 +84,11 @@ void GDI_Ending(void)
     }
 
     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
-    Enter_Zoomed_Resolution_Mode();
+    // we are about to show a CPS scaled to full resolution, so zoom out
+    Leave_Zoomed_Resolution_Mode();
 
     Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-    SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+    SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
     Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
     Keyboard->Clear();
     //	CountDownTimerClass count;
@@ -223,8 +225,11 @@ void Nod_Ending(void)
     CountDownTimerClass count;
     if (CCFileClass("TRAILER.VQA").Is_Available()) {
         Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+        // we are about to show a CPS scaled to full resolution, so zoom out
+        Leave_Zoomed_Resolution_Mode();
+
         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
         Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
         Keyboard->Clear();
         count.Set(TIMER_SECOND * 3);
@@ -237,8 +242,11 @@ void Nod_Ending(void)
     }
 
     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+    // we are about to show a CPS scaled to full resolution, so zoom out
+    Leave_Zoomed_Resolution_Mode();
+
     Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-    SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+    SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
     Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
     Keyboard->Clear();
     //	CountDownTimerClass count;

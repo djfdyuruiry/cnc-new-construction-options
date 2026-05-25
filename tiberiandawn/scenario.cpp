@@ -145,11 +145,13 @@ bool Start_Scenario(char* root, bool briefing)
                 Theme.Queue_Song(THEME_AOI);
             }
 
+            // we are about to start the scenario, so zoom out
             Leave_Zoomed_Resolution_Mode();
         } else {
             Play_Movie(BriefMovie);
             Play_Movie(ActionMovie, Scen.TransitTheme);
 
+            // we are about to start the scenario, so zoom out
             Leave_Zoomed_Resolution_Mode();
 #ifdef NEWMENU
 
@@ -699,6 +701,8 @@ void Do_Lose(void)
     }
 
     Play_Movie(LoseMovie);
+
+    // we are about to show a user popup, so zoom out
     Leave_Zoomed_Resolution_Mode();
 
     /*

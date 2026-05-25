@@ -2247,6 +2247,7 @@ void Play_Movie(char const* name, ThemeType theme, bool clrscrn)
         PreserveVQAScreen = 0;
         Keyboard->Clear();
 
+        // we are playing a video (which plays at 640x400) so zoom in if needed
         Enter_Zoomed_Resolution_Mode();
 
         VQAHandle* vqa = NULL;
@@ -2533,6 +2534,16 @@ void const* Get_Radar_Icon(void const* shapefile, int shapenum, int frames, int 
     return (retval);
 }
 
+/**
+ * Fill an area with a given texture, sourced from an SHP file.
+ *
+ * @param shapefile The SHP file to load
+ * @param shapenum Number of the shape in the file to load
+ * @param xpos Where to draw (X pixel)
+ * @param ypos Where to draw (Y pixel)
+ * @param width Width in pixels to fill
+ * @param height Height in pixels to fill
+ */
 void CC_Texture_Fill(void const* shapefile, int shapenum, int xpos, int ypos, int width, int height)
 {
     unsigned char* shape_pointer;

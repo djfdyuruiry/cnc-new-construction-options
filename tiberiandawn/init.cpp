@@ -109,6 +109,7 @@ bool Init_Game(int, char*[])
      */
     CncLogger::OnFatalError = [](const auto& err) {
         Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
+        // the error may have happened whilst zoomed in, revert that if so
         Leave_Zoomed_Resolution_Mode();
         Show_Mouse();
 
@@ -848,6 +849,7 @@ bool Select_Game(bool fade)
                 **	through the loop, and the 'fade' flag is true
                 */
                 if (fade) {
+                    // we are about to render the title screen background (rendered at 640x400) so zoom in if needed
                     Enter_Zoomed_Resolution_Mode();
                 }
 
@@ -1240,10 +1242,12 @@ bool Select_Game(bool fade)
                 // verify existance of movie file before playing this sequence.
                 if (CCFileClass("TRAILER.VQA").Is_Available()) {
                     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+                    // we are about to show a CPS scaled to full resolution, so zoom out
+                    Leave_Zoomed_Resolution_Mode();
                     VisiblePage.Clear();
                     if (CCFileClass("ATTRACT2.CPS").Is_Available()) {
                         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-                        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+                        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
                         Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
                     }
                     Keyboard->Clear();
@@ -1258,10 +1262,13 @@ bool Select_Game(bool fade)
 
                 if (CCFileClass("SIZZLE.VQA").Is_Available()) {
                     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+                    // we are about to show a CPS scaled to full resolution, so zoom out
+                    Leave_Zoomed_Resolution_Mode();
+
                     VisiblePage.Clear();
                     if (CCFileClass("ATTRACT2.CPS").Is_Available()) {
                         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-                        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+                        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
                         Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
                     }
                     Keyboard->Clear();
@@ -1276,10 +1283,13 @@ bool Select_Game(bool fade)
 
                 if (CCFileClass("SIZZLE2.VQA").Is_Available()) {
                     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+                    // we are about to show a CPS scaled to full resolution, so zoom out
+                    Leave_Zoomed_Resolution_Mode();
+
                     VisiblePage.Clear();
                     if (CCFileClass("ATTRACT2.CPS").Is_Available()) {
                         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-                        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+                        SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
                         Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
                     }
                     Keyboard->Clear();
@@ -1293,10 +1303,13 @@ bool Select_Game(bool fade)
                 }
 
                 Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
+                // we are about to show a CPS scaled to full resolution, so zoom out
+                Leave_Zoomed_Resolution_Mode();
+
                 VisiblePage.Clear();
                 if (CCFileClass("ATTRACT2.CPS").Is_Available()) {
                     Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
-                    SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, 640, 398);
+                    SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
                     Fade_Palette_To(Palette, FADE_PALETTE_MEDIUM, Call_Back);
                 }
                 Keyboard->Clear();

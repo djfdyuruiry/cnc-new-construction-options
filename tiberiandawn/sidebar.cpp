@@ -347,6 +347,7 @@ void SidebarClass::Init_IO(void)
             ShapeButtonClass* SBCUpgrade = (ShapeButtonClass*)Upgrade;
             ShapeButtonClass* SBCZoom = (ShapeButtonClass*)Zoom;
 
+            // calculate the placement for sidebar buttons relative to sidebar position
             auto placement_x = SideX + buttonspacing - 2;
             constexpr auto placement_y = 160;
 
