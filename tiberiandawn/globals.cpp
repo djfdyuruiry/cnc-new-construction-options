@@ -942,3 +942,6 @@ char* TitlePicture = NULL;
 
 // OmniBlade - Moves from tcpip.cpp as part of networking cleanup.
 bool Server; // Is this player acting as client or server
+
+Texture MenuFillTexture("BTEXTURE.SHP", 0);
+Texture InGameFillTexture("BTEXTURE.SHP", 1);

@@ -643,6 +643,10 @@ bool Init_Game(int, char*[])
         MFCD::Cache("ZOUNDS.MIX");
     }
 
+    if (!MenuFillTexture.Load() || !InGameFillTexture.Load()) {
+        CNC_LOG_FATAL("Failed to load Sidebar fill texture");
+    }
+
     return (true);
 }
 

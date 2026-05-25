@@ -145,7 +145,9 @@ void Draw_Box(int x, int y, int w, int h, BoxStyleEnum up, bool filled)
 
     if (filled) {
         if (useGoldStyle && style.Filler == CC_GREEN_BKGD) {
-            CC_Texture_Fill(MFCD::Retrieve("BTEXTURE.SHP"), InMainLoop, x, y, w, h);
+            const auto& texture = InMainLoop ? InGameFillTexture : MenuFillTexture;
+
+            texture.Draw_Rectangle(*LogicPage, x, y, w, h);
         } else {
             LogicPage->Fill_Rect(x, y, x + w, y + h, style.Filler);
         }
