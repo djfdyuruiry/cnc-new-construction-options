@@ -816,11 +816,9 @@ void SidebarClass::Draw_It(bool complete)
                 CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
 
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                    // current resolution will exceed the default, so fill in the blank space below the sidebar with
-                    // the dialog texture
-                    CC_Texture_Fill(
-                        MFCD::Retrieve("BTEXTURE.SHP"),
-                        InMainLoop,
+                    // resolution is larger than standard height, so fill in the blank bottom space with a texture
+                    InGameFillTexture.Draw_Rectangle(
+                        *LogicPage,
                         SideX,
                         GBUFF_INIT_HEIGHT,
                         SideBarWidth,
