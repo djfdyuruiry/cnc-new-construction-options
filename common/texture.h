@@ -8,7 +8,7 @@
 /**
  * Stores a texture in memory and provides convenience methods for drawing the texture onto a viewport.
  *
- * Call Load at least once before calling Draw, load must return true.
+ * Call Load at least once before calling Draw; Load must return true.
  *
  * OOP version of CC_Texture_Fill from Tiberian Dawn with caching.
  */

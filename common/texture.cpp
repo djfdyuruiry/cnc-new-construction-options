@@ -3,7 +3,7 @@
 #include "ccfile.h"
 #include "keyframe.h"
 
-#define SHAPE_BUFFER_SIZE 131072L
+#define SHAPE_BUFFER_SIZE 131072L // 128KB
 
 void* Get_Shape_Header_Data(void* ptr);
 
@@ -64,7 +64,7 @@ void Texture::Draw_Rectangle(
 ) const
 {
     if (!Loaded) {
-        CNC_LOG_WARN("Attempted to draw texture before it was successfully loaded");
+        CNC_LOGGER_WARN("Attempted to draw texture before it was successfully loaded");
         return;
     }
 

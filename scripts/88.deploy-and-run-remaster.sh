@@ -42,8 +42,15 @@ function main() {
   local mods_path="${pfx_path}/drive_c/users/steamuser/Documents/CnCRemastered/Mods"
   echo "Mods path: ${mods_path}"
 
+  local config_path="${pfx_path}/drive_c/users/steamuser/AppData/Roaming/nco"
+  echo "Config path: ${config_path}"
+
   if [ -d "${win_td_path}" ]; then
     deploy_mod "${mods_path}" "${win_td_path}" "Tiberian_Dawn" "TD"
+
+    # deploy test files
+    mkdir -p "${config_path}/tiberian-dawn"
+    cp -rfv "${td_test_resources_path}"/* "${config_path}/tiberian-dawn"
   fi
 
   if [ -d "${win_ra_path}" ]; then
