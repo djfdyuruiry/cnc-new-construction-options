@@ -305,7 +305,7 @@ bool Set_Video_Mode(int& w, int& h, int bits_per_pixel)
     }
 
     window = SDL_CreateWindow("CNC: New Construction Options", x, y, win_w, win_h, win_flags);
- 
+
     if (window == nullptr) {
         DBG_ERROR("SDL_CreateWindow failed: %s", SDL_GetError());
         Reset_Video_Mode();
@@ -441,14 +441,13 @@ void Toggle_Video_Fullscreen()
         SDL_SetWindowFullscreen(window, 0);
 
         if (Settings.Video.StretchWidth == 0 || Settings.Video.StretchHeight == 0) {
-            SDL_SetWindowSize(window, Settings.Video.Width, Settings.Video.StretchHeight);
+            SDL_SetWindowSize(window, Settings.Video.Width, Settings.Video.Height);
         } else {
             SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchHeight);
         }
     }
 
     Update_HWCursor_Settings();
-            SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchWidth);
 }
 
 void Get_Video_Scale(float& x, float& y)
