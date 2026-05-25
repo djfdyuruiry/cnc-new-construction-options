@@ -368,7 +368,7 @@ void CellClass::Redraw_Objects(bool forced)
     Validate();
     CELL cell = Cell_Number();
 
-    if (Map.In_View(cell) && Map.In_Radar(cell) && (forced || !Map.Is_Cell_Flagged(cell))) {
+    if (Map.In_View(cell) && (Debug_Map || Map.In_Radar(cell)) && (forced || !Map.Is_Cell_Flagged(cell))) {
 
         /*
         **	Flag the icon to be redrawn.

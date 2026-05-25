@@ -627,8 +627,8 @@ void Resolve_Resolution_Mode()
 {
     if (Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files()) {
         /* If DOSMode is enabled, adjust resolution accordingly. */
-        ScreenWidth = 320;
-        ScreenHeight = 200;
+        ScreenWidth = GBUFF_INIT_WIDTH / 2;
+        ScreenHeight = GBUFF_INIT_HEIGHT / 2;
 
         if (Is_Demo()) {
             CNC_LOG_INFO("DOS demo data files detected, game will run at 320x200 resolution");

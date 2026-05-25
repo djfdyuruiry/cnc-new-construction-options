@@ -136,7 +136,7 @@ void PowerClass::One_Time(const bool on_save_load)
         PowY = Map.RadY + Map.RadHeight + (13 << factor);
     }
     PowWidth = 8 << factor;
-    PowHeight = (factor ? 400 : 200) - PowY;
+    PowHeight = (factor ? GBUFF_INIT_HEIGHT : GBUFF_INIT_HEIGHT / 2) - PowY;
     PowLineSpace = 5 << factor;
     PowLineWidth = PowWidth - 4;
 

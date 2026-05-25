@@ -2447,8 +2447,8 @@ void DisplayClass::Draw_It(bool forced)
             LogicPage->Draw_Rect(BandX + TacPixelX, BandY + TacPixelY, NewX + TacPixelX, NewY + TacPixelY, WHITE);
         }
 
-        // If resolution is larger than map size, fill areas outside the map in black
-        if (Is_Smaller_Than_Screen()) {
+        // If we are not in editor mode and resolution is larger than map size, fill areas outside the map in black
+        if (!Debug_Map && Is_Smaller_Than_Screen()) {
             if (Map.IsSidebarActive) {
                 // fill all space outside the map, except the sidebar and tabs
                 LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
