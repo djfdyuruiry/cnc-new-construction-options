@@ -193,9 +193,13 @@ DisplayClass::DisplayClass(void)
  *   05/31/1994 JLB : Handles layer system now.                                                *
  *   06/02/1994 JLB : Takes care of misc display tables and data allocation.                   *
  *=============================================================================================*/
-void DisplayClass::One_Time(void)
+void DisplayClass::One_Time(const bool on_save_load)
 {
     Set_View_Dimensions(0, Map.Get_Tab_Height());
+
+    if (on_save_load) {
+        return;
+    }
 
     MapClass::One_Time();
 
@@ -2442,6 +2446,7 @@ void DisplayClass::Draw_It(bool forced)
         if (IsRubberBand) {
             LogicPage->Draw_Rect(BandX + TacPixelX, BandY + TacPixelY, NewX + TacPixelX, NewY + TacPixelY, WHITE);
         }
+
         /*
         **	Clear the redraw flags so that normal redraw flag setting can resume.
         */
@@ -2647,6 +2652,53 @@ void DisplayClass::Redraw_Shadow_Rects(void)
                     }
                 }
             }
+        }
+    }
+
+    if (Debug_Map || !Is_Smaller_Than_Screen()) {
+        return;
+    }
+
+    /*
+     * If we are not in editor mode and resolution is larger than map size, fill visible areas outside the map with
+     * shadow
+     */
+
+    if (Map.IsSidebarActive) {
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 Map.Get_Tab_Height(),
+                                 Map.SideX - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 Map.SideX - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+    } else {
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 Map.Get_Tab_Height(),
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
         }
     }
 }
@@ -4607,8 +4659,8 @@ FROM_JSON(DisplayClass)
     OBJECT_TARGET_PTR_FROM_JSON(PendingObjectPtr);
     // NOTE: PendingObject is handled in saveload.cpp, see: DisplayClass::Decode_Pointers
     PARSE_TD_FIELD_FROM_JSON(DisplayClass, PendingHouse, HousesType);
-    FIELD_FROM_JSON(TacPixelX);
-    FIELD_FROM_JSON(TacPixelY);
+    FIELD_FROM_JSON(TacPixelX);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(TacPixelY);  // TODO: Remove and test, as it is calculated from resolution?
     FIELD_FROM_JSON(DesiredTacticalCoord);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsRepairMode);
@@ -4617,9 +4669,12 @@ FROM_JSON(DisplayClass)
     BITFIELD_FROM_JSON(IsRubberBand);
     BITFIELD_FROM_JSON(IsTentative);
     BITFIELD_FROM_JSON(IsShadowPresent);
-    FIELD_FROM_JSON(BandX);
-    FIELD_FROM_JSON(BandY);
-    FIELD_FROM_JSON(NewX);
-    FIELD_FROM_JSON(NewY);
+    FIELD_FROM_JSON(BandX); // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(BandY); // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(NewX); // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(NewY); // TODO: Remove and test, as it is calculated from resolution?
     FIELD_FROM_JSON(CursorShapeSave);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

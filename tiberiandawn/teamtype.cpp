@@ -965,8 +965,6 @@ TO_JSON(TeamTypeClass)
 
 FROM_JSON(TeamTypeClass)
 {
-    static const auto& Logger = CncLogger::For(TeamTypeClass);
-
     // Base AbstractTypeClass fields - See TO_JSON(TeamTypeClass)
     CSTR_FIELD_FROM_JSON(TeamTypeClass, IniName);
     FIELD_FROM_JSON(FullName);

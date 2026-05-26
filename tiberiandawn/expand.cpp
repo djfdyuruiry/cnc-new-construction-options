@@ -83,8 +83,8 @@ bool Expansion_Dialog(void)
 
     int option_width = 236 * factor;
     int option_height = 162 * factor;
-    int option_x = (320 * factor - option_width) / 2;
-    int option_y = (200 * factor - option_height) / 2;
+    int option_x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - option_width) / 2;
+    int option_y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - option_height) / 2;
 
     GadgetClass* buttons = NULL;
 
@@ -267,8 +267,8 @@ bool Bonus_Dialog(void)
 
     int option_width = 236 * factor;
     int option_height = 162 * factor;
-    int option_x = (320 * factor - option_width) / 2;
-    int option_y = (200 * factor - option_height) / 2;
+    int option_x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - option_width) / 2;
+    int option_y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - option_height) / 2;
 
     GadgetClass* buttons = NULL;
 

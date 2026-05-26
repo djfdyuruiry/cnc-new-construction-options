@@ -54,6 +54,7 @@ static SDL_Renderer* renderer;
 static SDL_Palette* palette;
 static Uint32 pixel_format;
 static SDL_Rect render_dst;
+static ResolutionMode CurrentResolutionMode = MODE_DEFAULT;
 
 static struct
 {
@@ -127,6 +128,20 @@ static void Update_HWCursor_Settings()
     */
     int win_w, win_h;
     SDL_GetRendererOutputSize(renderer, &win_w, &win_h);
+
+    const auto resolution_mode = Get_Current_Resolution_Mode();
+
+    if (resolution_mode == MODE_HIGH_RES) {
+        hwcursor.GameW = Settings.Video.Width;
+        hwcursor.GameH = Settings.Video.Height;
+    } else if (resolution_mode == MODE_DEFAULT) {
+        hwcursor.GameW = 640;
+        hwcursor.GameH = 400;
+    } else if (resolution_mode == MODE_DOS) {
+        hwcursor.GameW = 320;
+        hwcursor.GameH = 200;
+    }
+
     hwcursor.ScaleX = win_w / (float)hwcursor.GameW;
     hwcursor.ScaleY = win_h / (float)hwcursor.GameH;
 
@@ -215,7 +230,7 @@ SurfaceMonitorClass& AllSurfaces = AllSurfacesDummy; // List of all direct draw 
  * HISTORY:                                                                                    *
  *   09/26/1995 PWG : Created.                                                                 *
  *=============================================================================================*/
-bool Set_Video_Mode(int w, int h, int bits_per_pixel)
+bool Set_Video_Mode(int& w, int& h, int bits_per_pixel)
 {
     if (Settings.Video.VideoDriver != "default") {
         CNC_LOG_INFO("Using SDL video driver hint: {}", Settings.Video.VideoDriver);
@@ -269,24 +284,24 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
         /*
         ** Native fullscreen if no proper width and height set.
         */
-        if (Settings.Video.Width < w || Settings.Video.Height < h) {
-            win_w = Settings.Video.Width = 0;
-            win_h = Settings.Video.Height = 0;
+        if (Settings.Video.StretchWidth < w || Settings.Video.StretchHeight < h) {
+            win_w = Settings.Video.StretchWidth = 0;
+            win_h = Settings.Video.StretchHeight = 0;
             win_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
         } else {
-            win_w = Settings.Video.Width;
-            win_h = Settings.Video.Height;
+            win_w = Settings.Video.StretchWidth;
+            win_h = Settings.Video.StretchHeight;
             win_flags |= SDL_WINDOW_FULLSCREEN;
         }
 
         x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
         y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
-    } else if (Settings.Video.WindowWidth > w || Settings.Video.WindowHeight > h) {
-        win_w = Settings.Video.WindowWidth;
-        win_h = Settings.Video.WindowHeight;
+    } else if (Settings.Video.StretchWidth > w || Settings.Video.StretchHeight > h) {
+        win_w = Settings.Video.StretchWidth;
+        win_h = Settings.Video.StretchHeight;
     } else {
-        Settings.Video.WindowWidth = win_w;
-        Settings.Video.WindowHeight = win_h;
+        Settings.Video.Width = win_w;
+        Settings.Video.Height = win_h;
     }
 
     window = SDL_CreateWindow("CNC: New Construction Options", x, y, win_w, win_h, win_flags);
@@ -297,7 +312,13 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
         return false;
     }
 
+    SDL_GetWindowSize(window, &win_w, &win_h);
+
+    w = Settings.Video.Width;
+    h = Settings.Video.Height;
+
     DBG_INFO("Created SDL2 %s window in %dx%d", (win_flags ? "fullscreen" : "windowed"), win_w, win_h);
+
 
     pixel_format = SDL_GetWindowPixelFormat(window);
     if (pixel_format == SDL_PIXELFORMAT_UNKNOWN || SDL_BITSPERPIXEL(pixel_format) < 16) {
@@ -390,11 +411,9 @@ bool Set_Video_Mode(int w, int h, int bits_per_pixel)
     /*
     ** Set mouse scaling options.
     */
-    hwcursor.GameW = w;
-    hwcursor.GameH = h;
-    hwcursor.X = w / 2;
-    hwcursor.Y = h / 2;
     Update_HWCursor_Settings();
+    hwcursor.X = hwcursor.GameW / 2;
+    hwcursor.Y = hwcursor.GameH / 2;
 
     /*
     ** Init gamepad.
@@ -412,15 +431,20 @@ void Toggle_Video_Fullscreen()
     Settings.Video.Windowed = !Settings.Video.Windowed;
 
     if (!Settings.Video.Windowed) {
-        if (Settings.Video.Width == 0 || Settings.Video.Height == 0) {
+        if (Settings.Video.StretchWidth == 0 || Settings.Video.StretchHeight == 0) {
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         } else {
-            SDL_SetWindowSize(window, Settings.Video.Width, Settings.Video.Height);
+            SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchHeight);
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         }
     } else {
         SDL_SetWindowFullscreen(window, 0);
-        SDL_SetWindowSize(window, Settings.Video.WindowWidth, Settings.Video.WindowHeight);
+
+        if (Settings.Video.StretchWidth == 0 || Settings.Video.StretchHeight == 0) {
+            SDL_SetWindowSize(window, Settings.Video.Width, Settings.Video.Height);
+        } else {
+            SDL_SetWindowSize(window, Settings.Video.StretchWidth, Settings.Video.StretchHeight);
+        }
     }
 
     Update_HWCursor_Settings();
@@ -486,6 +510,25 @@ void Move_Video_Mouse(float xrel, float yrel)
         hwcursor.Y = hwcursor.GameH - 1;
     } else if (hwcursor.Y < 0) {
         hwcursor.Y = 0;
+    }
+}
+
+void Move_Video_Mouse_Absolute(const int x, const int y)
+{
+    if (x == 0 && y == 0) {
+        hwcursor.X = x;
+        hwcursor.Y = y;
+        return;
+    }
+
+    Move_Video_Mouse_Absolute(0, 0);
+
+    for (auto i = 0; i < x; i++) {
+        Move_Video_Mouse(i, 0);
+    }
+
+    for (auto j = 0; j < y; j++) {
+        Move_Video_Mouse(x, j);
     }
 }
 
@@ -884,8 +927,30 @@ public:
 
         SDL_UpdateTexture(texture, NULL, windowSurface->pixels, windowSurface->pitch);
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, &render_dst);
+
+        std::unique_ptr<SDL_Rect> src_rect;
+
+        if (CurrentResolutionMode == MODE_ZOOM) {
+            src_rect = std::make_unique<SDL_Rect>();
+
+            src_rect->x = 0;
+            src_rect->y = 0;
+            src_rect->w = 640;
+            src_rect->h = 400;
+        }
+
+        SDL_RenderCopy(renderer, texture, src_rect.get(), &render_dst);
         SDL_RenderPresent(renderer);
+    }
+
+    int GetWidth()
+    {
+        return surface == nullptr ? 0 : surface->w;
+    }
+
+    int GetHeight()
+    {
+        return surface == nullptr ? 0 : surface->h;
     }
 
 private:
@@ -923,4 +988,67 @@ Video& Video::Shared()
 VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
 {
     return new VideoSurfaceSDL2(w, h, flags);
+}
+
+/* Resolution mode API */
+
+ResolutionMode Get_Current_Resolution_Mode()
+{
+    return CurrentResolutionMode;
+}
+
+void Set_Current_Resolution_Mode(const ResolutionMode resolution_mode)
+{
+    CurrentResolutionMode = resolution_mode;
+}
+
+std::optional<int> Try_Get_Resolution_Mode_Width()
+{
+    if (frontSurface == nullptr) {
+        return std::nullopt;
+    }
+
+    if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
+        return 640;
+    }
+
+    return frontSurface->GetWidth();
+}
+
+std::optional<int> Try_Get_Resolution_Mode_Height()
+{
+    if (frontSurface == nullptr) {
+        return std::nullopt;
+    }
+
+    if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
+        return 400;
+    }
+
+    return frontSurface->GetHeight();
+}
+
+void Enter_Zoomed_Resolution_Mode()
+{
+    const auto resolution_mode = Get_Current_Resolution_Mode();
+
+    if (resolution_mode == MODE_DOS || resolution_mode == MODE_DEFAULT) {
+        // these modes never zoom in
+        return;
+    }
+
+    Set_Current_Resolution_Mode(MODE_ZOOM);
+    Move_Video_Mouse_Absolute(0, 0);
+}
+
+void Leave_Zoomed_Resolution_Mode()
+{
+    const auto resolution_mode = Get_Current_Resolution_Mode();
+
+    if (resolution_mode == MODE_DOS || resolution_mode == MODE_DEFAULT) {
+        // these modes never zoom out
+        return;
+    }
+
+    Set_Current_Resolution_Mode(MODE_HIGH_RES);
 }

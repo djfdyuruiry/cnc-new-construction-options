@@ -111,6 +111,7 @@ set(COMMON_SRC
     logger.cpp
     rulesections.cpp
     stringutils.cpp
+    texture.cpp
 )
 
 if(BUILD_NCO_TD OR BUILD_NCO_RA OR BUILD_TESTS)

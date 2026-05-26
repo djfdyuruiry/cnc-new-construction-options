@@ -2044,8 +2044,8 @@ FROM_JSON(DriveClass)
     BASE_CLASS_FROM_JSON(FootClass);
 
     TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(DriveClass, Class, UnitTypeClass, UnitType);
-    FIELD_FROM_JSON(SimLeptonX);
-    FIELD_FROM_JSON(SimLeptonY);
+    FIELD_FROM_JSON(SimLeptonX);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(SimLeptonY);  // TODO: Remove and test, as it is calculated from resolution?
     FIELD_FROM_JSON(Tiberium);
     BITFIELD_FROM_JSON(IsHarvesting);
     BITFIELD_FROM_JSON(IsReturning);

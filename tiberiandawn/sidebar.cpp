@@ -169,9 +169,10 @@ SidebarClass::SidebarClass(void)
  * HISTORY:                                                                                    *
  *   10/28/94   JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::One_Time(void)
+void SidebarClass::One_Time(const bool on_save_load)
 {
-    PowerClass::One_Time();
+    PowerClass::One_Time(on_save_load);
+
     /*
     ** Set up the pixel offsets and widths and heights used to render the
     ** sidebar.  They are now variables because we need to change them for
@@ -217,8 +218,12 @@ void SidebarClass::One_Time(void)
     Column[1].X = Column[0].X + (StripClass::STRIP_WIDTH * factor) + spacing - 1;
     Column[1].Y = SideY + TopHeight + 1;
 
-    Column[0].One_Time(0);
-    Column[1].One_Time(1);
+    Column[0].One_Time(0, on_save_load);
+    Column[1].One_Time(1, on_save_load);
+
+    if (on_save_load) {
+        return;
+    }
 
     /*
     **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
@@ -342,18 +347,26 @@ void SidebarClass::Init_IO(void)
             ShapeButtonClass* SBCUpgrade = (ShapeButtonClass*)Upgrade;
             ShapeButtonClass* SBCZoom = (ShapeButtonClass*)Zoom;
 
-            Repair->X = 484;
-            Repair->Y = 160;
+            // calculate the placement for sidebar buttons relative to sidebar position
+            auto placement_x = SideX + buttonspacing - 2;
+            constexpr auto placement_y = 160;
+
+            Repair->X = placement_x;
+            Repair->Y = placement_y;
             SBCRepair->ReflectButtonState = true;
             SBCRepair->Set_Shape(Hires_Retrieve(repair_shp));
 
-            Upgrade->X = 480 + 57;
-            Upgrade->Y = 160;
+            placement_x += Repair->Width + buttonspacing - 2;
+
+            Upgrade->X = placement_x;
+            Upgrade->Y = placement_y;
             SBCUpgrade->ReflectButtonState = true;
             SBCUpgrade->Set_Shape(Hires_Retrieve(sell_shp));
 
-            Zoom->X = 480 + 110;
-            Zoom->Y = 160;
+            placement_x += Upgrade->Width + buttonspacing - 4;
+
+            Zoom->X = placement_x;
+            Zoom->Y = placement_y;
             SBCZoom->Set_Shape(Hires_Retrieve(map_shp));
         } else {
             TextButtonClass* TBCRepair = (TextButtonClass*)Repair;
@@ -802,6 +815,17 @@ void SidebarClass::Draw_It(bool complete)
                 LogicPage->Draw_Line(SideX, 157, SeenBuff.Get_Width() - 1, 157, 0);
                 CC_Draw_Shape(SidebarShape1, 0, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
                 CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
+
+                if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                    // resolution is larger than standard height, so fill in the blank bottom space with a texture
+                    InGameFillTexture.Draw_Rectangle(
+                        *LogicPage,
+                        SideX,
+                        GBUFF_INIT_HEIGHT,
+                        SideBarWidth,
+                        SeenBuff.Get_Width() - GBUFF_INIT_HEIGHT
+                    );
+                }
             }
 
             //  Repair.Draw_Me(true);
@@ -1142,7 +1166,7 @@ SidebarClass::StripClass::StripClass(InitClass const&)
  * HISTORY:                                                                                    *
  *   12/31/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::StripClass::One_Time(int)
+void SidebarClass::StripClass::One_Time(int, const bool on_save_load)
 {
     static const char* _file[3] = {"ION", "ATOM", "BOMB"};
     int factor = Get_Resolution_Factor();
@@ -1152,6 +1176,10 @@ void SidebarClass::StripClass::One_Time(int)
     StripWidth = STRIP_WIDTH << factor;
     LeftEdgeOffset = (StripWidth - ObjectWidth) >> 1;
     ButtonSpacingOffset = (StripWidth - ((BUTTON_WIDTH << factor) << 1)) / 3;
+
+    if (on_save_load) {
+        return;
+    }
 
     /*
     ** Sidebar is player team specific in Hires
@@ -1764,6 +1792,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         if (RunningAsDLL) {
             return;
         }
+
         /*
         **	Fills the background to the side strip. We shouldnt need to do this if the strip
         ** has a full complement of icons.
@@ -2733,13 +2762,13 @@ FROM_JSON(SidebarClass::StripClass)
 {
     BASE_CLASS_FROM_JSON(StageClass);
 
-    FIELD_FROM_JSON(ObjectWidth);
-    FIELD_FROM_JSON(ObjectHeight);
-    FIELD_FROM_JSON(StripWidth);
-    FIELD_FROM_JSON(LeftEdgeOffset);
-    FIELD_FROM_JSON(ButtonSpacingOffset);
-    FIELD_FROM_JSON(X);
-    FIELD_FROM_JSON(Y);
+    FIELD_FROM_JSON(ObjectWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ObjectHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(StripWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(LeftEdgeOffset); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonSpacingOffset); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(X); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(Y); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(ID);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsBuilding);
@@ -2748,9 +2777,12 @@ FROM_JSON(SidebarClass::StripClass)
     FIELD_FROM_JSON(Flasher);
     FIELD_FROM_JSON(TopIndex);
     FIELD_FROM_JSON(Scroller);
-    FIELD_FROM_JSON(Slid);
+    FIELD_FROM_JSON(Slid); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(BuildableCount);
     FIELD_FROM_JSON(Buildables);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }
 
 TO_JSON(SidebarClass)
@@ -2780,21 +2812,24 @@ FROM_JSON(SidebarClass)
 {
     BASE_CLASS_FROM_JSON(PowerClass);
 
-    FIELD_FROM_JSON(SideX);
-    FIELD_FROM_JSON(SideY);
-    FIELD_FROM_JSON(SideBarWidth);
-    FIELD_FROM_JSON(SideWidth);
-    FIELD_FROM_JSON(SideHeight);
-    FIELD_FROM_JSON(TopHeight);
+    FIELD_FROM_JSON(SideX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideBarWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(SideHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(TopHeight); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(MaxVisible);
-    FIELD_FROM_JSON(ButtonOneWidth);
-    FIELD_FROM_JSON(ButtonTwoWidth);
-    FIELD_FROM_JSON(ButtonThreeWidth);
-    FIELD_FROM_JSON(ButtonHeight);
+    FIELD_FROM_JSON(ButtonOneWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonTwoWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonThreeWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(ButtonHeight); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(Column);
     BITFIELD_FROM_JSON(IsSidebarActive);
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsRepairActive);
     BITFIELD_FROM_JSON(IsUpgradeActive);
     BITFIELD_FROM_JSON(IsDemolishActive);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

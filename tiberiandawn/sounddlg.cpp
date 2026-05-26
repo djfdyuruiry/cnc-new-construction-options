@@ -62,8 +62,8 @@ int SoundControlsClass::Init(void)
     Option_Width = 292 * factor;
     Option_Height = 146 * factor;
 
-    Option_X = ((SeenBuff.Get_Width() - Option_Width) / 2);
-    Option_Y = (SeenBuff.Get_Height() - Option_Height) / 2;
+    Option_X = ((Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - Option_Width) / 2);
+    Option_Y = ((Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - Option_Height) / 2);
 
     Listbox_X = 1 * factor;
     Listbox_Y = 54 * factor;

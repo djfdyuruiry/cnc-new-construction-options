@@ -3,6 +3,7 @@
 
 #include "rect.h"
 #include <cstdint>
+#include <optional>
 
 enum GBC_Enum
 {
@@ -60,10 +61,11 @@ public:
 
 extern SurfaceMonitorClass& AllSurfaces; // List of all surfaces
 
-bool Set_Video_Mode(int w, int h, int bits_per_pixel);
+bool Set_Video_Mode(int& w, int& h, int bits_per_pixel);
 void Get_Video_Scale(float& x, float& y);
 void Set_Video_Cursor_Clip(bool clipped);
 void Move_Video_Mouse(float xrel, float yrel);
+void Move_Video_Mouse_Absolute(int x, int y);
 void Get_Video_Mouse(int& x, int& y);
 void Toggle_Video_Fullscreen();
 void Reset_Video_Mode();
@@ -100,5 +102,69 @@ unsigned Get_Video_Hardware_Capabilities();
 
 void Wait_Vert_Blank();
 void Set_DD_Palette(void* palette);
+
+/* Resolution mode control */
+
+enum ResolutionMode
+{
+    // original resolution (640x400)
+    MODE_DEFAULT,
+    // original DOS resolution (300x200)
+    MODE_DOS,
+    // custom resolution
+    MODE_HIGH_RES,
+    // zoom into default resolution
+    MODE_ZOOM
+};
+
+ResolutionMode Get_Current_Resolution_Mode();
+
+void Set_Current_Resolution_Mode(ResolutionMode resolution_mode);
+
+/**
+ * Lookup the width for the current resolution mode. This can be a subset of the current
+ * internal resolution (640x400) or the full resolution. Useful to ensure a relative point
+ * on the screen is in the correct position of the currently viewed screen portion. Used
+ * for dialogs that can be shown on 640x400 screen and in scenario gameplay (save/load etc.).
+ *
+ * Supported video backends: sdl2
+ *
+ * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed.
+ */
+std::optional<int> Try_Get_Resolution_Mode_Width();
+
+/**
+ * Lookup the height for the current resolution mode. This can be a subset of the current
+ * internal resolution (640x400) or the full resolution. Useful to ensure a relative point
+ * on the screen is in the correct position of the currently viewed screen portion. Used
+ * for dialogs that can be shown on 640x400 screen and in scenario gameplay (save/load etc.).
+ *
+ * Supported video backends: sdl2
+ *
+ * @return Width or std::nullopt if video system is uninitialised or using an unsupported video backed.
+ */
+std::optional<int> Try_Get_Resolution_Mode_Height();
+
+/**
+ * Enter the standard resolution mode for the game engine, if current resolution mode supports it.
+ *
+ * Generally this should be called after clearing the screen to prevent zoom in artifacts.
+ *
+ * This mode is currently used for menus, videos, CPS animations and score screens.
+ *
+ * Supported video backends: sdl2
+*/
+void Enter_Zoomed_Resolution_Mode();
+
+/**
+ * Enter the dynamic high resolution mode for the game engine, if current resolution mode supports it.
+ *
+ * Call this to reset calls to Enter_Standard_Resolution_Mode().
+ *
+ * This mode is currently only used when playing a scenario.
+ *
+ * Supported video backends: sdl2
+ */
+void Leave_Zoomed_Resolution_Mode();
 
 #endif // VIDEO_H

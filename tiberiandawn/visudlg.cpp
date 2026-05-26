@@ -43,8 +43,8 @@ int VisualControlsClass::Init(void)
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     Option_Width = 216 * factor;
     Option_Height = 122 * factor;
-    Option_X = (((SeenBuff.Get_Width() - Option_Width) / 2));
-    Option_Y = ((SeenBuff.Get_Height() - Option_Height) / 2);
+    Option_X = ((Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - Option_Width) / 2);
+    Option_Y = ((Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - Option_Height) / 2);
     Text_X = Option_X + (28 * factor);
     Text_Y = Option_Y + (30 * factor);
     Slider_X = Option_X + (105 * factor);

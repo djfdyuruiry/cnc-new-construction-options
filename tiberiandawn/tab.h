@@ -55,7 +55,7 @@ public:
     virtual void AI(KeyNumType& input, int x, int y);
     virtual void Draw_It(bool complete = false);
 
-    virtual void One_Time(void); // One-time inits
+    virtual void One_Time(bool on_save_load = false); // One-time inits
     virtual void Init_Clear(void);
 
     static void Draw_Credits_Tab(void);

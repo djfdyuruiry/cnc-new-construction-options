@@ -489,6 +489,7 @@ void LuaStateDeleter::operator()(lua_State* L) const
 {
     if (L)
     {
+        // BUG: If Lua enabled for scenario editor, this log statement crashes formatter (Lua is disabled in editor)
         CNC_LOGGER_INFO("Destroying Lua state: {}", static_cast<void*>(L));
         lua_close(L);
     }

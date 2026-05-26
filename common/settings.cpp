@@ -20,19 +20,19 @@ SettingsClass::SettingsClass()
     ** Video settings
     */
     // TODO: Could offer presets through the launcher or a ini setting (retro, modern etc.)
-    Video.WindowWidth = 1280;
-    Video.WindowHeight = 800;
+    Video.Width = 640;
+    Video.Height = 400;
+    Video.StretchWidth = 0;
+    Video.StretchHeight = 0;
     Video.Windowed = false;
     Video.Display = 1;
-    Video.Width = 0;
-    Video.Height = 0;
     Video.Boxing = true;
-    Video.BoxingAspectRatio = "4:3";
+    Video.BoxingAspectRatio = "16:10";
     Video.FrameLimit = 120;
     Video.InterpolationMode = 2;
     Video.HardwareCursor = false;
     Video.DOSMode = false;
-    Video.Scaler = "nearest";
+    Video.Scaler = "linear";
     Video.VideoDriver = "default";
     Video.RenderDriver = "default";
     Video.PixelFormat = "default";
@@ -58,19 +58,23 @@ void SettingsClass::Load(INIClass& ini)
     /*
     ** Video settings
     */
-    Video.WindowWidth = ini.Get_Int("Video", "WindowWidth", Video.WindowWidth);
-    Video.WindowHeight = ini.Get_Int("Video", "WindowHeight", Video.WindowHeight);
+    Video.Width = ini.Get_Int("Video", "Width", Video.Width);
+    Video.Height = ini.Get_Int("Video", "Height", Video.Height);
+    Video.StretchWidth = ini.Get_Int("Video", "StretchWidth", Video.StretchWidth);
+    Video.StretchHeight = ini.Get_Int("Video", "StretchHeight", Video.StretchHeight);
     Video.Windowed = ini.Get_Bool("Video", "Windowed", Video.Windowed);
     Video.Boxing = ini.Get_Bool("Video", "Boxing", Video.Boxing);
     Video.BoxingAspectRatio = ini.Get_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio);
     Video.Display = ini.Get_Int("Video", "Display", Video.Display);
-    Video.Width = ini.Get_Int("Video", "Width", Video.Width);
-    Video.Height = ini.Get_Int("Video", "Height", Video.Height);
     Video.FrameLimit = ini.Get_Int("Video", "FrameLimit", Video.FrameLimit);
     Video.HardwareCursor = ini.Get_Bool("Video", "HardwareCursor", Video.HardwareCursor);
     Video.DOSMode = ini.Get_Bool("Video", "DOSMode", Video.DOSMode);
     Video.Scaler = ini.Get_String("Video", "Scaler", Video.Scaler);
+
+#if !defined(_WIN32) && !defined(__APPLE__)
     Video.VideoDriver = ini.Get_String("Video", "VideoDriver", Video.VideoDriver);
+#endif
+
     Video.RenderDriver = ini.Get_String("Video", "RenderDriver", Video.RenderDriver);
     Video.PixelFormat = ini.Get_String("Video", "PixelFormat", Video.PixelFormat);
 
@@ -96,6 +100,18 @@ void SettingsClass::Load(INIClass& ini)
     }
 }
 
+/**
+ * Load settings, but use a high resolution as the
+ * default if none is defined in the INI.
+ */
+void SettingsClass::Load_Hi_Res(INIClass& ini)
+{
+    Video.Width = 800;
+    Video.Height = 600;
+
+    Load(ini);
+}
+
 void SettingsClass::Save(INIClass& ini)
 {
     /*
@@ -110,20 +126,31 @@ void SettingsClass::Save(INIClass& ini)
     /*
     ** Video settings
     */
-    ini.Put_Int("Video", "WindowWidth", Video.WindowWidth);
-    ini.Put_Int("Video", "WindowHeight", Video.WindowHeight);
+    ini.Put_Int("Video", "Width", Video.Width);
+    ini.Put_Int("Video", "Height", Video.Height);
+    ini.Put_Int("Video", "StretchWidth", Video.StretchWidth);
+    ini.Put_Int("Video", "StretchHeight", Video.StretchHeight);
     ini.Put_Bool("Video", "Windowed", Video.Windowed);
     ini.Put_Bool("Video", "Boxing", Video.Boxing);
     ini.Put_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio, "4:3, 16:9 etc.");
     ini.Put_Int("Video", "Display", Video.Display);
-    ini.Put_Int("Video", "Width", Video.Width);
-    ini.Put_Int("Video", "Height", Video.Height);
     ini.Put_Int("Video", "FrameLimit", Video.FrameLimit);
     ini.Put_Bool("Video", "HardwareCursor", Video.HardwareCursor);
     ini.Put_Bool("Video", "DOSMode", Video.DOSMode, "before you enable this, install the game data files from the DOS version");
-    ini.Put_String("Video", "Scaler", Video.Scaler, "nearest, linear ()");
-    ini.Put_String("Video", "VideoDriver", Video.VideoDriver, "default, x11, wayland");
-    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, direct3d, direct3d11, direct3d12, opengl, opengles2, opengles, metal, software");
+    ini.Put_String("Video", "Scaler", Video.Scaler, "nearest (sharp), linear (smooth)");
+
+#if !defined(_WIN32) && !defined(__APPLE__)
+    ini.Put_String("Video", "VideoDriver", Video.VideoDriver, "default, x11, wayland, directfb, kmsdrm");
+#endif
+
+#ifdef _WIN32
+    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, direct3d, direct3d11, direct3d12, opengl, software");
+#elifdef __APPLE__
+    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, metal, software");
+#else
+    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, opengl, opengles2, opengles, software");
+#endif
+
     ini.Put_String("Video", "PixelFormat", Video.PixelFormat);
 
     /*

@@ -89,8 +89,8 @@ int Com_Scenario_Dialog(void)
     ........................................................................*/
     int d_dialog_w = 290 * factor;                      // dialog width
     int d_dialog_h = 190 * factor;                      // dialog height
-    int d_dialog_x = ((320 * factor - d_dialog_w) / 2); // dialog x-coord
-    int d_dialog_y = ((200 * factor - d_dialog_h) / 2); // dialog y-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) / 2); // dialog y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);    // center x-coord
 
     int d_txt6_h = 6 * factor + 1; // ht of 6-pt text

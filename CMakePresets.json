@@ -35,6 +35,7 @@
             "inherits": "release",
             "displayName": "NCO Remaster build",
             "cacheVariables": {
+                "SDL2": "OFF",
                 "BUILD_REMASTER_TD": "ON",
                 "BUILD_REMASTER_RA": "ON",
                 "BUILD_NCO_TD": "OFF",

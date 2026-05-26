@@ -144,10 +144,15 @@ bool Start_Scenario(char* root, bool briefing)
             if (Scen.TransitTheme == THEME_NONE) {
                 Theme.Queue_Song(THEME_AOI);
             }
+
+            // we are about to start the scenario, so zoom out
+            Leave_Zoomed_Resolution_Mode();
         } else {
             Play_Movie(BriefMovie);
             Play_Movie(ActionMovie, Scen.TransitTheme);
 
+            // we are about to start the scenario, so zoom out
+            Leave_Zoomed_Resolution_Mode();
 #ifdef NEWMENU
 
             char buffer[_MAX_FNAME + _MAX_EXT + 4];
@@ -697,6 +702,9 @@ void Do_Lose(void)
 
     Play_Movie(LoseMovie);
 
+    // we are about to show a user popup, so zoom out
+    Leave_Zoomed_Resolution_Mode();
+
     /*
     ** Start same scenario again
     */
@@ -714,6 +722,13 @@ void Do_Lose(void)
 
     Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
     Show_Mouse();
+
+    if (Map.Is_Smaller_Than_Screen()) {
+        // BUG: Re-init map view to fix map rendering for small maps (looks glitchy on screen)
+        Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
+        Map.Flag_To_Redraw(true);
+        Map.Render();
+    }
 }
 
 /***********************************************************************************************

@@ -367,6 +367,10 @@ bool Load_Game(const char* file_name)
 {
     Clear_Scenario();
 
+    // we are about to load a scenario, which means the FROM_JSON methods will run and some of these call
+    // TabClass::One_Time and it's associated base class methods - these depend on the excepted resolution being set to
+    // calculate constants correctly, so zoom out
+    Leave_Zoomed_Resolution_Mode();
     Call_Back();
 
 #ifndef REMASTER_BUILD
@@ -550,6 +554,10 @@ bool Load_Game_Binary(const char* file_name)
         file.Close();
         return (false);
     }
+
+    // we are about to load a scenario, which means Map.Load will call TabClass::One_Time and the base class methods
+    // - these depend on the excepted resolution being set to calculate constants correctly, so zoom out
+    Leave_Zoomed_Resolution_Mode();
 
     Call_Back();
     /*

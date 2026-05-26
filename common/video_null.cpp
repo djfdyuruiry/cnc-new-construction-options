@@ -78,7 +78,7 @@ SurfaceMonitorClass& AllSurfaces = AllSurfacesDummy; // List of all direct draw 
  * HISTORY:                                                                                    *
  *   09/26/1995 PWG : Created.                                                                 *
  *=============================================================================================*/
-bool Set_Video_Mode(int w, int h, int bits_per_pixel)
+bool Set_Video_Mode(int& w, int& h, int bits_per_pixel)
 {
     return true;
 }
@@ -295,4 +295,37 @@ Video& Video::Shared()
 VideoSurface* Video::CreateSurface(int w, int h, GBC_Enum flags)
 {
     return new VideoSurfaceDummy(w, h, flags);
+}
+
+ResolutionMode Get_Current_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+    return MODE_DEFAULT;
+}
+
+void Set_Current_Resolution_Mode(const ResolutionMode)
+{
+    // TODO: Resolution mode support not implemented
+}
+
+std::optional<int> Try_Get_Resolution_Mode_Width()
+{
+    // TODO: Resolution mode support not implemented
+    return std::nullopt;
+}
+
+std::optional<int> Try_Get_Resolution_Mode_Height()
+{
+    // TODO: Resolution mode support not implemented
+    return std::nullopt;
+}
+
+void Enter_Zoomed_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+}
+
+void Leave_Zoomed_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
 }

@@ -112,8 +112,8 @@ int LoadOptionsClass::Process(void)
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     int d_dialog_w = 250 * factor;
     int d_dialog_h = 156 * factor;
-    int d_dialog_x = (SeenBuff.Get_Width() - d_dialog_w) >> 1;
-    int d_dialog_y = (SeenBuff.Get_Height() - d_dialog_h) >> 1;
+    int d_dialog_x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) >> 1;
+    int d_dialog_y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) >> 1;
     int d_dialog_cx = d_dialog_x + (d_dialog_w >> 1);
     int d_txt8_h = 11 * factor;
     int d_margin = 7 * factor;
@@ -453,7 +453,13 @@ int LoadOptionsClass::Process(void)
             game_num = Files[game_idx]->Num;
             if (WWMessageBox().Process(TXT_DELETE_FILE_QUERY, TXT_YES, TXT_NO) == 0) {
                 sprintf(fname, "savegame.%03d", game_num);
-                Delete_File(fname);
+                const auto save_full_path = PathsClass::Concatenate_Paths(Paths.User_Save_Path(), fname);
+
+                if (!Delete_File(save_full_path.c_str())) {
+                    // TODO: locale file entry
+                    WWMessageBox().Process("Error deleting save game", TXT_OK);
+                }
+
                 Clear_List(&listbtn);
                 Fill_List(&listbtn);
                 if (listbtn.Count() == 0) {

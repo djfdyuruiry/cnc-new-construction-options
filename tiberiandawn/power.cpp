@@ -124,9 +124,9 @@ void PowerClass::Init_Clear(void)
  * HISTORY:                                                                                    *
  *   12/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void PowerClass::One_Time(void)
+void PowerClass::One_Time(const bool on_save_load)
 {
-    RadarClass::One_Time();
+    RadarClass::One_Time(on_save_load);
 
     int factor = Get_Resolution_Factor();
     PowX = SeenBuff.Get_Width() - Map.RadWidth;
@@ -136,7 +136,7 @@ void PowerClass::One_Time(void)
         PowY = Map.RadY + Map.RadHeight + (13 << factor);
     }
     PowWidth = 8 << factor;
-    PowHeight = SeenBuff.Get_Height() - PowY;
+    PowHeight = (factor ? GBUFF_INIT_HEIGHT : GBUFF_INIT_HEIGHT / 2) - PowY;
     PowLineSpace = 5 << factor;
     PowLineWidth = PowWidth - 4;
 
@@ -144,6 +144,10 @@ void PowerClass::One_Time(void)
     PowerButton.Y = PowY;
     PowerButton.Width = PowWidth - 1;
     PowerButton.Height = PowHeight;
+
+    if (on_save_load) {
+        return;
+    }
 
     PowerShape = MFCD::Retrieve((factor) ? "HPOWER.SHP" : "POWER.SHP");
     PowerBarShape = Hires_Retrieve("PWRBAR.SHP");
@@ -512,22 +516,27 @@ FROM_JSON(PowerClass)
 {
     BASE_CLASS_FROM_JSON(RadarClass);
 
-    FIELD_FROM_JSON(PowX);
-    FIELD_FROM_JSON(PowY);
-    FIELD_FROM_JSON(PowWidth);
-    FIELD_FROM_JSON(PowHeight);
-    FIELD_FROM_JSON(PowLineSpace);
-    FIELD_FROM_JSON(PowLineWidth);
+    // TODO: any changes here may break the power bar, consider resetting/refreshing it
+
+    FIELD_FROM_JSON(PowX); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowY); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowWidth); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowLineSpace); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowLineWidth); // TODO: Remove and test, as it is calculated from resolution
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsActive);
     FIELD_FROM_JSON(RecordedDrain);
     FIELD_FROM_JSON(RecordedPower);
-    FIELD_FROM_JSON(DesiredDrainHeight);
-    FIELD_FROM_JSON(DesiredPowerHeight);
-    FIELD_FROM_JSON(DrainHeight);
-    FIELD_FROM_JSON(PowerHeight);
+    FIELD_FROM_JSON(DesiredDrainHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(DesiredPowerHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(DrainHeight); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_FROM_JSON(PowerHeight); // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(DrainBounce);
     FIELD_FROM_JSON(PowerBounce);
     FIELD_FROM_JSON(PowerDir);
     FIELD_FROM_JSON(DrainDir);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

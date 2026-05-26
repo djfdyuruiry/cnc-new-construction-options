@@ -127,7 +127,7 @@ void TabClass::Draw_It(bool complete)
 
 void TabClass::Draw_Credits_Tab(void)
 {
-    unsigned x = Get_Resolution_Factor() ? 320 : 160;
+    const auto x = Get_Resolution_Factor() ? Map.SideX - Get_Shape_Size(TabShape) : GBUFF_INIT_WIDTH / 4;
     CC_Draw_Shape(TabShape, 0, x, 0, WINDOW_MAIN, SHAPE_NORMAL);
 }
 
@@ -252,7 +252,7 @@ void TabClass::Set_Active(int select)
     }
 }
 
-void TabClass::One_Time(void)
+void TabClass::One_Time(const bool on_save_load)
 {
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     Eva_Width = 80 * factor;
@@ -263,7 +263,12 @@ void TabClass::One_Time(void)
     Tab_Height = 8 * factor;
 #endif
 
-    SidebarClass::One_Time();
+    SidebarClass::One_Time(on_save_load);
+
+    if (on_save_load) {
+        return;
+    }
+
     TabShape = Hires_Retrieve("TABS.SHP");
 }
 
@@ -279,8 +284,8 @@ TO_JSON(TabClass)
 
     FIELD_TO_JSON(Credits);
     BITFIELD_TO_JSON(IsToRedraw);
-    FIELD_TO_JSON(Eva_Width);
-    FIELD_TO_JSON(Tab_Height);
+    FIELD_TO_JSON(Eva_Width); // TODO: Remove and test, as it is calculated from resolution
+    FIELD_TO_JSON(Tab_Height); // TODO: Remove and test, as it is calculated from resolution
 }
 
 FROM_JSON(TabClass)
@@ -291,4 +296,7 @@ FROM_JSON(TabClass)
     BITFIELD_FROM_JSON(IsToRedraw);
     FIELD_FROM_JSON(Eva_Width);
     FIELD_FROM_JSON(Tab_Height);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }

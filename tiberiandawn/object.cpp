@@ -920,6 +920,12 @@ bool ObjectClass::Render(bool forced)
     COORDINATE coord = Render_Coord();
     CELL cell = Coord_Cell(coord);
 
+    // if we are not in editor mode, the cell this object resides in is outside the bounds of the map...
+    if (!Debug_Map && !Map.In_Radar(cell)) {
+        // skip further rendering
+        return false;
+    }
+
     if (Debug_Map || Debug_Unshroud || ((forced || IsToDisplay) && IsDown && !IsInLimbo)) {
         IsToDisplay = false;
 

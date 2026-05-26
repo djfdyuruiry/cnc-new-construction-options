@@ -456,6 +456,9 @@ int Main_Menu(unsigned int timeout)
 {
     int scale_factor = Get_Resolution_Factor() + 1;
 
+    // we are about to view the main menu (rendered at 640x400) so zoom in if needed
+    Enter_Zoomed_Resolution_Mode();
+
     int D_DIALOG_W = 152 * scale_factor, D_DIALOG_H = 136 * scale_factor, D_DIALOG_X = 85 * scale_factor,
         D_DIALOG_Y = 0, D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / scale_factor),
 

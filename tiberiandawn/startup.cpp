@@ -54,6 +54,7 @@ HINSTANCE ProgramInstance;
 
 extern int ReadyToQuit;
 void Read_Setup_Options(RawFileClass* config_file);
+void Resolve_Resolution_Mode();
 
 bool VideoBackBufferAllowed = true;
 void Check_From_WChat(char* wchat_name);
@@ -290,11 +291,7 @@ int main(int argc, char** argv)
         CCDebugString("C&C95 - Creating main window.\n");
 
 #ifndef REMASTER_BUILD
-        /* If DOSMode is enabled, adjust resolution accordingly. */
-        if (Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files()) {
-            ScreenWidth = 320;
-            ScreenHeight = 200;
-        }
+        Resolve_Resolution_Mode();
 #endif
 
 #if defined(_WIN32) && !defined(SDL_BUILD)
@@ -398,8 +395,8 @@ int main(int argc, char** argv)
         }
 #endif
 
-        SeenBuff.Attach(&VisiblePage, 0, 0, GBUFF_INIT_WIDTH, GBUFF_INIT_HEIGHT);
-        HidPage.Attach(&HiddenPage, 0, 0, GBUFF_INIT_WIDTH, GBUFF_INIT_HEIGHT);
+        SeenBuff.Attach(&VisiblePage, 0, 0, ScreenWidth, ScreenHeight);
+        HidPage.Attach(&HiddenPage, 0, 0, ScreenWidth, ScreenHeight);
 
         CCDebugString("C&C95 - Adjusting variables for resolution.\n");
         Options.Adjust_Variables_For_Resolution();
@@ -611,13 +608,62 @@ void Read_Setup_Options(RawFileClass* config_file)
     ini.Load(*config_file);
 
     /*
-    ** Read in global settings
+    ** Read in global settings, defaulting to hi resolution mode
     */
-    Settings.Load(ini);
+    Settings.Load_Hi_Res(ini);
 
     /*
     ** Read in the boolean options
     */
     VideoBackBufferAllowed = ini.Get_Bool("Options", "VideoBackBuffer", true);
     AllowHardwareBlitFills = ini.Get_Bool("Options", "HardwareFills", true);
+}
+
+/**
+ * Based on configuration, resolve which mode we want to use for the game resolution. DOS and hi-resolution modes
+ * change the internal game resolution, standard mode uses the default resolution of 640x400.
+ */
+void Resolve_Resolution_Mode()
+{
+    if (Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files()) {
+        /* If DOSMode is enabled, adjust resolution accordingly. */
+        ScreenWidth = GBUFF_INIT_WIDTH / 2;
+        ScreenHeight = GBUFF_INIT_HEIGHT / 2;
+
+        if (Is_Demo()) {
+            CNC_LOG_INFO("DOS demo data files detected, game will run at 320x200 resolution");
+        } else if (Is_DOS_Files()) {
+            CNC_LOG_INFO("DOS data files detected, game will run at 320x200 resolution");
+        } else {
+            CNC_LOG_INFO("DOS mode flag set in CONQUER.INI, game will run at 320x200 resolution");
+        }
+
+        Set_Current_Resolution_Mode(MODE_DOS);
+    } else if (Settings.Video.Width < GBUFF_INIT_WIDTH || Settings.Video.Height < GBUFF_INIT_HEIGHT) {
+        CNC_LOG_ERROR(
+            "CONQUER.INI resolution '{}x{}' is too small, minimum of {}x{} is supported. Falling back to default",
+            Settings.Video.Width,
+            Settings.Video.Height,
+            GBUFF_INIT_WIDTH,
+            GBUFF_INIT_HEIGHT
+        );
+
+        Set_Current_Resolution_Mode(MODE_DEFAULT);
+    } else if (Settings.Video.Width == GBUFF_INIT_WIDTH || Settings.Video.Height == GBUFF_INIT_HEIGHT) {
+        CNC_LOG_INFO("Default resolution set, game will run in {}x{}", GBUFF_INIT_WIDTH, GBUFF_INIT_HEIGHT);
+
+        Set_Current_Resolution_Mode(MODE_DEFAULT);
+    } else if (Settings.Video.Width > GBUFF_INIT_WIDTH || Settings.Video.Height > GBUFF_INIT_HEIGHT) {
+        CNC_LOG_INFO(
+            "Custom resolution set in CONQUER.INI, game will run at '{}x{}'",
+            Settings.Video.Width,
+            Settings.Video.Height
+        );
+
+        // adjust game resolution to custom mode
+        ScreenWidth = Settings.Video.Width;
+        ScreenHeight = Settings.Video.Height;
+
+        Set_Current_Resolution_Mode(MODE_HIGH_RES);
+    }
 }

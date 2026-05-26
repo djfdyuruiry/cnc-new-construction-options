@@ -163,6 +163,27 @@ public:
         return (Array.ID(ptr));
     };
 
+    /**
+     * Based on the current view dimensions, is the map width smaller than the screen width?
+     *
+     * If the sidebar is active, this is taken into account as the reduced horizontal resolution
+     * may make the map larger than the screen width.
+     */
+    bool Is_Width_Smaller_Than_Screen() const;
+
+    /**
+     * Based on the current view dimensions, is the map height smaller than the screen height?
+     */
+    bool Is_Height_Smaller_Than_Screen() const;
+
+    /**
+     * Based on the current view dimensions, is the map smaller than the screen resolution?
+     *
+     * If the sidebar is active, this is taken into account as the reduced horizontal resolution
+     * may make the map larger than the screen.
+     */
+    bool Is_Smaller_Than_Screen() const;
+
 protected:
     /*
     **	This is the array of cell objects.

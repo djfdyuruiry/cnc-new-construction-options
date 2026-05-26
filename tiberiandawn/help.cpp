@@ -417,16 +417,21 @@ FROM_JSON(HelpClass)
 {
     BASE_CLASS_FROM_JSON(TabClass);
 
-    FIELD_FROM_JSON(HelpX);
-    FIELD_FROM_JSON(HelpY);
-    FIELD_FROM_JSON(HelpWidth);
+    // TODO: changing this will prevent help text being preserved in save, this is probably OK
+
+    FIELD_FROM_JSON(HelpX);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(HelpY);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(HelpWidth);  // TODO: Remove and test, as it is calculated from resolution?
     BITFIELD_FROM_JSON(IsRight);
     FIELD_FROM_JSON(Cost);
-    FIELD_FROM_JSON(X);
-    FIELD_FROM_JSON(Y);
-    FIELD_FROM_JSON(DrawX);
-    FIELD_FROM_JSON(DrawY);
-    FIELD_FROM_JSON(Width);
+    FIELD_FROM_JSON(X);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(Y);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(DrawX);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(DrawY);  // TODO: Remove and test, as it is calculated from resolution?
+    FIELD_FROM_JSON(Width);  // TODO: Remove and test, as it is calculated from resolution
     FIELD_FROM_JSON(Text);
     FIELD_FROM_JSON(Color);
+
+    // ensure calculated constants are correct for current resolution
+    p.One_Time(true);
 }
