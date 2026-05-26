@@ -2447,36 +2447,6 @@ void DisplayClass::Draw_It(bool forced)
             LogicPage->Draw_Rect(BandX + TacPixelX, BandY + TacPixelY, NewX + TacPixelX, NewY + TacPixelY, WHITE);
         }
 
-        // If we are not in editor mode and resolution is larger than map size, fill areas outside the map in black
-        if (!Debug_Map && Is_Smaller_Than_Screen()) {
-            if (Map.IsSidebarActive) {
-                // fill all space outside the map, except the sidebar and tabs
-                LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
-                                     Map.Get_Tab_Height(),
-                                     Map.SideX - 1,
-                                     SeenBuff.Get_Height(),
-                                     TBLACK);
-
-                LogicPage->Fill_Rect(0,
-                                     MapCellHeight * CELL_PIXEL_H,
-                                     Map.SideX - 1,
-                                     SeenBuff.Get_Height(),
-                                     TBLACK);
-            } else {
-                // fill all space outside the map, except the tabs
-                LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
-                                     Map.Get_Tab_Height(),
-                                     SeenBuff.Get_Width(),
-                                     SeenBuff.Get_Height(),
-                                     TBLACK);
-                LogicPage->Fill_Rect(0,
-                                     MapCellHeight * CELL_PIXEL_H,
-                                     SeenBuff.Get_Width(),
-                                     SeenBuff.Get_Height(),
-                                     TBLACK);
-            }
-        }
-
         /*
         **	Clear the redraw flags so that normal redraw flag setting can resume.
         */
@@ -2682,6 +2652,53 @@ void DisplayClass::Redraw_Shadow_Rects(void)
                     }
                 }
             }
+        }
+    }
+
+    if (Debug_Map || !Is_Smaller_Than_Screen()) {
+        return;
+    }
+
+    /*
+     * If we are not in editor mode and resolution is larger than map size, fill visible areas outside the map with
+     * shadow
+     */
+
+    if (Map.IsSidebarActive) {
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 Map.Get_Tab_Height(),
+                                 Map.SideX - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 Map.SideX - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+    } else {
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 Map.Get_Tab_Height(),
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
         }
     }
 }

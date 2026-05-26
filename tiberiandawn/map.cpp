@@ -2079,14 +2079,33 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 
 #endif // USE_RA_AI
 
+bool MapClass::Is_Width_Smaller_Than_Screen() const
+{
+#ifdef REMASTER_BUILD
+    // disable small map detection in remaster
+    return false;
+#else
+    return (Map.IsSidebarActive ? Map.SideBarWidth : 0) + MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width();
+#endif
+}
+
+bool MapClass::Is_Height_Smaller_Than_Screen() const
+{
+#ifdef REMASTER_BUILD
+    // disable small map detection in remaster
+    return false;
+#else
+    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+#endif
+}
+
 bool MapClass::Is_Smaller_Than_Screen() const
 {
 #ifdef REMASTER_BUILD
     // disable small map detection in remaster
     return false;
 #else
-    return MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width()
-        && MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+    return Is_Width_Smaller_Than_Screen() || Is_Height_Smaller_Than_Screen();
 #endif
 }
 
