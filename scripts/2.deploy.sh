@@ -45,8 +45,10 @@ function main() {
   cp -rfv "${build_output}"/* "${target_dir}"
   mv -f "/tmp/$(basename "${binary}")" "${build_output}"
 
-  log_info "Deploying Lua Binaries"
-  cp -fv "${build_path}/${cmake_preset}/vcpkg_installed"/*/tools/lua/* "${target_dir}/lua"
+  if [ -d "${target_dir}/lua" ]; then
+    log_info "Deploying Lua Binaries"
+    cp -fv "${build_path}/${cmake_preset}/vcpkg_installed"/*/tools/lua/* "${target_dir}/lua"
+  fi
 
   deploy_test_files
 
