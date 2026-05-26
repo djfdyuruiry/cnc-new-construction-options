@@ -35,11 +35,6 @@
 #include "function.h"
 #include "common/framelimit.h"
 
-#define OPTION_WIDTH  236
-#define OPTION_HEIGHT 162
-#define OPTION_X      ((320 - OPTION_WIDTH) / 2)
-#define OPTION_Y      (200 - OPTION_HEIGHT) / 2
-
 void Special_Dialog(void)
 {
     SpecialClass oldspecial = Special;
@@ -65,14 +60,20 @@ void Special_Dialog(void)
         {TXT_SHOW_NAMES, 0, 0},
     };
 
-    TextButtonClass ok(200, TXT_OK, TPF_6PT_GRAD | TPF_NOSHADOW, OPTION_X + 5, OPTION_Y + OPTION_HEIGHT - 15);
+    const auto factor = Get_Resolution_Factor();
+    const auto option_width = factor == 0 ? 236 : 320;
+    const auto option_height = factor == 0 ? 162 : 220;
+    const auto option_x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - option_width) / 2;
+    const auto option_y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - option_height) / 2;
+
+    TextButtonClass ok(200, TXT_OK, TPF_6PT_GRAD | TPF_NOSHADOW, option_x + (factor == 0 ? 5 : 10), option_y + option_height - (factor == 0 ? 15 : 25));
     TextButtonClass cancel(
-        201, TXT_CANCEL, TPF_6PT_GRAD | TPF_NOSHADOW, OPTION_X + OPTION_WIDTH - 50, OPTION_Y + OPTION_HEIGHT - 15);
+        201, TXT_CANCEL, TPF_6PT_GRAD | TPF_NOSHADOW, option_x + option_width - (factor == 0 ? 50 : 55), option_y + option_height - (factor == 0 ? 15: 25));
     buttons = &ok;
     cancel.Add(*buttons);
     int index;
     for (index = 0; index < sizeof(_options) / sizeof(_options[0]); index++) {
-        _options[index].Button = new CheckBoxClass(100 + index, OPTION_X + 7, OPTION_Y + 20 + (index * 10));
+        _options[index].Button = new CheckBoxClass(100 + index, option_x + (factor == 0 ? 7 : 10), option_y + (factor == 0 ? 20 : 30) + (index * (factor == 0 ? 10 : 16)));
         if (_options[index].Button) {
             _options[index].Button->Add(*buttons);
 
@@ -168,13 +169,13 @@ void Special_Dialog(void)
             display = false;
 
             Hide_Mouse();
-            Dialog_Box(OPTION_X, OPTION_Y, OPTION_WIDTH, OPTION_HEIGHT);
-            Draw_Caption(TXT_SPECIAL_OPTIONS, OPTION_X, OPTION_Y, OPTION_WIDTH);
+            Dialog_Box(option_x, option_y, option_width, option_height);
+            Draw_Caption(TXT_SPECIAL_OPTIONS, option_x, option_y, option_width);
 
             for (index = 0; index < sizeof(_options) / sizeof(_options[0]); index++) {
                 Fancy_Text_Print(_options[index].Description,
-                                 _options[index].Button->X + 10,
-                                 _options[index].Button->Y,
+                                 _options[index].Button->X + (factor == 0 ? 10 : 13),
+                                 _options[index].Button->Y + (factor == 0 ? 0 : -2),
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -283,8 +284,8 @@ int Fetch_Difficulty(void)
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     int const w = 250 * factor;
     int const h = 70 * factor;
-    int const x = ((320 * factor) / 2) - w / 2;
-    int const y = ((200 * factor) / 2) - h / 2;
+    int const x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) / 2) - w / 2;
+    int const y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) / 2) - h / 2;
     int const bwidth = 30 * factor;
 
     /*
