@@ -53,13 +53,17 @@
 int CheckBoxClass::Draw_Me(int forced)
 {
     if (ToggleClass::Draw_Me(forced)) {
-
         Hide_Mouse();
-        Draw_Box(X, Y, Width, Height, BOXSTYLE_GREEN_DOWN, false);
-        LogicPage->Fill_Rect(X + 1, Y + 1, X + Width - 2, Y + Height - 2, DKGREY);
+
+        const auto factor = Get_Resolution_Factor();
+        const auto width = factor == 0 ? Width : Width + 3;
+        const auto height = factor == 0 ? Height : Height + 3;
+
+        Draw_Box(X, Y, width, height, BOXSTYLE_GREEN_DOWN, false);
+        LogicPage->Fill_Rect(X + 1, Y + 1, X + width - 2, Y + height - 2, DKGREY);
         if (IsOn) {
-            LogicPage->Draw_Line(X + 1, Y + 1, X + Width - 2, Y + Height - 2, BLACK);
-            LogicPage->Draw_Line(X + Width - 2, Y + 1, X + 1, Y + Height - 2, BLACK);
+            LogicPage->Draw_Line(X + 1, Y + 1, X + width - 2, Y + height - 2, BLACK);
+            LogicPage->Draw_Line(X + width - 2, Y + 1, X + 1, Y + height - 2, BLACK);
         }
         Show_Mouse();
         return (true);

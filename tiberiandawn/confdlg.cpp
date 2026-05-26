@@ -80,8 +80,8 @@ bool ConfirmationClass::Process(char const* string)
     Format_Window_String(buffer, 200 * factor, width, height);
     width += 60 * factor;
     height += 60 * factor;
-    int x = (320 * factor - width) / 2;
-    int y = (200 * factor - height) / 2;
+    int x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - width) / 2;
+    int y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - height) / 2;
 
     Set_Logic_Page(SeenBuff);
 

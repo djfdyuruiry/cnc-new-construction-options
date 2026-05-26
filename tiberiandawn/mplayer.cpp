@@ -82,9 +82,8 @@ GameType Select_MPlayer_Game(void)
     ........................................................................*/
     int d_dialog_w = 190 * factor;
     int d_dialog_h = 26 * 4 * factor;
-    int d_dialog_x = ((320 * factor - d_dialog_w) / 2);
-    //	d_dialog_y = ((200 - d_dialog_h) / 2),
-    int d_dialog_y = ((136 * factor - d_dialog_h) / 2);
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) / 2);
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) / 2);
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);
 
     int d_txt6_h = 11 * factor;
@@ -891,8 +890,8 @@ int Surrender_Dialog(void)
     ........................................................................*/
     int d_dialog_w = 170 * factor;                      // dialog width
     int d_dialog_h = 53 * factor;                       // dialog height
-    int d_dialog_x = ((320 * factor - d_dialog_w) / 2); // centered x-coord
-    int d_dialog_y = ((200 * factor - d_dialog_h) / 2); // centered y-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) / 2); // centered x-coord
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);    // coord of x-center
 
     int d_txt6_h = 6 * factor + 1; // ht of 6-pt text
