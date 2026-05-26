@@ -653,9 +653,11 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     Call_Back();
 
     /**
-     * Lua rabbit hole
+     * Lua rabbit hole (if not in scenario editor mode)
      */
-    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini);
+    if (!Debug_Map) {
+        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini);
+    }
 
     /*
     **	Return with flag saying that the scenario file was read.
