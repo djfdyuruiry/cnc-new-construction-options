@@ -78,19 +78,7 @@
     <None Update="tools\runtimes\linux-x64\native\nco.desktop" Link="tools\nco.desktop" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\runtimes\linux-x64\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == ''">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(RuntimeIdentifier)' == ''">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Condition="'$(RuntimeIdentifier)' == ''">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tools\runtimes\linux-x64\native\nco.desktop" Condition="'$(RuntimeIdentifier)' == ''">
+    <None Update="tools\runtimes\linux-x64\native\nco-launcher.desktop" Link="tools\nco-launcher.desktop" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config.yml">
@@ -99,7 +87,29 @@
     <None Update="config.yml.schema.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\runtimes\linux-x64\native\nco-launcher.desktop">
+  </ItemGroup>
+
+  <!-- Duplicate tool files needed for debug builds -->
+  <ItemGroup>
+    <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\bin2iso" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco.desktop" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-launcher.desktop" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

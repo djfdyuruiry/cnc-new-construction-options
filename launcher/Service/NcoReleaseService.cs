@@ -271,6 +271,7 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
     }
   }
 
+  [SupportedOSPlatform("macos")]
   private async Task DownloadMacOsLauncher(IDownloadEventVisitor eventVisitor)
   {
     await WithNcoArchive(
