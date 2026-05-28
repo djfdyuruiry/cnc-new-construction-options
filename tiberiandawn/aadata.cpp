@@ -360,8 +360,6 @@ AircraftTypeClass::AircraftTypeClass(AircraftType airtype,
     Type = airtype;
     ROT = rot;
     Mission = deforder;
-    CameoName = cameo_name;
-    ImageName = image_name;
 }
 
 /***********************************************************************************************
