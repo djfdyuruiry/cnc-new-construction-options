@@ -48,6 +48,10 @@
 
 #include <SDL.h>
 
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_sdlrenderer2.h>
+
 extern WWKeyboardClass* Keyboard;
 static SDL_Window* window;
 static SDL_Renderer* renderer;
@@ -55,6 +59,7 @@ static SDL_Palette* palette;
 static Uint32 pixel_format;
 static SDL_Rect render_dst;
 static ResolutionMode CurrentResolutionMode = MODE_DEFAULT;
+static bool show_ui = true;
 
 static struct
 {
@@ -423,6 +428,28 @@ bool Set_Video_Mode(int& w, int& h, int bits_per_pixel)
         Keyboard->Open_Controller();
     }
 
+    /* imgui poc */
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;      // Enable Gamepad Controls
+
+    ImGui::StyleColorsDark();
+
+    // Setup scaling
+    auto& style = ImGui::GetStyle();
+    const auto main_scale = ImGui_ImplSDL2_GetContentScaleForDisplay(display);
+    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+    style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer2_Init(renderer);
+    /**/
+
     return true;
 }
 
@@ -574,6 +601,10 @@ void Reset_Video_Mode(void)
         SDL_FreeSurface(hwcursor.Surface);
         hwcursor.Surface = nullptr;
     }
+
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 
     SDL_DestroyRenderer(renderer);
     renderer = nullptr;
@@ -940,6 +971,23 @@ public:
         }
 
         SDL_RenderCopy(renderer, texture, src_rect.get(), &render_dst);
+
+        // Start the Dear ImGui frame
+        ImGui_ImplSDLRenderer2_NewFrame();
+
+        if (show_ui) {
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
+
+            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+            static bool show_demo_window = true;
+            if (show_demo_window)
+                ImGui::ShowDemoWindow(&show_demo_window);
+
+            ImGui::Render();
+            ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
+        }
+
         SDL_RenderPresent(renderer);
     }
 
@@ -1051,4 +1099,9 @@ void Leave_Zoomed_Resolution_Mode()
     }
 
     Set_Current_Resolution_Mode(MODE_HIGH_RES);
+}
+
+void Toggle_Imgui()
+{
+    show_ui = !show_ui;
 }

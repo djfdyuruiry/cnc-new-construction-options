@@ -21,6 +21,9 @@
 #include <cmath>
 #include <SDL.h>
 
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+
 void Focus_Loss();
 void Focus_Restore();
 void Process_Network();
@@ -38,14 +41,26 @@ void WWKeyboardClassSDL2::Fill_Buffer_From_System(void)
 
     while (!Is_Buffer_Full() && SDL_PollEvent(&event)) {
         unsigned short key;
+
+        ImGui_ImplSDL2_ProcessEvent(&event);
+        ImGuiIO& imgui_io = ImGui::GetIO(); (void)imgui_io;
+
         switch (event.type) {
         case SDL_QUIT:
             exit(0);
             break;
         case SDL_KEYDOWN:
+            if (imgui_io.WantCaptureKeyboard) {
+                break;
+            }
+
             Put_Key_Message(event.key.keysym.scancode, false);
             break;
         case SDL_KEYUP:
+            if (imgui_io.WantCaptureKeyboard) {
+                break;
+            }
+
             if (event.key.keysym.scancode == SDL_SCANCODE_RETURN && Down(VK_MENU)) {
                 Toggle_Video_Fullscreen();
             } else {
@@ -53,10 +68,18 @@ void WWKeyboardClassSDL2::Fill_Buffer_From_System(void)
             }
             break;
         case SDL_MOUSEMOTION:
+            if (imgui_io.WantCaptureMouse) {
+                break;
+            }
+
             Move_Video_Mouse(static_cast<float>(event.motion.xrel), static_cast<float>(event.motion.yrel));
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP: {
+            if (imgui_io.WantCaptureMouse) {
+                break;
+            }
+
             int x, y;
 
             switch (event.button.button) {
@@ -98,6 +121,10 @@ void WWKeyboardClassSDL2::Fill_Buffer_From_System(void)
             }
             break;
         case SDL_MOUSEWHEEL:
+            if (imgui_io.WantCaptureMouse) {
+                break;
+            }
+
             if (event.wheel.y > 0) { // scroll up
                 Put_Key_Message(VK_MOUSEWHEEL_UP, false);
             } else if (event.wheel.y < 0) { // scroll down

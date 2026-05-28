@@ -2,6 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "dependencies": [
     {
+      "name": "imgui",
+      "version>=": "1.92.8",
+      "features": [
+        "sdl2-binding",
+        "sdl2-renderer-binding"
+      ]
+    },
+    {
       "name": "lua",
       "version>=": "5.5.0#1",
       "features": [
@@ -58,6 +66,10 @@
     }
   ],
   "overrides": [
+    {
+      "name": "imgui",
+      "version": "1.92.8"
+    },
     {
       "name": "lua",
       "version": "5.5.0#1"

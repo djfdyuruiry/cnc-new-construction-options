@@ -167,4 +167,6 @@ void Enter_Zoomed_Resolution_Mode();
  */
 void Leave_Zoomed_Resolution_Mode();
 
+void Toggle_Imgui();
+
 #endif // VIDEO_H
