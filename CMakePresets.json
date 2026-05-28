@@ -287,6 +287,19 @@
             ]
         },
         {
+            "name": "tiberian-dawn",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "tiberian-dawn"
+                },
+                {
+                    "type": "build",
+                    "name": "tiberian-dawn"
+                }
+            ]
+        },
+        {
             "name": "tiberian-dawn-debug",
             "steps": [
                 {
@@ -296,6 +309,19 @@
                 {
                     "type": "build",
                     "name": "tiberian-dawn-debug"
+                }
+            ]
+        },
+        {
+            "name": "red-alert",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "red-alert"
+                },
+                {
+                    "type": "build",
+                    "name": "red-alert"
                 }
             ]
         },
