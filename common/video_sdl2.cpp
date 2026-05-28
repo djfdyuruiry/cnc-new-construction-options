@@ -976,6 +976,8 @@ public:
         ImGui_ImplSDLRenderer2_NewFrame();
 
         if (show_ui) {
+            ImGui::GetIO().DisplayFramebufferScale = ImVec2(hwcursor.ScaleX, hwcursor.ScaleY);
+
             ImGui_ImplSDL2_NewFrame();
             ImGui::NewFrame();
 
