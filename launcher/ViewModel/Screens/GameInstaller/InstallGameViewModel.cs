@@ -120,6 +120,10 @@ public class InstallGameViewModel : ScreenViewModelBase
       Nco = ItemToBeInstalled<NewConstructionOptions>.Build(configService.Config.Nco);
       NcoLauncher = ItemToBeInstalled<NewConstructionOptions>.Build(new NewConstructionOptions());
 
+      // don't attempt to install launcher if previously installed
+      // (we might be running that previously installed launcher now)
+      NcoLauncher.Installed = configService.Config.Nco.Installed;
+
       return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)
           .Where(x => x)

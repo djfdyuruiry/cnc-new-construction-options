@@ -38,6 +38,12 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
 
       eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
+  
+    if (configService.Config.Nco.Installed)
+    {
+      // don't reinstall the launcher (we might be running a previously installed launcher now)
+      return;
+    }
 
     // launcher shortcut
     var launcherBinary = configService.Config.Nco.LauncherBinary;
@@ -95,6 +101,12 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
 
+    if (configService.Config.Nco.Installed)
+    {
+      // don't reinstall launcher files (we might be running a previously installed launcher now)
+      return;
+    }
+
     // launcher shortcut
     var launcherTemplate = await File.ReadAllTextAsync(
       Path.Join(pathsConfig.ToolsPath, "nco-launcher.desktop")
@@ -120,6 +132,12 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       var binaryPath = Path.Join(installRoot, game.InstallPostfix, game.PlatformBinary);
 
       File.SetUnixFileMode(binaryPath, File.GetUnixFileMode(binaryPath) | UnixFileMode.UserExecute);
+    }
+
+    if (configService.Config.Nco.Installed)
+    {
+      // don't reconfigure the launcher (we might be running a previously installed launcher now)
+      return;
     }
 
     // launcher binary
@@ -377,7 +395,12 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       {
         await DownloadGameEngineMacOs(eventVisitor);
         eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
-        await DownloadMacOsLauncher(eventVisitor);
+
+        if (!configService.Config.Nco.Installed)
+        {
+          // don't reinstall the launcher (we might be running a previously installed launcher now)
+          await DownloadMacOsLauncher(eventVisitor);
+        }
 
         return;
       }
@@ -395,7 +418,11 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
 
       eventVisitor.Visit(new FinishNcoReleaseDownloadEvent());
 
-      await DownloadLauncher(eventVisitor);
+      if (!configService.Config.Nco.Installed)
+      {
+        // don't reinstall the launcher (we might be running a previously installed launcher now)
+        await DownloadLauncher(eventVisitor);
+      }
     }
     catch (Exception e)
     {
