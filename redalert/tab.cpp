@@ -140,23 +140,31 @@ void TabClass::Draw_Credits_Tab(void)
     ** Use the new sidebar art for 640x400
     */
     if (Options.ToggleSidebar) {
-        CC_Draw_Shape(TabShape,
-                      Map.MoneyFlashTimer > 1 ? 5 : 2,
-                      (320 - (EVA_WIDTH * 2)) * RESFACTOR,
-                      0,
-                      WINDOW_MAIN,
-                      SHAPE_NORMAL);
+        CC_Draw_Shape(
+            TabShape,
+            Map.MoneyFlashTimer > 1 ? 5 : 2,
+            RESFACTOR == 1 ? 320 - (EVA_WIDTH * 2) : SeenBuff.Get_Width() - (EVA_WIDTH * 4),
+            0,
+            WINDOW_MAIN,
+            SHAPE_NORMAL
+        );
     } else {
         CC_Draw_Shape(
-            TabShape, Map.MoneyFlashTimer > 1 ? 8 : 6, (320 - EVA_WIDTH) * RESFACTOR, 0, WINDOW_MAIN, SHAPE_NORMAL);
+            TabShape,
+            Map.MoneyFlashTimer > 1 ? 8 : 6,
+            RESFACTOR == 1 ? (320 - EVA_WIDTH) : SeenBuff.Get_Width() - EVA_WIDTH * 2,
+            0,
+            WINDOW_MAIN,
+            SHAPE_NORMAL
+        );
     }
 
     if (Scen.MissionTimer.Is_Active()) {
         bool light = ((int)Scen.MissionTimer < TICKS_PER_MINUTE * Rule.TimerWarning) || Map.FlasherTimer > 0;
         if (Options.ToggleSidebar) {
-            CC_Draw_Shape(TabShape, light ? 4 : 2, (320 - (EVA_WIDTH * 3)) * RESFACTOR, 0, WINDOW_MAIN, SHAPE_NORMAL);
+            CC_Draw_Shape(TabShape, light ? 4 : 2, RESFACTOR == 1 ? (320 - (EVA_WIDTH * 3)) : EVA_WIDTH * 2, 0, WINDOW_MAIN, SHAPE_NORMAL);
         } else {
-            CC_Draw_Shape(TabShape, light ? 4 : 2, (320 - (EVA_WIDTH * 2)) * RESFACTOR, 0, WINDOW_MAIN, SHAPE_NORMAL);
+            CC_Draw_Shape(TabShape, light ? 4 : 2, RESFACTOR == 1 ? (320 - (EVA_WIDTH * 2)) : EVA_WIDTH * 2, 0, WINDOW_MAIN, SHAPE_NORMAL);
         }
     }
 }
@@ -226,10 +234,12 @@ void TabClass::AI(KeyNumType& input, int x, int y)
         if (ok) {
             if (input == KN_LMOUSE) {
                 int sel = -1;
+                const auto side_x = RESFACTOR == 1 ? SIDE_X : SeenBuff.Get_Width() - (640 - (SIDE_X * 2));
+
                 if (x < EVA_WIDTH * RESFACTOR)
                     sel = 0;
                 if (Options.ToggleSidebar) {
-                    if (x > (320 - 80) * RESFACTOR)
+                    if (x >= side_x)
                         sel = 1;
                 }
                 if (sel >= 0) {

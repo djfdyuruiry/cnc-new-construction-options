@@ -398,6 +398,9 @@ bool Start_Scenario(char* name, bool briefing)
         while (Get_Mouse_State()) {
             Show_Mouse();
         }
+
+        Leave_Zoomed_Resolution_Mode();
+
         Restate_Mission(Scen.ScenarioName, TXT_OK, TXT_NONE);
     }
 #endif
@@ -407,6 +410,7 @@ bool Start_Scenario(char* name, bool briefing)
         VisiblePage.Clear();
         Show_Mouse();
         Play_Movie(Scen.ActionMovie, Scen.TransitTheme);
+        Leave_Zoomed_Resolution_Mode();
     }
 
     if (Scen.TransitTheme == THEME_NONE) {

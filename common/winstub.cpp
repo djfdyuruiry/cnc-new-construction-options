@@ -45,13 +45,15 @@ void Load_Title_Screen(const char* name, GraphicViewPortClass* video_page, unsig
 {
     GraphicBufferClass* load_buffer;
     const char* ext = strrchr(name, '.');
+    int width = 640;
+    int height = 400;
 
     if (!strcasecmp(ext, ".PCX"))
         load_buffer = Read_PCX_File(name, (char*)palette, NULL, 0); // Load 640x400 title
     else if (!strcasecmp(ext, ".CPS")) {
         /* CPS files are hardcoded to 320x200. */
-        const int width = 320;
-        const int height = 200;
+        width = 320;
+        height = 200;
 
         load_buffer = new GraphicBufferClass(width, height, NULL, width * (height + 4));
         Load_Uncompress(name, *load_buffer, *load_buffer, palette);
@@ -61,7 +63,12 @@ void Load_Title_Screen(const char* name, GraphicViewPortClass* video_page, unsig
     }
 
     if (load_buffer) {
-        load_buffer->Blit(*video_page);
+        // blit, centering the title screen on the display
+        load_buffer->Blit(
+            *video_page,
+            Try_Get_Resolution_Mode_Width().value_or(video_page->Get_Width()) / 2 - (width / 2),
+            Try_Get_Resolution_Mode_Height().value_or(video_page->Get_Height()) / 2 - (height / 2)
+        );
         delete load_buffer;
     }
 }
