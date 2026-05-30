@@ -635,6 +635,8 @@ bool Load_Game(const char* file_name)
     */
     Clear_Scenario();
 
+    Leave_Zoomed_Resolution_Mode();
+
     /*
     **	Load the scenario global information.
     */
@@ -817,8 +819,6 @@ bool Load_Game(const char* file_name)
 
     file.Close();
     Decode_All_Pointers();
-
-    Leave_Zoomed_Resolution_Mode();
     Map.Init_IO();
     Map.Flag_To_Redraw(true);
 

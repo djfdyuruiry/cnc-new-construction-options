@@ -215,9 +215,7 @@ void SidebarClass::One_Time(const bool on_save)
     SidebarClass::Background.Width = (int)((int)SIDE_WIDTH - 1) * RESFACTOR - 1;
     SidebarClass::Background.Height = (int)((int)SIDE_HEIGHT - 1) * RESFACTOR;
 
-    if (!on_save) {
-        PowerClass::One_Time();
-    }
+    PowerClass::One_Time(on_save);
 
     /*
     **	This sets up the clipping window. This window is used by the shape drawing

@@ -130,9 +130,9 @@ void PowerClass::Init_Clear(void)
  * HISTORY:                                                                                    *
  *   12/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void PowerClass::One_Time(void)
+void PowerClass::One_Time(const bool on_save)
 {
-    RadarClass::One_Time();
+    RadarClass::One_Time(on_save);
 
     bool dosmode = (RESFACTOR == 1);
     POWER_Y = (dosmode) ? (88 + 9) : (7 + 70 + 13);
@@ -141,6 +141,11 @@ void PowerClass::One_Time(void)
     PowerButton.Y = POWER_Y * RESFACTOR;
     PowerButton.Width = (POWER_WIDTH * RESFACTOR) - 1;
     PowerButton.Height = POWER_HEIGHT * RESFACTOR;
+
+    if (on_save) {
+        return;
+    }
+
     PowerShape = MFCD::Retrieve("POWER.SHP");
     PowerBarShape = MFCD::Retrieve("POWERBAR.SHP");
 }
