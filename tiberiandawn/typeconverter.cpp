@@ -87,7 +87,8 @@ const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(ScenarioPlayerType,           "SCEN_PLAYER_", SCEN_PLAYER_NONE,                       SCEN_PLAYER_LAST,                         {},                  {},                  false),
     ENUM_TYPE_PAIR(LayerType,                    "LAYER_",       LAYER_NONE,                             LAYER_LAST,                               {},                  {},                  false),
     ENUM_TYPE_PAIR(UrgencyType,                  "URGENCY_",     URGENCY_NONE,                           URGENCY_FIRST,                            {},                  {},                  false),
-    ENUM_TYPE_PAIR(CCPaletteType,                "CC_",          static_cast<CCPaletteType>(TBLACK),     static_cast<CCPaletteType>(WHITE),        CCPalettePatchTable, {},                  false)
+    ENUM_TYPE_PAIR(CCPaletteType,                "CC_",          static_cast<CCPaletteType>(TBLACK),     static_cast<CCPaletteType>(WHITE),        CCPalettePatchTable, {},                  false),
+    ENUM_TYPE_PAIR(GameType,                     "GAME_",        GAME_NORMAL,                            GAME_GLYPHX_MULTIPLAYER,                  {},                  {},                  false)
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(
@@ -185,6 +186,7 @@ void TdTypeConverter::Set_Rule_With_Variant(
     RULE_VARIANT(LayerType)
     RULE_VARIANT(UrgencyType)
     RULE_VARIANT(CCPaletteType)
+    RULE_VARIANT(GameType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -251,6 +253,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(
     CSV_RULE_VARIANT(LayerType)
     CSV_RULE_VARIANT(UrgencyType)
     CSV_RULE_VARIANT(CCPaletteType)
+    CSV_RULE_VARIANT(GameType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -310,6 +313,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVaria
     TYPE_NAME_VARIANT(LayerType)
     TYPE_NAME_VARIANT(UrgencyType)
     TYPE_NAME_VARIANT(CCPaletteType)
+    TYPE_NAME_VARIANT(GameType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -370,6 +374,7 @@ std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& varia
     TO_STRING_VARIANT(LayerType)
     TO_STRING_VARIANT(UrgencyType)
     TO_STRING_VARIANT(CCPaletteType)
+    TO_STRING_VARIANT(GameType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }

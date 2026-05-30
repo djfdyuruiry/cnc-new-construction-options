@@ -370,6 +370,7 @@ bool Load_Game(const char* file_name)
     // we are about to load a scenario, which means the FROM_JSON methods will run and some of these call
     // TabClass::One_Time and it's associated base class methods - these depend on the excepted resolution being set to
     // calculate constants correctly, so zoom out
+    const auto resolution_mode = Get_Current_Resolution_Mode();
     Leave_Zoomed_Resolution_Mode();
     Call_Back();
 
@@ -381,6 +382,7 @@ bool Load_Game(const char* file_name)
 #endif
 
     if (!save_header.has_value()) {
+        Set_Current_Resolution_Mode(resolution_mode);
         return false;
     }
 
@@ -412,6 +414,7 @@ bool Load_Game(const char* file_name)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
+        Set_Current_Resolution_Mode(resolution_mode);
         Raise_Fatal_CD_Error(NAMEOF(Load_Game), RequiredCD);
         return false;
     }
@@ -449,6 +452,17 @@ bool Load_Game(const char* file_name)
     Call_Back();
 
     Fixup_Scenario();
+
+    if (GameToPlay != GAME_NORMAL) {
+        for (auto index = 0; index < Houses.Count(); index++) {
+            const auto house_ptr = Houses.Ptr(index);
+            const auto house_type = house_ptr->Class->House;
+
+            if (house_type >= HOUSE_MULTI1 && house_type <= HOUSE_MULTI6) {
+                house_ptr->Init_Data(house_ptr->RemapColor, house_ptr->ActLike, house_ptr->Credits);
+            }
+        }
+    }
 
     Load_INI_Rules_And_Lua();
 
@@ -557,6 +571,7 @@ bool Load_Game_Binary(const char* file_name)
 
     // we are about to load a scenario, which means Map.Load will call TabClass::One_Time and the base class methods
     // - these depend on the excepted resolution being set to calculate constants correctly, so zoom out
+    const auto resolution_mode = Get_Current_Resolution_Mode();
     Leave_Zoomed_Resolution_Mode();
 
     Call_Back();
@@ -583,6 +598,7 @@ bool Load_Game_Binary(const char* file_name)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
+        Set_Current_Resolution_Mode(resolution_mode);
         Raise_Fatal_CD_Error(NAMEOF(Load_Game_Binary), RequiredCD);
         return false;
     }
@@ -606,6 +622,7 @@ bool Load_Game_Binary(const char* file_name)
         || !Overlays.Load(file) || !Smudges.Load(file) || !Templates.Load(file) || !Terrains.Load(file)
         || !Units.Load(file) || !Factories.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -615,11 +632,13 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Logic.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
     for (i = 0; i < LAYER_COUNT; i++) {
         if (!Map.Layer[i].Load(file)) {
             file.Close();
+            Set_Current_Resolution_Mode(resolution_mode);
             return (false);
         }
     }
@@ -630,6 +649,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Score.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -638,6 +658,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Base.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -646,6 +667,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Load_Misc_Values(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -1270,7 +1292,7 @@ void Decode_All_Pointers_Binary()
  * HISTORY:                                                                *
  *   01/12/1995 BR : Created.                                              *
  *=========================================================================*/
-bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep)
+bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep, GameType& game_type)
 {
     const auto file_name = std::format("SAVEGAME.{:03d}", id);
 
@@ -1286,6 +1308,8 @@ bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& ho
     housep = header->Parse_Player_House_Type();
 
     strcpy(buf, header->Description.c_str());
+
+    game_type = header->Parse_Game_Type();
 
     return true;
 }

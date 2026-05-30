@@ -629,8 +629,9 @@ void LoadOptionsClass::Fill_List(ListClass* list)
             /*
             ** get the game's info; if success, add it to the list
             */
+            auto game_type = GAME_NORMAL;
             bool ok = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
-                ? Get_Savefile_Info(id, descr, scenario, house)
+                ? Get_Savefile_Info(id, descr, scenario, house, game_type)
                 : Get_Savefile_Info_Binary(id, descr, &scenario, &house);
 
             fdata = new FileEntryClass;
@@ -639,7 +640,9 @@ void LoadOptionsClass::Fill_List(ListClass* list)
             if (!ok) {
                 strcpy(fdata->Descr, Text_String(TXT_OLD_GAME));
             } else {
-                if (house == HOUSE_BAD) {
+                if (game_type == GAME_SKIRMISH) {
+                    sprintf(fdata->Descr, "%s", "(Skirmish)");
+                } else if (house == HOUSE_BAD) {
                     sprintf(fdata->Descr, "(%s) ", Text_String(TXT_N_O_D));
                 } else {
                     sprintf(fdata->Descr, "(%s) ", Text_String(TXT_G_D_I));

@@ -17,6 +17,7 @@
 class SaveGameScenarioState_v1
 {
 public:
+
     // ini file values
 
     int ScenarioNumber;
@@ -49,7 +50,7 @@ public:
     nlohmann::json Views;
 
     void Read_Globals();
-    bool Validate() const;
+    bool Validate(GameType scenario_game_type) const;
     ScenarioDirType Parse_Scenario_Direction() const;
     ScenarioVarType Parse_Scenario_Variation() const;
     bool Write_Globals() const;
@@ -238,7 +239,7 @@ public:
 
     bool Load_From_File(const std::string& path);
     void Read_Globals();
-    bool Validate() const;
+    bool Validate(GameType scenario_game_type) const;
     bool Write_Globals() const;
     void Dump_Json(std::string& output) const;
     bool To_File(CDFileClass& save_file, const SaveGameHeader& header) const;

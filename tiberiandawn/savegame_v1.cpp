@@ -31,7 +31,7 @@ void SaveGameScenarioState_v1::Read_Globals()
     Views = Scen.Views;
 }
 
-bool SaveGameScenarioState_v1::Validate() const
+bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
 {
     auto result = true;
 
@@ -57,6 +57,12 @@ bool SaveGameScenarioState_v1::Validate() const
     for (const auto& [field, value] : stringFields) {
         const auto bufferSize = GlobalBufferSizes.at(field);
 
+        if (scenario_game_type == GAME_SKIRMISH && field == NAMEOF(BriefText)) {
+            // don't validate briefing text for Skirmish scenarios
+            continue;
+        }
+
+        // BriefText is blank in Skirmish scenarios
         if (CncStringUtils::Is_Blank(value)) {
             CNC_LOGGER_ERROR("Blank/missing ScenarioState.{} save game value", field);
 
@@ -147,7 +153,7 @@ ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
 
 bool SaveGameScenarioState_v1::Write_Globals() const
 {
-    if (!Validate()) {
+    if (!Validate(GameToPlay)) {
         CNC_LOGGER_ERROR("Refusing to write globals from invalid save data");
         return false;
     }
@@ -299,9 +305,11 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
     // open file stream
     auto save_file_stream = std::ifstream(full_path);
 
-    // read header (discarded)
+    // read header
     SaveGameHeader header;
-    SaveGameHeader::From_Stream(save_file_stream, header);
+    if (!SaveGameHeader::From_Stream(save_file_stream, header)) {
+        return false;
+    }
 
     // read SaveGame JSON
     std::string save_line;
@@ -318,7 +326,7 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
     try {
         from_json(nlohmann::json::parse(save_line), *this);
 
-        return Validate();
+        return Validate(header.Parse_Game_Type());
     } catch (const CncJsonException& e) {
         error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
@@ -350,11 +358,11 @@ void SaveGame_v1::Read_Globals()
 #endif
 }
 
-bool SaveGame_v1::Validate() const
+bool SaveGame_v1::Validate(const GameType scenario_game_type) const
 {
     auto result = true;
 
-    result = ScenarioState.Validate() && result;
+    result = ScenarioState.Validate(scenario_game_type) && result;
     result = Objects.Validate() && result;
 
     if (!GameCellTriggers.is_object()) {
@@ -454,7 +462,7 @@ bool SaveGame_v1::Validate() const
 
 bool SaveGame_v1::Write_Globals() const
 {
-    if (!Validate()) {
+    if (!Validate(GameToPlay)) {
         CNC_LOGGER_ERROR("Refusing to write to globals from invalid save data");
         return false;
     }
@@ -496,7 +504,7 @@ bool SaveGame_v1::To_File(CDFileClass& save_file, const SaveGameHeader& header) 
         return false;
     }
 
-    if (!header.Validate() || !Validate()) {
+    if (!header.Validate() || !Validate(header.Parse_Game_Type())) {
         save_file.Delete();
         return false;
     }

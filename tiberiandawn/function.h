@@ -627,7 +627,7 @@ int Create_Air_Reinforcement(HouseClass* house,
 */
 bool Load_Misc_Values(FileClass& file);
 bool Save_Misc_Values(FileClass& file);
-bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep);
+bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep, GameType& game_type);
 bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* housep);
 bool Load_Game(int id);
 bool Load_Game(const char* file_name);

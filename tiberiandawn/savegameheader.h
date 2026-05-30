@@ -16,6 +16,7 @@ public:
     static constexpr char LINE_SEPERATOR = '\n';
 
     std::string Version;
+    std::string ScenarioGameType;
     int ScenarioID;
     std::string PlayerHouseType;
     std::string PlayerType;
@@ -28,12 +29,21 @@ public:
     bool Validate() const;
     bool Write_Globals() const;
 
+    GameType Parse_Game_Type() const;
     HousesType Parse_Player_House_Type() const;
     ScenarioPlayerType Parse_Player_Type() const;
 
     void Dump_Json(std::string& output) const;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SaveGameHeader, Version, ScenarioID, PlayerHouseType, PlayerType, Description)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        SaveGameHeader,
+        Version,
+        ScenarioGameType,
+        ScenarioID,
+        PlayerHouseType,
+        PlayerType,
+        Description
+    )
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameHeader);
