@@ -63,6 +63,9 @@ void Load_Title_Screen(const char* name, GraphicViewPortClass* video_page, unsig
     }
 
     if (load_buffer) {
+        // fill screen with black, to redraw any areas outside the background image used in previous screen
+        video_page->Fill_Rect(0, 0, video_page->Get_Width(), video_page->Get_Height(), TBLACK);
+
         // blit, centering the title screen on the display
         load_buffer->Blit(
             *video_page,
