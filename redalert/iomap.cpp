@@ -297,10 +297,8 @@ bool MouseClass::Load(Straw& file)
     // ensure calculated constants are correct for current resolution
     SidebarClass::One_Time();
 
-    // re-init map view, if needed
-    if (Is_Smaller_Than_Screen()) {
-        Set_View_Dimensions(0, 8 * RESFACTOR);
-    }
+    // re-init map view
+    Set_View_Dimensions(0, 8 * RESFACTOR);
 
     return (true);
 }
