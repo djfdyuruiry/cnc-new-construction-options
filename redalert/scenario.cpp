@@ -1241,7 +1241,6 @@ void Do_Lose(void)
     Show_Mouse();
 
     if (Map.Is_Smaller_Than_Screen()) {
-        // BUG: Re-init map view to fix map rendering for small maps (looks glitchy on screen)
         Map.Set_View_Dimensions(0, 8 *RESFACTOR);
         Map.Flag_To_Redraw(true);
         Map.Render();
