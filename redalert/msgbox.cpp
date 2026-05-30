@@ -139,8 +139,8 @@ int WWMessageBox::Process(const char* msg, const char* b1txt, const char* b2txt,
     width += 40 * RESFACTOR;
     height += (numbuttons == 0) ? (40 * RESFACTOR) : (60 * RESFACTOR);
 
-    int x = (SeenBuff.Get_Width() - width) / 2;
-    int y = (SeenBuff.Get_Height() - height) / 2;
+    int x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - width) / 2;
+    int y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - height) / 2;
     int printx = x + (20 * RESFACTOR);
 
     /*
