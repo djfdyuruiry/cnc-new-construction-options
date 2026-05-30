@@ -1,6 +1,6 @@
 # Hi-Resolution Support Documentation
 
-This is the complete documentation for high resolution support added to the NCO Command & Conquer engine, allowing running Tiberian Dawn at resolutions higher than 640x400.
+This is the complete documentation for high resolution support added to the NCO Command & Conquer engine, allowing running Tiberian Dawn and Red Alert at resolutions higher than 640x400.
 
 ## Background
 
@@ -20,6 +20,10 @@ This is the complete documentation for high resolution support added to the NCO 
 
 See: [video_sdl2.cpp](../../common/video_sdl2.cpp) and [video.h](../../common/video.h)
 
+The below diagram shows how the video backend is used from Tiberian Dawn/Red Alert:
+
+![Common Library Video Calls](common-lib.drawio.png)
+
 ### Resolution Modes
 
 Internally the SDL2 backend uses an enum to set the 'mode' which drives how then window is initialized and resolution configured:
@@ -38,10 +42,6 @@ Resolution settings are stored in `CONQUER.INI` and loaded on startup, the `Reso
 Only the scenario view is true hi-res, that is the in-game screen with the map and sidebar. Briefings and dialog
 boxes (Options menu etc.) in-game are also hi-res.
 
-The below diagram shows how the video backend is used from Tiberian Dawn:
-
-![Common Library Video Calls](common-lib.drawio.png)
-
 ### Scenario View
 
 - The sidebar logic was reworked to use relative co-ordinates, anchoring all controls to the top-right hand side of the screen
@@ -58,8 +58,29 @@ At various points static graphics in CPS format are rendered to the screen, inte
 
 Interactive menus using CPS images are still 'zoomed' in to 640x400.
 
-## Known issues
+### Known issues
 
 - Need to review FROM_JSON methods to ensure that any calculated constants or variables tied to game resolution are refreshed on save load (calling One_Time with a flag to partially reset object)
   - I have added ` // TODO: Remove and test, as it is calculated from resolution` to fields of interest
   - For now, the `TabClass::One_Time` call in `FROM_JSON` functions should reset any incorrect field values
+
+## Red Alert
+
+Resolution settings are stored in `REDALERT.INI` and loaded on startup, the `Resolve_Resolution_Mode` function in [startup.cpp](../../redalert/startup.cpp) determines the mode to use.
+
+Only the scenario view is true hi-res, that is the in-game screen with the map and sidebar. Briefings and dialog
+boxes (Options menu etc.) in-game are also hi-res.
+
+### Scenario View
+
+- The sidebar logic was reworked to use relative co-ordinates, anchoring all controls to the top-right hand side of the screen
+  - Sidebar resolution is unchanged, but a black rectangle is drawn below it to fill the empty space
+- Maps that are smaller than the current resolution can cause some problems but several changes were added to mitigate this:
+  - All cells and objects outside the intended map size (set in scenario INI) are never rendered
+  - Black rectangles are added on sides of the map to prevent artifacts from units at the edges of the map (which may be right of the map or below the map or both)
+  - When a scenario like this is started/restarted or loaded from a save, the map view dimensions are refreshed to ensure it is displayed correctly before render
+- Save/load functionality was updated to ensure that the `SidebarClass::One_Time` method and base methods are called to refresh resolution dependant fields
+
+### PCX Images
+
+At various points static graphics in PCX format are rendered to the screen, these are hardcoded to 640x400. The game now renders these graphics in the center of the screen, filling in areas around the outside in black.
