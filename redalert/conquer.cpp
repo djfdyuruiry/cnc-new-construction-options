@@ -3891,7 +3891,7 @@ static bool Change_Local_Dir(int cd)
 {
     static bool _initialised = false;
     static unsigned _detected = 0;
-    static const char* _vol_labels[CD_COUNT] = {"allied", "soviet", "counterstrike", "aftermath", "."};
+    static const char* _vol_labels[CD_COUNT] = {"allies", "soviet", "counterstrike", "aftermath", "."};
     std::string paths[3] = {Paths.User_Path(), Paths.Data_Path(), Paths.Program_Path()};
 
     // Detect which if any of the discs have had their data copied to an appropriate local folder.
