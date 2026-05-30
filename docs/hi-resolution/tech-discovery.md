@@ -1,6 +1,8 @@
 This doc details the insights gained on how the video system works in the C&C engine. The aim is to define how we can 
 implement a higher resolution than 640x400.
 
+> This was carried out against Tiberian Dawn, but Red Alert works in a similar wayTiberian Dawn
+
 ## SDL
 
 - `common/video_sdl2.cpp` implements the low-level integration with SDL2, so the game can draw to the screen
