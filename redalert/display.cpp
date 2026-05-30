@@ -209,7 +209,7 @@ DisplayClass::DisplayClass(void)
  *   05/31/1994 JLB : Handles layer system now.                                                *
  *   06/02/1994 JLB : Takes care of misc display tables and data allocation.                   *
  *=============================================================================================*/
-void DisplayClass::One_Time(void)
+void DisplayClass::One_Time()
 {
     MapClass::One_Time();
 
@@ -514,6 +514,88 @@ short const* DisplayClass::Text_Overlap_List(char const* text, int x, int y) con
         *ptr = REFRESH_EOL;
     }
     return (_list);
+}
+
+/***********************************************************************************************
+ * DisplayClass::Set_View_Dimensions_Pixels -- Sets the tactical display screen coordinates.   *
+ *                                                                                             *
+ *    Use this routine to set the tactical map screen coordinates and dimensions. This routine *
+ *    is typically used when the screen size or position changes as a result of the sidebar    *
+ *    changing position or appearance. Cloned from Tiberian Dawn logic to enable hi-res mode.  *
+ *                                                                                             *
+ * INPUT:   x,y   -- The X and Y pixel position on the screen for the tactical map upper left  *
+ *                   corner.                                                                   *
+ *                                                                                             *
+ *          width -- The width of the tactical display (in pixels). If this parameter is       *
+ *                   omitted, then the width will be as wide as the screen will allow.         *
+ *                                                                                             *
+ *          height-- The height of the tactical display (in pixels). If this parameter is      *
+ *                   omitted, then the width will be as wide as the screen will allow.         *
+ *                                                                                             *
+ *                                                                                             *
+ * OUTPUT:  none                                                                               *
+ *                                                                                             *
+ * WARNINGS:   none                                                                            *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   12/06/1994 JLB : Created.                                                                 *
+ *   06/27/1995 JLB : Adjusts tactical map position if necessary.                              *
+ *=============================================================================================*/
+void DisplayClass::Set_View_Dimensions_Pixels(int x, int y, int width, int height)
+{
+    if (width == -1) {
+        width = SeenBuff.Get_Width() - x;
+    }
+
+    TacLeptonWidth = Pixel_To_Lepton(width);
+
+    // ST - 3/1/2019 12:05PM
+    // Made the below code more consistent with the width calculation. This is needed if we aren't going to draw the
+    // tabs at the top of the screen
+    //
+    if (height == -1) {
+        height = SeenBuff.Get_Height() - y;
+        // height = (SeenBuff.Get_Height()-y) / CELL_PIXEL_H
+    }
+
+    TacLeptonHeight = Pixel_To_Lepton(height);
+
+    // TacLeptonHeight = height * CELL_LEPTON_H;
+
+    /*
+    **	Adjust the tactical cell if it is now in an invalid position
+    **	because of the changed dimensions.
+    */
+#ifdef REMASTER_BUILD
+    int xx = 0; // Coord_X(TacticalCoord) - (MapCellX * CELL_LEPTON_W);
+    int yy = 0; // Coord_Y(TacticalCoord) - (MapCellY * CELL_LEPTON_H);
+#else
+    int xx = Coord_X(TacticalCoord) - (MapCellX * CELL_LEPTON_W);
+    int yy = Coord_Y(TacticalCoord) - (MapCellY * CELL_LEPTON_H);
+#endif
+
+    Confine_Rect(
+        &xx, &yy, TacLeptonWidth, TacLeptonHeight, MapCellWidth * CELL_LEPTON_W, MapCellHeight * CELL_LEPTON_H);
+
+    Set_Tactical_Position(XY_Coord(xx + (MapCellX * CELL_LEPTON_W), yy + (MapCellY * CELL_LEPTON_H)));
+
+    TacPixelX = x;
+    TacPixelY = y;
+    WindowList[WINDOW_TACTICAL][WINDOWX] = x;
+    WindowList[WINDOW_TACTICAL][WINDOWY] = y;
+    WindowList[WINDOW_TACTICAL][WINDOWWIDTH] = width;
+    WindowList[WINDOW_TACTICAL][WINDOWHEIGHT] = height;
+    if (Window == WINDOW_TACTICAL) {
+        Change_Window(0);
+        Change_Window(Window);
+    }
+    IsToRedraw = true;
+    Flag_To_Redraw(false);
+
+    TacButton.X = TacPixelX;
+    TacButton.Y = TacPixelY;
+    TacButton.Width = Lepton_To_Pixel(TacLeptonWidth);
+    TacButton.Height = Lepton_To_Pixel(TacLeptonHeight);
 }
 
 /***********************************************************************************************
@@ -2439,6 +2521,55 @@ void DisplayClass::Redraw_Shadow(void)
                     }
                 }
             }
+        }
+    }
+
+
+    if (Debug_Map || !Is_Smaller_Than_Screen()) {
+        return;
+    }
+
+    /*
+     * If we are not in editor mode and resolution is larger than map size, fill visible areas outside the map with
+     * shadow
+     */
+    if (Map.IsSidebarActive) {
+        const auto sidebar_x = SeenBuff.Get_Width() - (80 * RESFACTOR);
+
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 8 * RESFACTOR,
+                                 sidebar_x - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 sidebar_x - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+    } else {
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 8 * RESFACTOR,
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
         }
     }
 }

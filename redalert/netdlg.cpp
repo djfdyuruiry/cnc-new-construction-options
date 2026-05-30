@@ -690,8 +690,8 @@ static int Net_Join_Dialog(void)
     //------------------------------------------------------------------------
     int d_dialog_w = 320 * RESFACTOR;                      // dialog width
     int d_dialog_h = 200 * RESFACTOR;                      // dialog height
-    int d_dialog_x = ((320 * RESFACTOR - d_dialog_w) / 2); // dialog x-coord
-    int d_dialog_y = ((200 * RESFACTOR - d_dialog_h) / 2); // centered y-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(200 * RESFACTOR) - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);       // center x-coord
 
     int d_txt6_h = 6 * RESFACTOR + 1; // ht of 6-pt text
@@ -3405,7 +3405,7 @@ static int Net_New_Dialog(void)
     //------------------------------------------------------------------------
     int d_dialog_w = 320 * RESFACTOR;                      // dialog width
     int d_dialog_h = 200 * RESFACTOR;                      // dialog height
-    int d_dialog_x = ((320 * RESFACTOR - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2); // dialog x-coord
     int d_dialog_y = ((200 * RESFACTOR - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);       // center x-coord
 
@@ -5389,31 +5389,31 @@ void Log_Message(char* msg)
  * routine is exited; their contents are used to form connections to the other players,		  *
  * after the scenario has been loaded.																			  *
  *                                                                                             *
- *    здддддддддддддддддддддддддддддддддддддддддддд©                                           *
- *    Ё              New Network Game              Ё                                           *
- *    Ё                                            Ё                                           *
- *    Ё     Players               Scenario         Ё                                           *
- *    Ё здддддддддддддбд©   зддддддддддддддддддбд© Ё                                           *
- *    Ё Ё Boffo       Ё.Ё   Ё Green Acres      Ё.Ё Ё                                           *
- *    Ё Ё Bozo        цд╢   Ё Brown Sewers     цд╢ Ё                                           *
- *    Ё Ё Bonzo       Ё Ё   Ё      ...         Ё Ё Ё                                           *
- *    Ё Ё             цд╢   Ё                  цд╢ Ё                                           *
- *    Ё Ё             Ё.Ё   Ё                  Ё.Ё Ё                                           *
- *    Ё юдддддддддддддады   юддддддддддддддддддады Ё                                           *
- *    Ё     [Reject]             Count:--- ##      Ё                                           *
- *    Ё                          Level:--- ##      Ё                                           *
- *    Ё                                            Ё                                           *
- *    Ё               Credits: _____               Ё                                           *
- *    Ё       [  Bases   ]   [   Crates   ]        Ё                                           *
- *    Ё       [ Tiberium ]   [ AI Players ]        Ё                                           *
- *    Ё  зддддддддддддддддддддддддддддддддддддд©   Ё                                           *
- *    Ё  Ё                                     Ё   Ё                                           *
- *    Ё  Ё                                     Ё   Ё                                           *
- *    Ё  юддддддддддддддддддддддддддддддддддддды   Ё                                           *
- *    Ё  зддддддддддддддддддддддддддддддддддддд©   Ё                                           *
- *    Ё  юддддддддддддддддддддддддддддддддддддды   Ё                                           *
- *    Ё              [OK]    [Cancel]              Ё                                           *
- *    юдддддддддддддддддддддддддддддддддддддддддддды                                           *
+ *    О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©                                           *
+ *    О©╫              New Network Game              О©╫                                           *
+ *    О©╫                                            О©╫                                           *
+ *    О©╫     Players               Scenario         О©╫                                           *
+ *    О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©   О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д© О©╫                                           *
+ *    О©╫ О©╫ Boffo       О©╫.О©╫   О©╫ Green Acres      О©╫.О©╫ О©╫                                           *
+ *    О©╫ О©╫ Bozo        О©╫д╢   О©╫ Brown Sewers     О©╫д╢ О©╫                                           *
+ *    О©╫ О©╫ Bonzo       О©╫ О©╫   О©╫      ...         О©╫ О©╫ О©╫                                           *
+ *    О©╫ О©╫             О©╫д╢   О©╫                  О©╫д╢ О©╫                                           *
+ *    О©╫ О©╫             О©╫.О©╫   О©╫                  О©╫.О©╫ О©╫                                           *
+ *    О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫   О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫                                           *
+ *    О©╫     [Reject]             Count:--- ##      О©╫                                           *
+ *    О©╫                          Level:--- ##      О©╫                                           *
+ *    О©╫                                            О©╫                                           *
+ *    О©╫               Credits: _____               О©╫                                           *
+ *    О©╫       [  Bases   ]   [   Crates   ]        О©╫                                           *
+ *    О©╫       [ Tiberium ]   [ AI Players ]        О©╫                                           *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©   О©╫                                           *
+ *    О©╫  О©╫                                     О©╫   О©╫                                           *
+ *    О©╫  О©╫                                     О©╫   О©╫                                           *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫   О©╫                                           *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©   О©╫                                           *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫   О©╫                                           *
+ *    О©╫              [OK]    [Cancel]              О©╫                                           *
+ *    О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫                                           *
  *                                                                                             *
  * INPUT:                                                                                      *
  *      none.                                                                                  *
@@ -5435,7 +5435,7 @@ static int Net_Fake_New_Dialog(void)
     //------------------------------------------------------------------------
     int d_dialog_w = 120 * RESFACTOR;                      // dialog width
     int d_dialog_h = 80 * RESFACTOR;                       // dialog height
-    int d_dialog_x = ((320 * RESFACTOR - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2); // dialog x-coord
     int d_dialog_y = ((200 * RESFACTOR - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);       // center x-coord
 
@@ -6165,35 +6165,35 @@ static int Net_Fake_New_Dialog(void)
  * we ping him, requesting a CHAT_ANNOUNCE if he's still in chat.  If we don't hear				  *
  * from him after that, we remove him from our list.														  *
  *                                                                                             *
- *    зддддддддддддддддддддддддддддддддддддддддддддддддддд©                                    *
- *    Ё                 Network Games                     Ё                                    *
- *    Ё                                                   Ё                                    *
- *    Ё              Your Name: ____________              Ё                                    *
- *    Ё                  House: [GDI] [NOD]               Ё                                    *
- *    Ё          Desired Color: [ ][ ][ ][ ]              Ё                                    *
- *    Ё                                                   Ё                                    *
- *    Ё            Games                 Players          Ё                                    *
- *    Ё зддддддддддддддддддддддбд© зддддддддддддддддддбд© Ё                                    *
- *    Ё Ё(Bill's Game         )Ё.Ё Ё Peter Parker GDI Ё.Ё Ё                                    *
- *    Ё Ё Peter Parker's Game  цд╢ Ё Mary Jane    GDI цд╢ Ё                                    *
- *    Ё Ё(Magnum PI's Game    )Ё Ё Ё JJ Jameson   NOD Ё Ё Ё                                    *
- *    Ё Ё                      цд╢ Ё                  цд╢ Ё                                    *
- *    Ё Ё                      Ё.Ё Ё                  Ё.Ё Ё                                    *
- *    Ё юддддддддддддддддддддддады юддддддддддддддддддады Ё                                    *
- *    Ё           Scenario: Big Long Description          Ё                                    *
- *    Ё                Starting Credits: xxxx             Ё                                    *
- *    Ё          Count: ---          Level: ---           Ё                                    *
- *    Ё          Bases: ON          Crates: ON            Ё                                    *
- *    Ё       Tiberium: ON      AI Players: ON            Ё                                    *
- *    Ё                                                   Ё                                    *
- *    Ё  зддддддддддддддддддддддддддддддддддддддддддддд©  Ё                                    *
- *    Ё  Ё                                             Ё  Ё                                    *
- *    Ё  Ё                                             Ё  Ё                                    *
- *    Ё  юддддддддддддддддддддддддддддддддддддддддддддды  Ё                                    *
- *    Ё  зддддддддддддддддддддддддддддддддддддддддддддд©  Ё                                    *
- *    Ё  юддддддддддддддддддддддддддддддддддддддддддддды  Ё                                    *
- *    Ё            [Join]  [Cancel]    [New]              Ё                                    *
- *    юддддддддддддддддддддддддддддддддддддддддддддддддддды                                    *
+ *    О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©                                    *
+ *    О©╫                 Network Games                     О©╫                                    *
+ *    О©╫                                                   О©╫                                    *
+ *    О©╫              Your Name: ____________              О©╫                                    *
+ *    О©╫                  House: [GDI] [NOD]               О©╫                                    *
+ *    О©╫          Desired Color: [ ][ ][ ][ ]              О©╫                                    *
+ *    О©╫                                                   О©╫                                    *
+ *    О©╫            Games                 Players          О©╫                                    *
+ *    О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д© О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д© О©╫                                    *
+ *    О©╫ О©╫(Bill's Game         )О©╫.О©╫ О©╫ Peter Parker GDI О©╫.О©╫ О©╫                                    *
+ *    О©╫ О©╫ Peter Parker's Game  О©╫д╢ О©╫ Mary Jane    GDI О©╫д╢ О©╫                                    *
+ *    О©╫ О©╫(Magnum PI's Game    )О©╫ О©╫ О©╫ JJ Jameson   NOD О©╫ О©╫ О©╫                                    *
+ *    О©╫ О©╫                      О©╫д╢ О©╫                  О©╫д╢ О©╫                                    *
+ *    О©╫ О©╫                      О©╫.О©╫ О©╫                  О©╫.О©╫ О©╫                                    *
+ *    О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫                                    *
+ *    О©╫           Scenario: Big Long Description          О©╫                                    *
+ *    О©╫                Starting Credits: xxxx             О©╫                                    *
+ *    О©╫          Count: ---          Level: ---           О©╫                                    *
+ *    О©╫          Bases: ON          Crates: ON            О©╫                                    *
+ *    О©╫       Tiberium: ON      AI Players: ON            О©╫                                    *
+ *    О©╫                                                   О©╫                                    *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©  О©╫                                    *
+ *    О©╫  О©╫                                             О©╫  О©╫                                    *
+ *    О©╫  О©╫                                             О©╫  О©╫                                    *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫  О©╫                                    *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©  О©╫                                    *
+ *    О©╫  О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫  О©╫                                    *
+ *    О©╫            [Join]  [Cancel]    [New]              О©╫                                    *
+ *    О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫                                    *
  *                                                                                             *
  * INPUT:                                                                                      *
  *      none.                                                                                  *
@@ -6216,7 +6216,7 @@ static int Net_Fake_Join_Dialog(void)
     //------------------------------------------------------------------------
     int d_dialog_w = 120 * RESFACTOR;                      // dialog width
     int d_dialog_h = 80 * RESFACTOR;                       // dialog height
-    int d_dialog_x = ((320 * RESFACTOR - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2); // dialog x-coord
     int d_dialog_y = ((200 * RESFACTOR - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);       // center x-coord
 

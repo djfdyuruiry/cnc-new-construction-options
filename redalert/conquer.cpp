@@ -208,6 +208,12 @@ void Main_Game(int argc, char* argv[])
 
         fade = true;
 
+        if (Map.Is_Smaller_Than_Screen()) {
+            Map.Set_View_Dimensions(0, 8 * RESFACTOR);
+            Map.Flag_To_Redraw(true);
+            Map.Render();
+        }
+
         /*
         ** Initialise the color lookup tables for the chronal vortex
         */
@@ -1903,6 +1909,13 @@ bool Main_Loop()
         Set_Video_Cursor_Clip(false);
         Do_Restart();
         Set_Video_Cursor_Clip(true);
+
+        if (Map.Is_Smaller_Than_Screen()) {
+            Map.Set_View_Dimensions(0, 8 * RESFACTOR);
+            Map.Flag_To_Redraw(true);
+            Map.Render();
+        }
+
         return (!GameActive);
     }
 
@@ -2446,6 +2459,8 @@ void Play_Movie(char const* name, ThemeType theme, bool clrscrn, bool immediate)
         Keyboard->Clear();
 
         VQAHandle* vqa = NULL;
+
+        Enter_Zoomed_Resolution_Mode();
 
 #ifdef MOVIE640
         if (IsVQ640) {
@@ -4257,7 +4272,7 @@ bool Force_CD_Available(int cd)
 #endif
 
 #ifdef FRENCH
-                sprintf(buffer, "InsŠrez le %s", _cd_name[cd]);
+                sprintf(buffer, "Insï¿½rez le %s", _cd_name[cd]);
 #else
 #ifdef GERMAN
                 sprintf(buffer, "Bitte %s", _cd_name[cd]);
@@ -4268,7 +4283,7 @@ bool Force_CD_Available(int cd)
             } else {
 #ifdef DVD
 #ifdef FRENCH
-                sprintf(buffer, "InsŠrez le %s", _cd_name[4]);
+                sprintf(buffer, "Insï¿½rez le %s", _cd_name[4]);
 #else
 #ifdef GERMAN
                 sprintf(buffer, "Bitte %s", _cd_name[4]);

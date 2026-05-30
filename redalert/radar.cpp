@@ -142,7 +142,7 @@ RadarClass::RadarClass(void)
  * HISTORY:                                                                                    *
  *   12/22/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void RadarClass::One_Time(void)
+void RadarClass::One_Time(const bool on_save)
 {
     RadWidth = 80 * RESFACTOR;
     RadHeight = 70 * RESFACTOR;
@@ -155,7 +155,9 @@ void RadarClass::One_Time(void)
     RadIWidth = (64 + 9) * RESFACTOR;  //************
     RadIHeight = (64 + 1) * RESFACTOR; //************
 
-    DisplayClass::One_Time();
+    if (!on_save) {
+        DisplayClass::One_Time();
+    }
 #ifdef OBSOLETE
     RadarButton.X = RadX + RadOffX;
     RadarButton.Y = RadY + RadOffY;

@@ -398,6 +398,9 @@ bool Start_Scenario(char* name, bool briefing)
         while (Get_Mouse_State()) {
             Show_Mouse();
         }
+
+        Leave_Zoomed_Resolution_Mode();
+
         Restate_Mission(Scen.ScenarioName, TXT_OK, TXT_NONE);
     }
 #endif
@@ -408,6 +411,8 @@ bool Start_Scenario(char* name, bool briefing)
         Show_Mouse();
         Play_Movie(Scen.ActionMovie, Scen.TransitTheme);
     }
+
+    Leave_Zoomed_Resolution_Mode();
 
     if (Scen.TransitTheme == THEME_NONE) {
         Theme.Queue_Song(THEME_FIRST);
@@ -1206,6 +1211,8 @@ void Do_Lose(void)
 #endif // CHEAT_KEYS
     Play_Movie(Scen.LoseMovie);
 
+    Leave_Zoomed_Resolution_Mode();
+
     /*
     ** Start same scenario again
     */
@@ -1232,6 +1239,12 @@ void Do_Lose(void)
 
     GamePalette.Set(FADE_PALETTE_FAST, Call_Back);
     Show_Mouse();
+
+    if (Map.Is_Smaller_Than_Screen()) {
+        Map.Set_View_Dimensions(0, 8 *RESFACTOR);
+        Map.Flag_To_Redraw(true);
+        Map.Render();
+    }
 }
 
 #ifdef FIXIT_VERSION_3 //	Stalemate games.
@@ -1526,8 +1539,8 @@ int BGMessageBox(char const* msg, int btn1, int btn2)
     Format_Window_String(buffer, 300, width, height);
     height += (numbuttons == 0) ? 30 : 60;
 
-    int x = (SeenBuff.Get_Width() - width) / 2;
-    int y = (SeenBuff.Get_Height() - height) / 2;
+    int x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - width) / 2;
+    int y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - height) / 2;
 
     /*
     **	Other inits.

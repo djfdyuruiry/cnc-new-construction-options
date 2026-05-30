@@ -610,7 +610,7 @@ void Read_Setup_Options(RawFileClass* config_file)
     /*
     ** Read in global settings, defaulting to hi resolution mode
     */
-    Settings.Load_Hi_Res(ini);
+    Settings.Load(ini);
 
     /*
     ** Read in the boolean options

@@ -363,8 +363,8 @@ char const* Fetch_Password(int caption, int message, int btext)
     width += 40 * RESFACTOR;
     height += (60 + 25) * RESFACTOR;
 
-    int x = (SeenBuff.Get_Width() - width) / 2;
-    int y = (SeenBuff.Get_Height() - height) / 2;
+    int x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - width) / 2;
+    int y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - height) / 2;
 
     /*
     **	Create the "ok" and password edit buttons.

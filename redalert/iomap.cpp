@@ -293,6 +293,13 @@ bool MouseClass::Load(Straw& file)
     }
 
     LastTheater = Scen.Theater;
+
+    // ensure calculated constants are correct for current resolution
+    SidebarClass::One_Time(true);
+
+    // re-init map view
+    Set_View_Dimensions(0, 8 * RESFACTOR);
+
     return (true);
 }
 

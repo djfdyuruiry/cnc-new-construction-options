@@ -68,8 +68,10 @@ GameType Select_MPlayer_Game(void)
     //------------------------------------------------------------------------
     int d_dialog_w = 190 * RESFACTOR;
     int d_dialog_h = 78 * RESFACTOR;
-    int d_dialog_y = 90 * RESFACTOR;
-    int d_dialog_x = (((320 * RESFACTOR) - d_dialog_w) / 2);
+
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2);
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(200 * RESFACTOR) - d_dialog_h) / 2);
+
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);
 
     int d_txt6_h = 7 * RESFACTOR;
@@ -614,8 +616,8 @@ int Surrender_Dialog(int text)
 
     int D_DIALOG_W = 240 * RESFACTOR;                      // dialog width
     int D_DIALOG_H = 63 * RESFACTOR;                       // dialog height
-    int D_DIALOG_X = ((320 * RESFACTOR - D_DIALOG_W) / 2); // centered x-coord
-    int D_DIALOG_Y = ((200 * RESFACTOR - D_DIALOG_H) / 2); // centered y-coord
+    int D_DIALOG_X = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - D_DIALOG_W) / 2); // centered x-coord
+    int D_DIALOG_Y = ((Try_Get_Resolution_Mode_Height().value_or(200 * RESFACTOR) - D_DIALOG_H) / 2); // centered y-coord
     int D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);       // coord of x-center
 
     int D_TXT6_H = 7 * RESFACTOR;     // ht of 6-pt text
@@ -817,8 +819,8 @@ int Abort_Dialog(void)
 
     int D_DIALOG_W = 170 * RESFACTOR;                      // dialog width
     int D_DIALOG_H = 63 * RESFACTOR;                       // dialog height
-    int D_DIALOG_X = ((320 * RESFACTOR - D_DIALOG_W) / 2); // centered x-coord
-    int D_DIALOG_Y = ((200 * RESFACTOR - D_DIALOG_H) / 2); // centered y-coord
+    int D_DIALOG_X = (((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR)) - D_DIALOG_W) / 2); // centered x-coord
+    int D_DIALOG_Y = (((Try_Get_Resolution_Mode_Height().value_or(200 * RESFACTOR)) - D_DIALOG_H) / 2); // centered y-coord
     int D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);       // coord of x-center
 
     int D_TXT6_H = 7 * RESFACTOR;     // ht of 6-pt text

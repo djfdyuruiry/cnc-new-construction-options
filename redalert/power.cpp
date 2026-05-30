@@ -130,9 +130,9 @@ void PowerClass::Init_Clear(void)
  * HISTORY:                                                                                    *
  *   12/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void PowerClass::One_Time(void)
+void PowerClass::One_Time(const bool on_save)
 {
-    RadarClass::One_Time();
+    RadarClass::One_Time(on_save);
 
     bool dosmode = (RESFACTOR == 1);
     POWER_Y = (dosmode) ? (88 + 9) : (7 + 70 + 13);
@@ -141,6 +141,11 @@ void PowerClass::One_Time(void)
     PowerButton.Y = POWER_Y * RESFACTOR;
     PowerButton.Width = (POWER_WIDTH * RESFACTOR) - 1;
     PowerButton.Height = POWER_HEIGHT * RESFACTOR;
+
+    if (on_save) {
+        return;
+    }
+
     PowerShape = MFCD::Retrieve("POWER.SHP");
     PowerBarShape = MFCD::Retrieve("POWERBAR.SHP");
 }
@@ -184,7 +189,7 @@ void PowerClass::Draw_It(bool complete)
                 //LTGREY);
                 CC_Draw_Shape(PowerBarShape,
                               0,
-                              240 * RESFACTOR,
+                              RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
                               88 * RESFACTOR,
                               WINDOW_MAIN,
                               flags | SHAPE_NORMAL | SHAPE_WIN_REL,
@@ -196,7 +201,7 @@ void PowerClass::Draw_It(bool complete)
                     */
                     CC_Draw_Shape(PowerBarShape,
                                   1,
-                                  240 * RESFACTOR,
+                                  RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
                                   (88 * RESFACTOR) + (56 * RESFACTOR),
                                   WINDOW_MAIN,
                                   flags | SHAPE_NORMAL | SHAPE_WIN_REL,
@@ -245,8 +250,11 @@ void PowerClass::Draw_It(bool complete)
                     }
                     bottom = (175 * RESFACTOR) + 1;
 
-                    LogicPage->Fill_Rect(245 * RESFACTOR, bottom - power_height, 245 * RESFACTOR + 1, bottom, color2);
-                    LogicPage->Fill_Rect(246 * RESFACTOR, bottom - power_height, 246 * RESFACTOR + 1, bottom, color1);
+                    const auto x1 = RESFACTOR == 1 ? 245 : SeenBuff.Get_Width() - 150;
+                    const auto x2 = RESFACTOR == 1 ? 246 : SeenBuff.Get_Width() - 148;
+
+                    LogicPage->Fill_Rect(x1, bottom - power_height, x1 + 1, bottom, color2);
+                    LogicPage->Fill_Rect(x2, bottom - power_height, x2 + 1, bottom, color1);
                 }
 
                 /*
@@ -254,7 +262,7 @@ void PowerClass::Draw_It(bool complete)
                 */
                 CC_Draw_Shape(PowerShape,
                               0,
-                              (POWER_X * RESFACTOR) + RESFACTOR,
+                              RESFACTOR == 1 ? POWER_X + 1 : SeenBuff.Get_Width() - (640 - ((POWER_X * 2) + 2)),
                               bottom - (drain_height + (2 * RESFACTOR)),
                               WINDOW_MAIN,
                               flags | SHAPE_NORMAL,

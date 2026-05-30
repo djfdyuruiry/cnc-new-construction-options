@@ -167,6 +167,7 @@ public:
     virtual bool Scroll_Map(DirType facing, int& distance, bool really);
     virtual void Refresh_Cells(CELL cell, short const* list);
     virtual void Set_View_Dimensions(int x, int y, int width = -1, int height = -1);
+    virtual void Set_View_Dimensions_Pixels(int x, int y, int width = -1, int height = -1);
 
     /*
     **	Pending object placement control.

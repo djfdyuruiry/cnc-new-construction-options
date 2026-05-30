@@ -148,7 +148,7 @@ SidebarClass::SidebarClass(void)
     **	code so that as the sidebar buildable buttons scroll, they get properly
     **	clipped at the top and bottom edges.
     */
-    WindowList[WINDOW_SIDEBAR][WINDOWX] = (SIDE_X + 8);
+    WindowList[WINDOW_SIDEBAR][WINDOWX] = RESFACTOR == 1 ? (SIDE_X + 8) : SeenBuff.Get_Width() - (320 - (SIDE_X + 8));
     WindowList[WINDOW_SIDEBAR][WINDOWY] = SIDE_Y + 1 + TOP_HEIGHT;
     WindowList[WINDOW_SIDEBAR][WINDOWWIDTH] = SIDE_WIDTH;
     WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT;
@@ -207,22 +207,22 @@ SidebarClass::SidebarClass(NoInitClass const& x)
  * HISTORY:                                                                                    *
  *   10/28/94   JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::One_Time(void)
+void SidebarClass::One_Time(const bool on_save)
 {
     /* Set RESFACTOR positions.  */
-    SidebarClass::Background.X = (int)((int)SIDE_X + 8) * RESFACTOR;
+    SidebarClass::Background.X = RESFACTOR == 1 ? ((SIDE_X + 8)) : SeenBuff.Get_Width() - (640 - ((SIDE_X + 8) * 2));
     SidebarClass::Background.Y = (int)SIDE_Y * RESFACTOR;
     SidebarClass::Background.Width = (int)((int)SIDE_WIDTH - 1) * RESFACTOR - 1;
     SidebarClass::Background.Height = (int)((int)SIDE_HEIGHT - 1) * RESFACTOR;
 
-    PowerClass::One_Time();
+    PowerClass::One_Time(on_save);
 
     /*
     **	This sets up the clipping window. This window is used by the shape drawing
     **	code so that as the sidebar buildable buttons scroll, they get properly
     **	clipped at the top and bottom edges.
     */
-    WindowList[WINDOW_SIDEBAR][WINDOWX] = ((SIDE_X + 8)) * RESFACTOR;
+    WindowList[WINDOW_SIDEBAR][WINDOWX] = RESFACTOR == 1 ? ((SIDE_X + 8)) : SeenBuff.Get_Width() - (640 - ((SIDE_X + 8) * 2));
     WindowList[WINDOW_SIDEBAR][WINDOWY] = (SIDE_Y + 1 + TOP_HEIGHT) * RESFACTOR;
     WindowList[WINDOW_SIDEBAR][WINDOWWIDTH] = (SIDE_WIDTH)*RESFACTOR;
     WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT) * RESFACTOR;
@@ -237,10 +237,15 @@ void SidebarClass::One_Time(void)
     **	Set up the coordinates for the sidebar strips. These coordinates are for
     **	the upper left corner.
     */
-    Column[0].X = COLUMN_ONE_X * RESFACTOR;
+    Column[0].X = RESFACTOR == 1 ? COLUMN_ONE_X : SeenBuff.Get_Width() - (640 - (COLUMN_ONE_X * 2));
     Column[0].Y = COLUMN_ONE_Y * RESFACTOR;
-    Column[1].X = COLUMN_TWO_X * RESFACTOR;
+    Column[1].X = RESFACTOR == 1 ? COLUMN_TWO_X : SeenBuff.Get_Width() - (640 - (COLUMN_TWO_X * 2));
     Column[1].Y = COLUMN_TWO_Y * RESFACTOR;
+
+    if (on_save) {
+        return;
+    }
+
     Column[0].One_Time(0);
     Column[1].One_Time(1);
 
@@ -299,11 +304,12 @@ void SidebarClass::Init_IO(void)
     ** Add the sidebar's buttons only if we're not in editor mode.
     */
     if (!Debug_Map) {
+        const auto placement_y = (0x96 / 2) * RESFACTOR;
 
         Repair.IsSticky = true;
         Repair.ID = BUTTON_REPAIR;
-        Repair.X = (0x1f2 / 2) * RESFACTOR;
-        Repair.Y = (0x96 / 2) * RESFACTOR;
+        Repair.X = RESFACTOR == 1 ? (0x1f2 / 2) : SeenBuff.Get_Width() - (640 - 0x1f2);
+        Repair.Y = placement_y;
         Repair.IsPressed = false;
         Repair.IsToggleType = true;
         Repair.ReflectButtonState = true;
@@ -311,8 +317,8 @@ void SidebarClass::Init_IO(void)
 
         Upgrade.IsSticky = true;
         Upgrade.ID = BUTTON_UPGRADE;
-        Upgrade.X = (RESFACTOR == 1) ? 271 : 0x21f;
-        Upgrade.Y = (0x96 / 2) * RESFACTOR;
+        Upgrade.X = RESFACTOR == 1 ? 271 : SeenBuff.Get_Width() - (640 - 0x21f);
+        Upgrade.Y = placement_y;
         Upgrade.IsPressed = false;
         Upgrade.IsToggleType = true;
         Upgrade.ReflectButtonState = true;
@@ -320,8 +326,8 @@ void SidebarClass::Init_IO(void)
 
         Zoom.IsSticky = true;
         Zoom.ID = BUTTON_ZOOM;
-        Zoom.X = (0x24c / 2) * RESFACTOR;
-        Zoom.Y = (0x96 / 2) * RESFACTOR;
+        Zoom.X = RESFACTOR == 1 ? (0x24c / 2) : SeenBuff.Get_Width() - (640 - 0x24c);
+        Zoom.Y = placement_y;
         Zoom.IsPressed = false;
         Zoom.Set_Shape(MFCD::Retrieve("MAP.SHP"));
 
@@ -746,6 +752,8 @@ void SidebarClass::Draw_It(bool complete)
 
     BStart(BENCH_SIDEBAR);
 
+    const auto side_x = RESFACTOR == 1 ? SIDE_X : SeenBuff.Get_Width() - (640 - (SIDE_X * 2));
+
     if (IsSidebarActive && (IsToRedraw || complete) && !Debug_Map) {
         IsToRedraw = false;
 
@@ -758,15 +766,24 @@ void SidebarClass::Draw_It(bool complete)
             /*
             ** The sidebar shape is too big in 640x400 so it needs to be drawn in three chunks.
             */
-            CC_Draw_Shape(SidebarShape, 0, SIDE_X * RESFACTOR, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+            CC_Draw_Shape(SidebarShape, 0, side_x, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
             CC_Draw_Shape(
-                SidebarMiddleShape, shape, SIDE_X * RESFACTOR, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+                SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
             CC_Draw_Shape(
-                SidebarBottomShape, shape, SIDE_X * RESFACTOR, (8 + 80 + 50) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+                SidebarBottomShape, shape, side_x, (8 + 80 + 50) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
 
             Repair.Draw_Me(true);
             Upgrade.Draw_Me(true);
             Zoom.Draw_Me(true);
+
+            /*
+            ** In hi-res mode the sidebar won't fill the entire screen height, so fill the space with black to
+            ** prevent glitches.
+            */
+            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                LogicPage->Fill_Rect(side_x, SIDE_HEIGHT * 2 + 160 - 7, SeenBuff.Get_Width(), SeenBuff.Get_Height(), TBLACK);
+            }
+
             LogicPage->Unlock();
         }
     }
@@ -984,7 +1001,23 @@ bool SidebarClass::Activate(int control)
         **	activate it on the left side of the screen.
         */
         if (IsSidebarActive /*&& X*/) {
-            Set_View_Dimensions(0, 8 * RESFACTOR, ((320 - SIDE_WIDTH) / ICON_PIXEL_W) * RESFACTOR);
+            if (RESFACTOR == 1) {
+                Set_View_Dimensions(
+                    0,
+                    8 * RESFACTOR,
+                    ((320 - SIDE_WIDTH) / ICON_PIXEL_W)
+                );
+            } else {
+                constexpr auto sidebar_width = SIDE_WIDTH * 2;
+                const auto map_width = SeenBuff.Get_Width() - sidebar_width;
+
+                Set_View_Dimensions_Pixels(
+                    0,
+                    8 * RESFACTOR,
+                    map_width
+                );
+            }
+
             IsToRedraw = true;
             Help_Text(TXT_NONE);
             Repair.Zap();

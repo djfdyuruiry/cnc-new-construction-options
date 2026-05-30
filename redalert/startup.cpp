@@ -45,6 +45,7 @@ extern char RedAlertINI[_MAX_PATH];
 bool Read_Private_Config_Struct(FileClass& file, NewConfigType* config);
 void Print_Error_End_Exit(char* string);
 void Print_Error_Exit(char* string);
+void Resolve_Resolution_Mode();
 
 #ifdef SDL_BUILD
 #define SDL_MAIN_HANDLED
@@ -328,12 +329,7 @@ int main(int argc, char* argv[])
         Read_Setup_Options(&cfile);
 
 #ifndef REMASTER_BUILD
-        /* If DOSMode is enabled, adjust resolution accordingly. */
-        if (Settings.Video.DOSMode) {
-            RESFACTOR = 1;
-            ScreenWidth = 320;
-            ScreenHeight = 200;
-        }
+        Resolve_Resolution_Mode();
 #endif
         Set_Resfactor_Globals(RESFACTOR);
 
@@ -765,4 +761,50 @@ void Get_OS_Version(void)
         OutputDebugString(debugstr);
     }
 #endif //(0)
+}
+
+/**
+ * Based on configuration, resolve which mode we want to use for the game resolution. DOS and hi-resolution modes
+ * change the internal game resolution, standard mode uses the default resolution of 640x400.
+ */
+void Resolve_Resolution_Mode()
+{
+    if (Settings.Video.DOSMode) {
+        /* If DOSMode is enabled, adjust resolution accordingly. */
+        RESFACTOR = 1;
+        ScreenWidth = GBUFF_INIT_WIDTH / 2;
+        ScreenHeight = GBUFF_INIT_HEIGHT / 2;
+
+        CNC_LOG_INFO("DOS mode flag set in {}, game will run at 320x200 resolution", CONFIG_FILE_NAME);
+
+        Set_Current_Resolution_Mode(MODE_DOS);
+    } else if (Settings.Video.Width < GBUFF_INIT_WIDTH || Settings.Video.Height < GBUFF_INIT_HEIGHT) {
+        CNC_LOG_ERROR(
+            "{} resolution '{}x{}' is too small, minimum of {}x{} is supported. Falling back to default",
+            CONFIG_FILE_NAME,
+            Settings.Video.Width,
+            Settings.Video.Height,
+            GBUFF_INIT_WIDTH,
+            GBUFF_INIT_HEIGHT
+        );
+
+        Set_Current_Resolution_Mode(MODE_DEFAULT);
+    } else if (Settings.Video.Width == GBUFF_INIT_WIDTH || Settings.Video.Height == GBUFF_INIT_HEIGHT) {
+        CNC_LOG_INFO("Default resolution set, game will run in {}x{}", GBUFF_INIT_WIDTH, GBUFF_INIT_HEIGHT);
+
+        Set_Current_Resolution_Mode(MODE_DEFAULT);
+    } else if (Settings.Video.Width > GBUFF_INIT_WIDTH || Settings.Video.Height > GBUFF_INIT_HEIGHT) {
+        CNC_LOG_INFO(
+            "Custom resolution set in {}, game will run at '{}x{}'",
+            CONFIG_FILE_NAME,
+            Settings.Video.Width,
+            Settings.Video.Height
+        );
+
+        // adjust game resolution to custom mode
+        ScreenWidth = Settings.Video.Width;
+        ScreenHeight = Settings.Video.Height;
+
+        Set_Current_Resolution_Mode(MODE_HIGH_RES);
+    }
 }

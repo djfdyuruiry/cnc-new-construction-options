@@ -20,8 +20,8 @@ SettingsClass::SettingsClass()
     ** Video settings
     */
     // TODO: Could offer presets through the launcher or a ini setting (retro, modern etc.)
-    Video.Width = 640;
-    Video.Height = 400;
+    Video.Width = 800;
+    Video.Height = 600;
     Video.StretchWidth = 0;
     Video.StretchHeight = 0;
     Video.Windowed = false;
@@ -98,18 +98,6 @@ void SettingsClass::Load(INIClass& ini)
     } else {
         Video.ButtonStyle = -1;
     }
-}
-
-/**
- * Load settings, but use a high resolution as the
- * default if none is defined in the INI.
- */
-void SettingsClass::Load_Hi_Res(INIClass& ini)
-{
-    Video.Width = 800;
-    Video.Height = 600;
-
-    Load(ini);
 }
 
 void SettingsClass::Save(INIClass& ini)

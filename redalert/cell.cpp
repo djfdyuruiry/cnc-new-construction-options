@@ -375,7 +375,7 @@ void CellClass::Redraw_Objects(bool forced)
 
     CELL cell = Cell_Number();
 
-    if (Map.In_View(cell) && (forced || !Map.Is_Cell_Flagged(cell))) {
+    if (Map.In_View(cell) && (Debug_Map || Map.In_Radar(cell)) && (forced || !Map.Is_Cell_Flagged(cell))) {
 
         /*
         **	Flag the icon to be redrawn.
@@ -1034,6 +1034,12 @@ void CellClass::Draw_It(int x, int y, bool objects) const
 #endif
 
         CellCount++;
+
+        // if we are not in editor mode, the cell is outside the bounds of the map...
+        if (!Debug_Map && !Map.In_Radar(cell)) {
+            // skip further rendering
+            return;
+        }
 
         /*
         **	Fetch a pointer to the template type associated with this cell.
