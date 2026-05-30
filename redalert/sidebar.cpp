@@ -207,7 +207,7 @@ SidebarClass::SidebarClass(NoInitClass const& x)
  * HISTORY:                                                                                    *
  *   10/28/94   JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::One_Time(void)
+void SidebarClass::One_Time(const bool on_save)
 {
     /* Set RESFACTOR positions.  */
     SidebarClass::Background.X = RESFACTOR == 1 ? ((SIDE_X + 8)) : SeenBuff.Get_Width() - (640 - ((SIDE_X + 8) * 2));
@@ -215,7 +215,9 @@ void SidebarClass::One_Time(void)
     SidebarClass::Background.Width = (int)((int)SIDE_WIDTH - 1) * RESFACTOR - 1;
     SidebarClass::Background.Height = (int)((int)SIDE_HEIGHT - 1) * RESFACTOR;
 
-    PowerClass::One_Time();
+    if (!on_save) {
+        PowerClass::One_Time();
+    }
 
     /*
     **	This sets up the clipping window. This window is used by the shape drawing
@@ -241,6 +243,11 @@ void SidebarClass::One_Time(void)
     Column[0].Y = COLUMN_ONE_Y * RESFACTOR;
     Column[1].X = RESFACTOR == 1 ? COLUMN_TWO_X : SeenBuff.Get_Width() - (640 - (COLUMN_TWO_X * 2));
     Column[1].Y = COLUMN_TWO_Y * RESFACTOR;
+
+    if (on_save) {
+        return;
+    }
+
     Column[0].One_Time(0);
     Column[1].One_Time(1);
 

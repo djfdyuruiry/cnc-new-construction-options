@@ -2606,3 +2606,34 @@ void MapClass::Shroud_The_Map(void)
     Flag_To_Redraw(true);
 }
 #endif
+
+bool MapClass::Is_Width_Smaller_Than_Screen() const
+{
+#ifdef REMASTER_BUILD
+    // disable small map detection in remaster
+    return false;
+#else
+    constexpr auto sidebar_width = 80 * 2;
+    return (Map.IsSidebarActive ? sidebar_width : 0) + MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width();
+#endif
+}
+
+bool MapClass::Is_Height_Smaller_Than_Screen() const
+{
+#ifdef REMASTER_BUILD
+    // disable small map detection in remaster
+    return false;
+#else
+    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+#endif
+}
+
+bool MapClass::Is_Smaller_Than_Screen() const
+{
+#ifdef REMASTER_BUILD
+    // disable small map detection in remaster
+    return false;
+#else
+    return Is_Width_Smaller_Than_Screen() || Is_Height_Smaller_Than_Screen();
+#endif
+}

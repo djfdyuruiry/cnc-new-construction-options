@@ -110,7 +110,7 @@ public:
     /*
     ** Initialization
     */
-    virtual void One_Time(void);                    // One-time inits
+    virtual void One_Time(bool on_save = false);                    // One-time inits
     virtual void Init_Clear(void);                  // Clears all to known state
     virtual void Init_IO(void);                     // Inits button list
     virtual void Init_Theater(TheaterType theater); // Theater-specific inits

@@ -1284,6 +1284,12 @@ bool ObjectClass::Render(bool forced) const
     COORDINATE coord = Render_Coord();
     CELL cell = Coord_Cell(coord);
 
+    // if we are not in editor mode, the cell this object resides in is outside the bounds of the map...
+    if (!Debug_Map && !Map.In_Radar(cell)) {
+        // skip further rendering
+        return false;
+    }
+
     if (Debug_Map || Debug_Unshroud || ((forced || IsToDisplay) && IsDown && !IsInLimbo)) {
         const_cast<ObjectClass*>(this)->IsToDisplay = false; // added const_cast ST - 5/9/2019
 

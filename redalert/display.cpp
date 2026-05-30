@@ -209,7 +209,7 @@ DisplayClass::DisplayClass(void)
  *   05/31/1994 JLB : Handles layer system now.                                                *
  *   06/02/1994 JLB : Takes care of misc display tables and data allocation.                   *
  *=============================================================================================*/
-void DisplayClass::One_Time(void)
+void DisplayClass::One_Time()
 {
     MapClass::One_Time();
 
@@ -2521,6 +2521,55 @@ void DisplayClass::Redraw_Shadow(void)
                     }
                 }
             }
+        }
+    }
+
+
+    if (Debug_Map || !Is_Smaller_Than_Screen()) {
+        return;
+    }
+
+    /*
+     * If we are not in editor mode and resolution is larger than map size, fill visible areas outside the map with
+     * shadow
+     */
+    if (Map.IsSidebarActive) {
+        const auto sidebar_x = SeenBuff.Get_Width() - (80 * RESFACTOR);
+
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 8 * RESFACTOR,
+                                 sidebar_x - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the sidebar and tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 sidebar_x - 1,
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+    } else {
+        if (Is_Width_Smaller_Than_Screen()) {
+            // fill all space to the right of the map, except the tabs
+            LogicPage->Fill_Rect(MapCellWidth * CELL_PIXEL_W,
+                                 8 * RESFACTOR,
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
+        }
+
+        if (Is_Height_Smaller_Than_Screen()) {
+            // fill all space below the map, except the tabs
+            LogicPage->Fill_Rect(0,
+                                 MapCellHeight * CELL_PIXEL_H,
+                                 SeenBuff.Get_Width(),
+                                 SeenBuff.Get_Height(),
+                                 BLACK);
         }
     }
 }

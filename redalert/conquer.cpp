@@ -208,6 +208,12 @@ void Main_Game(int argc, char* argv[])
 
         fade = true;
 
+        if (Map.Is_Smaller_Than_Screen()) {
+            Map.Set_View_Dimensions(0, 8 * RESFACTOR);
+            Map.Flag_To_Redraw(true);
+            Map.Render();
+        }
+
         /*
         ** Initialise the color lookup tables for the chronal vortex
         */
@@ -1903,6 +1909,13 @@ bool Main_Loop()
         Set_Video_Cursor_Clip(false);
         Do_Restart();
         Set_Video_Cursor_Clip(true);
+
+        if (Map.Is_Smaller_Than_Screen()) {
+            Map.Set_View_Dimensions(0, 8 * RESFACTOR);
+            Map.Flag_To_Redraw(true);
+            Map.Render();
+        }
+
         return (!GameActive);
     }
 
