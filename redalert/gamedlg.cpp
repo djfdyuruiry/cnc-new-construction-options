@@ -62,8 +62,8 @@ void GameControlsClass::Process(void)
     */
     int d_dialog_w = 232 * RESFACTOR;                            // dialog width
     int d_dialog_h = 141 * RESFACTOR;                            // dialog height
-    int d_dialog_x = ((SeenBuff.Get_Width() - d_dialog_w) / 2);  // dialog x-coord
-    int d_dialog_y = ((SeenBuff.Get_Height() - d_dialog_h) / 2); // centered y-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2);  // dialog x-coord
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(200 * RESFACTOR) - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);             // center x-coord
     int d_top_margin = 25 * RESFACTOR;
 

@@ -410,8 +410,9 @@ bool Start_Scenario(char* name, bool briefing)
         VisiblePage.Clear();
         Show_Mouse();
         Play_Movie(Scen.ActionMovie, Scen.TransitTheme);
-        Leave_Zoomed_Resolution_Mode();
     }
+
+    Leave_Zoomed_Resolution_Mode();
 
     if (Scen.TransitTheme == THEME_NONE) {
         Theme.Queue_Song(THEME_FIRST);

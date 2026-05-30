@@ -181,8 +181,8 @@ bool Receive_Remote_File(char* file_name, unsigned int file_length, int gametype
     */
     int d_dialog_w = 200 * RESFACTOR;                      // dialog width
     int d_dialog_h = 90 * RESFACTOR;                       // dialog height
-    int d_dialog_x = ((320 * RESFACTOR - d_dialog_w) / 2); // dialog x-coord
-    int d_dialog_y = ((200 * RESFACTOR - d_dialog_h) / 2); // centered y-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * RESFACTOR) - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(200 * RESFACTOR) - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);       // center x-coord
 
     int d_margin1 = 10;
@@ -455,8 +455,8 @@ bool Send_Remote_File(char* file_name, int gametype)
 
     int d_dialog_w = 240 * factor;                      // dialog width
     int d_dialog_h = 90 * factor;                       // dialog height
-    int d_dialog_x = ((320 * factor - d_dialog_w) / 2); // dialog x-coord
-    int d_dialog_y = ((200 * factor - d_dialog_h) / 2); // centered y-coord
+    int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(320 * factor) - d_dialog_w) / 2); // dialog x-coord
+    int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(200 * factor) - d_dialog_h) / 2); // centered y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);    // center x-coord
 
     int d_margin1 = 10;
