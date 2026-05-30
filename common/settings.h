@@ -10,7 +10,6 @@ public:
     SettingsClass();
 
     void Load(INIClass& ini);
-    void Load_Hi_Res(INIClass& ini);
     void Save(INIClass& ini);
 
     struct
