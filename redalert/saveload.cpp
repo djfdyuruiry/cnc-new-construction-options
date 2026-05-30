@@ -367,7 +367,11 @@ bool Save_Game(const char* file_name, const char* descr)
     /*
     **	Open the file
     */
+#ifdef REMASTER_BUILD
     CDFileClass file(file_name);
+#else
+    CDFileClass file(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name).c_str());
+#endif
 
     FilePipe fpipe(&file);
 #ifdef REMASTER_BUILD
@@ -518,7 +522,12 @@ bool Load_Game(const char* file_name)
     /*
     **	Open the file
     */
+#ifdef REMASTER_BUILD
     CDFileClass file(file_name);
+#else
+    CDFileClass file(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name).c_str());
+#endif
+
     if (!file.Is_Available()) {
         return (false);
     }
@@ -1438,7 +1447,12 @@ bool Get_Savefile_Info(int id, char* buf, unsigned* scenp, HousesType* housep)
     **	Generate the filename to load
     */
     sprintf(name, "SAVEGAME.%03d", id);
+
+#ifdef REMASTER_BUILD
     CDFileClass file(name);
+#else
+    CDFileClass file(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), name).c_str());
+#endif
 
     FileStraw straw(file);
 

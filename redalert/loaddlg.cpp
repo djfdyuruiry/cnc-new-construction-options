@@ -667,7 +667,12 @@ void LoadOptionsClass::Fill_List(ListClass* list)
     /*
     ** Find all savegame files
     */
-    snprintf(scan_path, sizeof(scan_path), "%s", Paths.Concatenate_Paths(Paths.User_Save_Path(), "SAVEGAME.*").c_str());
+    snprintf(
+        scan_path,
+        sizeof(scan_path),
+        "%s",
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), "SAVEGAME.*").c_str()
+    );
 
     found = Find_First(scan_path, 0, &ff);
     while (found) {
