@@ -45,6 +45,13 @@ public:
     bool HasTempleBeenHitWithIonCannon;
     int AreThingiesEnabledFlag;
 
+    // skirmish state
+
+    int MultiPlayerCount;
+    int MultiPlayerGhosts;
+    nlohmann::json MultiPlayerIds;
+    nlohmann::json MultiPlayerNames;
+
     nlohmann::json SelectedObjects;
     nlohmann::json Waypoints;
     nlohmann::json Views;
@@ -75,6 +82,10 @@ public:
         EndCountdownNumber,
         HasTempleBeenHitWithIonCannon,
         AreThingiesEnabledFlag,
+        MultiPlayerCount,
+        MultiPlayerGhosts,
+        MultiPlayerIds,
+        MultiPlayerNames,
         SelectedObjects,
         Waypoints,
         Views

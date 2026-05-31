@@ -26,6 +26,11 @@ void SaveGameScenarioState_v1::Read_Globals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
+    MultiPlayerCount = MPlayerCount;
+    MultiPlayerGhosts = MPlayerGhosts;
+    MultiPlayerIds = MPlayerID;
+    MultiPlayerNames = MPlayerNames;
+
     SelectedObjects = CurrentObject;
     Waypoints = Scen.Waypoint;
     Views = Scen.Views;
@@ -100,6 +105,61 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
             SelectedObjects.type_name()
         );
         result = false;
+    }
+
+    if (!MultiPlayerIds.is_array()) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.MultiPlayerIds save game value, expected array - actual type: {}",
+            MultiPlayerIds.type_name()
+        );
+        result = false;
+    } else if (MultiPlayerIds.size() > std::size(MPlayerID)) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.MultiPlayerIds save game value, expected an array with max {} elements - actual size: {}",
+            std::size(MPlayerID),
+            MultiPlayerIds.size()
+        );
+        result = false;
+    }
+
+    if (!MultiPlayerNames.is_array()) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.MultiPlayerNames save game value, expected array - actual type: {}",
+            MultiPlayerNames.type_name()
+        );
+        result = false;
+    } else if (MultiPlayerNames.size() > std::size(MPlayerNames)) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.MultiPlayerNames save game value, expected an array with max {} elements - actual size: {}",
+            std::size(MPlayerID),
+            MultiPlayerNames.size()
+        );
+        result = false;
+    } else {
+        for (auto i = 0 ; i < MultiPlayerNames.size(); i++) {
+            const auto& name_json = MultiPlayerNames.at(i);
+
+            if (!name_json.is_string()) {
+                CNC_LOGGER_ERROR(
+                    "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string - actual type: {}",
+                    i,
+                    name_json.type_name()
+                );
+                result = false;
+            }
+
+            const std::string name = name_json;
+
+            if (name.size() > std::size(MPlayerNames[i])) {
+                CNC_LOGGER_ERROR(
+                    "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string with maximum length of {} - actual size: {}",
+                    i,
+                    std::size(MPlayerNames[i]),
+                    name.size()
+                );
+                result = false;
+            }
+        }
     }
 
     if (!Waypoints.is_array()) {
@@ -182,6 +242,16 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     EndCountDown = EndCountdownNumber;
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
+
+    MPlayerCount = MultiPlayerCount;
+    MPlayerGhosts = MultiPlayerGhosts;
+    from_json(MultiPlayerIds, MPlayerID);
+
+    for (auto i = 0; i < std::size(MPlayerNames); i++) {
+        const std::string name = MultiPlayerNames.at(i);
+
+        strcpy(MPlayerNames[i], name.c_str());
+    }
 
     from_json(SelectedObjects, CurrentObject);
     from_json(Waypoints, Scen.Waypoint);

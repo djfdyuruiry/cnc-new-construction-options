@@ -453,17 +453,6 @@ bool Load_Game(const char* file_name)
 
     Fixup_Scenario();
 
-    if (GameToPlay != GAME_NORMAL) {
-        for (auto index = 0; index < Houses.Count(); index++) {
-            const auto house_ptr = Houses.Ptr(index);
-            const auto house_type = house_ptr->Class->House;
-
-            if (house_type >= HOUSE_MULTI1 && house_type <= HOUSE_MULTI6) {
-                house_ptr->Init_Data(house_ptr->RemapColor, house_ptr->ActLike, house_ptr->Credits);
-            }
-        }
-    }
-
     Load_INI_Rules_And_Lua();
 
     ScenarioInit = 0;
@@ -476,7 +465,8 @@ bool Load_Game(const char* file_name)
     ** can change colors, this fix only makes sense on multiplayer houses
     ** - mrparrot 07/12/2021
     */
-    for (HousesType house = HOUSE_MULTI1; house < MPlayerCount + MPlayerGhosts; house++) {
+    const auto max_multi_house = HOUSE_MULTI1 + MPlayerCount + MPlayerGhosts;
+    for (HousesType house = HOUSE_MULTI1; house < max_multi_house; house++) {
         HouseClass* hptr = HouseClass::As_Pointer(house);
         if (hptr && hptr->IsActive) {
             hptr->Init_Data(hptr->RemapColor, hptr->ActLike, hptr->Credits);
