@@ -46,6 +46,7 @@ public:
     int AreThingiesEnabledFlag;
 
     // skirmish state
+
     int MultiPlayerCount;
     int MultiPlayerGhosts;
     bool MultiPlayerBases;
@@ -60,6 +61,7 @@ public:
     nlohmann::json MultiPlayerHouses;
 
     // map state
+
     nlohmann::json SelectedObjects;
     nlohmann::json Waypoints;
     nlohmann::json Views;
@@ -184,18 +186,6 @@ public:
     // TODO: Remove all MPlayer fields, these are absorbed into main save game sceanrio now
     nlohmann::json RemasterMPlayerIsHuman;
     nlohmann::json PlacementType;
-    int RemasterMPlayerCount;
-    bool RemasterMPlayerBases;
-    int RemasterMPlayerCredits;
-    int RemasterMPlayerTiberium;
-    int RemasterMPlayerGoodies;
-    int RemasterMPlayerGhosts;
-    int RemasterMPlayerSolo;
-    int RemasterMPlayerUnitCount;
-    unsigned char RemasterMPlayerLocalID;
-    nlohmann::json RemasterMPlayerHouses;
-    nlohmann::json RemasterMPlayerNames;
-    nlohmann::json RemasterMPlayerID;
     nlohmann::json MultiplayerSidebars;
     nlohmann::json RemasterSpecial;
     bool NotAllowSuperWeapons;
@@ -211,18 +201,6 @@ public:
         RemasterClientSidebarWidthInLeptons,
         RemasterMPlayerIsHuman,
         PlacementType,
-        RemasterMPlayerCount,
-        RemasterMPlayerBases,
-        RemasterMPlayerCredits,
-        RemasterMPlayerTiberium,
-        RemasterMPlayerGoodies,
-        RemasterMPlayerGhosts,
-        RemasterMPlayerSolo,
-        RemasterMPlayerUnitCount,
-        RemasterMPlayerLocalID,
-        RemasterMPlayerHouses,
-        RemasterMPlayerNames,
-        RemasterMPlayerID,
         MultiplayerSidebars,
         RemasterSpecial,
         NotAllowSuperWeapons

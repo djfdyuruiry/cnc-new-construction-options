@@ -7776,24 +7776,6 @@ void SaveGameRemasterState_v1::Read_Dll_State()
         PlacementType.emplace_back(TdTypeConverter::Techno_Type_To_Reference_Json(building_type));
     }
 
-    RemasterMPlayerCount = MPlayerCount;
-    RemasterMPlayerBases = MPlayerBases;
-    RemasterMPlayerCredits = MPlayerCredits;
-    RemasterMPlayerTiberium = MPlayerTiberium;
-    RemasterMPlayerGoodies = MPlayerGoodies;
-    RemasterMPlayerGhosts = MPlayerGhosts;
-    RemasterMPlayerSolo = MPlayerSolo;
-    RemasterMPlayerUnitCount = MPlayerUnitCount;
-    RemasterMPlayerLocalID = MPlayerLocalID;
-
-    RemasterMPlayerHouses = nlohmann::json::array();
-    for (const auto& house : MPlayerHouses) {
-        RemasterMPlayerHouses.emplace_back(TdTypeConverter::To_String(house));
-    }
-
-    RemasterMPlayerNames = MPlayerNames;
-    RemasterMPlayerID = MPlayerID;
-
     MultiplayerSidebars = nlohmann::json::array();
 
     for (const auto& sidebar : DLLExportClass::MultiplayerSidebars) {
@@ -7815,10 +7797,8 @@ bool SaveGameRemasterState_v1::Validate() const
         {NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs},
         {NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman},
         {NAMEOF(PlacementType), PlacementType},
-        {NAMEOF(RemasterMPlayerHouses), RemasterMPlayerHouses},
-        {NAMEOF(RemasterMPlayerNames), RemasterMPlayerNames},
-        {NAMEOF(RemasterMPlayerID), RemasterMPlayerID},
-        {NAMEOF(MultiplayerSidebars), MultiplayerSidebars}};
+        {NAMEOF(MultiplayerSidebars), MultiplayerSidebars}
+};
 
     for (const auto& [field, json_value] : player_fields) {
         if (!json_value.is_array()) {
@@ -7829,7 +7809,7 @@ bool SaveGameRemasterState_v1::Validate() const
         } else if (json_value.size() != MAX_PLAYERS) {
             result = false;
             CNC_LOGGER_ERROR(
-                "Invalid RemasterState.{} save game value - json array with max size of {} expected, actual size: {}",
+                "Invalid RemasterState.{} save game value - expected json array of size {}, actual size: {}",
                 field,
                 MAX_PLAYERS,
                 json_value.size());
@@ -7870,40 +7850,6 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
             std::format("{}", i),
             DLLExportClass::PlacementType[i]);
     }
-
-    MPlayerCount = RemasterMPlayerCount;
-    MPlayerBases = RemasterMPlayerBases;
-    MPlayerCredits = RemasterMPlayerCredits;
-    MPlayerTiberium = RemasterMPlayerTiberium;
-    MPlayerGoodies = RemasterMPlayerGoodies;
-    MPlayerGhosts = RemasterMPlayerGhosts;
-    MPlayerSolo = RemasterMPlayerSolo;
-    MPlayerUnitCount = RemasterMPlayerUnitCount;
-    MPlayerLocalID = RemasterMPlayerLocalID;
-
-    for (auto i = 0; i < RemasterMPlayerHouses.size(); i++) {
-        MPlayerHouses[i] = TdTypeConverter::Load_Value_From_Json<HousesType>(
-            RemasterMPlayerHouses.at(i),
-            std::format("RemasterState.{}", NAMEOF(RemasterMPlayerHouses)),
-            std::format("{}", i));
-    }
-
-    // copy RemasterMPlayerNames[] JSON string character data into MPlayerNames[]
-    for (auto i = 0; i < RemasterMPlayerNames.size(); i++) {
-        auto json_name = RemasterMPlayerNames.at(i);
-
-        if (!json_name.is_string()) {
-            MPlayerNames[i][0] = '\0';
-            continue;
-        }
-
-        auto name = json_name.get<std::string>();
-
-        strcpy(MPlayerNames[i], name.c_str());
-        MPlayerNames[i][11] = '\0';
-    }
-
-    from_json(RemasterMPlayerID, MPlayerID);
 
     from_json(MultiplayerSidebars, DLLExportClass::MultiplayerSidebars);
 

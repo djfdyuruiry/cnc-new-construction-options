@@ -48,11 +48,11 @@ void SaveGameScenarioState_v1::Read_Globals()
     Views = Scen.Views;
 }
 
-// TODO: Full skirmish state validation
 bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
 {
     auto result = true;
 
+    // ini file values
     if (!TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection)) {
         CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioDirection save game value: {}", ScenarioDirection);
         result = false;
@@ -102,6 +102,7 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
         result = false;
     }
 
+    // game settings
     if (!TdTypeConverter::Try_Parse<DiffType>(AiDifficulty).has_value()) {
         CNC_LOGGER_ERROR("Unable to parse ScenarioState.AiDifficulty save game value: {}", AiDifficulty);
         result = false;
@@ -112,67 +113,61 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
         result = false;
     }
 
+    // skirmish state
+    std::map<std::string, nlohmann::json> player_fields = {
+        {NAMEOF(MultiPlayerIds), MultiPlayerIds},
+        {NAMEOF(MultiPlayerNames), MultiPlayerNames},
+        {NAMEOF(MultiPlayerHouses), MultiPlayerHouses},
+    };
+
+    for (const auto& [field, json_value] : player_fields) {
+        if (!json_value.is_array()) {
+            result = false;
+            CNC_LOGGER_ERROR("Invalid ScenarioState.{} save game value - json array expected, actual type: {}",
+                             field,
+                             json_value.type_name());
+        } else if (json_value.size() != MAX_PLAYERS) {
+            result = false;
+            CNC_LOGGER_ERROR(
+                "Invalid ScenarioState.{} save game value - expected json array of size {}, actual size: {}",
+                field,
+                MAX_PLAYERS,
+                json_value.size());
+        } else  if (field == NAMEOF(MultiPlayerNames)) {
+            for (auto i = 0 ; i < json_value.size(); i++) {
+                const auto& name_json = json_value.at(i);
+
+                if (!name_json.is_string()) {
+                    CNC_LOGGER_ERROR(
+                        "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string - actual type: {}",
+                        i,
+                        name_json.type_name()
+                    );
+                    result = false;
+                }
+
+                const std::string name = name_json;
+
+                if (name.size() > std::size(MPlayerNames[i])) {
+                    CNC_LOGGER_ERROR(
+                        "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string with maximum length of {} - actual size: {}",
+                        i,
+                        std::size(MPlayerNames[i]),
+                        name.size()
+                    );
+                    result = false;
+                }
+            }
+        }
+    }
+
+    // map state
     if (!SelectedObjects.is_object()) {
         CNC_LOGGER_ERROR(
             "Invalid ScenarioState.SelectedObjects save game value, expected object - actual type: {}",
             SelectedObjects.type_name()
         );
         result = false;
-    }
-
-    if (!MultiPlayerIds.is_array()) {
-        CNC_LOGGER_ERROR(
-            "Invalid ScenarioState.MultiPlayerIds save game value, expected array - actual type: {}",
-            MultiPlayerIds.type_name()
-        );
-        result = false;
-    } else if (MultiPlayerIds.size() > std::size(MPlayerID)) {
-        CNC_LOGGER_ERROR(
-            "Invalid ScenarioState.MultiPlayerIds save game value, expected an array with max {} elements - actual size: {}",
-            std::size(MPlayerID),
-            MultiPlayerIds.size()
-        );
-        result = false;
-    }
-
-    if (!MultiPlayerNames.is_array()) {
-        CNC_LOGGER_ERROR(
-            "Invalid ScenarioState.MultiPlayerNames save game value, expected array - actual type: {}",
-            MultiPlayerNames.type_name()
-        );
-        result = false;
-    } else if (MultiPlayerNames.size() > std::size(MPlayerNames)) {
-        CNC_LOGGER_ERROR(
-            "Invalid ScenarioState.MultiPlayerNames save game value, expected an array with max {} elements - actual size: {}",
-            std::size(MPlayerID),
-            MultiPlayerNames.size()
-        );
-        result = false;
-    } else {
-        for (auto i = 0 ; i < MultiPlayerNames.size(); i++) {
-            const auto& name_json = MultiPlayerNames.at(i);
-
-            if (!name_json.is_string()) {
-                CNC_LOGGER_ERROR(
-                    "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string - actual type: {}",
-                    i,
-                    name_json.type_name()
-                );
-                result = false;
-            }
-
-            const std::string name = name_json;
-
-            if (name.size() > std::size(MPlayerNames[i])) {
-                CNC_LOGGER_ERROR(
-                    "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string with maximum length of {} - actual size: {}",
-                    i,
-                    std::size(MPlayerNames[i]),
-                    name.size()
-                );
-                result = false;
-            }
-        }
     }
 
     if (!Waypoints.is_array()) {
@@ -269,18 +264,16 @@ bool SaveGameScenarioState_v1::Write_Globals() const
 
     // load MPlayerNames C strings from JSON string data
     for (auto i = 0; i < std::size(MPlayerNames); i++) {
-        strcpy(
-            MPlayerNames[i],
-            MultiPlayerNames.at(i).get<std::string>().c_str()
-        );
+        const std::string player_name = MultiPlayerNames.at(i);
+
+        strcpy(MPlayerNames[i], player_name.c_str());
     }
 
     // load MPlayerNames C strings from JSON string data
     for (auto i = 0; i < std::size(MPlayerHouses); i++) {
-        MPlayerHouses[i] = TdTypeConverter::Assert_Parse<HousesType>(
-            MultiPlayerHouses.at(i).get<std::string>(),
-            ""
-        );
+        const std::string player_house = MultiPlayerHouses.at(i);
+
+        MPlayerHouses[i] = TdTypeConverter::Try_Parse<HousesType>(player_house).value();
     }
 
     from_json(SelectedObjects, CurrentObject);
