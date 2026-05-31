@@ -180,13 +180,12 @@ private:
 class SaveGameRemasterState_v1
 {
 public:
-    nlohmann::json MultiplayerStartPositions;
+    nlohmann::json RemasterMultiplayerStartPositions;
     nlohmann::json RemasterPlayerIDs;
     int RemasterClientSidebarWidthInLeptons;
-    // TODO: Remove all MPlayer fields, these are absorbed into main save game sceanrio now
     nlohmann::json RemasterMPlayerIsHuman;
-    nlohmann::json PlacementType;
-    nlohmann::json MultiplayerSidebars;
+    nlohmann::json RemasterPlacementType;
+    nlohmann::json RemasterMultiplayerSidebars;
     nlohmann::json RemasterSpecial;
     bool NotAllowSuperWeapons;
 
@@ -196,12 +195,12 @@ public:
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGameRemasterState_v1,
-        MultiplayerStartPositions,
+        RemasterMultiplayerStartPositions,
         RemasterPlayerIDs,
         RemasterClientSidebarWidthInLeptons,
         RemasterMPlayerIsHuman,
-        PlacementType,
-        MultiplayerSidebars,
+        RemasterPlacementType,
+        RemasterMultiplayerSidebars,
         RemasterSpecial,
         NotAllowSuperWeapons
     )
