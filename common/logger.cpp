@@ -89,10 +89,6 @@ std::shared_ptr<spdlog::logger> CncLogger::operator()() const
 {
     auto logger = spdlog::get(Name);
 
-#ifdef REMASTER_BUILD
-    logger->flush();
-#endif
-
     return logger;
 }
 
@@ -122,6 +118,13 @@ std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string 
         spdlog::async_overflow_policy::block
     );
 
+#ifndef REMASTER_BUILD
+    // ensure any error/critical messages trigger a flush, due to increased likelyhood that the process might crash
+    logger->flush_on(spdlog::level::err);
+#else
+    // BUG: not all log messages reach the file in remaster, so make everything other than debug/trace trigger a flush
+    logger->flush_on(spdlog::level::info);
+#endif
     return logger;
 }
 
@@ -136,11 +139,14 @@ void CncLogger::Init_SpdLog()
 
     spdlog::init_thread_pool(8192, 1);
 
+// remaster dll has no stdout handle, so disable console logging in that build
+#ifndef REMASTER_BUILD
     // console logging
     auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     stdout_sink->set_pattern("%^%L [%=15!n] %v%$");
 
     Sinks.emplace_back(std::move(stdout_sink));
+#endif
 
     // create log file in user path, filename matches program binary (nco-td.log, TIBERIANDAWN.DLL.log etc.)
     const auto log_file_name = std::format("{}.log", PathsClass::Try_Get_Program_Binary_Name());
