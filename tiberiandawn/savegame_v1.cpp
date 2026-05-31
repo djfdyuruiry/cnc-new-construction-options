@@ -28,14 +28,27 @@ void SaveGameScenarioState_v1::Read_Globals()
 
     MultiPlayerCount = MPlayerCount;
     MultiPlayerGhosts = MPlayerGhosts;
+    MultiPlayerBases = MPlayerCount;
+    MultiPlayerCredits = MPlayerGhosts;
+    MultiPlayerTiberium = MPlayerBases;
+    MultiPlayerGoodies = MPlayerCredits;
+    MultiPlayerSolo = MPlayerTiberium;
+    MultiPlayerUnitCount = MPlayerGoodies;
+    MultiPlayerLocalID = MPlayerLocalID;
     MultiPlayerIds = MPlayerID;
     MultiPlayerNames = MPlayerNames;
+
+    MultiPlayerHouses = nlohmann::json::array();
+    for (const auto& house : MPlayerHouses) {
+        MultiPlayerHouses.push_back(TdTypeConverter::To_String(house));
+    }
 
     SelectedObjects = CurrentObject;
     Waypoints = Scen.Waypoint;
     Views = Scen.Views;
 }
 
+// TODO: Full skirmish state validation
 bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
 {
     auto result = true;
@@ -245,12 +258,29 @@ bool SaveGameScenarioState_v1::Write_Globals() const
 
     MPlayerCount = MultiPlayerCount;
     MPlayerGhosts = MultiPlayerGhosts;
+    MPlayerCount = MultiPlayerBases;
+    MPlayerGhosts = MultiPlayerCredits;
+    MPlayerBases = MultiPlayerTiberium;
+    MPlayerCredits = MultiPlayerGoodies;
+    MPlayerTiberium = MultiPlayerSolo;
+    MPlayerGoodies = MultiPlayerUnitCount;
+    MPlayerLocalID = MultiPlayerLocalID;
     from_json(MultiPlayerIds, MPlayerID);
 
+    // load MPlayerNames C strings from JSON string data
     for (auto i = 0; i < std::size(MPlayerNames); i++) {
-        const std::string name = MultiPlayerNames.at(i);
+        strcpy(
+            MPlayerNames[i],
+            MultiPlayerNames.at(i).get<std::string>().c_str()
+        );
+    }
 
-        strcpy(MPlayerNames[i], name.c_str());
+    // load MPlayerNames C strings from JSON string data
+    for (auto i = 0; i < std::size(MPlayerHouses); i++) {
+        MPlayerHouses[i] = TdTypeConverter::Assert_Parse<HousesType>(
+            MultiPlayerHouses.at(i).get<std::string>(),
+            ""
+        );
     }
 
     from_json(SelectedObjects, CurrentObject);

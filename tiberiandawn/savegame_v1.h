@@ -46,12 +46,20 @@ public:
     int AreThingiesEnabledFlag;
 
     // skirmish state
-
     int MultiPlayerCount;
     int MultiPlayerGhosts;
+    bool MultiPlayerBases;
+    int MultiPlayerCredits;
+    int MultiPlayerTiberium;
+    int MultiPlayerGoodies;
+    int MultiPlayerSolo;
+    int MultiPlayerUnitCount;
+    unsigned char MultiPlayerLocalID;
     nlohmann::json MultiPlayerIds;
     nlohmann::json MultiPlayerNames;
+    nlohmann::json MultiPlayerHouses;
 
+    // map state
     nlohmann::json SelectedObjects;
     nlohmann::json Waypoints;
     nlohmann::json Views;
@@ -84,8 +92,16 @@ public:
         AreThingiesEnabledFlag,
         MultiPlayerCount,
         MultiPlayerGhosts,
+        MultiPlayerBases,
+        MultiPlayerCredits,
+        MultiPlayerTiberium,
+        MultiPlayerGoodies,
+        MultiPlayerSolo,
+        MultiPlayerUnitCount,
+        MultiPlayerLocalID,
         MultiPlayerIds,
         MultiPlayerNames,
+        MultiPlayerHouses,
         SelectedObjects,
         Waypoints,
         Views
@@ -165,6 +181,7 @@ public:
     nlohmann::json MultiplayerStartPositions;
     nlohmann::json RemasterPlayerIDs;
     int RemasterClientSidebarWidthInLeptons;
+    // TODO: Remove all MPlayer fields, these are absorbed into main save game sceanrio now
     nlohmann::json RemasterMPlayerIsHuman;
     nlohmann::json PlacementType;
     int RemasterMPlayerCount;
