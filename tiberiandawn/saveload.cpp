@@ -370,6 +370,7 @@ bool Load_Game(const char* file_name)
     // we are about to load a scenario, which means the FROM_JSON methods will run and some of these call
     // TabClass::One_Time and it's associated base class methods - these depend on the excepted resolution being set to
     // calculate constants correctly, so zoom out
+    const auto resolution_mode = Get_Current_Resolution_Mode();
     Leave_Zoomed_Resolution_Mode();
     Call_Back();
 
@@ -381,6 +382,7 @@ bool Load_Game(const char* file_name)
 #endif
 
     if (!save_header.has_value()) {
+        Set_Current_Resolution_Mode(resolution_mode);
         return false;
     }
 
@@ -412,6 +414,7 @@ bool Load_Game(const char* file_name)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
+        Set_Current_Resolution_Mode(resolution_mode);
         Raise_Fatal_CD_Error(NAMEOF(Load_Game), RequiredCD);
         return false;
     }
@@ -453,21 +456,6 @@ bool Load_Game(const char* file_name)
     Load_INI_Rules_And_Lua();
 
     ScenarioInit = 0;
-
-    /*
-    ** Fixup remap tables. ST - 2/28/2020 1:50PM
-    ** Only fixup remap of multiplayer houses. On non-remaster renderer, remapping
-    ** Nod breaks Nod radar color because it gets remapped to its primary color,
-    ** which is LTBLUE where it is supposed to be RED. Since only multiplayer colors
-    ** can change colors, this fix only makes sense on multiplayer houses
-    ** - mrparrot 07/12/2021
-    */
-    for (HousesType house = HOUSE_MULTI1; house < MPlayerCount + MPlayerGhosts; house++) {
-        HouseClass* hptr = HouseClass::As_Pointer(house);
-        if (hptr && hptr->IsActive) {
-            hptr->Init_Data(hptr->RemapColor, hptr->ActLike, hptr->Credits);
-        }
-    }
 
 #ifdef DEMO
     if (Scen.Scenario != 10 && Scen.Scenario != 1 && Scen.Scenario != 6) {
@@ -557,6 +545,7 @@ bool Load_Game_Binary(const char* file_name)
 
     // we are about to load a scenario, which means Map.Load will call TabClass::One_Time and the base class methods
     // - these depend on the excepted resolution being set to calculate constants correctly, so zoom out
+    const auto resolution_mode = Get_Current_Resolution_Mode();
     Leave_Zoomed_Resolution_Mode();
 
     Call_Back();
@@ -583,6 +572,7 @@ bool Load_Game_Binary(const char* file_name)
         }
     }
     if (!Force_CD_Available(RequiredCD)) {
+        Set_Current_Resolution_Mode(resolution_mode);
         Raise_Fatal_CD_Error(NAMEOF(Load_Game_Binary), RequiredCD);
         return false;
     }
@@ -606,6 +596,7 @@ bool Load_Game_Binary(const char* file_name)
         || !Overlays.Load(file) || !Smudges.Load(file) || !Templates.Load(file) || !Terrains.Load(file)
         || !Units.Load(file) || !Factories.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -615,11 +606,13 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Logic.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
     for (i = 0; i < LAYER_COUNT; i++) {
         if (!Map.Layer[i].Load(file)) {
             file.Close();
+            Set_Current_Resolution_Mode(resolution_mode);
             return (false);
         }
     }
@@ -630,6 +623,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Score.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -638,6 +632,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Base.Load(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -646,6 +641,7 @@ bool Load_Game_Binary(const char* file_name)
     */
     if (!Load_Misc_Values(file)) {
         file.Close();
+        Set_Current_Resolution_Mode(resolution_mode);
         return (false);
     }
 
@@ -1132,6 +1128,21 @@ void Decode_All_Pointers(const HousesType& player_house)
         Map.PendingObject = nullptr;
         Map.Set_Cursor_Shape(nullptr);
     }
+
+    /*
+    ** Fixup remap tables. ST - 2/28/2020 1:50PM
+    ** Only fixup remap of multiplayer houses. On non-remaster renderer, remapping
+    ** Nod breaks Nod radar color because it gets remapped to its primary color,
+    ** which is LTBLUE where it is supposed to be RED. Since only multiplayer colors
+    ** can change colors, this fix only makes sense on multiplayer houses
+    ** - mrparrot 07/12/2021
+    */
+    for (HousesType house = HOUSE_MULTI1; house <= HOUSE_MULTI6; house++) {
+        HouseClass* hptr = HouseClass::As_Pointer(house);
+        if (hptr && hptr->IsActive) {
+            hptr->Init_Data(hptr->RemapColor, hptr->ActLike, hptr->Credits);
+        }
+    }
 }
 
 void Decode_All_Pointers_Binary()
@@ -1270,7 +1281,7 @@ void Decode_All_Pointers_Binary()
  * HISTORY:                                                                *
  *   01/12/1995 BR : Created.                                              *
  *=========================================================================*/
-bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep)
+bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep, GameType& game_type)
 {
     const auto file_name = std::format("SAVEGAME.{:03d}", id);
 
@@ -1286,6 +1297,8 @@ bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& ho
     housep = header->Parse_Player_House_Type();
 
     strcpy(buf, header->Description.c_str());
+
+    game_type = header->Parse_Game_Type();
 
     return true;
 }

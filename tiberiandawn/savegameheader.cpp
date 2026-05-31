@@ -21,7 +21,13 @@ bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
     try {
         from_json(nlohmann::json::parse(header_line), output);
 
-        return output.Validate();
+        const auto validate_result =  output.Validate();
+
+        if (!validate_result) {
+            CNC_LOGGER_ERROR("Save game header is invalid");
+        }
+
+        return validate_result;
     } catch (const CncJsonException& e) {
         error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
@@ -56,6 +62,7 @@ bool SaveGameHeader::From_File(const std::string& path, SaveGameHeader& output)
 
 void SaveGameHeader::Read_Globals()
 {
+    ScenarioGameType = TdTypeConverter::To_String(GameToPlay);
     ScenarioID = Scen.Scenario;
     PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
     PlayerType = TdTypeConverter::To_String(ScenPlayer);
@@ -67,6 +74,16 @@ bool SaveGameHeader::Validate() const
 
     if (CncStringUtils::Is_Blank(Version)) {
         CNC_LOGGER_ERROR("Blank/missing Header.Version save game value");
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<GameType>(ScenarioGameType)) {
+        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioGameType save game value: {}", ScenarioGameType);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
+        CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
         result = false;
     }
 
@@ -91,10 +108,19 @@ bool SaveGameHeader::Validate() const
 bool SaveGameHeader::Write_Globals() const
 {
     Scen.Scenario = ScenarioID;
+    GameToPlay = Parse_Game_Type();
     ScenPlayer = Parse_Player_Type();
     Whom = Parse_Player_House_Type();
 
     return true;
+}
+
+GameType SaveGameHeader::Parse_Game_Type() const
+{
+    return TdTypeConverter::Assert_Parse<GameType>(
+        ScenarioGameType,
+        "Attempted to parse invalid Header.ScenarioGameType save game value: {}"
+    );
 }
 
 HousesType SaveGameHeader::Parse_Player_House_Type() const

@@ -80,19 +80,23 @@ void GameOptionsClass::Adjust_Variables_For_Resolution(void)
  *=============================================================================================*/
 void GameOptionsClass::Process(void)
 {
+    // only JSON saves support skirmish games, so hide save/load menu items if game is using legacy binary format
+    const auto save_load_enabled_for_skirmish = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE);
+
     static struct
     {
         int ID;         // Button ID to use.
         int Text;       // Text number to use for this button.
         bool Multiplay; // Allowed in multiplayer version?
+        bool Skirmish; // Allowed in skirmish missions?
     } _constants[] = {
-        {BUTTON_LOAD, TXT_LOAD_MISSION, false},
-        {BUTTON_SAVE, TXT_SAVE_MISSION, false},
-        {BUTTON_DELETE, TXT_DELETE_MISSION, true},
-        {BUTTON_GAME, TXT_GAME_CONTROLS, true},
-        {BUTTON_QUIT, TXT_QUIT_MISSION, true},
-        {BUTTON_RESUME, TXT_RESUME_MISSION, true},
-        {BUTTON_RESTATE, TXT_RESTATE_MISSION, false},
+        {BUTTON_LOAD, TXT_LOAD_MISSION, false, save_load_enabled_for_skirmish},
+        {BUTTON_SAVE, TXT_SAVE_MISSION, false, save_load_enabled_for_skirmish},
+        {BUTTON_DELETE, TXT_DELETE_MISSION, false, save_load_enabled_for_skirmish},
+        {BUTTON_GAME, TXT_GAME_CONTROLS, true, true},
+        {BUTTON_QUIT, TXT_QUIT_MISSION, true, true},
+        {BUTTON_RESUME, TXT_RESUME_MISSION, true, true},
+        {BUTTON_RESTATE, TXT_RESTATE_MISSION, false, false},
     };
 
     /*
@@ -117,7 +121,11 @@ void GameOptionsClass::Process(void)
         int text = _constants[index].Text;
         buttonsel[index] = NULL;
 
-        if (GameToPlay != GAME_NORMAL && !_constants[index].Multiplay) {
+        const auto enabled_flag = GameToPlay == GAME_SKIRMISH
+            ? _constants[index].Skirmish
+            : _constants[index].Multiplay;
+
+        if (GameToPlay != GAME_NORMAL && !enabled_flag) {
             buttonsel[index] = 0;
             continue;
         }

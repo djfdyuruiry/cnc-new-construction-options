@@ -26,15 +26,33 @@ void SaveGameScenarioState_v1::Read_Globals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
+    MultiPlayerCount = MPlayerCount;
+    MultiPlayerGhosts = MPlayerGhosts;
+    MultiPlayerBases = MPlayerCount;
+    MultiPlayerCredits = MPlayerGhosts;
+    MultiPlayerTiberium = MPlayerBases;
+    MultiPlayerGoodies = MPlayerCredits;
+    MultiPlayerSolo = MPlayerTiberium;
+    MultiPlayerUnitCount = MPlayerGoodies;
+    MultiPlayerLocalID = MPlayerLocalID;
+    MultiPlayerIds = MPlayerID;
+    MultiPlayerNames = MPlayerNames;
+
+    MultiPlayerHouses = nlohmann::json::array();
+    for (const auto& house : MPlayerHouses) {
+        MultiPlayerHouses.push_back(TdTypeConverter::To_String(house));
+    }
+
     SelectedObjects = CurrentObject;
     Waypoints = Scen.Waypoint;
     Views = Scen.Views;
 }
 
-bool SaveGameScenarioState_v1::Validate() const
+bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
 {
     auto result = true;
 
+    // ini file values
     if (!TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection)) {
         CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioDirection save game value: {}", ScenarioDirection);
         result = false;
@@ -57,6 +75,12 @@ bool SaveGameScenarioState_v1::Validate() const
     for (const auto& [field, value] : stringFields) {
         const auto bufferSize = GlobalBufferSizes.at(field);
 
+        if (scenario_game_type == GAME_SKIRMISH && field == NAMEOF(BriefText)) {
+            // don't validate briefing text for Skirmish scenarios
+            continue;
+        }
+
+        // BriefText is blank in Skirmish scenarios
         if (CncStringUtils::Is_Blank(value)) {
             CNC_LOGGER_ERROR("Blank/missing ScenarioState.{} save game value", field);
 
@@ -78,6 +102,7 @@ bool SaveGameScenarioState_v1::Validate() const
         result = false;
     }
 
+    // game settings
     if (!TdTypeConverter::Try_Parse<DiffType>(AiDifficulty).has_value()) {
         CNC_LOGGER_ERROR("Unable to parse ScenarioState.AiDifficulty save game value: {}", AiDifficulty);
         result = false;
@@ -88,6 +113,55 @@ bool SaveGameScenarioState_v1::Validate() const
         result = false;
     }
 
+    // skirmish state
+    std::map<std::string, nlohmann::json> player_fields = {
+        {NAMEOF(MultiPlayerIds), MultiPlayerIds},
+        {NAMEOF(MultiPlayerNames), MultiPlayerNames},
+        {NAMEOF(MultiPlayerHouses), MultiPlayerHouses},
+    };
+
+    for (const auto& [field, json_value] : player_fields) {
+        if (!json_value.is_array()) {
+            result = false;
+            CNC_LOGGER_ERROR("Invalid ScenarioState.{} save game value - json array expected, actual type: {}",
+                             field,
+                             json_value.type_name());
+        } else if (json_value.size() != MAX_PLAYERS) {
+            result = false;
+            CNC_LOGGER_ERROR(
+                "Invalid ScenarioState.{} save game value - expected json array of size {}, actual size: {}",
+                field,
+                MAX_PLAYERS,
+                json_value.size());
+        } else  if (field == NAMEOF(MultiPlayerNames)) {
+            for (auto i = 0 ; i < json_value.size(); i++) {
+                const auto& name_json = json_value.at(i);
+
+                if (!name_json.is_string()) {
+                    CNC_LOGGER_ERROR(
+                        "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string - actual type: {}",
+                        i,
+                        name_json.type_name()
+                    );
+                    result = false;
+                }
+
+                const std::string name = name_json;
+
+                if (name.size() > std::size(MPlayerNames[i])) {
+                    CNC_LOGGER_ERROR(
+                        "Invalid ScenarioState.MultiPlayerNames[{}] save game value, expected string with maximum length of {} - actual size: {}",
+                        i,
+                        std::size(MPlayerNames[i]),
+                        name.size()
+                    );
+                    result = false;
+                }
+            }
+        }
+    }
+
+    // map state
     if (!SelectedObjects.is_object()) {
         CNC_LOGGER_ERROR(
             "Invalid ScenarioState.SelectedObjects save game value, expected object - actual type: {}",
@@ -147,7 +221,7 @@ ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
 
 bool SaveGameScenarioState_v1::Write_Globals() const
 {
-    if (!Validate()) {
+    if (!Validate(GameToPlay)) {
         CNC_LOGGER_ERROR("Refusing to write globals from invalid save data");
         return false;
     }
@@ -176,6 +250,31 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     EndCountDown = EndCountdownNumber;
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
+
+    MPlayerCount = MultiPlayerCount;
+    MPlayerGhosts = MultiPlayerGhosts;
+    MPlayerCount = MultiPlayerBases;
+    MPlayerGhosts = MultiPlayerCredits;
+    MPlayerBases = MultiPlayerTiberium;
+    MPlayerCredits = MultiPlayerGoodies;
+    MPlayerTiberium = MultiPlayerSolo;
+    MPlayerGoodies = MultiPlayerUnitCount;
+    MPlayerLocalID = MultiPlayerLocalID;
+    from_json(MultiPlayerIds, MPlayerID);
+
+    // load MPlayerNames C strings from JSON string data
+    for (auto i = 0; i < std::size(MPlayerNames); i++) {
+        const std::string player_name = MultiPlayerNames.at(i);
+
+        strcpy(MPlayerNames[i], player_name.c_str());
+    }
+
+    // load MPlayerNames C strings from JSON string data
+    for (auto i = 0; i < std::size(MPlayerHouses); i++) {
+        const std::string player_house = MultiPlayerHouses.at(i);
+
+        MPlayerHouses[i] = TdTypeConverter::Try_Parse<HousesType>(player_house).value();
+    }
 
     from_json(SelectedObjects, CurrentObject);
     from_json(Waypoints, Scen.Waypoint);
@@ -299,9 +398,11 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
     // open file stream
     auto save_file_stream = std::ifstream(full_path);
 
-    // read header (discarded)
+    // read header
     SaveGameHeader header;
-    SaveGameHeader::From_Stream(save_file_stream, header);
+    if (!SaveGameHeader::From_Stream(save_file_stream, header)) {
+        return false;
+    }
 
     // read SaveGame JSON
     std::string save_line;
@@ -318,7 +419,7 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
     try {
         from_json(nlohmann::json::parse(save_line), *this);
 
-        return Validate();
+        return Validate(header.Parse_Game_Type());
     } catch (const CncJsonException& e) {
         error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
@@ -350,11 +451,11 @@ void SaveGame_v1::Read_Globals()
 #endif
 }
 
-bool SaveGame_v1::Validate() const
+bool SaveGame_v1::Validate(const GameType scenario_game_type) const
 {
     auto result = true;
 
-    result = ScenarioState.Validate() && result;
+    result = ScenarioState.Validate(scenario_game_type) && result;
     result = Objects.Validate() && result;
 
     if (!GameCellTriggers.is_object()) {
@@ -454,7 +555,7 @@ bool SaveGame_v1::Validate() const
 
 bool SaveGame_v1::Write_Globals() const
 {
-    if (!Validate()) {
+    if (!Validate(GameToPlay)) {
         CNC_LOGGER_ERROR("Refusing to write to globals from invalid save data");
         return false;
     }
@@ -496,7 +597,7 @@ bool SaveGame_v1::To_File(CDFileClass& save_file, const SaveGameHeader& header) 
         return false;
     }
 
-    if (!header.Validate() || !Validate()) {
+    if (!header.Validate() || !Validate(header.Parse_Game_Type())) {
         save_file.Delete();
         return false;
     }

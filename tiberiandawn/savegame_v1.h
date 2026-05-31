@@ -17,6 +17,7 @@
 class SaveGameScenarioState_v1
 {
 public:
+
     // ini file values
 
     int ScenarioNumber;
@@ -44,12 +45,29 @@ public:
     bool HasTempleBeenHitWithIonCannon;
     int AreThingiesEnabledFlag;
 
+    // skirmish state
+
+    int MultiPlayerCount;
+    int MultiPlayerGhosts;
+    bool MultiPlayerBases;
+    int MultiPlayerCredits;
+    int MultiPlayerTiberium;
+    int MultiPlayerGoodies;
+    int MultiPlayerSolo;
+    int MultiPlayerUnitCount;
+    unsigned char MultiPlayerLocalID;
+    nlohmann::json MultiPlayerIds;
+    nlohmann::json MultiPlayerNames;
+    nlohmann::json MultiPlayerHouses;
+
+    // map state
+
     nlohmann::json SelectedObjects;
     nlohmann::json Waypoints;
     nlohmann::json Views;
 
     void Read_Globals();
-    bool Validate() const;
+    bool Validate(GameType scenario_game_type) const;
     ScenarioDirType Parse_Scenario_Direction() const;
     ScenarioVarType Parse_Scenario_Variation() const;
     bool Write_Globals() const;
@@ -74,6 +92,18 @@ public:
         EndCountdownNumber,
         HasTempleBeenHitWithIonCannon,
         AreThingiesEnabledFlag,
+        MultiPlayerCount,
+        MultiPlayerGhosts,
+        MultiPlayerBases,
+        MultiPlayerCredits,
+        MultiPlayerTiberium,
+        MultiPlayerGoodies,
+        MultiPlayerSolo,
+        MultiPlayerUnitCount,
+        MultiPlayerLocalID,
+        MultiPlayerIds,
+        MultiPlayerNames,
+        MultiPlayerHouses,
         SelectedObjects,
         Waypoints,
         Views
@@ -153,20 +183,9 @@ public:
     nlohmann::json MultiplayerStartPositions;
     nlohmann::json RemasterPlayerIDs;
     int RemasterClientSidebarWidthInLeptons;
+    // TODO: Remove all MPlayer fields, these are absorbed into main save game sceanrio now
     nlohmann::json RemasterMPlayerIsHuman;
     nlohmann::json PlacementType;
-    int RemasterMPlayerCount;
-    bool RemasterMPlayerBases;
-    int RemasterMPlayerCredits;
-    int RemasterMPlayerTiberium;
-    int RemasterMPlayerGoodies;
-    int RemasterMPlayerGhosts;
-    int RemasterMPlayerSolo;
-    int RemasterMPlayerUnitCount;
-    unsigned char RemasterMPlayerLocalID;
-    nlohmann::json RemasterMPlayerHouses;
-    nlohmann::json RemasterMPlayerNames;
-    nlohmann::json RemasterMPlayerID;
     nlohmann::json MultiplayerSidebars;
     nlohmann::json RemasterSpecial;
     bool NotAllowSuperWeapons;
@@ -182,18 +201,6 @@ public:
         RemasterClientSidebarWidthInLeptons,
         RemasterMPlayerIsHuman,
         PlacementType,
-        RemasterMPlayerCount,
-        RemasterMPlayerBases,
-        RemasterMPlayerCredits,
-        RemasterMPlayerTiberium,
-        RemasterMPlayerGoodies,
-        RemasterMPlayerGhosts,
-        RemasterMPlayerSolo,
-        RemasterMPlayerUnitCount,
-        RemasterMPlayerLocalID,
-        RemasterMPlayerHouses,
-        RemasterMPlayerNames,
-        RemasterMPlayerID,
         MultiplayerSidebars,
         RemasterSpecial,
         NotAllowSuperWeapons
@@ -238,7 +245,7 @@ public:
 
     bool Load_From_File(const std::string& path);
     void Read_Globals();
-    bool Validate() const;
+    bool Validate(GameType scenario_game_type) const;
     bool Write_Globals() const;
     void Dump_Json(std::string& output) const;
     bool To_File(CDFileClass& save_file, const SaveGameHeader& header) const;

@@ -75,7 +75,9 @@ std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
                 std::string error_message;
 
                 try {
-                    if (header.Write_Globals() && save.Write_Globals()) {
+                    const auto header_globals_written = header.Write_Globals();
+
+                    if (header_globals_written && save.Write_Globals()) {
                         return header;
                     }
                 } catch (const CncJsonException& e) {
