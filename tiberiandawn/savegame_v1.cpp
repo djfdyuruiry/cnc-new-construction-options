@@ -75,7 +75,10 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
     for (const auto& [field, value] : stringFields) {
         const auto bufferSize = GlobalBufferSizes.at(field);
 
-        if (scenario_game_type == GAME_SKIRMISH && field == NAMEOF(BriefText)) {
+        if (
+            (scenario_game_type == GAME_SKIRMISH || scenario_game_type == GAME_GLYPHX_MULTIPLAYER)
+            && field == NAMEOF(BriefText)
+        ) {
             // don't validate briefing text for Skirmish scenarios
             continue;
         }

@@ -1762,7 +1762,9 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
     bool result = false;
 
     if (save) {
-        result = Save_Game(file_path_and_name, "internal");
+        result = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+            ? Save_Game(file_path_and_name, "internal")
+            : Save_Game_Binary(file_path_and_name, "internal");
     } else {
 
         if (game_type == NULL) {
@@ -1780,7 +1782,9 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
             }
         }
 
-        result = Load_Game(file_path_and_name);
+        result = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+            ? Load_Game(file_path_and_name)
+            : Load_Game_Binary(file_path_and_name);
 
         if (result == false) {
             CNC_LOG_ERROR("Failed to load remaster save");
@@ -7843,15 +7847,18 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
 
     from_json(RemasterMPlayerIsHuman, MPlayerIsHuman);
 
-    for (auto i = 0; i < PlacementType.size(); i++) {
+    for (auto i = 0; i < std::size(DLLExportClass::PlacementType); i++) {
         TdTypeConverter::Techno_Type_Target_From_Json<BuildingTypeClass, StructType>(
             PlacementType.at(i),
             std::format("RemasterState.{}", NAMEOF(PlacementType)),
             std::format("{}", i),
-            DLLExportClass::PlacementType[i]);
+            DLLExportClass::PlacementType[i]
+        );
     }
 
-    from_json(MultiplayerSidebars, DLLExportClass::MultiplayerSidebars);
+    for (auto i = 0; i < std::size(DLLExportClass::MultiplayerSidebars); i++) {
+        from_json(MultiplayerSidebars.at(i), DLLExportClass::MultiplayerSidebars[i]);
+    }
 
     from_json(RemasterSpecial, Special);
     Rule.AllowSuperWeapons = !NotAllowSuperWeapons;

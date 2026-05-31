@@ -1363,7 +1363,7 @@ bool MapClass::Write_Binary_Big(char const* root)
 void MapClass::Logic(void)
 {
     if (Debug_Force_Crash) {
-        *((int*)0) = 1;
+        Prog_End("Debug_Force_Crash was set to true", true);
     }
 
     /*
