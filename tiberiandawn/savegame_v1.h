@@ -47,6 +47,9 @@ public:
 
     // skirmish state
 
+    std::string MultiPlayerName;
+    std::string MultiPlayerPrefColor;
+    std::string MultiPlayerHouse;
     int MultiPlayerCount;
     int MultiPlayerGhosts;
     bool MultiPlayerBases;
@@ -92,6 +95,9 @@ public:
         EndCountdownNumber,
         HasTempleBeenHitWithIonCannon,
         AreThingiesEnabledFlag,
+        MultiPlayerName,
+        MultiPlayerPrefColor,
+        MultiPlayerHouse,
         MultiPlayerCount,
         MultiPlayerGhosts,
         MultiPlayerBases,

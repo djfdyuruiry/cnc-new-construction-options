@@ -26,6 +26,9 @@ void SaveGameScenarioState_v1::Read_Globals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
+    MultiPlayerName = MPlayerName;
+    MultiPlayerPrefColor = TdTypeConverter::To_String(static_cast<PlayerColorType>(MPlayerPrefColor));
+    MultiPlayerHouse = TdTypeConverter::To_String(MPlayerHouse);
     MultiPlayerCount = MPlayerCount;
     MultiPlayerGhosts = MPlayerGhosts;
     MultiPlayerBases = MPlayerCount;
@@ -113,6 +116,25 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
 
     if (!TdTypeConverter::Try_Parse<DiffType>(AiDifficulty).has_value()) {
         CNC_LOGGER_ERROR("Unable to parse ScenarioState.AiDifficulty save game value: {}", AiDifficulty);
+        result = false;
+    }
+
+    if (MultiPlayerName.size() > std::size(MPlayerName) - 1) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.MultiPlayerName save game value, expected string with maximum length of {} - actual size: {}",
+            std::size(MPlayerName) - 1,
+            MultiPlayerName.size()
+        );
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<PlayerColorType>(MultiPlayerPrefColor).has_value()) {
+        CNC_LOGGER_ERROR("Unable to parse ScenarioState.MultiPlayerPrefColor save game value: {}", MultiPlayerPrefColor);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<HousesType>(MultiPlayerHouse).has_value()) {
+        CNC_LOGGER_ERROR("Unable to parse ScenarioState.MultiPlayerHouse save game value: {}", MultiPlayerHouse);
         result = false;
     }
 
@@ -254,6 +276,9 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
+    strcpy(MPlayerName, MultiPlayerName.c_str());
+    MPlayerPrefColor = TdTypeConverter::Try_Parse<PlayerColorType>(MultiPlayerPrefColor).value();
+    MPlayerHouse = TdTypeConverter::Try_Parse<HousesType>(MultiPlayerHouse).value();
     MPlayerCount = MultiPlayerCount;
     MPlayerGhosts = MultiPlayerGhosts;
     MPlayerCount = MultiPlayerBases;
