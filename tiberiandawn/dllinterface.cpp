@@ -1791,8 +1791,6 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
             : Load_Game_Binary(file_path_and_name);
 
         if (result == false) {
-            MessageBoxA(
-                MainWindow, "Failed to load remaster save", "Command & Conquer", MB_ICONEXCLAMATION | MB_OK);
             CNC_LOG_ERROR("Failed to load remaster save");
 
             return false;
