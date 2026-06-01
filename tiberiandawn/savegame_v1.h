@@ -62,6 +62,8 @@ public:
     nlohmann::json MultiPlayerIds;
     nlohmann::json MultiPlayerNames;
     nlohmann::json MultiPlayerHouses;
+    nlohmann::json MultiSpecial;
+    bool MultiSuperweaponsEnabled;
 
     // map state
 
@@ -73,6 +75,7 @@ public:
     bool Validate(GameType scenario_game_type) const;
     ScenarioDirType Parse_Scenario_Direction() const;
     ScenarioVarType Parse_Scenario_Variation() const;
+    SpecialClass Parse_MultiPlayer_Special() const;
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
@@ -110,6 +113,8 @@ public:
         MultiPlayerIds,
         MultiPlayerNames,
         MultiPlayerHouses,
+        MultiSpecial,
+        MultiSuperweaponsEnabled,
         SelectedObjects,
         Waypoints,
         Views
@@ -192,8 +197,6 @@ public:
     nlohmann::json RemasterMPlayerIsHuman;
     nlohmann::json RemasterPlacementType;
     nlohmann::json RemasterMultiplayerSidebars;
-    nlohmann::json RemasterSpecial;
-    bool NotAllowSuperWeapons;
 
     void Read_Dll_State();
     bool Validate() const;
@@ -206,9 +209,7 @@ public:
         RemasterClientSidebarWidthInLeptons,
         RemasterMPlayerIsHuman,
         RemasterPlacementType,
-        RemasterMultiplayerSidebars,
-        RemasterSpecial,
-        NotAllowSuperWeapons
+        RemasterMultiplayerSidebars
     )
 
 private:

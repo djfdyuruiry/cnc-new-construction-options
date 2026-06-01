@@ -37,6 +37,7 @@
 
 #include "common/bitfields.h"
 #include "common/json.h"
+#include "common/rulesections.h"
 #include <stdint.h>
 
 #pragma pack(push, 1)
@@ -272,6 +273,16 @@ public:
     // Fixes issue from Change 738397 2020/07/17 14:06:03
     //
     //
+
+    /**
+     * Set values in this instance based on rule section values.
+     */
+    RuleSections& Read_Rules(RuleSections& rules);
+
+    /**
+     * Set rule section values based on values in this instance.
+     */
+    RuleSections& Write_Rules(RuleSections& rules) const;
 
     JSON_FUNCTIONS(SpecialClass)
 };

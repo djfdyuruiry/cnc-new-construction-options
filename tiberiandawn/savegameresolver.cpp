@@ -60,7 +60,11 @@ std::optional<SaveGameHeader> SaveGameResolver::Load_Header(const std::string& p
     return header;
 }
 
-std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
+std::optional<SaveGameHeader> SaveGameResolver::Load(
+    const std::string& path,
+    SpecialClass& skirmish_special,
+    bool& skirmish_superweapons_enabled
+)
 {
     SaveGameHeader header;
 
@@ -78,6 +82,9 @@ std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
                     const auto header_globals_written = header.Write_Globals();
 
                     if (header_globals_written && save.Write_Globals()) {
+                        skirmish_special = save.ScenarioState.Parse_MultiPlayer_Special();
+                        skirmish_superweapons_enabled = save.ScenarioState.MultiSuperweaponsEnabled;
+
                         return header;
                     }
                 } catch (const CncJsonException& e) {

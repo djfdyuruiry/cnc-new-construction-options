@@ -287,6 +287,7 @@ public:
 
     /*
     **	Are superweapons allowed?
+    **  // TODO: Add to rules.ini
     */
     bool AllowSuperWeapons;
 

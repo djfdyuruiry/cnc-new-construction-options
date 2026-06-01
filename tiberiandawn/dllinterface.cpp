@@ -7791,9 +7791,6 @@ void SaveGameRemasterState_v1::Read_Dll_State()
     for (const auto& sidebar : DLLExportClass::MultiplayerSidebars) {
         RemasterMultiplayerSidebars.emplace_back(sidebar);
     }
-
-    RemasterSpecial = Special;
-    NotAllowSuperWeapons = !Rule.AllowSuperWeapons;
 }
 
 bool SaveGameRemasterState_v1::Validate() const
@@ -7824,13 +7821,6 @@ bool SaveGameRemasterState_v1::Validate() const
                 MAX_PLAYERS,
                 json_value.size());
         }
-    }
-
-    if (!RemasterSpecial.is_object()) {
-        result = false;
-        CNC_LOGGER_ERROR("Invalid RemasterState.{} save game value - json object expected, actual type: {}",
-                         NAMEOF(RemasterSpecial),
-                         RemasterSpecial.type_name());
     }
 
     return result;
@@ -7865,9 +7855,6 @@ bool SaveGameRemasterState_v1::Write_Dll_State() const
     for (auto i = 0; i < std::size(DLLExportClass::MultiplayerSidebars); i++) {
         from_json(RemasterMultiplayerSidebars.at(i), DLLExportClass::MultiplayerSidebars[i]);
     }
-
-    from_json(RemasterSpecial, Special);
-    Rule.AllowSuperWeapons = !NotAllowSuperWeapons;
 
     return true;
 }

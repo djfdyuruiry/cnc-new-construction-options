@@ -354,10 +354,18 @@ bool Load_Game(int id)
  * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
  * TODO: Store RuleSections as map in save game, refactor RulesClass to accept this instead of INI file for scenario rules
  */
-static void Load_INI_Rules_And_Lua()
+static void Load_INI_Rules_And_Lua(const SpecialClass& skirmish_special, const bool& skirmish_superweapons_enabled)
 {
     Rule.Init_For_Scenario(Scen);
     ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr);
+
+    if (GameToPlay == GAME_GLYPHX_MULTIPLAYER || GameToPlay == GAME_SKIRMISH) {
+        CNC_LOG_WARN("Setting skirmish gameplay options using save data");
+
+        // ensure rules match skirmish game settings
+        skirmish_special.Write_Rules(Rule.Sections);
+        Rule.AllowSuperWeapons = skirmish_superweapons_enabled;
+    }
 }
 
 /*
@@ -374,12 +382,18 @@ bool Load_Game(const char* file_name)
     Leave_Zoomed_Resolution_Mode();
     Call_Back();
 
+    SpecialClass skirmish_special;
+    bool skirmish_superweapons_enabled;
+
+    const auto save_header = SaveGameResolver::Load(
 #ifndef REMASTER_BUILD
-    const auto save_header =
-        SaveGameResolver::Load(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name));
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name),
 #else
-    const auto save_header = SaveGameResolver::Load(file_name);
+        file_name,
 #endif
+        skirmish_special,
+        skirmish_superweapons_enabled
+    );
 
     if (!save_header.has_value()) {
         Set_Current_Resolution_Mode(resolution_mode);
@@ -453,7 +467,7 @@ bool Load_Game(const char* file_name)
 
     Fixup_Scenario();
 
-    Load_INI_Rules_And_Lua();
+    Load_INI_Rules_And_Lua(skirmish_special, skirmish_superweapons_enabled);
 
     ScenarioInit = 0;
 
