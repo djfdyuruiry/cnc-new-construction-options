@@ -58,25 +58,28 @@ RuleSections& SpecialClass::Read_Rules(RuleSections& rules)
 RuleSections& SpecialClass::Write_Rules(RuleSections& rules) const
 {
     // map
-    rules[GAME_MAP_SECTION].Set(TIBERIUM_GROWS_RULE, (bool)IsTGrowth);
-    rules[GAME_MAP_SECTION].Set(TIBERIUM_SPREADS_RULE, (bool)IsTSpread);
-    rules[GAME_MAP_SECTION].Set(SLOW_TIBERIUM_GROWTH_AND_SPREAD_RULE, !(bool)IsTFast);
+    rules[GAME_MAP_SECTION]
+        .Set(TIBERIUM_GROWS_RULE, static_cast<bool>(IsTGrowth))
+        .Set(TIBERIUM_SPREADS_RULE, static_cast<bool>(IsTSpread))
+        .Set(SLOW_TIBERIUM_GROWTH_AND_SPREAD_RULE, !static_cast<bool>(IsTFast));
 
     // misc
-    rules[GAME_MISC_SECTION].Set(SMART_DEFENSE_RULE, (bool)IsSmartDefense);
-    rules[GAME_MISC_SECTION].Set(TARGET_TREES_RULE, (bool)IsTreeTarget);
-    rules[GAME_MISC_SECTION].Set(MCV_REDEPLOYABLE_RULE, (bool)IsMCVDeploy);
-    rules[GAME_MISC_SECTION].Set(SPAWN_VISCEROIDS_RULE, (bool)IsVisceroids);
-    rules[GAME_MISC_SECTION].Set(VEHICLES_DO_THREE_POINT_TURNS_RULE, (bool)IsThreePoint);
-    rules[GAME_MISC_SECTION].Set(SHOW_BIBS_ON_BUILDINGS_RULE, !(bool)IsRoad);
-    rules[GAME_MISC_SECTION].Set(SHOW_CIVILIAN_NAMES_RULE, (bool)IsNamed);
-    rules[GAME_MISC_SECTION].Set(HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE, (bool)IsSeparate);
+    rules[GAME_MISC_SECTION]
+        .Set(SMART_DEFENSE_RULE, static_cast<bool>(IsSmartDefense))
+        .Set(TARGET_TREES_RULE, static_cast<bool>(IsTreeTarget))
+        .Set(MCV_REDEPLOYABLE_RULE, static_cast<bool>(IsMCVDeploy))
+        .Set(SPAWN_VISCEROIDS_RULE, static_cast<bool>(IsVisceroids))
+        .Set(VEHICLES_DO_THREE_POINT_TURNS_RULE, static_cast<bool>(IsThreePoint))
+        .Set(SHOW_BIBS_ON_BUILDINGS_RULE, !static_cast<bool>(IsRoad))
+        .Set(SHOW_CIVILIAN_NAMES_RULE, static_cast<bool>(IsNamed))
+        .Set(HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE, static_cast<bool>(IsSeparate));
 
     // cheats
-    rules[GAME_CHEATS_SECTION].Set(UNITS_ARE_INDESTRUCTIBLE_RULE, (bool)IsInert);
-    rules[GAME_CHEATS_SECTION].Set(INFANTRY_AUTO_SCATTERS_RULE, (bool)IsScatter);
-    rules[GAME_CHEATS_SECTION].Set(GIVE_ATTACKERS_AN_ADVANTAGE_RULE, !(bool)IsDefenderAdvantage);
-    rules[GAME_CHEATS_SECTION].Set(SPEEDY_SUPERWEAPONS_RULE, (bool)IsSpeedBuild);
+    rules[GAME_CHEATS_SECTION]
+        .Set(UNITS_ARE_INDESTRUCTIBLE_RULE, static_cast<bool>(IsInert))
+        .Set(INFANTRY_AUTO_SCATTERS_RULE, static_cast<bool>(IsScatter))
+        .Set(GIVE_ATTACKERS_AN_ADVANTAGE_RULE, !static_cast<bool>(IsDefenderAdvantage))
+        .Set(SPEEDY_SUPERWEAPONS_RULE, static_cast<bool>(IsSpeedBuild));
 
     return rules;
 }

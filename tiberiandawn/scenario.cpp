@@ -252,9 +252,14 @@ void Set_Scenario_Difficulty(int difficulty)
 bool Read_Scenario(char* root)
 {
     CCDebugString("C&C95 - In Read_Scenario.\n");
+
+    // capture any setup that was done for a skirmish scenario before clear
+    const auto special_options = Special;
+    const auto allow_superweapons = Rule.AllowSuperWeapons;
+
     Clear_Scenario();
     ScenarioInit++;
-    if (Read_Scenario_Ini(root)) {
+    if (Read_Scenario_Ini(root, special_options, allow_superweapons)) {
 
         Fill_In_Data();
 

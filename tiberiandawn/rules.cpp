@@ -267,7 +267,12 @@ void RulesClass::Init(CCINIClass& ini)
     Apply_Static_And_Global_Values();
 }
 
-void RulesClass::Init_For_Scenario(const ScenarioClass& scenario)
+void RulesClass::Init_For_Scenario(
+    const ScenarioClass& scenario,
+    const GameType& game_to_play,
+    const SpecialClass special_options,
+    const std::optional<bool> superweapons_allowed
+)
 {
     const std::string scenario_ini_file = scenario.FileName;
 
@@ -294,6 +299,12 @@ void RulesClass::Init_For_Scenario(const ScenarioClass& scenario)
 
     Init(ini);
     Init_Types(ini);
+
+    // ensure we restore any skirmish game options after reading rules
+    if (game_to_play == GAME_SKIRMISH || game_to_play == GAME_GLYPHX_MULTIPLAYER) {
+        special_options.Write_Rules(Sections);
+        AllowSuperWeapons = superweapons_allowed.value_or(AllowSuperWeapons);
+    }
 }
 
 /**

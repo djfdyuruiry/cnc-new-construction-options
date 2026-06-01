@@ -476,7 +476,6 @@ private:
 #define Read_Var_With_Type(VAR, T) Get_With_Callback<T>(#VAR, [&](const auto v) { VAR = v; })
 
 // Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
-#define Read_Var(VAR) Read_Var_With_Type(#VAR, VAR, [&](const auto v) { VAR = v; })
 #define Read_Bool_Var(VAR) Read_Var_With_Type(VAR, bool)
 #define Read_UShort_Var(VAR) Read_Var_With_Type(VAR, ushort)
 #define Read_Int_Var(VAR) Read_Var_With_Type(VAR, int)
@@ -484,6 +483,12 @@ private:
 #define Read_Char_Var(VAR) Read_Var_With_Type(VAR, char)
 #define Read_UChar_Var(VAR) Read_Var_With_Type(VAR, uchar)
 #define Read_String_Var(VAR) Read_Var_With_Type(VAR, std::string)
+
+#define Read_Var_With_Name_And_Type(VAR, NAME, T) Get_With_Callback<T>(NAME, [&](const auto v) { VAR = v; })
+
+// Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
+#define Read_Bool_Var_With_Name(VAR, NAME) Read_Var_With_Name_And_Type(VAR, NAME, bool)
+#define Read_Negated_Bool_Var_With_Name(VAR, NAME) Get_With_Callback<bool>(NAME, [&](const auto v) { VAR = !v; })
 
 #define Set_Var_Comment(VAR, COMMENT) Set_Rule_Comment(#VAR, COMMENT)
 

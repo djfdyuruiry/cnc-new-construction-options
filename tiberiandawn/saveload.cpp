@@ -348,24 +348,17 @@ bool Load_Game(int id)
 
 /**
  * Ensure Rules from the scenario INI file recorded in the save game
- * are loaded. Also, init Lua runtime so all scripts are re-ran in prep
- * for continuing the scenario.
+ * are loaded and init Lua runtime so all scripts are re-ran in prep
+ * for continuing the scenario. If the save is from a Skirmish game
+ * we also apply the game options using Rules API.
  *
  * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
  * TODO: Store RuleSections as map in save game, refactor RulesClass to accept this instead of INI file for scenario rules
  */
 static void Load_INI_Rules_And_Lua(const SpecialClass& skirmish_special, const bool& skirmish_superweapons_enabled)
 {
-    Rule.Init_For_Scenario(Scen);
+    Rule.Init_For_Scenario(Scen, GameToPlay, skirmish_special, skirmish_superweapons_enabled);
     ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr);
-
-    if (GameToPlay == GAME_GLYPHX_MULTIPLAYER || GameToPlay == GAME_SKIRMISH) {
-        CNC_LOG_WARN("Setting skirmish gameplay options using save data");
-
-        // ensure rules match skirmish game settings
-        skirmish_special.Write_Rules(Rule.Sections);
-        Rule.AllowSuperWeapons = skirmish_superweapons_enabled;
-    }
 }
 
 /*
