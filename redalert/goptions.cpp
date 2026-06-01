@@ -74,7 +74,7 @@ void GameOptionsClass::Process(void)
         int Text;       // Text number to use for this button.
         bool Multiplay; // Allowed in multiplayer version?
     } _constants[] = {
-        {BUTTON_LOAD, TXT_LOAD_MISSION, false},
+        {BUTTON_LOAD, TXT_LOAD_MISSION, true},
 #ifdef FIXIT_MULTI_SAVE
         {BUTTON_SAVE, TXT_SAVE_MISSION, true},
 #else
@@ -133,14 +133,12 @@ void GameOptionsClass::Process(void)
             continue;
         }
 
-        if ((Session.Type == GAME_SKIRMISH || Session.Type == GAME_INTERNET) && text == TXT_SAVE_MISSION) {
+        if ((Session.Type == GAME_INTERNET) && text == TXT_SAVE_MISSION) {
             continue;
         }
 
 #ifdef FIXIT_VERSION_3
-        if (Session.Type != GAME_NORMAL && (num_players < 2) && text == TXT_SAVE_MISSION) {
-            continue;
-        }
+
 #else
 #ifdef FIXIT_MULTI_SAVE
         if (Session.Type != GAME_NORMAL && (num_players < 2 || PlayingAgainstVersion == VERSION_RED_ALERT_104)
@@ -149,10 +147,6 @@ void GameOptionsClass::Process(void)
         }
 #endif // FIXIT_MULTI_SAVE
 #endif
-
-        if (Session.Type == GAME_SKIRMISH && text == TXT_DELETE_MISSION) {
-            continue;
-        }
 
         if (Session.Type != GAME_NORMAL && text == TXT_DELETE_MISSION) {
             text = TXT_RESIGN;
@@ -468,7 +462,7 @@ void GameOptionsClass::Process(void)
 
             case (BUTTON_SAVE):
                 display = true;
-                if (Session.Type == GAME_NORMAL) {
+                if (Session.Type == GAME_NORMAL || Session.Type == GAME_SKIRMISH) {
                     LoadOptionsClass(LoadOptionsClass::SAVE).Process();
 
                 } else {

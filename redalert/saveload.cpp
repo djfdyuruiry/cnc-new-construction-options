@@ -349,7 +349,7 @@ bool Save_Game(const char* file_name, const char* descr)
 
     int save_net = 0; // 1 = save network/modem game
 
-    if (Session.Type == GAME_GLYPHX_MULTIPLAYER) {
+    if (Session.Type == GAME_GLYPHX_MULTIPLAYER || Session.Type == GAME_SKIRMISH) {
         save_net = 1;
     }
 
