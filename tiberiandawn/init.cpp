@@ -118,10 +118,10 @@ bool Init_Game(int, char*[])
         // TODO: Play commando death sound before this or mission failure message :D
         WWMessageBox().Process(err.c_str());
 
+        Prog_End(err.c_str(), false);
+
         // If a debugger is attached, trigger a breakpoint
         TRIGGER_DEBUGGER;
-
-        Prog_End(err.c_str(), false);
 
         if (!RunningAsDLL) {
             exit(1);

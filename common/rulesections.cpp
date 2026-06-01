@@ -237,7 +237,7 @@ void RuleSection::Save_All_To_Ini(INIClass& ini) const
 
 RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
 {
-    CNC_LOGGER_WARN(
+    CNC_LOGGER_DEBUG(
         "Updating rule at runtime: [{}] -> {} = {}",
         SectionName,
         name,
@@ -260,7 +260,7 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
 
     Rules[name.data()] = value;
 
-    CNC_LOGGER_WARN("Running OnRulesChanged() handler");
+    CNC_LOGGER_DEBUG("Running OnRulesChanged() handler");
     OnRulesChanged(*this, name, value);
 
     return *this;

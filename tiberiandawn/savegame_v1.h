@@ -47,6 +47,9 @@ public:
 
     // skirmish state
 
+    std::string MultiPlayerName;
+    std::string MultiPlayerPrefColor;
+    std::string MultiPlayerHouse;
     int MultiPlayerCount;
     int MultiPlayerGhosts;
     bool MultiPlayerBases;
@@ -59,6 +62,8 @@ public:
     nlohmann::json MultiPlayerIds;
     nlohmann::json MultiPlayerNames;
     nlohmann::json MultiPlayerHouses;
+    nlohmann::json MultiSpecial;
+    bool MultiSuperweaponsEnabled;
 
     // map state
 
@@ -70,6 +75,7 @@ public:
     bool Validate(GameType scenario_game_type) const;
     ScenarioDirType Parse_Scenario_Direction() const;
     ScenarioVarType Parse_Scenario_Variation() const;
+    SpecialClass Parse_MultiPlayer_Special() const;
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
@@ -92,6 +98,9 @@ public:
         EndCountdownNumber,
         HasTempleBeenHitWithIonCannon,
         AreThingiesEnabledFlag,
+        MultiPlayerName,
+        MultiPlayerPrefColor,
+        MultiPlayerHouse,
         MultiPlayerCount,
         MultiPlayerGhosts,
         MultiPlayerBases,
@@ -104,6 +113,8 @@ public:
         MultiPlayerIds,
         MultiPlayerNames,
         MultiPlayerHouses,
+        MultiSpecial,
+        MultiSuperweaponsEnabled,
         SelectedObjects,
         Waypoints,
         Views
@@ -180,15 +191,12 @@ private:
 class SaveGameRemasterState_v1
 {
 public:
-    nlohmann::json MultiplayerStartPositions;
+    nlohmann::json RemasterMultiplayerStartPositions;
     nlohmann::json RemasterPlayerIDs;
     int RemasterClientSidebarWidthInLeptons;
-    // TODO: Remove all MPlayer fields, these are absorbed into main save game sceanrio now
     nlohmann::json RemasterMPlayerIsHuman;
-    nlohmann::json PlacementType;
-    nlohmann::json MultiplayerSidebars;
-    nlohmann::json RemasterSpecial;
-    bool NotAllowSuperWeapons;
+    nlohmann::json RemasterPlacementType;
+    nlohmann::json RemasterMultiplayerSidebars;
 
     void Read_Dll_State();
     bool Validate() const;
@@ -196,14 +204,12 @@ public:
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGameRemasterState_v1,
-        MultiplayerStartPositions,
+        RemasterMultiplayerStartPositions,
         RemasterPlayerIDs,
         RemasterClientSidebarWidthInLeptons,
         RemasterMPlayerIsHuman,
-        PlacementType,
-        MultiplayerSidebars,
-        RemasterSpecial,
-        NotAllowSuperWeapons
+        RemasterPlacementType,
+        RemasterMultiplayerSidebars
     )
 
 private:

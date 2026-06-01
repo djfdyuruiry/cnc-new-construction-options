@@ -26,6 +26,9 @@ void SaveGameScenarioState_v1::Read_Globals()
     HasTempleBeenHitWithIonCannon = TempleIoned;
     AreThingiesEnabledFlag = AreThingiesEnabled;
 
+    MultiPlayerName = MPlayerName;
+    MultiPlayerPrefColor = TdTypeConverter::To_String(static_cast<PlayerColorType>(MPlayerPrefColor));
+    MultiPlayerHouse = TdTypeConverter::To_String(MPlayerHouse);
     MultiPlayerCount = MPlayerCount;
     MultiPlayerGhosts = MPlayerGhosts;
     MultiPlayerBases = MPlayerCount;
@@ -37,6 +40,8 @@ void SaveGameScenarioState_v1::Read_Globals()
     MultiPlayerLocalID = MPlayerLocalID;
     MultiPlayerIds = MPlayerID;
     MultiPlayerNames = MPlayerNames;
+    MultiSpecial = Special;
+    MultiSuperweaponsEnabled = !Rule.AllowSuperWeapons;
 
     MultiPlayerHouses = nlohmann::json::array();
     for (const auto& house : MPlayerHouses) {
@@ -75,7 +80,10 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
     for (const auto& [field, value] : stringFields) {
         const auto bufferSize = GlobalBufferSizes.at(field);
 
-        if (scenario_game_type == GAME_SKIRMISH && field == NAMEOF(BriefText)) {
+        if (
+            (scenario_game_type == GAME_SKIRMISH || scenario_game_type == GAME_GLYPHX_MULTIPLAYER)
+            && field == NAMEOF(BriefText)
+        ) {
             // don't validate briefing text for Skirmish scenarios
             continue;
         }
@@ -110,6 +118,25 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
 
     if (!TdTypeConverter::Try_Parse<DiffType>(AiDifficulty).has_value()) {
         CNC_LOGGER_ERROR("Unable to parse ScenarioState.AiDifficulty save game value: {}", AiDifficulty);
+        result = false;
+    }
+
+    if (MultiPlayerName.size() > std::size(MPlayerName) - 1) {
+        CNC_LOGGER_ERROR(
+            "Invalid ScenarioState.MultiPlayerName save game value, expected string with maximum length of {} - actual size: {}",
+            std::size(MPlayerName) - 1,
+            MultiPlayerName.size()
+        );
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<PlayerColorType>(MultiPlayerPrefColor).has_value()) {
+        CNC_LOGGER_ERROR("Unable to parse ScenarioState.MultiPlayerPrefColor save game value: {}", MultiPlayerPrefColor);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<HousesType>(MultiPlayerHouse).has_value()) {
+        CNC_LOGGER_ERROR("Unable to parse ScenarioState.MultiPlayerHouse save game value: {}", MultiPlayerHouse);
         result = false;
     }
 
@@ -159,6 +186,13 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
                 }
             }
         }
+    }
+
+    if (!MultiSpecial.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR("Invalid ScenarioState.{} save game value - json object expected, actual type: {}",
+                         NAMEOF(MultiSpecial),
+                         MultiSpecial.type_name());
     }
 
     // map state
@@ -219,6 +253,11 @@ ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
     );
 }
 
+SpecialClass SaveGameScenarioState_v1::Parse_MultiPlayer_Special() const
+{
+    return MultiSpecial;
+}
+
 bool SaveGameScenarioState_v1::Write_Globals() const
 {
     if (!Validate(GameToPlay)) {
@@ -251,6 +290,9 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
+    strcpy(MPlayerName, MultiPlayerName.c_str());
+    MPlayerPrefColor = TdTypeConverter::Try_Parse<PlayerColorType>(MultiPlayerPrefColor).value();
+    MPlayerHouse = TdTypeConverter::Try_Parse<HousesType>(MultiPlayerHouse).value();
     MPlayerCount = MultiPlayerCount;
     MPlayerGhosts = MultiPlayerGhosts;
     MPlayerCount = MultiPlayerBases;
@@ -275,6 +317,8 @@ bool SaveGameScenarioState_v1::Write_Globals() const
 
         MPlayerHouses[i] = TdTypeConverter::Try_Parse<HousesType>(player_house).value();
     }
+
+    // MultiSpecial and MultiSuperweaponsEnabled are handled by saveload.cpp to not conflict with scenario rules logic
 
     from_json(SelectedObjects, CurrentObject);
     from_json(Waypoints, Scen.Waypoint);

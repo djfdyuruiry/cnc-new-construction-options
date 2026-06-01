@@ -488,7 +488,7 @@ void Set_Scenario_Name(char* buf,
                        ScenarioDirType dir = SCEN_DIR_NONE,
                        ScenarioVarType var = SCEN_VAR_NONE);
 void Write_Scenario_Ini(char* root);
-bool Read_Scenario_Ini(char* root, bool fresh = true);
+bool Read_Scenario_Ini(char* root, SpecialClass special_options, bool allow_superweapons, bool fresh = true);
 bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const char* root, bool fresh);
 int Scan_Place_Object(ObjectClass* obj, CELL cell);
 

@@ -19,41 +19,73 @@ void RulesClass::Init_Sections(CCINIClass& ini)
     });
 }
 
-void RulesClass::Apply_Special_Properties() {
+RuleSections& SpecialClass::Read_Rules(RuleSections& rules)
+{
     // map
-    Special.IsTGrowth = Get_Bool_Rule(GAME_MAP_SECTION, TIBERIUM_GROWS_RULE);
-    Special.IsTSpread = Get_Bool_Rule(GAME_MAP_SECTION, TIBERIUM_SPREADS_RULE);
-    Special.IsTFast = !Get_Bool_Rule(GAME_MAP_SECTION, SLOW_TIBERIUM_GROWTH_AND_SPREAD_RULE);
+    IsTGrowth = rules[GAME_MAP_SECTION].Get<bool>(TIBERIUM_GROWS_RULE);
+    IsTSpread = rules[GAME_MAP_SECTION].Get<bool>(TIBERIUM_SPREADS_RULE);
+    IsTFast = !rules[GAME_MAP_SECTION].Get<bool>(SLOW_TIBERIUM_GROWTH_AND_SPREAD_RULE);
 
     // misc
-    Special.IsSmartDefense = Get_Bool_Rule(GAME_MISC_SECTION, SMART_DEFENSE_RULE);
-    Special.IsTreeTarget = Get_Bool_Rule(GAME_MISC_SECTION, TARGET_TREES_RULE);
-    Special.IsMCVDeploy = Get_Bool_Rule(GAME_MISC_SECTION, MCV_REDEPLOYABLE_RULE);
-    Special.IsVisceroids = Get_Bool_Rule(GAME_MISC_SECTION, SPAWN_VISCEROIDS_RULE);
-    Special.IsThreePoint = Get_Bool_Rule(GAME_MISC_SECTION, VEHICLES_DO_THREE_POINT_TURNS_RULE);
-    Special.IsRoad = !Get_Bool_Rule(GAME_MISC_SECTION, SHOW_BIBS_ON_BUILDINGS_RULE);
-    Special.IsNamed = Get_Bool_Rule(GAME_MISC_SECTION, SHOW_CIVILIAN_NAMES_RULE);
-    Special.IsSeparate = Get_Bool_Rule(GAME_MISC_SECTION, HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE);
+    IsSmartDefense = rules[GAME_MISC_SECTION].Get<bool>(SMART_DEFENSE_RULE);
+    IsTreeTarget = rules[GAME_MISC_SECTION].Get<bool>(TARGET_TREES_RULE);
+    IsMCVDeploy = rules[GAME_MISC_SECTION].Get<bool>(MCV_REDEPLOYABLE_RULE);
+    IsVisceroids = rules[GAME_MISC_SECTION].Get<bool>(SPAWN_VISCEROIDS_RULE);
+    IsThreePoint = rules[GAME_MISC_SECTION].Get<bool>(VEHICLES_DO_THREE_POINT_TURNS_RULE);
+    IsRoad = !rules[GAME_MISC_SECTION].Get<bool>(SHOW_BIBS_ON_BUILDINGS_RULE);
+    IsNamed = rules[GAME_MISC_SECTION].Get<bool>(SHOW_CIVILIAN_NAMES_RULE);
+    IsSeparate = rules[GAME_MISC_SECTION].Get<bool>(HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE);
 
     // cheats
-    Special.IsInert = Get_Bool_Rule(GAME_CHEATS_SECTION, UNITS_ARE_INDESTRUCTIBLE_RULE);
-    Special.IsScatter = Get_Bool_Rule(GAME_CHEATS_SECTION, INFANTRY_AUTO_SCATTERS_RULE);
-    Special.IsDefenderAdvantage = !Get_Bool_Rule(GAME_CHEATS_SECTION, GIVE_ATTACKERS_AN_ADVANTAGE_RULE);
-    Special.IsSpeedBuild = Get_Bool_Rule(GAME_CHEATS_SECTION, SPEEDY_SUPERWEAPONS_RULE);
+    IsInert = rules[GAME_CHEATS_SECTION].Get<bool>(UNITS_ARE_INDESTRUCTIBLE_RULE);
+    IsScatter = rules[GAME_CHEATS_SECTION].Get<bool>(INFANTRY_AUTO_SCATTERS_RULE);
+    IsDefenderAdvantage = !rules[GAME_CHEATS_SECTION].Get<bool>(GIVE_ATTACKERS_AN_ADVANTAGE_RULE);
+    IsSpeedBuild = rules[GAME_CHEATS_SECTION].Get<bool>(SPEEDY_SUPERWEAPONS_RULE);
 
     // TODO: Make rule and restore audio if missing
-    // Special.IsJuvenile = false;
+    // IsJuvenile = false;
 
     // TODO: Make rules for the below
-    // Special.IsVisibleTarget = false;
-    // Special.IsShowPath = false;
-    // Special.HealthBarDisplayMode = HB_SELECTED;
-    // Special.ResourceBarDisplayMode = RB_SELECTED;
-    // Special.ModernBalance = false;
+    // IsVisibleTarget = false;
+    // IsShowPath = false;
+    // HealthBarDisplayMode = HB_SELECTED;
+    // ResourceBarDisplayMode = RB_SELECTED;
+    // ModernBalance = false;
+
+    return rules;
+}
+
+RuleSections& SpecialClass::Write_Rules(RuleSections& rules) const
+{
+    // map
+    rules[GAME_MAP_SECTION]
+        .Set(TIBERIUM_GROWS_RULE, static_cast<bool>(IsTGrowth))
+        .Set(TIBERIUM_SPREADS_RULE, static_cast<bool>(IsTSpread))
+        .Set(SLOW_TIBERIUM_GROWTH_AND_SPREAD_RULE, !static_cast<bool>(IsTFast));
+
+    // misc
+    rules[GAME_MISC_SECTION]
+        .Set(SMART_DEFENSE_RULE, static_cast<bool>(IsSmartDefense))
+        .Set(TARGET_TREES_RULE, static_cast<bool>(IsTreeTarget))
+        .Set(MCV_REDEPLOYABLE_RULE, static_cast<bool>(IsMCVDeploy))
+        .Set(SPAWN_VISCEROIDS_RULE, static_cast<bool>(IsVisceroids))
+        .Set(VEHICLES_DO_THREE_POINT_TURNS_RULE, static_cast<bool>(IsThreePoint))
+        .Set(SHOW_BIBS_ON_BUILDINGS_RULE, !static_cast<bool>(IsRoad))
+        .Set(SHOW_CIVILIAN_NAMES_RULE, static_cast<bool>(IsNamed))
+        .Set(HELIPADS_AND_AIRCRAFT_BOUGHT_SEPARATELY_RULE, static_cast<bool>(IsSeparate));
+
+    // cheats
+    rules[GAME_CHEATS_SECTION]
+        .Set(UNITS_ARE_INDESTRUCTIBLE_RULE, static_cast<bool>(IsInert))
+        .Set(INFANTRY_AUTO_SCATTERS_RULE, static_cast<bool>(IsScatter))
+        .Set(GIVE_ATTACKERS_AN_ADVANTAGE_RULE, !static_cast<bool>(IsDefenderAdvantage))
+        .Set(SPEEDY_SUPERWEAPONS_RULE, static_cast<bool>(IsSpeedBuild));
+
+    return rules;
 }
 
 void RulesClass::Apply_Static_And_Global_Values() {
-    Apply_Special_Properties();
+    Special.Read_Rules(Sections);
 
     FactoryClass::STEP_COUNT = Get_Int_Rule(GAME_FACTORIES_SECTION, TOTAL_PRODUCTION_STEPS_RULE);
 }

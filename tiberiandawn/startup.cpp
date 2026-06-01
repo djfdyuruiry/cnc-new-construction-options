@@ -101,6 +101,8 @@ BOOL WINAPI DllMain(HINSTANCE instance, unsigned int fdwReason, void* lpvReserve
 
         Uninit_Game();
 
+        spdlog::shutdown();
+
         break;
 
     case DLL_THREAD_ATTACH:

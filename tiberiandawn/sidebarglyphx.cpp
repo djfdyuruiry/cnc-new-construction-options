@@ -871,5 +871,5 @@ FROM_JSON(SidebarGlyphxClass)
     );
 
     p.Column[0].Set_Parent_Sidebar(&p);
-    p.Column[0].Set_Parent_Sidebar(&p);
+    p.Column[1].Set_Parent_Sidebar(&p);
 }

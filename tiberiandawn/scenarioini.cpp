@@ -196,9 +196,13 @@ extern void GlyphX_Assign_Houses(void); // ST - 6/25/2019 11:08AM
  *    The remaining necessary interpolated data is generated elsewhere.                        *
  *                                                                                             *
  * INPUT:                                                                                      *
- *          root      root filename for scenario file to read                                  *
+ *          root                root filename for scenario file to read                        *
  *                                                                                             *
- *          fresh      true = should the current scenario be cleared?                          *
+ *          special_options     scenarion options to set for the scenario (skirmish only)      *
+ *                                                                                             *
+ *          allow_superweapons  true = allow superweapons for this scenario (skirmish only)    *
+ *                                                                                             *
+ *          fresh               true = should the current scenario be cleared?                 *
  *                                                                                             *
  * OUTPUT:  bool; Was the scenario read successful?                                            *
  *                                                                                             *
@@ -207,7 +211,7 @@ extern void GlyphX_Assign_Houses(void); // ST - 6/25/2019 11:08AM
  * HISTORY:                                                                                    *
  *   10/07/1992 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool Read_Scenario_Ini(char* root, bool fresh)
+bool Read_Scenario_Ini(char* root, SpecialClass special_options, bool allow_superweapons, bool fresh)
 {
     char fname[_MAX_FNAME + _MAX_EXT]; // full INI filename
     char buf[128];                     // Working string staging buffer.
@@ -302,7 +306,7 @@ bool Read_Scenario_Ini(char* root, bool fresh)
     /**
      * Load any rule sections embedded in the scenario file.
      */
-    Rule.Init_For_Scenario(Scen);
+    Rule.Init_For_Scenario(Scen, GameToPlay, special_options, allow_superweapons);
 
     /*
     **	For single-player scenarios, 'BuildLevel' is the scenario number.
