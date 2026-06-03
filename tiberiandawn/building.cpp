@@ -186,7 +186,7 @@ bool BuildingClass::Can_Have_Rally_Point() const
        return false;
     }
 
-    auto rally_points_enabled = Get_Bool_Rule(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
+    auto rally_points_enabled = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
 
     return rally_points_enabled
         && Class->IsFactory
@@ -2055,7 +2055,7 @@ void BuildingClass::Drop_Debris(TARGET source)
     if (Target_Legal(WhomToRepay)) {
         odds -= 1;
 
-        IsSurvivorless = !Get_Bool_Rule(GAME_MISC_SECTION, DESTROYED_BUILDINGS_HAVE_SURVIVORS_RULE);
+        IsSurvivorless = !Rule.Get_Rule_Value<bool>(GAME_MISC_SECTION, DESTROYED_BUILDINGS_HAVE_SURVIVORS_RULE);
     }
 
     if (IsCaptured)
@@ -5639,9 +5639,9 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	cells to these are of friendly persuasion, then consider the proximity check to
     **	have been a success.
     */
-    auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-    auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-    auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+    auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+    auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
     auto ptr = Occupy_List(true);
 

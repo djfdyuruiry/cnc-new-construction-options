@@ -2044,6 +2044,10 @@ inline TextPrintType operator~(TextPrintType a)
 **	These control the maximum number of objects in the game. Make sure that these
 **	maximums never exceed the maximum value for the "ID" element in the
 **	object class.
+**
+**  Note: These limits are used to define sizes for TFixedHeapClass instances,
+**        these instances are called by the destructors of the related object
+**        class instances to free memory.
 */
 #define AIRCRAFT_MAX      100 // Lasts for minutes.
 #define ANIM_MAX          200 // Lasts only a few seconds.
@@ -2052,15 +2056,18 @@ inline TextPrintType operator~(TextPrintType a)
 #define FACTORY_MAX       32  // Lasts a few minutes.
 #define HOUSE_MAX         12  // Lasts entire scenario.
 #define INFANTRY_MAX      500 // Lasts for minutes.
-#define OVERLAY_MAX       1   // Very transitory.
-#define REINFORCEMENT_MAX 50  // Maximum number of reinforcements.
-#define SMUDGE_MAX        1   // Very transitory.
 #define TEAM_MAX          60  // Lasts forever.
-#define TEMPLATE_MAX      1   // Very transitory.
 #define TERRAIN_MAX       500 // Lasts for hours or eternity.
 #define TRIGGER_MAX       80  // Lasts forever.
 #define UNIT_MAX          500 // Lasts for minutes.
 #define TEAMTYPE_MAX      60  // Lasts forever.
+// these are created and destroyed in the same operation, when being placed on the map - hence the single heap slot
+#define OVERLAY_MAX       1   // Very transitory.
+#define SMUDGE_MAX        1   // Very transitory.
+#define TEMPLATE_MAX      1   // Very transitory.
+
+// TODO: remove - not used, old code
+#define REINFORCEMENT_MAX 50  // Maximum number of reinforcements.
 
 // Save filename description.
 #define DESCRIP_MAX 44 // 40 chars + CR + LF + CTRL-Z + NULL

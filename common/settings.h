@@ -47,6 +47,6 @@ public:
     } Options;
 };
 
-extern SettingsClass Settings;
-
 #endif
+
+extern SettingsClass Settings;

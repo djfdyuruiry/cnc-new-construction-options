@@ -790,7 +790,7 @@ PathType* FootClass::Find_Path(CELL dest, FacingType* final_moves, int maxlen, M
 
     memset(path.Overlap, 0, sizeof(MainOverlap));
 
-	if (Get_Bool_Rule(ENHANCEMENTS_SECTION, ASTAR_PATH_FINDING_RULE))
+	if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, ASTAR_PATH_FINDING_RULE))
 	{
 		int asThreat = threat;
 		bool result = false;

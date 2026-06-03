@@ -350,6 +350,8 @@ int Com_Scenario_Dialog(void)
     housebtn.Set_Selected_Index(MPlayerHouse - HOUSE_GOOD);
     housebtn.Set_Read_Only(true);
 
+    const auto max_start_credits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_MAX_RULE);
+
     /*........................................................................
     Init scenario values, only the first time through
     ........................................................................*/
@@ -357,7 +359,7 @@ int Com_Scenario_Dialog(void)
         // GB 2022 set defaults for skirmish also:
         BuildLevel = 7;
 
-        MPlayerCredits = 10000; // init credits & credit buffer
+        MPlayerCredits = max_start_credits; // init credits & credit buffer
         MPlayerBases = 1;       // init scenario parameters
         MPlayerTiberium = 1;
         MPlayerGoodies = 0;
@@ -374,9 +376,9 @@ int Com_Scenario_Dialog(void)
     optionlist.Set_Read_Only(0);
 
     optionlist.Add_Item(Text_String(TXT_BASES_ON));
-    optionlist.Add_Item("Tiberium Regrows");
+    optionlist.Add_Item("Tiberium Regrows"); // TODO: Locale file entry
     optionlist.Add_Item(Text_String(TXT_CRATES_ON));
-    //optionlist.Add_Item(Text_String(TXT_SHADOW_REGROWS));
+    //optionlist.Add_Item(Text_String(TXT_SHADOW_REGROWS)); // TODO: Implement for TD? (copied from RA)
     optionlist.Add_Item(Text_String(TXT_CAPTURE_THE_FLAG));
 
     optionlist.Check_Item(0, MPlayerBases);
@@ -391,7 +393,7 @@ int Com_Scenario_Dialog(void)
     countgauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
     countgauge.Set_Value(MPlayerUnitCount - MPlayerCountMin[MPlayerBases]);
 
-    creditsgauge.Set_Maximum(10000 /* TODO: Rule.MPMaxMoney*/);
+    creditsgauge.Set_Maximum(max_start_credits);
     creditsgauge.Set_Value(MPlayerCredits);
 
     int maxp = 4 /*Rule.MaxPlayers - 2*/;
@@ -747,6 +749,11 @@ int Com_Scenario_Dialog(void)
         case (BUTTON_CREDITS | KN_BUTTON):
             if (!ready_to_go) {
                 MPlayerCredits = creditsgauge.Get_Value();
+
+                if (MPlayerCredits == 0) {
+                    // clear lingering digits when player quickly slides to zero
+                    display = REDRAW_ALL;
+                }
 
                 if (display < REDRAW_MESSAGE) {
                     display = REDRAW_MESSAGE;

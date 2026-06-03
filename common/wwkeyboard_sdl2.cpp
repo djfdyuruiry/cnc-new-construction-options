@@ -71,7 +71,7 @@ void WWKeyboardClassSDL2::Fill_Buffer_From_System(void)
                 key = VK_MBUTTON;
                 break;
             }
-
+    
             if (Settings.Mouse.RawInput || Is_Gamepad_Active()) {
                 Get_Video_Mouse(x, y);
             } else {

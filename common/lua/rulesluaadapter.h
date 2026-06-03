@@ -7,14 +7,24 @@
 class RulesLuaAdapter final
 {
 public:
-    static void Push_Rule_Type(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key);
+    static void Push_Rule_Type(
+        const LuaEngine& engine,
+        const RuleSections& sections,
+        std::string section,
+        std::string key
+    );
 
     /**
      * Unpack variant to call corresponding engine Push_Value template.
      */
     static void Push_Rule_Variant(const LuaEngine& engine, const RuleValueVariant& variant);
 
-    static void Push_Rule_Value(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key);
+    static void Push_Rule_Value(
+        const LuaEngine& engine,
+        const RuleSections& sections,
+        std::string section,
+        std::string key
+    );
 
     template<LuaVariantCompatible T, RuleValueVariantCompatible U>
     static bool Set_Rule_Value_For_Section(LuaArguments& args, RuleSection& section, const std::string& key)
@@ -45,12 +55,17 @@ public:
     static void Set_Rule_Value(
         const SharedLuaEngine& engine,
         LuaArguments& arguments,
-        RuleSections& sections,
+        const RuleSections& sections,
         const std::string& section,
         const std::string& key
     );
 
-    static void Assert_Rule_Exists(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key);
+    static void Assert_Rule_Exists(
+        const LuaEngine& engine,
+        const RuleSections& sections,
+        std::string section,
+        std::string key
+    );
 
 private:
     RulesLuaAdapter() = delete;

@@ -277,12 +277,12 @@ public:
     /**
      * Set values in this instance based on rule section values.
      */
-    RuleSections& Read_Rules(RuleSections& rules);
+    const RuleSections& Read_Rules(const RuleSections& rules);
 
     /**
      * Set rule section values based on values in this instance.
      */
-    RuleSections& Write_Rules(RuleSections& rules) const;
+    const RuleSections& Write_Rules(const RuleSections& rules) const;
 
     JSON_FUNCTIONS(SpecialClass)
 };

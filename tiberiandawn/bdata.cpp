@@ -4432,10 +4432,10 @@ int BuildingTypeClass::Height(void) const
  *=============================================================================================*/
 int BuildingTypeClass::Repair_Cost(void) const
 {
-	auto repair_factor = Get_Float_Rule(GAME_REPAIR_SECTION, BUILDING_REPAIR_FACTOR_RULE);
+	auto repair_factor = Rule.Get_Rule_Value<float>(GAME_REPAIR_SECTION, BUILDING_REPAIR_FACTOR_RULE);
 	auto repair_percent = nearbyint(repair_factor * 100);
 
-    auto repair_step = Get_Int_Rule(GAME_REPAIR_SECTION, BUILDING_REPAIR_STRENGTH_STEP_RULE);
+    auto repair_step = Rule.Get_Rule_Value<int>(GAME_REPAIR_SECTION, BUILDING_REPAIR_STRENGTH_STEP_RULE);
 
     int cost = (Raw_Cost() * repair_step) / MaxStrength;
     cost /= 2;
@@ -4461,7 +4461,7 @@ int BuildingTypeClass::Repair_Cost(void) const
  *=============================================================================================*/
 int BuildingTypeClass::Repair_Step(void) const
 {
-    return Get_Int_Rule(GAME_REPAIR_SECTION, BUILDING_REPAIR_STRENGTH_STEP_RULE);
+    return Rule.Get_Rule_Value<int>(GAME_REPAIR_SECTION, BUILDING_REPAIR_STRENGTH_STEP_RULE);
 }
 
 /***********************************************************************************************
@@ -4556,7 +4556,7 @@ int BuildingTypeClass::Full_Name(void) const
         Scen.Scenario == 3
         && Type == STRUCT_MISSION
         && (PlayerPtr && PlayerPtr->Class->House == HOUSE_BAD)
-        && Get_Bool_Rule(GAME_SCENARIOS_SECTION, RENAME_TECH_CENTER_TO_PRISON_IN_NOD_SCENARIO_3_RULE)
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, RENAME_TECH_CENTER_TO_PRISON_IN_NOD_SCENARIO_3_RULE)
     ) {
         CNC_LOGGER_WARN("Mission 3 detected, renaming {} to {}", TechnoTypeClass::Full_Name(), TXT_PRISON);
 

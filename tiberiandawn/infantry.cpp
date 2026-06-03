@@ -778,7 +778,7 @@ void InfantryClass::Per_Cell_Process(bool center)
     **	If over Tiberium, then this infantry unit will take damage.
     */
     if (IsActive && !IsInLimbo && center && cellptr->Land_Type() == LAND_TIBERIUM && *this != INFANTRY_E5) {
-        auto damage = Get_Int_Rule(GAME_MAP_SECTION, TIBERIUM_INFANTRY_DAMAGE_RULE);
+        auto damage = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, TIBERIUM_INFANTRY_DAMAGE_RULE);
 
         Take_Damage(damage, 0, WARHEAD_FIRE);
     }

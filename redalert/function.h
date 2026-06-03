@@ -57,6 +57,7 @@
 
 #define WWMEM_H
 
+#include "common/settings.h"
 #include "common/wwlib32.h"
 #include "common/winstub.h"
 #include "bench.h"
@@ -706,3 +707,5 @@ void Enable_Uncompressed_Shapes(void);
 void On_Achievement_Event(const HouseClass* player_ptr, const char* achievement_type, const char* achievement_reason);
 
 #endif
+
+extern SettingsClass Settings;

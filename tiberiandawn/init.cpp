@@ -133,40 +133,6 @@ bool Init_Game(int, char*[])
     CCDebugString("C&C95 - About to load reslib.dll\n");
 
     /*
-    **	Initialize the game object heaps.
-    */
-    CCDebugString("C&C95 - About to enter Units.Set_Heap\n");
-    Units.Set_Heap(UNIT_MAX);
-    CCDebugString("C&C95 - About to enter Factories.Set_Heap\n");
-    Factories.Set_Heap(FACTORY_MAX);
-    CCDebugString("C&C95 - About to enter Terrains.Set_Heap\n");
-    Terrains.Set_Heap(TERRAIN_MAX);
-    CCDebugString("C&C95 - About to enter Templates.Set_Heap\n");
-    Templates.Set_Heap(TEMPLATE_MAX);
-    CCDebugString("C&C95 - About to enter Smudges.Set_Heap\n");
-    Smudges.Set_Heap(SMUDGE_MAX);
-    CCDebugString("C&C95 - About to enter Overlays.Set_Heap\n");
-    Overlays.Set_Heap(OVERLAY_MAX);
-    CCDebugString("C&C95 - About to enter Infantry.Set_Heap\n");
-    Infantry.Set_Heap(INFANTRY_MAX);
-    CCDebugString("C&C95 - About to enter Bullets.Set_Heap\n");
-    Bullets.Set_Heap(BULLET_MAX);
-    CCDebugString("C&C95 - About to enter Buildings.Set_Heap\n");
-    Buildings.Set_Heap(BUILDING_MAX);
-    CCDebugString("C&C95 - About to enter Anims.Set_Heap\n");
-    Anims.Set_Heap(ANIM_MAX);
-    CCDebugString("C&C95 - About to enter Aircraft.Set_Heap\n");
-    Aircraft.Set_Heap(AIRCRAFT_MAX);
-    CCDebugString("C&C95 - About to enter Triggers.Set_Heap\n");
-    Triggers.Set_Heap(TRIGGER_MAX);
-    CCDebugString("C&C95 - About to enter TeamTypes.Set_Heap\n");
-    TeamTypes.Set_Heap(TEAMTYPE_MAX);
-    CCDebugString("C&C95 - About to enter Teams.Set_Heap\n");
-    Teams.Set_Heap(TEAM_MAX);
-    CCDebugString("C&C95 - About to enter Houses.Set_Heap\n");
-    Houses.Set_Heap(HOUSE_MAX);
-
-    /*
     **	Initialize all the waypoints to invalid values.
     */
     CCDebugString("C&C95 - About to clear waypoints\n");
@@ -481,6 +447,40 @@ bool Init_Game(int, char*[])
     */
     CNC_LOG_DEBUG("Initialising RulesClass global instance: Rule");
     Rule.Init();
+
+    /*
+    **	Initialize the game object heaps.
+    */
+    CCDebugString("C&C95 - About to enter Units.Set_Heap\n");
+    Units.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, UNITS_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Factories.Set_Heap\n");
+    Factories.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, FACTORIES_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Terrains.Set_Heap\n");
+    Terrains.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, TERRAIN_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Templates.Set_Heap\n");
+    Templates.Set_Heap(TEMPLATE_MAX);
+    CCDebugString("C&C95 - About to enter Smudges.Set_Heap\n");
+    Smudges.Set_Heap(SMUDGE_MAX);
+    CCDebugString("C&C95 - About to enter Overlays.Set_Heap\n");
+    Overlays.Set_Heap(OVERLAY_MAX);
+    CCDebugString("C&C95 - About to enter Infantry.Set_Heap\n");
+    Infantry.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, INFANTRY_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Bullets.Set_Heap\n");
+    Bullets.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, BULLETS_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Buildings.Set_Heap\n");
+    Buildings.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, BUILDINGS_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Anims.Set_Heap\n");
+    Anims.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, ANIMATIONS_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Aircraft.Set_Heap\n");
+    Aircraft.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, AIRCRAFT_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Triggers.Set_Heap\n");
+    Triggers.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, TRIGGERS_MAX_RULE));
+    CCDebugString("C&C95 - About to enter TeamTypes.Set_Heap\n");
+    TeamTypes.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, TEAM_TYPES_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Teams.Set_Heap\n");
+    Teams.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, TEAMS_MAX_RULE));
+    CCDebugString("C&C95 - About to enter Houses.Set_Heap\n");
+    Houses.Set_Heap(Rule.Get_Rule_Value<int>(GAME_LIMITS_SECTION, HOUSES_MAX_RULE));
 
     /* Initialize the Interpolation Table.  */
     if (Get_Resolution_Factor()) {

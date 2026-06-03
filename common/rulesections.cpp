@@ -2,6 +2,18 @@
 
 #include "rulesections.h"
 
+RuleSection& RuleSection::EnableStringSanitization()
+{
+    SanitizeIniStrings = true;
+    return *this;
+}
+
+RuleSection& RuleSection::DisableStringSanitization()
+{
+    SanitizeIniStrings = false;
+    return *this;
+}
+
 bool RuleSection::Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
 {
     if (std::holds_alternative<int>(value_variant_a)) {
@@ -172,21 +184,21 @@ std::string_view RuleSection::Get_Type(std::string_view name) const
     return Get_Variant_Type(it->second);
 }
 
-RuleSection& RuleSection::Set_Ini_Comment(INIClass& ini, const std::string& comment)
+RuleSection& RuleSection::Set_Ini_Comment(const std::string& comment)
 {
     if (CncStringUtils::Is_Blank(comment)) {
         CNC_LOGGER_DEBUG("Skipping blank INI comment for section: {}", SectionName);
         return *this;
     }
 
-    if (ini.Section_Present(SectionName.c_str())) {
-        CNC_LOGGER_DEBUG("Ignoring INI comment call for already existing section: {}", SectionName);
-        return *this;
-    }
-
-    ini.Put_Section(SectionName.c_str(), comment);
+    Comment = comment;
 
     return *this;
+}
+
+const std::optional<std::string>& RuleSection::Get_Ini_Comment() const
+{
+    return Comment;
 }
 
 const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name) const
@@ -230,9 +242,26 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
 
 void RuleSection::Save_All_To_Ini(INIClass& ini) const
 {
+    ini.Put_Section(SectionName.c_str(), Comment);
+
     for (const auto& key : Rules | std::views::keys) {
         Save_To_Ini(ini, key);
     }
+}
+
+size_t RuleSection::Get_C_Str(const std::string_view name, char* buffer, const size_t buffer_size)
+{
+    const auto str_value = Get<std::string>(name);
+    const auto str_length = str_value.length();
+
+    buffer[0] = '\0';
+    strncpy(buffer, str_value.data(), buffer_size);
+
+    if (str_length >= buffer_size) {
+        buffer[buffer_size - 1] = '\0';
+    }
+
+    return str_length;
 }
 
 RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
@@ -264,6 +293,11 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
     OnRulesChanged(*this, name, value);
 
     return *this;
+}
+
+RuleSection& RuleSection::Set(std::string_view name, const char* value)
+{
+    return Set(name, std::string(value));
 }
 
 std::optional<std::string_view>& RuleSection::Get_Converter_Section_Type_Name()
@@ -363,4 +397,15 @@ RuleSection& RuleSections::operator[](std::string_view name)
     }
 
     return Add_Section(name.data());
+}
+
+RuleSection& RuleSections::operator[](std::string_view name) const
+{
+    auto it = Sections.find(name.data());
+
+    if (it == Sections.end()) {
+        throw std::out_of_range(std::format("Attempted to access missing rule section: {}'", name));
+    }
+
+    return *(it->second);
 }

@@ -112,7 +112,7 @@ bool Save_Game(int id, char* descr)
     */
     sprintf(name, "SAVEGAME.%03d", id);
 
-    return Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+    return Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
         ? Save_Game(name, descr)
         : Save_Game_Binary(name, descr);
 }
@@ -341,7 +341,7 @@ bool Load_Game(int id)
     */
     sprintf(name, "SAVEGAME.%03d", id);
 
-    return Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+    return Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
         ? Load_Game(name)
         : Load_Game_Binary(name);
 }

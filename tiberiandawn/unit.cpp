@@ -2464,7 +2464,7 @@ bool UnitClass::Harvesting(void)
         **	than the harvester can carry.
         */
         int reducer = (ptr->OverlayData % 6) + 1;
-        auto capacity = Get_Int_Rule(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
+        auto capacity = Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
 
         reducer = ptr->Reduce_Tiberium(MIN(reducer, capacity - Tiberium));
         Tiberium += reducer;
@@ -4265,7 +4265,7 @@ int UnitClass::Pip_Count(void) const
         return (How_Many());
     }
     if (Class->IsToHarvest) {
-        auto pips = Get_Int_Rule(GAME_HARVESTING_SECTION, HARVESTER_PIPS_RULE);
+        auto pips = Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, HARVESTER_PIPS_RULE);
 
         return (Fixed_To_Cardinal(pips, Tiberium_Load()));
     }

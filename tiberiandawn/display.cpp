@@ -926,9 +926,9 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
-	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+	auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
 	/*
 	**	Scan through all cells that the building foundation would cover. If any adjacent

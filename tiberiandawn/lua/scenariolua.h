@@ -17,7 +17,7 @@
 class TdRuleSectionsProvider final
 {
 public:
-    static RuleSections& Sections();
+    static const RuleSections& Sections();
 
 private:
     TdRuleSectionsProvider() = delete;

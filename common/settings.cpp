@@ -3,8 +3,6 @@
 #include "ini.h"
 #include "miscasm.h"
 
-SettingsClass Settings;
-
 SettingsClass::SettingsClass()
 {
     /*

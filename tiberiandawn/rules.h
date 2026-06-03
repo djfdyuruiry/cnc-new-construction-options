@@ -297,11 +297,6 @@ public:
     */
     DifficultyClass Diff[DIFF_COUNT];
 
-    // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
-    RuleSections Sections;
-    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    std::map<std::string_view, std::unique_ptr<RuleSections>> TypeRules;
-
     RulesClass(void);
 
     void Init();
@@ -317,15 +312,36 @@ public:
         std::optional<bool> superweapons_allowed
     );
 
+    const RuleSections& Get_Rule_Sections() const;
+
     template<EnumSignedChar T>
-    RuleSections& Get_Rule_Sections_For_Type()
+    const RuleSections& Get_Rule_Sections_For_Type() const
     {
-        return *TypeRules[TdTypeConverter::Get_Type_Name<T>()].get();
+        static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
+
+        if (!TypeRules.contains(type_name)) {
+            throw std::out_of_range(
+                std::format("Attempted to get rule sections for unsupported type: {}", type_name)
+            );
+        }
+
+        return *TypeRules.at(type_name);;
     }
 
-    void Assert_Section_Not_Present(std::string_view name);
+    void Assert_Section_Not_Present(std::string_view name) const;
+
+    template<RuleValueVariantCompatible T>
+    T Get_Rule_Value(const std::string_view section, const std::string_view rule) const
+    {
+        return Sections[section].Get<T>(rule);
+    }
 
 private:
+    // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
+    RuleSections Sections;
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    std::map<std::string_view, std::unique_ptr<RuleSections>> TypeRules;
+
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);
     void Difficulty(CCINIClass& ini);
@@ -334,8 +350,8 @@ private:
 
     // see rules-nco.cpp
     void Init_Sections(CCINIClass& ini); // TODO: Add back section asserts ONLY when resetting rules (same for types)
-    void Apply_Special_Properties();
-    void Apply_Static_And_Global_Values();
+    void Apply_Special_Properties() const;
+    void Apply_Static_And_Global_Values() const;
 
     void Export_AI(CCINIClass& ini) const;
     void Export_IQ(CCINIClass& ini) const;
@@ -343,13 +359,5 @@ private:
 
     void Export(CCINIClass& ini) const;
 };
-
-#define Get_Rule_Value(section, rule, value_type) Rule.Sections[section].Get<value_type>(rule)
-
-#define Get_Int_Rule(section, rule) Get_Rule_Value(section, rule, int)
-
-#define Get_Bool_Rule(section, rule) Get_Rule_Value(section, rule, bool)
-
-#define Get_Float_Rule(section, rule) Get_Rule_Value(section, rule, float)
 
 #endif
