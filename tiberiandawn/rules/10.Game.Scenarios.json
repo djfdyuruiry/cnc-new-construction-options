@@ -1,0 +1,50 @@
+{
+  "$schema": "../../cmake/nco-rules-json-schema.json",
+  "section": "Game.Scenarios",
+  "ini_comment": "Rules for specific scenarios, used to modify the tech tree (TODO: Embed in scenario INI)",
+  "comment": "Change game rules for specific single player scenarios, mainly used to modify the player tech tree.",
+  "rules": [
+    {
+      "name": "SetBuildLevelTo1InGdiScenario2",
+      "type": "bool",
+      "default": true,
+      "comment": "When player is in GDI mission 2 set the build level to 1"
+    },
+    {
+      "name": "RenameTechCenterToPrisonInNodScenario3",
+      "type": "bool",
+      "default": true,
+      "comment": "When playing NOD mission 3 rename Tech Centers to `Prison`"
+    },
+    {
+      "name": "HideBazookaFromGdiUntilScenario8",
+      "type": "bool",
+      "default": true,
+      "comment": "-"
+    },
+    {
+      "name": "HideRocketLauncherFromGdiUntilScenario9",
+      "type": "bool",
+      "default": true,
+      "comment": "-"
+    },
+    {
+      "name": "HideSandbagFromGdiUntilScenario9",
+      "type": "bool",
+      "default": true,
+      "comment": "-"
+    },
+    {
+      "name": "AllowNodToBuildAdvancedPowerInScenario12",
+      "type": "bool",
+      "default": true,
+      "comment": "-"
+    },
+    {
+      "name": "RequireTechCentreForStealthTankInNodScenario11",
+      "type": "bool",
+      "default": true,
+      "comment": "-"
+    }
+  ]
+}
