@@ -500,24 +500,35 @@ void Set_Video_Cursor_Clip(bool clipped)
     }
 }
 
-void Move_Video_Mouse(float xrel, float yrel)
+void Move_Video_Mouse(const float xrel, const float yrel)
 {
+    auto next_x = hwcursor.X;
+    auto next_y = hwcursor.Y;
+
     if (Keyboard->Is_Gamepad_Active() || hwcursor.Clip || !Settings.Video.Windowed) {
-        hwcursor.X += xrel * (Settings.Mouse.Sensitivity / 100.0f);
-        hwcursor.Y += yrel * (Settings.Mouse.Sensitivity / 100.0f);
+        next_x += xrel * (Settings.Mouse.Sensitivity / 100.0f);
+        next_y += yrel * (Settings.Mouse.Sensitivity / 100.0f);
     }
 
-    if (hwcursor.X >= hwcursor.GameW) {
-        hwcursor.X = hwcursor.GameW - 1;
-    } else if (hwcursor.X < 0) {
-        hwcursor.X = 0;
+    if (next_x >= hwcursor.GameW) {
+        next_x = hwcursor.GameW - 1;
+    } else if (next_x < 0) {
+        next_x = 0;
     }
 
-    if (hwcursor.Y >= hwcursor.GameH) {
-        hwcursor.Y = hwcursor.GameH - 1;
-    } else if (hwcursor.Y < 0) {
-        hwcursor.Y = 0;
+    if (next_y >= hwcursor.GameH) {
+        next_y = hwcursor.GameH - 1;
+    } else if (next_y < 0) {
+        next_y = 0;
     }
+
+    if (Get_Current_Resolution_Mode() == MODE_ZOOM && (next_x > 639 || next_y > 399)) {
+        // prevent mouse leaving screen in zoom mode
+        return;
+    }
+
+    hwcursor.X = next_x;
+    hwcursor.Y = next_y;
 }
 
 void Move_Video_Mouse_Absolute(const int x, const int y)
