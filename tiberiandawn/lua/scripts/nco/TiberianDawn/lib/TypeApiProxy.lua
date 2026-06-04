@@ -43,7 +43,7 @@ local function TypeInstanceApiProxy(api, typeName, getPropertyNamesFunc, instanc
   local setPropertyValueFunc = string.format("set%sPropertyValue", typeName)
 
   local function getPropertyType(...)
-      return api[getPropertyTypeFunc](instanceName, ...)
+    return api[getPropertyTypeFunc](instanceName, ...)
   end
 
   local function getDisplayName()

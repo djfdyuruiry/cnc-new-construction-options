@@ -7,6 +7,11 @@
 
 class INIClass;
 
+/**
+ * Holds settings specific to the Tiberian Dawn game engine that are stored
+ * in the CONQUER.INI file. Used by the multiplayer setup screen for Skirmish
+ * and network play.
+ */
 class TiberianDawnSettings
 {
 public:
