@@ -25,7 +25,7 @@ private:
     template<SupportedByTdTypeConverter T>
     static T Resolve_Instance_By_Name(
         const LuaEngine& engine,
-        RuleSections& sections,
+        const RuleSections& sections,
         std::string_view type_name,
         std::string instance_name
     )
@@ -35,11 +35,19 @@ private:
 
         // lookup instance type using INI name (fallback)
         if (!instance.has_value()) {
-            const auto type_rule = sections[instance_name].template Try_Get<std::string>("Type");
-
             if (!sections.Has_Section(instance_name)) {
                 engine.Raise_Error_Format(
-                    "Failed to find type by INI name, {} type {} does not have required 'Type' rule",
+                    "{} type {} does not exist",
+                    type_name,
+                    instance_name
+                );
+            }
+
+            const auto type_rule = sections[instance_name].template Try_Get<std::string>("Type");
+
+            if (!type_rule.has_value()) {
+                engine.Raise_Error_Format(
+                    "{} type {} does not have required 'Type' rule",
                     type_name,
                     instance_name
                 );
@@ -62,6 +70,7 @@ private:
         auto get_instances_function = std::format("get{}InstanceNames", type_name);
         auto get_properties_function = std::format("get{}PropertyNames", type_name);
         auto get_property_type_function = std::format("get{}PropertyType", type_name);
+        auto get_display_name_function = std::format("get{}DisplayName", type_name);
         auto get_property_value_function = std::format("get{}PropertyValue", type_name);
         auto set_property_value_function = std::format("set{}PropertyValue", type_name);
 
@@ -85,7 +94,7 @@ private:
             auto type_name = TdTypeConverter::Get_Type_Name<T>();
 
             // fetch rule names using first instance in rule cache
-            auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            const auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
             auto section_names = sections.Section_Names();
 
             if (section_names.empty()) {
@@ -149,6 +158,36 @@ private:
 
             return 1;
         })
+        .addCFunction(get_display_name_function.c_str(), [](auto L) {
+            const auto engine = SharedLuaEngine(L);
+            auto type_name = TdTypeConverter::Get_Type_Name<T>();
+            auto arguments = LuaArguments(
+                engine,
+                std::format("get{}DisplayName(<string: instanceName>)", type_name)
+            );
+
+            // process args
+            arguments.Count_Is(1)
+                .First_Argument_Is<std::string>()
+                .Assert();
+
+            const auto instance_name = arguments.Read_First<std::string>().Unpack();
+
+            // fetch type instance rule section
+            const auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            // validate instance section exists
+            auto instance = Resolve_Instance_By_Name<T>(engine, sections, type_name, instance_name);
+
+            const auto& name = sections[instance_name].Get_Ini_Comment();
+
+            if (!name.has_value()) {
+                return 0;
+            }
+
+            engine.Push_Value(name.value());
+
+            return 1;
+        })
         .addCFunction(get_property_value_function.c_str(), [](auto L) {
             const auto engine = SharedLuaEngine(L);
             auto type_name = TdTypeConverter::Get_Type_Name<T>();
@@ -200,7 +239,7 @@ private:
             const auto property_name = arguments.Read_Next<std::string>().Unpack();
 
             // validate arg
-            auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            const auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
             const auto instance = Resolve_Instance_By_Name<T>(engine, sections, type_name, instance_name);
 
             // fetch type rules and instance name

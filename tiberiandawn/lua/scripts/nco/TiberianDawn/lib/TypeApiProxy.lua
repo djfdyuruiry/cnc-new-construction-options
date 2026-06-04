@@ -9,10 +9,12 @@ local isType = TypeValidator.Validators.isType
 
 ---@class TypeInstanceApi
 ---@field __name string
+---@field getDisplayName fun(): string
 ---@field getPropertyNames fun(): string[]
 ---@field getPropertyType fun(): type|string
 ---@field getProperty fun(propertyName: string): number|boolean|string
 ---@field setProperty fun(propertyName: string, value: number|boolean|string): number|boolean|string
+---@field __tostring fun(): string
 
 ---@alias TypeInstanceApiProxy TypeInstanceApi | { [string]: number|boolean|string }
 
@@ -20,6 +22,7 @@ local isType = TypeValidator.Validators.isType
 ---@field __name string
 ---@field getInstanceNames fun(): string[]
 ---@field getPropertyNames fun(): string[]
+---@field __tostring fun(): string
 
 ---@alias TypeApiProxy TypeApi | { [string]: TypeInstanceApiProxy }
 
@@ -35,11 +38,16 @@ local function TypeInstanceApiProxy(api, typeName, getPropertyNamesFunc, instanc
   })
 
   local getPropertyTypeFunc = string.format("get%sPropertyType", typeName)
+  local getDisplayNameFunc = string.format("get%sDisplayName", typeName)
   local getPropertyValueFunc = string.format("get%sPropertyValue", typeName)
   local setPropertyValueFunc = string.format("set%sPropertyValue", typeName)
 
   local function getPropertyType(...)
     return api[getPropertyTypeFunc](instanceName, ...)
+  end
+
+  local function getDisplayName()
+    return api[getDisplayNameFunc](instanceName)
   end
 
   local function getProperty(...)
@@ -58,6 +66,7 @@ local function TypeInstanceApiProxy(api, typeName, getPropertyNamesFunc, instanc
     {
       __name = instanceName,
       getPropertyType = getPropertyType,
+      getDisplayName = getDisplayName,
       getProperty = getProperty,
       setProperty = setProperty,
       getPropertyNames = getPropertyNames,
@@ -70,7 +79,8 @@ local function TypeInstanceApiProxy(api, typeName, getPropertyNamesFunc, instanc
       -- set value
       __newindex = function(_, ...)
         return setProperty(...)
-      end
+      end,
+      __tostring = getDisplayName
     }
   )
 end
@@ -109,6 +119,9 @@ local function TypeApiProxy(api, typeName)
       -- make proxy read only
       __newindex = function()
         error("Type API is read only. Did you mean to set a property and forget to add the type name?")
+      end,
+      __tostring = function()
+        return typeName
       end
     }
   )

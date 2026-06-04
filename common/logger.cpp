@@ -1,6 +1,11 @@
+#include "logger.h"
+
 #include <filesystem>
 
-#include "logger.h"
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+
 #include "paths.h"
 
 /**

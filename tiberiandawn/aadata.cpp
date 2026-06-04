@@ -626,10 +626,10 @@ BuildingClass* AircraftTypeClass::Who_Can_Build_Me(bool, bool legal, HousesType 
  *=============================================================================================*/
 int AircraftTypeClass::Repair_Cost(void) const
 {
-	auto repair_factor = Get_Float_Rule(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_FACTOR_RULE);
+	auto repair_factor = Rule.Get_Rule_Value<float>(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_FACTOR_RULE);
 	auto repair_percent = nearbyint(repair_factor * 100);
 
-    auto repair_step = Get_Int_Rule(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_STRENGTH_STEP_RULE);
+    auto repair_step = Rule.Get_Rule_Value<int>(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_STRENGTH_STEP_RULE);
 
 	return(
 		Fixed_To_Cardinal(
@@ -655,7 +655,7 @@ int AircraftTypeClass::Repair_Cost(void) const
  *=============================================================================================*/
 int AircraftTypeClass::Repair_Step(void) const
 {
-    return Get_Int_Rule(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_STRENGTH_STEP_RULE);
+    return Rule.Get_Rule_Value<int>(GAME_REPAIR_SECTION, AIRCRAFT_REPAIR_STRENGTH_STEP_RULE);
 }
 
 /***********************************************************************************************

@@ -227,7 +227,7 @@ void FactoryClass::AI(void)
 {
     Validate();
     if (!IsSuspended && (Object != NULL || SpecialItem)) {
-        auto stages = Get_Int_Rule(GAME_FACTORIES_SECTION, PRODUCTION_STEPS_PER_TICK_RULE);
+        auto stages = Rule.Get_Rule_Value<int>(GAME_FACTORIES_SECTION, PRODUCTION_STEPS_PER_TICK_RULE);
 
         /*
         **	Determine the acceleration factor for factory production.
@@ -236,7 +236,7 @@ void FactoryClass::AI(void)
         **	factory types doesn't affect individual factories.
         */
         if (Object && House->IsHuman) {
-			auto factory_count_multiplier = Get_Float_Rule(GAME_FACTORIES_SECTION, FACTORY_COUNT_STEP_MULTIPLIER_RULE);
+			auto factory_count_multiplier = Rule.Get_Rule_Value<float>(GAME_FACTORIES_SECTION, FACTORY_COUNT_STEP_MULTIPLIER_RULE);
 			auto modified_stages = stages;
 
 			switch (Object->What_Am_I()) {

@@ -41,6 +41,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "common/irandom.h"
 #include "common/ini.h"
 #include "common/framelimit.h"
@@ -517,6 +518,7 @@ GameType Select_MPlayer_Game(void)
 void Read_MultiPlayer_Settings(void)
 {
 #ifndef REMASTER_BUILD
+    // TODO: consider removing this fun - values are not saved back to ini later
     char buf[128]; // buffer for parsing INI entry
     CELL cell;
 
@@ -524,15 +526,6 @@ void Read_MultiPlayer_Settings(void)
     INIClass ini;
     CDFileClass file(CONFIG_FILE_NAME);
     if (ini.Load(file)) {
-
-        //	Get the player's last-used Handle
-        ini.Get_String("MultiPlayer", "Handle", "Noname", MPlayerName, sizeof(MPlayerName));
-
-        //	Get the player's last-used Color
-        MPlayerPrefColor = (PlayerColorType)ini.Get_Int("MultiPlayer", "Color", 0);
-
-        MPlayerHouse = (HousesType)ini.Get_Int("MultiPlayer", "Side", HOUSE_GOOD);
-
         TrapCheckHeap = ini.Get_Int("MultiPlayer", "CheckHeap", 0);
 
         //	Read special recording playback values, to help find sync bugs
@@ -589,18 +582,7 @@ void Read_MultiPlayer_Settings(void)
 void Write_MultiPlayer_Settings(void)
 {
 #ifndef REMASTER_BUILD
-    INIClass ini;
-    CDFileClass file(CONFIG_FILE_NAME);
-    if (ini.Load(file)) {
-
-        //	Save the player's last-used Handle & Color
-        ini.Put_Int("MultiPlayer", "Color", (int)MPlayerPrefColor);
-        ini.Put_Int("MultiPlayer", "Side", MPlayerHouse);
-        ini.Put_String("MultiPlayer", "Handle", MPlayerName);
-
-        //	Write the INI data out to a file.
-        ini.Save(file);
-    }
+    TdSettings.Update();
 #endif
 }
 

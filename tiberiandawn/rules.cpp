@@ -41,6 +41,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "tiberiandawnsettings.h"
 
 /***********************************************************************************************
  * DifficultyClass::DifficultyClass -- Default constructor for difficulty class object.        *
@@ -303,8 +304,30 @@ void RulesClass::Init_For_Scenario(
     // ensure we restore any skirmish game options after reading rules
     if (game_to_play == GAME_SKIRMISH || game_to_play == GAME_GLYPHX_MULTIPLAYER) {
         special_options.Write_Rules(Sections);
+
+        Special.IsCaptureTheFlag = special_options.IsCaptureTheFlag;
+        TdSettings.Update(); // if we are loading from a save, this ensures skirmish setup screen is in sync
+
         AllowSuperWeapons = superweapons_allowed.value_or(AllowSuperWeapons);
     }
+
+    if (Logger()->level() > spdlog::level::debug) {
+        // don't bother inspecting types after load, debug info won't be logged anyway
+        return;
+    }
+
+    for (const auto& [type_name, sections] : TypeRules) {
+        CNC_LOG_DEBUG("Type section: {}", type_name);
+
+        for (const auto& section : sections->Section_Names()) {
+            CNC_LOG_DEBUG("  Instance section: {}", section);
+        }
+    }
+}
+
+const RuleSections& RulesClass::Get_Rule_Sections() const
+{
+    return Sections;
 }
 
 /**
@@ -314,24 +337,7 @@ void RulesClass::Init_For_Scenario(
 void RulesClass::Reset()
 {
     Sections = RuleSections();
-
-    static const auto type_names = std::vector {
-        TdTypeConverter::Get_Type_Name<AnimType>(),
-        TdTypeConverter::Get_Type_Name<WarheadType>(),
-        TdTypeConverter::Get_Type_Name<BulletType>(),
-        TdTypeConverter::Get_Type_Name<WeaponType>(),
-        TdTypeConverter::Get_Type_Name<AircraftType>(),
-        TdTypeConverter::Get_Type_Name<StructType>(),
-        TdTypeConverter::Get_Type_Name<InfantryType>(),
-        TdTypeConverter::Get_Type_Name<UnitType>(),
-        TdTypeConverter::Get_Type_Name<HousesType>(),
-    };
-
     TypeRules.clear();
-
-    for (const auto& type_name : type_names) {
-        TypeRules[type_name] = std::make_unique<RuleSections>();
-    }
 }
 
 /**
@@ -588,14 +594,12 @@ void RulesClass::Difficulty(CCINIClass& ini)
  * Lua APIs to interact with the classes indirectly via the Rules section.
  */
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& ini, const CncLogger& Logger)
+static void Init_Type(RuleSections& sections, U first, U count, CCINIClass& ini, const CncLogger& Logger)
 {
     // get name for type and rules section
     auto type_name = TdTypeConverter::Get_Type_Name<U>();
 
     CNC_LOGGER_INFO("Processing rule sections for type: {}", type_name);
-
-    auto& sections = *rules.TypeRules[type_name];
 
     // override rules to ensure INI comments for all types reveal real names
     const auto old_is_named = Special.IsNamed;
@@ -610,7 +614,7 @@ static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& 
             // trigger type instance properties update if rules cache is updated
             typeInstance.Read_Rules(section); // TODO: consider optimising this to only update the affected property
         })
-        .Set_Ini_Comment(ini, std::string(Text_String(typeInstance.Full_Name())))
+        .Set_Ini_Comment(std::string(Text_String(typeInstance.Full_Name())))
         .template Set_Converter_Section_Type<U, TdTypeConverter>()
         .template With<IniRuleContext>(ini, [&](auto& c) {
             // load initial values from INI, falling back to type instance hardcoded values
@@ -620,12 +624,10 @@ static RuleSections& Init_Type(RulesClass& rules, U first, U count, CCINIClass& 
 
     // reset temporary rules override
     Special.IsNamed = old_is_named;
-
-    return sections;
 }
 
 template<EnumSignedChar U, RulesTypeClass<U> T>
-static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logger)
+static void Init_Type(RuleSections& sections, U first, U count, const CncLogger& Logger)
 {
     auto prefix = TdTypeConverter::Get_Type_Name<U>();
     const auto rules_filename = std::format("{}.INI", prefix);
@@ -642,7 +644,7 @@ static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logg
         }
     }
 
-    auto& sections = Init_Type<U, T>(rules, first, count, ini, Logger);
+    Init_Type<U, T>(sections, first, count, ini, Logger);
 
     // TODO: Load new types instances for ini sections with names not found in game engine
     //       (needs type ptr/reference rework and enums refactoring - to allow types to grow rather than be static)
@@ -661,32 +663,48 @@ static void Init_Type(RulesClass& rules, U first, U count, const CncLogger& Logg
     ini_file.Close();
 }
 
+/**
+ * Convenience function to get or create a RuleSections instance for a given
+ * type.
+ */
+template <EnumSignedChar T>
+RuleSections& Sections_For(std::map<std::string_view, std::unique_ptr<RuleSections>>& type_rules)
+{
+    static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
+
+    if (!type_rules.contains(type_name)) {
+        type_rules[type_name] = std::make_unique<RuleSections>();
+    }
+
+    return *type_rules[type_name];
+}
+
 void RulesClass::Init_Types()
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, Logger);
-    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, Logger);
-    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, Logger);
-    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, Logger);
-    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger);
-    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, Logger);
-    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, Logger);
-    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, Logger);
-    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, Logger);
+    Init_Type<AnimType, AnimTypeClass>(Sections_For<AnimType>(TypeRules), ANIM_FIRST, ANIM_COUNT, Logger);
+    Init_Type<WarheadType, WarheadTypeClass>(Sections_For<WarheadType>(TypeRules), WARHEAD_FIRST, WARHEAD_COUNT, Logger);
+    Init_Type<BulletType, BulletTypeClass>(Sections_For<BulletType>(TypeRules), BULLET_FIRST, BULLET_COUNT, Logger);
+    Init_Type<WeaponType, WeaponTypeClass>(Sections_For<WeaponType>(TypeRules), WEAPON_FIRST, WEAPON_COUNT, Logger);
+    Init_Type<AircraftType, AircraftTypeClass>(Sections_For<AircraftType>(TypeRules), AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger);
+    Init_Type<StructType, BuildingTypeClass>(Sections_For<StructType>(TypeRules), STRUCT_FIRST, STRUCT_COUNT, Logger);
+    Init_Type<InfantryType, InfantryTypeClass>(Sections_For<InfantryType>(TypeRules), INFANTRY_FIRST, INFANTRY_COUNT, Logger);
+    Init_Type<UnitType, UnitTypeClass>(Sections_For<UnitType>(TypeRules), UNIT_FIRST, UNIT_COUNT, Logger);
+    Init_Type<HousesType, HouseTypeClass>(Sections_For<HousesType>(TypeRules), HOUSE_FIRST, HOUSE_COUNT, Logger);
 }
 
 void RulesClass::Init_Types(CCINIClass& ini)
 {
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    Init_Type<AnimType, AnimTypeClass>(*this, ANIM_FIRST, ANIM_COUNT, ini, Logger);
-    Init_Type<WarheadType, WarheadTypeClass>(*this, WARHEAD_FIRST, WARHEAD_COUNT, ini, Logger);
-    Init_Type<BulletType, BulletTypeClass>(*this, BULLET_FIRST, BULLET_COUNT, ini, Logger);
-    Init_Type<WeaponType, WeaponTypeClass>(*this, WEAPON_FIRST, WEAPON_COUNT, ini, Logger);
-    Init_Type<AircraftType, AircraftTypeClass>(*this, AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini, Logger);
-    Init_Type<StructType, BuildingTypeClass>(*this, STRUCT_FIRST, STRUCT_COUNT, ini, Logger);
-    Init_Type<InfantryType, InfantryTypeClass>(*this, INFANTRY_FIRST, INFANTRY_COUNT, ini, Logger);
-    Init_Type<UnitType, UnitTypeClass>(*this, UNIT_FIRST, UNIT_COUNT, ini, Logger);
-    Init_Type<HousesType, HouseTypeClass>(*this, HOUSE_FIRST, HOUSE_COUNT, ini, Logger);
+    Init_Type<AnimType, AnimTypeClass>(Sections_For<AnimType>(TypeRules), ANIM_FIRST, ANIM_COUNT, ini, Logger);
+    Init_Type<WarheadType, WarheadTypeClass>(Sections_For<WarheadType>(TypeRules), WARHEAD_FIRST, WARHEAD_COUNT, ini, Logger);
+    Init_Type<BulletType, BulletTypeClass>(Sections_For<BulletType>(TypeRules), BULLET_FIRST, BULLET_COUNT, ini, Logger);
+    Init_Type<WeaponType, WeaponTypeClass>(Sections_For<WeaponType>(TypeRules), WEAPON_FIRST, WEAPON_COUNT, ini, Logger);
+    Init_Type<AircraftType, AircraftTypeClass>(Sections_For<AircraftType>(TypeRules), AIRCRAFT_FIRST, AIRCRAFT_COUNT, ini, Logger);
+    Init_Type<StructType, BuildingTypeClass>(Sections_For<StructType>(TypeRules), STRUCT_FIRST, STRUCT_COUNT, ini, Logger);
+    Init_Type<InfantryType, InfantryTypeClass>(Sections_For<InfantryType>(TypeRules), INFANTRY_FIRST, INFANTRY_COUNT, ini, Logger);
+    Init_Type<UnitType, UnitTypeClass>(Sections_For<UnitType>(TypeRules), UNIT_FIRST, UNIT_COUNT, ini, Logger);
+    Init_Type<HousesType, HouseTypeClass>(Sections_For<HousesType>(TypeRules), HOUSE_FIRST, HOUSE_COUNT, ini, Logger);
 }
 
 /***********************************************************************************************
@@ -712,7 +730,7 @@ void RulesClass::Export_Difficulty(CCINIClass& ini) const
 #endif
 }
 
-void RulesClass::Assert_Section_Not_Present(std::string_view name)
+void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
 {
     if (
         Sections.Has_Section(name) ||

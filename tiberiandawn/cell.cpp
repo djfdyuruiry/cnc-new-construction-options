@@ -1938,7 +1938,7 @@ int CellClass::Tiberium_Adjust(bool pregame)
             }
 
             OverlayData = _adj[count];
-            return((OverlayData+1) * Get_Int_Rule(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE));
+            return((OverlayData+1) * Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE));
         }
     }
     return (0);

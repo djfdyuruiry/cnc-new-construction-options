@@ -39,6 +39,7 @@
 #include "common/paths.h"
 #include "common/utfargs.h"
 #include "settings.h"
+#include "tiberiandawnsettings.h"
 
 bool Read_Private_Config_Struct(FileClass& file, NewConfigType* config);
 void Print_Error_End_Exit(char* string);
@@ -458,6 +459,7 @@ int main(int argc, char** argv)
         */
         ini.Load(cfile);
         Settings.Save(ini);
+        TdSettings.Save(ini);
         Options.Save_Settings(ini);
         ini.Save(cfile);
 
@@ -610,9 +612,10 @@ void Read_Setup_Options(RawFileClass* config_file)
     ini.Load(*config_file);
 
     /*
-    ** Read in global settings, defaulting to hi resolution mode
+    ** Read in common settings, and Tiberium Dawn specific settings.
     */
-    Settings.Load(ini);
+    Settings.Load(config_file->File_Name(), ini);
+    TdSettings.Load(config_file->File_Name(), ini);
 
     /*
     ** Read in the boolean options

@@ -1,0 +1,80 @@
+{
+  "$schema": "../../cmake/nco-rules-json-schema.json",
+  "section": "Game.Limits",
+  "ini_comment": "Internal game engine limits for map objects, scenario control etc. (not supported in Lua)",
+  "comment": "This section allows you to change previously hardcoded limits in the game engine. These were originally capped due to memory constraints and to maintain good performance.<br/><br/>Default limits in Tiberian Dawn have been doubled in NCO.<br/><br/>**Note: Changing these in Lua has no effect, they can only be set via rules.ini**",
+  "rules": [
+    {
+      "name": "InfantryMax",
+      "type": "int",
+      "default": 1000,
+      "comment": "Maximum number of infantry"
+    },
+    {
+      "name": "UnitsMax",
+      "type": "int",
+      "default": 1000,
+      "comment": "Maximum number of units"
+    },
+    {
+      "name": "AircraftMax",
+      "type": "int",
+      "default": 1000,
+      "comment": "Maximum number of aircraft"
+    },
+    {
+      "name": "BuildingsMax",
+      "type": "int",
+      "default": 1000,
+      "comment": "Maximum number of buildings"
+    },
+    {
+      "name": "FactoriesMax",
+      "type": "int",
+      "default": 64,
+      "comment": "Maximum number of factories"
+    },
+    {
+      "name": "HousesMax",
+      "type": "int",
+      "default": 24,
+      "comment": "Maximum number of houses"
+    },
+    {
+      "name": "AnimationsMax",
+      "type": "int",
+      "default": 400,
+      "comment": "Maximum number of animations"
+    },
+    {
+      "name": "BulletsMax",
+      "type": "int",
+      "default": 500,
+      "comment": "Maximum number of bullets"
+    },
+    {
+      "name": "TerrainMax",
+      "type": "int",
+      "default": 1000,
+      "comment": "Maximum number of terrain object (trees etc.)"
+    },
+    {
+      "name": "TeamsMax",
+      "type": "int",
+      "default": 120,
+      "comment": "Maximum number of teams (instances of team types)"
+    },
+    {
+      "name": "TeamTypesMax",
+      "type": "int",
+      "default": 120,
+      "comment": "Maximum number of team types (reinforcements, teams for AI to build)"
+    },
+    {
+      "name": "TriggersMax",
+      "type": "int",
+      "default": 160,
+      "comment": "Maximum number of triggers"
+    }
+  ]
+}

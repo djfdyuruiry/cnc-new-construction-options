@@ -53,7 +53,13 @@ concept RuleValueVariantCompatible = (
 );
 
 template<typename C, typename T>
-concept TypeConverter = requires(std::string str, const std::string& str_ref, std::string_view str_view, const std::vector<T>& instances, const char c, T instance) {
+concept TypeConverter = requires(
+    std::string str,
+    const std::string& str_ref,
+    std::string_view str_view,
+    const std::vector<T>& instances,
+    const char c, T instance
+) {
     { C::template Get_Valid_Strings<T>() } -> std::same_as<std::vector<std::string>>;
     { C::template Get_Valid_Instances<T>() } -> std::same_as<std::vector<T>>;
     { C::template Try_Parse<T>(str) } -> std::same_as<std::optional<T>>;
@@ -81,8 +87,12 @@ public:
 
     RuleSection(
         std::string section_name,
-        std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed
-    ) : SectionName(std::move(section_name)), OnRulesChanged(std::move(on_rules_changed)) {}
+        std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed =
+            [](const auto&, const auto, const auto&){}
+    ) : SectionName(std::move(section_name)), SanitizeIniStrings(false), OnRulesChanged(std::move(on_rules_changed)) {}
+
+    RuleSection& EnableStringSanitization();
+    RuleSection& DisableStringSanitization();
 
     template<typename T>
     RuleSection& With(INIClass& context, std::function<void(T&)> actions)
@@ -104,7 +114,9 @@ public:
 
     std::string_view Get_Type(std::string_view name) const;
 
-    RuleSection& Set_Ini_Comment(INIClass& ini, const std::string& comment);
+    RuleSection& Set_Ini_Comment(const std::string& comment);
+
+    const std::optional<std::string>& Get_Ini_Comment() const;
 
     template<RuleValueVariantCompatible T>
     RuleSection& Load_From_Ini(
@@ -195,9 +207,11 @@ public:
         } else if constexpr (std::is_same_v<T, std::string>) {
             auto str_value = ini.Get_String(SectionName.data(), name.data(), resolved_default_value);
 
-            // TODO: trim string to forgive spacing around rule string
-            // forgive incorrect casing in rule values
-            CncStringUtils::To_Upper(str_value);
+            if (SanitizeIniStrings) {
+                // TODO: trim string to forgive spacing around rule string
+                // forgive incorrect casing in rule values
+                CncStringUtils::To_Upper(str_value);
+            }
 
             if (!str_validator.has_value() || str_validator.value()(str_value)) {
                 value = str_value;
@@ -233,10 +247,12 @@ public:
         const auto& value_variant = *value_variant_optional;
 
         if (!std::holds_alternative<T>(value_variant)) {
+            static T default_value;
+
             CNC_LOGGER_FATAL(
                 "Attempted to read rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
+                Get_Variant_Type(default_value),
                 Get_Variant_Type(value_variant),
-                Get_Type(name),
                 SectionName,
                 name
             );
@@ -257,7 +273,20 @@ public:
         return value_optional.value();
     }
 
+    /**
+     * Get a string rule by name and write its value into a C String. Value is truncated automatically if provided
+     * buffer is too small to store entire string.
+     *
+     * @param name Rule name
+     * @param buffer Buffer to store rule value in
+     * @param buffer_size Size of @param buffer
+     * @return Number of characters in rule value string (excluding null terminator) - use this to detect if value was
+     *         truncated when written to @param buffer (It will be bigger than @param buffer_size)
+     */
+    size_t Get_C_Str(std::string_view name, char* buffer, size_t buffer_size) const;
+
     RuleSection& Set(std::string_view name, RuleValueVariant value);
+    RuleSection& Set(std::string_view name, const char* value);
 
     template<RuleValueVariantCompatible T>
     const RuleSection& Get_With_Callback(std::string_view name, std::function<void(T)> callback) const
@@ -403,9 +432,19 @@ private:
 
     static inline const std::function<bool(int)> ValidateUShort = [](auto v) { return v <= std::numeric_limits<ushort>::max(); };
     static inline const std::function<bool(ulong)> ValidateUInt = [](auto v) { return v <= std::numeric_limits<uint>::max(); };
-    static inline const std::function<bool(int)> ValidateChar = [](auto v) { return v >= std::numeric_limits<char>::min() && v <= std::numeric_limits<char>::max(); };
-    static inline const std::function<bool(int)> ValidateUChar = [](auto v) { return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max(); };
+    static inline const std::function<bool(int)> ValidateChar = [](auto v) {
+        return v >= std::numeric_limits<char>::min() && v <= std::numeric_limits<char>::max();
+    };
+    static inline const std::function<bool(int)> ValidateUChar = [](auto v) {
+        return v >= std::numeric_limits<uchar>::min() && v <= std::numeric_limits<uchar>::max();
+    };
 
+    /**
+     * If true, when reading string rule values, the exact value from the INI file is used. If false, the
+     * string is sanitized to forgive incorrect casing and whitespaces.
+     */
+    bool SanitizeIniStrings;
+    std::optional<std::string> Comment;
     std::map<std::string, RuleValueVariant> Rules;
     std::map<std::string, std::string> RuleComments;
     std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
@@ -641,6 +680,11 @@ public:
         return *this;
     }
 
+    IniRuleContext& With_Default(const char* default_value)
+    {
+        return With_Default(std::string(default_value));
+    }
+
     RuleSection& Get_Section() const
     {
         return Section;
@@ -686,6 +730,8 @@ public:
     RuleSection& Add_Section(std::string_view name);
 
     RuleSection& operator[](std::string_view name);
+
+    RuleSection& operator[](std::string_view name) const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSections, Sections)
 private:

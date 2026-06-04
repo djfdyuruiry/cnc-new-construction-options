@@ -2977,12 +2977,8 @@ static int Net_New_Dialog(void)
     Init dialog values, only the first time through
     ........................................................................*/
     if (first_time) {
-        MPlayerCredits = 3000; // init credits & credit buffer
-        MPlayerBases = 1;      // init scenario parameters
-        MPlayerTiberium = 0;
-        MPlayerGoodies = 0;
+        MPlayerCredits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_DEFAULT_RULE); // init credits & credit buffer
         MPlayerGhosts = 0;
-        Special.IsCaptureTheFlag = 0;
         MPlayerUnitCount = (MPlayerCountMax[MPlayerBases] + MPlayerCountMin[MPlayerBases]) / 2;
         first_time = 0;
     }
@@ -3036,6 +3032,15 @@ static int Net_New_Dialog(void)
         scenariolist.Add_Item(strupr(MPlayerScenarios[i]));
     }
     ScenarioIdx = 0; // 1st scenario is selected
+
+    // select the last scenario chosen by the player (if present)
+    for (i = 0; i < MPlayerFilenum.Count(); i++) {
+        if (MPlayerFilenum[i] == MPlayerScenarioNumber) {
+            ScenarioIdx = i;
+            scenariolist.Set_Selected_Index(i);
+            break;
+        }
+    }
 
     /*........................................................................
     Init player color-used flags
@@ -3230,6 +3235,11 @@ static int Net_New_Dialog(void)
         case (BUTTON_SCENARIOLIST | KN_BUTTON):
             if (scenariolist.Current_Index() != ScenarioIdx) {
                 ScenarioIdx = scenariolist.Current_Index();
+
+                // store the scenario number rather than current scenario list index
+                // (index will change if maps are added/removed by player)
+                MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
+
                 MPlayerCredits = atoi(credbuf);
                 transmit = 1;
             }

@@ -153,7 +153,7 @@ void DriveClass::Force_Track(int track, COORDINATE coord)
 int DriveClass::Tiberium_Load(void) const
 {
     if (*this == UNIT_HARVESTER) {
-        auto capacity = Get_Int_Rule(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
+        auto capacity = Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
 
         return (Cardinal_To_Fixed(capacity, Tiberium));
     }
@@ -1643,8 +1643,8 @@ int DriveClass::Offload_Tiberium_Bail(void)
     if (Tiberium) {
         Tiberium--;
 
-        auto capacity = Get_Int_Rule(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
-        auto credits = capacity * Get_Int_Rule(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE); 
+        auto capacity = Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
+        auto credits = capacity * Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE);
         
         if (House->IsHuman) {
             return (credits / capacity); // 25 in debugger

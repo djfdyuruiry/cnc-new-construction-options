@@ -17,7 +17,7 @@
 template <typename T>
 concept RuleSectionsProviderConcept = requires()
 {
-    { T::Sections() } -> std::same_as<RuleSections&>;
+    { T::Sections() } -> std::same_as<const RuleSections&>;
 };
 
 // TODO: Update to support new rule variant types

@@ -1,0 +1,32 @@
+{
+  "$schema": "../../cmake/nco-rules-json-schema.json",
+  "section": "Game.Multiplayer",
+  "ini_comment": "Skirmish and network game rules",
+  "comment": "Change behavior specific to skirmish and network games, some options will change how the setup screen for games behaves (max units, number of AI etc.)",
+  "rules": [
+    {
+      "name": "StartUnitsWithBaseMax",
+      "type": "int",
+      "default": 12,
+      "comment": "When bases are ON, the maximum number of starting units"
+    },
+    {
+      "name": "StartUnitsWithoutBaseMax",
+      "type": "int",
+      "default": 50,
+      "comment": "When bases are OFF, the maximum number of starting units"
+    },
+    {
+      "name": "StartCreditsDefault",
+      "type": "int",
+      "default": 10000,
+      "comment": "Default number of starting credits for each player"
+    },
+    {
+      "name": "StartCreditsMax",
+      "type": "int",
+      "default": 10000,
+      "comment": "Maximum number of starting credits for each player"
+    }
+  ]
+}

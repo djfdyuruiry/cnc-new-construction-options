@@ -1762,7 +1762,7 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
     bool result = false;
 
     if (save) {
-        result = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+        result = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
             ? Save_Game(file_path_and_name, "internal")
             : Save_Game_Binary(file_path_and_name, "internal");
 
@@ -1786,7 +1786,7 @@ extern "C" __declspec(dllexport) bool __cdecl CNC_Save_Load(bool save,
             }
         }
 
-        result = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+        result = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
             ? Load_Game(file_path_and_name)
             : Load_Game_Binary(file_path_and_name);
 
@@ -4486,9 +4486,9 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-	auto maxPlacementDistance = Get_Int_Rule(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Get_Bool_Rule(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Get_Bool_Rule(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+	auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {

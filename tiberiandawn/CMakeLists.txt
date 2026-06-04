@@ -156,6 +156,7 @@ set(TIBDAWN_SRC
     savegameheader.cpp
     savegameresolver.cpp
     technotypejsonreference.cpp
+    tiberiandawnsettings.cpp
     typeconverter.cpp
 )
 

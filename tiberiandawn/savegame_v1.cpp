@@ -1,5 +1,7 @@
 #include "function.h"
 #include "savegame_v1.h"
+
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 
 #pragma region SaveGameScenarioState_v1
@@ -31,12 +33,12 @@ void SaveGameScenarioState_v1::Read_Globals()
     MultiPlayerHouse = TdTypeConverter::To_String(MPlayerHouse);
     MultiPlayerCount = MPlayerCount;
     MultiPlayerGhosts = MPlayerGhosts;
-    MultiPlayerBases = MPlayerCount;
-    MultiPlayerCredits = MPlayerGhosts;
-    MultiPlayerTiberium = MPlayerBases;
-    MultiPlayerGoodies = MPlayerCredits;
-    MultiPlayerSolo = MPlayerTiberium;
-    MultiPlayerUnitCount = MPlayerGoodies;
+    MultiPlayerBases = MPlayerBases;
+    MultiPlayerCredits = MPlayerCredits;
+    MultiPlayerTiberium = MPlayerTiberium;
+    MultiPlayerGoodies = MPlayerGoodies;
+    MultiPlayerSolo = MPlayerSolo;
+    MultiPlayerUnitCount = MPlayerUnitCount;
     MultiPlayerLocalID = MPlayerLocalID;
     MultiPlayerIds = MPlayerID;
     MultiPlayerNames = MPlayerNames;
@@ -290,17 +292,20 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     TempleIoned = HasTempleBeenHitWithIonCannon;
     AreThingiesEnabled = AreThingiesEnabledFlag;
 
+    MPlayerScenarioNumber = ScenarioNumber;
     strcpy(MPlayerName, MultiPlayerName.c_str());
     MPlayerPrefColor = TdTypeConverter::Try_Parse<PlayerColorType>(MultiPlayerPrefColor).value();
     MPlayerHouse = TdTypeConverter::Try_Parse<HousesType>(MultiPlayerHouse).value();
     MPlayerCount = MultiPlayerCount;
     MPlayerGhosts = MultiPlayerGhosts;
-    MPlayerCount = MultiPlayerBases;
-    MPlayerGhosts = MultiPlayerCredits;
-    MPlayerBases = MultiPlayerTiberium;
-    MPlayerCredits = MultiPlayerGoodies;
-    MPlayerTiberium = MultiPlayerSolo;
-    MPlayerGoodies = MultiPlayerUnitCount;
+    MPlayerCount = MultiPlayerCount;
+    MPlayerGhosts = MultiPlayerGhosts;
+    MPlayerBases = MultiPlayerBases;
+    MPlayerCredits = MultiPlayerCredits;
+    MPlayerTiberium = MultiPlayerTiberium;
+    MPlayerGoodies = MultiPlayerGoodies;
+    MPlayerSolo = MultiPlayerSolo;
+    MPlayerUnitCount = MultiPlayerUnitCount;
     MPlayerLocalID = MultiPlayerLocalID;
     from_json(MultiPlayerIds, MPlayerID);
 

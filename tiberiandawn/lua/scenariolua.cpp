@@ -18,9 +18,9 @@
 #include "ui_luaapi.h"
 #include "events/addmessage_luaevent.h"
 
-RuleSections& TdRuleSectionsProvider::Sections()
+const RuleSections& TdRuleSectionsProvider::Sections()
 {
-    return Rule.Sections;
+    return Rule.Get_Rule_Sections();
 }
 
 const LuaEngine& ScenarioLua::Get_Engine()

@@ -1,6 +1,11 @@
 #include "rulesluaadapter.h"
 
-void RulesLuaAdapter::Push_Rule_Type(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
+void RulesLuaAdapter::Push_Rule_Type(
+    const LuaEngine& engine,
+    const RuleSections& sections,
+    std::string section,
+    std::string key
+)
 {
     Assert_Rule_Exists(engine, sections, section, key);
 
@@ -53,13 +58,24 @@ void RulesLuaAdapter::Push_Rule_Variant(const LuaEngine& engine, const RuleValue
     }
 }
 
-void RulesLuaAdapter::Push_Rule_Value(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
+void RulesLuaAdapter::Push_Rule_Value(
+    const LuaEngine& engine,
+    const RuleSections& sections,
+    std::string section,
+    std::string key
+)
 {
     Assert_Rule_Exists(engine, sections, section, key);
     Push_Rule_Variant(engine, sections[section].Get_Variant(key));
 }
 
-void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments& arguments, RuleSections& sections, const std::string& section, const std::string& key)
+void RulesLuaAdapter::Set_Rule_Value(
+    const SharedLuaEngine& engine,
+    LuaArguments& arguments,
+    const RuleSections& sections,
+    const std::string& section,
+    const std::string& key
+)
 {
     Assert_Rule_Exists(engine, sections, section, key);
 
@@ -119,7 +135,10 @@ void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments
             rule_type_error = false;
         }
     } else {
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
+        throw std::invalid_argument(
+            "Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without "
+            "updating supporting code"
+        );
     }
 
     if (rule_type_error) {
@@ -134,7 +153,12 @@ void RulesLuaAdapter::Set_Rule_Value(const SharedLuaEngine& engine, LuaArguments
     Push_Rule_Variant(engine, rule_value_variant);
 }
 
-void RulesLuaAdapter::Assert_Rule_Exists(const LuaEngine& engine, RuleSections& sections, std::string section, std::string key)
+void RulesLuaAdapter::Assert_Rule_Exists(
+    const LuaEngine& engine,
+    const RuleSections& sections,
+    std::string section,
+    std::string key
+)
 {
     if (!sections.Has_Section(section)) {
         engine.Raise_Error_Format(

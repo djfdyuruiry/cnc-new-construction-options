@@ -81,7 +81,7 @@ void GameOptionsClass::Adjust_Variables_For_Resolution(void)
 void GameOptionsClass::Process(void)
 {
     // only JSON saves support skirmish games, so hide save/load menu items if game is using legacy binary format
-    const auto save_load_enabled_for_skirmish = Get_Bool_Rule(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE);
+    const auto save_load_enabled_for_skirmish = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE);
 
     static struct
     {

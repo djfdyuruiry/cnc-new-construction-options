@@ -19,7 +19,7 @@ void RulesClass::Init_Sections(CCINIClass& ini)
     });
 }
 
-RuleSections& SpecialClass::Read_Rules(RuleSections& rules)
+const RuleSections& SpecialClass::Read_Rules(const RuleSections& rules)
 {
     // map
     IsTGrowth = rules[GAME_MAP_SECTION].Get<bool>(TIBERIUM_GROWS_RULE);
@@ -55,7 +55,7 @@ RuleSections& SpecialClass::Read_Rules(RuleSections& rules)
     return rules;
 }
 
-RuleSections& SpecialClass::Write_Rules(RuleSections& rules) const
+const RuleSections& SpecialClass::Write_Rules(const RuleSections& rules) const
 {
     // map
     rules[GAME_MAP_SECTION]
@@ -84,8 +84,11 @@ RuleSections& SpecialClass::Write_Rules(RuleSections& rules) const
     return rules;
 }
 
-void RulesClass::Apply_Static_And_Global_Values() {
+void RulesClass::Apply_Static_And_Global_Values() const {
     Special.Read_Rules(Sections);
 
-    FactoryClass::STEP_COUNT = Get_Int_Rule(GAME_FACTORIES_SECTION, TOTAL_PRODUCTION_STEPS_RULE);
+    FactoryClass::STEP_COUNT = Rule.Get_Rule_Value<int>(GAME_FACTORIES_SECTION, TOTAL_PRODUCTION_STEPS_RULE);
+
+    MPlayerCountMax[0] = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_UNITS_WITHOUT_BASE_MAX_RULE);
+    MPlayerCountMax[1] = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_UNITS_WITH_BASE_MAX_RULE);
 }

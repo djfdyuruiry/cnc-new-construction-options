@@ -4627,8 +4627,8 @@ int TechnoClass::Refund_Amount(void) const
     **	If the object is carrying Tiberium directly (i.e., the harvester), then
     **	account for the credits of the load.
     */
-    auto capacity = Get_Int_Rule(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
-    auto credits = capacity * Get_Int_Rule(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE); 
+    auto capacity = Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, MAX_HARVESTER_CAPACITY_RULE);
+    auto credits = capacity * Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE);
     cost += Fixed_To_Cardinal(credits, Tiberium_Load()) / 2;
 
     if (House->IsHuman) {

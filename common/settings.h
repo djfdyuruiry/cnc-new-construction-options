@@ -2,6 +2,9 @@
 #define SETTINGS_H
 
 #include <string>
+
+#include "logger.h"
+
 class INIClass;
 
 class SettingsClass
@@ -9,7 +12,7 @@ class SettingsClass
 public:
     SettingsClass();
 
-    void Load(INIClass& ini);
+    void Load(std::string ini_file_name, INIClass& ini);
     void Save(INIClass& ini);
 
     struct
@@ -45,8 +48,13 @@ public:
     {
         bool MouseWheelScrolling;
     } Options;
+
+private:
+    static inline const auto& Logger = CncLogger::For(Settings);
+
+    std::string IniFileName;
 };
 
-extern SettingsClass Settings;
-
 #endif
+
+extern SettingsClass Settings;
