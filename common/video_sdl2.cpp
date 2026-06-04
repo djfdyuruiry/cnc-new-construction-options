@@ -48,6 +48,13 @@
 
 #include <SDL.h>
 
+// C&C 95 Resolution
+static constexpr auto DefaultWidth = 640;
+static constexpr auto DefaultHeight = 400;
+// C&C DOS Resolution
+static constexpr auto DefaultDosWidth = DefaultWidth / 2;
+static constexpr auto DefaultDosHeight = DefaultHeight / 2;
+
 extern WWKeyboardClass* Keyboard;
 static SDL_Window* window;
 static SDL_Renderer* renderer;
@@ -135,11 +142,11 @@ static void Update_HWCursor_Settings()
         hwcursor.GameW = Settings.Video.Width;
         hwcursor.GameH = Settings.Video.Height;
     } else if (resolution_mode == MODE_DEFAULT) {
-        hwcursor.GameW = 640;
-        hwcursor.GameH = 400;
+        hwcursor.GameW = DefaultWidth;
+        hwcursor.GameH = DefaultHeight;
     } else if (resolution_mode == MODE_DOS) {
-        hwcursor.GameW = 320;
-        hwcursor.GameH = 200;
+        hwcursor.GameW = DefaultDosWidth;
+        hwcursor.GameH = DefaultDosHeight;
     }
 
     hwcursor.ScaleX = win_w / (float)hwcursor.GameW;
@@ -515,21 +522,8 @@ void Move_Video_Mouse(float xrel, float yrel)
 
 void Move_Video_Mouse_Absolute(const int x, const int y)
 {
-    if (x == 0 && y == 0) {
-        hwcursor.X = x;
-        hwcursor.Y = y;
-        return;
-    }
-
-    Move_Video_Mouse_Absolute(0, 0);
-
-    for (auto i = 0; i < x; i++) {
-        Move_Video_Mouse(i, 0);
-    }
-
-    for (auto j = 0; j < y; j++) {
-        Move_Video_Mouse(x, j);
-    }
+    hwcursor.X = x;
+    hwcursor.Y = y;
 }
 
 void Get_Video_Mouse(int& x, int& y)
@@ -935,8 +929,8 @@ public:
 
             src_rect->x = 0;
             src_rect->y = 0;
-            src_rect->w = 640;
-            src_rect->h = 400;
+            src_rect->w = DefaultWidth;
+            src_rect->h = DefaultHeight;
         }
 
         SDL_RenderCopy(renderer, texture, src_rect.get(), &render_dst);
@@ -1009,7 +1003,7 @@ std::optional<int> Try_Get_Resolution_Mode_Width()
     }
 
     if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
-        return 640;
+        return DefaultWidth;
     }
 
     return frontSurface->GetWidth();
@@ -1022,7 +1016,7 @@ std::optional<int> Try_Get_Resolution_Mode_Height()
     }
 
     if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
-        return 400;
+        return DefaultHeight;
     }
 
     return frontSurface->GetHeight();
@@ -1038,7 +1032,9 @@ void Enter_Zoomed_Resolution_Mode()
     }
 
     Set_Current_Resolution_Mode(MODE_ZOOM);
-    Move_Video_Mouse_Absolute(0, 0);
+
+    // center mouse in zoomed view
+    Move_Video_Mouse_Absolute(DefaultWidth / 2, DefaultHeight / 2);
 }
 
 void Leave_Zoomed_Resolution_Mode()
@@ -1051,4 +1047,12 @@ void Leave_Zoomed_Resolution_Mode()
     }
 
     Set_Current_Resolution_Mode(MODE_HIGH_RES);
+
+    if (frontSurface == nullptr) {
+        CNC_LOG_WARN("Failed to center mouse due to uninitialised video surface");
+        return;
+    }
+
+    // center mouse on screen
+    Move_Video_Mouse_Absolute(frontSurface->GetWidth() / 2, frontSurface->GetHeight() / 2);
 }
