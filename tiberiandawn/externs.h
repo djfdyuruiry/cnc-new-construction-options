@@ -262,6 +262,7 @@ extern char* CallWaitStrings[CALL_WAIT_STRINGS_NUM];
 /*
 ** Network/Modem globals
 */
+extern int MPlayerScenarioNumber;
 extern int ScenarioIdx;
 extern int ColorUsed[];
 extern char MPlayerName[MPLAYER_NAME_MAX];

@@ -283,7 +283,7 @@ public:
      * @return Number of characters in rule value string (excluding null terminator) - use this to detect if value was
      *         truncated when written to @param buffer (It will be bigger than @param buffer_size)
      */
-    size_t Get_C_Str(std::string_view name, char* buffer, size_t buffer_size);
+    size_t Get_C_Str(std::string_view name, char* buffer, size_t buffer_size) const;
 
     RuleSection& Set(std::string_view name, RuleValueVariant value);
     RuleSection& Set(std::string_view name, const char* value);

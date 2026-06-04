@@ -450,6 +450,7 @@ ModemGameType ModemGameToPlay; // type of modem play Dialer, answerer, null
 /***************************************************************************
 **	Index into scenario description list box
 */
+int MPlayerScenarioNumber;
 int ScenarioIdx;
 
 /***************************************************************************

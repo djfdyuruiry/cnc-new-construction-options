@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string_view>
 
 // set SPDLOG_FUNCTION to platform specific macro for more detailed function signatures
 #ifndef SPDLOG_FUNCTION
@@ -16,10 +15,7 @@
 #endif
 
 #include <spdlog/async.h>
-#include <spdlog/cfg/env.h>
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
 
 #ifndef TRIGGER_DEBUGGER
     #ifdef _DEBUG
@@ -51,9 +47,9 @@ class CncLogger
 public:
     static inline const auto DefaultLoggerName = std::string("nco");
     static inline std::function<void(std::string)> OnFatalError = [](const auto& e) {
-        TRIGGER_DEBUGGER;
-
         spdlog::shutdown();
+
+        TRIGGER_DEBUGGER;
 
         throw std::runtime_error(e);
     };

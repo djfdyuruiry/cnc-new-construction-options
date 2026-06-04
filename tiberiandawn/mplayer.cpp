@@ -41,6 +41,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "common/irandom.h"
 #include "common/ini.h"
 #include "common/framelimit.h"
@@ -517,6 +518,7 @@ GameType Select_MPlayer_Game(void)
 void Read_MultiPlayer_Settings(void)
 {
 #ifndef REMASTER_BUILD
+    // TODO: consider removing this fun - values are not saved back to ini later
     char buf[128]; // buffer for parsing INI entry
     CELL cell;
 
@@ -524,31 +526,6 @@ void Read_MultiPlayer_Settings(void)
     INIClass ini;
     CDFileClass file(CONFIG_FILE_NAME);
     if (ini.Load(file)) {
-
-        auto multiplayer = RuleSection("MultiPlayer");
-
-        multiplayer.With<IniRuleContext>(ini, [](auto& c) {
-            c.Load("Handle").With_Default("Noname")
-             .template Load_With_Converter<PlayerColorType, TdTypeConverter>("Color", REMAP_GOLD)
-             .template Load_With_Converter<HousesType, TdTypeConverter>("Side", HOUSE_GOOD);
-        });
-
-        //	Get the player's last-used Handle
-        constexpr auto max_name_length = std::size(MPlayerName);
-
-        if (multiplayer.Get_C_Str("Handle", MPlayerName, max_name_length) >= max_name_length) {
-            CNC_LOG_WARN(
-                "Multiplayer handle in {} is too long. Maximum allowed characters: {}",
-                CONFIG_FILE_NAME,
-                max_name_length
-            );
-        };
-
-        //	Get the player's last-used Color
-        MPlayerPrefColor = multiplayer.Get_With_Converter<PlayerColorType, TdTypeConverter>("Color");
-        MPlayerHouse = multiplayer.Get_With_Converter<HousesType, TdTypeConverter>("Side");
-
-        // TODO: consider removing the below - values are not saved back to ini later
         TrapCheckHeap = ini.Get_Int("MultiPlayer", "CheckHeap", 0);
 
         //	Read special recording playback values, to help find sync bugs
@@ -605,18 +582,7 @@ void Read_MultiPlayer_Settings(void)
 void Write_MultiPlayer_Settings(void)
 {
 #ifndef REMASTER_BUILD
-    INIClass ini;
-    CDFileClass file(CONFIG_FILE_NAME);
-    if (ini.Load(file)) {
-        RuleSection("MultiPlayer")
-            .Set_With_Converter<PlayerColorType, TdTypeConverter>("Color", static_cast<PlayerColorType>(MPlayerPrefColor))
-            .Set_With_Converter<HousesType, TdTypeConverter>("Side", MPlayerHouse)
-            .Set("Handle", MPlayerName)
-            .Save_All_To_Ini(ini);
-
-        //	Write the INI data out to a file.
-        ini.Save(file);
-    }
+    TdSettings.Update();
 #endif
 }
 

@@ -735,7 +735,7 @@ void Read_Setup_Options(RawFileClass* config_file)
     /*
     ** Read in global settings
     */
-    Settings.Load(ini);
+    Settings.Load(config_file->File_Name(), ini);
 
     /*
     ** Read in the boolean options

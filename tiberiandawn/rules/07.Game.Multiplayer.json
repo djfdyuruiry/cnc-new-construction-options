@@ -17,6 +17,12 @@
       "comment": "When bases are OFF, the maximum number of starting units"
     },
     {
+      "name": "StartCreditsDefault",
+      "type": "int",
+      "default": 10000,
+      "comment": "Default number of starting credits for each player"
+    },
+    {
       "name": "StartCreditsMax",
       "type": "int",
       "default": 10000,

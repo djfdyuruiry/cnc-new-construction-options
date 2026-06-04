@@ -249,7 +249,7 @@ void RuleSection::Save_All_To_Ini(INIClass& ini) const
     }
 }
 
-size_t RuleSection::Get_C_Str(const std::string_view name, char* buffer, const size_t buffer_size)
+size_t RuleSection::Get_C_Str(const std::string_view name, char* buffer, const size_t buffer_size) const
 {
     const auto str_value = Get<std::string>(name);
     const auto str_length = str_value.length();

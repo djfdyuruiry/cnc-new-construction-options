@@ -210,7 +210,6 @@ int Com_Scenario_Dialog(void)
                     d_color_x + (d_color_w * 4),
                     d_color_x + (d_color_w * 5)};
     int parms_received = 0; // 1 = game options received
-    bool changed = false;
 
     int rc;
     int recsignedoff = false;
@@ -350,8 +349,6 @@ int Com_Scenario_Dialog(void)
     housebtn.Set_Selected_Index(MPlayerHouse - HOUSE_GOOD);
     housebtn.Set_Read_Only(true);
 
-    const auto max_start_credits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_MAX_RULE);
-
     /*........................................................................
     Init scenario values, only the first time through
     ........................................................................*/
@@ -359,12 +356,8 @@ int Com_Scenario_Dialog(void)
         // GB 2022 set defaults for skirmish also:
         BuildLevel = 7;
 
-        MPlayerCredits = max_start_credits; // init credits & credit buffer
-        MPlayerBases = 1;       // init scenario parameters
-        MPlayerTiberium = 1;
-        MPlayerGoodies = 0;
+        MPlayerCredits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_DEFAULT_RULE); // init credits & credit buffer
         MPlayerGhosts = 1;
-        Special.IsCaptureTheFlag = 0;
         MPlayerUnitCount = (MPlayerCountMax[MPlayerBases] + MPlayerCountMin[MPlayerBases]) / 2;
         first_time = false;
     }
@@ -393,7 +386,7 @@ int Com_Scenario_Dialog(void)
     countgauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
     countgauge.Set_Value(MPlayerUnitCount - MPlayerCountMin[MPlayerBases]);
 
-    creditsgauge.Set_Maximum(max_start_credits);
+    creditsgauge.Set_Maximum(Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_MAX_RULE));
     creditsgauge.Set_Value(MPlayerCredits);
 
     int maxp = 4 /*Rule.MaxPlayers - 2*/;
@@ -420,6 +413,15 @@ int Com_Scenario_Dialog(void)
         scenariolist.Add_Item(strupr(MPlayerScenarios[i]));
     }
     ScenarioIdx = 0; // 1st scenario is selected
+
+    // select the last scenario chosen by the player (if present)
+    for (i = 0; i < MPlayerFilenum.Count(); i++) {
+        if (MPlayerFilenum[i] == MPlayerScenarioNumber) {
+            ScenarioIdx = i;
+            scenariolist.Set_Selected_Index(i);
+            break;
+        }
+    }
 
     /*........................................................................
     Init random-number generator, & create a seed to be used for all random
@@ -670,7 +672,6 @@ int Com_Scenario_Dialog(void)
                     name_edt.Flag_To_Redraw();
                     strcpy(MPlayerName, namebuf);
                     transmit = 1;
-                    changed = true;
                 }
             }
             break;
@@ -682,7 +683,6 @@ int Com_Scenario_Dialog(void)
             if (!ready_to_go) {
                 strcpy(MPlayerName, namebuf);
                 transmit = 1;
-                changed = true;
             }
             break;
 
@@ -702,6 +702,11 @@ int Com_Scenario_Dialog(void)
         case (BUTTON_SCENARIOLIST | KN_BUTTON):
             if (scenariolist.Current_Index() != ScenarioIdx && !ready_to_go) {
                 ScenarioIdx = scenariolist.Current_Index();
+
+                // store the scenario number rather than current scenario list index
+                // (index will change if maps are added/removed by player)
+                MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
+
                 strcpy(MPlayerName, namebuf);
                 transmit = 1;
             }
@@ -960,9 +965,7 @@ int Com_Scenario_Dialog(void)
     /*------------------------------------------------------------------------
     Save any changes made to our options
     ------------------------------------------------------------------------*/
-    if (changed) {
-        Write_MultiPlayer_Settings();
-    }
+    Write_MultiPlayer_Settings();
 
     return (rc);
 

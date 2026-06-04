@@ -41,6 +41,7 @@
 
 #include "function.h"
 #include "ccini.h"
+#include "tiberiandawnsettings.h"
 
 /***********************************************************************************************
  * DifficultyClass::DifficultyClass -- Default constructor for difficulty class object.        *
@@ -303,14 +304,23 @@ void RulesClass::Init_For_Scenario(
     // ensure we restore any skirmish game options after reading rules
     if (game_to_play == GAME_SKIRMISH || game_to_play == GAME_GLYPHX_MULTIPLAYER) {
         special_options.Write_Rules(Sections);
+
+        Special.IsCaptureTheFlag = special_options.IsCaptureTheFlag;
+        TdSettings.Update(); // if we are loading from a save, this ensures skirmish setup screen is in sync
+
         AllowSuperWeapons = superweapons_allowed.value_or(AllowSuperWeapons);
     }
 
-    for (const auto& [fst, snd] : TypeRules) {
-        CNC_LOG_WARN("Type section: {}", fst);
+    if (Logger()->level() > spdlog::level::debug) {
+        // don't bother inspecting types after load, debug info won't be logged anyway
+        return;
+    }
 
-        for (const auto& section : snd->Section_Names()) {
-            CNC_LOG_WARN("  Instance section: {}", section);
+    for (const auto& [type_name, sections] : TypeRules) {
+        CNC_LOG_DEBUG("Type section: {}", type_name);
+
+        for (const auto& section : sections->Section_Names()) {
+            CNC_LOG_DEBUG("  Instance section: {}", section);
         }
     }
 }

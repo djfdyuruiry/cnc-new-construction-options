@@ -1,7 +1,10 @@
 #include "wwstd.h"
 #include "settings.h"
 #include "ini.h"
+#include "logger.h"
 #include "miscasm.h"
+
+SettingsClass Settings;
 
 SettingsClass::SettingsClass()
 {
@@ -36,9 +39,13 @@ SettingsClass::SettingsClass()
     Video.PixelFormat = "default";
 }
 
-void SettingsClass::Load(INIClass& ini)
+void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
 {
     char buf[128];
+
+    IniFileName = std::move(ini_file_name);
+
+    CNC_LOG_INFO("Loading common settings from INI file: {}", IniFileName);
 
     /*
     ** Mouse settings
@@ -100,6 +107,8 @@ void SettingsClass::Load(INIClass& ini)
 
 void SettingsClass::Save(INIClass& ini)
 {
+    CNC_LOGGER_INFO("Saving common settings to INI file: {}", IniFileName);
+
     /*
     ** Mouse settings
     */
