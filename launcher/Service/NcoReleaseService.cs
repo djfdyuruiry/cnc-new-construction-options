@@ -62,6 +62,10 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
     var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary);
 
     File.SetUnixFileMode(launcherPath, File.GetUnixFileMode(launcherPath) | UnixFileMode.UserExecute);
+  
+    var binToIsoPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory, "tools", "bin2iso");
+    
+    File.SetUnixFileMode(binToIsoPath, File.GetUnixFileMode(binToIsoPath) | UnixFileMode.UserExecute);
   }
 
   private async Task RunLauncherPostInstallConfig(string installRoot, IDownloadEventVisitor eventVisitor)
