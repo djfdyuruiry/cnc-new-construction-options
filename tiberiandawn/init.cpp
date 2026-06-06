@@ -727,7 +727,7 @@ bool Select_Game(bool fade)
 #ifdef BONUS_MISSIONS
         SEL_BONUS_MISSIONS,
 #endif                        // BONUS_MISSIONS
-        SEL_SELECT_MISSION,     // load a saved game
+        SEL_SELECT_MISSION,   // select any mission from main campaigns
         SEL_LOAD_MISSION,     // load a saved game
         SEL_MULTIPLAYER_GAME, // play modem/null-modem/network game
         SEL_MAP_EDITOR,       // open map editor mode

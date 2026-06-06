@@ -572,7 +572,7 @@ int Main_Menu(unsigned int timeout)
     starty += ystep;
 
     TextButtonClass selectbtn(BUTTON_SELECT,
-                             "Mission Select",
+                             "Mission Select", // TODO: TXT locale string
                              TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                              D_SELECT_X,
                              starty,

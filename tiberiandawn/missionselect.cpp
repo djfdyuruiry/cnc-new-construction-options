@@ -102,11 +102,8 @@ bool Mission_Select_Dialog(void)
                     strcat(buffer, ".INI");
                     file.Set_Name(buffer);
 
-                    CNC_LOG_WARN("file search: {}", buffer);
-
-                    if (CCINIClass ini; file.Is_Available() && ini.Load(file, true)) {
-                        CNC_LOG_WARN("file OK: {}", buffer);
-
+                    if (CCINIClass ini; ini.Load(file, true)) {
+                        // TODO: stepwise refinement
                         ini.Get_String("Basic", "Name", "<none>", buffer, sizeof(buffer));
 
                         std::string mission_name = buffer;
@@ -133,6 +130,7 @@ bool Mission_Select_Dialog(void)
 
                         strncpy(buffer, description.c_str(), std::size(buffer));
 
+                        // BUG: Pass more info into list to allow setting scenario direction and variation (always selects EAST A)
                         char* data = new char[strlen(buffer) + 1 + sizeof(int) + 25];
                         *((int*)&data[0]) = index;
                         strcpy(&data[sizeof(int)], buffer);

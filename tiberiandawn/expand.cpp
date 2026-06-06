@@ -122,6 +122,7 @@ bool Expansion_Dialog(void)
     int index;
     INIClass ini;
 
+    // TODO: combine into one loop like mission select
     for (index = 20; index < 60; index++) {
         char buffer[128];
         CCFileClass file;
