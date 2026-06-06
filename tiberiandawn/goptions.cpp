@@ -397,6 +397,10 @@ void GameOptionsClass::Process(void)
                     Set_Palette(BlackPalette);
                     Map.Flag_To_Redraw(true);
                     Theme.Queue_Song(THEME_PICK_ANOTHER);
+
+                    // player might have watched the briefing/action movie, so ensure we leave zoom mode
+                    Leave_Zoomed_Resolution_Mode();
+
                     process = false;
                 }
                 break;
