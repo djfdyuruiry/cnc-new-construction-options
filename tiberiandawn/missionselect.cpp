@@ -131,7 +131,7 @@ bool Mission_Select_Dialog(void)
             Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), player);
         }
 
-        // TODO: Have between INI name and country (backed by INI file for modding/locale?)
+        // TODO: Use INI name etc. to lookup country and point of conflict (see mapsel.cpp)
         for (auto index = 1; index < 20; index++) {
             for (const auto& direction : { SCEN_DIR_EAST, SCEN_DIR_WEST }) {
                 for (auto variation = SCEN_VAR_A; variation < SCEN_VAR_COUNT; ++variation) {
