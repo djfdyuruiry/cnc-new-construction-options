@@ -62,6 +62,7 @@ public:
     //void const * down);
     virtual int Add_Item(char const* text);
     virtual int Add_Item(int text);
+    virtual int Add_Item(const std::string& text);
     virtual int Add_Scroll_Bar(void);
     virtual void Bump(int up);
     virtual int Count(void) const

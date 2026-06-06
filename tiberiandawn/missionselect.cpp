@@ -27,14 +27,44 @@ protected:
                 }
             }
 
-            Conquer_Clip_Text_Print(List[index] + sizeof(int), x, y, CC_GREEN, TBLACK, flags, width, Tabs);
+            Conquer_Clip_Text_Print(List[index], x, y, CC_GREEN, TBLACK, flags, width, Tabs);
 
         } else {
             Conquer_Clip_Text_Print(
-                List[index] + sizeof(int), x, y, (selected ? BLUE : WHITE), TBLACK, TextFlags, width, Tabs);
+                List[index], x, y, (selected ? BLUE : WHITE), TBLACK, TextFlags, width, Tabs);
         }
     }
 };
+
+std::string Build_Mission_Description(
+    const ScenarioPlayerType player,
+    const int scenario_number,
+    const ScenarioDirType direction,
+    const ScenarioVarType variation,
+    std::optional<std::string> mission_name
+)
+{
+    if (!mission_name.has_value()) {
+        auto direction_str = TdTypeConverter::To_String(direction);
+
+        CncStringUtils::To_Title_Case(direction_str);
+
+        mission_name = std::format(
+            "{}{}({})",
+            direction_str,
+            direction == SCEN_DIR_EAST ? "  " : " ",
+            TdTypeConverter::To_String(variation)
+        );
+    }
+
+    return std::format(
+        "{}: Mission {:>2} - {}",
+        TdTypeConverter::To_String(player),
+        scenario_number,
+        mission_name.value()
+    );
+
+}
 
 bool Mission_Select_Dialog(void)
 {
@@ -74,6 +104,16 @@ bool Mission_Select_Dialog(void)
                     up_button,
                     down_button);
 
+    struct MissionVariables
+    {
+        int Number;
+        ScenarioPlayerType Player;
+        HousesType House;
+        ScenarioDirType Direction;
+        ScenarioVarType Variant;
+    };
+    std::vector<MissionVariables> missions;
+
     buttons = &ok;
     cancel.Add(*buttons);
     list.Add(*buttons);
@@ -103,38 +143,23 @@ bool Mission_Select_Dialog(void)
                     file.Set_Name(buffer);
 
                     if (CCINIClass ini; ini.Load(file, true)) {
-                        // TODO: stepwise refinement
-                        ini.Get_String("Basic", "Name", "<none>", buffer, sizeof(buffer));
+                        static const std::string no_name = "<none>";
+                        auto ini_name = ini.Get_String("Basic", "Name", no_name);
+                        auto name = ini_name == no_name ? std::nullopt : std::optional(ini_name);
 
-                        std::string mission_name = buffer;
-
-                        if (mission_name == "<none>") {
-                            auto direction_str = TdTypeConverter::To_String(direction);
-
-                            CncStringUtils::To_Title_Case(direction_str);
-
-                            mission_name = std::format(
-                                "{}{}({})",
-                                direction_str,
-                                direction == SCEN_DIR_EAST ? "  " : " ",
-                                TdTypeConverter::To_String(variation)
-                            );
-                        }
-
-                        const auto description = std::format(
-                            "{}: Mission {:>2} - {}",
-                            TdTypeConverter::To_String(player),
-                            index,
-                            mission_name
+                        const auto description = Build_Mission_Description(
+                            player, index, direction, variation, name
                         );
 
-                        strncpy(buffer, description.c_str(), std::size(buffer));
+                        list.Add_Item(description);
 
-                        // BUG: Pass more info into list to allow setting scenario direction and variation (always selects EAST A)
-                        char* data = new char[strlen(buffer) + 1 + sizeof(int) + 25];
-                        *((int*)&data[0]) = index;
-                        strcpy(&data[sizeof(int)], buffer);
-                        list.Add_Item(data);
+                        missions.push_back({
+                            index,
+                            player,
+                            player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD,
+                            direction,
+                            variation
+                        });
                     }
                 }
             }
@@ -181,14 +206,14 @@ bool Mission_Select_Dialog(void)
         case KN_RETURN:
         case 200 | KN_BUTTON:
             if (list.Current_Item()) {
-                if (list.Current_Item()[sizeof(int)] == 'G') {
-                    ScenPlayer = SCEN_PLAYER_GDI;
-                } else {
-                    ScenPlayer = SCEN_PLAYER_NOD;
-                }
-                ScenDir = SCEN_DIR_EAST;
-                Whom = HOUSE_GOOD;
-                Scen.Scenario = *(int*)list.Current_Item();
+                const auto& [number, player, whom, dir, var] = missions[list.Current_Index()];
+
+                Scen.Scenario = number;
+                ScenPlayer = player;
+                Whom = whom;
+                ScenDir = dir;
+                ScenVar = var;
+
                 okval = true;
                 process = false;
                 break;
@@ -196,12 +221,12 @@ bool Mission_Select_Dialog(void)
 
         case KN_ESC:
         case 201 | KN_BUTTON:
+            Scen.Scenario = 1;
             ScenPlayer = SCEN_PLAYER_GDI;
-            ScenDir = SCEN_DIR_EAST;
             Whom = HOUSE_GOOD;
-            if (list.Current_Item()) {
-                Scen.Scenario = *(int*)list.Current_Item();
-            }
+            ScenDir = SCEN_DIR_EAST;
+            ScenVar = SCEN_VAR_NONE;
+
             process = false;
             okval = false;
             break;

@@ -178,6 +178,20 @@ int ListClass::Add_Item(int text)
     return (List.Count() - 1);
 }
 
+int ListClass::Add_Item(const std::string& text)
+{
+    if (!text.empty()) {
+        const auto text_size = text.length() + 1;
+        auto text_cstr = new char[text_size];
+
+        strncpy(text_cstr, text.c_str(), text_size);
+
+        Add_Item(text_cstr);
+    }
+
+    return (List.Count() - 1);
+}
+
 void ListClass::Remove_Item(int index)
 {
     if (index < List.Count()) {

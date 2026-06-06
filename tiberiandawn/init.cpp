@@ -1465,6 +1465,8 @@ bool Select_Game(bool fade)
     if (!gameloaded) {
         if (Debug_Map) {
             Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, SCEN_VAR_A);
+        } else if (ScenVar != SCEN_VAR_NONE) {
+            Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, ScenVar);
         } else {
             Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir);
         }

@@ -796,6 +796,8 @@ int Main_Menu(unsigned int timeout)
     /*
     **	Main Processing Loop.
     */
+    ScenVar = SCEN_VAR_NONE;
+
     bool display = true;
     bool process = true;
     while (process) {
