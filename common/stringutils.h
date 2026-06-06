@@ -12,8 +12,8 @@ public:
     static bool Is_Blank(const std::string_view& subject);
 
     static void To_Lower(std::string& subject);
-
     static void To_Upper(std::string& subject);
+    static void To_Title_Case(std::string& subject);
 
     template<class T = std::string>
     static std::string To_Csv(

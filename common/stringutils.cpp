@@ -21,3 +21,19 @@ void CncStringUtils::To_Upper(std::string& subject)
 {
     std::ranges::transform(subject, subject.begin(), ::toupper);
 }
+
+void CncStringUtils::To_Title_Case(std::string& subject)
+{
+    if (Is_Blank(subject)) {
+        return;
+    }
+
+    if (subject.length() == 1) {
+        To_Upper(subject);
+        return;
+    }
+
+    To_Lower(subject);
+    subject[0] = std::toupper(subject[0]);
+}
+

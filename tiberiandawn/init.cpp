@@ -727,6 +727,7 @@ bool Select_Game(bool fade)
 #ifdef BONUS_MISSIONS
         SEL_BONUS_MISSIONS,
 #endif                        // BONUS_MISSIONS
+        SEL_SELECT_MISSION,     // load a saved game
         SEL_LOAD_MISSION,     // load a saved game
         SEL_MULTIPLAYER_GAME, // play modem/null-modem/network game
         SEL_MAP_EDITOR,       // open map editor mode
@@ -1078,6 +1079,52 @@ bool Select_Game(bool fade)
                 }
                 break;
             }
+
+            case SEL_SELECT_MISSION:
+                Scen.CarryOverMoney = 0;
+                if (Mission_Select_Dialog()) {
+                    int difficulty = Fetch_Difficulty();
+                    if (difficulty != -1) {
+                        switch (difficulty) {
+                        case 0:
+                            Scen.CDifficulty = DIFF_HARD;
+                            Scen.Difficulty = DIFF_EASY;
+                            break;
+
+                        case 1:
+                            Scen.CDifficulty = DIFF_HARD;
+                            Scen.Difficulty = DIFF_NORMAL;
+                            break;
+
+                        case 2:
+                            Scen.CDifficulty = DIFF_NORMAL;
+                            Scen.Difficulty = DIFF_NORMAL;
+                            break;
+
+                        case 3:
+                            Scen.CDifficulty = DIFF_EASY;
+                            Scen.Difficulty = DIFF_NORMAL;
+                            break;
+
+                        case 4:
+                            Scen.CDifficulty = DIFF_EASY;
+                            Scen.Difficulty = DIFF_HARD;
+                            break;
+                        }
+
+                        Theme.Fade_Out();
+                        //						Theme.Queue_Song(THEME_AOI);
+                        GameToPlay = GAME_NORMAL;
+                        process = false;
+                    } else {
+                        display = true;
+                        selection = SEL_NONE;
+                    }
+                } else {
+                    display = true;
+                    selection = SEL_NONE;
+                }
+                break;
 
             /*
             **	Load a saved game.

@@ -465,6 +465,7 @@ void Nod_Ending(void);
 */
 bool Expansion_Present(void);
 bool Expansion_Dialog(void);
+bool Mission_Select_Dialog(void);
 bool Bonus_Dialog(void);
 
 /*
