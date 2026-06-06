@@ -88,6 +88,8 @@ public:
 
         SET_RALLY,     // rally point support
 
+        SELECT_ALL_OF_TYPE, // select objects based on type
+
         LAST_EVENT,    // one past the last event
     } EventType;
 

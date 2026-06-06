@@ -347,6 +347,27 @@ EventClass::EventClass(EventType type, int id, CELL cell)
     Data.Special.Cell = cell;
 }
 
+template<class T, class U>
+static void Select_Objects_Of_Type(TFixedIHeapClass<T>& object_heap, U instance)
+{
+    Unselect_All();
+
+    for (auto i = 0; i < object_heap.Count(); i++) {
+        auto object = object_heap.Ptr(i);
+        auto location = Coord_Cell(object->Coord);
+
+        if (
+            object->Is_Owned_By_Player() &&
+            object->Class->Type == instance &&
+            !object->IsInLimbo &&
+            Map.In_View(location) // BUG: This doesn't respect the actual resolution (fixed width and height check)
+        ) {
+            object->Select();
+        }
+    }
+}
+
+
 /***********************************************************************************************
  * EventClass::Execute -- Execute a queued command.                                            *
  *                                                                                             *
@@ -769,6 +790,24 @@ void EventClass::Execute(void)
                 Map.Flag_To_Redraw(true);
             }
         }
+        break;
+
+    case SELECT_ALL_OF_TYPE:
+        // collect objects of the same type
+        if (Data.Specific.Type == RTTI_AIRCRAFT) {
+            Select_Objects_Of_Type<AircraftClass, AircraftType>(
+                Aircraft, static_cast<AircraftType>(Data.Specific.ID)
+            );
+        } else if (Data.Specific.Type == RTTI_UNIT) {
+            Select_Objects_Of_Type<UnitClass, UnitType>(
+                Units, static_cast<UnitType>(Data.Specific.ID)
+            );
+        } else if (Data.Specific.Type == RTTI_INFANTRY) {
+            Select_Objects_Of_Type<InfantryClass, InfantryType>(
+                Infantry, static_cast<InfantryType>(Data.Specific.ID)
+            );
+        }
+
         break;
 
     /*

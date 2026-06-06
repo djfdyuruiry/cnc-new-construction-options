@@ -60,6 +60,7 @@
 
 #include "function.h"
 #include "common/irandom.h"
+#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -395,6 +396,48 @@ void Main_Game(int argc, char* argv[])
 #endif
 }
 
+static signed char Get_Selectable_Object_Instance_Id(ObjectClass* object)
+{
+    if (object->What_Am_I() == RTTI_AIRCRAFT) {
+        return dynamic_cast<AircraftClass*>(object)->Class->Type;
+    }
+
+    if (object->What_Am_I() == RTTI_UNIT) {
+        return dynamic_cast<UnitClass*>(object)->Class->Type;
+    }
+
+    if (object->What_Am_I() == RTTI_INFANTRY) {
+        return dynamic_cast<InfantryClass*>(object)->Class->Type;
+    }
+
+    return -1;
+}
+
+// BUG: Filter out non-player owned selected objects
+static void Select_Objects_Of_Same_Type()
+{
+    const auto first_tech = CurrentObject[0];
+    const auto first_type = first_tech->What_Am_I();
+    const auto first_instance = Get_Selectable_Object_Instance_Id(first_tech);
+
+    // unsupported type
+    if (first_instance == -1) {
+        return;
+    }
+
+    // If more than one object is selected, validate they are all the same type. If not, do nothing.
+    for (auto index = 1; index < CurrentObject.Count(); index++) {
+        const auto tech = CurrentObject[index];
+
+        if (tech->What_Am_I() != first_type || Get_Selectable_Object_Instance_Id(tech) != first_instance) {
+            // mixed types selected, so can't determine type to select
+            return;
+        }
+    }
+
+    OutList.Add(EventClass(EventClass::SELECT_ALL_OF_TYPE, first_type, first_instance));
+}
+
 /***********************************************************************************************
  * Keyboard_Process -- Processes the tactical map input codes.                                 *
  *                                                                                             *
@@ -598,16 +641,15 @@ void Keyboard_Process(KeyNumType& input)
         }
     }
 
-    if (key != 0 && (key == Options.KeyDeploy)) {
-        if (CurrentObject.Count()) {
-            for (index = 0; index < CurrentObject.Count(); index++) {
-                ObjectClass const* tech = CurrentObject[index];
+    if (key != 0 && key == Options.KeyDeploy && CurrentObject.Count()) {
+        for (index = 0; index < CurrentObject.Count(); index++) {
+            const auto tech = CurrentObject[index];
 
-                if (tech != NULL && tech->Can_Player_Move()) {
-                    OutList.Add(EventClass(EventClass::DEPLOY, tech->As_Target()));
-                }
+            if (tech != nullptr && tech->Can_Player_Move()) {
+                OutList.Add(EventClass(EventClass::DEPLOY, tech->As_Target()));
             }
         }
+
         input = KN_NONE;
     }
 
@@ -692,8 +734,11 @@ void Keyboard_Process(KeyNumType& input)
     /*
     **	Toggles the repair state similarly to pressing the repair button.
     */
-    if (key != 0 && key == Options.KeyRepair) {
+    if (key != 0 && key == Options.KeyRepair && CurrentObject.Count() < 1) {
         Map.Repair_Mode_Control(-1);
+        input = KN_NONE;
+    } else if (key != 0 && key == Options.KeySelectAllOfType && CurrentObject.Count() > 0) {
+        Select_Objects_Of_Same_Type();
         input = KN_NONE;
     }
 
