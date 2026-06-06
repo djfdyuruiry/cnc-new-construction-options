@@ -222,9 +222,13 @@ bool Mission_Select_Dialog(void)
         delete[](char*) list.Get_Item(index);
     }
 
+    // ensure correct data loaded if player picked a mission
     if (okval) {
-        // ensure correct data loaded
-        Force_CD_Available(ScenPlayer);
+        RequiredCD = ScenPlayer;
+
+        if (!Force_CD_Available(ScenPlayer)) {
+            Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), ScenPlayer);
+        }
     }
 
     return (okval);
