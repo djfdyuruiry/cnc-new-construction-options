@@ -465,6 +465,9 @@ int Main_Menu(unsigned int timeout)
         D_START_W = 125 * scale_factor, D_START_H = 9 * scale_factor, D_START_X = 98 * scale_factor,
         D_START_Y = 35 * scale_factor,
 
+        D_SELECT_W = 125 * scale_factor, D_SELECT_H = 9 * scale_factor, D_SELECT_X = 98 * scale_factor,
+        D_SELECT_Y = 35 * scale_factor,
+
 #ifdef BONUS_MISSIONS
         D_BONUS_W = 125 * scale_factor, D_BONUS_H = 9 * scale_factor, D_BONUS_X = 98 * scale_factor, D_BONUS_Y = 0,
 #endif // BONUS_MISSIONS
@@ -497,7 +500,7 @@ int Main_Menu(unsigned int timeout)
         D_EXIT_Y = 133 * scale_factor;
 
 #ifdef NEWMENU
-    int starty = 25 * scale_factor;
+    int starty = 25 * scale_factor - 9 * scale_factor;
 #endif
 
     // Make sure any changes to buttons here are also reflected in the enum and handling in Select_Game in init.cpp.
@@ -507,6 +510,7 @@ int Main_Menu(unsigned int timeout)
 #ifdef NEWMENU
         BUTTON_EXPAND = 100 * 2,
         BUTTON_START,
+        BUTTON_SELECT,
 #ifdef BONUS_MISSIONS
         BUTTON_BONUS,
 #endif // BONUS_MISSIONS
@@ -530,7 +534,7 @@ int Main_Menu(unsigned int timeout)
 #ifdef BONUS_MISSIONS
     TextButtonClass* buttons[8];
 #else
-    TextButtonClass* buttons[7];
+    TextButtonClass* buttons[8];
 #endif // BONUS_MISSIONS
 #else
     TextButtonClass* buttons[5];
@@ -565,6 +569,15 @@ int Main_Menu(unsigned int timeout)
                              starty,
                              D_START_W,
                              D_START_H);
+    starty += ystep;
+
+    TextButtonClass selectbtn(BUTTON_SELECT,
+                             "Mission Select", // TODO: TXT locale string
+                             TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                             D_SELECT_X,
+                             starty,
+                             D_SELECT_W,
+                             D_SELECT_H);
     starty += ystep;
 
 #ifdef BONUS_MISSIONS
@@ -735,6 +748,7 @@ int Main_Menu(unsigned int timeout)
     bonusbtn.Add_Tail(*commands);
 #endif // BONUS_MISSIONS
 
+    selectbtn.Add_Tail(*commands);
     loadbtn.Add_Tail(*commands);
     multibtn.Add_Tail(*commands);
     editorbtn.Add_Tail(*commands);
@@ -757,6 +771,7 @@ int Main_Menu(unsigned int timeout)
 #ifdef BONUS_MISSIONS
     buttons[butt++] = &bonusbtn;
 #endif // BONUS_MISSIONS
+    buttons[butt++] = &selectbtn;
     buttons[butt++] = &loadbtn;
     buttons[butt++] = &multibtn;
     buttons[butt++] = &editorbtn;
@@ -781,6 +796,8 @@ int Main_Menu(unsigned int timeout)
     /*
     **	Main Processing Loop.
     */
+    ScenVar = SCEN_VAR_NONE;
+
     bool display = true;
     bool process = true;
     while (process) {
@@ -875,6 +892,14 @@ int Main_Menu(unsigned int timeout)
 
         case (BUTTON_START | KN_BUTTON):
             retval = (input & 0x7FFF) - BUTTON_EXPAND;
+            process = false;
+            break;
+
+        case (BUTTON_SELECT | KN_BUTTON):
+            retval = (input & 0x7FFF) - BUTTON_EXPAND;
+#ifdef DEMO
+            retval += 1;
+#endif // DEMO
             process = false;
             break;
 

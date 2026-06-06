@@ -152,6 +152,7 @@ set(TIBDAWN_SRC
     lua/td_luaapi.cpp
     lua/tdtypes_luaapi.cpp
     lua/ui_luaapi.cpp
+    missionselect.cpp
     savegame_v1.cpp
     savegameheader.cpp
     savegameresolver.cpp

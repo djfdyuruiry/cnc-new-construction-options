@@ -52,30 +52,27 @@ public:
         : ListClass(id, x, y, w, h, flags, up, down){};
 
 protected:
-    virtual void Draw_Entry(int index, int x, int y, int width, int selected);
-};
+    void Draw_Entry(int index, int x, int y, int width, int selected) override
+    {
+        if (TextFlags & TPF_6PT_GRAD) {
+            TextPrintType flags = TextFlags;
 
-void EListClass::Draw_Entry(int index, int x, int y, int width, int selected)
-{
-    if (TextFlags & TPF_6PT_GRAD) {
-        TextPrintType flags = TextFlags;
-
-        if (selected) {
-            flags = flags | TPF_BRIGHT_COLOR;
-            LogicPage->Fill_Rect(x, y, x + width - 1, y + LineHeight - 1, CC_GREEN_SHADOW);
-        } else {
-            if (!(flags & TPF_USE_GRAD_PAL)) {
-                flags = flags | TPF_MEDIUM_COLOR;
+            if (selected) {
+                flags = flags | TPF_BRIGHT_COLOR;
+                LogicPage->Fill_Rect(x, y, x + width - 1, y + LineHeight - 1, CC_GREEN_SHADOW);
+            } else {
+                if (!(flags & TPF_USE_GRAD_PAL)) {
+                    flags = flags | TPF_MEDIUM_COLOR;
+                }
             }
+
+            Conquer_Clip_Text_Print(List[index] + sizeof(int), x, y, CC_GREEN, TBLACK, flags, width, Tabs);
+        } else {
+            Conquer_Clip_Text_Print(
+                List[index] + sizeof(int), x, y, (selected ? BLUE : WHITE), TBLACK, TextFlags, width, Tabs);
         }
-
-        Conquer_Clip_Text_Print(List[index] + sizeof(int), x, y, CC_GREEN, TBLACK, flags, width, Tabs);
-
-    } else {
-        Conquer_Clip_Text_Print(
-            List[index] + sizeof(int), x, y, (selected ? BLUE : WHITE), TBLACK, TextFlags, width, Tabs);
     }
-}
+};
 
 bool Expansion_Dialog(void)
 {
@@ -125,6 +122,7 @@ bool Expansion_Dialog(void)
     int index;
     INIClass ini;
 
+    // TODO: combine into one loop like mission select
     for (index = 20; index < 60; index++) {
         char buffer[128];
         CCFileClass file;

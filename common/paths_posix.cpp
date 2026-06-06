@@ -261,7 +261,29 @@ bool PathsClass::Is_Absolute(const char* path)
 
 std::string PathsClass::Concatenate_Paths(const char* path1, const char* path2)
 {
-    return std::string(path1) + SEP + path2;
+    if (path1 == nullptr && path2 == nullptr) {
+        // nothing to do
+        return "";
+    }
+
+    // nothing to concat to right
+    if (path1 == nullptr || strlen(path1) == 0) {
+        return path2;
+    }
+
+    // nothing to concat to left
+    if (path2 == nullptr || strlen(path2) == 0) {
+        return path1;
+    }
+
+    const std::string path1_str = path1;
+
+    if (path1_str.back() == SEP) {
+        // separator already present, just concat strings
+        return path1_str + path2;
+    }
+
+    return path1_str + SEP + path2;
 }
 
 std::string PathsClass::Get_Filename(const char* path)
