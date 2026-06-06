@@ -209,17 +209,11 @@ int CDFileClass::Set_Search_Drives(char* pathlist)
     ** Check for the case where RawPath was passed in.
     */
     if (pathlist != RawPath) {
-        std::string tempPath = RawPath;
-        tempPath += ";";
-        tempPath += pathlist;
-        strncpy(RawPath, tempPath.c_str(), sizeof(RawPath) - 1);
+        strcat(RawPath, ";");
+        strcat(RawPath, pathlist);
     }
 
-    char pathlist_copy[1024];
-    strncpy(pathlist_copy, pathlist, sizeof(pathlist_copy) - 1);
-    pathlist_copy[sizeof(pathlist_copy) - 1] = '\0';
-
-    char const* ptr = strtok(pathlist_copy, ";");
+    char const* ptr = strtok(pathlist, ";");
     while (ptr) {
         if (strlen(ptr)) {
             /*
