@@ -348,21 +348,23 @@ EventClass::EventClass(EventType type, int id, CELL cell)
 }
 
 template<class T, class U>
-static void Select_Objects_Of_Type(TFixedIHeapClass<T>& object_heap, U instance)
+static void Select_Objects_Of_Type(TFixedIHeapClass<T>& object_heap, const U instance_type)
 {
     Unselect_All();
 
     for (auto i = 0; i < object_heap.Count(); i++) {
         auto object = object_heap.Ptr(i);
-        auto location = Coord_Cell(object->Coord);
 
-        if (
-            object->Is_Owned_By_Player() &&
-            object->Class->Type == instance &&
-            !object->IsInLimbo &&
-            Map.In_View(location) // BUG: This doesn't respect the actual resolution (fixed width and height check)
-        ) {
-            object->Select();
+        // if object matches the instance_type, is owned by the played and is selectable...
+        if (object->Is_Owned_By_Player() && object->Class->Type == instance_type && !object->IsInLimbo) {
+            int x = -1;
+            int y = -1;
+
+            // and object is on visible on the screen...
+            if (Map.Coord_To_Pixel(object->Coord, x, y) && x > -1 && y > -1) {
+                // then select it
+                object->Select();
+            }
         }
     }
 }
@@ -793,6 +795,8 @@ void EventClass::Execute(void)
         break;
 
     case SELECT_ALL_OF_TYPE:
+        ObjectClass* a;
+
         // collect objects of the same type
         if (Data.Specific.Type == RTTI_AIRCRAFT) {
             Select_Objects_Of_Type<AircraftClass, AircraftType>(

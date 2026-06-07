@@ -399,28 +399,30 @@ void Main_Game(int argc, char* argv[])
 static signed char Get_Selectable_Object_Instance_Id(ObjectClass* object)
 {
     if (object->What_Am_I() == RTTI_AIRCRAFT) {
-        return dynamic_cast<AircraftClass*>(object)->Class->Type;
+        const auto aircraft = dynamic_cast<AircraftClass*>(object);
+        return aircraft->Is_Owned_By_Player() ? aircraft->Class->Type : -1;
     }
 
     if (object->What_Am_I() == RTTI_UNIT) {
-        return dynamic_cast<UnitClass*>(object)->Class->Type;
+        const auto unit = dynamic_cast<UnitClass*>(object);
+        return unit->Is_Owned_By_Player() ? unit->Class->Type : -1;
     }
 
     if (object->What_Am_I() == RTTI_INFANTRY) {
-        return dynamic_cast<InfantryClass*>(object)->Class->Type;
+        const auto infantry = dynamic_cast<InfantryClass*>(object);
+        return infantry->Is_Owned_By_Player() ? infantry->Class->Type : -1;
     }
 
     return -1;
 }
 
-// BUG: Filter out non-player owned selected objects
 static void Select_Objects_Of_Same_Type()
 {
     const auto first_tech = CurrentObject[0];
     const auto first_type = first_tech->What_Am_I();
     const auto first_instance = Get_Selectable_Object_Instance_Id(first_tech);
 
-    // unsupported type
+    // unsupported type (or not owned by player)
     if (first_instance == -1) {
         return;
     }
