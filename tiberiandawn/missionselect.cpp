@@ -41,15 +41,17 @@ std::string Build_Mission_Description(
     const int scenario_number,
     const ScenarioDirType direction,
     const ScenarioVarType variation,
-    std::optional<std::string> mission_name
+    const std::optional<std::string>& mission_name
 )
 {
+    auto mission_name_str = mission_name.value_or("");
+
     if (!mission_name.has_value()) {
         auto direction_str = TdTypeConverter::To_String(direction);
 
         CncStringUtils::To_Title_Case(direction_str);
 
-        mission_name = std::format(
+        mission_name_str = std::format(
             "{}{}({})",
             direction_str,
             direction == SCEN_DIR_EAST ? "  " : " ",
@@ -58,12 +60,12 @@ std::string Build_Mission_Description(
     }
 
     return std::format(
-        "{}: Mission {:>2} - {}",
+        "{}{}: Mission {:>2} - {}",
+        std::string(sizeof(int), ' '), // leading spaces are to maintain compatibility with drawing logic
         TdTypeConverter::To_String(player),
         scenario_number,
-        mission_name.value()
+        mission_name_str
     );
-
 }
 
 bool Mission_Select_Dialog(void)
