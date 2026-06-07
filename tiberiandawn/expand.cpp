@@ -122,44 +122,25 @@ bool Expansion_Dialog(void)
     int index;
     INIClass ini;
 
-    // TODO: combine into one loop like mission select
-    for (index = 20; index < 60; index++) {
-        char buffer[128];
-        CCFileClass file;
+    for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD }) {
+        for (index = 20; index < 60; index++) {
+            char buffer[128];
+            CCFileClass file;
 
-        Set_Scenario_Name(buffer, index, SCEN_PLAYER_GDI, SCEN_DIR_EAST, SCEN_VAR_A);
-        strcat(buffer, ".INI");
-        file.Set_Name(buffer);
-        if (file.Is_Available()) {
-            ini.Clear();
-            ini.Load(file);
-            ini.Get_String("Basic", "Name", "x", buffer, sizeof(buffer));
+            Set_Scenario_Name(buffer, index, player, SCEN_DIR_EAST, SCEN_VAR_A);
+            strcat(buffer, ".INI");
+            file.Set_Name(buffer);
+            if (file.Is_Available()) {
+                ini.Clear();
+                ini.Load(file);
+                ini.Get_String("Basic", "Name", "x", buffer, sizeof(buffer));
 
-            char* data = new char[strlen(buffer) + 1 + sizeof(int) + 25];
-            *((int*)&data[0]) = index;
-            strcpy(&data[sizeof(int)], "GDI: ");
-            strcat(&data[sizeof(int)], buffer);
-            list.Add_Item(data);
-        }
-    }
-
-    for (index = 20; index < 60; index++) {
-        char buffer[128];
-        CCFileClass file;
-
-        Set_Scenario_Name(buffer, index, SCEN_PLAYER_NOD, SCEN_DIR_EAST, SCEN_VAR_A);
-        strcat(buffer, ".INI");
-        file.Set_Name(buffer);
-        if (file.Is_Available()) {
-
-            ini.Clear();
-            ini.Load(file);
-            ini.Get_String("Basic", "Name", "x", buffer, sizeof(buffer));
-            char* data = new char[strlen(buffer) + 1 + sizeof(int) + 25];
-            *((int*)&data[0]) = index;
-            strcpy(&data[sizeof(int)], "NOD: ");
-            strcat(&data[sizeof(int)], buffer);
-            list.Add_Item(data);
+                char* data = new char[strlen(buffer) + 1 + sizeof(int) + 25];
+                *((int*)&data[0]) = index;
+                strcpy(&data[sizeof(int)], player == SCEN_PLAYER_GDI ? "GDI: " : "NOD: ");
+                strcat(&data[sizeof(int)], buffer);
+                list.Add_Item(data);
+            }
         }
     }
 

@@ -132,6 +132,7 @@ OptionsClass::OptionsClass(void)
     , KeyTeam9(KN_9)
     , KeyTeam10(KN_0)
     , KeyDeploy(KN_D)
+    , KeySelectAllOfType(KN_T)
 {
     GameSpeed = TIMER_SECOND / TICKS_PER_SECOND;
     ScrollRate = TIMER_SECOND / TICKS_PER_SECOND;
@@ -631,6 +632,7 @@ void OptionsClass::Load_Settings(void)
     KeyTeam8 = (KeyNumType)ini.Get_Int(HotkeyName, "KeyTeam8", KeyTeam8);
     KeyTeam9 = (KeyNumType)ini.Get_Int(HotkeyName, "KeyTeam9", KeyTeam9);
     KeyTeam10 = (KeyNumType)ini.Get_Int(HotkeyName, "KeyTeam10", KeyTeam10);
+    KeyDeploy = (KeyNumType)ini.Get_Int(HotkeyName, "KeyDeploy", KeyDeploy);
 
     KeyForceMove1 = (KeyNumType)(KeyForceMove1 & ~WWKEY_VK_BIT);
     KeyForceMove2 = (KeyNumType)(KeyForceMove2 & ~WWKEY_VK_BIT);
@@ -681,6 +683,7 @@ void OptionsClass::Load_Settings(void)
     KeyTeam8 = (KeyNumType)(KeyTeam8 & ~WWKEY_VK_BIT);
     KeyTeam9 = (KeyNumType)(KeyTeam9 & ~WWKEY_VK_BIT);
     KeyTeam10 = (KeyNumType)(KeyTeam10 & ~WWKEY_VK_BIT);
+    KeyDeploy = (KeyNumType)(KeyDeploy & ~WWKEY_VK_BIT);
 
     char workbuf[128];
 
@@ -877,6 +880,7 @@ void OptionsClass::Save_Settings(INIClass& ini)
     ini.Put_Int(HotkeyName, "KeyTeam8", KeyTeam8);
     ini.Put_Int(HotkeyName, "KeyTeam9", KeyTeam9);
     ini.Put_Int(HotkeyName, "KeyTeam10", KeyTeam10);
+    ini.Put_Int(HotkeyName, "KeyDeploy", KeyDeploy);
 }
 
 void OptionsClass::Save_Settings()
