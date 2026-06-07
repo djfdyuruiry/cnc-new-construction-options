@@ -369,7 +369,6 @@ static void Select_Objects_Of_Type(TFixedIHeapClass<T>& object_heap, const U ins
     }
 }
 
-
 /***********************************************************************************************
  * EventClass::Execute -- Execute a queued command.                                            *
  *                                                                                             *
@@ -795,8 +794,6 @@ void EventClass::Execute(void)
         break;
 
     case SELECT_ALL_OF_TYPE:
-        ObjectClass* a;
-
         // collect objects of the same type
         if (Data.Specific.Type == RTTI_AIRCRAFT) {
             Select_Objects_Of_Type<AircraftClass, AircraftType>(

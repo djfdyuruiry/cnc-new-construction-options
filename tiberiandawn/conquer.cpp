@@ -60,7 +60,6 @@
 
 #include "function.h"
 #include "common/irandom.h"
-#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
