@@ -1,9 +1,12 @@
+using System;
 using System.Runtime.Versioning;
 
 namespace CNC.NCO.Launcher.Model.Events.Download;
 
 public interface IDownloadEventVisitor : IVisitor
 {
+  void SetInstallLogCallback(Action<string> callback);
+
   // Game data install
   void Visit(StartDownloadGameDataEvent e);
   void Visit(StartDiscImageDownloadEvent e);

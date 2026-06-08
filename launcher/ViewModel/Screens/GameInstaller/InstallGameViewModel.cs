@@ -12,13 +12,16 @@ using ReactiveUI;
 
 using CNC.NCO.Launcher.Config;
 using CNC.NCO.Launcher.Model;
+using CNC.NCO.Launcher.Model.Events.Download;
 using CNC.NCO.Launcher.Model.ViewModel;
 using CNC.NCO.Launcher.Service;
+using Splat;
 
 namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 public class InstallGameViewModel : ScreenViewModelBase
 {
+  private readonly LauncherConfigService _configService;
   private readonly GameDataService _gameDataService;
   private readonly NcoReleaseService _releaseService;
   private readonly PathsConfig _paths;
@@ -95,6 +98,7 @@ public class InstallGameViewModel : ScreenViewModelBase
     PathsConfig paths
   ) : base("install-games", hostScreen)
   {
+    _configService = configService;
     _gameDataService = gameDataService;
     _releaseService = releaseService;
     _paths = paths;
@@ -107,22 +111,7 @@ public class InstallGameViewModel : ScreenViewModelBase
 
     SafeWhenNavigatedTo(() =>
     {
-      DiscImages = configService.Config
-        .EnabledDiscImages
-        .Select(ItemToBeInstalled<DiscImageSource>.Build)
-        .ToList();
-
-      ModsAndAddons = configService.Config
-        .EnabledZipUrlSpecs
-        .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
-        .ToList();
-
-      Nco = ItemToBeInstalled<NewConstructionOptions>.Build(configService.Config.Nco);
-      NcoLauncher = ItemToBeInstalled<NewConstructionOptions>.Build(new NewConstructionOptions());
-
-      // don't attempt to install launcher if previously installed
-      // (we might be running that previously installed launcher now)
-      NcoLauncher.Installed = configService.Config.Nco.Installed;
+      Initialise();
 
       return new CompositeDisposable(
         this.WhenValueChanged(x => x.InstallFinished)
@@ -137,15 +126,60 @@ public class InstallGameViewModel : ScreenViewModelBase
     });
   }
 
-  private Task Install()
+  public void Initialise()
+  {
+    DiscImages = _configService.Config
+      .EnabledDiscImages
+      .Select(ItemToBeInstalled<DiscImageSource>.Build)
+      .ToList();
+
+    ModsAndAddons = _configService.Config
+      .EnabledZipUrlSpecs
+      .Select(ItemToBeInstalled<ZipUrlSpec>.Build)
+      .ToList();
+
+    Nco = ItemToBeInstalled<NewConstructionOptions>.Build(_configService.Config.Nco);
+    NcoLauncher = ItemToBeInstalled<NewConstructionOptions>.Build(new NewConstructionOptions());
+
+    // don't attempt to install launcher if previously installed
+    // (we might be running that previously installed launcher now)
+    NcoLauncher.Installed = _configService.Config.Nco.Installed;
+  }
+
+  public Task Install()
+  {
+    var downloadVisitor = new InstallDownloadEventVisitor(this);
+
+    downloadVisitor.SetInstallLogCallback(s => InstallLog += s);
+
+    return InstallWith(
+      downloadVisitor,
+      () => Locator.Current.GetService<Bin2IsoService>()!,
+      b => CurrentSplashScreen = b
+    );
+  }
+
+  public Task InstallWith(
+    IDownloadEventVisitor downloadEventVisitor,
+    Func<Bin2IsoService> bin2IsoServiceBuilder,
+    Action<Bitmap>? onSplashScreenLoadedHandler = null
+  )
   {
     return Task.Run(async () =>
     {
-      var downloadEventVisitor = new InstallDownloadEventVisitor(this);
+      var logFilePath = Path.Join(_paths.NcoAppDataPath, "install.log");
+
+      if (Path.Exists(logFilePath))
+      {
+        File.Delete(logFilePath);
+      }
+
+      using var bin2IsoService = bin2IsoServiceBuilder();
 
       await _gameDataService.Download(
         downloadEventVisitor,
-        b => CurrentSplashScreen = b
+        bin2IsoService,
+        onSplashScreenLoadedHandler
       );
 
       if (!HasErrored)
@@ -158,7 +192,7 @@ public class InstallGameViewModel : ScreenViewModelBase
       IsInstalling = false;
       InstallFinished = !HasErrored;
 
-      await File.WriteAllTextAsync(Path.Join(_paths.NcoAppDataPath, "install.log"), InstallLog);
+      await File.WriteAllTextAsync(logFilePath, InstallLog);
     });
   }
 
