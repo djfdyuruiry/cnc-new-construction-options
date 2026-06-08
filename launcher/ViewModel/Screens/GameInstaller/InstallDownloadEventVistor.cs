@@ -10,13 +10,16 @@ namespace CNC.NCO.Launcher.ViewModel.Screens.GameInstaller;
 
 internal sealed class InstallDownloadEventVisitor(InstallGameViewModel host) : IDownloadEventVisitor
 {
-  private void AppendToInstallLog(string line)
-  {
-    host.InstallLog += $"{line}\n";
-  }
-
+  private Action<string>? _installLogCallback;
   private ItemToBeInstalled<DiscImageSource>? _currentDiscImage;
   private ItemToBeInstalled<ZipUrlSpec>? _currentZip;
+
+  public void SetInstallLogCallback(Action<string> callback)
+  {
+    _installLogCallback = callback;
+  }
+
+  private void AppendToInstallLog(string line) => _installLogCallback?.Invoke(line + Environment.NewLine);
 
   // game data install
   public void Visit(ConvertDiscImageEvent e) =>

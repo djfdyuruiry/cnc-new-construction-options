@@ -248,7 +248,7 @@ public class GameDataService(
     GameDataConfig dataConfig,
     IDownloadEventVisitor downloadEventVisitor,
     Bin2IsoService bin2IsoService,
-    Action<Bitmap> onSplashScreenLoaded,
+    Action<Bitmap>? onSplashScreenLoaded,
     string installPath
   )
   {
@@ -345,7 +345,7 @@ public class GameDataService(
 
     async Task OnIsoOpen(DiscImageSource imageSource, CDReader iso)
     {
-      if (imageSource.HasSplashScreenFile && iso.FileExists(imageSource.SplashScreenFile))
+      if (onSplashScreenLoaded is not null && imageSource.HasSplashScreenFile && iso.FileExists(imageSource.SplashScreenFile))
       {
         await using var fileStream = iso.OpenFile(imageSource.SplashScreenFile, FileMode.Open);
         onSplashScreenLoaded(Bitmap.DecodeToHeight(fileStream, 480));
@@ -355,7 +355,8 @@ public class GameDataService(
 
   public async Task Download(
     IDownloadEventVisitor downloadEventVisitor,
-    Action<Bitmap> onSplashScreenLoaded
+    Bin2IsoService bin2IsoService,
+    Action<Bitmap>? onSplashScreenLoaded
   )
   {
     GameDataConfig? currentGame = null;
@@ -367,8 +368,6 @@ public class GameDataService(
         : configService.Config.Nco.PendingInstallPath;
 
       Directory.CreateDirectory(paths.NcoCachePath);
-
-      using var bin2IsoService = Locator.Current.GetService<Bin2IsoService>()!;
 
       foreach (var game in configService.Config.EnabledGames)
       {
