@@ -2,7 +2,7 @@
 
 C&C: New Construction Options (NCO) is a cross-platform, enhanced game engine for `Command & Conquer: Tiberian Dawn` & `Command & Conquer:Red Alert`. It's goals are to enhance the gameplay and modding experience.
 
-This project aims to provide an out-of-the-box experience that looks and feels like the original games while giving users full control over customization and enhancements through in-game menus, INI file configuration and Lua scripting.
+This project aims to provide an out-of-the-box experience that looks and feels like the original games while giving users extensive modding control and enhancements through in-game menus, with full INI file configuration and Lua scripting.
 
 NCO is also available as a mod for Command & Conquer: Remastered Collection, both for Tiberian Dawn and Red Alert.
 
@@ -25,9 +25,8 @@ NCO can be installed as a mod for the Remastered Collection, follow the steps [h
 ---
 
 ### [> Enhancements List](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/2.Enhancements)
-### [> Planned Features](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/4.Planned-Features)
-
 ### [> Project Wiki](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki)
+### [> Planned Features](https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/4.Planned-Features)
 
 ## ⚠ Under Construction ⚠
 
@@ -36,6 +35,8 @@ NCO can be installed as a mod for the Remastered Collection, follow the steps [h
 **EVA: "BUILDING"**
 
 This project is under construction and heavy development, so features might change and things may not work as expected - please report any bugs/ideas to the Issues section of this repo.
+
+Always check the enhancements list as it will show which features are still in alpha/beta.
 
 ## Note on GitHub Forks
 
