@@ -10,6 +10,7 @@
     <Version>0.1.0</Version>
     <Title>NCO Launcher</Title>
     <AssemblyName>NCO Launcher</AssemblyName>
+    <ApplicationIcon>tools/runtimes/win-x64/native/nco-launcher.ico</ApplicationIcon>
     <Authors>djfdyuruiry</Authors>
     <Description>Cross platform UI for installing the New Construction Options game engine and required game data; also provides a game launcher.</Description>
     <PackageProjectUrl>https://github.com/djfdyuruiry/cnc-new-construction-options</PackageProjectUrl>
@@ -67,12 +68,23 @@
     <None Update="tools\runtimes\osx\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
     <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Link="tools\bin2iso.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Link="tools\create-or-update-shortcut.ps1" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="tools\runtimes\win-x64\native\nco-td.ico" Link="tools\nco-td.ico" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\nco-ra.ico" Link="tools\nco-ra.ico" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\nco-launcher.ico" Link="tools\nco-launcher.ico" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
     <None Update="tools\runtimes\linux-x64\native\bin2iso" Link="tools\bin2iso" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -82,6 +94,16 @@
     <None Update="tools\runtimes\linux-x64\native\nco-launcher.desktop" Link="tools\nco-launcher.desktop" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-td.png" Link="tools\nco-td.png" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-ra.png" Link="tools\nco-ra.png" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-launcher.png" Link="tools\nco-launcher.png" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
     <None Update="config.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -98,12 +120,23 @@
     <None Update="tools\runtimes\osx\native\bin2iso" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
     <None Update="tools\runtimes\win-x64\native\bin2iso.exe" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="tools\runtimes\win-x64\native\create-or-update-shortcut.ps1" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="tools\runtimes\win-x64\native\nco-td.ico" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\nco-ra.ico" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\win-x64\native\nco-launcher.ico" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
     <None Update="tools\runtimes\linux-x64\native\bin2iso" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -111,6 +144,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="tools\runtimes\linux-x64\native\nco-launcher.desktop" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-td.png" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-ra.png" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="tools\runtimes\linux-x64\native\nco-launcher.png" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

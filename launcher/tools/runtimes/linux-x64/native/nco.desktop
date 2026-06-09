@@ -7,3 +7,4 @@ Comment=New Construction Options
 NoDisplay=false
 Path=/INSTALL_PATH
 Terminal=false
+Icon=ICON_NAME

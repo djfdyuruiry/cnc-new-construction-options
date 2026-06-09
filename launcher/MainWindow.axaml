@@ -11,6 +11,7 @@
                      Width="1024"
                      Height="768"
                      WindowStartupLocation="CenterScreen"
+                     Icon="avares://NCO Launcher/img/nco-launcher.png"
                      mc:Ignorable="d"
                      d:DesignWidth="1024"
                      d:DesignHeight="768">

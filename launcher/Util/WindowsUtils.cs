@@ -19,7 +19,7 @@ public class WindowsUtils(PathsConfig paths)
     "Programs"
   );
 
-  public async Task CreateShortcut(string shortcutName, string targetPath)
+  public async Task CreateShortcut(string shortcutName, string targetPath, string iconPath)
   {
     try
     {
@@ -30,7 +30,8 @@ public class WindowsUtils(PathsConfig paths)
         @"-ExecutionPolicy Bypass",
         @"-File create-or-update-shortcut.ps1",
         $"-ShortcutPath '{shortcutPath}'",
-        $"-TargetPath '{targetPath}'"
+        $"-TargetPath '{targetPath}'",
+        $"-ShortcutIconPath '{iconPath}'"
       );
       startInfo.WorkingDirectory = paths.ToolsPath;
 
