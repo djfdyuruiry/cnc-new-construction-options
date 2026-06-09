@@ -24,12 +24,10 @@ public class GameDataService(
   PathsConfig paths
 )
 {
-  private void ZipUrlStreamHandler(
-    ZipUrlSpec spec,
+  private void ZipUrlStreamHandler(ZipUrlSpec spec,
     IDownloadEventVisitor downloadEventVisitor,
-    string installPath,
-    Stream downloadStream
-  )
+    string downloadPath,
+    Stream downloadStream)
   {
     using var zipReader = ReaderFactory.OpenReader(downloadStream);
 
@@ -45,7 +43,7 @@ public class GameDataService(
         continue;
       }
 
-      var destPath = Path.Join(installPath, entryKey.ToLower());
+      var destPath = Path.Join(downloadPath, entryKey.ToLower());
 
       Console.WriteLine($"Extracting {entryKey} to {destPath}");
 
@@ -55,21 +53,15 @@ public class GameDataService(
     }
   }
 
-  private async Task DownloadGameZipUrlFiles(
-    ZipUrlSpec zip,
-    IDownloadEventVisitor downloadEventVisitor,
-    string installPath
-  )
+  private async Task DownloadGameZipUrlFiles(ZipUrlSpec zip, string downloadPath, IDownloadEventVisitor downloadEventVisitor)
   {
     Console.WriteLine($"Downloading files from ZIP Url: {zip.Url}");
-
-    downloadEventVisitor.Visit(new StartZipUrlDownloadEvent(zip));
 
     if (mediaFireDownloadService.IsMediaFireUrl(zip.Url))
     {
       await mediaFireDownloadService.WithFileStream(
         zip.Url,
-        s => ZipUrlStreamHandler(zip, downloadEventVisitor, installPath, s)
+        s => ZipUrlStreamHandler(zip, downloadEventVisitor, downloadPath, s)
       );
 
       return;
@@ -85,7 +77,44 @@ public class GameDataService(
     response.EnsureSuccessStatusCode();
     await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-    ZipUrlStreamHandler(zip, downloadEventVisitor, installPath, responseStream);
+    ZipUrlStreamHandler(zip, downloadEventVisitor, downloadPath, responseStream);
+  }
+
+  private async Task ExtractGameZipUrlFiles(
+    ZipUrlSpec zip,
+    IDownloadEventVisitor downloadEventVisitor,
+    string installPath
+  )
+  {
+    Console.WriteLine($"Copying files from ZIP: {zip.Name}");
+
+    downloadEventVisitor.Visit(new StartZipUrlDownloadEvent(zip));
+
+    var downloadPath = Path.Join(paths.NcoCachePath, zip.Name);
+
+    if (
+      ! await HashingUtils.DirectoryChecksumIsValid(
+        downloadPath,
+        $"*{zip.ProvidesFilesEndingWith}",
+        zip.Checksum,
+        deleteInvalidFiles: true
+      )
+    )
+    {
+      Directory.CreateDirectory(downloadPath);
+
+      // fetch zip files, they are missing from cache or corrupt
+      await DownloadGameZipUrlFiles(zip, downloadPath, downloadEventVisitor);
+    }
+
+    foreach (var zipFile in Directory.GetFiles(downloadPath))
+    {
+      var destPath = Path.Join(installPath, Path.GetFileName(zipFile));
+
+      File.Copy(zipFile, destPath, true);
+
+      downloadEventVisitor.Visit(new WriteGameDataFileEvent(Path.GetFileName(zipFile), destPath));
+    }
 
     downloadEventVisitor.Visit(new FinishZipUrlDownloadEvent(zip));
   }
@@ -381,7 +410,7 @@ public class GameDataService(
 
         foreach (var zipUrl in game.EnabledZipUrlSpecs)
         {
-          await DownloadGameZipUrlFiles(zipUrl, downloadEventVisitor, installPath);
+          await ExtractGameZipUrlFiles(zipUrl, downloadEventVisitor, installPath);
         }
 
         downloadEventVisitor.Visit(new FinishDownloadGameDataEvent(game));

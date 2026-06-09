@@ -156,12 +156,15 @@
                 "ProvidesFilesEndingWith": {
                   "type": "string"
                 },
+                "Checksum": {
+                  "type": "string"
+                },
                 "InfoUrl": {
                   "type": "string",
                   "format": "uri"
                 }
               },
-              "required": ["SortOrder", "Name", "Url", "ProvidesFilesEndingWith"]
+              "required": ["SortOrder", "Name", "Url", "ProvidesFilesEndingWith", "Checksum"]
             }
           }
         },

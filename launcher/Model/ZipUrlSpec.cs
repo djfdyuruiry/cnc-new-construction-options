@@ -24,6 +24,7 @@ public class ZipUrlSpec : INotifyPropertyChanged
     }
   }
   public required string Url { get; set; }
+  public required string Checksum { get; set; }
   public required string ProvidesFilesEndingWith { get; set; }
   public string? InfoUrl { get; set; }
 
