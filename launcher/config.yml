@@ -210,5 +210,6 @@ RedAlert:
       DisplayName:
         The Lost Files ('Counterstrike'/'The Aftermath' Cutscenes)
       Url: https://www.mediafire.com/download/4b767436vd2et54/ra_TLF_Videos_v3-en.zip
-      InfoUrl: https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/2c.Red-Alert-Enhancements
       ProvidesFilesEndingWith: .MIX
+      Checksum: af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262
+      InfoUrl: https://github.com/djfdyuruiry/cnc-new-construction-options/wiki/2c.Red-Alert-Enhancements
