@@ -24,12 +24,18 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
   [SupportedOSPlatform("windows")]
   private async Task GenerateLauncherWindowsShortcuts(string installRoot, IDownloadEventVisitor eventVisitor)
   {
-    var winUtils = new WindowsUtils(pathsConfig);
+    var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory);
+    var sourceIconPath = $"{Path.Join(pathsConfig.ToolsPath, "nco-launcher")}.ico";
+    var launcherIconPath = $"{Path.Join(launcherPath, "nco-launcher")}.ico";
+
+    File.Copy(sourceIconPath, launcherIconPath, true);
 
     var launcherBinary = configService.Config.Nco.LauncherBinary;
-    var launcherBinaryPath = $"{Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary)}.exe";
+    var launcherBinaryPath = $"{Path.Join(launcherPath, launcherBinary)}.exe";
 
-    await winUtils.CreateShortcut("NCO Launcher", launcherBinaryPath);
+    var winUtils = new WindowsUtils(pathsConfig);
+
+    await winUtils.CreateShortcut("NCO Launcher", launcherBinaryPath, launcherIconPath);
 
     eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
   }
@@ -37,19 +43,29 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
   [SupportedOSPlatform("linux")]
   private async Task GenerateLauncherDesktopFiles(string installRoot, IDownloadEventVisitor eventVisitor)
   {
+    var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
+    var iconsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "icons", "hicolor", "256x256", "apps");
+
+    Directory.CreateDirectory(appsPath);
+    Directory.CreateDirectory(iconsPath);
+
+    const string iconName = "nco-launcher";
+    var sourceIconPath = $"{Path.Join(pathsConfig.ToolsPath, iconName)}.png";
+    var launcherIconPath = $"{Path.Join(iconsPath, iconName)}.png";
+
+    File.Copy(sourceIconPath, launcherIconPath, true);
+
     var launcherTemplate = await File.ReadAllTextAsync(
       Path.Join(pathsConfig.ToolsPath, "nco-launcher.desktop")
     );
 
     var launcherPath = Path.Join(installRoot, LauncherConfig.LauncherDirectory);
-    var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
-
-    Directory.CreateDirectory(appsPath);
 
     await File.WriteAllTextAsync(
       $"{Path.Join(appsPath, "nco-launcher")}.desktop",
       launcherTemplate.Replace("BINARY", $"'{Path.Join(launcherPath, configService.Config.Nco.LauncherBinary)}'")
         .Replace("/INSTALL_PATH", $"{launcherPath}")
+        .Replace("ICON_NAME", iconName)
     );
 
     eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
@@ -154,29 +170,21 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
     // game engine shortcuts
     foreach (var game in configService.Config.EnabledGames)
     {
-      var gameBinaryPath = $"{Path.Join(installRoot, game.InstallPostfix, game.Binary)}.exe";
+      var gamePath = Path.Join(installRoot, game.InstallPostfix);
+      var gameBinaryPath = $"{Path.Join(gamePath, game.Binary)}.exe";
+      var sourceIconPath = $"{Path.Join(pathsConfig.ToolsPath, game.Binary)}.ico";
+      var gameIconPath = $"{Path.Join(gamePath, game.Binary)}.ico";
+
+      File.Copy(sourceIconPath, gameIconPath, true);
 
       await winUtils.CreateShortcut(
         $"{game.DisplayName.Replace("Command & Conquer:", "C&C -")} (NCO)",
-        gameBinaryPath
+        gameBinaryPath,
+        gameIconPath
       );
 
       eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));
     }
-
-    if (configService.Config.Nco.Installed)
-    {
-      // don't reinstall the launcher (we might be running a previously installed launcher now)
-      return;
-    }
-
-    // launcher shortcut
-    var launcherBinary = configService.Config.Nco.LauncherBinary;
-    var launcherBinaryPath = $"{Path.Join(installRoot, LauncherConfig.LauncherDirectory, launcherBinary)}.exe";
-
-    await winUtils.CreateShortcut("NCO Launcher", launcherBinaryPath);
-
-    eventVisitor.Visit(new ShortcutCreatedEvent("NCO Launcher"));
   }
 
   /**
@@ -206,12 +214,20 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
       Path.Join(pathsConfig.ToolsPath, "nco.desktop")
     );
     var appsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "applications");
+    var iconsPath = Path.Join(pathsConfig.AppDataDirectoryPath, "icons", "hicolor", "256x256", "apps");
 
     Directory.CreateDirectory(appsPath);
+    Directory.CreateDirectory(iconsPath);
 
     // game engine shortcuts
     foreach (var game in configService.Config.EnabledGames)
     {
+      var iconName = game.Binary;
+      var sourceIconPath = $"{Path.Join(pathsConfig.ToolsPath, iconName)}.png";
+      var gameIconPath = $"{Path.Join(iconsPath, iconName)}.png";
+
+      File.Copy(sourceIconPath, gameIconPath, true);
+
       var gamePath = Path.Join(installRoot, game.InstallPostfix);
       var binaryPath = Path.Join(gamePath, game.PlatformBinary);
       var desktopName = $"nco-{game.InstallPostfix}";
@@ -221,6 +237,7 @@ public class NcoReleaseService(LauncherConfigService configService, IRestClient 
         engineTemplate.Replace("BINARY", binaryPath)
           .Replace("DISPLAY_NAME", $"{game.DisplayName.Replace("Command & Conquer: ", string.Empty)} (NCO)")
           .Replace("/INSTALL_PATH", gamePath)
+          .Replace("ICON_NAME", iconName)
       );
 
       eventVisitor.Visit(new ShortcutCreatedEvent(game.DisplayName));

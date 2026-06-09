@@ -4,7 +4,10 @@ param(
   $ShortcutPath,
   [Parameter(Mandatory=$true)]
   [string]
-  $TargetPath
+  $TargetPath,
+  [Parameter(Mandatory=$false)]
+  [string]
+  $ShortcutIconPath = ""
 )
 
 $ErrorActionPreference="Stop"
@@ -19,4 +22,9 @@ $shortcut = $shell.CreateShortcut($ShortcutPath)
 
 $shortcut.TargetPath = $TargetPath
 $shortcut.WorkingDirectory = Split-Path -Path $TargetPath
+
+if (-not [string]::IsNullOrWhitespace($ShortcutIconPath)) {
+  $shortcut.IconLocation = $ShortcutIconPath
+}
+
 $shortcut.Save()
