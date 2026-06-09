@@ -4476,6 +4476,7 @@ void TechnoClass::Draw_Pips(int x, int y, WindowNumberType window)
 
             if (object) {
                 pip = PIP_FULL;
+                // TODO: rules around this so you can set per infantry type
                 if (object->What_Am_I() == RTTI_INFANTRY) {
                     if (*((InfantryClass*)object) == INFANTRY_RAMBO) {
                         pip = PIP_COMMANDO;

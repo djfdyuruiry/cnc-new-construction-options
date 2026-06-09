@@ -1302,7 +1302,8 @@ public:
 
     // TODO: Implement NCO logic and new fields
     //bool IsImmuneToTiberium;
-    //bool HasC4Charges;
+
+    bool HasC4Charges;
 
     /*
     **	This is the explicit unit class constructor.
@@ -1339,7 +1340,8 @@ public:
                       std::vector<HousesType> ownableBy,
                       WeaponType primary,
                       WeaponType secondary,
-                      MPHType maxspeed);
+                      MPHType maxspeed,
+                      bool has_c4_charges = false);
     virtual RTTIType What_Am_I(void) const
     {
         return RTTI_INFANTRYTYPE;

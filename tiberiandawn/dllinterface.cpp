@@ -3221,7 +3221,7 @@ void DLLExportClass::DLL_Draw_Intercept(int shape_number,
         if (is_infantry) {
             InfantryClass* infantry = static_cast<InfantryClass*>(object);
             new_object.ControlGroup = infantry->Group;
-            new_object.CanPlaceBombs = infantry->Class->Type == INFANTRY_RAMBO;
+            new_object.CanPlaceBombs = infantry->Class->HasC4Charges;
         }
 
         new_object.CanHarvest = false;

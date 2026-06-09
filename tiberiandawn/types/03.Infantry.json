@@ -39,6 +39,11 @@
       "comment": "For 'fraidycat' infantry types that will run away from any damage causing events, this controls whether they avoid wandering into Tiberium."
     },
     {
+      "name": "HasC4Charges",
+      "type": "Bool",
+      "comment": "Does this infantry type carry C4 charges, and therefore can blow up buildings."
+    },
+    {
       "name": "Type",
       "type": "InfantryType",
       "requires_converter": true,

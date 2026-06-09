@@ -2882,9 +2882,10 @@ ActionType InfantryClass::What_Action(ObjectClass* object) const
     ActionType action = FootClass::What_Action(object);
 
     /*
-    **	First see if it's a commando, and if he's attacking a building, have him return ACTION_SABOTAGE instead
+    **	First see if infantry has C4 charges, and if he's attacking a building, have him return ACTION_SABOTAGE instead
     */
-    if (*this == INFANTRY_RAMBO && action == ACTION_ATTACK && object->What_Am_I() == RTTI_BUILDING) {
+    if (this->Class->HasC4Charges && action == ACTION_ATTACK && object->What_Am_I() == RTTI_BUILDING) {
+        // TODO: investigate doing this to units (like RA2 Tanya)
         return (ACTION_SABOTAGE);
     }
 
