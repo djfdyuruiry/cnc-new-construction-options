@@ -31,7 +31,19 @@ internal class SilentInstaller
     _container = containerBuilder.Build();
   }
 
-  private async Task RunInstallViewModel(ILifetimeScope scope)
+  private async Task SaveConfiguration(LauncherConfigService configService)
+  {
+    try
+    {
+      configService.SaveUserConfig();
+    }
+    catch (Exception ex)
+    {
+      await ErrorAndExit($"Failed to save launcher config file: {ex.Message}");
+    }
+  }
+
+  private async Task RunInstallViewModel(ILifetimeScope scope, LauncherConfigService configService)
   {
     try
     {
@@ -48,6 +60,9 @@ internal class SilentInstaller
       { 
         await ErrorAndExit($"Installation failed due to an error: {installVisitor.Error ?? "unknown error"}");
       }
+
+      configService.Config.Nco.InstallPath = configService.Config.Nco.PendingInstallPath;
+      configService.Config.Nco.Installed = true;
     }
     catch (Exception e)
     {
@@ -55,7 +70,7 @@ internal class SilentInstaller
     }
   }
 
-  private void ConfigureInstallation(ILifetimeScope scope)
+  private void ConfigureInstallation(ILifetimeScope scope, LauncherConfigService configService)
   {
     if (_config.InstallAll)
     {
@@ -63,9 +78,8 @@ internal class SilentInstaller
     }
   
     var paths = scope.Resolve<PathsConfig>();
-    var launcherConfig = scope.Resolve<LauncherConfigService>().Config;
 
-    var ncoConfig = launcherConfig.Nco;
+    var ncoConfig = configService.Config.Nco;
 
     // install in cli path OR existing install path OR default path
     ncoConfig.PendingInstallPath = !string.IsNullOrWhiteSpace(_config.InstallPath)
@@ -74,9 +88,9 @@ internal class SilentInstaller
         ? ncoConfig.InstallPath
         : paths.NcoAppDataPath;
 
-    launcherConfig.TiberianDawn.Enabled = _config.InstallTd;
-    launcherConfig.RedAlert.Enabled = _config.InstallRa;
-    launcherConfig.RedAlert.ZipUrlSpecs.ForEach(s => s.Enabled = _config.InstallRaTheLostFiles);
+    configService.Config.TiberianDawn.Enabled = _config.InstallTd;
+    configService.Config.RedAlert.Enabled = _config.InstallRa;
+    configService.Config.RedAlert.ZipUrlSpecs.ForEach(s => s.Enabled = _config.InstallRaTheLostFiles);
   }
 
   private async Task ErrorAndExit(string error)
@@ -118,7 +132,13 @@ internal class SilentInstaller
 
     await using var scope = _container.BeginLifetimeScope();
 
-    ConfigureInstallation(scope);
-    await RunInstallViewModel(scope);
+    var configService = scope.Resolve<LauncherConfigService>();
+
+    ConfigureInstallation(scope, configService);
+    await RunInstallViewModel(scope, configService);
+
+    await Console.Out.WriteLineAsync("Installation complete");
+
+    await SaveConfiguration(configService);
   }
 }
