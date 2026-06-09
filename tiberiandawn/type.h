@@ -1300,9 +1300,8 @@ public:
     char FireLaunch;
     char ProneLaunch;
 
-    // TODO: Implement NCO logic and new fields
-    //bool IsImmuneToTiberium;
-
+    // NCO original rules
+    bool IsImmuneToTiberium;
     bool HasC4Charges;
 
     /*
@@ -1341,7 +1340,8 @@ public:
                       WeaponType primary,
                       WeaponType secondary,
                       MPHType maxspeed,
-                      bool has_c4_charges = false);
+                      bool has_c4_charges = false,
+                      bool is_immune_to_tiberium = false);
     virtual RTTIType What_Am_I(void) const
     {
         return RTTI_INFANTRYTYPE;

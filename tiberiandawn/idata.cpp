@@ -406,7 +406,9 @@ static InfantryTypeClass const E5(INFANTRY_E5,           // Infantry type number
                                 { HOUSE_BAD, HOUSE_MULTI1, HOUSE_MULTI2, HOUSE_MULTI3, HOUSE_MULTI4, HOUSE_MULTI5, HOUSE_MULTI6, HOUSE_JP }, // Who can own this infantry unit.
                                   WEAPON_CHEMSPRAY,
                                   WEAPON_NONE,
-                                  MPH_SLOW);
+                                  MPH_SLOW,
+                                  false,
+                                  true);
 
 // Engineer
 
@@ -1495,7 +1497,8 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
                                      WeaponType primary,
                                      WeaponType secondary,
                                      MPHType maxspeed,
-                                     bool has_c4_charges)
+                                     bool has_c4_charges,
+                                     bool is_immune_to_tiberium)
     : TechnoTypeClass(name,
                       ininame,
                       std::move(cameo_name),
@@ -1552,6 +1555,7 @@ InfantryTypeClass::InfantryTypeClass(InfantryType type,
         DoControls[i].Jump = *do_table++;
     }
 
+    IsImmuneToTiberium = is_immune_to_tiberium;
     HasC4Charges = has_c4_charges;
 #ifdef cuts // ST - 10/3/95 10:09AM
     DoControls[DO_STAND_READY].Frame = dostandready;

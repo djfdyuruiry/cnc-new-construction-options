@@ -44,6 +44,11 @@
       "comment": "Does this infantry type carry C4 charges, and therefore can blow up buildings."
     },
     {
+      "name": "IsImmuneToTiberium",
+      "type": "Bool",
+      "comment": "Is this infantry type immune to tiberium damage."
+    },
+    {
       "name": "Type",
       "type": "InfantryType",
       "requires_converter": true,
