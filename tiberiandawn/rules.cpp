@@ -319,7 +319,7 @@ void RulesClass::Init_For_Scenario(
     for (const auto& [type_name, sections] : TypeRules) {
         CNC_LOG_DEBUG("Type section: {}", type_name);
 
-        for (const auto& section : sections->Section_Names()) {
+        for (const auto& section : sections.Section_Names()) {
             CNC_LOG_DEBUG("  Instance section: {}", section);
         }
     }
@@ -668,15 +668,11 @@ static void Init_Type(RuleSections& sections, U first, U count, const CncLogger&
  * type.
  */
 template <EnumSignedChar T>
-RuleSections& Sections_For(std::map<std::string_view, std::unique_ptr<RuleSections>>& type_rules)
+RuleSections& Sections_For(std::map<std::string_view, RuleSections>& type_rules)
 {
     static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
 
-    if (!type_rules.contains(type_name)) {
-        type_rules[type_name] = std::make_unique<RuleSections>();
-    }
-
-    return *type_rules[type_name];
+    return type_rules[type_name];
 }
 
 void RulesClass::Init_Types()
@@ -734,7 +730,7 @@ void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
 {
     if (
         Sections.Has_Section(name) ||
-        std::ranges::any_of(TypeRules, [&](const auto& s) { return s.second->Has_Section(name); })
+        std::ranges::any_of(TypeRules, [&](const auto& s) { return s.second.Has_Section(name); })
     ) {
         CNC_LOGGER_FATAL(
             "An attempt was made to init a rules section twice, this is likely due to using a INI Name "

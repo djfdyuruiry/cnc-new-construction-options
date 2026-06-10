@@ -79,6 +79,11 @@ public:
         return (RechargeTime);
     };
 
+    void Set_Recharge_Time(const int recharge)
+    {
+        RechargeTime = recharge;
+    }
+
     JSON_FUNCTIONS(SuperClass)
 private:
     bool Recharge(bool player = false);

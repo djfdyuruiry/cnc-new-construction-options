@@ -1103,11 +1103,11 @@ void AnimClass::Middle(void)
                 building = (BuildingClass*)backup;
         }
 
-        int radius = 3;
-        int rawdamage = 200;
+        int radius = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, NUCLEAR_STRIKE_DAMAGE_RADIUS_RULE);
+        int rawdamage = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, NUCLEAR_STRIKE_DAMAGE_RULE);
         if (GameToPlay == GAME_NORMAL) {
-            radius = 4;
-            rawdamage = 1000;
+            radius = Rule.Get_Rule_Value<int>(GAME_SUPERWEAPONS_SECTION, NUCLEAR_STRIKE_DAMAGE_RADIUS_RULE);
+            rawdamage = Rule.Get_Rule_Value<int>(GAME_SUPERWEAPONS_SECTION, NUCLEAR_STRIKE_DAMAGE_RULE);
             Fade_Palette_To(WhitePalette, 30, NULL);
         }
         for (int x = -radius; x <= radius; x++) {
@@ -1221,7 +1221,10 @@ void AnimClass::Middle(void)
             if (!building)
                 building = (BuildingClass*)backup;
         }
-        Explosion_Damage(Center_Coord(), 600, building, WARHEAD_PB);
+
+        const auto ionCannonDamage = Rule.Get_Rule_Value<int>(GAME_SUPERWEAPONS_SECTION, ION_CANNON_DAMAGE_RULE);
+
+        Explosion_Damage(Center_Coord(), ionCannonDamage, building, WARHEAD_PB);
     } break;
 
     case ANIM_NAPALM1:

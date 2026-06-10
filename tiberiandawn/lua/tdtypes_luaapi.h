@@ -66,13 +66,13 @@ private:
     template<EnumSignedChar T, RulesTypeClass<T> U>
     void Register_Type_Functions(luabridge::Namespace& n) const
     {
-        auto type_name = TdTypeConverter::Get_Type_Name<T>();
-        auto get_instances_function = std::format("get{}InstanceNames", type_name);
-        auto get_properties_function = std::format("get{}PropertyNames", type_name);
-        auto get_property_type_function = std::format("get{}PropertyType", type_name);
-        auto get_display_name_function = std::format("get{}DisplayName", type_name);
-        auto get_property_value_function = std::format("get{}PropertyValue", type_name);
-        auto set_property_value_function = std::format("set{}PropertyValue", type_name);
+        static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
+        static const auto get_instances_function = std::format("get{}InstanceNames", type_name);
+        static const auto get_properties_function = std::format("get{}PropertyNames", type_name);
+        static const auto get_property_type_function = std::format("get{}PropertyType", type_name);
+        static const auto get_display_name_function = std::format("get{}DisplayName", type_name);
+        static const auto get_property_value_function = std::format("get{}PropertyValue", type_name);
+        static const auto set_property_value_function = std::format("set{}PropertyValue", type_name);
 
         n.addCFunction(get_instances_function.c_str(), [](auto L) {
             const auto engine = SharedLuaEngine(L);
@@ -251,7 +251,7 @@ private:
 
                 // get new string value for the rule and rules section for specific type instance
                 auto property_value = arguments.Read_Next<std::string>().Unpack();
-                auto section = sections[section_name];
+                auto& section = sections[section_name];
 
                 // get current rule value and type
                 auto current_value = section.template Get<std::string>(property_name);

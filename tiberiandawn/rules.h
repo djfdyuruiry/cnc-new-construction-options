@@ -325,7 +325,7 @@ public:
             );
         }
 
-        return *TypeRules.at(type_name);;
+        return TypeRules.at(type_name);;
     }
 
     void Assert_Section_Not_Present(std::string_view name) const;
@@ -340,7 +340,7 @@ private:
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    std::map<std::string_view, std::unique_ptr<RuleSections>> TypeRules;
+    std::map<std::string_view, RuleSections> TypeRules;
 
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);
