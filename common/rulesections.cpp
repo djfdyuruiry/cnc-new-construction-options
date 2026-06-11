@@ -355,10 +355,6 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
 
     Rules[name.data()] = value;
 
-    if (SectionName == "E2") {
-        CNC_LOGGER_WARN("Running OnRulesChanged() handler for E2: {}", Variant_To_String(value));
-    }
-
     OnRulesChanged(*this, name, value);
 
     return *this;

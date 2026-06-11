@@ -347,13 +347,19 @@ bool Load_Game(int id)
 }
 
 /**
- * Ensure Rules from the scenario INI file recorded in the save game
- * are loaded and init Lua runtime so all scripts are re-ran in prep
- * for continuing the scenario. If the save is from a Skirmish game
+ * Ensure Rules from the scenario INI file recorded in the save game are loaded (if INI file is available) and init
+ * Lua runtime so all scripts are re-ran in prep for continuing the scenario. If the save is from a Skirmish game
  * we also apply the game options using Rules API.
  *
+ * Rules values stored in save game directly are applied last, ensuring if INI file is not available we still get the
+ * correct scenario behaviour; this also restores any rules changed dynamically at runtime by Lua etc.
+ *
+ * Scenarios with Lua scripts that have event handlers require the INI file and associated lua scripts to be
+ * available or else the scenario may be broken; player may be soft locked due to a event handler not firing.
+ *
  * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
- * TODO: Store RuleSections as map in save game, refactor RulesClass to accept this instead of INI file for scenario rules
+ * TODO: Flag if Lua scripts have run when saving so ScenarioLua can error if those scripts are not found on load
+ *       (missing event handlers could break a scenario)
  */
 static void Load_INI_Rules_And_Lua(const SaveGameData& data)
 {

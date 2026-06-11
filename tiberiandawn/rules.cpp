@@ -746,3 +746,102 @@ void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
         );
     }
 }
+
+TO_JSON(RulesClass)
+{
+    j["AttackInterval"] = p.AttackInterval;
+    j["AttackDelay"] = p.AttackDelay;
+    j["PowerEmergencyFraction"] = p.PowerEmergencyFraction;
+    j["HelipadRatio"] = p.HelipadRatio;
+    j["AdvancedDefenceRatio"] = p.AdvancedDefenceRatio;
+    j["AdvancedDefenceLimit"] = p.AdvancedDefenceLimit;
+    j["AARatio"] = p.AARatio;
+    j["AALimit"] = p.AALimit;
+    j["DefenseRatio"] = p.DefenseRatio;
+    j["DefenseLimit"] = p.DefenseLimit;
+    j["UnitFactoryRatio"] = p.UnitFactoryRatio;
+    j["UnitFactoryLimit"] = p.UnitFactoryLimit;
+    j["InfantryFactoryRatio"] = p.InfantryFactoryRatio;
+    j["InfantryFactoryLimit"] = p.InfantryFactoryLimit;
+    j["RefineryLimit"] = p.RefineryLimit;
+    j["RefineryRatio"] = p.RefineryRatio;
+    j["BaseSizeAdd"] = p.BaseSizeAdd;
+    j["PowerSurplus"] = p.PowerSurplus;
+    j["MaxIQ"] = p.MaxIQ;
+    j["IQSuperWeapons"] = p.IQSuperWeapons;
+    j["IQProduction"] = p.IQProduction;
+    j["IQGuardArea"] = p.IQGuardArea;
+    j["IQRepairSell"] = p.IQRepairSell;
+    j["IQCrush"] = p.IQCrush;
+    j["IQScatter"] = p.IQScatter;
+    j["IQContentScan"] = p.IQContentScan;
+    j["IQAircraft"] = p.IQAircraft;
+    j["IQHarvester"] = p.IQHarvester;
+    j["IQSellBack"] = p.IQSellBack;
+    j["InfantryReserve"] = p.InfantryReserve;
+    j["InfantryBaseMult"] = p.InfantryBaseMult;
+    j["IsComputerParanoid"] = p.IsComputerParanoid;
+    j["IsCompEasyBonus"] = p.IsCompEasyBonus;
+    j["IsFineDifficulty"] = p.IsFineDifficulty;
+    j["AllowSuperWeapons"] = p.AllowSuperWeapons;
+
+    j["Sections"] = p.Sections;
+    j["TypeRules"] = p.TypeRules;
+}
+
+FROM_JSON(RulesClass)
+{
+    if (!j.is_object()) {
+        throw CncJsonException("Invalid {} JSON - expected object, actual type: {}", NAMEOF(RulesClass), j.type_name());
+    }
+
+    p.AttackInterval = j["AttackInterval"];
+    p.AttackDelay = j["AttackDelay"];
+    p.PowerEmergencyFraction = j["PowerEmergencyFraction"];
+    p.HelipadRatio = j["HelipadRatio"];
+    p.AdvancedDefenceRatio = j["AdvancedDefenceRatio"];
+    p.AdvancedDefenceLimit = j["AdvancedDefenceLimit"];
+    p.AARatio = j["AARatio"];
+    p.AALimit = j["AALimit"];
+    p.DefenseRatio = j["DefenseRatio"];
+    p.DefenseLimit = j["DefenseLimit"];
+    p.UnitFactoryRatio = j["UnitFactoryRatio"];
+    p.UnitFactoryLimit = j["UnitFactoryLimit"];
+    p.InfantryFactoryRatio = j["InfantryFactoryRatio"];
+    p.InfantryFactoryLimit = j["InfantryFactoryLimit"];
+    p.RefineryLimit = j["RefineryLimit"];
+    p.RefineryRatio = j["RefineryRatio"];
+    p.BaseSizeAdd = j["BaseSizeAdd"];
+    p.PowerSurplus = j["PowerSurplus"];
+    p.MaxIQ = j["MaxIQ"];
+    p.IQSuperWeapons = j["IQSuperWeapons"];
+    p.IQProduction = j["IQProduction"];
+    p.IQGuardArea = j["IQGuardArea"];
+    p.IQRepairSell = j["IQRepairSell"];
+    p.IQCrush = j["IQCrush"];
+    p.IQScatter = j["IQScatter"];
+    p.IQContentScan = j["IQContentScan"];
+    p.IQAircraft = j["IQAircraft"];
+    p.IQHarvester = j["IQHarvester"];
+    p.IQSellBack = j["IQSellBack"];
+    p.InfantryReserve = j["InfantryReserve"];
+    p.InfantryBaseMult = j["InfantryBaseMult"];
+    p.IsComputerParanoid = j["IsComputerParanoid"];
+    p.IsCompEasyBonus = j["IsCompEasyBonus"];
+    p.IsFineDifficulty = j["IsFineDifficulty"];
+    p.AllowSuperWeapons = j["AllowSuperWeapons"];
+
+    /**
+     * Apply JSON to RuleSections references to preserve on rules changed handlers and
+     * RuleSection::ConverterSectionTypeName properties (these are not serialized to JSON).
+     *
+     * Additionally, rules not found in JSON are preserved, which effectively merges the current rules with those in
+     * JSON (with the JSON rule values having precendence over existing rule values).
+     */
+
+    from_json(j["Sections"], p.Sections);
+
+    for (const auto& [ type, sections_json ] : j["TypeRules"].items()) {
+        from_json(sections_json, p.TypeRules[type]);
+    }
+}

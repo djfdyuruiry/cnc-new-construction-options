@@ -367,47 +367,7 @@ public:
         return Sections[section].Get<T>(rule);
     }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        RulesClass,
-        AttackInterval,
-        AttackDelay,
-        PowerEmergencyFraction,
-        HelipadRatio,
-        AdvancedDefenceRatio,
-        AdvancedDefenceLimit,
-        AARatio,
-        AALimit,
-        DefenseRatio,
-        DefenseLimit,
-        UnitFactoryRatio,
-        UnitFactoryLimit,
-        InfantryFactoryRatio,
-        InfantryFactoryLimit,
-        RefineryLimit,
-        RefineryRatio,
-        BaseSizeAdd,
-        PowerSurplus,
-        MaxIQ,
-        IQSuperWeapons,
-        IQProduction,
-        IQGuardArea,
-        IQRepairSell,
-        IQCrush,
-        IQScatter,
-        IQContentScan,
-        IQAircraft,
-        IQHarvester,
-        IQSellBack,
-        InfantryReserve,
-        InfantryBaseMult,
-        IsComputerParanoid,
-        IsCompEasyBonus,
-        IsFineDifficulty,
-        AllowSuperWeapons,
-        Diff,
-        Sections,
-        TypeRules
-    )
+    JSON_FUNCTIONS(RulesClass)
 
 private:
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
