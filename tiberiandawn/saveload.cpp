@@ -352,20 +352,37 @@ bool Load_Game(int id)
  * we also apply the game options using Rules API.
  *
  * Rules values stored in save game directly are applied last, ensuring if INI file is not available we still get the
- * correct scenario behaviour; this also restores any rules changed dynamically at runtime by Lua etc.
+ * correct scenario behavior; this also restores any rules changed dynamically at runtime by Lua etc.
  *
- * Scenarios with Lua scripts that have event handlers require the INI file and associated lua scripts to be
- * available or else the scenario may be broken; player may be soft locked due to a event handler not firing.
- *
- * TODO: Flag if Lua scripts have run when saving so ScenarioLua can error if those scripts are not found on load
- *       (missing event handlers could break a scenario)
+ * Save games with Lua scripts are validated to ensure all required scripts are present - if a script is missing, a
+ * required event handler might not be loaded. This could lead to a soft lock state where expected triggers are never
+ * able to fire.
  */
-static void Load_INI_Rules_And_Lua(const SaveGameData& data)
+static bool Load_INI_Rules_And_Lua(const SaveGameData& data)
 {
     Rule.Init_For_Scenario(Scen, GameToPlay, data.SkirmishSpecial, data.SkirmishSuperweaponsEnabled);
     ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, true);
 
+    const auto& loaded_scripts = ScenarioLua::Get_Scenario_Scripts();
+    std::vector<std::string> missing_scripts;
+
+    for (const auto& script : data.ScenarioScripts) {
+        if (!std::ranges::contains(loaded_scripts, script)) {
+            missing_scripts.push_back(script);
+        }
+    }
+
+    if (!missing_scripts.empty()) {
+        // missing Lua script(s) might contain event handlers, so we need to abort the load process
+        CNC_LOG_ERROR(
+            "Lua script(s) required to load save game were not found: {}",
+            CncStringUtils::To_Csv(missing_scripts)
+        );
+        return false;
+    }
+
     data.Apply_Rules(Rule);
+    return true;
 }
 
 /*
@@ -462,7 +479,10 @@ bool Load_Game(const char* file_name)
 
     Fixup_Scenario();
 
-    Load_INI_Rules_And_Lua(save_header->Get_SaveGameData());
+    if (!Load_INI_Rules_And_Lua(save_header->Get_SaveGameData())) {
+        Set_Current_Resolution_Mode(resolution_mode);
+        return false;
+    }
 
     ScenarioInit = 0;
 

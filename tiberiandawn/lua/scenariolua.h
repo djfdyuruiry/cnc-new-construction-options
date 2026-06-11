@@ -66,6 +66,8 @@ public:
         bool was_loaded_from_save
     );
 
+    static const std::vector<std::string>& Get_Scenario_Scripts();
+
     static LuaResultWithValue<std::string> Eval_Lua_Console_Input(std::string input_line);
 
     static const std::vector<std::string>& Get_Lua_Console_Input_History();
@@ -98,6 +100,7 @@ private:
     static constexpr std::string_view NotFoundStr = "__NOT_FOUND__";
     static inline const auto& Logger = CncLogger::For(ScenarioLua);
     static inline std::optional<UniqueLuaEngine> Engine;
+    static inline std::vector<std::string> ScenarioScripts;
     static inline std::vector<std::string> LuaConsoleInputHistory;
 
     /**

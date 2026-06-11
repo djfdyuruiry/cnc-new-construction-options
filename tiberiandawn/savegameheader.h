@@ -13,13 +13,16 @@ class SaveGameData final
 public:
     SpecialClass SkirmishSpecial;
     bool SkirmishSuperweaponsEnabled;
+    std::vector<std::string> ScenarioScripts;
     nlohmann::json ScenarioRules;
 
     SaveGameData(SpecialClass skirmish_special,
                  bool skirmish_superweapons_enabled,
+                 std::vector<std::string> scenario_scripts,
                  nlohmann::json scenario_rules)
         : SkirmishSpecial(std::move(skirmish_special))
         , SkirmishSuperweaponsEnabled(skirmish_superweapons_enabled)
+        , ScenarioScripts(std::move(scenario_scripts))
         , ScenarioRules(std::move(scenario_rules))
     {
     }

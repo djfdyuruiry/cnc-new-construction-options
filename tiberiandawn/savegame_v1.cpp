@@ -3,6 +3,7 @@
 
 #include "tiberiandawnsettings.h"
 #include "typeconverter.h"
+#include "lua/scenariolua.h"
 
 #pragma region SaveGameScenarioState_v1
 void SaveGameScenarioState_v1::Read_Globals()
@@ -53,6 +54,8 @@ void SaveGameScenarioState_v1::Read_Globals()
     SelectedObjects = CurrentObject;
     Waypoints = Scen.Waypoint;
     Views = Scen.Views;
+
+    ScenarioScripts = ScenarioLua::Get_Scenario_Scripts();
 }
 
 bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
@@ -653,6 +656,7 @@ SaveGameData SaveGame_v1::Export_SaveGameData() const
         SaveGameData(
             ScenarioState.Parse_MultiPlayer_Special(),
             ScenarioState.MultiSuperweaponsEnabled,
+            ScenarioState.ScenarioScripts,
             Rules
         )
     );

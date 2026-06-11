@@ -71,6 +71,8 @@ public:
     nlohmann::json Waypoints;
     nlohmann::json Views;
 
+    std::vector<std::string> ScenarioScripts;
+
     void Read_Globals();
     bool Validate(GameType scenario_game_type) const;
     ScenarioDirType Parse_Scenario_Direction() const;
@@ -117,7 +119,8 @@ public:
         MultiSuperweaponsEnabled,
         SelectedObjects,
         Waypoints,
-        Views
+        Views,
+        ScenarioScripts
     )
 
 private:

@@ -129,6 +129,11 @@ void ScenarioLua::On_Scenario_Load(
     On_Scenario_Load(game_type, scenario, player, ini, was_loaded_from_save);
 }
 
+const std::vector<std::string>& ScenarioLua::Get_Scenario_Scripts()
+{
+    return ScenarioScripts;
+}
+
 LuaResultWithValue<std::string> ScenarioLua::Eval_Lua_Console_Input(std::string input_line)
 {
     LuaConsoleInputHistory.push_back(input_line);
@@ -270,15 +275,23 @@ void ScenarioLua::Exec_Scenario_Lua_Scripts(
         }
     }
 
+    ScenarioScripts.clear();
+
     for (const auto& script_path : lua_scripts_to_load) {
-      Get_Engine()
-           .Exec_File_If_Exists(script_path)
-           .On_Error([&](auto& r) {
+        bool script_exists;
+
+        Get_Engine()
+            .Exec_File_If_Exists(script_path, script_exists)
+            .On_Error([&](auto& r) {
                 CNC_LOGGER_ERROR(
                      "Failed to load scenario script '{}' due to an error: {}",
                      script_path,
                      r.Error_Message()
                 );
-           });
+            });
+
+        if (script_exists) {
+            ScenarioScripts.emplace_back(script_path);
+        }
     }
 }
