@@ -3343,7 +3343,9 @@ static BuildingTypeClass const Sandbag(STRUCT_SANDBAG_WALL,
                                        BSIZE_11,            // SIZE:			Building size.
                                        NULL,                // Preferred exit cell list.
                                        (short const*)List1, // OCCUPYLIST:	List of active foundation squares.
-                                       (short const*)NULL   // OVERLAPLIST:List of overlap cell offset.
+                                       (short const*)NULL,   // OVERLAPLIST:List of overlap cell offset.
+                                       false,
+                                       OVERLAY_SANDBAG_WALL
 );
 // Cyclone fence
 static BuildingTypeClass const Cyclone(STRUCT_CYCLONE_WALL,
@@ -3394,7 +3396,9 @@ static BuildingTypeClass const Cyclone(STRUCT_CYCLONE_WALL,
                                        BSIZE_11,            // SIZE:			Building size.
                                        NULL,                // Preferred exit cell list.
                                        (short const*)List1, // OCCUPYLIST:	List of active foundation squares.
-                                       (short const*)NULL   // OVERLAPLIST:List of overlap cell offset.
+                                       (short const*)NULL,   // OVERLAPLIST:List of overlap cell offset.
+                                       false,
+                                       OVERLAY_CYCLONE_WALL
 );
 // Brick wall
 static BuildingTypeClass const Brick(STRUCT_BRICK_WALL,
@@ -3445,7 +3449,9 @@ static BuildingTypeClass const Brick(STRUCT_BRICK_WALL,
                                      BSIZE_11,            // SIZE:			Building size.
                                      NULL,                // Preferred exit cell list.
                                      (short const*)List1, // OCCUPYLIST:	List of active foundation squares.
-                                     (short const*)NULL   // OVERLAPLIST:List of overlap cell offset.
+                                     (short const*)NULL,   // OVERLAPLIST:List of overlap cell offset.
+                                     false,
+                                     OVERLAY_BRICK_WALL
 );
 // Barbwire wall
 static BuildingTypeClass const Barbwire(STRUCT_BARBWIRE_WALL,
@@ -3496,7 +3502,9 @@ static BuildingTypeClass const Barbwire(STRUCT_BARBWIRE_WALL,
                                         BSIZE_11,            // SIZE:			Building size.
                                         NULL,                // Preferred exit cell list.
                                         (short const*)List1, // OCCUPYLIST:	List of active foundation squares.
-                                        (short const*)NULL   // OVERLAPLIST:List of overlap cell offset.
+                                        (short const*)NULL,   // OVERLAPLIST:List of overlap cell offset.
+                                        false,
+                                        OVERLAY_BARBWIRE_WALL
 );
 // Wood wall
 static BuildingTypeClass const Wood(STRUCT_WOOD_WALL,
@@ -3547,7 +3555,9 @@ static BuildingTypeClass const Wood(STRUCT_WOOD_WALL,
                                     BSIZE_11,            // SIZE:			Building size.
                                     NULL,                // Preferred exit cell list.
                                     (short const*)List1, // OCCUPYLIST:	List of active foundation squares.
-                                    (short const*)NULL   // OVERLAPLIST:List of overlap cell offset.
+                                    (short const*)NULL,   // OVERLAPLIST:List of overlap cell offset.
+                                    false,
+                                    OVERLAY_WOOD_WALL
 );
 
 BuildingTypeClass const* const BuildingTypeClass::Pointers[STRUCT_COUNT] = {
@@ -3687,7 +3697,8 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
                                      short const* exitlist,
                                      short const* sizelist,
                                      short const* overlap,
-                                     bool is_unsellable)
+                                     bool is_unsellable,
+                                     OverlayType overlay_type)
     : TechnoTypeClass(name,
                       ininame,
                       std::move(cameo_name),
@@ -3764,6 +3775,8 @@ BuildingTypeClass::BuildingTypeClass(StructType type,
     Anims[BSTATE_AUX2].Start = 0;
     Anims[BSTATE_AUX2].Count = 1;
     Anims[BSTATE_AUX2].Rate = 0;
+
+    OverlayToPlace = overlay_type;
 }
 
 /***********************************************************************************************

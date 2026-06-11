@@ -23,6 +23,36 @@
       "comment": "Allow the commandos to guard an area (applies to any infantry equipped with a RIFLE weapon)"
     },
     {
+      "name": "MaxBuildDistance",
+      "type": "int",
+      "default": 1,
+      "comment": "This controls how far away from an existing structure a player can place a building. _Note: values higher than 6 may cause performance problems._"
+    },
+    {
+      "name": "ModernWallBuilding",
+      "type": "bool",
+      "default": true,
+      "comment": "Two wall pieces are connected automatically when placed in line of sight of each-other. See ModernWallMaxLength and ModernWallFullCost."
+    },
+    {
+      "name": "ModernWallMaxLength",
+      "type": "int",
+      "default": 4,
+      "comment": "How far apart are two wall pieces allowed to be to allow them to be connected? Respects MaxBuildDistance and [Game.Map]->AllowBuildingBesideWalls"
+    },
+    {
+      "name": "ModernWallFullCost",
+      "type": "bool",
+      "default": true,
+      "comment": "When connecting two wall pieces, should the player pay for each piece of connecting wall? Requires ModernWallBuilding to be on"
+    },
+    {
+      "name": "CommandoGuard",
+      "type": "bool",
+      "default": true,
+      "comment": "Allow the commandos to guard an area (applies to any infantry equipped with a RIFLE weapon)"
+    },
+    {
       "name": "NewSaveGameFormat",
       "type": "bool",
       "default": true,

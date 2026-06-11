@@ -333,6 +333,9 @@ private:
 
     void Player_Set_Rally_Point(TARGET target);
 
+    bool Create_Overlay_At(const OverlayTypeClass& overlay, const CELL cell) const;
+    virtual bool Unlimbo_Wall(COORDINATE);
+
     /*
     ** Some additional padding in case we need to add data to the class and maintain backwards compatibility for
     *save/load

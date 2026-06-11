@@ -4434,9 +4434,9 @@ static const int _map_width_shift_bits = 7;
 static const int _map_width_shift_bits = 6;
 #endif
 
-static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool preventBuildingInShroud, bool allowBuildingBesideWalls, int remainingDistance)
+static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance)
 {
-	if (remainingDistance < 1)
+	if (remaining_distance < 1)
 	{
 		return;
 	}
@@ -4449,15 +4449,17 @@ static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distanc
 			continue;
 		}
 
-		if (!allowBuildingBesideWalls && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
-			return;
-		}
+	    if (allow_building_beside_walls
+	        && Map[adjcell].Overlay == OVERLAY_NONE
+	        && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
+	        return;
+	    }
 
-		if (!preventBuildingInShroud || Map.In_Radar(adjcell)) {
+		if (!prevent_building_in_shroud || Map.In_Radar(adjcell)) {
 			placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
 		}
 
-		Scan_For_Valid_Placement(adjcell, placement_distance, preventBuildingInShroud, allowBuildingBesideWalls, remainingDistance - 1);
+		Scan_For_Valid_Placement(adjcell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1);
 	}
 }
 
@@ -4486,9 +4488,9 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-	auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+	auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {
@@ -4499,9 +4501,7 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
                 || (Map[cell].Owner == PlayerPtr->Class->House)) {
 				placement_distance[cell] = 0U;
 
-				auto maxPlacement = maxPlacementDistance;
-
-				Scan_For_Valid_Placement(cell, placement_distance, preventBuildingInShroud, allowBuildingBesideWalls, maxPlacement);
+				Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, max_placement_distance);
             }
         }
     }
@@ -6026,6 +6026,86 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
             flag_entry.IsTheaterShape = false;
             flag_entry.IsFlag = true;
         }
+    }
+	*Render wall placement markers.
+	*Special thanks to pchote for this, getting the cursor rendering in classic was easy
+	*getting it to render in glyphX has been difficult
+	*/
+	if (cell_ptr->IsCursorHere && Map.PendingObject) {
+		auto isWall = (*Map.PendingObject).What_Am_I() == RTTI_BUILDINGTYPE
+			&& static_cast<const BuildingTypeClass&>(*Map.PendingObject).IsWall;
+
+		if (!isWall || Map.ZoneCell == cell_ptr->Cell_Number()) {
+			return;
+		}
+
+		auto& cursorEntry = dynamic_map->Entries[entry_index++];
+
+		strncpy(
+			cursorEntry.AssetName,
+			cell_ptr->Is_Generally_Clear()
+				? "PLACEMENT_EXTRA"
+				: "PLACEMENT_BAD",
+			CNC_OBJECT_ASSET_NAME_LENGTH
+		);
+
+		cursorEntry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
+		cursorEntry.Type = -1;
+		cursorEntry.Owner = (char)cell_ptr->Owner;
+		cursorEntry.DrawFlags = SHAPE_CENTER | SHAPE_GHOST | SHAPE_COLOR;
+		cursorEntry.PositionX = xpixel + (ICON_PIXEL_W / 2);
+		cursorEntry.PositionY = ypixel + (ICON_PIXEL_H / 2);
+		cursorEntry.Width = 24;
+		cursorEntry.Height = 24;
+		cursorEntry.CellX = Cell_X(cell);
+		cursorEntry.CellY = Cell_Y(cell);
+		cursorEntry.ShapeIndex = 0;
+		cursorEntry.IsSmudge = true;
+		cursorEntry.IsOverlay = false;
+		cursorEntry.IsResource = false;
+		cursorEntry.IsSellable = false;
+		cursorEntry.IsTheaterShape = false;
+		cursorEntry.IsFlag = false;
+	}
+
+    /*
+    ** Render wall placement markers.
+    */
+    if (cell_ptr->IsCursorHere && Map.PendingObject) {
+        auto isWall = (*Map.PendingObject).What_Am_I() == RTTI_BUILDINGTYPE
+            && static_cast<const BuildingTypeClass&>(*Map.PendingObject).IsWall;
+
+        if (!isWall || Map.ZoneCell == cell_ptr->Cell_Number()) {
+            return;
+        }
+
+        auto& cursorEntry = dynamic_map->Entries[entry_index++];
+
+        strncpy(
+            cursorEntry.AssetName,
+            cell_ptr->Is_Generally_Clear()
+                ? "PLACEMENT_EXTRA"
+                : "PLACEMENT_BAD",
+            CNC_OBJECT_ASSET_NAME_LENGTH
+        );
+
+        cursorEntry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
+        cursorEntry.Type = -1;
+        cursorEntry.Owner = (char)cell_ptr->Owner;
+        cursorEntry.DrawFlags = SHAPE_CENTER | SHAPE_GHOST | SHAPE_COLOR;
+        cursorEntry.PositionX = xpixel + (ICON_PIXEL_W / 2);
+        cursorEntry.PositionY = ypixel + (ICON_PIXEL_H / 2);
+        cursorEntry.Width = 24;
+        cursorEntry.Height = 24;
+        cursorEntry.CellX = Cell_X(cell);
+        cursorEntry.CellY = Cell_Y(cell);
+        cursorEntry.ShapeIndex = 0;
+        cursorEntry.IsSmudge = true;
+        cursorEntry.IsOverlay = false;
+        cursorEntry.IsResource = false;
+        cursorEntry.IsSellable = false;
+        cursorEntry.IsTheaterShape = false;
+        cursorEntry.IsFlag = false;
     }
 }
 

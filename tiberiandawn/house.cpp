@@ -4804,7 +4804,17 @@ void HouseClass::Sell_Wall(CELL cell)
                         Sound_Effect(VOC_CASHTURN);
                     }
 
-                    Refund_Money(btype->Cost_Of() / 2);
+                    const auto modern_walls =
+                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+                    const auto wall_length =
+                        Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
+                    const auto full_cost_walls =
+                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
+
+                    if (!IsHuman || !modern_walls || wall_length < 2 || full_cost_walls) {
+                        Refund_Money(btype->Cost_Of() / 2); // TODO: add modifier rule for wall sell value
+                    }
+
                     Map[cell].Overlay = OVERLAY_NONE;
                     Map[cell].OverlayData = 0;
                     Map[cell].Owner = HOUSE_NONE;
