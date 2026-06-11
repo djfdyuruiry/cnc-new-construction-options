@@ -15,7 +15,8 @@ public:
         std::string scenario_name,
         std::string scenario_type,
         std::string scenario_faction,
-        std::string scenario_house
+        std::string scenario_house,
+        bool was_loaded_from_save
     ) ;
 
     void Register_Dependencies(LuaEngine& engine) const override;
@@ -35,4 +36,5 @@ private:
     std::string ScenarioType;
     std::string ScenarioFaction;
     std::string ScenarioHouse;
+    bool WasLoadedFromSave;
 };

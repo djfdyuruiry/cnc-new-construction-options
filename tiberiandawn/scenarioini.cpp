@@ -660,7 +660,7 @@ bool Read_Scenario_Ini(char* root, SpecialClass special_options, bool allow_supe
      * Lua rabbit hole (if not in scenario editor mode)
      */
     if (!Debug_Map) {
-        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini);
+        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini, false);
     }
 
     /*

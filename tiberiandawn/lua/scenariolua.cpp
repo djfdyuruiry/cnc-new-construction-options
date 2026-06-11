@@ -41,7 +41,8 @@ void ScenarioLua::On_Scenario_Load(
     const GameEnum& game_type,
     const ScenarioClass& scenario,
     const HouseClass& player,
-    const std::optional<std::string>& ini_script_path
+    const std::optional<std::string>& ini_script_path,
+    const bool was_loaded_from_save
 )
 {
     Call_Back();
@@ -61,7 +62,8 @@ void ScenarioLua::On_Scenario_Load(
        scenario_name,
        scenario_type_name,
        faction,
-       house_name
+       house_name,
+       was_loaded_from_save
     );
 
     // ensure house_name is lowercase for filename use
@@ -78,7 +80,8 @@ void ScenarioLua::On_Scenario_Load(
     const GameEnum& game_type,
     const ScenarioClass& scenario,
     const HouseClass& player,
-    const CCINIClass& ini
+    const CCINIClass& ini,
+    const bool was_loaded_from_save
 )
 {
     const auto ini_script_path = ini.Get_String(
@@ -87,10 +90,15 @@ void ScenarioLua::On_Scenario_Load(
         NotFoundStr
     );
 
-    On_Scenario_Load(game_type, scenario, player, ini_script_path);
+    On_Scenario_Load(game_type, scenario, player, ini_script_path, was_loaded_from_save);
 }
 
-void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClass& scenario, const HouseClass& player)
+void ScenarioLua::On_Scenario_Load(
+    const GameEnum& game_type,
+    const ScenarioClass& scenario,
+    const HouseClass& player,
+    const bool was_loaded_from_save
+)
 {    const std::string scenario_ini_file = scenario.FileName;
 
     if (CncStringUtils::Is_Blank(scenario_ini_file)) {
@@ -105,7 +113,7 @@ void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClas
     if (!ini_file.Is_Available()) {
         CNC_LOGGER_WARN("Not checking scenario INI for lua scripts - file is missing: {}", scenario_ini_file);
 
-        On_Scenario_Load(game_type, scenario, player, std::nullopt);
+        On_Scenario_Load(game_type, scenario, player, std::nullopt, was_loaded_from_save);
         return;
     }
 
@@ -118,7 +126,7 @@ void ScenarioLua::On_Scenario_Load(const GameEnum& game_type, const ScenarioClas
 
     CNC_LOGGER_INFO("Checking scenario INI file for lua scripts: {}", scenario_ini_file);
 
-    On_Scenario_Load(game_type, scenario, player, ini);
+    On_Scenario_Load(game_type, scenario, player, ini, was_loaded_from_save);
 }
 
 LuaResultWithValue<std::string> ScenarioLua::Eval_Lua_Console_Input(std::string input_line)
@@ -212,7 +220,13 @@ void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
     });
 }
 
-void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(std::string& scenario_name, std::string& scenario_type_name, std::string& faction, std::string& house_name)
+void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(
+    std::string& scenario_name,
+    std::string& scenario_type_name,
+    std::string& faction,
+    std::string& house_name,
+    const bool was_loaded_from_save
+)
 {
     Engine = LuaEngineBuilder<UniqueLuaEngine>()
         .With_Api<SystemLuaApi>()
@@ -223,7 +237,7 @@ void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(std::string& scenario_name, std:
         .With_Api<GameLuaApi>()
         .With_Api<MessagesLuaApi>()
         .With_Api<UiLuaApi>()
-        .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name)
+        .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name, was_loaded_from_save)
         .Build();
 }
 

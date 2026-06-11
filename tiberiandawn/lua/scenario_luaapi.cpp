@@ -11,12 +11,19 @@
 #include "events/modifyhousemoney_luaevent.h"
 #include "scenario_luaapi.h"
 
-ScenarioLuaApi::ScenarioLuaApi(std::string scenario_name, std::string scenario_type, std::string scenario_faction, std::string scenario_house): TiberianDawnLuaApi("Scenario", true)
+ScenarioLuaApi::ScenarioLuaApi(
+    std::string scenario_name,
+    std::string scenario_type,
+    std::string scenario_faction,
+    std::string scenario_house,
+    const bool was_loaded_from_save
+) : TiberianDawnLuaApi("Scenario", true)
 {
     ScenarioName = std::move(scenario_name);
     ScenarioType = std::move(scenario_type);
     ScenarioFaction = std::move(scenario_faction);
     ScenarioHouse = std::move(scenario_house);
+    WasLoadedFromSave = was_loaded_from_save;
 }
 
 void ScenarioLuaApi::Register_Dependencies(LuaEngine& engine) const
@@ -30,7 +37,8 @@ void ScenarioLuaApi::Register_Consts(LuaEngine& engine) const
         n.addConstant("name", ScenarioName)
             .addConstant("type", ScenarioType)
             .addConstant("faction", ScenarioFaction)
-            .addConstant("house", ScenarioHouse);
+            .addConstant("house", ScenarioHouse)
+            .addConstant("wasLoadedFromSave", WasLoadedFromSave);
     });
 }
 

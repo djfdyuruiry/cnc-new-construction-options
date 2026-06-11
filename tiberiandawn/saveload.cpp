@@ -357,14 +357,13 @@ bool Load_Game(int id)
  * Scenarios with Lua scripts that have event handlers require the INI file and associated lua scripts to be
  * available or else the scenario may be broken; player may be soft locked due to a event handler not firing.
  *
- * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
  * TODO: Flag if Lua scripts have run when saving so ScenarioLua can error if those scripts are not found on load
  *       (missing event handlers could break a scenario)
  */
 static void Load_INI_Rules_And_Lua(const SaveGameData& data)
 {
     Rule.Init_For_Scenario(Scen, GameToPlay, data.SkirmishSpecial, data.SkirmishSuperweaponsEnabled);
-    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr);
+    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, true);
 
     data.Apply_Rules(Rule);
 }

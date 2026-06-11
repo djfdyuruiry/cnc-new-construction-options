@@ -2095,7 +2095,7 @@ bool MapClass::Is_Height_Smaller_Than_Screen() const
     // disable small map detection in remaster
     return false;
 #else
-    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height() - Map.Get_Tab_Height();
 #endif
 }
 
@@ -2107,6 +2107,21 @@ bool MapClass::Is_Smaller_Than_Screen() const
 #else
     return Is_Width_Smaller_Than_Screen() || Is_Height_Smaller_Than_Screen();
 #endif
+}
+
+bool MapClass::Redraw_If_Smaller_Then_Screen()
+{
+    if (!Is_Smaller_Than_Screen()) {
+        return false;
+    }
+
+    Map.IsSidebarActive
+        ? Map.Set_View_Dimensions(0, Map.Get_Tab_Height(), SeenBuff.Get_Width() - Map.SideBarWidth)
+        : Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
+    Flag_To_Redraw(true);
+    Render();
+
+    return true;
 }
 
 TO_JSON(MapClass)

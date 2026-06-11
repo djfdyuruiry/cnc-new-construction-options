@@ -47,20 +47,23 @@ public:
         const GameEnum& game_type,
         const ScenarioClass& scenario,
         const HouseClass& player,
-        const std::optional<std::string>& ini
+        const std::optional<std::string>& ini,
+        bool was_loaded_from_save = false
     );
 
     static void On_Scenario_Load(
         const GameEnum& game_type,
         const ScenarioClass& scenario,
         const HouseClass& player,
-        const CCINIClass& ini
+        const CCINIClass& ini,
+        bool was_loaded_from_save
     );
 
     static void On_Scenario_Load(
         const GameEnum& game_type,
         const ScenarioClass& scenario,
-        const HouseClass& player
+        const HouseClass& player,
+        bool was_loaded_from_save
     );
 
     static LuaResultWithValue<std::string> Eval_Lua_Console_Input(std::string input_line);
@@ -105,7 +108,8 @@ private:
          std::string& scenario_name,
          std::string& scenario_type_name,
          std::string& faction,
-         std::string& house_name
+         std::string& house_name,
+         bool was_loaded_from_save
     );
 
     /**

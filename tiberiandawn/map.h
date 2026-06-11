@@ -184,6 +184,14 @@ public:
      */
     bool Is_Smaller_Than_Screen() const;
 
+    /**
+     * Based on the current view dimensions, if the map is smaller than the screen resolution, force it to redraw
+     * to ensure cells and sidebar are rendered correctly for the current resolution.
+     *
+     * @return True if the map was redrawn, false otherwise.
+     */
+    bool Redraw_If_Smaller_Then_Screen();
+
 protected:
     /*
     **	This is the array of cell objects.

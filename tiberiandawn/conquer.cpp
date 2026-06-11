@@ -158,11 +158,7 @@ void Main_Game(int argc, char* argv[])
 
         fade = true;
 
-        if (Map.Is_Smaller_Than_Screen()) {
-            Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
-            Map.Flag_To_Redraw(true);
-            Map.Render();
-        }
+        Map.Redraw_If_Smaller_Then_Screen();
 
         /*
         **	Make the game screen visible, clear the keyboard buffer of spurious
@@ -1839,11 +1835,7 @@ bool Main_Loop()
         Do_Restart();
         Set_Video_Cursor_Clip(true);
 
-        if (Map.Is_Smaller_Than_Screen()) {
-            Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
-            Map.Flag_To_Redraw(true);
-            Map.Render();
-        }
+        Map.Redraw_If_Smaller_Then_Screen();
     }
 
     /*

@@ -1240,11 +1240,7 @@ void Do_Lose(void)
     GamePalette.Set(FADE_PALETTE_FAST, Call_Back);
     Show_Mouse();
 
-    if (Map.Is_Smaller_Than_Screen()) {
-        Map.Set_View_Dimensions(0, 8 *RESFACTOR);
-        Map.Flag_To_Redraw(true);
-        Map.Render();
-    }
+    Map.Redraw_If_Smaller_Then_Screen();
 }
 
 #ifdef FIXIT_VERSION_3 //	Stalemate games.

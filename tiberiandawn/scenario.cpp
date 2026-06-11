@@ -728,11 +728,7 @@ void Do_Lose(void)
     Fade_Palette_To(GamePalette, FADE_PALETTE_FAST, Call_Back);
     Show_Mouse();
 
-    if (Map.Is_Smaller_Than_Screen()) {
-        Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
-        Map.Flag_To_Redraw(true);
-        Map.Render();
-    }
+    Map.Redraw_If_Smaller_Then_Screen();
 }
 
 /***********************************************************************************************
