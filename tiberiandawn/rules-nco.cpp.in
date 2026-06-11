@@ -55,7 +55,7 @@ const RuleSections& SpecialClass::Read_Rules(const RuleSections& rules)
     return rules;
 }
 
-const RuleSections& SpecialClass::Write_Rules(const RuleSections& rules) const
+RuleSections& SpecialClass::Write_Rules(RuleSections& rules) const
 {
     // map
     rules[GAME_MAP_SECTION]

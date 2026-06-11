@@ -23,10 +23,10 @@
 #define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) j.emplace(#FIELD, CONVERTER(p.FIELD))
 
 // from_json macros
-#define FIELD_FROM_JSON_TO_VALUE(FIELD, VALUE) j.at(#FIELD).get_to(VALUE)
-#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
-#define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
-#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
+#define FIELD_FROM_JSON_TO_VALUE(FIELD, VALUE) j[#FIELD].get_to(VALUE)
+#define FIELD_FROM_JSON(FIELD) j[#FIELD].get_to(p.FIELD)
+#define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j[#FIELD].get<TYPE>()
+#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j[#FIELD].get<bool>()
 
 // to_json/from_json friend functions shorthand (reference types)
 # define JSON_FUNCTIONS(TYPE) friend void to_json(nlohmann::json& j, const TYPE& p); \
@@ -254,7 +254,7 @@ public:
         const std::string_view& field_name
     )
     {
-        const auto& field = j.at(field_name);
+        const auto& field = j[field_name];
 
         Assert_Json_Is<JsonString>(json_path, field);
 

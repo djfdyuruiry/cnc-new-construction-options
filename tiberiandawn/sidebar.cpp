@@ -2714,7 +2714,7 @@ FROM_JSON(SidebarClass::StripClass::BuildType)
     FIELD_FROM_JSON(BuildableViaCapture);
 
     // BuildableID field
-    const auto& buildable_id_json = j.at(NAMEOF(BuildableID));
+    const auto& buildable_id_json = j[NAMEOF(BuildableID)];
 
     CncJsonUtils::Assert_Json_Is<JsonString>(buildable_id_json, NAMEOF(BuildableID));
 

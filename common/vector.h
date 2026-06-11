@@ -138,8 +138,8 @@ public:
     {
         CncJsonUtils::Assert_Json_Is_Object_With_Keys(j, ". (VectorClass)", {NAMEOF(_items), NAMEOF(_vector_size)});
 
-        const auto& _vector_size = j.at(NAMEOF(_vector_size));
-        const auto& _items = j.at(NAMEOF(_items));
+        const auto& _vector_size = j[NAMEOF(_vector_size)];
+        const auto& _items = j[NAMEOF(_items)];
 
         CncJsonUtils::Assert_Json_Is<JsonUnsignedInt>(_vector_size, ". (VectorClass)");
         CncJsonUtils::Assert_Json_Is<JsonObject>(_items, NAMEOF(_items));
@@ -428,7 +428,7 @@ public:
     friend FROM_JSON(DynamicVectorArrayClass)
     {
         // Collection field
-        const auto& json_collection = j.at(NAMEOF(Collection));
+        const auto& json_collection = j[NAMEOF(Collection)];
 
         CncJsonUtils::Assert_Json_Is<JsonArray>(json_collection, NAMEOF(Collection));
 

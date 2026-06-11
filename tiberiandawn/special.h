@@ -282,7 +282,7 @@ public:
     /**
      * Set rule section values based on values in this instance.
      */
-    const RuleSections& Write_Rules(RuleSections& rules) const;
+    RuleSections& Write_Rules(RuleSections& rules) const;
 
     JSON_FUNCTIONS(SpecialClass)
 };

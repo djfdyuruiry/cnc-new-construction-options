@@ -5732,7 +5732,7 @@ FROM_JSON(BuildingClass)
 
     TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BuildingClass, Class, BuildingTypeClass, StructType);
 
-    p.Factory = TARGET_TO_PTR_WITH_TYPE(j.at(NAMEOF(Factory)).get<int>(), FactoryClass);
+    p.Factory = TARGET_TO_PTR_WITH_TYPE(j[NAMEOF(Factory)].get<int>(), FactoryClass);
 
     PARSE_TD_FIELD_FROM_JSON(BuildingClass, ActLike, HousesType);
     BITFIELD_FROM_JSON(IsReadyToCommence);

@@ -747,6 +747,10 @@ void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
     }
 }
 
+/**
+ * Note: Diff array is not serialized to JSON as these values are loaded into HouseClass instances when scenario is
+ * loaded from INI, so save games already have the appropriate values set elsewhere.
+ */
 TO_JSON(RulesClass)
 {
     j["AttackInterval"] = p.AttackInterval;

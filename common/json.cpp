@@ -11,7 +11,7 @@ void CncJsonUtils::Cstr_Field_From_Json(
 )
 {
     const auto sub_path = std::format("{}{}", json_path, field_name);
-    const auto& field_json = j.at(field_name);
+    const auto& field_json = j[field_name];
 
     Assert_Json_Is<JsonString>(field_json, sub_path);
 

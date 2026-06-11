@@ -2198,7 +2198,7 @@ FROM_JSON(MapClass)
     BITFIELD_FROM_JSON(IsForwardScan);
 
     // Array field - follows MouseClass::Save logic
-    const auto& cells = j.at(NAMEOF(Array));
+    const auto& cells = j[NAMEOF(Array)];
 
     CncJsonUtils::Assert_Json_Is<JsonObject>(cells, NAMEOF(Array));
 

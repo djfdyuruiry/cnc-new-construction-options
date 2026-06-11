@@ -32,9 +32,9 @@ FROM_JSON(RuleValueVariant)
     if (
         !j.is_object() ||
         !j.contains("type") ||
-        !j.at("type").is_string() ||
+        !j["type"].is_string() ||
         !j.contains("value") ||
-        j.at("value").is_null()
+        j["value"].is_null()
     ) {
         throw CncJsonException(
             "Invalid {} JSON value - expected object with keys 'type' (string) and 'value' (non-null value), "
@@ -44,8 +44,8 @@ FROM_JSON(RuleValueVariant)
         );
     }
 
-    const auto variant_type = j.at("type").get<std::string>();
-    auto& variant_value = j.at("value");
+    const auto variant_type = j["type"].get<std::string>();
+    auto& variant_value = j["value"];
 
     if (variant_type == "int") {
         p = variant_value.get<int>();

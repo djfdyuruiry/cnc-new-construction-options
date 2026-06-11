@@ -989,7 +989,7 @@ FROM_JSON(TeamTypeClass)
     FIELD_FROM_JSON(ClassCount);
 
     // Class array
-    const auto& class_array = j.at(NAMEOF(Class));
+    const auto& class_array = j[NAMEOF(Class)];
 
     CncJsonUtils::Assert_Json_Is_Array_Of_Exact_Size<JsonUnsignedInt>(
         class_array,
