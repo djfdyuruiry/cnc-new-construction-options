@@ -17,6 +17,12 @@
       "comment": "Barracks, Hand of Nod, Weapons Factory etc. support setting rally points for produced units TS/RA2 style. Ported from the CFEPatch - see: https://bitbucket.org/cfehunter/cncremastered/src/cfepatch/"
     },
     {
+      "name": "CommandoGuard",
+      "type": "bool",
+      "default": true,
+      "comment": "Allow the commandos to guard an area (applies to any infantry equipped with a RIFLE weapon)"
+    },
+    {
       "name": "NewSaveGameFormat",
       "type": "bool",
       "default": true,
