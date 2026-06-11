@@ -47,8 +47,8 @@ class TdTypeConverter final
 {
 public:
     static constexpr std::string_view EnumPostfix = "Type";
-    static const std::map<std::string, std::string_view> TypeNamePatchTable;
-    static const std::map<std::string_view, EnumTypeInfoVariant> EnumTypes;
+    static const std::unordered_map<std::string, std::string_view> TypeNamePatchTable;
+    static const std::unordered_map<std::string_view, EnumTypeInfoVariant> EnumTypes;
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
@@ -557,8 +557,8 @@ public:
 
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
-    static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
-    static inline std::map<std::string_view, std::map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
+    static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
+    static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
 
     TdTypeConverter() = delete;
 };

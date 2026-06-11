@@ -203,7 +203,7 @@ LuaMapParameter LuaArguments::Read_Next_Map(std::string_view parameter_name)
         Lua.Raise_Error_Format("({}) CFunction attempted to read more arguments than were provided", FunctionSignature);
     }
 
-    std::map<std::string, LuaVariant> table_map;
+    std::unordered_map<std::string, LuaVariant> table_map;
     std::optional<std::string> read_error;
 
     Lua.Push_Nil();

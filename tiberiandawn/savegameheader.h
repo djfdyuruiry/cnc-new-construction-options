@@ -8,6 +8,28 @@
 
 #include "defines.h"
 
+class SaveGameData final
+{
+public:
+    SpecialClass SkirmishSpecial;
+    bool SkirmishSuperweaponsEnabled;
+    nlohmann::json ScenarioRules;
+
+    SaveGameData(SpecialClass skirmish_special,
+                 bool skirmish_superweapons_enabled,
+                 nlohmann::json scenario_rules)
+        : SkirmishSpecial(std::move(skirmish_special))
+        , SkirmishSuperweaponsEnabled(skirmish_superweapons_enabled)
+        , ScenarioRules(std::move(scenario_rules))
+    {
+    }
+
+    void Apply_Rules(RulesClass& rules) const;
+
+private:
+    static inline const auto& Logger = CncLogger::For(SaveGameData);
+};
+
 class SaveGameHeader final
 {
 public:
@@ -28,6 +50,8 @@ public:
     void Read_Globals();
     bool Validate() const;
     bool Write_Globals() const;
+    void Set_SaveGameData(SaveGameData data);
+    const SaveGameData& Get_SaveGameData() const;
 
     GameType Parse_Game_Type() const;
     HousesType Parse_Player_House_Type() const;
@@ -47,4 +71,5 @@ public:
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameHeader);
+    std::optional<SaveGameData> SaveData;
 };

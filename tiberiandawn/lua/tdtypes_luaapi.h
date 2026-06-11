@@ -239,7 +239,7 @@ private:
             const auto property_name = arguments.Read_Next<std::string>().Unpack();
 
             // validate arg
-            const auto& sections = Rule.Get_Rule_Sections_For_Type<T>();
+            auto& sections = Rule.Get_Editable_Rule_Sections_For_Type<T>();
             const auto instance = Resolve_Instance_By_Name<T>(engine, sections, type_name, instance_name);
 
             // fetch type rules and instance name

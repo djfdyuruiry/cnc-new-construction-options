@@ -18,6 +18,7 @@ class TdRuleSectionsProvider final
 {
 public:
     static const RuleSections& Sections();
+    static RuleSections& Editable_Sections();
 
 private:
     TdRuleSectionsProvider() = delete;

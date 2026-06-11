@@ -97,16 +97,16 @@ RulesClass::RulesClass(void)
     , PowerEmergencyFraction(3, 4)
     , HelipadRatio(".12")
     , HelipadLimit(6)
-    , TeslaRatio(".8")
-    , TeslaLimit(5)
+    , AdvancedDefenceRatio(".8")
+    , AdvancedDefenceLimit(5)
     , AARatio(".14")
     , AALimit(10)
     , DefenseRatio(".5")
     , DefenseLimit(25)
-    , WarRatio(".1")
-    , WarLimit(3)
-    , BarracksRatio(".16")
-    , BarracksLimit(2)
+    , UnitFactoryRatio(".1")
+    , UnitFactoryLimit(3)
+    , InfantryFactoryRatio(".16")
+    , InfantryFactoryLimit(2)
     , RefineryLimit(7)
     , RefineryRatio(".18")
     , BaseSizeAdd(3)
@@ -330,6 +330,11 @@ const RuleSections& RulesClass::Get_Rule_Sections() const
     return Sections;
 }
 
+RuleSections& RulesClass::Get_Editable_Rule_Sections()
+{
+    return Sections;
+}
+
 /**
  * Purge all existing rule definitions, leaving the rule sections
  * and type rules blank.
@@ -431,16 +436,16 @@ void RulesClass::AI(CCINIClass& ini)
     BaseSizeAdd = ini.Get_Int(AI, "BaseSizeAdd", BaseSizeAdd);
     RefineryRatio = ini.Get_Fixed(AI, "RefineryRatio", RefineryRatio);
     RefineryLimit = ini.Get_Int(AI, "RefineryLimit", RefineryLimit);
-    BarracksRatio = ini.Get_Fixed(AI, "BarracksRatio", BarracksRatio);
-    BarracksLimit = ini.Get_Int(AI, "BarracksLimit", BarracksLimit);
-    WarRatio = ini.Get_Fixed(AI, "WarRatio", WarRatio);
-    WarLimit = ini.Get_Int(AI, "WarLimit", WarLimit);
+    InfantryFactoryRatio = ini.Get_Fixed(AI, "BarracksRatio", InfantryFactoryRatio);
+    InfantryFactoryLimit = ini.Get_Int(AI, "BarracksLimit", InfantryFactoryLimit);
+    UnitFactoryRatio = ini.Get_Fixed(AI, "WarRatio", UnitFactoryRatio);
+    UnitFactoryLimit = ini.Get_Int(AI, "WarLimit", UnitFactoryLimit);
     DefenseRatio = ini.Get_Fixed(AI, "DefenseRatio", DefenseRatio);
     DefenseLimit = ini.Get_Int(AI, "DefenseLimit", DefenseLimit);
     AARatio = ini.Get_Fixed(AI, "AARatio", AARatio);
     AALimit = ini.Get_Int(AI, "AALimit", AALimit);
-    TeslaRatio = ini.Get_Fixed(AI, "ObeliskRatio", TeslaRatio);
-    TeslaLimit = ini.Get_Int(AI, "ObeliskLimit", TeslaLimit);
+    AdvancedDefenceRatio = ini.Get_Fixed(AI, "ObeliskRatio", AdvancedDefenceRatio);
+    AdvancedDefenceLimit = ini.Get_Int(AI, "ObeliskLimit", AdvancedDefenceLimit);
     HelipadRatio = ini.Get_Fixed(AI, "HelipadRatio", HelipadRatio);
     HelipadLimit = ini.Get_Int(AI, "HelipadLimit", HelipadLimit);
     IsCompEasyBonus = ini.Get_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
@@ -474,16 +479,16 @@ void RulesClass::Export_AI(CCINIClass& ini) const
     ini.Put_Int(AI, "BaseSizeAdd", BaseSizeAdd);
     ini.Put_Fixed(AI, "RefineryRatio", RefineryRatio);
     ini.Put_Int(AI, "RefineryLimit", RefineryLimit);
-    ini.Put_Fixed(AI, "BarracksRatio", BarracksRatio);
-    ini.Put_Int(AI, "BarracksLimit", BarracksLimit);
-    ini.Put_Fixed(AI, "WarRatio", WarRatio);
-    ini.Put_Int(AI, "WarLimit", WarLimit);
+    ini.Put_Fixed(AI, "BarracksRatio", InfantryFactoryRatio);
+    ini.Put_Int(AI, "BarracksLimit", InfantryFactoryLimit);
+    ini.Put_Fixed(AI, "WarRatio", UnitFactoryRatio);
+    ini.Put_Int(AI, "WarLimit", UnitFactoryLimit);
     ini.Put_Fixed(AI, "DefenseRatio", DefenseRatio);
     ini.Put_Int(AI, "DefenseLimit", DefenseLimit);
     ini.Put_Fixed(AI, "AARatio", AARatio);
     ini.Put_Int(AI, "AALimit", AALimit);
-    ini.Put_Fixed(AI, "ObeliskRatio", TeslaRatio);
-    ini.Put_Int(AI, "ObeliskLimit", TeslaLimit);
+    ini.Put_Fixed(AI, "ObeliskRatio", AdvancedDefenceRatio);
+    ini.Put_Int(AI, "ObeliskLimit", AdvancedDefenceLimit);
     ini.Put_Fixed(AI, "HelipadRatio", HelipadRatio);
     ini.Put_Int(AI, "HelipadLimit", HelipadLimit);
     ini.Put_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
@@ -668,7 +673,7 @@ static void Init_Type(RuleSections& sections, U first, U count, const CncLogger&
  * type.
  */
 template <EnumSignedChar T>
-RuleSections& Sections_For(std::map<std::string_view, RuleSections>& type_rules)
+RuleSections& Sections_For(std::unordered_map<std::string_view, RuleSections>& type_rules)
 {
     static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
 

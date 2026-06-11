@@ -23,6 +23,11 @@ const RuleSections& TdRuleSectionsProvider::Sections()
     return Rule.Get_Rule_Sections();
 }
 
+RuleSections& TdRuleSectionsProvider::Editable_Sections()
+{
+    return Rule.Get_Editable_Rule_Sections();
+}
+
 const LuaEngine& ScenarioLua::Get_Engine()
 {
     if (!Engine.has_value()) {

@@ -72,7 +72,7 @@ void RulesLuaAdapter::Push_Rule_Value(
 void RulesLuaAdapter::Set_Rule_Value(
     const SharedLuaEngine& engine,
     LuaArguments& arguments,
-    const RuleSections& sections,
+    RuleSections& sections,
     const std::string& section,
     const std::string& key
 )

@@ -55,7 +55,7 @@ public:
     static void Set_Rule_Value(
         const SharedLuaEngine& engine,
         LuaArguments& arguments,
-        const RuleSections& sections,
+        RuleSections& sections,
         const std::string& section,
         const std::string& key
     );

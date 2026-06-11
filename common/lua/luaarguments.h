@@ -23,7 +23,7 @@ public:
         const LuaEngine& lua,
         const std::string_view function_signature,
         const std::string_view parameter,
-        std::map<std::string, LuaVariant> data
+        std::unordered_map<std::string, LuaVariant> data
     ): Lua(lua), FunctionSignature(function_signature), Parameter(parameter), Data(std::move(data)) {}
 
     template<LuaVariantCompatible T>
@@ -72,7 +72,7 @@ private:
     const LuaEngine& Lua;
     std::string_view FunctionSignature;
     std::string_view Parameter;
-    std::map<std::string, LuaVariant> Data;
+    std::unordered_map<std::string, LuaVariant> Data;
 };
 
 /**

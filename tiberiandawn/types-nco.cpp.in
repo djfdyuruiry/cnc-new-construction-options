@@ -79,6 +79,10 @@ const IniRuleContext& InfantryTypeClass::Read_INI(const IniRuleContext& ini)
 
 const RuleSection& InfantryTypeClass::Read_Rules(const RuleSection& rules)
 {
+    if (rules.SectionName == "E2") {
+      CNC_LOG_WARN("Running Read_Rules() handler for E2");
+    }
+
     return TechnoTypeClass::Read_Rules(rules)
         @READ_INFANTRY_RULES_CODE@;
 }

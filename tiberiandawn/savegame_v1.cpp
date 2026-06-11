@@ -70,7 +70,7 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
         result = false;
     }
 
-    const std::map<std::string, std::string> stringFields = {
+    const std::unordered_map<std::string, std::string> stringFields = {
         { NAMEOF(ScenarioFileName), ScenarioFileName },
         { NAMEOF(BriefText), BriefText },
         { NAMEOF(BriefMovieName), BriefMovieName },
@@ -143,7 +143,7 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
     }
 
     // skirmish state
-    std::map<std::string, nlohmann::json> player_fields = {
+    std::unordered_map<std::string, nlohmann::json> player_fields = {
         {NAMEOF(MultiPlayerIds), MultiPlayerIds},
         {NAMEOF(MultiPlayerNames), MultiPlayerNames},
         {NAMEOF(MultiPlayerHouses), MultiPlayerHouses},
@@ -358,7 +358,7 @@ bool SaveGameObjectHeaps_v1::Validate() const
 {
     auto result = true;
 
-    std::map<std::string_view, const nlohmann::json*> heaps = {
+    std::unordered_map<std::string_view, const nlohmann::json*> heaps = {
         { NAMEOF(AnimsHeap), &AnimsHeap },
         { NAMEOF(AircraftHeap), &AircraftHeap },
         { NAMEOF(BulletsHeap), &BulletsHeap },
@@ -498,6 +498,8 @@ void SaveGame_v1::Read_Globals()
 #ifdef REMASTER_BUILD
     RemasterState.Read_Dll_State();
 #endif
+
+    Rules = Rule;
 }
 
 bool SaveGame_v1::Validate(const GameType scenario_game_type) const
@@ -599,6 +601,15 @@ bool SaveGame_v1::Validate(const GameType scenario_game_type) const
     result = RemasterState.Validate() && result;
 #endif
 
+    if (!Rules.is_object()) {
+        result = false;
+        CNC_LOGGER_ERROR(
+            "Invalid {} save game value - json object expected, actual type: {}",
+            NAMEOF(Rules),
+            Rules.type_name()
+        );
+    }
+
     return result;
 }
 
@@ -630,6 +641,21 @@ bool SaveGame_v1::Write_Globals() const
 #endif
 
     return true;
+}
+
+SaveGameData SaveGame_v1::Export_SaveGameData() const
+{
+    if (!Validate(GameToPlay)) {
+        throw std::runtime_error("Refusing to export data from invalid save game");
+    }
+
+    return std::move(
+        SaveGameData(
+            ScenarioState.Parse_MultiPlayer_Special(),
+            ScenarioState.MultiSuperweaponsEnabled,
+            Rules
+        )
+    );
 }
 
 void SaveGame_v1::Dump_Json(std::string& output) const

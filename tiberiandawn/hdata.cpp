@@ -299,7 +299,7 @@ HouseTypeClass& HouseTypeClass::As_Mutable_Reference(HousesType house)
 
 void HouseTypeClass::Set_Remap_Color_Table()
 {
-    static std::map<PlayerColorType, unsigned char const*> color_to_table {
+    static std::unordered_map<PlayerColorType, unsigned char const*> color_to_table {
         { REMAP_GOLD, RemapGold },
         { REMAP_LTBLUE, RemapLtBlue },
         { REMAP_RED, RemapRed },

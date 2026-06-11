@@ -2,6 +2,72 @@
 
 #include "rulesections.h"
 
+TO_JSON(RuleValueVariant)
+{
+    j["type"]= RuleSection::Get_Variant_Type(p);
+
+    if (const auto value = std::get_if<int>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<bool>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<float>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<ushort>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<std::string>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<uint>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<char>(&p)) {
+        j["value"] = *value;
+    } else if (const auto value = std::get_if<uchar>(&p)) {
+        j["value"] = *value;
+    } else {
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
+    }
+}
+
+FROM_JSON(RuleValueVariant)
+{
+    if (
+        !j.is_object() ||
+        !j.contains("type") ||
+        !j.at("type").is_string() ||
+        !j.contains("value") ||
+        j.at("value").is_null()
+    ) {
+        throw CncJsonException(
+            "Invalid {} JSON value - expected object with keys 'type' (string) and 'value' (non-null value), "
+            "actual JSON: {}",
+            NAMEOF(RuleValueVariant),
+            j.dump()
+        );
+    }
+
+    const auto variant_type = j.at("type").get<std::string>();
+    auto& variant_value = j.at("value");
+
+    if (variant_type == "int") {
+        p = variant_value.get<int>();
+    } else if (variant_type == "bool") {
+        p = variant_value.get<bool>();
+    } else if (variant_type == "float") {
+        p = variant_value.get<float>();
+    } else if (variant_type == "unsigned short") {
+        p = variant_value.get<ushort>();
+    } else if (variant_type == "string") {
+        p = variant_value.get<std::string>();
+    } else if (variant_type == "unsigned int") {
+        p = variant_value.get<uint>();
+    } else if (variant_type == "char") {
+        p = variant_value.get<char>();
+    } else if (variant_type == "unsigned char") {
+        p = variant_value.get<uchar>();
+    } else {
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
+    }
+}
+
 RuleSection& RuleSection::EnableStringSanitization()
 {
     SanitizeIniStrings = true;
@@ -14,7 +80,7 @@ RuleSection& RuleSection::DisableStringSanitization()
     return *this;
 }
 
-bool RuleSection::Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b)
+bool RuleSection::Variants_Have_Same_Type(const RuleValueVariant& value_variant_a, const RuleValueVariant& value_variant_b)
 {
     if (std::holds_alternative<int>(value_variant_a)) {
         return std::holds_alternative<int>(value_variant_b);
@@ -44,7 +110,7 @@ bool RuleSection::Variants_Have_Same_Type(RuleValueVariant value_variant_a, Rule
     throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
 }
 
-std::string_view RuleSection::Get_Variant_Type(RuleValueVariant value_variant)
+std::string_view RuleSection::Get_Variant_Type(const RuleValueVariant& value_variant)
 {
     if (std::holds_alternative<int>(value_variant)) {
         return "int";
@@ -74,7 +140,7 @@ std::string_view RuleSection::Get_Variant_Type(RuleValueVariant value_variant)
     throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
 }
 
-std::string RuleSection::Get_Variant_Values(RuleValueVariant value_variant)
+std::string RuleSection::Get_Variant_Values(const RuleValueVariant& value_variant)
 {
     if (std::holds_alternative<int>(value_variant)) {
         return std::format("{}-{}", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
@@ -104,7 +170,7 @@ std::string RuleSection::Get_Variant_Values(RuleValueVariant value_variant)
     throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
 }
 
-std::string RuleSection::Variant_To_String(RuleValueVariant value_variant)
+std::string RuleSection::Variant_To_String(const RuleValueVariant& value_variant)
 {
     if (const auto value = std::get_if<int>(&value_variant)) {
         return std::format("{}", *value);
@@ -273,7 +339,7 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
         Variant_To_String(value)
     );
 
-    auto existing_rule = Try_Get_Variant(name);
+    const auto existing_rule = Try_Get_Variant(name);
 
     if (existing_rule.has_value()) {
         if (!Variants_Have_Same_Type(existing_rule.value(), value)) {
@@ -289,7 +355,10 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
 
     Rules[name.data()] = value;
 
-    CNC_LOGGER_DEBUG("Running OnRulesChanged() handler");
+    if (SectionName == "E2") {
+        CNC_LOGGER_WARN("Running OnRulesChanged() handler for E2: {}", Variant_To_String(value));
+    }
+
     OnRulesChanged(*this, name, value);
 
     return *this;
@@ -300,7 +369,7 @@ RuleSection& RuleSection::Set(std::string_view name, const char* value)
     return Set(name, std::string(value));
 }
 
-std::optional<std::string_view>& RuleSection::Get_Converter_Section_Type_Name()
+const std::optional<std::string>& RuleSection::Get_Converter_Section_Type_Name()
 {
     return ConverterSectionTypeName;
 }
@@ -319,6 +388,35 @@ std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_v
     }
 
     return std::nullopt;
+}
+
+TO_JSON(RuleSection)
+{
+    for (const auto& [ name, value ] : p.Rules) {
+        to_json(j[name], value);
+    }
+}
+
+/**
+ * Update rules from JSON export, values for existing rules not present in the JSON export are preserved.
+ */
+FROM_JSON(RuleSection)
+{
+    if (!j.is_object()) {
+        throw CncJsonException(
+            "Invalid {} JSON - expected type 'object', actual type: {}",
+            NAMEOF(RuleSection),
+            j.type_name()
+        );
+    }
+
+    for (const auto& [ key, value ] : j.items()) {
+        RuleValueVariant variant_value;
+
+        from_json(value, variant_value);
+
+        p.Set(key, std::move(variant_value));
+    }
 }
 
 //IniRuleContext
@@ -340,7 +438,7 @@ IniRuleContext& IniRuleContext::Load(std::string_view name)
 
 void RuleSections::Default_Rules_Changed_Handler(std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed)
 {
-    OnRulesChangedDefault = on_rules_changed;
+    OnRulesChangedDefault = std::move(on_rules_changed);
 }
 
 std::vector<std::string_view> RuleSections::Section_Names() const
@@ -363,7 +461,7 @@ bool RuleSections::Has_Section(std::string_view name) const
 void RuleSections::Save_All_To_Ini(INIClass& ini) const
 {
     for (const auto& section : Sections | std::views::values) {
-        section->Save_All_To_Ini(ini);
+        section.Save_All_To_Ini(ini);
     }
 }
 
@@ -371,12 +469,12 @@ RuleSection& RuleSections::Add_Section(std::string_view name, std::function<void
 {
     CNC_LOGGER_DEBUG("Adding new rules section '{}'", name);
 
-    Sections[name.data()] = std::make_unique<RuleSection>(
+    Sections.emplace(name.data(), RuleSection(
         name.data(),
-        on_rules_changed
-    );
+        std::move(on_rules_changed)
+    ));
 
-    return *Sections[name.data()];
+    return Sections.at(name.data());
 }
 
 RuleSection& RuleSections::Add_Section(std::string_view name)
@@ -390,22 +488,44 @@ RuleSection& RuleSections::Add_Section(std::string_view name)
 
 RuleSection& RuleSections::operator[](std::string_view name)
 {
-    auto it = Sections.find(name.data());
-
-    if (it != Sections.end()) {
-        return *(it->second);
+    if (!Sections.contains(name.data())) {
+        return Add_Section(name.data());
     }
 
-    return Add_Section(name.data());
+    return Sections.at(name.data());
 }
 
-RuleSection& RuleSections::operator[](std::string_view name) const
+const RuleSection& RuleSections::operator[](std::string_view name) const
 {
-    auto it = Sections.find(name.data());
-
-    if (it == Sections.end()) {
+    if (!Sections.contains(name.data())) {
         throw std::out_of_range(std::format("Attempted to access missing rule section: {}'", name));
     }
 
-    return *(it->second);
+    return Sections.at(name.data());
+}
+
+TO_JSON(RuleSections)
+{
+    for (const auto& [ name, section ] : p.Sections) {
+        j[name] = section;
+    }
+}
+
+/**
+ * Read rule sections from JSON, RuleSections::[] only calls Add_Section if the section is not present, so existing
+ * sections will be updated rather than replaced.
+ */
+FROM_JSON(RuleSections)
+{
+    if (!j.is_object()) {
+        throw CncJsonException(
+            "Invalid {} JSON - expected type 'object', actual type: {}",
+            NAMEOF(RuleSections),
+            j.type_name()
+        );
+    }
+
+    for (const auto& [name, section_json ] : j.items()) {
+        from_json(section_json, p[name]);
+    }
 }

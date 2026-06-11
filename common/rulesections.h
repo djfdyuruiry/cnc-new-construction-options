@@ -40,6 +40,9 @@ typedef unsigned long ulong;
 
 using RuleValueVariant = std::variant<int, bool, float, ushort, std::string, uint, char, uchar>;
 
+TO_JSON(RuleValueVariant);
+FROM_JSON(RuleValueVariant);
+
 template<typename T>
 concept RuleValueVariantCompatible = (
     std::is_same_v<T, int> ||
@@ -77,13 +80,13 @@ class RuleSection
 public:
     const std::string SectionName;
 
-    static bool Variants_Have_Same_Type(RuleValueVariant value_variant_a, RuleValueVariant value_variant_b);
+    static bool Variants_Have_Same_Type(const RuleValueVariant& value_variant_a, const RuleValueVariant& value_variant_b);
 
-    static std::string_view Get_Variant_Type(RuleValueVariant value_variant);
+    static std::string_view Get_Variant_Type(const RuleValueVariant& value_variant);
 
-    static std::string Get_Variant_Values(RuleValueVariant value_variant);
+    static std::string Get_Variant_Values(const RuleValueVariant& value_variant);
 
-    static std::string Variant_To_String(RuleValueVariant value_variant);
+    static std::string Variant_To_String(const RuleValueVariant& value_variant);
 
     RuleSection(
         std::string section_name,
@@ -304,7 +307,7 @@ public:
         return *this;
     }
 
-    std::optional<std::string_view>& Get_Converter_Section_Type_Name();
+    const std::optional<std::string>& Get_Converter_Section_Type_Name();
 
     template<class T, TypeConverter<T> C>
     T Get_With_Converter(std::string_view name) const
@@ -423,7 +426,7 @@ public:
     std::optional<std::string> Try_Get_Rule_Comment(std::string_view name) const;
 
     // TODO: Handle OnRulesChanged, if needed
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSection, Rules, ConverterSectionTypeName, SectionName)
+    JSON_FUNCTIONS(RuleSection)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 
@@ -445,10 +448,10 @@ private:
      */
     bool SanitizeIniStrings;
     std::optional<std::string> Comment;
-    std::map<std::string, RuleValueVariant> Rules;
-    std::map<std::string, std::string> RuleComments;
+    std::unordered_map<std::string, RuleValueVariant> Rules;
+    std::unordered_map<std::string, std::string> RuleComments;
     std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
-    std::optional<std::string_view> ConverterSectionTypeName;
+    std::optional<std::string> ConverterSectionTypeName;
 
     template<class T, class U = T, class V = std::string>
     void Safe_Parse(
@@ -731,12 +734,12 @@ public:
 
     RuleSection& operator[](std::string_view name);
 
-    RuleSection& operator[](std::string_view name) const;
+    const RuleSection& operator[](std::string_view name) const;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(RuleSections, Sections)
+    JSON_FUNCTIONS(RuleSections)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSections);
 
-    std::map<std::string, std::unique_ptr<RuleSection>> Sections;
+    std::unordered_map<std::string, RuleSection> Sections;
     std::optional<std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)>> OnRulesChangedDefault;
 };

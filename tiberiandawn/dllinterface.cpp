@@ -7797,13 +7797,13 @@ bool SaveGameRemasterState_v1::Validate() const
 
     auto result = true;
 
-    std::map<std::string, nlohmann::json> player_fields = {
+    std::unordered_map<std::string, nlohmann::json> player_fields = {
         {NAMEOF(RemasterMultiplayerStartPositions), RemasterMultiplayerStartPositions},
         {NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs},
         {NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman},
         {NAMEOF(RemasterPlacementType), RemasterPlacementType},
         {NAMEOF(RemasterMultiplayerSidebars), RemasterMultiplayerSidebars}
-};
+    };
 
     for (const auto& [field, json_value] : player_fields) {
         if (!json_value.is_array()) {

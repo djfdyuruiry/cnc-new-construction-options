@@ -122,7 +122,7 @@ public:
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameScenarioState_v1);
-    static inline const std::map<std::string, int> GlobalBufferSizes = {
+    static inline const std::unordered_map<std::string, int> GlobalBufferSizes = {
         { NAMEOF(ScenarioFileName), std::size(Scen.FileName) },
         { NAMEOF(BriefText), std::size(Scen.BriefingText) },
         { NAMEOF(BriefMovieName), std::size(BriefMovie) },
@@ -249,10 +249,13 @@ public:
     SaveGameRemasterState_v1 RemasterState;
 #endif
 
+    nlohmann::json Rules;
+
     bool Load_From_File(const std::string& path);
     void Read_Globals();
     bool Validate(GameType scenario_game_type) const;
     bool Write_Globals() const;
+    SaveGameData Export_SaveGameData() const;
     void Dump_Json(std::string& output) const;
     bool To_File(CDFileClass& save_file, const SaveGameHeader& header) const;
 
@@ -272,7 +275,8 @@ public:
         GameLogic,
         Layers,
         AiBase,
-        GameScore
+        GameScore,
+        Rules
     )
 #else
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
@@ -287,7 +291,8 @@ public:
         Layers,
         AiBase,
         GameScore,
-        RemasterState
+        RemasterState,
+        Rules
     )
 #endif
 

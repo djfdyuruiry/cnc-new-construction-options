@@ -6207,7 +6207,7 @@ int HouseClass::AI_Building(void)
         **	will be sufficient money to train troopers.
         */
         current = BQuantity[STRUCT_BARRACKS] + BQuantity[STRUCT_HAND];
-        if (current < Round_Up(Rule.BarracksRatio * fixed(CurBuildings)) && current < (unsigned)Rule.BarracksLimit
+        if (current < Round_Up(Rule.InfantryFactoryRatio * fixed(CurBuildings)) && current < (unsigned)Rule.InfantryFactoryLimit
             && (money > 300 || hasincome)) {
             b = &BuildingTypeClass::As_Reference(STRUCT_BARRACKS);
             if (Can_Build(b, ActLike) && (b->Cost_Of() < money || hasincome)) {
@@ -6233,7 +6233,7 @@ int HouseClass::AI_Building(void)
         **	be sufficient money to build vehicles.
         */
         current = BQuantity[STRUCT_WEAP] + BQuantity[STRUCT_AIRSTRIP];
-        if (current < Round_Up(Rule.WarRatio * fixed(CurBuildings)) && current < (unsigned)Rule.WarLimit
+        if (current < Round_Up(Rule.UnitFactoryRatio * fixed(CurBuildings)) && current < (unsigned)Rule.UnitFactoryLimit
             && (money > 2000 || hasincome)) {
             b = &BuildingTypeClass::As_Reference(STRUCT_WEAP);
 
@@ -6291,7 +6291,7 @@ int HouseClass::AI_Building(void)
     **	Advanced base defense would be good. (TobiasKarnat)
     */
         current = BQuantity[STRUCT_ATOWER] + BQuantity[STRUCT_OBELISK];
-        if (current < Round_Up(Rule.TeslaRatio * fixed(CurBuildings)) && current < (unsigned)Rule.TeslaLimit) {
+        if (current < Round_Up(Rule.AdvancedDefenceRatio * fixed(CurBuildings)) && current < (unsigned)Rule.AdvancedDefenceLimit) {
             b = &BuildingTypeClass::As_Reference(STRUCT_ATOWER);
             if (Can_Build(b, ActLike) && (b->Cost_Of() < money || hasincome) && Power_Fraction() >= 1) {
                 choiceptr = BuildChoice.Alloc();
