@@ -92,7 +92,6 @@ void RulesClass::Apply_Static_And_Global_Values() const {
 
     Special.Read_Rules(Sections);
 
-    // TODO: consider save/load implications
     for (auto i = 0; i < Houses.Count(); i++) {
         const auto house = Houses.Ptr(i);
 

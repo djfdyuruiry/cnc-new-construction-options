@@ -6027,10 +6027,8 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
             flag_entry.IsFlag = true;
         }
     }
-	*Render wall placement markers.
-	*Special thanks to pchote for this, getting the cursor rendering in classic was easy
-	*getting it to render in glyphX has been difficult
-	*/
+
+    // render wall placement markers
 	if (cell_ptr->IsCursorHere && Map.PendingObject) {
 		auto isWall = (*Map.PendingObject).What_Am_I() == RTTI_BUILDINGTYPE
 			&& static_cast<const BuildingTypeClass&>(*Map.PendingObject).IsWall;
