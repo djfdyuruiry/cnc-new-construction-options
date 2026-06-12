@@ -46,6 +46,7 @@
 #include "common/vqaconfig.h"
 #include "common/wspudp.h"
 #include "common/paths.h"
+#include "common/settings.h"
 #include "common/winasm.h"
 #include <time.h>
 
@@ -644,7 +645,7 @@ bool Init_Game(int, char*[])
         MFCD::Cache("ZOUNDS.MIX");
     }
 
-    if (!MenuFillTexture.Load() || !InGameFillTexture.Load()) {
+    if (!(Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files()) && (!MenuFillTexture.Load() || !InGameFillTexture.Load())) {
         CNC_LOG_FATAL("Failed to load Sidebar fill texture");
     }
 
