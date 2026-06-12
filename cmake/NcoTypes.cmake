@@ -223,7 +223,7 @@ function(Main)
 
       message(STATUS "[NcoTypeRules] Processing property #${PROP_INDEX}: ${PROP_NAME} (type=${PROP_TYPE})")
 
-      if (NOT ${PROP_COMMENT} STREQUAL "-") # ignore placeholder comments
+      if (NOT "${PROP_COMMENT}" STREQUAL "-") # ignore placeholder comments
         string(APPEND LOAD_COMMENTS_CODE "\n        ")
         string(APPEND LOAD_COMMENTS_CODE ".Set_Var_Comment(${PROP_NAME}, \"${PROP_COMMENT}\")")
       endif()

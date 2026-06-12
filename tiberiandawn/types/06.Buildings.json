@@ -90,6 +90,13 @@
       "requires_converter": true,
       "valid_values": "NONE, 11, 21, 12, 22, 23, 32, 33, 42, 55",
       "comment": "This is the size of the building. This size value is a rough indication of the building's 'footprint'."
+    },
+    {
+      "name": "OverlayToPlace",
+      "type": "OverlayType",
+      "requires_converter": true,
+      "valid_values": "NONE, CONCRETE, SANDBAG_WALL, CYCLONE_WALL, BRICK_WALL, BARBWIRE_WALL, WOOD_WALL, TIBERIUM1, TIBERIUM2, TIBERIUM3, TIBERIUM4, TIBERIUM5, TIBERIUM6, TIBERIUM7, TIBERIUM8, TIBERIUM9, TIBERIUM10, TIBERIUM11, TIBERIUM12, ROAD, SQUISH, V12, V13, V14, V15, V16, V17, V18, FLAG_SPOT, WOOD_CRATE, STEEL_CRATE",
+      "comment": "Walls are placed as overlay on the map, this determines which overlay to use; non-wall buildings are always NONE."
     }
   ]
 }
