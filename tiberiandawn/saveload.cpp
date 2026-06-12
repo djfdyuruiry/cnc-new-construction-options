@@ -402,7 +402,7 @@ bool Load_Game(const char* file_name)
 #ifndef REMASTER_BUILD
         PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name)
 #else
-        ,file_name
+        file_name
 #endif
     );
 
