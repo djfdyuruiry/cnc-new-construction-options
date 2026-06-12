@@ -27,7 +27,7 @@ public:
     {
     }
 
-    void Apply_Rules(RulesClass& rules) const;
+     bool Apply_Rules(RulesClass& rules) const;
 
 private:
     static inline const auto& Logger = CncLogger::For(SaveGameData);

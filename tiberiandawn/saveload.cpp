@@ -381,8 +381,7 @@ static bool Load_INI_Rules_And_Lua(const SaveGameData& data)
         return false;
     }
 
-    data.Apply_Rules(Rule);
-    return true;
+    return data.Apply_Rules(Rule);
 }
 
 /*

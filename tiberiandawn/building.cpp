@@ -103,6 +103,8 @@
 */
 #include "sidebarglyphx.h"
 
+extern bool DLL_Export_Get_Input_Key_State(KeyNumType key);
+
 enum SAMState
 {
     SAM_NONE = -1,   // Used for non SAM site buildings.

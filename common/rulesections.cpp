@@ -29,20 +29,15 @@ TO_JSON(RuleValueVariant)
 
 FROM_JSON(RuleValueVariant)
 {
-    if (
-        !j.is_object() ||
-        !j.contains("type") ||
-        !j["type"].is_string() ||
-        !j.contains("value") ||
-        j["value"].is_null()
-    ) {
-        throw CncJsonException(
-            "Invalid {} JSON value - expected object with keys 'type' (string) and 'value' (non-null value), "
-            "actual JSON: {}",
-            NAMEOF(RuleValueVariant),
-            j.dump()
-        );
-    }
+    CncJsonUtils::Assert_Json_Is_Object_With_Keys_And_Types(
+        j,
+        NAMEOF(RuleValueVariant),
+        { "type", "value"},
+        {
+            {"type", nlohmann::json::value_t::string },
+            {"value", CncJsonUtils::NotNullJsonType },
+        }
+    );
 
     const auto variant_type = j["type"].get<std::string>();
     auto& variant_value = j["value"];
@@ -398,13 +393,7 @@ TO_JSON(RuleSection)
  */
 FROM_JSON(RuleSection)
 {
-    if (!j.is_object()) {
-        throw CncJsonException(
-            "Invalid {} JSON - expected type 'object', actual type: {}",
-            NAMEOF(RuleSection),
-            j.type_name()
-        );
-    }
+    CncJsonUtils::Assert_Json_Is<JsonObject>(j, NAMEOF(RuleSection));
 
     for (const auto& [ key, value ] : j.items()) {
         RuleValueVariant variant_value;
@@ -513,13 +502,7 @@ TO_JSON(RuleSections)
  */
 FROM_JSON(RuleSections)
 {
-    if (!j.is_object()) {
-        throw CncJsonException(
-            "Invalid {} JSON - expected type 'object', actual type: {}",
-            NAMEOF(RuleSections),
-            j.type_name()
-        );
-    }
+    CncJsonUtils::Assert_Json_Is<JsonObject>(j, NAMEOF("RuleSections"));
 
     for (const auto& [name, section_json ] : j.items()) {
         from_json(section_json, p[name]);

@@ -795,9 +795,7 @@ TO_JSON(RulesClass)
 
 FROM_JSON(RulesClass)
 {
-    if (!j.is_object()) {
-        throw CncJsonException("Invalid {} JSON - expected object, actual type: {}", NAMEOF(RulesClass), j.type_name());
-    }
+    CncJsonUtils::Assert_Json_Is<JsonObject>(j, NAMEOF(RulesClass));
 
     p.AttackInterval = j["AttackInterval"];
     p.AttackDelay = j["AttackDelay"];

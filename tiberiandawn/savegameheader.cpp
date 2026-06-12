@@ -4,11 +4,23 @@
 #include "savegameheader.h"
 #include "typeconverter.h"
 
-void SaveGameData::Apply_Rules(RulesClass& rules) const
+bool SaveGameData::Apply_Rules(RulesClass& rules) const
 {
     CNC_LOGGER_INFO("Applying scenario rules from save game data");
 
-    from_json(ScenarioRules, rules);
+    std::string error_message;
+
+    try {
+        from_json(ScenarioRules, rules);
+        return true;
+    } catch (const CncJsonException& e) {
+        error_message = e.what();
+    } catch (const nlohmann::json::exception& e) {
+        error_message = e.what();
+    }
+
+    CNC_LOG_ERROR("Error applying rules from save game data: {}", error_message);
+    return false;
 }
 
 bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)

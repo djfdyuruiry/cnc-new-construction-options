@@ -136,7 +136,7 @@ public:
 
     friend FROM_JSON(VectorClass<T>)
     {
-        CncJsonUtils::Assert_Json_Is_Object_With_Keys(j, ". (VectorClass)", {NAMEOF(_items), NAMEOF(_vector_size)});
+        CncJsonUtils::Assert_Json_Is_Object_With_Keys(j, NAMEOF(VectorClass), {NAMEOF(_items), NAMEOF(_vector_size)});
 
         const auto& _vector_size = j[NAMEOF(_vector_size)];
         const auto& _items = j[NAMEOF(_items)];
