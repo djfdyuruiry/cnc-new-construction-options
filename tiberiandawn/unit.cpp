@@ -316,6 +316,15 @@ COORDINATE UnitClass::Sort_Y(void) const
 void UnitClass::AI(void)
 {
     Validate();
+    if (IsGoingToBlow && FlashCount < 10) {
+        // BUG: make more visible (too rapid right now)
+        Clicked_As_Target(HOUSE_COUNT, 10);
+    }
+    if (IsGoingToBlow && CountDown.Expired()) {
+        int damage = 5000;
+        Take_Damage(damage, 0, WARHEAD_FIRE, As_Techno(WhomToRepay));
+        return;
+    }
 
     /*
     **	Act on new orders if the unit is at a good position to do so.
@@ -1160,7 +1169,11 @@ UnitClass::UnitClass(UnitType classid, HousesType house)
 {
     Flagged = HOUSE_NONE;
     Reload = 0;
+    IsGoingToBlow = false;
+    CountDown.Set(0);
+    WhomToRepay = TARGET_NONE;
     Ammo = Class->MaxAmmo;
+
     IsCloakable = Class->IsCloakable;
     TiberiumUnloadRefinery = NULL;
     if (Class->IsAnimating)
@@ -1753,6 +1766,7 @@ void UnitClass::Per_Cell_Process(bool center)
 {
     Validate();
     CELL cell = Coord_Cell(Coord);
+
     TechnoClass* whom;
     HousesType house;
 

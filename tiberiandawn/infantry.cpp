@@ -711,26 +711,37 @@ void InfantryClass::Per_Cell_Process(bool center)
     }
 
     /*
-    **	If the infantry unit is entering a cell that contains the building it is trying to
+    **	If the infantry unit is entering a cell that contains the building/unit it is trying to
     **	sabotage, then sabotage it.
     */
     if (center && Mission == MISSION_SABOTAGE) {
-        BuildingClass* building = cellptr->Cell_Building();
-        if (building && building->As_Target() == NavCom) {
-            int temp = Special.IsScatter;
-
-            building->IsGoingToBlow = true;
-            building->Clicked_As_Target(PlayerPtr->Class->House,
-                                        20); // 2019/09/20 JAS - Added record of who clicked on the object
-            building->Clicked_As_Target(building->Owner(), 20);
-            building->CountDown.Set(20);
-            building->WhomToRepay = As_Target();
-            Special.IsScatter = true;
-            NavCom = TARGET_NONE;
-            Do_Uncloak();
-            Arm = Rearm_Delay(true);
-            Scatter(building->Center_Coord(), true); // RUN AWAY!
-            Special.IsScatter = temp;
+        CellClass* cellptr = &Map[Coord_Cell(Coord)];
+        ObjectClass* target = cellptr->Cell_Techno();
+        if (target && target->As_Target() == NavCom) {
+            if (target->What_Am_I() == RTTI_BUILDING) {
+                BuildingClass* building = (BuildingClass*)target;
+                int temp = Special.IsScatter;
+                building->IsGoingToBlow = true;
+                building->Clicked_As_Target(PlayerPtr->Class->House, 20);
+                building->Clicked_As_Target(building->Owner(), 20);
+                building->CountDown.Set(20);
+                building->WhomToRepay = As_Target();
+                Special.IsScatter = true;
+                NavCom = TARGET_NONE;
+                Do_Uncloak();
+                Arm = Rearm_Delay(true);
+                Scatter(building->Center_Coord(), true);
+                Special.IsScatter = temp;
+            } else if (target->What_Am_I() == RTTI_UNIT) {
+                UnitClass* unit = (UnitClass*)target;
+                unit->IsGoingToBlow = true;
+                unit->CountDown.Set(20);
+                unit->WhomToRepay = As_Target();
+                NavCom = TARGET_NONE;
+                Do_Uncloak();
+                Arm = Rearm_Delay(true);
+                Scatter(unit->Coord, true);
+            }
             return;
         }
     }
@@ -2886,7 +2897,8 @@ ActionType InfantryClass::What_Action(ObjectClass* object) const
     /*
     **	First see if infantry has C4 charges, and if he's attacking a building, have him return ACTION_SABOTAGE instead
     */
-    if (this->Class->HasC4Charges && action == ACTION_ATTACK && object->What_Am_I() == RTTI_BUILDING) {
+    if (this->Class->HasC4Charges && action == ACTION_ATTACK && (object->What_Am_I() == RTTI_BUILDING || object->What_Am_I() == RTTI_UNIT)) {
+
         // TODO: investigate doing this to units (like RA2 Tanya)
         return (ACTION_SABOTAGE);
     }

@@ -56,6 +56,10 @@ public:
     */
     HousesType Flagged;
 
+    unsigned IsGoingToBlow : 1;
+    TCountDownTimerClass CountDown;
+    TARGET WhomToRepay;
+
     /*---------------------------------------------------------------------
     **	Constructors, Destructors, and overloaded operators.
     */
@@ -216,6 +220,7 @@ private:
     ** Timer to prevent Harvesters from collecting too often
     */
     TCountDownTimerClass HarvestTimer;
+
 
     /*
     **	This is the refinery a harvester is interested in unloading at.
