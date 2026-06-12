@@ -286,7 +286,7 @@ int Fetch_Difficulty(void)
     int const h = 70 * factor;
     int const x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) / 2) - w / 2;
     int const y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) / 2) - h / 2;
-    int const bwidth = 30 * factor;
+    int const bwidth = 40 * factor;
 
     /*
     **	Fill the description buffer with the description text. Break
