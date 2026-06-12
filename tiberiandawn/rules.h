@@ -74,9 +74,25 @@ public:
     fixed RepairDelay;
     fixed BuildDelay;
 
-    unsigned IsBuildSlowdown : 1;
-    unsigned IsWallDestroyer : 1;
-    unsigned IsContentScan : 1;
+    bool IsBuildSlowdown;
+    bool IsWallDestroyer;
+    bool IsContentScan;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        DifficultyClass,
+        FirepowerBias,
+        GroundspeedBias,
+        AirspeedBias,
+        ArmorBias,
+        ROFBias,
+        CostBias,
+        BuildSpeedBias,
+        RepairDelay,
+        BuildDelay,
+        IsBuildSlowdown,
+        IsWallDestroyer,
+        IsContentScan
+    )
 };
 
 class RuleSections;
@@ -119,14 +135,14 @@ public:
 
     /*
     **	This specifies the percentage of the base (by building quantity) that should
-    **	be composed of Tesla Coils.
+    **	be composed of Advanced Guard Towers / Obelisks.
     */
-    fixed TeslaRatio;
+    fixed AdvancedDefenceRatio;
 
     /*
-    **	Limit tesla coil production to this maximum.
+    **	Limit Advanced Guard Tower / Obelisk production to this maximum.
     */
-    int TeslaLimit;
+    int AdvancedDefenceLimit;
 
     /*
     **	This specifies the percentage of the base (by building quantity) that should
@@ -152,25 +168,25 @@ public:
 
     /*
     **	This specifies the percentage of the base (by building quantity) that should
-    **	be composed of war factories.
+    **	be composed of unit factories.
     */
-    fixed WarRatio;
+    fixed UnitFactoryRatio;
 
     /*
-    **	War factories are limited to this quantity for the computer controlled player.
+    **	Unit factories are limited to this quantity for the computer controlled player.
     */
-    int WarLimit;
+    int UnitFactoryLimit;
 
     /*
     **	This specifies the percentage of the base (by building quantity) that should
-    **	be composed of infantry producing structures.
+    **	be composed of infantry factories.
     */
-    fixed BarracksRatio;
+    fixed InfantryFactoryRatio;
 
     /*
-    **	No more than this many barracks can be built.
+    **	No more than this many infantry factories can be built.
     */
-    int BarracksLimit;
+    int InfantryFactoryLimit;
 
     /*
     **	Refinery building is limited to this many refineries.
@@ -313,6 +329,7 @@ public:
     );
 
     const RuleSections& Get_Rule_Sections() const;
+    RuleSections& Get_Editable_Rule_Sections();
 
     template<EnumSignedChar T>
     const RuleSections& Get_Rule_Sections_For_Type() const
@@ -325,7 +342,21 @@ public:
             );
         }
 
-        return *TypeRules.at(type_name);;
+        return TypeRules.at(type_name);
+    }
+
+    template<EnumSignedChar T>
+    RuleSections& Get_Editable_Rule_Sections_For_Type()
+    {
+        static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
+
+        if (!TypeRules.contains(type_name)) {
+            throw std::out_of_range(
+                std::format("Attempted to get rule sections for unsupported type: {}", type_name)
+            );
+        }
+
+        return TypeRules.at(type_name);
     }
 
     void Assert_Section_Not_Present(std::string_view name) const;
@@ -336,11 +367,13 @@ public:
         return Sections[section].Get<T>(rule);
     }
 
+    JSON_FUNCTIONS(RulesClass)
+
 private:
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    std::map<std::string_view, std::unique_ptr<RuleSections>> TypeRules;
+    std::unordered_map<std::string_view, RuleSections> TypeRules;
 
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);

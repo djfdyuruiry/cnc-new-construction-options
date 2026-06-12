@@ -2613,7 +2613,7 @@ bool MapClass::Is_Width_Smaller_Than_Screen() const
     // disable small map detection in remaster
     return false;
 #else
-    constexpr auto sidebar_width = 80 * 2;
+    const auto sidebar_width = 80 * RESFACTOR;
     return (Map.IsSidebarActive ? sidebar_width : 0) + MapCellWidth * CELL_PIXEL_W < SeenBuff.Get_Width();
 #endif
 }
@@ -2624,7 +2624,8 @@ bool MapClass::Is_Height_Smaller_Than_Screen() const
     // disable small map detection in remaster
     return false;
 #else
-    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+    const auto tab_height = 8 * RESFACTOR;
+    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height() - tab_height;
 #endif
 }
 
@@ -2636,4 +2637,22 @@ bool MapClass::Is_Smaller_Than_Screen() const
 #else
     return Is_Width_Smaller_Than_Screen() || Is_Height_Smaller_Than_Screen();
 #endif
+}
+
+bool MapClass::Redraw_If_Smaller_Then_Screen()
+{
+    if (!Is_Smaller_Than_Screen()) {
+        return false;
+    }
+
+    const auto sidebar_width = 80 * RESFACTOR;
+    const auto tab_height = 8 * RESFACTOR;
+
+    Map.IsSidebarActive
+        ? Map.Set_View_Dimensions(0, tab_height, SeenBuff.Get_Width() - sidebar_width)
+        : Map.Set_View_Dimensions(0, tab_height);
+    Flag_To_Redraw(true);
+    Render();
+
+    return true;
 }

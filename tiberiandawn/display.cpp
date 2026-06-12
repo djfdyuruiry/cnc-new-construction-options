@@ -833,9 +833,9 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const* object)
 }
 
 #ifdef USE_RA_AI
-bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool preventBuildingInShroud, bool allowBuildingBesideWalls, int remainingDistance) const
+bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance) const
 {
-	if (remainingDistance < 1) {
+	if (remaining_distance < 1) {
 		return false;
 	}
 
@@ -846,7 +846,7 @@ bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool preventB
 			continue;
 		}
 
-		if (preventBuildingInShroud && !In_Radar(cell))
+		if (prevent_building_in_shroud && !In_Radar(cell))
 		{
 			return false;
 		}
@@ -857,7 +857,9 @@ bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool preventB
 		**	building located there.
 		*/
 		if ((*this)[newcell].Owner == house) {
-			if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference((*this)[newcell].Overlay).IsWall) {
+			if (allow_building_beside_walls
+			    && (*this)[newcell].Overlay != OVERLAY_NONE
+			    && OverlayTypeClass::As_Reference((*this)[newcell].Overlay).IsWall) {
 				return true;
 			}
 		}
@@ -870,7 +872,7 @@ bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool preventB
 			return true;
 		}
 
-		if (Scan_For_Proximity(newcell, house, preventBuildingInShroud, allowBuildingBesideWalls, remainingDistance - 1)) {
+		if (Scan_For_Proximity(newcell, house, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1)) {
 			return true;
 		}
 	}
@@ -926,9 +928,11 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
-	auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+	auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto prevent_building_in_shroud =
+	    Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allow_building_beside_walls =
+	    Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
 	/*
 	**	Scan through all cells that the building foundation would cover. If any adjacent
@@ -940,7 +944,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		CELL cell = trycell + *ptr++;
 
         // BUG: Doesn't prevent building in shroud
-		if (preventBuildingInShroud && !Map.In_Radar(cell)) {
+		if (prevent_building_in_shroud && !Map.In_Radar(cell)) {
 			return false;
 		}
 	}
@@ -949,8 +953,14 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	while (*ptr != REFRESH_EOL) {
 		CELL cell = trycell + *ptr++;
 
-		auto maximumDistance = maxPlacementDistance;
-		auto proximityDetected = Scan_For_Proximity(cell, house, preventBuildingInShroud, allowBuildingBesideWalls, maximumDistance);
+		auto maximumDistance = max_placement_distance;
+		auto proximityDetected = Scan_For_Proximity(
+		    cell,
+		    house,
+		    prevent_building_in_shroud,
+		    allow_building_beside_walls,
+		    maximumDistance
+		);
 
 		if (proximityDetected)
 		{
@@ -1205,6 +1215,8 @@ void DisplayClass::AI(KeyNumType& input, int x, int y)
             || Get_Mouse_Y() >= (TacPixelY + Lepton_To_Pixel(TacLeptonHeight)))) {
         Mouse_Left_Release(-1, Get_Mouse_X(), Get_Mouse_Y(), NULL, ACTION_NONE);
     }
+
+	Update_Placement_Cursor();
 
     MapClass::AI(input, x, y);
 }
@@ -2470,6 +2482,75 @@ void DisplayClass::Draw_It(bool forced)
     }
 }
 
+/**
+ * This routine will run any updates for the cursor while in placement mode
+ */
+void DisplayClass::Update_Placement_Cursor()
+{
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
+
+	if (!modern_walls || wall_length < 2 || !In_Radar(ZoneCell))
+	{
+		return;
+	}
+
+	const auto placementBuilding = PendingObject
+		&& PendingObject->What_Am_I() == RTTI_BUILDINGTYPE
+			? static_cast<const BuildingTypeClass*>(PendingObject)
+			: nullptr;
+
+	if (placementBuilding == nullptr || !placementBuilding->IsWall)
+	{
+		return;
+	}
+
+#ifdef REMASTER_BUILD
+    bool ctrldown = DLL_Export_Get_Input_Key_State(KN_LCTRL);
+#else
+    bool ctrldown = (Keyboard->Down(Options.KeyForceAttack1) || Keyboard->Down(Options.KeyForceAttack2));
+#endif
+
+	if (!In_Radar(ZoneCell) || ctrldown) {
+		if (CursorSize[1] != REFRESH_EOL) {
+			Set_Cursor_Shape(placementBuilding->Occupy_List(true));
+		}
+
+		return;
+	}
+
+	short offset_list[50];
+	auto constexpr max_offsets = std::size(offset_list) - 1;
+	const auto wall_overlay = placementBuilding->OverlayToPlace;
+
+	auto offsets_length = 1;
+
+	offset_list[0] = 0;
+
+	for (const auto& dir : FacingCardinals)
+	{
+		const auto scan_distance = Scan_For_Overlay(ZoneCell, dir, wall_overlay, wall_length);
+
+		//Break out if we're going to overflow the buffer
+		if (offsets_length + scan_distance > max_offsets) {
+			break;
+		}
+
+		auto current = ZoneCell;
+
+		for (auto i =  0; i < scan_distance; ++i)
+		{
+			current = Adjacent_Cell(current, dir);
+
+			offset_list[offsets_length++] = current - ZoneCell - ZoneOffset;
+		}
+	}
+
+	offset_list[offsets_length] = REFRESH_EOL;
+
+	Set_Cursor_Shape(offset_list);
+}
+
 /***********************************************************************************************
  * DisplayClass::Redraw_Icons -- Draws all terrain icons necessary.                            *
  *                                                                                             *
@@ -2702,6 +2783,8 @@ void DisplayClass::Redraw_Shadow_Rects(void)
         }
     }
 }
+
+
 
 /***********************************************************************************************
  * DisplayClass::Next_Object -- Searches for next object on display.                           *

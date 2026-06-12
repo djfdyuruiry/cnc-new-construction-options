@@ -19,13 +19,15 @@ public:
 
     void Load(std::string ini_file_name, INIClass& ini);
 
-    RuleSection& MultiPlayer() const;
+    const RuleSection& MultiPlayer() const;
+    RuleSection& Editable_MultiPlayer();
 
-    void Update_MultiPlayer() const;
-    void Update() const;
+    void Update_MultiPlayer();
+    void Update();
     void Save(INIClass& ini) const;
 
-    RuleSection& operator[](std::string_view section) const;
+    const RuleSection& operator[](std::string_view section) const;
+    RuleSection& operator[](std::string_view section);
 
 private:
     static inline const auto& Logger = CncLogger::For(TiberianDawnSettings);

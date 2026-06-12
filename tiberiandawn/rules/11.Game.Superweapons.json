@@ -1,0 +1,44 @@
+{
+  "$schema": "../../cmake/nco-rules-json-schema.json",
+  "section": "Game.Superweapons",
+  "ini_comment": "Rules for superweapons in the game",
+  "comment": "Change superweapon damage and recharge times.",
+  "rules": [
+    {
+      "name": "AirStrikeRechargeTimeInMins",
+      "type": "int",
+      "default": 8,
+      "comment": "How long an Air Strike takes to recharge, in minutes"
+    },
+    {
+      "name": "IonCannonRechargeTimeInMins",
+      "type": "int",
+      "default": 10,
+      "comment": "How long the Ion Cannon takes to recharge, in minutes"
+    },
+    {
+      "name": "IonCannonDamage",
+      "type": "int",
+      "default": 600,
+      "comment": "Ion Cannon direct hit damage"
+    },
+    {
+      "name": "NuclearStrikeRechargeTimeInMins",
+      "type": "int",
+      "default": 14,
+      "comment": "How long a Nuclear Strike takes to recharge, in minutes"
+    },
+    {
+      "name": "NuclearStrikeDamage",
+      "type": "int",
+      "default": 1000,
+      "comment": "Nuclear Strike direct hit damage"
+    },
+    {
+      "name": "NuclearStrikeDamageRadius",
+      "type": "int",
+      "default": 4,
+      "comment": "How big is the blast radius of a Nuclear Strike"
+    }
+  ]
+}

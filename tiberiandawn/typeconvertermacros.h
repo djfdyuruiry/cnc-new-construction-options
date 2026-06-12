@@ -67,27 +67,27 @@
 #pragma region From JSON Macros
 
 // Load target value from JSON into pointer memory address
-#define TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = TARGET_TO_PTR_WITH_TYPE(j.at(#FIELD).get<TARGET>(), TYPE)
+#define TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = TARGET_TO_PTR_WITH_TYPE(j[#FIELD].get<TARGET>(), TYPE)
 
 // Load target value from JSON into pointer memory address
 #define TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(FIELD, TYPE) \
-    ((TYPE const*&)p.FIELD) = TARGET_TO_PTR_WITH_TYPE(j.at(#FIELD).get<TARGET>(), TYPE)
+    ((TYPE const*&)p.FIELD) = TARGET_TO_PTR_WITH_TYPE(j[#FIELD].get<TARGET>(), TYPE)
 
 // Load target value for ObjectTypeClass into pointer memory address
 #define OBJECT_TARGET_PTR_FROM_JSON(FIELD) TARGET_PTR_FROM_JSON_WITH_TYPE(FIELD, ObjectClass)
 
 // Load target value for ref to TechnoTypeClass of TYPE into pointer memory address
 #define TECHNO_TYPE_TARGET_PTR_FROM_REF_JSON_WITH_TYPE(CLASS, FIELD, TYPE, ENUM) \
-    TdTypeConverter::Techno_Type_Target_From_Json<TYPE, ENUM>(j.at(#FIELD), #CLASS, #FIELD, p.FIELD)
+    TdTypeConverter::Techno_Type_Target_From_Json<TYPE, ENUM>(j[#FIELD], #CLASS, #FIELD, p.FIELD)
 
 // Load target value for ref to TechnoTypeClass of TYPE into const pointer memory address
 #define TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(CLASS, FIELD, TYPE, ENUM) \
-    TdTypeConverter::Techno_Type_Target_From_Json<TYPE, ENUM>(j.at(#FIELD), #CLASS, #FIELD, const_cast<TYPE*&>(p.FIELD))
+    TdTypeConverter::Techno_Type_Target_From_Json<TYPE, ENUM>(j[#FIELD], #CLASS, #FIELD, const_cast<TYPE*&>(p.FIELD))
 
 // Load target values for array (with length SIZE) of ObjectTypeClass pointer memory addresses
 #define OBJECT_TARGET_PTR_ARRAY_FROM_JSON_WITH_SIZE(CLASS, FIELD, TYPE, SIZE) \
     TdTypeConverter::Object_Target_Array_From_Json<TYPE>( \
-        j.at(#FIELD), #CLASS, #FIELD, p.FIELD, SIZE \
+        j[#FIELD], #CLASS, #FIELD, p.FIELD, SIZE \
     )
 
 // Load target values for array of ObjectTypeClass pointer memory addresses

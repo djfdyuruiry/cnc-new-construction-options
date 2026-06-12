@@ -9,9 +9,9 @@
 #include "luaarguments.h"
 
 // Method implementations
-void LuaApi::With_Api_Namespace(const LuaEngine& engine, std::function<void(luabridge::Namespace&)> action) const
+void LuaApi::With_Api_Namespace(const LuaEngine& engine, const std::function<void(luabridge::Namespace&)>& action) const
 {
-    engine.With_Api_Namespace(Name, std::move(action));
+    engine.With_Api_Namespace(Name, action);
 }
 
 void LuaApi::Register_Api_Metadata(const LuaEngine& engine) const

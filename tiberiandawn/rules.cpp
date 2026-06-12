@@ -97,16 +97,16 @@ RulesClass::RulesClass(void)
     , PowerEmergencyFraction(3, 4)
     , HelipadRatio(".12")
     , HelipadLimit(6)
-    , TeslaRatio(".8")
-    , TeslaLimit(5)
+    , AdvancedDefenceRatio(".8")
+    , AdvancedDefenceLimit(5)
     , AARatio(".14")
     , AALimit(10)
     , DefenseRatio(".5")
     , DefenseLimit(25)
-    , WarRatio(".1")
-    , WarLimit(3)
-    , BarracksRatio(".16")
-    , BarracksLimit(2)
+    , UnitFactoryRatio(".1")
+    , UnitFactoryLimit(3)
+    , InfantryFactoryRatio(".16")
+    , InfantryFactoryLimit(2)
     , RefineryLimit(7)
     , RefineryRatio(".18")
     , BaseSizeAdd(3)
@@ -319,13 +319,18 @@ void RulesClass::Init_For_Scenario(
     for (const auto& [type_name, sections] : TypeRules) {
         CNC_LOG_DEBUG("Type section: {}", type_name);
 
-        for (const auto& section : sections->Section_Names()) {
+        for (const auto& section : sections.Section_Names()) {
             CNC_LOG_DEBUG("  Instance section: {}", section);
         }
     }
 }
 
 const RuleSections& RulesClass::Get_Rule_Sections() const
+{
+    return Sections;
+}
+
+RuleSections& RulesClass::Get_Editable_Rule_Sections()
 {
     return Sections;
 }
@@ -431,16 +436,16 @@ void RulesClass::AI(CCINIClass& ini)
     BaseSizeAdd = ini.Get_Int(AI, "BaseSizeAdd", BaseSizeAdd);
     RefineryRatio = ini.Get_Fixed(AI, "RefineryRatio", RefineryRatio);
     RefineryLimit = ini.Get_Int(AI, "RefineryLimit", RefineryLimit);
-    BarracksRatio = ini.Get_Fixed(AI, "BarracksRatio", BarracksRatio);
-    BarracksLimit = ini.Get_Int(AI, "BarracksLimit", BarracksLimit);
-    WarRatio = ini.Get_Fixed(AI, "WarRatio", WarRatio);
-    WarLimit = ini.Get_Int(AI, "WarLimit", WarLimit);
+    InfantryFactoryRatio = ini.Get_Fixed(AI, "BarracksRatio", InfantryFactoryRatio);
+    InfantryFactoryLimit = ini.Get_Int(AI, "BarracksLimit", InfantryFactoryLimit);
+    UnitFactoryRatio = ini.Get_Fixed(AI, "WarRatio", UnitFactoryRatio);
+    UnitFactoryLimit = ini.Get_Int(AI, "WarLimit", UnitFactoryLimit);
     DefenseRatio = ini.Get_Fixed(AI, "DefenseRatio", DefenseRatio);
     DefenseLimit = ini.Get_Int(AI, "DefenseLimit", DefenseLimit);
     AARatio = ini.Get_Fixed(AI, "AARatio", AARatio);
     AALimit = ini.Get_Int(AI, "AALimit", AALimit);
-    TeslaRatio = ini.Get_Fixed(AI, "ObeliskRatio", TeslaRatio);
-    TeslaLimit = ini.Get_Int(AI, "ObeliskLimit", TeslaLimit);
+    AdvancedDefenceRatio = ini.Get_Fixed(AI, "ObeliskRatio", AdvancedDefenceRatio);
+    AdvancedDefenceLimit = ini.Get_Int(AI, "ObeliskLimit", AdvancedDefenceLimit);
     HelipadRatio = ini.Get_Fixed(AI, "HelipadRatio", HelipadRatio);
     HelipadLimit = ini.Get_Int(AI, "HelipadLimit", HelipadLimit);
     IsCompEasyBonus = ini.Get_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
@@ -474,16 +479,16 @@ void RulesClass::Export_AI(CCINIClass& ini) const
     ini.Put_Int(AI, "BaseSizeAdd", BaseSizeAdd);
     ini.Put_Fixed(AI, "RefineryRatio", RefineryRatio);
     ini.Put_Int(AI, "RefineryLimit", RefineryLimit);
-    ini.Put_Fixed(AI, "BarracksRatio", BarracksRatio);
-    ini.Put_Int(AI, "BarracksLimit", BarracksLimit);
-    ini.Put_Fixed(AI, "WarRatio", WarRatio);
-    ini.Put_Int(AI, "WarLimit", WarLimit);
+    ini.Put_Fixed(AI, "BarracksRatio", InfantryFactoryRatio);
+    ini.Put_Int(AI, "BarracksLimit", InfantryFactoryLimit);
+    ini.Put_Fixed(AI, "WarRatio", UnitFactoryRatio);
+    ini.Put_Int(AI, "WarLimit", UnitFactoryLimit);
     ini.Put_Fixed(AI, "DefenseRatio", DefenseRatio);
     ini.Put_Int(AI, "DefenseLimit", DefenseLimit);
     ini.Put_Fixed(AI, "AARatio", AARatio);
     ini.Put_Int(AI, "AALimit", AALimit);
-    ini.Put_Fixed(AI, "ObeliskRatio", TeslaRatio);
-    ini.Put_Int(AI, "ObeliskLimit", TeslaLimit);
+    ini.Put_Fixed(AI, "ObeliskRatio", AdvancedDefenceRatio);
+    ini.Put_Int(AI, "ObeliskLimit", AdvancedDefenceLimit);
     ini.Put_Fixed(AI, "HelipadRatio", HelipadRatio);
     ini.Put_Int(AI, "HelipadLimit", HelipadLimit);
     ini.Put_Bool(AI, "CompEasyBonus", IsCompEasyBonus);
@@ -668,15 +673,11 @@ static void Init_Type(RuleSections& sections, U first, U count, const CncLogger&
  * type.
  */
 template <EnumSignedChar T>
-RuleSections& Sections_For(std::map<std::string_view, std::unique_ptr<RuleSections>>& type_rules)
+RuleSections& Sections_For(std::unordered_map<std::string_view, RuleSections>& type_rules)
 {
     static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
 
-    if (!type_rules.contains(type_name)) {
-        type_rules[type_name] = std::make_unique<RuleSections>();
-    }
-
-    return *type_rules[type_name];
+    return type_rules[type_name];
 }
 
 void RulesClass::Init_Types()
@@ -734,7 +735,7 @@ void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
 {
     if (
         Sections.Has_Section(name) ||
-        std::ranges::any_of(TypeRules, [&](const auto& s) { return s.second->Has_Section(name); })
+        std::ranges::any_of(TypeRules, [&](const auto& s) { return s.second.Has_Section(name); })
     ) {
         CNC_LOGGER_FATAL(
             "An attempt was made to init a rules section twice, this is likely due to using a INI Name "
@@ -743,5 +744,106 @@ void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
             RulesFilename,
             name
         );
+    }
+}
+
+/**
+ * Note: Diff array is not serialized to JSON as these values are loaded into HouseClass instances when scenario is
+ * loaded from INI, so save games already have the appropriate values set elsewhere.
+ */
+TO_JSON(RulesClass)
+{
+    j["AttackInterval"] = p.AttackInterval;
+    j["AttackDelay"] = p.AttackDelay;
+    j["PowerEmergencyFraction"] = p.PowerEmergencyFraction;
+    j["HelipadRatio"] = p.HelipadRatio;
+    j["AdvancedDefenceRatio"] = p.AdvancedDefenceRatio;
+    j["AdvancedDefenceLimit"] = p.AdvancedDefenceLimit;
+    j["AARatio"] = p.AARatio;
+    j["AALimit"] = p.AALimit;
+    j["DefenseRatio"] = p.DefenseRatio;
+    j["DefenseLimit"] = p.DefenseLimit;
+    j["UnitFactoryRatio"] = p.UnitFactoryRatio;
+    j["UnitFactoryLimit"] = p.UnitFactoryLimit;
+    j["InfantryFactoryRatio"] = p.InfantryFactoryRatio;
+    j["InfantryFactoryLimit"] = p.InfantryFactoryLimit;
+    j["RefineryLimit"] = p.RefineryLimit;
+    j["RefineryRatio"] = p.RefineryRatio;
+    j["BaseSizeAdd"] = p.BaseSizeAdd;
+    j["PowerSurplus"] = p.PowerSurplus;
+    j["MaxIQ"] = p.MaxIQ;
+    j["IQSuperWeapons"] = p.IQSuperWeapons;
+    j["IQProduction"] = p.IQProduction;
+    j["IQGuardArea"] = p.IQGuardArea;
+    j["IQRepairSell"] = p.IQRepairSell;
+    j["IQCrush"] = p.IQCrush;
+    j["IQScatter"] = p.IQScatter;
+    j["IQContentScan"] = p.IQContentScan;
+    j["IQAircraft"] = p.IQAircraft;
+    j["IQHarvester"] = p.IQHarvester;
+    j["IQSellBack"] = p.IQSellBack;
+    j["InfantryReserve"] = p.InfantryReserve;
+    j["InfantryBaseMult"] = p.InfantryBaseMult;
+    j["IsComputerParanoid"] = p.IsComputerParanoid;
+    j["IsCompEasyBonus"] = p.IsCompEasyBonus;
+    j["IsFineDifficulty"] = p.IsFineDifficulty;
+    j["AllowSuperWeapons"] = p.AllowSuperWeapons;
+
+    j["Sections"] = p.Sections;
+    j["TypeRules"] = p.TypeRules;
+}
+
+FROM_JSON(RulesClass)
+{
+    CncJsonUtils::Assert_Json_Is<JsonObject>(j, NAMEOF(RulesClass));
+
+    p.AttackInterval = j["AttackInterval"];
+    p.AttackDelay = j["AttackDelay"];
+    p.PowerEmergencyFraction = j["PowerEmergencyFraction"];
+    p.HelipadRatio = j["HelipadRatio"];
+    p.AdvancedDefenceRatio = j["AdvancedDefenceRatio"];
+    p.AdvancedDefenceLimit = j["AdvancedDefenceLimit"];
+    p.AARatio = j["AARatio"];
+    p.AALimit = j["AALimit"];
+    p.DefenseRatio = j["DefenseRatio"];
+    p.DefenseLimit = j["DefenseLimit"];
+    p.UnitFactoryRatio = j["UnitFactoryRatio"];
+    p.UnitFactoryLimit = j["UnitFactoryLimit"];
+    p.InfantryFactoryRatio = j["InfantryFactoryRatio"];
+    p.InfantryFactoryLimit = j["InfantryFactoryLimit"];
+    p.RefineryLimit = j["RefineryLimit"];
+    p.RefineryRatio = j["RefineryRatio"];
+    p.BaseSizeAdd = j["BaseSizeAdd"];
+    p.PowerSurplus = j["PowerSurplus"];
+    p.MaxIQ = j["MaxIQ"];
+    p.IQSuperWeapons = j["IQSuperWeapons"];
+    p.IQProduction = j["IQProduction"];
+    p.IQGuardArea = j["IQGuardArea"];
+    p.IQRepairSell = j["IQRepairSell"];
+    p.IQCrush = j["IQCrush"];
+    p.IQScatter = j["IQScatter"];
+    p.IQContentScan = j["IQContentScan"];
+    p.IQAircraft = j["IQAircraft"];
+    p.IQHarvester = j["IQHarvester"];
+    p.IQSellBack = j["IQSellBack"];
+    p.InfantryReserve = j["InfantryReserve"];
+    p.InfantryBaseMult = j["InfantryBaseMult"];
+    p.IsComputerParanoid = j["IsComputerParanoid"];
+    p.IsCompEasyBonus = j["IsCompEasyBonus"];
+    p.IsFineDifficulty = j["IsFineDifficulty"];
+    p.AllowSuperWeapons = j["AllowSuperWeapons"];
+
+    /**
+     * Apply JSON to RuleSections references to preserve on rules changed handlers and
+     * RuleSection::ConverterSectionTypeName properties (these are not serialized to JSON).
+     *
+     * Additionally, rules not found in JSON are preserved, which effectively merges the current rules with those in
+     * JSON (with the JSON rule values having precendence over existing rule values).
+     */
+
+    from_json(j["Sections"], p.Sections);
+
+    for (const auto& [ type, sections_json ] : j["TypeRules"].items()) {
+        from_json(sections_json, p.TypeRules[type]);
     }
 }

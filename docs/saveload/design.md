@@ -133,7 +133,7 @@ The nlohmann/json library provides excellent support for arbitrary types through
 
 See: https://json.nlohmann.me/features/arbitrary_types/
 
-```cpp
+```c++
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -172,10 +172,10 @@ public:
     }
 
     friend void from_json(const json& j, AircraftClass& a) {
-        if (j.at("type") != "aircraft")
+        if (j["type"] != "aircraft")
             throw std::runtime_error("Invalid aircraft data");
 
-        a.Class = AircraftTypeClass::As_Reference(static_cast<AircraftType>(j.at("class_id").get<int>()));
+        a.Class = AircraftTypeClass::As_Reference(static_cast<AircraftType>(j["class_id"].get<int>()));
         // ... set other fields ...
     }
 };

@@ -854,6 +854,9 @@ public:
     } AnimControlType;
     AnimControlType Anims[BSTATE_COUNT];
 
+    // when this building is placed, this is the overlay that gets placed on the map instead
+    OverlayType OverlayToPlace;
+
     /*
     **	This is a mask flag used to determine if all the necessary prerequisite
     **	buildings have been built.
@@ -916,7 +919,8 @@ public:
                       short const* exitlist,
                       short const* sizelist,
                       short const* overlap,
-                      bool is_unsellable = false);
+                      bool is_unsellable = false,
+                      OverlayType overlay_type = OVERLAY_NONE);
     virtual RTTIType What_Am_I(void) const
     {
         return RTTI_BUILDINGTYPE;
@@ -1300,9 +1304,9 @@ public:
     char FireLaunch;
     char ProneLaunch;
 
-    // TODO: Implement NCO logic and new fields
-    //bool IsImmuneToTiberium;
-    //bool HasC4Charges;
+    // NCO original rules
+    bool IsImmuneToTiberium;
+    bool HasC4Charges;
 
     /*
     **	This is the explicit unit class constructor.
@@ -1339,7 +1343,9 @@ public:
                       std::vector<HousesType> ownableBy,
                       WeaponType primary,
                       WeaponType secondary,
-                      MPHType maxspeed);
+                      MPHType maxspeed,
+                      bool has_c4_charges = false,
+                      bool is_immune_to_tiberium = false);
     virtual RTTIType What_Am_I(void) const
     {
         return RTTI_INFANTRYTYPE;

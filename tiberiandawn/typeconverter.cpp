@@ -4,7 +4,7 @@
 /**
  * Make some type names more human-readable or less confusing.
  */
-const std::map<std::string, std::string_view> TdTypeConverter::TypeNamePatchTable = {
+const std::unordered_map<std::string, std::string_view> TdTypeConverter::TypeNamePatchTable = {
     { NAMEOF(AnimType), "Animation" },
     { NAMEOF(StructType), "Building" },
     { NAMEOF(HousesType), "House" }
@@ -36,7 +36,7 @@ static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 #define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
 // Info about each enum supported type, indexed against it's typename
-const std::map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
+const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
     //            [Typename]                     [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]    [Excluded Vals]      [Allow non-enum values?]
     ENUM_TYPE_PAIR(ArmorType,                    "ARMOR_",       ARMOR_NONE,                             ARMOR_LAST,                               {},                  {},                  false),
     ENUM_TYPE_PAIR(MPHType,                      "MPH_",         MPH_IMMOBILE,                           MPH_LIGHT_SPEED,                          {},                  {},                  true),

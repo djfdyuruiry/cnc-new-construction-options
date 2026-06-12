@@ -5,12 +5,6 @@
   "comment": "Building placement rules and tiberium behavior.",
   "rules": [
     {
-      "name": "MaxBuildDistance",
-      "type": "int",
-      "default": 1,
-      "comment": "This controls how far away from an existing structure a player can place a building. _Note: values higher than 6 may cause performance problems._ (Candidate for moving to enhancements)"
-    },
-    {
       "name": "PreventBuildingInShroud",
       "type": "bool",
       "default": true,

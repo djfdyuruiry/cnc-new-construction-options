@@ -158,6 +158,8 @@ public:
 
     LuaResult Exec_File(const std::filesystem::path& script_path) const;
 
+    LuaResult Exec_File_If_Exists(const std::filesystem::path& script_path, bool& file_was_found) const;
+
     LuaResult Exec_File_If_Exists(const std::filesystem::path& script_path) const;
 
     std::future<LuaResult> Exec_File_Async(const std::filesystem::path& script_path) const;

@@ -18,6 +18,7 @@ template <typename T>
 concept RuleSectionsProviderConcept = requires()
 {
     { T::Sections() } -> std::same_as<const RuleSections&>;
+    { T::Editable_Sections() } -> std::same_as<RuleSections&>;
 };
 
 // TODO: Update to support new rule variant types
@@ -114,7 +115,7 @@ public:
                 auto section = arguments.Read_First<std::string>().Unpack();
                 auto key = arguments.Read_Next<std::string>().Unpack();
 
-                RulesLuaAdapter::Set_Rule_Value(engine, arguments, R::Sections(), section, key);
+                RulesLuaAdapter::Set_Rule_Value(engine, arguments, R::Editable_Sections(), section, key);
 
                 return 1;
             });

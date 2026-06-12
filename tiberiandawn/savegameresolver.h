@@ -49,11 +49,7 @@ public:
      * will determine load behavior. References for skirmish options will be assigned values
      * from save data.
      */
-    static std::optional<SaveGameHeader> Load(
-        const std::string& path,
-        SpecialClass& skirmish_special,
-        bool& skirmish_superweapons_enabled
-    );
+    static std::optional<SaveGameHeader> Load(const std::string& path);
 
 private:
     static inline const CncLogger Logger = CncLogger::For(SaveGameResolver);

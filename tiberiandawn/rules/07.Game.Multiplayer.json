@@ -27,6 +27,18 @@
       "type": "int",
       "default": 10000,
       "comment": "Maximum number of starting credits for each player"
+    },
+    {
+      "name": "NuclearStrikeDamage",
+      "type": "int",
+      "default": 200,
+      "comment": "Modified direct hit damage for Nuclear Strike in Multiplayer games"
+    },
+    {
+      "name": "NuclearStrikeDamageRadius",
+      "type": "int",
+      "default": 3,
+      "comment": "Modified blast radius for Nuclear Strike in Multiplayer games"
     }
   ]
 }

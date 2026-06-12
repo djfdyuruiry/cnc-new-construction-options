@@ -52,11 +52,11 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
     Load_MultiPlayer(ini);
 }
 
-void TiberianDawnSettings::Update_MultiPlayer() const
+void TiberianDawnSettings::Update_MultiPlayer()
 {
     CNC_LOGGER_DEBUG("Updating Tiberian Dawn multiplayer settings from globals variables");
 
-    MultiPlayer().Set("Handle", MPlayerName)
+    Editable_MultiPlayer().Set("Handle", MPlayerName)
         .Set("ScenarioNumber", MPlayerScenarioNumber)
         .Set("BasesOn", MPlayerBases)
         .Set("TiberiumRegrows", static_cast<bool>(MPlayerTiberium))
@@ -66,7 +66,7 @@ void TiberianDawnSettings::Update_MultiPlayer() const
         .Set_With_Converter<HousesType, TdTypeConverter>("Side", MPlayerHouse);
 }
 
-void TiberianDawnSettings::Update() const
+void TiberianDawnSettings::Update()
 {
     Update_MultiPlayer();
 }
@@ -78,7 +78,7 @@ void TiberianDawnSettings::Save(INIClass& ini) const
     Settings.Save_All_To_Ini(ini);
 }
 
-RuleSection& TiberianDawnSettings::MultiPlayer() const
+const RuleSection& TiberianDawnSettings::MultiPlayer() const
 {
     if (!Settings.Has_Section(MultiPlayerSection)) {
         throw std::runtime_error("Attempted to get multiplayer settings before TdSettings.Load(...) was called");
@@ -87,7 +87,21 @@ RuleSection& TiberianDawnSettings::MultiPlayer() const
     return Settings[MultiPlayerSection];
 }
 
-RuleSection& TiberianDawnSettings::operator[](std::string_view section) const
+RuleSection& TiberianDawnSettings::Editable_MultiPlayer()
+{
+    if (!Settings.Has_Section(MultiPlayerSection)) {
+        throw std::runtime_error("Attempted to get multiplayer settings before TdSettings.Load(...) was called");
+    }
+
+    return Settings[MultiPlayerSection];
+}
+
+const RuleSection& TiberianDawnSettings::operator[](const std::string_view section) const
+{
+    return Settings[section];
+}
+
+RuleSection& TiberianDawnSettings::operator[](const std::string_view section)
 {
     return Settings[section];
 }

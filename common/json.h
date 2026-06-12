@@ -7,8 +7,6 @@
 #define JSON_DISABLE_ENUM_SERIALIZATION 1
 #include <nlohmann/json.hpp>
 
-#include "stringutils.h"
-
 // emulate C# style nameof
 #define NAMEOF(SYMBOL) #SYMBOL
 
@@ -23,10 +21,10 @@
 #define CONVERT_FIELD_TO_JSON(FIELD, CONVERTER) j.emplace(#FIELD, CONVERTER(p.FIELD))
 
 // from_json macros
-#define FIELD_FROM_JSON_TO_VALUE(FIELD, VALUE) j.at(#FIELD).get_to(VALUE)
-#define FIELD_FROM_JSON(FIELD) j.at(#FIELD).get_to(p.FIELD)
-#define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j.at(#FIELD).get<TYPE>()
-#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j.at(#FIELD).get<bool>()
+#define FIELD_FROM_JSON_TO_VALUE(FIELD, VALUE) j[#FIELD].get_to(VALUE)
+#define FIELD_FROM_JSON(FIELD) j[#FIELD].get_to(p.FIELD)
+#define FIELD_FROM_JSON_WITH_TYPE(FIELD, TYPE) p.FIELD = j[#FIELD].get<TYPE>()
+#define BITFIELD_FROM_JSON(FIELD) p.FIELD = j[#FIELD].get<bool>()
 
 // to_json/from_json friend functions shorthand (reference types)
 # define JSON_FUNCTIONS(TYPE) friend void to_json(nlohmann::json& j, const TYPE& p); \
@@ -87,6 +85,11 @@ concept JsonType = std::is_same_v<T, JsonString>
 class CncJsonUtils final
 {
 public:
+    // custom value_t entry for signalling we want anything that isn't null
+    static constexpr auto NotNullJsonType = static_cast<nlohmann::json::value_t>(
+        static_cast<uint8_t>(nlohmann::json::value_t::discarded) + 1
+    );
+
     static std::string Build_Type_Error(const std::string& expected_type, const nlohmann::json& subject);
 
     static std::string Build_Parse_Error(
@@ -211,33 +214,14 @@ public:
         const nlohmann::json& subject,
         const std::string& json_path,
         const std::vector<std::string>& expected_keys
-    )
-    {
-        Assert_Json_Is<JsonObject>(subject, json_path);
+    );
 
-        std::vector<std::string> missing_keys;
-
-        for (const auto& key : expected_keys) {
-            if (!subject.contains(key)) {
-                missing_keys.push_back(key);
-            }
-        }
-
-        if (!missing_keys.empty()) {
-            std::vector<std::string> actual_keys;
-
-            for (const auto& [key, _] : subject.items()) {
-                actual_keys.emplace_back(key);
-            }
-
-            Throw_Json_Assert_Failure(
-                json_path,
-                "expected object with keys '{}', actual keys: {}",
-                CncStringUtils::To_Csv(expected_keys),
-                CncStringUtils::To_Csv(actual_keys)
-            );
-        }
-    }
+    static void Assert_Json_Is_Object_With_Keys_And_Types(
+        const nlohmann::json& subject,
+        const std::string& json_path,
+        const std::vector<std::string>& expected_keys,
+        const std::unordered_map<std::string, nlohmann::json::value_t>& expected_types
+    );
 
     static void Cstr_Field_From_Json(
         const nlohmann::json& j,
@@ -254,7 +238,7 @@ public:
         const std::string_view& field_name
     )
     {
-        const auto& field = j.at(field_name);
+        const auto& field = j[field_name];
 
         Assert_Json_Is<JsonString>(json_path, field);
 

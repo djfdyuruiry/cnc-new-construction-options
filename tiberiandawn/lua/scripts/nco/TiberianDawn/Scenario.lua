@@ -90,6 +90,7 @@ local TdApiModule = require("nco.TiberianDawn.lib.TdApiModule")
 ---@class Scenario : ApiModule
 ---@field name string
 ---@field type "single-player"|"multiplayer"
+---@field wasLoadedFromSave boolean
 ---@field player ScenarioPlayer
 ---@field houses ScenarioHouses | { [string]: House }
 ---@field teams ScenarioTeamTypes | { [string]: string }
@@ -134,6 +135,8 @@ local function builder(cppApi)
   return {
     name = cppApi.name,
     type = cppApi.type,
+
+    wasLoadedFromSave = cppApi.wasLoadedFromSave,
 
     player = {
       faction = cppApi.faction,

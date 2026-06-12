@@ -4804,7 +4804,17 @@ void HouseClass::Sell_Wall(CELL cell)
                         Sound_Effect(VOC_CASHTURN);
                     }
 
-                    Refund_Money(btype->Cost_Of() / 2);
+                    const auto modern_walls =
+                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+                    const auto wall_length =
+                        Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
+                    const auto full_cost_walls =
+                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
+
+                    if (!IsHuman || !modern_walls || wall_length < 2 || full_cost_walls) {
+                        Refund_Money(btype->Cost_Of() / 2); // TODO: add modifier rule for wall sell value
+                    }
+
                     Map[cell].Overlay = OVERLAY_NONE;
                     Map[cell].OverlayData = 0;
                     Map[cell].Owner = HOUSE_NONE;
@@ -6207,7 +6217,7 @@ int HouseClass::AI_Building(void)
         **	will be sufficient money to train troopers.
         */
         current = BQuantity[STRUCT_BARRACKS] + BQuantity[STRUCT_HAND];
-        if (current < Round_Up(Rule.BarracksRatio * fixed(CurBuildings)) && current < (unsigned)Rule.BarracksLimit
+        if (current < Round_Up(Rule.InfantryFactoryRatio * fixed(CurBuildings)) && current < (unsigned)Rule.InfantryFactoryLimit
             && (money > 300 || hasincome)) {
             b = &BuildingTypeClass::As_Reference(STRUCT_BARRACKS);
             if (Can_Build(b, ActLike) && (b->Cost_Of() < money || hasincome)) {
@@ -6233,7 +6243,7 @@ int HouseClass::AI_Building(void)
         **	be sufficient money to build vehicles.
         */
         current = BQuantity[STRUCT_WEAP] + BQuantity[STRUCT_AIRSTRIP];
-        if (current < Round_Up(Rule.WarRatio * fixed(CurBuildings)) && current < (unsigned)Rule.WarLimit
+        if (current < Round_Up(Rule.UnitFactoryRatio * fixed(CurBuildings)) && current < (unsigned)Rule.UnitFactoryLimit
             && (money > 2000 || hasincome)) {
             b = &BuildingTypeClass::As_Reference(STRUCT_WEAP);
 
@@ -6291,7 +6301,7 @@ int HouseClass::AI_Building(void)
     **	Advanced base defense would be good. (TobiasKarnat)
     */
         current = BQuantity[STRUCT_ATOWER] + BQuantity[STRUCT_OBELISK];
-        if (current < Round_Up(Rule.TeslaRatio * fixed(CurBuildings)) && current < (unsigned)Rule.TeslaLimit) {
+        if (current < Round_Up(Rule.AdvancedDefenceRatio * fixed(CurBuildings)) && current < (unsigned)Rule.AdvancedDefenceLimit) {
             b = &BuildingTypeClass::As_Reference(STRUCT_ATOWER);
             if (Can_Build(b, ActLike) && (b->Cost_Of() < money || hasincome) && Power_Fraction() >= 1) {
                 choiceptr = BuildChoice.Alloc();

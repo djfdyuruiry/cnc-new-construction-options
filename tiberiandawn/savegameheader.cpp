@@ -4,6 +4,25 @@
 #include "savegameheader.h"
 #include "typeconverter.h"
 
+bool SaveGameData::Apply_Rules(RulesClass& rules) const
+{
+    CNC_LOGGER_INFO("Applying scenario rules from save game data");
+
+    std::string error_message;
+
+    try {
+        from_json(ScenarioRules, rules);
+        return true;
+    } catch (const CncJsonException& e) {
+        error_message = e.what();
+    } catch (const nlohmann::json::exception& e) {
+        error_message = e.what();
+    }
+
+    CNC_LOG_ERROR("Error applying rules from save game data: {}", error_message);
+    return false;
+}
+
 bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
 {
     // read SaveGameHeader JSON
@@ -113,6 +132,20 @@ bool SaveGameHeader::Write_Globals() const
     Whom = Parse_Player_House_Type();
 
     return true;
+}
+
+void SaveGameHeader::Set_SaveGameData(SaveGameData data)
+{
+    SaveData = std::move(data);
+}
+
+const SaveGameData& SaveGameHeader::Get_SaveGameData() const
+{
+    if (!SaveData.has_value()) {
+        throw std::runtime_error("Attempt was made to access save game header with empty save data export");
+    }
+
+    return SaveData.value();
 }
 
 GameType SaveGameHeader::Parse_Game_Type() const

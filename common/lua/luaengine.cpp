@@ -152,16 +152,26 @@ LuaResult LuaEngine::Exec_File(const std::filesystem::path& script_path) const
     });
 }
 
-LuaResult LuaEngine::Exec_File_If_Exists(const std::filesystem::path& script_path) const
+LuaResult LuaEngine::Exec_File_If_Exists(const std::filesystem::path& script_path, bool& file_was_found) const
 {
     const auto full_script_path = Resolve_Script_Path(script_path);
 
-    if (!std::filesystem::exists(full_script_path) || std::filesystem::is_directory(full_script_path)) {
+    file_was_found = std::filesystem::exists(full_script_path) && !std::filesystem::is_directory(full_script_path);
+
+    if (!file_was_found) {
         CNC_LOGGER_WARN("Skipping lua file execution as it does not exist: {}", full_script_path.string());
+
         return {LUA_OK};
     }
 
     return Exec_File(full_script_path);
+}
+
+LuaResult LuaEngine::Exec_File_If_Exists(const std::filesystem::path& script_path) const
+{
+    bool temp;
+
+    return Exec_File_If_Exists(script_path, temp);
 }
 
 std::future<LuaResult> LuaEngine::Exec_File_Async(const std::filesystem::path& script_path) const

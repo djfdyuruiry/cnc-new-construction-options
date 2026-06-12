@@ -2079,6 +2079,12 @@ CELL MapClass::Nearby_Location(CELL cell) const //, SpeedType speed, int zone, M
 
 #endif // USE_RA_AI
 
+/**
+ * Based on the current view dimensions, is the map width smaller than the screen width?
+ *
+ * If the sidebar is active, this is taken into account as the reduced horizontal resolution
+ * may make the map larger than the screen width.
+ */
 bool MapClass::Is_Width_Smaller_Than_Screen() const
 {
 #ifdef REMASTER_BUILD
@@ -2089,16 +2095,25 @@ bool MapClass::Is_Width_Smaller_Than_Screen() const
 #endif
 }
 
+/**
+ * Based on the current view dimensions, is the map height smaller than the screen height?
+ */
 bool MapClass::Is_Height_Smaller_Than_Screen() const
 {
 #ifdef REMASTER_BUILD
     // disable small map detection in remaster
     return false;
 #else
-    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height();
+    return MapCellHeight * CELL_PIXEL_H < SeenBuff.Get_Height() - Map.Get_Tab_Height();
 #endif
 }
 
+/**
+ * Based on the current view dimensions, is the map smaller than the screen resolution?
+ *
+ * If the sidebar is active, this is taken into account as the reduced horizontal resolution
+ * may make the map larger than the screen.
+ */
 bool MapClass::Is_Smaller_Than_Screen() const
 {
 #ifdef REMASTER_BUILD
@@ -2108,6 +2123,71 @@ bool MapClass::Is_Smaller_Than_Screen() const
     return Is_Width_Smaller_Than_Screen() || Is_Height_Smaller_Than_Screen();
 #endif
 }
+
+/**
+ * Based on the current view dimensions, if the map is smaller than the screen resolution, force it to redraw
+ * to ensure cells and sidebar are rendered correctly for the current resolution.
+ *
+ * @return True if the map was redrawn, false otherwise.
+ */
+bool MapClass::Redraw_If_Smaller_Then_Screen()
+{
+    if (!Is_Smaller_Than_Screen()) {
+        return false;
+    }
+
+    Map.IsSidebarActive
+        ? Map.Set_View_Dimensions(0, Map.Get_Tab_Height(), SeenBuff.Get_Width() - Map.SideBarWidth)
+        : Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
+    Flag_To_Redraw(true);
+    Render();
+
+    return true;
+}
+
+/**
+ * This routine will find the nearest instance of the overlay in the given direction from the origin. It will abort if
+ * it comes across any obstacle.
+ */
+int MapClass::Scan_For_Overlay(
+    const CELL origin,
+    const FacingType dir,
+    const OverlayType overlay,
+    const int maxLength
+) const
+{
+	if (!In_Radar(origin))
+	{
+		return -1;
+	}
+
+	auto current = origin;
+
+	for (auto i = 0; i < maxLength; ++i)
+	{
+		current = Adjacent_Cell(current, dir);
+
+		if (!In_Radar(current))
+		{
+			break;
+		}
+
+		const auto& map_cell = Map[current];
+
+		if (map_cell.Overlay == overlay) {
+			//Found a match
+			return i;
+		}
+
+	    if (!Map[current].Is_Generally_Clear()) {
+			//Blocked by an object
+			break;
+		}
+	}
+
+	return -1;
+}
+
 
 TO_JSON(MapClass)
 {
@@ -2183,7 +2263,7 @@ FROM_JSON(MapClass)
     BITFIELD_FROM_JSON(IsForwardScan);
 
     // Array field - follows MouseClass::Save logic
-    const auto& cells = j.at(NAMEOF(Array));
+    const auto& cells = j[NAMEOF(Array)];
 
     CncJsonUtils::Assert_Json_Is<JsonObject>(cells, NAMEOF(Array));
 

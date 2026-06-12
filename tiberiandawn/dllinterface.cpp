@@ -3221,7 +3221,7 @@ void DLLExportClass::DLL_Draw_Intercept(int shape_number,
         if (is_infantry) {
             InfantryClass* infantry = static_cast<InfantryClass*>(object);
             new_object.ControlGroup = infantry->Group;
-            new_object.CanPlaceBombs = infantry->Class->Type == INFANTRY_RAMBO;
+            new_object.CanPlaceBombs = infantry->Class->HasC4Charges;
         }
 
         new_object.CanHarvest = false;
@@ -4434,9 +4434,9 @@ static const int _map_width_shift_bits = 7;
 static const int _map_width_shift_bits = 6;
 #endif
 
-static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool preventBuildingInShroud, bool allowBuildingBesideWalls, int remainingDistance)
+static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance)
 {
-	if (remainingDistance < 1)
+	if (remaining_distance < 1)
 	{
 		return;
 	}
@@ -4449,15 +4449,17 @@ static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distanc
 			continue;
 		}
 
-		if (!allowBuildingBesideWalls && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
-			return;
-		}
+	    if (allow_building_beside_walls
+	        && Map[adjcell].Overlay == OVERLAY_NONE
+	        && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
+	        return;
+	    }
 
-		if (!preventBuildingInShroud || Map.In_Radar(adjcell)) {
+		if (!prevent_building_in_shroud || Map.In_Radar(adjcell)) {
 			placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
 		}
 
-		Scan_For_Valid_Placement(adjcell, placement_distance, preventBuildingInShroud, allowBuildingBesideWalls, remainingDistance - 1);
+		Scan_For_Valid_Placement(adjcell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1);
 	}
 }
 
@@ -4486,9 +4488,9 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-	auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+	auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+	auto prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {
@@ -4499,9 +4501,7 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
                 || (Map[cell].Owner == PlayerPtr->Class->House)) {
 				placement_distance[cell] = 0U;
 
-				auto maxPlacement = maxPlacementDistance;
-
-				Scan_For_Valid_Placement(cell, placement_distance, preventBuildingInShroud, allowBuildingBesideWalls, maxPlacement);
+				Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, max_placement_distance);
             }
         }
     }
@@ -6026,6 +6026,84 @@ void DLLExportClass::Cell_Class_Draw_It(CNCDynamicMapStruct* dynamic_map,
             flag_entry.IsTheaterShape = false;
             flag_entry.IsFlag = true;
         }
+    }
+
+    // render wall placement markers
+	if (cell_ptr->IsCursorHere && Map.PendingObject != nullptr) {
+		auto is_wall = Map.PendingObject->What_Am_I() == RTTI_BUILDINGTYPE
+			&& static_cast<const BuildingTypeClass&>(*Map.PendingObject).IsWall;
+
+		if (!is_wall || Map.ZoneCell == cell_ptr->Cell_Number()) {
+			return;
+		}
+
+		auto& cursor_entry = dynamic_map->Entries[entry_index++];
+
+		strncpy(
+			cursor_entry.AssetName,
+			cell_ptr->Is_Generally_Clear()
+				? "PLACEMENT_EXTRA"
+				: "PLACEMENT_BAD",
+			CNC_OBJECT_ASSET_NAME_LENGTH
+		);
+
+		cursor_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
+		cursor_entry.Type = -1;
+		cursor_entry.Owner = (char)cell_ptr->Owner;
+		cursor_entry.DrawFlags = SHAPE_CENTER | SHAPE_GHOST | SHAPE_COLOR;
+		cursor_entry.PositionX = xpixel + (ICON_PIXEL_W / 2);
+		cursor_entry.PositionY = ypixel + (ICON_PIXEL_H / 2);
+		cursor_entry.Width = 24;
+		cursor_entry.Height = 24;
+		cursor_entry.CellX = Cell_X(cell);
+		cursor_entry.CellY = Cell_Y(cell);
+		cursor_entry.ShapeIndex = 0;
+		cursor_entry.IsSmudge = true;
+		cursor_entry.IsOverlay = false;
+		cursor_entry.IsResource = false;
+		cursor_entry.IsSellable = false;
+		cursor_entry.IsTheaterShape = false;
+		cursor_entry.IsFlag = false;
+	}
+
+    /*
+    ** Render wall placement markers.
+    */
+    if (cell_ptr->IsCursorHere && Map.PendingObject != nullptr) {
+        auto is_wall = Map.PendingObject->What_Am_I() == RTTI_BUILDINGTYPE
+            && static_cast<const BuildingTypeClass&>(*Map.PendingObject).IsWall;
+
+        if (!is_wall || Map.ZoneCell == cell_ptr->Cell_Number()) {
+            return;
+        }
+
+        auto& cursor_entry = dynamic_map->Entries[entry_index++];
+
+        strncpy(
+            cursor_entry.AssetName,
+            cell_ptr->Is_Generally_Clear()
+                ? "PLACEMENT_EXTRA"
+                : "PLACEMENT_BAD",
+            CNC_OBJECT_ASSET_NAME_LENGTH
+        );
+
+        cursor_entry.AssetName[CNC_OBJECT_ASSET_NAME_LENGTH - 1] = 0;
+        cursor_entry.Type = -1;
+        cursor_entry.Owner = (char)cell_ptr->Owner;
+        cursor_entry.DrawFlags = SHAPE_CENTER | SHAPE_GHOST | SHAPE_COLOR;
+        cursor_entry.PositionX = xpixel + (ICON_PIXEL_W / 2);
+        cursor_entry.PositionY = ypixel + (ICON_PIXEL_H / 2);
+        cursor_entry.Width = 24;
+        cursor_entry.Height = 24;
+        cursor_entry.CellX = Cell_X(cell);
+        cursor_entry.CellY = Cell_Y(cell);
+        cursor_entry.ShapeIndex = 0;
+        cursor_entry.IsSmudge = true;
+        cursor_entry.IsOverlay = false;
+        cursor_entry.IsResource = false;
+        cursor_entry.IsSellable = false;
+        cursor_entry.IsTheaterShape = false;
+        cursor_entry.IsFlag = false;
     }
 }
 
@@ -7797,13 +7875,13 @@ bool SaveGameRemasterState_v1::Validate() const
 
     auto result = true;
 
-    std::map<std::string, nlohmann::json> player_fields = {
+    std::unordered_map<std::string, nlohmann::json> player_fields = {
         {NAMEOF(RemasterMultiplayerStartPositions), RemasterMultiplayerStartPositions},
         {NAMEOF(RemasterPlayerIDs), RemasterPlayerIDs},
         {NAMEOF(RemasterMPlayerIsHuman), RemasterMPlayerIsHuman},
         {NAMEOF(RemasterPlacementType), RemasterPlacementType},
         {NAMEOF(RemasterMultiplayerSidebars), RemasterMultiplayerSidebars}
-};
+    };
 
     for (const auto& [field, json_value] : player_fields) {
         if (!json_value.is_array()) {

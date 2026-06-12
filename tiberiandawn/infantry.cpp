@@ -775,9 +775,9 @@ void InfantryClass::Per_Cell_Process(bool center)
     FootClass::Per_Cell_Process(center);
 
     /*
-    **	If over Tiberium, then this infantry unit will take damage.
+    **	If over Tiberium, then this infantry unit will take damage (unless they are immune).
     */
-    if (IsActive && !IsInLimbo && center && cellptr->Land_Type() == LAND_TIBERIUM && *this != INFANTRY_E5) {
+    if (IsActive && !IsInLimbo && center && cellptr->Land_Type() == LAND_TIBERIUM && !this->Class->IsImmuneToTiberium) {
         auto damage = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, TIBERIUM_INFANTRY_DAMAGE_RULE);
 
         Take_Damage(damage, 0, WARHEAD_FIRE);
@@ -2557,7 +2557,9 @@ TARGET InfantryClass::Greatest_Threat(ThreatType threat) const
     **	unless specifically in hunt mode.
     */
     case WEAPON_RIFLE:
-        if (House->IsHuman && (Mission == MISSION_GUARD || Mission == MISSION_GUARD_AREA)) {
+        const auto commando_guard_rule = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, COMMANDO_GUARD_RULE);
+
+        if (House->IsHuman && (Mission == MISSION_GUARD || Mission == MISSION_GUARD_AREA) && !commando_guard_rule) {
             return (TARGET_NONE);
         }
         return (TechnoClass::Greatest_Threat(threat | THREAT_INFANTRY | THREAT_BUILDINGS));
@@ -2882,9 +2884,10 @@ ActionType InfantryClass::What_Action(ObjectClass* object) const
     ActionType action = FootClass::What_Action(object);
 
     /*
-    **	First see if it's a commando, and if he's attacking a building, have him return ACTION_SABOTAGE instead
+    **	First see if infantry has C4 charges, and if he's attacking a building, have him return ACTION_SABOTAGE instead
     */
-    if (*this == INFANTRY_RAMBO && action == ACTION_ATTACK && object->What_Am_I() == RTTI_BUILDING) {
+    if (this->Class->HasC4Charges && action == ACTION_ATTACK && object->What_Am_I() == RTTI_BUILDING) {
+        // TODO: investigate doing this to units (like RA2 Tanya)
         return (ACTION_SABOTAGE);
     }
 

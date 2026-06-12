@@ -55,7 +55,7 @@ const RuleSections& SpecialClass::Read_Rules(const RuleSections& rules)
     return rules;
 }
 
-const RuleSections& SpecialClass::Write_Rules(const RuleSections& rules) const
+RuleSections& SpecialClass::Write_Rules(RuleSections& rules) const
 {
     // map
     rules[GAME_MAP_SECTION]
@@ -85,10 +85,28 @@ const RuleSections& SpecialClass::Write_Rules(const RuleSections& rules) const
 }
 
 void RulesClass::Apply_Static_And_Global_Values() const {
+    FactoryClass::STEP_COUNT = Get_Rule_Value<int>(GAME_FACTORIES_SECTION, TOTAL_PRODUCTION_STEPS_RULE);
+
+    MPlayerCountMax[0] = Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_UNITS_WITHOUT_BASE_MAX_RULE);
+    MPlayerCountMax[1] = Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_UNITS_WITH_BASE_MAX_RULE);
+
     Special.Read_Rules(Sections);
 
-    FactoryClass::STEP_COUNT = Rule.Get_Rule_Value<int>(GAME_FACTORIES_SECTION, TOTAL_PRODUCTION_STEPS_RULE);
+    for (auto i = 0; i < Houses.Count(); i++) {
+        const auto house = Houses.Ptr(i);
 
-    MPlayerCountMax[0] = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_UNITS_WITHOUT_BASE_MAX_RULE);
-    MPlayerCountMax[1] = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_UNITS_WITH_BASE_MAX_RULE);
+        if (house == nullptr) {
+            continue;
+        }
+
+        house->AirStrike.Set_Recharge_Time(
+            Get_Rule_Value<int>(GAME_SUPERWEAPONS_SECTION, AIR_STRIKE_RECHARGE_TIME_IN_MINS_RULE) * TICKS_PER_MINUTE
+        );
+        house->IonCannon.Set_Recharge_Time(
+            Get_Rule_Value<int>(GAME_SUPERWEAPONS_SECTION, ION_CANNON_RECHARGE_TIME_IN_MINS_RULE) * TICKS_PER_MINUTE
+        );
+        house->NukeStrike.Set_Recharge_Time(
+            Get_Rule_Value<int>(GAME_SUPERWEAPONS_SECTION, NUCLEAR_STRIKE_RECHARGE_TIME_IN_MINS_RULE) * TICKS_PER_MINUTE
+        );
+    }
 }

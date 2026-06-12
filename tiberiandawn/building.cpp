@@ -103,6 +103,8 @@
 */
 #include "sidebarglyphx.h"
 
+extern bool DLL_Export_Get_Input_Key_State(KeyNumType key);
+
 enum SAMState
 {
     SAM_NONE = -1,   // Used for non SAM site buildings.
@@ -1356,6 +1358,91 @@ void BuildingClass::AI(void)
     }
 }
 
+bool BuildingClass::Create_Overlay_At(const OverlayTypeClass& overlay, const CELL cell) const
+{
+    if (const auto o = overlay.Create_One_Of(House))
+    {
+        if (o->Unlimbo(Cell_Coord(cell)))
+        {
+            Map[cell].Owner = House->Class->House;
+            return true;
+        }
+
+        delete o;
+    }
+
+    return false;
+}
+
+bool BuildingClass::Unlimbo_Wall(const COORDINATE coord)
+{
+    const auto placement_cell = Coord_Cell(coord);
+
+    if (Can_Enter_Cell(placement_cell, FACING_NONE) != MOVE_OK) {
+        return false;
+    }
+
+    const auto overlay_type = Class->OverlayToPlace;
+
+    if (overlay_type == OVERLAY_NONE) {
+        return false;
+    }
+
+    // attempt to place the core pillar
+    const auto& overlay = OverlayTypeClass::As_Reference(overlay_type);
+
+    if (!Create_Overlay_At(overlay, placement_cell)) {
+        return false;
+    }
+
+    // wall rules
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
+    const auto full_cost_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
+
+#ifdef REMASTER_BUILD
+    bool ctrldown = DLL_Export_Get_Input_Key_State(KN_LCTRL);
+#else
+    bool ctrldown = (Keyboard->Down(Options.KeyForceAttack1) || Keyboard->Down(Options.KeyForceAttack2));
+#endif
+
+    if (modern_walls && wall_length > 1 && !ctrldown) {
+        /*
+         * Walk through every cardinal direction and run the same scanning logic as the build cursor
+         * Then place new wall overlays and transfer cell ownership up to the scan result distance
+         */
+        for (const auto& dir : FacingCardinals) {
+            const auto scan_dist = Map.Scan_For_Overlay(placement_cell, dir, overlay_type, wall_length);
+            auto adjacent_cell = placement_cell;
+
+            for (auto i = 0; i < scan_dist; ++i) {
+                adjacent_cell = Adjacent_Cell(adjacent_cell, dir);
+
+                if (full_cost_walls && House->Available_Money() < Class->Cost_Of()) {
+                    Speak(VOX_NO_CASH);
+
+                    break;
+                }
+
+                //If we fail to create the overlay here, abort this direction and move on
+                if (!Create_Overlay_At(overlay, adjacent_cell)) {
+                    break;
+                }
+
+                if (full_cost_walls) {
+                    House->Spend_Money(Class->Cost_Of());
+                }
+            }
+        }
+    }
+
+    Transmit_Message(RADIO_OVER_OUT);
+
+    Delete_This();
+
+    return true;
+}
+
 /***********************************************************************************************
  * BuildingClass::Unlimbo -- Removes a building from limbo state.                              *
  *                                                                                             *
@@ -1395,46 +1482,13 @@ bool BuildingClass::Unlimbo(COORDINATE coord, DirType dir)
     }
 #endif
 
-    /*
-    **	If this is a wall type building, then it never gets unlimboed. Instead, it gets
-    **	converted to an overlay type.
-    */
-    if (Class->IsWall) {
-        if (Can_Enter_Cell(Coord_Cell(coord), FACING_NONE) == MOVE_OK) {
-            OverlayType otype = OVERLAY_NONE;
-            switch (Class->Type) {
-            case STRUCT_SANDBAG_WALL:
-                otype = OVERLAY_SANDBAG_WALL;
-                break;
-
-            case STRUCT_CYCLONE_WALL:
-                otype = OVERLAY_CYCLONE_WALL;
-                break;
-
-            case STRUCT_BRICK_WALL:
-                otype = OVERLAY_BRICK_WALL;
-                break;
-
-            case STRUCT_BARBWIRE_WALL:
-                otype = OVERLAY_BARBWIRE_WALL;
-                break;
-
-            case STRUCT_WOOD_WALL:
-                otype = OVERLAY_WOOD_WALL;
-                break;
-            }
-            if (otype != OVERLAY_NONE) {
-                ObjectClass* o = OverlayTypeClass::As_Reference(otype).Create_One_Of(House);
-                if (o && o->Unlimbo(coord)) {
-                    Map[Coord_Cell(coord)].Owner = House->Class->House;
-                    Transmit_Message(RADIO_OVER_OUT);
-                    Delete_This();
-                    return (true);
-                }
-            }
-        }
-        return (false);
-    }
+	/*
+	**	If this is a wall type building, then it never gets unlimboed. Instead, it gets
+	**	converted to an overlay type.
+	*/
+	if (Class->IsWall) {
+		return Unlimbo_Wall(coord);
+	}
 
     /*
     **	Normal building unlimbo process.
@@ -5565,9 +5619,9 @@ bool BuildingClass::Can_Player_Move(void) const
         || (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
-static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBuildingBesideWalls, int remainingDistance)
+static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allow_building_beside_walls, int remaining_distance)
 {
-    if (remainingDistance < 1) {
+    if (remaining_distance < 1) {
         return false;
     }
 
@@ -5584,7 +5638,9 @@ static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBui
         **	building located there.
         */
         if (Map[newcell].Owner == house->Class->House) {
-            if (allowBuildingBesideWalls || !OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
+            if (allow_building_beside_walls
+                && Map[newcell].Overlay != OVERLAY_NONE
+                && OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
                 return true;
             }
         }
@@ -5597,7 +5653,7 @@ static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allowBui
             return true;
         }
 
-        if (Scan_For_Proximity_Check(newcell, house, allowBuildingBesideWalls, remainingDistance - 1)) {
+        if (Scan_For_Proximity_Check(newcell, house, allow_building_beside_walls, remaining_distance - 1)) {
             return true;
         }
     }
@@ -5639,16 +5695,18 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	cells to these are of friendly persuasion, then consider the proximity check to
     **	have been a success.
     */
-    auto maxPlacementDistance = Rule.Get_Rule_Value<int>(GAME_MAP_SECTION, MAX_BUILD_DISTANCE_RULE);
-    auto preventBuildingInShroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-    auto allowBuildingBesideWalls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+    const auto prevent_building_in_shroud =
+        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+    const auto allow_building_beside_walls =
+        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
     auto ptr = Occupy_List(true);
 
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        if (preventBuildingInShroud && !Map.In_Radar(cell)) {
+        if (prevent_building_in_shroud && !Map.In_Radar(cell)) {
             return false;
         }
     }
@@ -5658,10 +5716,9 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        auto maxDistance = maxPlacementDistance;
-        auto proximityDetected = Scan_For_Proximity_Check(cell, House, allowBuildingBesideWalls, maxDistance);
+        auto proximity_detected = Scan_For_Proximity_Check(cell, House, allow_building_beside_walls, max_placement_distance);
 
-        if (proximityDetected) {
+        if (proximity_detected) {
             return true;
         }
     }
@@ -5732,7 +5789,7 @@ FROM_JSON(BuildingClass)
 
     TECHNO_TYPE_TARGET_CONST_PTR_FROM_REF_JSON_WITH_TYPE(BuildingClass, Class, BuildingTypeClass, StructType);
 
-    p.Factory = TARGET_TO_PTR_WITH_TYPE(j.at(NAMEOF(Factory)).get<int>(), FactoryClass);
+    p.Factory = TARGET_TO_PTR_WITH_TYPE(j[NAMEOF(Factory)].get<int>(), FactoryClass);
 
     PARSE_TD_FIELD_FROM_JSON(BuildingClass, ActLike, HousesType);
     BITFIELD_FROM_JSON(IsReadyToCommence);

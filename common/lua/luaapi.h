@@ -41,7 +41,7 @@ public:
 
     virtual ~LuaApi() = default;
 
-    void With_Api_Namespace(const LuaEngine& engine, std::function<void(luabridge::Namespace&)> action) const;
+    void With_Api_Namespace(const LuaEngine& engine, const std::function<void(luabridge::Namespace&)>& action) const;
 
     void Register_Api_Metadata(const LuaEngine& engine) const;
 

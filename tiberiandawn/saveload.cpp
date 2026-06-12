@@ -347,18 +347,41 @@ bool Load_Game(int id)
 }
 
 /**
- * Ensure Rules from the scenario INI file recorded in the save game
- * are loaded and init Lua runtime so all scripts are re-ran in prep
- * for continuing the scenario. If the save is from a Skirmish game
+ * Ensure Rules from the scenario INI file recorded in the save game are loaded (if INI file is available) and init
+ * Lua runtime so all scripts are re-ran in prep for continuing the scenario. If the save is from a Skirmish game
  * we also apply the game options using Rules API.
  *
- * TODO: Pass flag to lua script so they know they are being called on save load (not fresh scenario)
- * TODO: Store RuleSections as map in save game, refactor RulesClass to accept this instead of INI file for scenario rules
+ * Rules values stored in save game directly are applied last, ensuring if INI file is not available we still get the
+ * correct scenario behavior; this also restores any rules changed dynamically at runtime by Lua etc.
+ *
+ * Save games with Lua scripts are validated to ensure all required scripts are present - if a script is missing, a
+ * required event handler might not be loaded. This could lead to a soft lock state where expected triggers are never
+ * able to fire.
  */
-static void Load_INI_Rules_And_Lua(const SpecialClass& skirmish_special, const bool& skirmish_superweapons_enabled)
+static bool Load_INI_Rules_And_Lua(const SaveGameData& data)
 {
-    Rule.Init_For_Scenario(Scen, GameToPlay, skirmish_special, skirmish_superweapons_enabled);
-    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr);
+    Rule.Init_For_Scenario(Scen, GameToPlay, data.SkirmishSpecial, data.SkirmishSuperweaponsEnabled);
+    ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, true);
+
+    const auto& loaded_scripts = ScenarioLua::Get_Scenario_Scripts();
+    std::vector<std::string> missing_scripts;
+
+    for (const auto& script : data.ScenarioScripts) {
+        if (!std::ranges::contains(loaded_scripts, script)) {
+            missing_scripts.push_back(script);
+        }
+    }
+
+    if (!missing_scripts.empty()) {
+        // missing Lua script(s) might contain event handlers, so we need to abort the load process
+        CNC_LOG_ERROR(
+            "Lua script(s) required to load save game were not found: {}",
+            CncStringUtils::To_Csv(missing_scripts)
+        );
+        return false;
+    }
+
+    return data.Apply_Rules(Rule);
 }
 
 /*
@@ -375,17 +398,12 @@ bool Load_Game(const char* file_name)
     Leave_Zoomed_Resolution_Mode();
     Call_Back();
 
-    SpecialClass skirmish_special;
-    bool skirmish_superweapons_enabled;
-
     const auto save_header = SaveGameResolver::Load(
 #ifndef REMASTER_BUILD
-        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name),
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name)
 #else
-        file_name,
+        file_name
 #endif
-        skirmish_special,
-        skirmish_superweapons_enabled
     );
 
     if (!save_header.has_value()) {
@@ -460,7 +478,10 @@ bool Load_Game(const char* file_name)
 
     Fixup_Scenario();
 
-    Load_INI_Rules_And_Lua(skirmish_special, skirmish_superweapons_enabled);
+    if (!Load_INI_Rules_And_Lua(save_header->Get_SaveGameData())) {
+        Set_Current_Resolution_Mode(resolution_mode);
+        return false;
+    }
 
     ScenarioInit = 0;
 
