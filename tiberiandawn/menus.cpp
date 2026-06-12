@@ -531,17 +531,8 @@ int Main_Menu(unsigned int timeout)
     KeyNumType input; // input from user
     int retval;       // return value
     int curbutton;
-#ifdef NEWMENU
     const auto button_count = Is_Demo() ? 7 : 8;
-#ifdef BONUS_MISSIONS
-    TextButtonClass* buttons[button_count];
-#else
-    TextButtonClass* buttons[button_count];
-#endif // BONUS_MISSIONS
-#else
-    TextButtonClass* buttons[5];
-#endif
-    //	unsigned int starttime;
+    std::vector<TextButtonClass*> buttons(button_count);
 
     ControlClass* commands = NULL; // the button list
 
