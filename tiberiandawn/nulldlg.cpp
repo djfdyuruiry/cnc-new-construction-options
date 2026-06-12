@@ -911,6 +911,7 @@ int Com_Scenario_Dialog(void)
         in the same order on all systems.
         .....................................................................*/
         MPlayerID[0] = MPlayerLocalID;
+        strcpy(MPlayerName, namebuf);
         strcpy(MPlayerNames[0], MPlayerName);
 
         /*.....................................................................
