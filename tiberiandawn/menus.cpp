@@ -35,6 +35,7 @@
 
 #include "function.h"
 #include "common/framelimit.h"
+#include "common/settings.h"
 
 /*****************************
 **	Function prototypes
@@ -441,13 +442,13 @@ int Do_Menu(char const** strings, bool blue)
  * Main_Menu -- Menu processing                                            *
  *                                                                         *
  * INPUT:                                                                  *
- *		none.																						*
+ *		none.															   *
  *                                                                         *
  * OUTPUT:                                                                 *
- *		index of item selected, -1 if time out											*
+ *		index of item selected, -1 if time out							   *
  *                                                                         *
  * WARNINGS:                                                               *
- *		none.																						*
+ *		none.															   *
  *                                                                         *
  * HISTORY:                                                                *
  *   05/17/1995 BRR : Created.                                             *
@@ -500,7 +501,7 @@ int Main_Menu(unsigned int timeout)
         D_EXIT_Y = 133 * scale_factor;
 
 #ifdef NEWMENU
-    int starty = 25 * scale_factor - 9 * scale_factor;
+    int starty = 25 * scale_factor - (Settings.Video.DOSMode || Is_DOS_Files() ? 0 : 9 * scale_factor);
 #endif
 
     // Make sure any changes to buttons here are also reflected in the enum and handling in Select_Game in init.cpp.
@@ -531,10 +532,11 @@ int Main_Menu(unsigned int timeout)
     int retval;       // return value
     int curbutton;
 #ifdef NEWMENU
+    const auto button_count = Is_Demo() ? 7 : 8;
 #ifdef BONUS_MISSIONS
-    TextButtonClass* buttons[8];
+    TextButtonClass* buttons[button_count];
 #else
-    TextButtonClass* buttons[8];
+    TextButtonClass* buttons[button_count];
 #endif // BONUS_MISSIONS
 #else
     TextButtonClass* buttons[5];
@@ -547,7 +549,8 @@ int Main_Menu(unsigned int timeout)
 #ifdef BONUS_MISSIONS
     int ystep = 13 * scale_factor;
 #else
-    int ystep = 15 * scale_factor;
+    const auto base_y_step = Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files() ? 13 : 15;
+    int ystep = base_y_step * scale_factor;
 #endif // BONUS_MISSIONS
 
     if (expansions)
@@ -571,14 +574,18 @@ int Main_Menu(unsigned int timeout)
                              D_START_H);
     starty += ystep;
 
-    TextButtonClass selectbtn(BUTTON_SELECT,
-                             "Mission Select", // TODO: TXT locale string
-                             TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                             D_SELECT_X,
-                             starty,
-                             D_SELECT_W,
-                             D_SELECT_H);
-    starty += ystep;
+    TextButtonClass selectbtn;
+
+    if (!Is_Demo()) {
+        selectbtn = TextButtonClass(BUTTON_SELECT,
+                                 "Mission Select", // TODO: TXT locale string
+                                 TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                                 D_SELECT_X,
+                                 starty,
+                                 D_SELECT_W,
+                                 D_SELECT_H);
+        starty += ystep;
+    }
 
 #ifdef BONUS_MISSIONS
     TextButtonClass bonusbtn(BUTTON_BONUS,
@@ -748,7 +755,10 @@ int Main_Menu(unsigned int timeout)
     bonusbtn.Add_Tail(*commands);
 #endif // BONUS_MISSIONS
 
-    selectbtn.Add_Tail(*commands);
+    if (!Is_Demo()) {
+        selectbtn.Add_Tail(*commands);
+    }
+
     loadbtn.Add_Tail(*commands);
     multibtn.Add_Tail(*commands);
     editorbtn.Add_Tail(*commands);
