@@ -87,19 +87,19 @@ int Com_Scenario_Dialog(void)
     /*........................................................................
     Dialog & button dimensions
     ........................................................................*/
-    int d_dialog_w = 290 * factor;                      // dialog width
-    int d_dialog_h = 190 * factor;                      // dialog height
+    int d_dialog_w = 300 * factor;                      // dialog width
+    int d_dialog_h = 195 * factor;                      // dialog height
     int d_dialog_x = ((Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) / 2); // dialog x-coord
     int d_dialog_y = ((Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) / 2); // dialog y-coord
     int d_dialog_cx = d_dialog_x + (d_dialog_w / 2);    // center x-coord
 
     int d_txt6_h = 6 * factor + 1; // ht of 6-pt text
-    int d_margin1 = 5 * factor;    // margin width/height
-    int d_margin2 = 2 * factor;    // margin width/height
+    int d_margin1 = 10 * factor;    // margin width/height
+    int d_margin2 = 4 * factor;    // margin width/height
 
     int d_name_w = 70 * factor;
     int d_name_h = 9 * factor;
-    int d_name_x = d_dialog_x + (d_dialog_w / 4) - (d_name_w / 2);
+    int d_name_x = d_dialog_x + 5 + (d_dialog_w / 4) - (d_name_w / 2);
     int d_name_y = d_dialog_y + d_margin2 + d_txt6_h + 1 * factor;
 
     int d_house_w = 60 * factor;
@@ -146,9 +146,9 @@ int Com_Scenario_Dialog(void)
     int d_aiplayers_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
     int d_aiplayers_y = d_credits_y + d_credits_h;
 
-    int d_options_w = 100 * factor;
+    int d_options_w = 110 * factor;
     int d_options_h = (5 * 6 * factor) + 4 * factor;
-    int d_options_x = d_dialog_x + d_dialog_w - 143 * factor;
+    int d_options_x = d_dialog_x + 10 + d_dialog_w - 143 * factor;
     int d_options_y = d_scenariolist_y + d_scenariolist_h + d_margin1 - 2 * factor;
 
     int d_ok_w = 45 * factor;

@@ -50,7 +50,7 @@ void GameOptionsClass::Adjust_Variables_For_Resolution(void)
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
 
     OptionWidth = (216 + 8) * factor;
-    OptionHeight = 100 * factor;
+    OptionHeight = 110 * factor;
     OptionX = ((SeenBuff.Get_Width() - OptionWidth) / 2);
     OptionY = ((SeenBuff.Get_Height() - OptionHeight) / 2);
     ButtonWidth = 130 * factor;
@@ -261,7 +261,7 @@ void GameOptionsClass::Process(void)
             */
             Fancy_Text_Print("%s\r%s",
                              (WindowList[WINDOW_EDITOR][WINDOWX] + WindowList[WINDOW_EDITOR][WINDOWWIDTH])
-                                 - 3 * resfactor,
+                                 - 6 * resfactor,
                              WindowList[WINDOW_EDITOR][WINDOWY] + WindowList[WINDOW_EDITOR][WINDOWHEIGHT]
                                  - ((GameToPlay == GAME_NORMAL) ? (30 * resfactor) : (19 * resfactor)),
                              GREEN,
