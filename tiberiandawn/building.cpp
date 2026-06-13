@@ -1345,39 +1345,16 @@ void BuildingClass::AI(void)
             || !Target_Legal(RallyPoint)
             || (!Map.In_View(Coord_Cell(Center_Coord())) && !Map.In_View(Coord_Cell(As_Coord(RallyPoint))))
         ) {
-            if (Map.RallyPointLine.has_value()) {
+            if (Map.VisibleRallyPointSource != nullptr) {
                 //Map.Refresh_RallyLine(); would make the below 'false'
                 Map.Flag_To_Redraw(true);
             }
 
-            Map.RallyPointLine.reset();
+            Map.VisibleRallyPointSource = nullptr;
             return;
         }
 
-        int startX, startY, endX, endY;
-
-        Map.Coord_To_Pixel(Center_Coord(), startX, startY);
-        Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
-
-        auto rallyPointStart = XY_Coord(startX, startY);
-        auto rallyPointEnd = XY_Coord(endX, endY);
-
-        if (Map.RallyPointLine.has_value()) {
-            if (Map.RallyPointLine->first != rallyPointStart || Map.RallyPointLine->second != rallyPointEnd) {
-                //Map.Refresh_RallyLine(); would make the below 'false'
-
-                // rally point already rendered and location has changed, map needs full redraw
-                Map.Flag_To_Redraw(true);
-            } else {
-                // rally point already rendered but location has not changed, no full redraw
-                Map.Flag_To_Redraw(false);
-            }
-        } else {
-            // rally point not currently rendered, no full redraw
-            Map.Flag_To_Redraw(false);
-        }
-
-        Map.RallyPointLine = { rallyPointStart, rallyPointEnd };
+        Map.VisibleRallyPointSource = this;
     }
 }
 

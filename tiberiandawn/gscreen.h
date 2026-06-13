@@ -106,7 +106,7 @@ public:
     ** When the building currently selected by the player has a rally point set, the line from the
     ** structure to the rally point will be stored here for use in the
     */
-    std::optional<std::pair<COORDINATE, COORDINATE>> RallyPointLine;
+    BuildingClass* VisibleRallyPointSource;
 
     /*
     **	This points to the buttons that are used for input. All of the derived classes will

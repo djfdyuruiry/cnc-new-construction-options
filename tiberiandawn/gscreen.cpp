@@ -363,51 +363,52 @@ void GScreenClass::Render(void)
     //	IsToRedraw = true;
     //}
 
+    if (Map.VisibleRallyPointSource != nullptr) {
+        Map.Flag_To_Redraw(true);
+    }
+
     if (IsToUpdate || IsToRedraw) {
 
         // WWMouse->Erase_Mouse(&HidPage, TRUE);
         GraphicViewPortClass* oldpage = Set_Logic_Page(HidPage);
         Draw_It(IsToRedraw);
 
-        if (Map.RallyPointLine.has_value() && LogicPage->Lock()) {
-            const auto& [ startCoord, endCoord ] = Map.RallyPointLine.value();
+        if (Map.VisibleRallyPointSource != nullptr) {
+            int coords[4] { Coord_X(VisibleRallyPointSource->Center_Coord()), Coord_Y(VisibleRallyPointSource->Center_Coord()), Coord_X(As_Coord(VisibleRallyPointSource->RallyPoint)), Coord_Y(As_Coord(VisibleRallyPointSource->RallyPoint))};
+            const auto& [ start_x, start_y, end_x, end_y ] = coords;
 
-            int pixels[4] { Coord_X(startCoord), Coord_Y(startCoord), Coord_X(endCoord), Coord_Y(endCoord) };
-            auto [ start_x, start_y, end_x, end_y ] = pixels;
+            int start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y;
+            const auto start_ok = Map.Coord_To_Pixel(VisibleRallyPointSource->Center_Coord(), start_pixel_x, start_pixel_y);
+            const auto end_ok = Map.Coord_To_Pixel(As_Coord(VisibleRallyPointSource->RallyPoint), end_pixel_x, end_pixel_y);
 
-            CNC_LOG_WARN("Before: {},{} -> {},{}", start_x, start_y, end_x, end_y);
+            if (start_ok || end_ok) {
+                CNC_LOG_WARN("XY: {},{} -> {},{}", start_x, start_y, end_x, end_y);
 
-            if (start_x > 32500) {
-                start_x = 0;
-            }
-            if (end_x > 32500) {
-                end_x = 0;
-            }
+                if (start_ok && !end_ok) {
+                    // draw from start to edge of screen
+                } else if (end_ok && !start_ok) {
+                    // draw from end to edge of screen
+                }
 
-            if (start_y > 20000) {
-                start_y = 0;
-            }
-            if (end_y > 20000) {
-                end_y = 0;
-            }
+                if (Map.IsSidebarActive && start_pixel_x >= Map.SideX) {
+                    start_pixel_x = Map.SideX - 1;
+                }
 
-            if (Map.IsSidebarActive && start_x >= Map.SideX) {
-                start_x = Map.SideX - 1;
-            }
-            if (start_y <= Map.Get_Tab_Height()) {
-                start_y = Map.Get_Tab_Height() - 1;
-            }
+                if (Map.IsSidebarActive && end_pixel_x >= Map.SideX) {
+                    end_pixel_x = Map.SideX - 1;
+                }
 
-            // enure end point is in bounds of the map area
-            if (Map.IsSidebarActive && end_x >= Map.SideX) {
-                end_x = Map.SideX - 1;
-            }
-            if (end_y <= Map.Get_Tab_Height()) {
-                end_y = Map.Get_Tab_Height() - 1;
-            }
-            CNC_LOG_WARN("After: {},{} -> {},{}", start_x, start_y, end_x, end_y);
+                if (start_pixel_y <= Map.Get_Tab_Height()) {
+                    start_pixel_y = Map.Get_Tab_Height() - 1;
+                }
 
-            LogicPage->Draw_Line(start_x, start_y, end_x, end_y, LTGREEN);
+                if (end_pixel_y <= Map.Get_Tab_Height()) {
+                    end_pixel_y = Map.Get_Tab_Height() - 1;
+                }
+
+                LogicPage->Draw_Line(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, LTGREEN);
+                CNC_LOG_WARN("Render: {},{} -> {},{}", start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y);
+            }
 
             LogicPage->Unlock();
         }
