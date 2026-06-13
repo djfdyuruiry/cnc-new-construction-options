@@ -369,6 +369,13 @@ void GScreenClass::Render(void)
         GraphicViewPortClass* oldpage = Set_Logic_Page(HidPage);
         Draw_It(IsToRedraw);
 
+        if (Map.RallyPointLine.has_value() && LogicPage->Lock()) {
+            const auto& [ startCoord, endCoord ] = Map.RallyPointLine.value();
+
+            LogicPage->Draw_Line(Coord_X(startCoord), Coord_Y(startCoord), Coord_X(endCoord), Coord_Y(endCoord), LTGREEN);
+            LogicPage->Unlock();
+        }
+
         if (Buttons)
             Buttons->Draw_All(false);
 

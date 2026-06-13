@@ -184,15 +184,11 @@ int BuildingClass::Validate(void) const
   *=============================================================================================*/
 bool BuildingClass::Can_Have_Rally_Point() const
 {
-    if (!this->IsOwnedByPlayer) {
+    if (!this->IsOwnedByPlayer || !Class->IsFactory || Class->ToBuild == FACTORY_TYPE_BUILDING) {
        return false;
     }
 
-    auto rally_points_enabled = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
-
-    return rally_points_enabled
-        && Class->IsFactory
-        && Class->ToBuild != FACTORY_TYPE_BUILDING; // rallying makes no sense for buildings
+    return Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, RALLY_POINTS_RULE);
 }
 
 void BuildingClass::Set_Unselected_By_Player(HouseClass* player)
@@ -734,19 +730,22 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
         }
     }
 
-    if (Can_Have_Rally_Point() 
+    if (Can_Have_Rally_Point()
         && Is_Selected_By_Player()
         && Is_Owned_By_Player()
         && RallyPoint
-        && Target_Legal(RallyPoint))
-    {
+        && Target_Legal(RallyPoint)) {
         int startX, startY, endX, endY;
 
         Map.Coord_To_Pixel(Center_Coord(), startX, startY);
         Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
 
-        // BUG: Line flickers if it intercepts certain objects
-        CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
+        Map.RallyPointLine = { XY_Coord(startX, startY), XY_Coord(endX, endY) };
+    } else if (Can_Have_Rally_Point()
+        && !Is_Selected_By_Player()
+        && Is_Owned_By_Player()
+        && RallyPoint) {
+        Map.RallyPointLine.reset();
     }
 
     TechnoClass::Draw_It(x, y, window);
