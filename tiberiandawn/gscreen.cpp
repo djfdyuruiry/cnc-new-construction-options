@@ -372,7 +372,43 @@ void GScreenClass::Render(void)
         if (Map.RallyPointLine.has_value() && LogicPage->Lock()) {
             const auto& [ startCoord, endCoord ] = Map.RallyPointLine.value();
 
-            LogicPage->Draw_Line(Coord_X(startCoord), Coord_Y(startCoord), Coord_X(endCoord), Coord_Y(endCoord), LTGREEN);
+            int pixels[4] { Coord_X(startCoord), Coord_Y(startCoord), Coord_X(endCoord), Coord_Y(endCoord) };
+            auto [ start_x, start_y, end_x, end_y ] = pixels;
+
+            CNC_LOG_WARN("Before: {},{} -> {},{}", start_x, start_y, end_x, end_y);
+
+            if (start_x > 32500) {
+                start_x = 0;
+            }
+            if (end_x > 32500) {
+                end_x = 0;
+            }
+
+            if (start_y > 20000) {
+                start_y = 0;
+            }
+            if (end_y > 20000) {
+                end_y = 0;
+            }
+
+            if (Map.IsSidebarActive && start_x >= Map.SideX) {
+                start_x = Map.SideX - 1;
+            }
+            if (start_y <= Map.Get_Tab_Height()) {
+                start_y = Map.Get_Tab_Height() - 1;
+            }
+
+            // enure end point is in bounds of the map area
+            if (Map.IsSidebarActive && end_x >= Map.SideX) {
+                end_x = Map.SideX - 1;
+            }
+            if (end_y <= Map.Get_Tab_Height()) {
+                end_y = Map.Get_Tab_Height() - 1;
+            }
+            CNC_LOG_WARN("After: {},{} -> {},{}", start_x, start_y, end_x, end_y);
+
+            LogicPage->Draw_Line(start_x, start_y, end_x, end_y, LTGREEN);
+
             LogicPage->Unlock();
         }
 

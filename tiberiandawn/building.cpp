@@ -1338,17 +1338,13 @@ void BuildingClass::AI(void)
         }
     }
 
-    // BUG: Draws over the sidebar slightly (stops after power bar)
-    if (Can_Have_Rally_Point()
-        && Is_Owned_By_Player()
-        && RallyPoint) {
-        if (!Is_Selected_By_Player()
+    // rally point logic
+    if (Can_Have_Rally_Point() && Is_Owned_By_Player() && RallyPoint) {
+        if (
+            !Is_Selected_By_Player()
             || !Target_Legal(RallyPoint)
-            || !Map.In_View(Coord_Cell(Center_Coord()))
-            || !Map.In_View(Coord_Cell(As_Coord(RallyPoint)))
-            //|| (Map.IsSidebarActive && Coord_X(Center_Coord()) >= Map.SideX)
-            //|| (Map.IsSidebarActive && Coord_X(As_Coord(RallyPoint)) >= Map.SideX)
-            ) {
+            || (!Map.In_View(Coord_Cell(Center_Coord())) && !Map.In_View(Coord_Cell(As_Coord(RallyPoint))))
+        ) {
             if (Map.RallyPointLine.has_value()) {
                 //Map.Refresh_RallyLine(); would make the below 'false'
                 Map.Flag_To_Redraw(true);
@@ -1363,22 +1359,25 @@ void BuildingClass::AI(void)
         Map.Coord_To_Pixel(Center_Coord(), startX, startY);
         Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
 
-        int rallyPointStart = XY_Coord(startX, startY);
-        int rallyPointEnd = XY_Coord(endX, endY);
+        auto rallyPointStart = XY_Coord(startX, startY);
+        auto rallyPointEnd = XY_Coord(endX, endY);
 
         if (Map.RallyPointLine.has_value()) {
             if (Map.RallyPointLine->first != rallyPointStart || Map.RallyPointLine->second != rallyPointEnd) {
                 //Map.Refresh_RallyLine(); would make the below 'false'
+
+                // rally point already rendered and location has changed, map needs full redraw
                 Map.Flag_To_Redraw(true);
             } else {
+                // rally point already rendered but location has not changed, no full redraw
                 Map.Flag_To_Redraw(false);
             }
-
-            Map.RallyPointLine = { rallyPointStart, rallyPointEnd };
         } else {
-            Map.RallyPointLine = { rallyPointStart, rallyPointEnd };
+            // rally point not currently rendered, no full redraw
             Map.Flag_To_Redraw(false);
         }
+
+        Map.RallyPointLine = { rallyPointStart, rallyPointEnd };
     }
 }
 
@@ -2304,6 +2303,7 @@ void BuildingClass::Assign_Target(TARGET target)
 
     if (Can_Have_Rally_Point() && Target_Legal(target)) {
         RallyPoint = target;
+
         return;
     }
 
