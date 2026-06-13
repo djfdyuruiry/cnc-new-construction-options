@@ -730,24 +730,6 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
         }
     }
 
-    if (Can_Have_Rally_Point()
-        && Is_Selected_By_Player()
-        && Is_Owned_By_Player()
-        && RallyPoint
-        && Target_Legal(RallyPoint)) {
-        int startX, startY, endX, endY;
-
-        Map.Coord_To_Pixel(Center_Coord(), startX, startY);
-        Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
-
-        Map.RallyPointLine = { XY_Coord(startX, startY), XY_Coord(endX, endY) };
-    } else if (Can_Have_Rally_Point()
-        && !Is_Selected_By_Player()
-        && Is_Owned_By_Player()
-        && RallyPoint) {
-        Map.RallyPointLine.reset();
-    }
-
     TechnoClass::Draw_It(x, y, window);
 }
 
@@ -1353,6 +1335,49 @@ void BuildingClass::AI(void)
                     Mark(MARK_CHANGE);
                 }
             }
+        }
+    }
+
+    // BUG: Draws over the sidebar slightly (stops after power bar)
+    if (Can_Have_Rally_Point()
+        && Is_Owned_By_Player()
+        && RallyPoint) {
+        if (!Is_Selected_By_Player()
+            || !Target_Legal(RallyPoint)
+            || !Map.In_View(Coord_Cell(Center_Coord()))
+            || !Map.In_View(Coord_Cell(As_Coord(RallyPoint)))
+            //|| (Map.IsSidebarActive && Coord_X(Center_Coord()) >= Map.SideX)
+            //|| (Map.IsSidebarActive && Coord_X(As_Coord(RallyPoint)) >= Map.SideX)
+            ) {
+            if (Map.RallyPointLine.has_value()) {
+                //Map.Refresh_RallyLine(); would make the below 'false'
+                Map.Flag_To_Redraw(true);
+            }
+
+            Map.RallyPointLine.reset();
+            return;
+        }
+
+        int startX, startY, endX, endY;
+
+        Map.Coord_To_Pixel(Center_Coord(), startX, startY);
+        Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
+
+        int rallyPointStart = XY_Coord(startX, startY);
+        int rallyPointEnd = XY_Coord(endX, endY);
+
+        if (Map.RallyPointLine.has_value()) {
+            if (Map.RallyPointLine->first != rallyPointStart || Map.RallyPointLine->second != rallyPointEnd) {
+                //Map.Refresh_RallyLine(); would make the below 'false'
+                Map.Flag_To_Redraw(true);
+            } else {
+                Map.Flag_To_Redraw(false);
+            }
+
+            Map.RallyPointLine = { rallyPointStart, rallyPointEnd };
+        } else {
+            Map.RallyPointLine = { rallyPointStart, rallyPointEnd };
+            Map.Flag_To_Redraw(false);
         }
     }
 }
