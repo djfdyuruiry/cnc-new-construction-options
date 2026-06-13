@@ -45,6 +45,9 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include <cmath>
+#include <algorithm>
+
 
 #include "common/filepcx.h"
 
@@ -384,27 +387,43 @@ void GScreenClass::Render(void)
             if (start_ok || end_ok) {
                 CNC_LOG_WARN("XY: {},{} -> {},{}", start_x, start_y, end_x, end_y);
 
+                // one of the rally lines points is out of view
                 if (start_ok && !end_ok) {
-                    // draw from start to edge of screen
+                    double dx = (double)end_x - start_x;
+                    double dy = (double)end_y - start_y;
+                    double mag = std::sqrt(dx * dx + dy * dy);
+                    if (mag > 0) {
+                        dx /= mag; dy /= mag;
+                        double limitW = Map.IsSidebarActive ? Map.SideX : SeenBuff.Get_Width();
+                        double limitH = SeenBuff.Get_Height();
+                        double limitYMin = Map.Get_Tab_Height();
+                        double tx = (dx > 0) ? (limitW - start_pixel_x) / dx : (dx < 0) ? (0 - start_pixel_x) / dx : 1e18;
+                        double ty = (dy > 0) ? (limitH - start_pixel_y) / dy : (dy < 0) ? (limitYMin - start_pixel_y) / dy : 1e18;
+                        double t = std::min(tx, ty);
+                        end_pixel_x = (int)(start_pixel_x + t * dx);
+                        end_pixel_y = (int)(start_pixel_y + t * dy);
+
+                        // BUG: spills over sidebar and tabs
+                    }
                 } else if (end_ok && !start_ok) {
-                    // draw from end to edge of screen
+                    double dx = (double)start_x - end_x;
+                    double dy = (double)start_y - end_y;
+                    double mag = std::sqrt(dx * dx + dy * dy);
+                    if (mag > 0) {
+                        dx /= mag; dy /= mag;
+                        double limitW = Map.IsSidebarActive ? Map.SideX : SeenBuff.Get_Width();
+                        double limitH = SeenBuff.Get_Height();
+                        double limitYMin = Map.Get_Tab_Height();
+                        double tx = (dx > 0) ? (limitW - end_pixel_x) / dx : (dx < 0) ? (0 - end_pixel_x) / dx : 1e18;
+                        double ty = (dy > 0) ? (limitH - end_pixel_y) / dy : (dy < 0) ? (limitYMin - end_pixel_y) / dy : 1e18;
+                        double t = std::min(tx, ty);
+                        start_pixel_x = (int)(end_pixel_x + t * dx);
+                        start_pixel_y = (int)(end_pixel_y + t * dy);
+
+                        // BUG: spills over sidebar and tabs
+                    }
                 }
 
-                if (Map.IsSidebarActive && start_pixel_x >= Map.SideX) {
-                    start_pixel_x = Map.SideX - 1;
-                }
-
-                if (Map.IsSidebarActive && end_pixel_x >= Map.SideX) {
-                    end_pixel_x = Map.SideX - 1;
-                }
-
-                if (start_pixel_y <= Map.Get_Tab_Height()) {
-                    start_pixel_y = Map.Get_Tab_Height() - 1;
-                }
-
-                if (end_pixel_y <= Map.Get_Tab_Height()) {
-                    end_pixel_y = Map.Get_Tab_Height() - 1;
-                }
 
                 LogicPage->Draw_Line(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, LTGREEN);
                 CNC_LOG_WARN("Render: {},{} -> {},{}", start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y);
