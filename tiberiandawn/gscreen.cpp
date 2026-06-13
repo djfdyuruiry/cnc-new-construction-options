@@ -385,13 +385,12 @@ void GScreenClass::Render(void)
             const auto end_ok = Map.Coord_To_Pixel(As_Coord(VisibleRallyPointSource->RallyPoint), end_pixel_x, end_pixel_y);
 
             if (start_ok || end_ok) {
-                CNC_LOG_WARN("XY: {},{} -> {},{}", start_x, start_y, end_x, end_y);
-
                 // one of the rally lines points is out of view
                 if (start_ok && !end_ok) {
-                    double dx = (double)end_x - start_x;
-                    double dy = (double)end_y - start_y;
-                    double mag = std::sqrt(dx * dx + dy * dy);
+                    // calculate the line from start point to the edge of the screen, in the direction of the end point
+                    auto dx = static_cast<double>(end_x) - start_x;
+                    auto dy = static_cast<double>(end_y) - start_y;
+                    auto mag = std::sqrt(dx * dx + dy * dy);
                     if (mag > 0) {
                         dx /= mag; dy /= mag;
                         double limitW = Map.IsSidebarActive ? Map.SideX - 1 : SeenBuff.Get_Width() - 1;
@@ -404,6 +403,7 @@ void GScreenClass::Render(void)
                         end_pixel_y = (int)(start_pixel_y + t * dy);
                     }
                 } else if (end_ok && !start_ok) {
+                    // calculate the line from end point to the edge of the screen, in the direction of the start point
                     double dx = (double)start_x - end_x;
                     double dy = (double)start_y - end_y;
                     double mag = std::sqrt(dx * dx + dy * dy);
@@ -420,13 +420,13 @@ void GScreenClass::Render(void)
                     }
                 }
 
+                // BUG: correctly prevents line drawing over tabs or sidebar but can cause pitch/angle of the line to be slightly off
                 if (Map.IsSidebarActive && start_pixel_x >= Map.SideX) start_pixel_x = Map.SideX - 1;
                 if (Map.IsSidebarActive && end_pixel_x >= Map.SideX) end_pixel_x = Map.SideX - 1;
                 if (start_pixel_y < Map.Get_Tab_Height()) start_pixel_y = Map.Get_Tab_Height();
                 if (end_pixel_y < Map.Get_Tab_Height()) end_pixel_y = Map.Get_Tab_Height();
 
                 LogicPage->Draw_Line(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, LTGREEN);
-                CNC_LOG_WARN("Render: {},{} -> {},{}", start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y);
             }
 
             LogicPage->Unlock();
