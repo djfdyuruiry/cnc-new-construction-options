@@ -394,16 +394,14 @@ void GScreenClass::Render(void)
                     double mag = std::sqrt(dx * dx + dy * dy);
                     if (mag > 0) {
                         dx /= mag; dy /= mag;
-                        double limitW = Map.IsSidebarActive ? Map.SideX : SeenBuff.Get_Width();
-                        double limitH = SeenBuff.Get_Height();
+                        double limitW = Map.IsSidebarActive ? Map.SideX - 1 : SeenBuff.Get_Width() - 1;
+                        double limitH = SeenBuff.Get_Height() - 1;
                         double limitYMin = Map.Get_Tab_Height();
                         double tx = (dx > 0) ? (limitW - start_pixel_x) / dx : (dx < 0) ? (0 - start_pixel_x) / dx : 1e18;
                         double ty = (dy > 0) ? (limitH - start_pixel_y) / dy : (dy < 0) ? (limitYMin - start_pixel_y) / dy : 1e18;
                         double t = std::min(tx, ty);
                         end_pixel_x = (int)(start_pixel_x + t * dx);
                         end_pixel_y = (int)(start_pixel_y + t * dy);
-
-                        // BUG: spills over sidebar and tabs
                     }
                 } else if (end_ok && !start_ok) {
                     double dx = (double)start_x - end_x;
@@ -411,19 +409,21 @@ void GScreenClass::Render(void)
                     double mag = std::sqrt(dx * dx + dy * dy);
                     if (mag > 0) {
                         dx /= mag; dy /= mag;
-                        double limitW = Map.IsSidebarActive ? Map.SideX : SeenBuff.Get_Width();
-                        double limitH = SeenBuff.Get_Height();
+                        double limitW = Map.IsSidebarActive ? Map.SideX - 1 : SeenBuff.Get_Width() - 1;
+                        double limitH = SeenBuff.Get_Height() - 1;
                         double limitYMin = Map.Get_Tab_Height();
                         double tx = (dx > 0) ? (limitW - end_pixel_x) / dx : (dx < 0) ? (0 - end_pixel_x) / dx : 1e18;
                         double ty = (dy > 0) ? (limitH - end_pixel_y) / dy : (dy < 0) ? (limitYMin - end_pixel_y) / dy : 1e18;
                         double t = std::min(tx, ty);
                         start_pixel_x = (int)(end_pixel_x + t * dx);
                         start_pixel_y = (int)(end_pixel_y + t * dy);
-
-                        // BUG: spills over sidebar and tabs
                     }
                 }
 
+                if (Map.IsSidebarActive && start_pixel_x >= Map.SideX) start_pixel_x = Map.SideX - 1;
+                if (Map.IsSidebarActive && end_pixel_x >= Map.SideX) end_pixel_x = Map.SideX - 1;
+                if (start_pixel_y < Map.Get_Tab_Height()) start_pixel_y = Map.Get_Tab_Height();
+                if (end_pixel_y < Map.Get_Tab_Height()) end_pixel_y = Map.Get_Tab_Height();
 
                 LogicPage->Draw_Line(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, LTGREEN);
                 CNC_LOG_WARN("Render: {},{} -> {},{}", start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y);
