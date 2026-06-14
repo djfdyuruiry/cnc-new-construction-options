@@ -857,11 +857,15 @@ bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool prevent_
 		**	building located there.
 		*/
 		if ((*this)[newcell].Owner == house) {
-			if (allow_building_beside_walls
+			if (
+			    !allow_building_beside_walls
 			    && (*this)[newcell].Overlay != OVERLAY_NONE
-			    && OverlayTypeClass::As_Reference((*this)[newcell].Overlay).IsWall) {
-				return true;
+			    && OverlayTypeClass::As_Reference((*this)[newcell].Overlay).IsWall
+			) {
+				return false;
 			}
+
+		    return true;
 		}
 
 		TechnoClass* base = (*this)[newcell].Cell_Techno();

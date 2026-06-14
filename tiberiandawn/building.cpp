@@ -5635,11 +5635,15 @@ static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allow_bu
         **	building located there.
         */
         if (Map[newcell].Owner == house->Class->House) {
-            if (allow_building_beside_walls
+            if (
+                !allow_building_beside_walls
                 && Map[newcell].Overlay != OVERLAY_NONE
-                && OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall) {
-                return true;
+                && OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall
+            ) {
+                return false;
             }
+
+            return true;
         }
 
         BuildingClass* base = Map[newcell].Cell_Building();

@@ -12,6 +12,7 @@
 #include "debugstring.h"
 #include "graphicsviewport.h"
 #include "keyframe.h"
+#include "logger.h"
 #include "shape.h"
 #include <string.h>
 #include <stdarg.h>
@@ -264,6 +265,17 @@ void BF_Ghost_Fading_Trans(int width,
                            unsigned char* fade_tab,
                            int count)
 {
+    if (!fade_tab || !ghost_lookup || !ghost_tab) {
+        CNC_LOG_ERROR(
+            "BF_Ghost_Fading_Trans called with one or more pointers: fade_tab is null = {}, ghost_lookup is null = {}, "
+            "ghost_tab is null = {}",
+            fade_tab == nullptr,
+            ghost_lookup == nullptr,
+            ghost_tab == nullptr
+        );
+        return;
+    }
+
     while (height--) {
         for (int i = width; i > 0; --i) {
             unsigned char sbyte = *src++;
