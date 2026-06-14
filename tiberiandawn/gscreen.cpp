@@ -44,10 +44,9 @@
  *   GScreenClass::Remove_A_Button -- Removes a gadget from the game input system.             *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#include "function.h"
 #include <cmath>
-#include <algorithm>
 
+#include "function.h"
 
 #include "common/filepcx.h"
 

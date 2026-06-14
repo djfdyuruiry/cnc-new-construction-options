@@ -2277,7 +2277,6 @@ void BuildingClass::Assign_Target(TARGET target)
 
     if (Can_Have_Rally_Point() && Target_Legal(target)) {
         RallyPoint = target;
-
         return;
     }
 
