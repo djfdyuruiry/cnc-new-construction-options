@@ -4450,7 +4450,7 @@ static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distanc
 		}
 
 	    if (allow_building_beside_walls
-	        && Map[adjcell].Overlay == OVERLAY_NONE
+	        && Map[adjcell].Overlay != OVERLAY_NONE
 	        && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
 	        return;
 	    }
