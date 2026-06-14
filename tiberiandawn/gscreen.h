@@ -102,6 +102,15 @@ public:
     virtual void Code_Pointers(void);
     virtual void Decode_Pointers(void);
 
+    bool Rally_Point_Visible() const;
+
+    /*
+    ** When the building currently selected by the player has a rally point set, the line from the
+    ** structure to the rally point should be rendered. This pointer is set by BuildingClass::AI so
+    ** ::Render can use it's center point and rally point target to draw a line between them.
+    */
+    BuildingClass const* VisibleRallyPointSource;
+
     /*
     **	This points to the buttons that are used for input. All of the derived classes will
     **	attached their specific buttons to this list.
@@ -124,6 +133,8 @@ private:
     **	class can perform it's rendering.
     */
     unsigned IsToUpdate : 1;
+
+    void Render_Rally_Point_Line() const;
 
     JSON_FUNCTIONS(GScreenClass)
 private:

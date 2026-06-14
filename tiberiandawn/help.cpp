@@ -263,9 +263,7 @@ void HelpClass::Draw_It(bool forced)
     TabClass::Draw_It(forced);
 
     if (Text != TXT_NONE && (forced || !CountDownTimer.Time())) {
-
         if (LogicPage->Lock()) {
-
             //		Fancy_Text_Print(Text, DrawX, DrawY, Color, BLACK, TPF_6POINT|TPF_NOSHADOW);
             Fancy_Text_Print(Text, DrawX, DrawY, Color, BLACK, TPF_MAP | TPF_NOSHADOW);
             LogicPage->Draw_Rect(DrawX - 1, DrawY - 1, DrawX + Width + 1, DrawY + FontHeight, Color);

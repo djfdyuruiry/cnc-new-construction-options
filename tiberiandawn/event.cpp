@@ -785,10 +785,8 @@ void EventClass::Execute(void)
     case SET_RALLY:
         if (const auto building = As_Building(Data.NavCom.Whom))
         {
-            if (building->RallyPoint != Data.NavCom.Where)
-            {
+            if (building->Can_Have_Rally_Point() && Target_Legal(Data.NavCom.Where)) {
                 building->RallyPoint = Data.NavCom.Where;
-                Map.Flag_To_Redraw(true);
             }
         }
         break;
