@@ -1062,4 +1062,8 @@ void GScreenClass::Code_Pointers(void)
  *=============================================================================================*/
 void GScreenClass::Decode_Pointers(void)
 {
+    if (VisibleRallyPointSource != NULL) {
+        static_cast<BuildingClass const*&>(VisibleRallyPointSource) = static_cast<BuildingClass*>(As_Object(TARGET_SAFE_CAST(VisibleRallyPointSource), false));
+        Check_Ptr((void*)VisibleRallyPointSource, __FILE__, __LINE__);
+    }
 }

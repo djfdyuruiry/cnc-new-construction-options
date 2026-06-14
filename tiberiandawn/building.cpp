@@ -184,7 +184,7 @@ int BuildingClass::Validate(void) const
   *=============================================================================================*/
 bool BuildingClass::Can_Have_Rally_Point() const
 {
-    if (!this->IsOwnedByPlayer || !Class->IsFactory || Class->ToBuild == FACTORY_TYPE_BUILDING) {
+    if (!Is_Owned_By_Player() || !Class->IsFactory || Class->ToBuild == FACTORY_TYPE_BUILDING) {
        return false;
     }
 
@@ -1339,22 +1339,19 @@ void BuildingClass::AI(void)
     }
 
     // rally point logic
-    if (Can_Have_Rally_Point() && Is_Owned_By_Player() && RallyPoint) {
-        if (
-            !Is_Selected_By_Player()
-            || !Target_Legal(RallyPoint)
-            || (!Map.In_View(Coord_Cell(Center_Coord())) && !Map.In_View(Coord_Cell(As_Coord(RallyPoint))))
-        ) {
-            if (Map.VisibleRallyPointSource != nullptr) {
-                //Map.Refresh_RallyLine(); would make the below 'false'
-                Map.Flag_To_Redraw(true);
-            }
+    if (!Can_Have_Rally_Point() || !Target_Legal(RallyPoint)) {
+        return;
+    }
 
-            Map.VisibleRallyPointSource = nullptr;
-            return;
-        }
-
+    if (Is_Selected_By_Player()) {
+        // GScreenClass::Render will use this reference to draw any visible portion of the rally line to screen
         Map.VisibleRallyPointSource = this;
+    } else if (Map.VisibleRallyPointSource == this) {
+        // we are about to remove the rally point source, so ensure Map render routine clears any visible portion of
+        // the rally line from the screen
+        Map.Flag_To_Redraw(true);
+
+        Map.VisibleRallyPointSource = nullptr;
     }
 }
 

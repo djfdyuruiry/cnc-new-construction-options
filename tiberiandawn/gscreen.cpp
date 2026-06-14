@@ -72,6 +72,7 @@ GScreenClass::GScreenClass(void)
 {
     IsToUpdate = true;
     IsToRedraw = true;
+    VisibleRallyPointSource = nullptr;
 }
 
 /***********************************************************************************************
@@ -156,6 +157,7 @@ void GScreenClass::Init_Clear(void)
     */
     HiddenPage.Clear();
     IsToRedraw = true;
+    VisibleRallyPointSource = nullptr;
 }
 
 /***********************************************************************************************
@@ -366,7 +368,8 @@ void GScreenClass::Render(void)
     //	IsToRedraw = true;
     //}
 
-    if (Map.VisibleRallyPointSource != nullptr) {
+    if (Rally_Point_Visible()) {
+        // TODO: inefficient, would be better to replicate the rubber band logic to refresh only the cells below rally point line
         Map.Flag_To_Redraw(true);
     }
 
@@ -376,60 +379,8 @@ void GScreenClass::Render(void)
         GraphicViewPortClass* oldpage = Set_Logic_Page(HidPage);
         Draw_It(IsToRedraw);
 
-        if (Map.VisibleRallyPointSource != nullptr) {
-            int coords[4] { Coord_X(VisibleRallyPointSource->Center_Coord()), Coord_Y(VisibleRallyPointSource->Center_Coord()), Coord_X(As_Coord(VisibleRallyPointSource->RallyPoint)), Coord_Y(As_Coord(VisibleRallyPointSource->RallyPoint))};
-            const auto& [ start_x, start_y, end_x, end_y ] = coords;
-
-            int start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y;
-            const auto start_ok = Map.Coord_To_Pixel(VisibleRallyPointSource->Center_Coord(), start_pixel_x, start_pixel_y);
-            const auto end_ok = Map.Coord_To_Pixel(As_Coord(VisibleRallyPointSource->RallyPoint), end_pixel_x, end_pixel_y);
-
-            if (start_ok || end_ok) {
-                // one of the rally lines points is out of view
-                if (start_ok && !end_ok) {
-                    // calculate the line from start point to the edge of the screen, in the direction of the end point
-                    auto dx = static_cast<double>(end_x) - start_x;
-                    auto dy = static_cast<double>(end_y) - start_y;
-                    auto mag = std::sqrt(dx * dx + dy * dy);
-                    if (mag > 0) {
-                        dx /= mag; dy /= mag;
-                        double limitW = Map.IsSidebarActive ? Map.SideX - 1 : SeenBuff.Get_Width() - 1;
-                        double limitH = SeenBuff.Get_Height() - 1;
-                        double limitYMin = Map.Get_Tab_Height();
-                        double tx = (dx > 0) ? (limitW - start_pixel_x) / dx : (dx < 0) ? (0 - start_pixel_x) / dx : 1e18;
-                        double ty = (dy > 0) ? (limitH - start_pixel_y) / dy : (dy < 0) ? (limitYMin - start_pixel_y) / dy : 1e18;
-                        double t = std::min(tx, ty);
-                        end_pixel_x = (int)(start_pixel_x + t * dx);
-                        end_pixel_y = (int)(start_pixel_y + t * dy);
-                    }
-                } else if (end_ok && !start_ok) {
-                    // calculate the line from end point to the edge of the screen, in the direction of the start point
-                    double dx = (double)start_x - end_x;
-                    double dy = (double)start_y - end_y;
-                    double mag = std::sqrt(dx * dx + dy * dy);
-                    if (mag > 0) {
-                        dx /= mag; dy /= mag;
-                        double limitW = Map.IsSidebarActive ? Map.SideX - 1 : SeenBuff.Get_Width() - 1;
-                        double limitH = SeenBuff.Get_Height() - 1;
-                        double limitYMin = Map.Get_Tab_Height();
-                        double tx = (dx > 0) ? (limitW - end_pixel_x) / dx : (dx < 0) ? (0 - end_pixel_x) / dx : 1e18;
-                        double ty = (dy > 0) ? (limitH - end_pixel_y) / dy : (dy < 0) ? (limitYMin - end_pixel_y) / dy : 1e18;
-                        double t = std::min(tx, ty);
-                        start_pixel_x = (int)(end_pixel_x + t * dx);
-                        start_pixel_y = (int)(end_pixel_y + t * dy);
-                    }
-                }
-
-                // BUG: correctly prevents line drawing over tabs or sidebar but can cause pitch/angle of the line to be slightly off
-                if (Map.IsSidebarActive && start_pixel_x >= Map.SideX) start_pixel_x = Map.SideX - 1;
-                if (Map.IsSidebarActive && end_pixel_x >= Map.SideX) end_pixel_x = Map.SideX - 1;
-                if (start_pixel_y < Map.Get_Tab_Height()) start_pixel_y = Map.Get_Tab_Height();
-                if (end_pixel_y < Map.Get_Tab_Height()) end_pixel_y = Map.Get_Tab_Height();
-
-                LogicPage->Draw_Line(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, LTGREEN);
-            }
-
-            LogicPage->Unlock();
+        if (Rally_Point_Visible()) {
+            Render_Rally_Point_Line();
         }
 
         if (Buttons)
@@ -544,14 +495,145 @@ void GScreenClass::Blit_Display(void)
 #endif //(0)
 }
 
+bool GScreenClass::Rally_Point_Visible() const
+{
+    return Map.VisibleRallyPointSource != nullptr
+        && Map.VisibleRallyPointSource->Can_Have_Rally_Point()
+        && Target_Legal(Map.VisibleRallyPointSource->RallyPoint);
+}
+
+/**
+ * Given a path between two co-ords (where the end point is a co-ord that is not currently
+ * visible to the player) determine the last visible pixel of the path (at the screen edge).
+ *
+ * Used to partially draw a line which is cut off by the edge of these screen.
+ */
+static bool Get_Screen_Edge_Pixel_For_Path(
+    const int& path_start_coord_x,
+    const int& path_start_coord_y,
+    const int& path_end_coord_x,
+    const int& path_end_coord_y,
+    const int& path_start_pixel_x,
+    const int& path_start_pixel_y,
+    int& path_end_pixel_x,
+    int& path_end_pixel_y
+)
+{
+    // calculate the line from lhs point to the edge of the screen, in the direction of the rhs point
+    auto dirX = static_cast<double>(path_end_coord_x) - path_start_coord_x;
+    auto dirY = static_cast<double>(path_end_coord_y) - path_start_coord_y;
+
+    const auto length = std::sqrt(dirX * dirX + dirY * dirY);
+
+    if (length < 1) {
+        return false;
+    }
+
+    dirX /= length;
+    dirY /= length;
+
+    const auto rightEdge = static_cast<double>(Map.IsSidebarActive ? Map.SideX - 1 : SeenBuff.Get_Width() - 1);
+    const auto bottomEdge = static_cast<double>(SeenBuff.Get_Height()) - 1;
+    const auto topEdge = static_cast<double>(Map.Get_Tab_Height());
+
+    // Calculate the distance to the closest screen edge to clip the line
+    const auto tToXEdge = (dirX > 0)
+        ? (rightEdge - path_start_pixel_x) / dirX
+        : (dirX < 0) ? (0 - path_start_pixel_x) / dirX : 1e18;
+    const auto tToYEdge = (dirY > 0)
+        ? (bottomEdge - path_start_pixel_y) / dirY
+        : (dirY < 0) ? (topEdge - path_start_pixel_y) / dirY : 1e18;
+
+    const auto tToEdge = std::min(tToXEdge, tToYEdge);
+
+    path_end_pixel_x = static_cast<int>(path_start_pixel_x + tToEdge * dirX);
+    path_end_pixel_y = static_cast<int>(path_start_pixel_y + tToEdge * dirY);
+
+    return true;
+}
+
+void GScreenClass::Render_Rally_Point_Line() const
+{
+    if (!LogicPage->Lock()) {
+        return;
+    }
+
+    // unpack rally start and end point co-ords
+    int coords[4] {
+        Coord_X(VisibleRallyPointSource->Center_Coord()),
+        Coord_Y(VisibleRallyPointSource->Center_Coord()),
+        Coord_X(As_Coord(VisibleRallyPointSource->RallyPoint)),
+        Coord_Y(As_Coord(VisibleRallyPointSource->RallyPoint))
+    };
+    const auto& [ start_x, start_y, end_x, end_y ] = coords;
+
+    // attempt to convert co-ords to pixel values
+    int start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y;
+    const auto start_ok = Map.Coord_To_Pixel(VisibleRallyPointSource->Center_Coord(), start_pixel_x, start_pixel_y);
+    const auto end_ok = Map.Coord_To_Pixel(As_Coord(VisibleRallyPointSource->RallyPoint), end_pixel_x, end_pixel_y);
+
+    if (!start_ok && ! end_ok) {
+        // neither rally point is in a viewable section of the map, abort
+        LogicPage->Unlock();
+        return;
+    }
+
+    // one of the rally lines points is out of view
+    if (start_ok && !end_ok) {
+        // calculate the last visible pixel of the line from start point to the end point
+        Get_Screen_Edge_Pixel_For_Path(
+            start_x,
+            start_y,
+            end_x,
+            end_y,
+            start_pixel_x,
+            start_pixel_y,
+            end_pixel_x,
+            end_pixel_y
+        );
+    } else if (end_ok && !start_ok) {
+        // calculate the last visible pixel of the line from end point to the start point
+        Get_Screen_Edge_Pixel_For_Path(
+            end_x,
+            end_y,
+            start_x,
+            start_y,
+            end_pixel_x,
+            end_pixel_y,
+            start_pixel_x,
+            start_pixel_y
+        );
+    }
+
+    // BUG: checks prevent line drawing over sidebar or tabs but can cause pitch/angle of the line to be slightly off
+    if (Map.IsSidebarActive && start_pixel_x >= Map.SideX) {
+        start_pixel_x = Map.SideX - 1;
+    }
+    if (start_pixel_y < Map.Get_Tab_Height()) {
+        start_pixel_y = Map.Get_Tab_Height() + 1;
+    }
+
+    if (Map.IsSidebarActive && end_pixel_x >= Map.SideX) {
+        end_pixel_x = Map.SideX - 1;
+    }
+    if (end_pixel_y < Map.Get_Tab_Height()) {
+        end_pixel_y = Map.Get_Tab_Height() + 1;
+    }
+
+    LogicPage->Draw_Line(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, LTGREEN);
+    LogicPage->Unlock();
+}
+
 TO_JSON(GScreenClass)
 {
     BITFIELD_TO_JSON(IsToRedraw);
     BITFIELD_TO_JSON(IsToUpdate);
+    OBJECT_TARGET_PTR_TO_JSON(VisibleRallyPointSource);
 }
 
 FROM_JSON(GScreenClass)
 {
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsToUpdate);
+    TARGET_CONST_PTR_FROM_JSON_WITH_TYPE(VisibleRallyPointSource, BuildingClass);
 }
