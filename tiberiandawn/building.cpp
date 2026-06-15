@@ -5707,7 +5707,7 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        if (prevent_building_in_shroud && !Map.In_Radar(cell)) {
+        if (prevent_building_in_shroud && !Map[cell].Is_Visible(PlayerPtr)) {
             return false;
         }
     }
