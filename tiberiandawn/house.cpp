@@ -8482,7 +8482,7 @@ TO_JSON(HouseClass)
     FIELD_TO_JSON(IQ);
     CONVERT_TD_FIELD_TO_JSON(Difficulty);
 #endif
-    FIELD_TO_JSON(Allies);
+    BITFIELD_OF_WIDTH_TO_JSON(Allies, HOUSE_COUNT);
     FIELD_TO_JSON(AlertTime);
     FIELD_TO_JSON(BorrowedTime);
     FIELD_TO_JSON(FreeHarvester);
@@ -8502,6 +8502,8 @@ TO_JSON(HouseClass)
 
     // Class field
     FIELD_VALUE_TO_JSON(Class, TdTypeConverter::To_String(p.Class == nullptr ? HOUSE_NONE : p.Class->House));
+
+    FIELD_TO_JSON(Regions);
 }
 
 FROM_JSON(HouseClass)
@@ -8638,7 +8640,7 @@ FROM_JSON(HouseClass)
     FIELD_FROM_JSON(IQ);
     PARSE_TD_FIELD_FROM_JSON(HouseClass, Difficulty, DiffType);
 #endif
-    FIELD_FROM_JSON(Allies);
+    BITFIELD_OF_WIDTH_FROM_JSON(HouseClass, Allies, HOUSE_COUNT);
     FIELD_FROM_JSON(AlertTime);
     FIELD_FROM_JSON(BorrowedTime);
     FIELD_FROM_JSON(FreeHarvester);
@@ -8655,6 +8657,7 @@ FROM_JSON(HouseClass)
     FIELD_FROM_JSON(NukeDest);
     FIELD_FROM_JSON(VisibleCredits);
     FIELD_FROM_JSON(DebugUnlockBuildables);
+    FIELD_FROM_JSON(Regions);
 
     // Class field
     const_cast<HouseTypeClass const*&>(p.Class) = reinterpret_cast<HouseTypeClass const*>(
