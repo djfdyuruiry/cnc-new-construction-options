@@ -846,7 +846,7 @@ bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool prevent_
 			continue;
 		}
 
-		if (prevent_building_in_shroud && !In_Radar(cell))
+		if (prevent_building_in_shroud && !(*this)[newcell].Is_Visible(PlayerPtr))
 		{
 			return false;
 		}
@@ -947,8 +947,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	while (*ptr != REFRESH_EOL) {
 		CELL cell = trycell + *ptr++;
 
-        // BUG: Doesn't prevent building in shroud
-		if (prevent_building_in_shroud && !Map.In_Radar(cell)) {
+		if (prevent_building_in_shroud && !Map[cell].Is_Visible(PlayerPtr)) {
 			return false;
 		}
 	}

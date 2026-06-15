@@ -4449,14 +4449,13 @@ static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distanc
 			continue;
 		}
 
-	    if (!allow_building_beside_walls
-	        && Map[adjcell].Overlay != OVERLAY_NONE
-	        && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall) {
-	        return;
-	    }
+	    const auto adjcell_contains_wall = Map[adjcell].Overlay != OVERLAY_NONE
+            && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall;
 
-		if (!prevent_building_in_shroud || Map.In_Radar(adjcell)) {
-			placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
+		if (!prevent_building_in_shroud || Map[adjcell].Is_Visible(PlayerPtr)) {
+		    if (!adjcell_contains_wall || allow_building_beside_walls) {
+		        placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
+		    }
 		}
 
 		Scan_For_Valid_Placement(adjcell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1);

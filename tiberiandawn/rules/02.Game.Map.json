@@ -8,13 +8,13 @@
       "name": "PreventBuildingInShroud",
       "type": "bool",
       "default": true,
-      "comment": "(**NOTE: Broken**) Prevent a player from placing a building inside the shroud/fog of war."
+      "comment": "Prevent a player from placing a building inside the shroud/fog of war."
     },
     {
       "name": "AllowBuildingBesideWalls",
       "type": "bool",
       "default": true,
-      "comment": "Allow building structures off player walls. (Known issue: if turned off the game shows White instead of Red tiles when you try to place beside walls, but it does work - it won't let you place the building)"
+      "comment": "Allow building structures off player walls."
     },
     {
       "name": "TiberiumGrows",
