@@ -1165,7 +1165,7 @@ void Decode_All_Pointers(const HousesType& player_house)
     ** can change colors, this fix only makes sense on multiplayer houses
     ** - mrparrot 07/12/2021
     */
-    for (HousesType house = HOUSE_MULTI1; house <= HOUSE_MULTI6; house++) {
+    for (HousesType house = HOUSE_MULTI1; house <= HOUSE_MULTI6; ++house) {
         HouseClass* hptr = HouseClass::As_Pointer(house);
         if (hptr && hptr->IsActive) {
             hptr->Init_Data(hptr->RemapColor, hptr->ActLike, hptr->Credits);

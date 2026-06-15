@@ -79,6 +79,16 @@ public:
         Threat = 0;
     }
 
+    friend void to_json(nlohmann::json& j, const RegionClass& p)
+    {
+        FIELD_TO_JSON(Threat);
+    }
+
+    friend void from_json(const nlohmann::json& j, RegionClass& p)
+    {
+        FIELD_FROM_JSON(Threat);
+    }
+
 protected:
     int Threat;
 };

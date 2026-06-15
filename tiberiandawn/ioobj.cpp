@@ -1340,6 +1340,16 @@ void HouseClass::Decode_Pointers(void)
     */
     ((HouseTypeClass const*&)Class) = &HouseTypeClass::As_Reference((HousesType) * ((intptr_t*)&Class));
     Check_Ptr((void*)Class, __FILE__, __LINE__);
+
+    if (RemapTable == nullptr) {
+        /*
+        ** We have loaded a house class into memory that is missing a remap table, so reset it to default.
+        ** This is normally important when a non-multiplayer class is present in a multiplayer scenario -
+        ** the multiplayer remap logic uses the HouseClass field instead of the reference to HouseTypeClass.
+        */
+        RemapTable = Class->RemapTable;
+    }
+    Check_Ptr((void*)RemapTable, __FILE__, __LINE__);
 }
 
 /***********************************************************************************************
