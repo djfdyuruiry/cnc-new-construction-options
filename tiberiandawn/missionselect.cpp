@@ -36,36 +36,156 @@ protected:
     }
 };
 
-std::string Build_Mission_Description(
+struct MissionVariables
+{
+    int Number;
+    ScenarioPlayerType Player;
+    HousesType House;
+    ScenarioDirType Direction;
+    ScenarioVarType Variant;
+};
+
+// lookups that use reference data from map selection screens to get the country name TXT value
+
+static const auto gdi_country_name_lookup = [](const int& index) {
+    if (index > 21) {
+        return -1;
+    }
+
+    // first two GDI missions have country stored at the end of the lookup, so treat wrap around negative indexes
+    if (index < 0) {
+        return CountryNames[GDIStats[21].nameindex];
+    }
+
+    return CountryNames[GDIStats[index].nameindex];
+};
+
+static const auto nod_country_name_lookup = [](const int& index) {
+    if (index > 22) {
+        return -1;
+    }
+
+    return CountryNames[NodStats[index].nameindex];
+};
+
+/**
+ * Build a human readable description for a given mission using it's metadata.
+ */
+static std::string Build_Mission_Description(
     const ScenarioPlayerType player,
     const int scenario_number,
     const ScenarioDirType direction,
     const ScenarioVarType variation,
-    const std::optional<std::string>& mission_name
+    const std::optional<std::string>& mission_name,
+    const std::optional<std::string>& country
 )
 {
-    auto mission_name_str = mission_name.value_or("");
+    auto mission_description = mission_name.value_or("");
 
+    // if no mission name was found in the INI files, build a default description using metadata
     if (!mission_name.has_value()) {
+        auto country_name_str = country.value_or("");
         auto direction_str = TdTypeConverter::To_String(direction);
 
+        CncStringUtils::To_Title_Case(country_name_str);
         CncStringUtils::To_Title_Case(direction_str);
 
-        mission_name_str = std::format(
-            "{}{}({})",
-            direction_str,
-            direction == SCEN_DIR_EAST ? "  " : " ",
-            TdTypeConverter::To_String(variation)
-        );
+        // {country name} {direction} ({variation})
+        mission_description =
+            country_name_str + (country.has_value() ? " " : "") +
+            std::format("({} {})", direction_str, TdTypeConverter::To_String(variation))
+        ;
     }
 
+    // {campaign player}: Mission {number} - {mission description}
     return std::format(
         "{}{}: Mission {:>2} - {}",
         std::string(sizeof(int), ' '), // leading spaces are to maintain compatibility with drawing logic
-        TdTypeConverter::To_String(player),
+        player == SCEN_PLAYER_JP ? "Funpark" : TdTypeConverter::To_String(player),
         scenario_number,
-        mission_name_str
+        mission_description
     );
+}
+
+/**
+ * Find any missions between 1-20 for all three single player campaigns (GDI, NOD and Funpark). Any scenario INI
+ * present will be loaded into the mission list, with required metadata to enable correct loading of the mission.
+ *
+ * Country names are retrieved using the reference tables from map selection logic, if a scenario name is present in
+ * the INI file it overrides country name.
+ */
+static void Populate_Mission_List(EListClass& mission_list, std::vector<MissionVariables>& mission_metadata)
+{
+    for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP }) {
+        /*
+        ** Load mix files for GDI/NOD so we can enumerate scenario INI files.
+        */
+        RequiredCD = player;
+
+        if (!Force_CD_Available(player)) {
+            Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), player);
+        }
+
+        const auto& country_name_lookup = player == SCEN_PLAYER_GDI
+            ? gdi_country_name_lookup
+            : nod_country_name_lookup;
+        // workaround for gdi mission 1 + 2 being at then end of the countries lookup
+        auto country_index = player == SCEN_PLAYER_GDI ? -2 : 0;
+
+        // TODO: lookup point of conflict (see mapsel.cpp)
+        for (auto mission = 1; mission < 20; mission++) {
+            for (const auto& direction : { SCEN_DIR_EAST, SCEN_DIR_WEST }) {
+                for (auto variation = SCEN_VAR_A; variation < SCEN_VAR_COUNT; ++variation) {
+                    CCFileClass file;
+                    char buffer[128];
+
+                    Set_Scenario_Name(buffer, mission, player, direction, variation);
+                    strcat(buffer, ".INI");
+                    file.Set_Name(buffer);
+
+                    if (CCINIClass ini; ini.Load(file, true)) {
+                        // read custom scenario name (if present)
+                        static const std::string no_name = "<none>";
+                        auto ini_name = ini.Get_String("Basic", "Name", no_name);
+                        auto name = ini_name == no_name ? std::nullopt : std::optional(ini_name);
+
+                        // read country name (if present)
+                        const auto txt_country = country_name_lookup(
+                            // workaround for duplicate gdi scenario 13 INI files (A + B variants are the same mission)
+                            player == SCEN_PLAYER_GDI && mission > 13 ? country_index - 1 : country_index
+                        );
+                        std::optional<std::string> country;
+
+                        // ignore country names for Funpark missions
+                        if (player != SCEN_PLAYER_JP && txt_country > -1) {
+                            country = Text_String(txt_country);
+                        }
+
+                        // only increment country index if not on final campaign mission
+                        if (player == SCEN_PLAYER_GDI && mission < 15) {
+                            ++country_index;
+                        } else if (player == SCEN_PLAYER_NOD && mission < 13) {
+                            ++country_index;
+                        }
+
+                        // store mission description and metadata for list logic
+                        const auto description = Build_Mission_Description(
+                            player, mission, direction, variation, name, country
+                        );
+
+                        mission_list.Add_Item(description);
+                        mission_metadata.push_back({
+                            mission,
+                            player,
+                            player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD,
+                            direction,
+                            variation
+                        });
+                    }
+                }
+            }
+        }
+    }
 }
 
 bool Mission_Select_Dialog(void)
@@ -105,68 +225,13 @@ bool Mission_Select_Dialog(void)
                     TPF_6PT_GRAD | TPF_NOSHADOW,
                     up_button,
                     down_button);
-
-    struct MissionVariables
-    {
-        int Number;
-        ScenarioPlayerType Player;
-        HousesType House;
-        ScenarioDirType Direction;
-        ScenarioVarType Variant;
-    };
     std::vector<MissionVariables> missions;
+
+    Populate_Mission_List(list, missions);
 
     buttons = &ok;
     cancel.Add(*buttons);
     list.Add(*buttons);
-
-    /*
-    **	Add in all the expansion scenarios.
-    */
-    for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD }) {
-        /*
-        ** Load mix files for GDI/NOD so we can enumerate scenario INI files.
-        */
-        RequiredCD = player;
-
-        if (!Force_CD_Available(player)) {
-            Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), player);
-        }
-
-        // TODO: Use INI name etc. to lookup country and point of conflict (see mapsel.cpp)
-        for (auto index = 1; index < 20; index++) {
-            for (const auto& direction : { SCEN_DIR_EAST, SCEN_DIR_WEST }) {
-                for (auto variation = SCEN_VAR_A; variation < SCEN_VAR_COUNT; ++variation) {
-                    CCFileClass file;
-                    char buffer[128];
-
-                    Set_Scenario_Name(buffer, index, player, direction, variation);
-                    strcat(buffer, ".INI");
-                    file.Set_Name(buffer);
-
-                    if (CCINIClass ini; ini.Load(file, true)) {
-                        static const std::string no_name = "<none>";
-                        auto ini_name = ini.Get_String("Basic", "Name", no_name);
-                        auto name = ini_name == no_name ? std::nullopt : std::optional(ini_name);
-
-                        const auto description = Build_Mission_Description(
-                            player, index, direction, variation, name
-                        );
-
-                        list.Add_Item(description);
-
-                        missions.push_back({
-                            index,
-                            player,
-                            player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD,
-                            direction,
-                            variation
-                        });
-                    }
-                }
-            }
-        }
-    }
 
     Set_Logic_Page(SeenBuff);
     bool recalc = true;
