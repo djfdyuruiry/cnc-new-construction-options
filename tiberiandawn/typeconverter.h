@@ -197,7 +197,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string To_Csv_String(const std::vector<T>& instances)
     {
-        std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
+        static const std::function<std::string (const T&)> to_string = [](const T& v) { return To_String<T>(v); };
 
         return CncStringUtils::To_Csv(instances, to_string);
     }
@@ -209,9 +209,7 @@ public:
         std::vector<T> items;
         items.assign(instances, instances + size);
 
-        std::function<std::string (T)> to_string = [](T v) { return To_String<T>(v); };
-
-        return CncStringUtils::To_Csv(items, to_string);
+        return To_Csv_String(items);
     }
 
     template<class T>

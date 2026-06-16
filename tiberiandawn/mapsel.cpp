@@ -308,17 +308,19 @@ struct countrylist
      {{SDE, SDE, SDE}, {SDN, SDN, SDN}},
      {{SVA, SVB, SVC}, {SVN, SVN, SVN}}}};
 
-struct gdistats
-{
-    int nameindex;
-    int pop;
-    int area;
-    int capital;
-    int govt;
-    int gdp;
-    int conflict;
-    int military;
-} const GDIStats[] = {
+int const CountryNames[] = {
+    TXT_MAP_COUNTRYNAME0,  TXT_MAP_COUNTRYNAME1,  TXT_MAP_COUNTRYNAME2,  TXT_MAP_COUNTRYNAME3,
+    TXT_MAP_COUNTRYNAME4,  TXT_MAP_COUNTRYNAME5,  TXT_MAP_COUNTRYNAME6,  TXT_MAP_COUNTRYNAME7,
+    TXT_MAP_COUNTRYNAME8,  TXT_MAP_COUNTRYNAME9,  TXT_MAP_COUNTRYNAME10, TXT_MAP_COUNTRYNAME11,
+    TXT_MAP_COUNTRYNAME12, TXT_MAP_COUNTRYNAME13, TXT_MAP_COUNTRYNAME14, TXT_MAP_COUNTRYNAME15,
+    TXT_MAP_COUNTRYNAME16, TXT_MAP_COUNTRYNAME17, TXT_MAP_COUNTRYNAME18, TXT_MAP_COUNTRYNAME19,
+    TXT_MAP_COUNTRYNAME20, TXT_MAP_COUNTRYNAME21, TXT_MAP_COUNTRYNAME22, TXT_MAP_COUNTRYNAME23,
+    TXT_MAP_COUNTRYNAME24, TXT_MAP_COUNTRYNAME25, TXT_MAP_COUNTRYNAME26, TXT_MAP_COUNTRYNAME27,
+    TXT_MAP_COUNTRYNAME28, TXT_MAP_COUNTRYNAME29, TXT_MAP_COUNTRYNAME30, TXT_MAP_COUNTRYNAME31,
+    TXT_MAP_COUNTRYNAME32, TXT_MAP_COUNTRYNAME33, TXT_MAP_COUNTRYNAME34
+};
+
+const gdistats GDIStats[] = {
     // Name   Pop        Area  	  Capital	Government     GDP	    Conflict   Military
     {0, TXT_MAP_P01, TXT_MAP_A00, TXT_MAP_C00, 0, TXT_MAP_GDP00, TXT_MAP_PC00, 0},
     {1, TXT_MAP_P02, TXT_MAP_A01, TXT_MAP_C01, 1, TXT_MAP_GDP01, TXT_MAP_PC01, 3},
@@ -344,19 +346,7 @@ struct gdistats
     // Hack in a slot for Estonia
     {34, TXT_MAP_P17, TXT_MAP_A16, TXT_MAP_C16, 0, TXT_MAP_GDP00, TXT_MAP_PC19, 0}};
 
-struct nodstats
-{
-    int nameindex;
-    int pop;
-    int expendable;
-    int capital;
-    int govt;
-    int corruptible;
-    int worth;
-    int conflict;
-    int military;
-    int probability;
-} const NodStats[] = {
+const nodstats NodStats[] = {
     // Name   Pop     Expendable   Capital	Government Corruptible   Worth	    Conflict   Military  Probability
     {16, TXT_MAP_P18, 38, TXT_MAP_C17, 8, 86, TXT_MAP_GDP14, TXT_MAP_PC20, 0, 23},
     {17, TXT_MAP_P19, 75, TXT_MAP_C18, 0, 18, TXT_MAP_GDP15, TXT_MAP_PC21, 1, 82},
@@ -1199,16 +1189,7 @@ void Print_Statistics(int country, int xpos, int ypos)
                                         TXT_MAP_GDISTAT5,
                                         TXT_MAP_NODSTAT3,
                                         TXT_MAP_NODSTAT4};
-    static int const _countryname[] = {
-        TXT_MAP_COUNTRYNAME0,  TXT_MAP_COUNTRYNAME1,  TXT_MAP_COUNTRYNAME2,  TXT_MAP_COUNTRYNAME3,
-        TXT_MAP_COUNTRYNAME4,  TXT_MAP_COUNTRYNAME5,  TXT_MAP_COUNTRYNAME6,  TXT_MAP_COUNTRYNAME7,
-        TXT_MAP_COUNTRYNAME8,  TXT_MAP_COUNTRYNAME9,  TXT_MAP_COUNTRYNAME10, TXT_MAP_COUNTRYNAME11,
-        TXT_MAP_COUNTRYNAME12, TXT_MAP_COUNTRYNAME13, TXT_MAP_COUNTRYNAME14, TXT_MAP_COUNTRYNAME15,
-        TXT_MAP_COUNTRYNAME16, TXT_MAP_COUNTRYNAME17, TXT_MAP_COUNTRYNAME18, TXT_MAP_COUNTRYNAME19,
-        TXT_MAP_COUNTRYNAME20, TXT_MAP_COUNTRYNAME21, TXT_MAP_COUNTRYNAME22, TXT_MAP_COUNTRYNAME23,
-        TXT_MAP_COUNTRYNAME24, TXT_MAP_COUNTRYNAME25, TXT_MAP_COUNTRYNAME26, TXT_MAP_COUNTRYNAME27,
-        TXT_MAP_COUNTRYNAME28, TXT_MAP_COUNTRYNAME29, TXT_MAP_COUNTRYNAME30, TXT_MAP_COUNTRYNAME31,
-        TXT_MAP_COUNTRYNAME32, TXT_MAP_COUNTRYNAME33, TXT_MAP_COUNTRYNAME34};
+    static const int* _countryname = CountryNames;
 
     static int const _govtnames[] = {TXT_MAP_GOVT0,
                                      TXT_MAP_GOVT1,

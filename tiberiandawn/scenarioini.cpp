@@ -263,6 +263,12 @@ bool Read_Scenario_Ini(char* root, SpecialClass special_options, bool allow_supe
     }
 
     /*
+    **	Handle player selecting a funpark mission·
+    */
+    Special.IsJurassic = ScenPlayer == SCEN_PLAYER_JP;
+    AreThingiesEnabled = ScenPlayer == SCEN_PLAYER_JP;
+
+    /*
     **	Create scenario filename and read the file.
     */
 

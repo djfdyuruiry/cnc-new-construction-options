@@ -22,7 +22,13 @@ void CncStringUtils::To_Upper(std::string& subject)
     std::ranges::transform(subject, subject.begin(), ::toupper);
 }
 
-void CncStringUtils::To_Title_Case(std::string& subject)
+/**
+ * Transforms a given string from any casing to title case, e.x. 'I am kane' -> 'I Am Kane'.
+ *
+ * @param subject String to transform.
+ * @param word_separators List of characters that can be used to determine the start/end of a word.
+ */
+void CncStringUtils::To_Title_Case(std::string& subject, const std::vector<char>& word_separators)
 {
     if (Is_Blank(subject)) {
         return;
@@ -33,7 +39,20 @@ void CncStringUtils::To_Title_Case(std::string& subject)
         return;
     }
 
+    // normalize string to lowercase
     To_Lower(subject);
-    subject[0] = std::toupper(subject[0]);
-}
 
+    auto last_char_was_separator = false;
+
+    // transform the first character to uppercase
+    subject[0] = std::toupper(subject[0]);
+
+    // transform any character that comes directly after a word separator to uppercase
+    for (auto& c : subject) {
+        if (last_char_was_separator) {
+            c = std::toupper(c);
+        }
+
+        last_char_was_separator = c == ' ' || c == '/';
+    }
+}

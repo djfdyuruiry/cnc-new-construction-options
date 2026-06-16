@@ -1,5 +1,6 @@
 #pragma once
 
+#include <format>
 #include <functional>
 #include <sstream>
 #include <string>
@@ -13,12 +14,12 @@ public:
 
     static void To_Lower(std::string& subject);
     static void To_Upper(std::string& subject);
-    static void To_Title_Case(std::string& subject);
+    static void To_Title_Case(std::string& subject, const std::vector<char>& word_separators = { ' ', '/' });
 
     template<class T = std::string>
     static std::string To_Csv(
         const std::vector<T>& items,
-        const std::function<std::string(T)>& to_string = [](auto s) { return s; }
+        const std::function<std::string(const T&)>& to_string = [](const T& s) { return std::format("{}", s); }
     )
     {
         std::ostringstream oss;
