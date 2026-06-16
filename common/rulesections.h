@@ -448,8 +448,8 @@ private:
      */
     bool SanitizeIniStrings;
     std::optional<std::string> Comment;
-    std::unordered_map<std::string, RuleValueVariant> Rules;
-    std::unordered_map<std::string, std::string> RuleComments;
+    std::map<std::string, RuleValueVariant> Rules;
+    std::map<std::string, std::string> RuleComments;
     std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
     std::optional<std::string> ConverterSectionTypeName;
 
@@ -740,6 +740,6 @@ public:
 private:
     static inline const auto& Logger = CncLogger::For(RuleSections);
 
-    std::unordered_map<std::string, RuleSection> Sections;
+    std::map<std::string, RuleSection> Sections;
     std::optional<std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)>> OnRulesChangedDefault;
 };
