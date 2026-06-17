@@ -2,9 +2,10 @@
 
 /**
  * These classes provide an API for dynamically managing rules for a game, without
- * having to explicitly declare class members for each rule. It uses the built in
+ * having to explicitly declare class members for each rule. It uses the built-in
  * INIClass methods for loading and exporting rule values. Setting rule values after
- * loading is also supported.
+ * loading is also supported. Supports converting string values to/from native game
+ * engine values, given an appropriate TypeConverter implementation.
  * 
  * Class hierarchy:
  * 
@@ -15,7 +16,9 @@
  * Usage:
  * 
  *  It is intended that one RuleSections instance is added as a member of a RulesClass
- *  class. This way it can be used to load rules to/from INI files using INIClass instances. 
+ *  class. This way it can be used to load rules to/from INI files using INIClass instances.
+ *
+ *  Can be used to manage non-rules INI files, for example in SettingsClass options for .
  */
 
 #include <functional>
@@ -534,21 +537,37 @@ private:
 
 #define Set_Var_Comment(VAR, COMMENT) Set_Rule_Comment(#VAR, COMMENT)
 
+#define Set_Var_With_Type(VAR, T) Set(#VAR, (T)VAR)
+
+#define Set_Bool_Var(VAR) Set_Var_With_Type(VAR, bool)
+#define Set_UShort_Var(VAR) Set_Var_With_Type(VAR, ushort)
+#define Set_Int_Var(VAR) Set_Var_With_Type(VAR, int)
+#define Set_UInt_Var(VAR) Set_Var_With_Type(VAR, uint)
+#define Set_Char_Var(VAR) Set_Var_With_Type(VAR, char)
+#define Set_UChar_Var(VAR) Set_Var_With_Type(VAR, uchar)
+#define Set_String_Var(VAR) Set_Var_With_Type(VAR, std::string)
+
+#define Set_Var(VAR) Set(#VAR, VAR)
+
+class IniRuleContext;
+
 class IniRuleContext
 {
 public:
     IniRuleContext(RuleSection& section, INIClass& context) : Section(section), Context(context) {}
 
     template<RuleValueVariantCompatible T>
-    const IniRuleContext& Load(std::string_view name, T default_value) const
+    IniRuleContext& Load(std::string_view name, T default_value)
     {
         Section.Load_From_Ini(Context, name, default_value);
+
+        ValueInStream = Section.Get<T>(name);
 
         return *this;
     }
 
     template<class T, TypeConverter<T> C>
-    const IniRuleContext& Load_With_Converter(std::string_view name, T default_value) const
+    IniRuleContext& Load_With_Converter(std::string_view name, T default_value)
     {
         if (const auto type_name = Section.Get_Converter_Section_Type_Name(); type_name.has_value()) {
             C::template Register_Rule_Type<T>(type_name.value(), name);
@@ -578,11 +597,13 @@ public:
             }
         );
 
+        ValueInStream = Section.Get<std::string>(name);
+
         return *this;
     }
 
     template<class T, TypeConverter<T> C>
-    const IniRuleContext& Load_With_Csv_Converter(std::string_view name, const std::vector<T>& default_values) const
+    IniRuleContext& Load_With_Csv_Converter(std::string_view name, const std::vector<T>& default_values)
     {
         if (const auto type_name = Section.Get_Converter_Section_Type_Name(); type_name.has_value()) {
             C::template Register_Csv_Rule_Type<T>(type_name.value(), name);
@@ -609,15 +630,17 @@ public:
             }
         );
 
+        ValueInStream = Section.Get<std::string>(name);
+
         return *this;
     }
 
     template<RuleValueVariantCompatible T>
-    const IniRuleContext& Load_With_Callback(
+    IniRuleContext& Load_With_Callback(
         std::string_view name,
         T default_value,
         std::function<void(T)> callback
-    ) const
+    )
     {
         Load(name, default_value);
 
@@ -627,11 +650,11 @@ public:
     }
 
     template<class T, TypeConverter<T> C>
-    const IniRuleContext& Load_With_Converter_Callback(
+    IniRuleContext& Load_With_Converter_Callback(
         std::string_view name,
         T default_value,
         std::function<void(T)> callback
-    ) const
+    )
     {
         Load_With_Converter<T, C>(name, default_value);
 
@@ -641,11 +664,11 @@ public:
     }
 
     template<class T, TypeConverter<T> C>
-    const IniRuleContext& Load_With_Csv_Converter_Callback(
+    IniRuleContext& Load_With_Csv_Converter_Callback(
         std::string_view name,
         const std::vector<T>& default_values,
         std::function<void(std::vector<T>)> callback
-    ) const
+    )
     {
         Load_With_Csv_Converter<T, C>(name, default_values);
 
@@ -678,14 +701,77 @@ public:
 
         Load(NameInStream.value(), default_value);
 
-        NameInStream = std::nullopt;
-
         return *this;
     }
 
     IniRuleContext& With_Default(const char* default_value)
     {
         return With_Default(std::string(default_value));
+    }
+
+    /**
+     * Use bound_value as the default and then load the rule value from the INI context, writing the resolved value
+     * back into bound_value.
+     */
+    template <RuleValueVariantCompatible T>
+    IniRuleContext& With_Binding(T& bound_value)
+    {
+        With_Default<T>(bound_value);
+
+        bound_value = Section.Get<T>(NameInStream.value());
+
+        return *this;
+    }
+
+    template<RuleValueVariantCompatible T>
+    IniRuleContext& Then_Set(T& ref)
+    {
+        if (!NameInStream.has_value() || !ValueInStream.has_value()) {
+            CNC_LOGGER_FATAL("Load(..) must be called before And_Then_Set(..)");
+        }
+
+        ref = std::get<T>(*ValueInStream);
+
+        return *this;
+    }
+
+    template<class T, TypeConverter<T> C>
+    IniRuleContext& Then_Set_With_Converter(T& ref)
+    {
+        if (!NameInStream.has_value() || !ValueInStream.has_value()) {
+            CNC_LOGGER_FATAL("Load(..) must be called before And_Then_Set(..)");
+        }
+
+        ref = C::template Assert_Parse<T>(
+            std::get<std::string>(*ValueInStream),
+            "IniRuleContext::ValueInStream"
+        );
+
+        return *this;
+    }
+
+    template<RuleValueVariantCompatible T, class U>
+    IniRuleContext& Then_Set_With_Type(U& ref)
+    {
+        if (!NameInStream.has_value()) {
+            CNC_LOGGER_FATAL("Load(..) must be called before Then_Set_With_Type(..)");
+        }
+
+        ref = static_cast<U>(std::get<T>(*ValueInStream));
+
+        return *this;
+    }
+
+    template<RuleValueVariantCompatible T>
+    IniRuleContext& With_Callback(const std::function<void(T)> callback)
+    {
+        if (!NameInStream.has_value()) {
+            CNC_LOGGER_FATAL("Load(..) must be called before With_Callback(..)");
+        }
+
+        callback(std::get<T>(*ValueInStream));
+
+        return *this;
     }
 
     RuleSection& Get_Section() const
@@ -699,23 +785,34 @@ private:
     RuleSection& Section;
     INIClass& Context;
     std::optional<std::string> NameInStream;
+    std::optional<RuleValueVariant> ValueInStream;
 };
 
 // IniRuleContext macro 'methods' - useful for setting variables and class members from rules
 
 // Load a variable/member by its C++ name (with a specific type) from an INI context and set its value
 // to equal the INI value
-#define Load_Var_With_Type(VAR, T) Load_With_Callback<T>(#VAR, (T)VAR, [&](const auto v) { VAR = v; })
+#define Load_Var_With_Type(VAR, T, DEFAULT) template Load_With_Callback<T>(#VAR, (T)DEFAULT, [&](const T v) { VAR = v; })
 
 // Load a variable/member by its C++ name from an INI context and set its value to equal the INI value
 #define Load_Var(VAR) Load_With_Callback(#VAR, VAR, [&](const auto v) { VAR = v; })
-#define Load_Bool_Var(VAR) Load_Var_With_Type(VAR, bool)
-#define Load_UShort_Var(VAR) Load_Var_With_Type(VAR, ushort)
-#define Load_Int_Var(VAR) Load_Var_With_Type(VAR, int)
-#define Load_UInt_Var(VAR) Load_Var_With_Type(VAR, uint)
-#define Load_Char_Var(VAR) Load_Var_With_Type(VAR, char)
-#define Load_UChar_Var(VAR) Load_Var_With_Type(VAR, uchar)
-#define Load_String_Var(VAR) Load_Var_With_Type(VAR, std::string)
+
+#define Load_Bool_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, bool, DEFAULT)
+#define Load_UShort_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, ushort, DEFAULT)
+#define Load_Int_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, int, DEFAULT)
+#define Load_UInt_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, uint, DEFAULT)
+#define Load_Char_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, char, DEFAULT)
+#define Load_UChar_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, uchar, DEFAULT)
+#define Load_String_Var_With_Default(VAR, DEFAULT) Load_Var_With_Type(VAR, std::string, DEFAULT)
+
+#define Load_Bool_Var(VAR) Load_Var_With_Type(VAR, bool, VAR)
+#define Load_UShort_Var(VAR) Load_Var_With_Type(VAR, ushort, VAR)
+#define Load_Int_Var(VAR) Load_Var_With_Type(VAR, int, VAR)
+#define Load_UInt_Var(VAR) Load_Var_With_Type(VAR, uint, VAR)
+#define Load_Char_Var(VAR) Load_Var_With_Type(VAR, char, VAR)
+#define Load_UChar_Var(VAR) Load_Var_With_Type(VAR, uchar, VAR)
+#define Load_String_Var(VAR) Load_Var_With_Type(VAR, std::string, VAR)
+#define Load_With_Method_Call(VAR, METHOD) Load_With_Callback(#VAR, VAR, [&](const auto v) { METHOD(v); })
 
 class RuleSections
 {

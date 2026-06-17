@@ -441,7 +441,7 @@ void SoundControlsClass::Process(void)
     /*
     ** Save them settings - you know it makes sense
     */
-    Options.Save_Settings(); // save new value
+    Options.Update(); // save new value
 
     /*
     **	Free the items from the list box.

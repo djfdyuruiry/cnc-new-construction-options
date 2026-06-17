@@ -114,7 +114,7 @@ public:
     }
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    IniRuleContext& Read_INI(IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& rules);
 private:
     static inline const auto& Logger = CncLogger::For(WeaponTypeClass);
@@ -179,7 +179,7 @@ public:
     }
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    IniRuleContext& Read_INI(IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& rules);
 private:
     static inline const auto& Logger = CncLogger::For(WarheadTypeClass);
@@ -294,7 +294,7 @@ public:
     void Set_Prefix(const std::string& str);
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    IniRuleContext& Read_INI(IniRuleContext& ini);
     const RuleSection& Read_Rules(const RuleSection& ini);
 private:
     static HouseTypeClass const* const Pointers[HOUSE_COUNT];
@@ -482,7 +482,7 @@ public:
 #endif
 
     // see: types-nco.cpp.in
-    virtual const IniRuleContext& Read_INI(const IniRuleContext& ini);
+    virtual IniRuleContext& Read_INI(IniRuleContext& ini);
     virtual const RuleSection& Read_Rules(const RuleSection& rules);
 
     static void const* SelectShapes;
@@ -699,7 +699,7 @@ public:
 #endif                                   // USE_RA_AI
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 };
 
@@ -971,7 +971,7 @@ public:
 #endif
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
 private:
@@ -1223,7 +1223,7 @@ public:
 #endif
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
     /*
@@ -1382,7 +1382,7 @@ public:
 #endif
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection&) override;
 };
 
@@ -1568,7 +1568,7 @@ public:
     };
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& ini) override;
 
 private:
@@ -1974,7 +1974,7 @@ public:
     };
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
 private:
@@ -2092,7 +2092,7 @@ public:
 #endif
 
     // see: types-nco.cpp.in
-    const IniRuleContext& Read_INI(const IniRuleContext& ini) override;
+    IniRuleContext& Read_INI(IniRuleContext& ini) override;
     const RuleSection& Read_Rules(const RuleSection& rules) override;
 
     static void const* LRotorData;

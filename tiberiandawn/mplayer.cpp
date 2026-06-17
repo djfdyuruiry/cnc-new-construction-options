@@ -582,7 +582,7 @@ void Read_MultiPlayer_Settings(void)
 void Write_MultiPlayer_Settings(void)
 {
 #ifndef REMASTER_BUILD
-    TdSettings.Update();
+    TdSettings.Update_MultiPlayer();
 #endif
 }
 

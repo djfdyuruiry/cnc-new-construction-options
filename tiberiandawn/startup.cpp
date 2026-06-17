@@ -458,9 +458,8 @@ int main(int argc, char** argv)
         ** Save settings and options if they were changed during gameplay.
         */
         ini.Load(cfile);
-        Settings.Save(ini);
-        TdSettings.Save(ini);
-        Options.Save_Settings(ini);
+        Options.Update();
+        TdSettings.Save(ini); // Settings SettingsClass instance will also be written by this call
         ini.Save(cfile);
 
         VisiblePage.Clear();
@@ -613,8 +612,10 @@ void Read_Setup_Options(RawFileClass* config_file)
 
     /*
     ** Read in common settings, and Tiberium Dawn specific settings.
+    **
+    ** TdSettings::Load calls SettingsClass::Load
     */
-    Settings.Load(config_file->File_Name(), ini);
+    TdSettings.Init(Settings);
     TdSettings.Load(config_file->File_Name(), ini);
 
     /*

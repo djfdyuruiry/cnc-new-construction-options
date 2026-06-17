@@ -41,8 +41,6 @@ SettingsClass::SettingsClass()
 
 void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
 {
-    char buf[128];
-
     IniFileName = std::move(ini_file_name);
 
     CNC_LOG_INFO("Loading common settings from INI file: {}", IniFileName);
@@ -50,43 +48,65 @@ void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
     /*
     ** Mouse settings
     */
-    Mouse.RawInput = ini.Get_Bool("Mouse", "RawInput", Mouse.RawInput);
-    Mouse.Sensitivity = ini.Get_Int("Mouse", "Sensitivity", Mouse.Sensitivity);
-    Mouse.ControllerEnabled = ini.Get_Bool("Mouse", "ControllerEnabled", Mouse.ControllerEnabled);
-    Mouse.ControllerPointerSpeed = ini.Get_Int("Mouse", "ControllerPointerSpeed", Mouse.ControllerPointerSpeed);
+    Sections["Mouse"].With<IniRuleContext>(ini, [&](auto& c) {
+         c.Load("RawInput").With_Binding(Mouse.RawInput)
+          .Load("Sensitivity").With_Binding(Mouse.Sensitivity)
+          .Load("ControllerEnabled").With_Binding(Mouse.ControllerEnabled)
+          .Load("ControllerPointerSpeed").With_Binding(Mouse.ControllerPointerSpeed)
+          .Load("MouseWheelScrolling").With_Binding(Options.MouseWheelScrolling);
+    });
+
     /*
     ** Compatibility with CNCNet configuration for this feature
     */
-    Options.MouseWheelScrolling = ini.Get_Bool("Options", "MouseWheelScrolling", Options.MouseWheelScrolling);
-    Options.MouseWheelScrolling = ini.Get_Bool("Mouse", "MouseWheelScrolling", Options.MouseWheelScrolling);
+    Sections["Options"].With<IniRuleContext>(ini, [&](auto& c) {
+        c.Load("MouseWheelScrolling").With_Binding(Options.MouseWheelScrolling);
+    });
 
     /*
     ** Video settings
     */
-    Video.Width = ini.Get_Int("Video", "Width", Video.Width);
-    Video.Height = ini.Get_Int("Video", "Height", Video.Height);
-    Video.StretchWidth = ini.Get_Int("Video", "StretchWidth", Video.StretchWidth);
-    Video.StretchHeight = ini.Get_Int("Video", "StretchHeight", Video.StretchHeight);
-    Video.Windowed = ini.Get_Bool("Video", "Windowed", Video.Windowed);
-    Video.Boxing = ini.Get_Bool("Video", "Boxing", Video.Boxing);
-    Video.BoxingAspectRatio = ini.Get_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio);
-    Video.Display = ini.Get_Int("Video", "Display", Video.Display);
-    Video.FrameLimit = ini.Get_Int("Video", "FrameLimit", Video.FrameLimit);
-    Video.HardwareCursor = ini.Get_Bool("Video", "HardwareCursor", Video.HardwareCursor);
-    Video.DOSMode = ini.Get_Bool("Video", "DOSMode", Video.DOSMode);
-    Video.Scaler = ini.Get_String("Video", "Scaler", Video.Scaler);
+    Sections["Video"].With<IniRuleContext>(ini, [&](auto& c) {
+        c.Load("VideoWidth").With_Binding(Video.Width)
+         .Load("VideoHeight").With_Binding(Video.Height)
+         .Load("StretchWidth").With_Binding(Video.StretchWidth)
+         .Load("StretchHeight").With_Binding(Video.StretchHeight)
+         .Load("Windowed").With_Binding(Video.Windowed)
+         .Load("Boxing").With_Binding(Video.Boxing)
+         .Load("BoxingAspectRatio").With_Comment("4:3, 16:9 etc.").With_Binding(Video.BoxingAspectRatio)
+         .Load("Display").With_Binding(Video.Display)
+         .Load("FrameLimit").With_Binding(Video.FrameLimit)
+         .Load("HardwareCursor").With_Binding(Video.HardwareCursor)
+         .Load("DOSMode")
+            .With_Comment("before you enable this, install the game data files from the DOS version")
+            .With_Binding(Video.DOSMode)
+         .Load("Scaler").With_Comment("nearest (sharp), linear (smooth)").With_Binding(Video.Scaler)
 
 #if !defined(_WIN32) && !defined(__APPLE__)
-    Video.VideoDriver = ini.Get_String("Video", "VideoDriver", Video.VideoDriver);
+         .Load("VideoDriver").With_Comment("default, x11, wayland, directfb, kmsdrm").With_Binding(Video.VideoDriver)
 #endif
 
-    Video.RenderDriver = ini.Get_String("Video", "RenderDriver", Video.RenderDriver);
-    Video.PixelFormat = ini.Get_String("Video", "PixelFormat", Video.PixelFormat);
+#ifdef _WIN32
+         .Load("RenderDriver")
+            .With_Comment("default, direct3d, direct3d11, direct3d12, opengl, software")
+            .With_Binding(Video.RenderDriver)
+#elifdef __APPLE__
+         .Load("RenderDriver").With_Comment("default, metal, software").With_Binding(Video.RenderDriver)
+#else
+         .Load("RenderDriver")
+            .With_Comment("default, opengl, opengles2, opengles, software")
+            .With_Binding(Video.RenderDriver)
+#endif
+
+         .Load("PixelFormat").With_Binding(Video.PixelFormat)
+         .Load("InterpolationMode").With_Binding(Video.InterpolationMode)
+         .Load("ButtonStyle").With_Default("Default");
+    });
 
     /*
     ** VQA and WSA interpolation mode 0 = scanlines, 1 = vertical doubling, 2 = linear
     */
-    Video.InterpolationMode = Bound(ini.Get_Int("Video", "InterpolationMode", Video.InterpolationMode), 0, 2);
+    Video.InterpolationMode = Bound(Video.InterpolationMode, 0, 2);
 
     /*
     ** Boxing and raw input require software cursor.
@@ -95,68 +115,74 @@ void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
         Video.HardwareCursor = false;
     }
 
-    ini.Get_String("Video", "ButtonStyle", "Default", buf, sizeof(buf));
-    if (!stricmp(buf, "Gold")) {
+    const auto button_style = Sections["Video"].Get<std::string>("ButtonStyle");
+
+    if (button_style == "Gold") {
         Video.ButtonStyle = 1;
-    } else if (!stricmp(buf, "Classic") || !stricmp(buf, "DOS")) {
+    } else if (button_style == "Classic" || button_style == "DOS") {
         Video.ButtonStyle = 0;
     } else {
         Video.ButtonStyle = -1;
     }
 }
 
-void SettingsClass::Save(INIClass& ini)
+void SettingsClass::Update_Sections()
 {
-    CNC_LOGGER_INFO("Saving common settings to INI file: {}", IniFileName);
+    CNC_LOGGER_DEBUG("Updating common settings from SettingsClass fields");
 
     /*
     ** Mouse settings
     */
-    ini.Put_Bool("Mouse", "RawInput", Mouse.RawInput);
-    ini.Put_Int("Mouse", "Sensitivity", Mouse.Sensitivity);
-    ini.Put_Bool("Mouse", "ControllerEnabled", Mouse.ControllerEnabled);
-    ini.Put_Int("Mouse", "ControllerPointerSpeed", Mouse.ControllerPointerSpeed);
-    ini.Put_Bool("Mouse", "MouseWheelScrolling", Options.MouseWheelScrolling);
+    Sections["Mouse"]
+        .Set("RawInput", Mouse.RawInput)
+        .Set("Sensitivity", Mouse.Sensitivity)
+        .Set("ControllerEnabled", Mouse.ControllerEnabled)
+        .Set("ControllerPointerSpeed", Mouse.ControllerPointerSpeed)
+        .Set("MouseWheelScrolling", Options.MouseWheelScrolling);
+
+    /*
+    ** Compatibility with CNCNet configuration for this feature
+    */
+    Sections["Options"].Set("MouseWheelScrolling", Options.MouseWheelScrolling);
 
     /*
     ** Video settings
     */
-    ini.Put_Int("Video", "Width", Video.Width);
-    ini.Put_Int("Video", "Height", Video.Height);
-    ini.Put_Int("Video", "StretchWidth", Video.StretchWidth);
-    ini.Put_Int("Video", "StretchHeight", Video.StretchHeight);
-    ini.Put_Bool("Video", "Windowed", Video.Windowed);
-    ini.Put_Bool("Video", "Boxing", Video.Boxing);
-    ini.Put_String("Video", "BoxingAspectRatio", Video.BoxingAspectRatio, "4:3, 16:9 etc.");
-    ini.Put_Int("Video", "Display", Video.Display);
-    ini.Put_Int("Video", "FrameLimit", Video.FrameLimit);
-    ini.Put_Bool("Video", "HardwareCursor", Video.HardwareCursor);
-    ini.Put_Bool("Video", "DOSMode", Video.DOSMode, "before you enable this, install the game data files from the DOS version");
-    ini.Put_String("Video", "Scaler", Video.Scaler, "nearest (sharp), linear (smooth)");
-
+    Sections["Video"]
+        .Set("VideoWidth", Video.Width)
+        .Set("VideoHeight", Video.Height)
+        .Set("StretchWidth", Video.StretchWidth)
+        .Set("StretchHeight", Video.StretchHeight)
+        .Set("Windowed", Video.Windowed)
+        .Set("Boxing", Video.Boxing)
+        .Set("BoxingAspectRatio", Video.BoxingAspectRatio)
+        .Set("Display", Video.Display)
+        .Set("FrameLimit", Video.FrameLimit)
+        .Set("HardwareCursor", Video.HardwareCursor)
+        .Set("DOSMode", Video.DOSMode)
+        .Set("Scaler", Video.Scaler)
 #if !defined(_WIN32) && !defined(__APPLE__)
-    ini.Put_String("Video", "VideoDriver", Video.VideoDriver, "default, x11, wayland, directfb, kmsdrm");
+        .Set("VideoDriver", Video.VideoDriver)
 #endif
+        .Set("RenderDriver", Video.RenderDriver)
+        .Set("PixelFormat", Video.PixelFormat)
+        .Set("InterpolationMode", Video.InterpolationMode)
+        .Set(
+            "ButtonStyle",
+            Video.ButtonStyle == -1 ? "Default" : (Video.ButtonStyle == 1 ? "Gold" : "Classic")
+        );
+}
 
-#ifdef _WIN32
-    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, direct3d, direct3d11, direct3d12, opengl, software");
-#elifdef __APPLE__
-    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, metal, software");
-#else
-    ini.Put_String("Video", "RenderDriver", Video.RenderDriver, "default, opengl, opengles2, opengles, software");
-#endif
+void SettingsClass::Save(INIClass& ini)
+{
+    CNC_LOGGER_INFO("Saving common settings to INI file: {}", IniFileName);
 
-    ini.Put_String("Video", "PixelFormat", Video.PixelFormat);
+    Update_Sections();
 
-    /*
-    ** VQA and WSA interpolation mode 0 = scanlines, 1 = vertical doubling, 2 = linear
-    */
-    ini.Put_Int("Video", "InterpolationMode", Video.InterpolationMode);
+    Sections.Save_All_To_Ini(ini);
+}
 
-    ini.Put_String(
-        "Video",
-        "ButtonStyle",
-        Video.ButtonStyle == -1 ? "Default" : (Video.ButtonStyle == 1 ? "Gold" : "Classic"),
-        "Default, Gold, Classic, DOS"
-    );
+RuleSections& SettingsClass::Get_Sections()
+{
+    return Sections;
 }

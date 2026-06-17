@@ -4,6 +4,7 @@
 
 #include "common/logger.h"
 #include "common/rulesections.h"
+#include "common/settings.h"
 
 class INIClass;
 
@@ -11,31 +12,33 @@ class INIClass;
  * Holds settings specific to the Tiberian Dawn game engine that are stored
  * in the CONQUER.INI file. Used by the multiplayer setup screen for Skirmish
  * and network play.
+ *
+ * Requires Settings singleton instance of SettingsClass for save/load from
+ * INI. Instance pointer should be provided by calling the ::Init method.
  */
 class TiberianDawnSettings
 {
 public:
     static constexpr auto MultiPlayerSection = "MultiPlayer";
 
+    void Init(SettingsClass& common_settings);
     void Load(std::string ini_file_name, INIClass& ini);
 
-    const RuleSection& MultiPlayer() const;
-    RuleSection& Editable_MultiPlayer();
-
     void Update_MultiPlayer();
-    void Update();
-    void Save(INIClass& ini) const;
-
-    const RuleSection& operator[](std::string_view section) const;
-    RuleSection& operator[](std::string_view section);
+    void Update_Sections();
+    void Save(INIClass& ini);
 
 private:
     static inline const auto& Logger = CncLogger::For(TiberianDawnSettings);
 
+    SettingsClass* CommonSettings = nullptr;
     std::string IniFileName;
-    RuleSections Settings;
+
+    RuleSections& Get_Common_Sections();
+    RuleSection& Get_Multiplayer_Section();
 
     void Load_MultiPlayer(INIClass& ini);
 };
 
+// singleton instance
 extern TiberianDawnSettings TdSettings;

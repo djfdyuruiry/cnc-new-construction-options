@@ -34,7 +34,12 @@
 
 #ifndef OPTIONS_H
 #define OPTIONS_H
+#include "settings.h"
 
+/**
+ * Handles game options for Tiberian Dawn. Requires a singleton instance of SettingsClass to be passed to ::One_Time
+ * for save/load of settings to that instance. See TiberianDawnSettings, it is the class that does save/load from INI.
+ */
 class OptionsClass
 {
 public:
@@ -46,14 +51,14 @@ public:
 
     OptionsClass(void);
 
-    void One_Time(void);
+    void One_Time(SettingsClass& settings);
     void Process(void);
 
     void Fixup_Palette(void) const;
     void Set_Shuffle(int on);
     void Set_Repeat(int on);
     void Set_Score_Volume(int volume);
-    void Set_Sound_Volume(int volume, int feedback);
+    void Set_Sound_Volume(int volume, int feedback = false);
     void Set_Brightness(int brightness);
     int Get_Brightness(void) const;
     void Set_Color(int color);
@@ -68,9 +73,8 @@ public:
     /*
     ** File I/O routines
     */
-    void Load_Settings(void);
-    void Save_Settings(INIClass& ini);
-    void Save_Settings(void);
+    void Load_Settings();
+    void Update();
 
     void Set(void);
 
@@ -160,6 +164,10 @@ protected:
 private:
 private:
     static char const* const HotkeyName;
+
+    SettingsClass* CommonSettings = nullptr;
+
+    RuleSection& Get_Options_Section() const;
 };
 
 #endif

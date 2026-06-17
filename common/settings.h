@@ -4,15 +4,23 @@
 #include <string>
 
 #include "logger.h"
+#include "rulesections.h"
 
 class INIClass;
 
+/**
+ * Common settings for Tiberian Dawn and Red Alert.
+ *
+ * Game engines call ::Get_Sections to add their own engine
+ * specific sections and settings.
+ */
 class SettingsClass
 {
 public:
     SettingsClass();
 
     void Load(std::string ini_file_name, INIClass& ini);
+    void Update_Sections();
     void Save(INIClass& ini);
 
     struct
@@ -49,10 +57,13 @@ public:
         bool MouseWheelScrolling;
     } Options;
 
+    RuleSections& Get_Sections();
+
 private:
     static inline const auto& Logger = CncLogger::For(Settings);
 
     std::string IniFileName;
+    RuleSections Sections;
 };
 
 #endif

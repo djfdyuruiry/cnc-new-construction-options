@@ -563,7 +563,7 @@ bool Init_Game(int, char*[])
     //	malloc(4);
     Logic.One_Time();
     //	malloc(5);
-    Options.One_Time();
+    Options.One_Time(Settings);
 
     //	malloc(6);
 
