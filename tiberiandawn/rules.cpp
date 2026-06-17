@@ -306,7 +306,7 @@ void RulesClass::Init_For_Scenario(
         special_options.Write_Rules(Sections);
 
         Special.IsCaptureTheFlag = special_options.IsCaptureTheFlag;
-        TdSettings.Update(); // if we are loading from a save, this ensures skirmish setup screen is in sync
+        TdSettings.Update_MultiPlayer(); // if we are loading from a save, this ensures skirmish setup screen is in sync
 
         AllowSuperWeapons = superweapons_allowed.value_or(AllowSuperWeapons);
     }

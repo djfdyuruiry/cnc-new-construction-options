@@ -1,5 +1,13 @@
 #pragma once
 
+#pragma region RuleSection Macros
+
+// RuleSection macro 'method' for setting a rule by converting a type to string
+#define Set_With_TdConverter(VAR) \
+    Set(#VAR, TdTypeConverter::To_String(VAR))
+
+#pragma endregion
+
 #pragma region IniRuleContext Macros
 
 // IniRuleContext macro 'method' for loading types that are converted from string representation to a non-trivial type

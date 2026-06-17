@@ -37,7 +37,7 @@ static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 
 // Info about each enum supported type, indexed against it's typename
 const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
-    //            [Typename]                     [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]    [Excluded Vals]      [Allow non-enum values?]
+    //               [Typename]                     [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]    [Excluded Vals]      [Allow non-enum values?]
     ENUM_TYPE_PAIR(ArmorType,                    "ARMOR_",       ARMOR_NONE,                             ARMOR_LAST,                               {},                  {},                  false),
     ENUM_TYPE_PAIR(MPHType,                      "MPH_",         MPH_IMMOBILE,                           MPH_LIGHT_SPEED,                          {},                  {},                  true),
     ENUM_TYPE_PAIR(WeaponType,                   "WEAPON_",      WEAPON_NONE,                            WEAPON_LAST,                              WeaponPatchTable,    {},                  false),
@@ -88,7 +88,8 @@ const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter:
     ENUM_TYPE_PAIR(LayerType,                    "LAYER_",       LAYER_NONE,                             LAYER_LAST,                               {},                  {},                  false),
     ENUM_TYPE_PAIR(UrgencyType,                  "URGENCY_",     URGENCY_NONE,                           URGENCY_FIRST,                            {},                  {},                  false),
     ENUM_TYPE_PAIR(CCPaletteType,                "CC_",          static_cast<CCPaletteType>(TBLACK),     static_cast<CCPaletteType>(WHITE),        CCPalettePatchTable, {},                  false),
-    ENUM_TYPE_PAIR(GameType,                     "GAME_",        GAME_NORMAL,                            GAME_GLYPHX_MULTIPLAYER,                  {},                  {},                  false)
+    ENUM_TYPE_PAIR(GameType,                     "GAME_",        GAME_NORMAL,                            GAME_GLYPHX_MULTIPLAYER,                  {},                  {},                  false),
+    ENUM_TYPE_PAIR(KeyNumType,                   "KN_",          KN_NONE,                                KN_MOUSEWHEEL_DOWN,                       {},                  {},                  false)
 };
 
 bool TdTypeConverter::Rule_Requires_Converter(
@@ -187,6 +188,7 @@ void TdTypeConverter::Set_Rule_With_Variant(
     RULE_VARIANT(UrgencyType)
     RULE_VARIANT(CCPaletteType)
     RULE_VARIANT(GameType)
+    RULE_VARIANT(KeyNumType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -254,6 +256,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(
     CSV_RULE_VARIANT(UrgencyType)
     CSV_RULE_VARIANT(CCPaletteType)
     CSV_RULE_VARIANT(GameType)
+    CSV_RULE_VARIANT(KeyNumType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -314,6 +317,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVaria
     TYPE_NAME_VARIANT(UrgencyType)
     TYPE_NAME_VARIANT(CCPaletteType)
     TYPE_NAME_VARIANT(GameType)
+    TYPE_NAME_VARIANT(KeyNumType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -375,6 +379,7 @@ std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& varia
     TO_STRING_VARIANT(UrgencyType)
     TO_STRING_VARIANT(CCPaletteType)
     TO_STRING_VARIANT(GameType)
+    TO_STRING_VARIANT(KeyNumType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }

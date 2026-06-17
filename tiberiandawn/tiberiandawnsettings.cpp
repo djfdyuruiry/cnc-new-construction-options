@@ -1,27 +1,39 @@
+#include "common/settings.h"
+
 #include "function.h"
 #include "tiberiandawnsettings.h"
+
+void TiberianDawnSettings::Init(SettingsClass& common_settings)
+{
+    CommonSettings = &common_settings;
+}
 
 void TiberianDawnSettings::Load_MultiPlayer(INIClass& ini)
 {
     CNC_LOGGER_DEBUG("Loading Tiberian Dawn multiplayer settings");
 
-    auto& multiplayer_settings = Settings[MultiPlayerSection];
+    auto& multiplayer_section = Get_Multiplayer_Section();
 
-    multiplayer_settings.With<IniRuleContext>(ini, [&](auto& c) {
+    multiplayer_section.With<IniRuleContext>(ini, [&](auto& c) {
         c.Load("Handle").With_Default("Noname")
-         .Load("ScenarioNumber").With_Default(0)
-         .Load("BasesOn").With_Default(true)
-         .Load("TiberiumRegrows").With_Default(true)
-         .Load("CratesOn").With_Default(false)
+         .Load("ScenarioNumber").With_Default(0).Then_Set(MPlayerScenarioNumber)
+         .Load("BasesOn").With_Default(true).Then_Set(MPlayerBases)
+         .Load("TiberiumRegrows").With_Default(true).template Then_Set_With_Type<bool>(MPlayerTiberium)
+         .Load("CratesOn").With_Default(false).template Then_Set_With_Type<bool>(MPlayerGoodies)
          .Load("CaptureTheFlag").With_Default(false)
-         .template Load_With_Converter<PlayerColorType, TdTypeConverter>("Color", REMAP_GOLD)
-         .template Load_With_Converter<HousesType, TdTypeConverter>("Side", HOUSE_GOOD);
+            .template With_Callback<bool>([] (auto ctf) { Special.IsCaptureTheFlag = ctf; })
+         .template Load_With_Converter_Callback<PlayerColorType, TdTypeConverter>(
+             "Color", REMAP_GOLD, [] (auto colour) { MPlayerPrefColor = colour; }
+         )
+         .template Load_With_Converter_Callback<HousesType, TdTypeConverter>(
+             "Side", HOUSE_GOOD, [] (auto house) { MPlayerHouse = house; }
+         );
     });
 
     //	Get the player's last-used Handle
     static constexpr auto max_name_length = std::size(MPlayerName);
 
-    if (multiplayer_settings.Get_C_Str("Handle", MPlayerName, std::size(MPlayerName)) >= max_name_length)
+    if (multiplayer_section.Get_C_Str("Handle", MPlayerName, std::size(MPlayerName)) >= max_name_length)
     {
         CNC_LOG_WARN(
             "'[MultiPlayer] -> Handle' in {} is too long. Maximum allowed characters: {}",
@@ -29,26 +41,16 @@ void TiberianDawnSettings::Load_MultiPlayer(INIClass& ini)
             max_name_length
         );
     }
-
-    MPlayerScenarioNumber = multiplayer_settings.Get<int>("ScenarioNumber");
-    MPlayerBases = multiplayer_settings.Get<bool>("BasesOn");
-    MPlayerTiberium = multiplayer_settings.Get<bool>("TiberiumRegrows");
-    MPlayerGoodies = multiplayer_settings.Get<bool>("CratesOn");
-    Special.IsCaptureTheFlag = multiplayer_settings.Get<bool>("CaptureTheFlag");
-
-    //	Get the player's last-used Color
-    MPlayerPrefColor = multiplayer_settings.Get_With_Converter<PlayerColorType, TdTypeConverter>("Color");
-    MPlayerHouse = multiplayer_settings.Get_With_Converter<HousesType, TdTypeConverter>("Side");
 }
 
 void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
 {
-    // reset state
     IniFileName = std::move(ini_file_name);
-    Settings = RuleSections();
 
+    // reset state
     CNC_LOGGER_INFO("Loading Tiberian Dawn settings from INI file: {}", IniFileName);
 
+    CommonSettings->Load(IniFileName, ini);
     Load_MultiPlayer(ini);
 }
 
@@ -56,7 +58,8 @@ void TiberianDawnSettings::Update_MultiPlayer()
 {
     CNC_LOGGER_DEBUG("Updating Tiberian Dawn multiplayer settings from globals variables");
 
-    Editable_MultiPlayer().Set("Handle", MPlayerName)
+    Get_Multiplayer_Section()
+        .Set("Handle", MPlayerName)
         .Set("ScenarioNumber", MPlayerScenarioNumber)
         .Set("BasesOn", MPlayerBases)
         .Set("TiberiumRegrows", static_cast<bool>(MPlayerTiberium))
@@ -66,44 +69,32 @@ void TiberianDawnSettings::Update_MultiPlayer()
         .Set_With_Converter<HousesType, TdTypeConverter>("Side", MPlayerHouse);
 }
 
-void TiberianDawnSettings::Update()
+void TiberianDawnSettings::Update_Sections()
 {
     Update_MultiPlayer();
 }
 
-void TiberianDawnSettings::Save(INIClass& ini) const
+void TiberianDawnSettings::Save(INIClass& ini)
 {
     CNC_LOGGER_INFO("Saving Tiberian Dawn settings to INI file: {}", IniFileName);
 
-    Settings.Save_All_To_Ini(ini);
+    Update_Sections();
+
+    CommonSettings->Save(ini);
 }
 
-const RuleSection& TiberianDawnSettings::MultiPlayer() const
+RuleSections& TiberianDawnSettings::Get_Common_Sections()
 {
-    if (!Settings.Has_Section(MultiPlayerSection)) {
-        throw std::runtime_error("Attempted to get multiplayer settings before TdSettings.Load(...) was called");
+    if (CommonSettings == nullptr) {
+        throw std::runtime_error("Attempted to read common settings before TiberianDawnSettings::Init was called");
     }
 
-    return Settings[MultiPlayerSection];
+    return CommonSettings->Get_Sections();
 }
 
-RuleSection& TiberianDawnSettings::Editable_MultiPlayer()
+RuleSection& TiberianDawnSettings::Get_Multiplayer_Section()
 {
-    if (!Settings.Has_Section(MultiPlayerSection)) {
-        throw std::runtime_error("Attempted to get multiplayer settings before TdSettings.Load(...) was called");
-    }
-
-    return Settings[MultiPlayerSection];
-}
-
-const RuleSection& TiberianDawnSettings::operator[](const std::string_view section) const
-{
-    return Settings[section];
-}
-
-RuleSection& TiberianDawnSettings::operator[](const std::string_view section)
-{
-    return Settings[section];
+    return Get_Common_Sections()[MultiPlayerSection];
 }
 
 TiberianDawnSettings TdSettings;
