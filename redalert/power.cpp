@@ -190,6 +190,7 @@ void PowerClass::Draw_It(bool complete)
 
                 //				LogicPage->Fill_Rect(POWER_X, POWER_Y, POWER_X+POWER_WIDTH-1, POWER_Y+POWER_HEIGHT-1,
                 //LTGREY);
+                // render
                 CC_Draw_Shape(PowerBarShape,
                               0,
                               RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
@@ -198,53 +199,51 @@ void PowerClass::Draw_It(bool complete)
                               flags | SHAPE_NORMAL | SHAPE_WIN_REL,
                               remap);
 
-                /*
-                ** Hires power strip is too big to fit into a shape so it
-                ** is in two parts
-                */
-                if (!dosmode) {
-                    if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                        constexpr auto hi_res_piece_height = 112;
+                if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                    /*
+                    ** Dynamic power strip that scales to most sensible resolutions.
+                    */
+                    constexpr auto hi_res_piece_height = 112;
 
-                        const auto power_x = RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160;
-                        const auto end_piece_y = SeenBuff.Get_Height() - hi_res_piece_height;
+                    const auto power_x = RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160;
+                    const auto end_piece_y = SeenBuff.Get_Height() - hi_res_piece_height;
 
-                        auto y = 88 * RESFACTOR + hi_res_piece_height;
+                    auto y = 88 * RESFACTOR + hi_res_piece_height;
 
-                        /*
-                        ** Fill the entire height with unfilled power strip segments by rendering the top of the end
-                        ** piece repeatedly.
-                        */
-                        while (y < end_piece_y) {
-                            constexpr auto hi_res_power_strip_y_step = 8;
+                    // fill height with power strip segments, rendering the top of the end piece repeatedly
+                    while (y < end_piece_y) {
+                        constexpr auto hi_res_power_strip_y_step = 8;
 
-                            CC_Draw_Shape(PowerBarShape,
-                                          1,
-                                          power_x,
-                                          y,
-                                          WINDOW_MAIN,
-                                          flags | SHAPE_NORMAL | SHAPE_WIN_REL,
-                                          remap);
-                            y += hi_res_power_strip_y_step;
-                        }
-
-                        // draw end piece of the power strip at the bottom of the screen
-                        CC_Draw_Shape(PowerBarShape,
-                         1,
-                         power_x,
-                         end_piece_y,
-                         WINDOW_MAIN,
-                         flags | SHAPE_NORMAL | SHAPE_WIN_REL,
-                         remap);
-                    } else {
                         CC_Draw_Shape(PowerBarShape,
                                       1,
-                                      RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
-                                      (88 * RESFACTOR) + (56 * RESFACTOR),
+                                      power_x,
+                                      y,
                                       WINDOW_MAIN,
                                       flags | SHAPE_NORMAL | SHAPE_WIN_REL,
                                       remap);
+                        y += hi_res_power_strip_y_step;
                     }
+
+                    // render the bottom piece of the unfilled power strip
+                    CC_Draw_Shape(PowerBarShape,
+                     1,
+                     power_x,
+                     end_piece_y,
+                     WINDOW_MAIN,
+                     flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                     remap);
+                } else if (!dosmode) {
+                    /*
+                    ** Hires power strip is too big to fit into a shape so it
+                    ** is in two parts
+                    */
+                    CC_Draw_Shape(PowerBarShape,
+                                  1,
+                                  RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
+                                  (88 * RESFACTOR) + (56 * RESFACTOR),
+                                  WINDOW_MAIN,
+                                  flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                                  remap);
                 }
                 /*
                 **	Determine how much the power production exceeds or falls short

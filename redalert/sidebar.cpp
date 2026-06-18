@@ -76,13 +76,6 @@
 
 #include "function.h"
 #include "factory.h"
-#include "texture.h"
-
-void* SidebarClass::SidebarShape = NULL;
-void* SidebarClass::SidebarMiddleShape = NULL;
-void* SidebarClass::SidebarBottomShape = NULL;
-void* SidebarClass::SidebarFillShape = NULL;
-void* SidebarClass::SidebarFillSeperatorShape = NULL;
 
 /***************************************************************************
 **	This holds the translucent table for use with the construction clock
@@ -255,16 +248,16 @@ void SidebarClass::One_Time(const bool on_save)
     /*
     **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
     */
-    if (SidebarShape == NULL) {
-        SidebarShape = (void*)MFCD::Retrieve("SIDEBAR.SHP");
+    if (SidebarShape == nullptr) {
+        SidebarShape = const_cast<void*>(MFCD::Retrieve("SIDEBAR.SHP"));
     }
 
-    if (SidebarFillShape == NULL) {
-        SidebarFillShape = (void*)MFCD::Retrieve("DD-BKGND.SHP");
+    if (SidebarFillShape == nullptr) {
+        SidebarFillShape = const_cast<void*>(MFCD::Retrieve("DD-BKGND.SHP"));
     }
 
-    if (SidebarFillSeperatorShape == NULL) {
-        SidebarFillSeperatorShape = (void*)MFCD::Retrieve("DD-TOP.SHP");
+    if (SidebarFillSeperatorShape == nullptr) {
+        SidebarFillSeperatorShape = const_cast<void*>(MFCD::Retrieve("DD-TOP.SHP"));
     }
 }
 
@@ -833,11 +826,6 @@ void SidebarClass::Draw_It(bool complete)
                     y += background_height;
                 }
             }
-
-            // BUG: If no radar is present, and player isn't on multiplayer names screen, shadows to the right of buttons glitch sometimes
-            Repair.Draw_Me(true);
-            Upgrade.Draw_Me(true);
-            Zoom.Draw_Me(true);
 
             LogicPage->Unlock();
         }

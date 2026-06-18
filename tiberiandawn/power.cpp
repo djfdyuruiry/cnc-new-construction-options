@@ -212,13 +212,13 @@ void PowerClass::Draw_It(bool complete)
                 ** Draw the unfilled section
                 */
                 if (factor) {
+                    /*
+                    ** Dynamic unfilled power strip that scales to most sensible resolutions.
+                    */
                     if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                         auto y = PowY;
 
-                        /*
-                        ** Fill the entire height with unfilled power strip segments by rendering the top of the end
-                        ** piece repeatedly.
-                        */
+                        // fill height with power strip segments, rendering the top of the end piece repeatedly
                         while (y + hi_res_power_strip_y_step < bottom) {
                             CC_Draw_Shape(PowerBarShape,
                                           1,
@@ -229,7 +229,7 @@ void PowerClass::Draw_It(bool complete)
                             y += hi_res_power_strip_y_step;
                         }
 
-                        // draw the bottom piece of the unfilled power strip
+                        // render the bottom piece of the unfilled power strip
                         CC_Draw_Shape(PowerBarShape,
                                       1,
                                       PowX,
@@ -286,12 +286,17 @@ void PowerClass::Draw_It(bool complete)
                     */
                     if (Get_Resolution_Factor()) {
                         if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                            // fill entire height of the sidebar with power strip segments, filled with correct color
+                            /*
+                            ** Dynamic filled power strip that scales to most sensible resolutions. Uses clipping to
+                            ** only render to a desired height that represents the current player power generation.
+                            */
+                            const auto shape_num = 3 + power_color;
                             auto y = PowY;
 
+                            // fill height with power strip segments, rendering the top of the end piece repeatedly
                             while (y + hi_res_power_strip_y_step < bottom) {
                                 CC_Draw_Shape(PowerBarShape,
-                                              3 + power_color,
+                                              shape_num,
                                               PowX,
                                               y - WindowList[WINDOW_CUSTOM][WINDOWY],
                                               WINDOW_CUSTOM,
@@ -299,9 +304,9 @@ void PowerClass::Draw_It(bool complete)
                                 y += hi_res_power_strip_y_step;
                             }
 
-                            // draw the bottom piece of the power strip, filled with correct color
+                            // render the bottom piece of the unfilled power strip
                             CC_Draw_Shape(PowerBarShape,
-                                          3 + power_color,
+                                          shape_num,
                                           PowX,
                                           bottom - hi_res_end_piece_height - WindowList[WINDOW_CUSTOM][WINDOWY],
                                           WINDOW_CUSTOM,
