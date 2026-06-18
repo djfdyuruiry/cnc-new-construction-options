@@ -172,8 +172,6 @@ void PowerClass::One_Time(const bool on_save_load)
  *=============================================================================================*/
 void PowerClass::Draw_It(bool complete)
 {
-    constexpr auto hi_res_power_strip_y_step = 10;
-    constexpr auto hi_res_end_piece_height = 124;
     static int _modtable[] = {0, -1, 0, 1, 0, -1, -2, -1, 0, 1, 2, 1, 0};
     int power_color;
     int factor = Get_Resolution_Factor();
@@ -184,6 +182,9 @@ void PowerClass::Draw_It(bool complete)
         if (LogicPage->Lock()) {
 
             if (Map.IsSidebarActive) {
+                constexpr auto hi_res_power_strip_y_step = 10;
+                constexpr auto hi_res_end_piece_height = 124;
+
                 IsToRedraw = false;
 
                 /*
@@ -214,7 +215,10 @@ void PowerClass::Draw_It(bool complete)
                     if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                         auto y = PowY;
 
-                        // fill the entire height of the sidebar with unfilled power strip segments
+                        /*
+                        ** Fill the entire height with unfilled power strip segments by rendering the top of the end
+                        ** piece repeatedly.
+                        */
                         while (y + hi_res_power_strip_y_step < bottom) {
                             CC_Draw_Shape(PowerBarShape,
                                           0,

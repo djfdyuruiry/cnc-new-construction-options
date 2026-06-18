@@ -101,6 +101,8 @@ public:
     static void* SidebarShape;
     static void* SidebarMiddleShape; // Only used in Win95 version
     static void* SidebarBottomShape; // Only used in Win95 version
+    static void* SidebarFillShape;
+    static void* SidebarFillSeperatorShape;
 
     SidebarClass(void);
     SidebarClass(NoInitClass const& x);

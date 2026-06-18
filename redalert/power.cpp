@@ -134,9 +134,12 @@ void PowerClass::One_Time(const bool on_save)
 {
     RadarClass::One_Time(on_save);
 
+    constexpr auto power_strip_height = 153;
     bool dosmode = (RESFACTOR == 1);
+
     POWER_Y = (dosmode) ? (88 + 9) : (7 + 70 + 13);
-    POWER_HEIGHT = (dosmode) ? (80) : (SeenBuff.Get_Height() - POWER_Y);
+    // = height of screen - height of other sidebar graphics (these are static, power strip is dynamic in hi-res mode)
+    POWER_HEIGHT = (dosmode) ? 80 : SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - power_strip_height);
     PowerButton.X = POWER_X * RESFACTOR;
     PowerButton.Y = POWER_Y * RESFACTOR;
     PowerButton.Width = (POWER_WIDTH * RESFACTOR) - 1;
@@ -201,7 +204,6 @@ void PowerClass::Draw_It(bool complete)
                 */
                 if (!dosmode) {
                     if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                        constexpr auto hi_res_power_strip_y_step = 9;
                         constexpr auto hi_res_piece_height = 112;
 
                         const auto power_x = RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160;
@@ -210,12 +212,12 @@ void PowerClass::Draw_It(bool complete)
                         auto y = 88 * RESFACTOR + hi_res_piece_height;
 
                         /*
-                        ** Draw power strip segments along the entire screen height.
-                        **
-                        ** Stops at the offset from the bottom of the screen that matches the first segment in the
-                        ** end piece graphic.
+                        ** Fill the entire height with unfilled power strip segments by rendering the top of the end
+                        ** piece repeatedly.
                         */
                         while (y < end_piece_y) {
+                            constexpr auto hi_res_power_strip_y_step = 8;
+
                             CC_Draw_Shape(PowerBarShape,
                                           1,
                                           power_x,
@@ -248,7 +250,7 @@ void PowerClass::Draw_It(bool complete)
                 **	Determine how much the power production exceeds or falls short
                 **	of power demands.
                 */
-                int bottom = (POWER_Y + POWER_HEIGHT - 1) * RESFACTOR;
+                int bottom = RESFACTOR == 1 ? 176 : SeenBuff.Get_Height() - 49;
                 int power_height = (PowerHeight == DesiredPowerHeight)
                                        ? PowerHeight + (_modtable[PowerBounce] * PowerDir)
                                        : PowerHeight;
@@ -273,29 +275,6 @@ void PowerClass::Draw_It(bool complete)
                         color1 = 235;
                         color2 = 230;
                     }
-
-                    CNC_LOG_WARN("Power pre: {}, {}, {}", power_height, drain_height, POWER_HEIGHT);
-
-                    if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                        const auto fillable_height = POWER_HEIGHT - 50;
-                        const auto ratio = fillable_height / (76 * RESFACTOR + 1);
-
-                        power_height = Bound(power_height * ratio, 0, fillable_height);
-                        drain_height = Bound(drain_height * ratio, 0, fillable_height);
-                    } else if (!dosmode) {
-                        /*
-                        ** New power bar is in slightly different place
-                        **
-                        ** Old power bar was 107 pixels high. New bar is 153 pixels high.
-                        **
-                        ** ST - 5/2/96 11:23AM
-                        */
-                        power_height = (power_height * (76 * RESFACTOR + 1)) / (53 * RESFACTOR + 1);
-                        drain_height = (drain_height * (76 * RESFACTOR + 1)) / (53 * RESFACTOR + 1);
-                    }
-
-                    CNC_LOG_WARN("Power post: {}, {}, {}", power_height, drain_height, POWER_HEIGHT);
-                    bottom = RESFACTOR == 1 ? 176 : SeenBuff.Get_Height() - 49;
 
                     const auto x1 = RESFACTOR == 1 ? 245 : SeenBuff.Get_Width() - 150;
                     const auto x2 = RESFACTOR == 1 ? 246 : SeenBuff.Get_Width() - 148;
@@ -464,8 +443,6 @@ void PowerClass::Refresh_Cells(CELL cell, short const* list)
  *=========================================================================*/
 int PowerClass::Power_Height(int value)
 {
-    auto power_height = RESFACTOR == 1 ? (80) : (200 - POWER_Y);
-
     int num = value / POWER_STEP_LEVEL; // figure out the initial num of DRAIN_VALUE's
     int retval = 0;                     // currently there is no power
 
@@ -474,7 +451,7 @@ int PowerClass::Power_Height(int value)
     ** of each.
     */
     for (int lp = 0; lp < num; lp++) {
-        retval = retval + (((power_height - 2) - retval) / POWER_STEP_FACTOR);
+        retval = retval + (((POWER_HEIGHT - 2) - retval) / POWER_STEP_FACTOR);
         value -= POWER_STEP_LEVEL;
     }
 
@@ -482,10 +459,10 @@ int PowerClass::Power_Height(int value)
     ** Adjust the retval to factor in the remainder
     */
     if (value) {
-        retval = retval + (((((power_height - 2) - retval) / POWER_STEP_FACTOR) * value) / POWER_STEP_LEVEL);
+        retval = retval + (((((POWER_HEIGHT - 2) - retval) / POWER_STEP_FACTOR) * value) / POWER_STEP_LEVEL);
     }
 
-    retval = Bound(retval, 0, power_height - 2);
+    retval = Bound(retval, 0, POWER_HEIGHT - 2);
     return (retval);
 }
 

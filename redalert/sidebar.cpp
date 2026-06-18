@@ -81,6 +81,8 @@
 void* SidebarClass::SidebarShape = NULL;
 void* SidebarClass::SidebarMiddleShape = NULL;
 void* SidebarClass::SidebarBottomShape = NULL;
+void* SidebarClass::SidebarFillShape = NULL;
+void* SidebarClass::SidebarFillSeperatorShape = NULL;
 
 /***************************************************************************
 **	This holds the translucent table for use with the construction clock
@@ -255,6 +257,14 @@ void SidebarClass::One_Time(const bool on_save)
     */
     if (SidebarShape == NULL) {
         SidebarShape = (void*)MFCD::Retrieve("SIDEBAR.SHP");
+    }
+
+    if (SidebarFillShape == NULL) {
+        SidebarFillShape = (void*)MFCD::Retrieve("DD-BKGND.SHP");
+    }
+
+    if (SidebarFillSeperatorShape == NULL) {
+        SidebarFillSeperatorShape = (void*)MFCD::Retrieve("DD-TOP.SHP");
     }
 }
 
@@ -749,20 +759,15 @@ bool SidebarClass::Scroll(bool up, int column)
  *=============================================================================================*/
 void SidebarClass::Draw_It(bool complete)
 {
-    PowerClass::Draw_It(complete);
-
     BStart(BENCH_SIDEBAR);
-
-    const auto side_x = RESFACTOR == 1 ? SIDE_X : SeenBuff.Get_Width() - (640 - (SIDE_X * 2));
 
     if (IsSidebarActive && (IsToRedraw || complete) && !Debug_Map) {
         IsToRedraw = false;
 
         if (LogicPage->Lock()) {
-            /*
-            **	Draw the outline box around the sidebar buttons.
-            */
-            int shape = complete ? 0 : 1;
+            constexpr auto power_width = 20;
+            const auto side_x = RESFACTOR == 1 ? SIDE_X : SeenBuff.Get_Width() - (640 - (SIDE_X * 2));
+            const auto shape = complete ? 0 : 1;
 
             /*
             ** The sidebar shape is too big in 640x400 so it needs to be drawn in three chunks.
@@ -771,34 +776,68 @@ void SidebarClass::Draw_It(bool complete)
             CC_Draw_Shape(
                 SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
 
-            if (Get_Current_Resolution_Mode() != MODE_HIGH_RES) {
+            const auto bottom_shape_x = side_x;
+            const auto bottom_shape_y = (8 + 80 + 50) * RESFACTOR;
+
+            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                /*
+                ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip.
+                */
+                WindowList[WINDOW_CUSTOM][WINDOWX] = bottom_shape_x + power_width;
+                WindowList[WINDOW_CUSTOM][WINDOWY] = bottom_shape_y;
+                WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = GBUFF_INIT_HEIGHT - WindowList[WINDOW_CUSTOM][WINDOWY];
+
                 CC_Draw_Shape(
-                    SidebarBottomShape, shape, side_x, (8 + 80 + 50) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+                    SidebarBottomShape,
+                    shape,
+                    -power_width,
+                    0,
+                    WINDOW_CUSTOM,
+                    SHAPE_WIN_REL
+                );
+            } else {
+                CC_Draw_Shape(
+                    SidebarBottomShape,
+                    shape,
+                    bottom_shape_x,
+                    bottom_shape_y,
+                    WINDOW_MAIN,
+                    SHAPE_WIN_REL
+                );
             }
 
+            /*
+            ** In hi-res mode the sidebar won't fill the screen height, so fill the remaining height with a repeating
+            ** set of ::SidebarFillSeperatorShape followed by a background made from two ::SidebarFillShape shapes.
+            */
+            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                // ensure we avoid the power strip
+                const auto x = side_x + power_width;
+                const auto flags = SHAPE_WIN_REL | SHAPE_NORMAL;
+
+                auto y = GBUFF_INIT_HEIGHT + 1;
+
+                while (y < SeenBuff.Get_Height()) {
+                    constexpr auto seperator_height = 16;
+                    constexpr auto background_height = 192;
+
+                    // seperator graphic
+                    CC_Draw_Shape(SidebarFillSeperatorShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
+                    y += seperator_height;
+
+                    // tiled background
+                    CC_Draw_Shape(SidebarFillShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
+                    y += background_height;
+                    CC_Draw_Shape(SidebarFillShape, 2, x, y, WINDOW_MAIN, flags, nullptr);
+                    y += background_height;
+                }
+            }
+
+            // BUG: If no radar is present, and player isn't on multiplayer names screen, shadows to the right of buttons glitch sometimes
             Repair.Draw_Me(true);
             Upgrade.Draw_Me(true);
             Zoom.Draw_Me(true);
-
-            /*
-            ** In hi-res mode the sidebar won't fill the entire screen height, so fill the space with black to
-            ** prevent glitches.
-            */
-            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                constexpr auto logo_width = 64;
-                constexpr auto logo_height = 192;
-
-                const auto left_column_x = side_x + 20;
-                const auto right_column_x = left_column_x + logo_width + 6;
-
-                auto y = SIDE_HEIGHT * 2 + 160 - 7;
-
-                while (y < SeenBuff.Get_Height()) {
-                    CC_Draw_Shape(StripClass::LogoShapes, 0, left_column_x, y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
-                    CC_Draw_Shape(StripClass::LogoShapes, 1, right_column_x, y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
-                    y += logo_height;
-                }
-            }
 
             LogicPage->Unlock();
         }
@@ -814,6 +853,7 @@ void SidebarClass::Draw_It(bool complete)
         Column[1].Draw_It(complete);
 
         if (complete || IsToRedraw) {
+            // BUG: If no radar is present, and player isn't on multiplayer names screen, shadows to the right of buttons glitch sometimes
             Repair.Draw_Me(true);
             Upgrade.Draw_Me(true);
             Zoom.Draw_Me(true);
