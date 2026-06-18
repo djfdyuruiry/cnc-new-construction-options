@@ -221,7 +221,7 @@ void PowerClass::Draw_It(bool complete)
                         */
                         while (y + hi_res_power_strip_y_step < bottom) {
                             CC_Draw_Shape(PowerBarShape,
-                                          0,
+                                          1,
                                           PowX,
                                           y - WindowList[WINDOW_CUSTOM][WINDOWY],
                                           WINDOW_CUSTOM,
@@ -291,7 +291,7 @@ void PowerClass::Draw_It(bool complete)
 
                             while (y + hi_res_power_strip_y_step < bottom) {
                                 CC_Draw_Shape(PowerBarShape,
-                                              2 + power_color,
+                                              3 + power_color,
                                               PowX,
                                               y - WindowList[WINDOW_CUSTOM][WINDOWY],
                                               WINDOW_CUSTOM,
