@@ -136,7 +136,7 @@ void PowerClass::One_Time(const bool on_save)
 
     bool dosmode = (RESFACTOR == 1);
     POWER_Y = (dosmode) ? (88 + 9) : (7 + 70 + 13);
-    POWER_HEIGHT = (dosmode) ? (80) : (200 - POWER_Y);
+    POWER_HEIGHT = (dosmode) ? (80) : (SeenBuff.Get_Height() - POWER_Y);
     PowerButton.X = POWER_X * RESFACTOR;
     PowerButton.Y = POWER_Y * RESFACTOR;
     PowerButton.Width = (POWER_WIDTH * RESFACTOR) - 1;
@@ -194,18 +194,55 @@ void PowerClass::Draw_It(bool complete)
                               WINDOW_MAIN,
                               flags | SHAPE_NORMAL | SHAPE_WIN_REL,
                               remap);
+
+                /*
+                ** Hires power strip is too big to fit into a shape so it
+                ** is in two parts
+                */
                 if (!dosmode) {
-                    /*
-                    ** Hires power strip is too big to fit into a shape so it
-                    ** is in two parts
-                    */
-                    CC_Draw_Shape(PowerBarShape,
-                                  1,
-                                  RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
-                                  (88 * RESFACTOR) + (56 * RESFACTOR),
-                                  WINDOW_MAIN,
-                                  flags | SHAPE_NORMAL | SHAPE_WIN_REL,
-                                  remap);
+                    if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                        constexpr auto hi_res_power_strip_y_step = 9;
+                        constexpr auto hi_res_piece_height = 112;
+
+                        const auto power_x = RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160;
+                        const auto end_piece_y = SeenBuff.Get_Height() - hi_res_piece_height;
+
+                        auto y = 88 * RESFACTOR + hi_res_piece_height;
+
+                        /*
+                        ** Draw power strip segments along the entire screen height.
+                        **
+                        ** Stops at the offset from the bottom of the screen that matches the first segment in the
+                        ** end piece graphic.
+                        */
+                        while (y < end_piece_y) {
+                            CC_Draw_Shape(PowerBarShape,
+                                          1,
+                                          power_x,
+                                          y,
+                                          WINDOW_MAIN,
+                                          flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                                          remap);
+                            y += hi_res_power_strip_y_step;
+                        }
+
+                        // draw end piece of the power strip at the bottom of the screen
+                        CC_Draw_Shape(PowerBarShape,
+                         1,
+                         power_x,
+                         end_piece_y,
+                         WINDOW_MAIN,
+                         flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                         remap);
+                    } else {
+                        CC_Draw_Shape(PowerBarShape,
+                                      1,
+                                      RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
+                                      (88 * RESFACTOR) + (56 * RESFACTOR),
+                                      WINDOW_MAIN,
+                                      flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                                      remap);
+                    }
                 }
                 /*
                 **	Determine how much the power production exceeds or falls short
@@ -237,18 +274,28 @@ void PowerClass::Draw_It(bool complete)
                         color2 = 230;
                     }
 
-                    /*
-                    ** New power bar is in slightly different place
-                    **
-                    ** Old power bar was 107 pixels high. New bar is 153 pixels high.
-                    **
-                    ** ST - 5/2/96 11:23AM
-                    */
-                    if (!dosmode) {
+                    CNC_LOG_WARN("Power pre: {}, {}, {}", power_height, drain_height, POWER_HEIGHT);
+
+                    if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                        const auto fillable_height = POWER_HEIGHT - 50;
+                        const auto ratio = fillable_height / (76 * RESFACTOR + 1);
+
+                        power_height = Bound(power_height * ratio, 0, fillable_height);
+                        drain_height = Bound(drain_height * ratio, 0, fillable_height);
+                    } else if (!dosmode) {
+                        /*
+                        ** New power bar is in slightly different place
+                        **
+                        ** Old power bar was 107 pixels high. New bar is 153 pixels high.
+                        **
+                        ** ST - 5/2/96 11:23AM
+                        */
                         power_height = (power_height * (76 * RESFACTOR + 1)) / (53 * RESFACTOR + 1);
                         drain_height = (drain_height * (76 * RESFACTOR + 1)) / (53 * RESFACTOR + 1);
                     }
-                    bottom = (175 * RESFACTOR) + 1;
+
+                    CNC_LOG_WARN("Power post: {}, {}, {}", power_height, drain_height, POWER_HEIGHT);
+                    bottom = RESFACTOR == 1 ? 176 : SeenBuff.Get_Height() - 49;
 
                     const auto x1 = RESFACTOR == 1 ? 245 : SeenBuff.Get_Width() - 150;
                     const auto x2 = RESFACTOR == 1 ? 246 : SeenBuff.Get_Width() - 148;
@@ -417,6 +464,8 @@ void PowerClass::Refresh_Cells(CELL cell, short const* list)
  *=========================================================================*/
 int PowerClass::Power_Height(int value)
 {
+    auto power_height = RESFACTOR == 1 ? (80) : (200 - POWER_Y);
+
     int num = value / POWER_STEP_LEVEL; // figure out the initial num of DRAIN_VALUE's
     int retval = 0;                     // currently there is no power
 
@@ -425,7 +474,7 @@ int PowerClass::Power_Height(int value)
     ** of each.
     */
     for (int lp = 0; lp < num; lp++) {
-        retval = retval + (((POWER_HEIGHT - 2) - retval) / POWER_STEP_FACTOR);
+        retval = retval + (((power_height - 2) - retval) / POWER_STEP_FACTOR);
         value -= POWER_STEP_LEVEL;
     }
 
@@ -433,10 +482,10 @@ int PowerClass::Power_Height(int value)
     ** Adjust the retval to factor in the remainder
     */
     if (value) {
-        retval = retval + (((((POWER_HEIGHT - 2) - retval) / POWER_STEP_FACTOR) * value) / POWER_STEP_LEVEL);
+        retval = retval + (((((power_height - 2) - retval) / POWER_STEP_FACTOR) * value) / POWER_STEP_LEVEL);
     }
 
-    retval = Bound(retval, 0, POWER_HEIGHT - 2);
+    retval = Bound(retval, 0, power_height - 2);
     return (retval);
 }
 

@@ -76,6 +76,7 @@
 
 #include "function.h"
 #include "factory.h"
+#include "texture.h"
 
 void* SidebarClass::SidebarShape = NULL;
 void* SidebarClass::SidebarMiddleShape = NULL;
@@ -769,8 +770,11 @@ void SidebarClass::Draw_It(bool complete)
             CC_Draw_Shape(SidebarShape, 0, side_x, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
             CC_Draw_Shape(
                 SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
-            CC_Draw_Shape(
-                SidebarBottomShape, shape, side_x, (8 + 80 + 50) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+
+            if (Get_Current_Resolution_Mode() != MODE_HIGH_RES) {
+                CC_Draw_Shape(
+                    SidebarBottomShape, shape, side_x, (8 + 80 + 50) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+            }
 
             Repair.Draw_Me(true);
             Upgrade.Draw_Me(true);
@@ -781,12 +785,26 @@ void SidebarClass::Draw_It(bool complete)
             ** prevent glitches.
             */
             if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                LogicPage->Fill_Rect(side_x, SIDE_HEIGHT * 2 + 160 - 7, SeenBuff.Get_Width(), SeenBuff.Get_Height(), TBLACK);
+                constexpr auto logo_width = 64;
+                constexpr auto logo_height = 192;
+
+                const auto left_column_x = side_x + 20;
+                const auto right_column_x = left_column_x + logo_width + 6;
+
+                auto y = SIDE_HEIGHT * 2 + 160 - 7;
+
+                while (y < SeenBuff.Get_Height()) {
+                    CC_Draw_Shape(StripClass::LogoShapes, 0, left_column_x, y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    CC_Draw_Shape(StripClass::LogoShapes, 1, right_column_x, y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    y += logo_height;
+                }
             }
 
             LogicPage->Unlock();
         }
     }
+
+    PowerClass::Draw_It(complete);
 
     /*
     **	Draw the side strip elements by calling their respective draw functions.
@@ -801,6 +819,7 @@ void SidebarClass::Draw_It(bool complete)
             Zoom.Draw_Me(true);
         }
     }
+
     IsToRedraw = false;
 
     BEnd(BENCH_SIDEBAR);

@@ -41,6 +41,7 @@
 #include "control.h"
 #include "shapebtn.h"
 #include "stage.h"
+#include "texture.h"
 
 class Pipe;
 class Straw;

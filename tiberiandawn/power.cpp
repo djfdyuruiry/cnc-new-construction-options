@@ -136,7 +136,8 @@ void PowerClass::One_Time(const bool on_save_load)
         PowY = Map.RadY + Map.RadHeight + (13 << factor);
     }
     PowWidth = 8 << factor;
-    PowHeight = (factor ? GBUFF_INIT_HEIGHT : GBUFF_INIT_HEIGHT / 2) - PowY;
+    PowHeight = SeenBuff.Get_Height() - PowY;
+
     PowLineSpace = 5 << factor;
     PowLineWidth = PowWidth - 4;
 
@@ -171,6 +172,8 @@ void PowerClass::One_Time(const bool on_save_load)
  *=============================================================================================*/
 void PowerClass::Draw_It(bool complete)
 {
+    constexpr auto hi_res_power_strip_y_step = 10;
+    constexpr auto hi_res_end_piece_height = 124;
     static int _modtable[] = {0, -1, 0, 1, 0, -1, -2, -1, 0, 1, 2, 1, 0};
     int power_color;
     int factor = Get_Resolution_Factor();
@@ -186,7 +189,7 @@ void PowerClass::Draw_It(bool complete)
                 /*
                 ** 1st get the height of the filled section of the power bar
                 */
-                int bottom = PowY + PowHeight - 1;
+                int bottom = PowY + PowHeight;
                 int power_height = (PowerHeight == DesiredPowerHeight)
                                        ? PowerHeight + (_modtable[PowerBounce] * PowerDir)
                                        : PowerHeight;
@@ -208,9 +211,31 @@ void PowerClass::Draw_It(bool complete)
                 ** Draw the unfilled section
                 */
                 if (factor) {
+                    if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                        auto y = PowY;
 
-                    CC_Draw_Shape(PowerBarShape, 0, PowX, PowY, WINDOW_CUSTOM, SHAPE_WIN_REL);
-                    CC_Draw_Shape(PowerBarShape, 1, PowX, PowY + 100, WINDOW_CUSTOM, SHAPE_WIN_REL);
+                        // fill the entire height of the sidebar with unfilled power strip segments
+                        while (y + hi_res_power_strip_y_step < bottom) {
+                            CC_Draw_Shape(PowerBarShape,
+                                          0,
+                                          PowX,
+                                          y - WindowList[WINDOW_CUSTOM][WINDOWY],
+                                          WINDOW_CUSTOM,
+                                          SHAPE_WIN_REL);
+                            y += hi_res_power_strip_y_step;
+                        }
+
+                        // draw the bottom piece of the unfilled power strip
+                        CC_Draw_Shape(PowerBarShape,
+                                      1,
+                                      PowX,
+                                      bottom - hi_res_end_piece_height - WindowList[WINDOW_CUSTOM][WINDOWY],
+                                      WINDOW_CUSTOM,
+                                      SHAPE_WIN_REL);
+                    } else {
+                        CC_Draw_Shape(PowerBarShape, 0, PowX, PowY, WINDOW_CUSTOM, SHAPE_WIN_REL);
+                        CC_Draw_Shape(PowerBarShape, 1, PowX, PowY + 100, WINDOW_CUSTOM, SHAPE_WIN_REL);
+                    }
                 } else {
                     /* Draw MS-DOS power gauge. */
                     int top_y = PowY + 1;
@@ -256,19 +281,42 @@ void PowerClass::Draw_It(bool complete)
                     ** Draw the filled section
                     */
                     if (Get_Resolution_Factor()) {
-                        CC_Draw_Shape(PowerBarShape,
-                                      2 + power_color,
-                                      PowX,
-                                      PowY - WindowList[WINDOW_CUSTOM][WINDOWY],
-                                      WINDOW_CUSTOM,
-                                      SHAPE_WIN_REL);
+                        if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                            // fill entire height of the sidebar with power strip segments, filled with correct color
+                            auto y = PowY;
 
-                        CC_Draw_Shape(PowerBarShape,
-                                      3 + power_color,
-                                      PowX,
-                                      PowY - WindowList[WINDOW_CUSTOM][WINDOWY] + 100,
-                                      WINDOW_CUSTOM,
-                                      SHAPE_WIN_REL);
+                            while (y + hi_res_power_strip_y_step < bottom) {
+                                CC_Draw_Shape(PowerBarShape,
+                                              2 + power_color,
+                                              PowX,
+                                              y - WindowList[WINDOW_CUSTOM][WINDOWY],
+                                              WINDOW_CUSTOM,
+                                              SHAPE_WIN_REL);
+                                y += hi_res_power_strip_y_step;
+                            }
+
+                            // draw the bottom piece of the power strip, filled with correct color
+                            CC_Draw_Shape(PowerBarShape,
+                                          3 + power_color,
+                                          PowX,
+                                          bottom - hi_res_end_piece_height - WindowList[WINDOW_CUSTOM][WINDOWY],
+                                          WINDOW_CUSTOM,
+                                          SHAPE_WIN_REL);
+                        } else {
+                            CC_Draw_Shape(PowerBarShape,
+                                          2 + power_color,
+                                          PowX,
+                                          PowY - WindowList[WINDOW_CUSTOM][WINDOWY],
+                                          WINDOW_CUSTOM,
+                                          SHAPE_WIN_REL);
+
+                            CC_Draw_Shape(PowerBarShape,
+                                          3 + power_color,
+                                          PowX,
+                                          PowY - WindowList[WINDOW_CUSTOM][WINDOWY] + 100,
+                                          WINDOW_CUSTOM,
+                                          SHAPE_WIN_REL);
+                        }
                     } else {
                         LogicPage->Fill_Rect(PowX + 2, bottom - power_height + 1, PowX + 5, bottom - 1, power_color);
                     }
@@ -492,50 +540,29 @@ TO_JSON(PowerClass)
 {
     BASE_CLASS_TO_JSON(RadarClass);
 
-    FIELD_TO_JSON(PowX);
-    FIELD_TO_JSON(PowY);
-    FIELD_TO_JSON(PowWidth);
-    FIELD_TO_JSON(PowHeight);
-    FIELD_TO_JSON(PowLineSpace);
-    FIELD_TO_JSON(PowLineWidth);
     BITFIELD_TO_JSON(IsToRedraw);
     BITFIELD_TO_JSON(IsActive);
-    FIELD_TO_JSON(RecordedDrain);
-    FIELD_TO_JSON(RecordedPower);
-    FIELD_TO_JSON(DesiredDrainHeight);
-    FIELD_TO_JSON(DesiredPowerHeight);
-    FIELD_TO_JSON(DrainHeight);
-    FIELD_TO_JSON(PowerHeight);
-    FIELD_TO_JSON(DrainBounce);
-    FIELD_TO_JSON(PowerBounce);
-    FIELD_TO_JSON(PowerDir);
-    FIELD_TO_JSON(DrainDir);
 }
 
 FROM_JSON(PowerClass)
 {
     BASE_CLASS_FROM_JSON(RadarClass);
 
-    // TODO: any changes here may break the power bar, consider resetting/refreshing it
-
-    FIELD_FROM_JSON(PowX); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(PowY); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(PowWidth); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(PowHeight); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(PowLineSpace); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(PowLineWidth); // TODO: Remove and test, as it is calculated from resolution
     BITFIELD_FROM_JSON(IsToRedraw);
     BITFIELD_FROM_JSON(IsActive);
-    FIELD_FROM_JSON(RecordedDrain);
-    FIELD_FROM_JSON(RecordedPower);
-    FIELD_FROM_JSON(DesiredDrainHeight); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(DesiredPowerHeight); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(DrainHeight); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(PowerHeight); // TODO: Remove and test, as it is calculated from resolution
-    FIELD_FROM_JSON(DrainBounce);
-    FIELD_FROM_JSON(PowerBounce);
-    FIELD_FROM_JSON(PowerDir);
-    FIELD_FROM_JSON(DrainDir);
+
+    // reset the instance state so that variables are automatically refreshed by ::AI method
+    p.IsToRedraw = true;
+    p.RecordedDrain = -1;
+    p.RecordedPower = -1;
+    p.DesiredDrainHeight = 0;
+    p.DesiredPowerHeight = 0;
+    p.DrainHeight = 0;
+    p.PowerHeight = 0;
+    p.PowerBounce = 0;
+    p.DrainBounce = 0;
+    p.DrainDir = 0;
+    p.PowerDir = 0;
 
     // ensure calculated constants are correct for current resolution
     p.One_Time(true);
