@@ -817,12 +817,14 @@ void SidebarClass::Draw_It(bool complete)
                 CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
 
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                    static constexpr auto power_width = 20;
+
                     // resolution is larger than standard height, so fill in the blank bottom space with a texture
                     InGameFillTexture.Draw_Rectangle(
                         *LogicPage,
-                        SideX,
+                        SideX + power_width,
                         GBUFF_INIT_HEIGHT,
-                        SideBarWidth,
+                        SideBarWidth - power_width,
                         SeenBuff.Get_Width() - GBUFF_INIT_HEIGHT
                     );
                 }

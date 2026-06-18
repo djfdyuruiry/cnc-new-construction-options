@@ -134,9 +134,12 @@ void PowerClass::One_Time(const bool on_save)
 {
     RadarClass::One_Time(on_save);
 
+    constexpr auto power_strip_height = 153;
     bool dosmode = (RESFACTOR == 1);
+
     POWER_Y = (dosmode) ? (88 + 9) : (7 + 70 + 13);
-    POWER_HEIGHT = (dosmode) ? (80) : (200 - POWER_Y);
+    // = height of screen - height of other sidebar graphics (these are static, power strip is dynamic in hi-res mode)
+    POWER_HEIGHT = (dosmode) ? 80 : SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - power_strip_height);
     PowerButton.X = POWER_X * RESFACTOR;
     PowerButton.Y = POWER_Y * RESFACTOR;
     PowerButton.Width = (POWER_WIDTH * RESFACTOR) - 1;
@@ -187,6 +190,7 @@ void PowerClass::Draw_It(bool complete)
 
                 //				LogicPage->Fill_Rect(POWER_X, POWER_Y, POWER_X+POWER_WIDTH-1, POWER_Y+POWER_HEIGHT-1,
                 //LTGREY);
+                // render
                 CC_Draw_Shape(PowerBarShape,
                               0,
                               RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160,
@@ -194,7 +198,41 @@ void PowerClass::Draw_It(bool complete)
                               WINDOW_MAIN,
                               flags | SHAPE_NORMAL | SHAPE_WIN_REL,
                               remap);
-                if (!dosmode) {
+
+                if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                    /*
+                    ** Dynamic power strip that scales to most sensible resolutions.
+                    */
+                    constexpr auto hi_res_piece_height = 112;
+
+                    const auto power_x = RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160;
+                    const auto end_piece_y = SeenBuff.Get_Height() - hi_res_piece_height;
+
+                    auto y = 88 * RESFACTOR + hi_res_piece_height;
+
+                    // fill height with power strip segments, rendering the top of the end piece repeatedly
+                    while (y < end_piece_y) {
+                        constexpr auto hi_res_power_strip_y_step = 8;
+
+                        CC_Draw_Shape(PowerBarShape,
+                                      1,
+                                      power_x,
+                                      y,
+                                      WINDOW_MAIN,
+                                      flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                                      remap);
+                        y += hi_res_power_strip_y_step;
+                    }
+
+                    // render the bottom piece of the unfilled power strip
+                    CC_Draw_Shape(PowerBarShape,
+                     1,
+                     power_x,
+                     end_piece_y,
+                     WINDOW_MAIN,
+                     flags | SHAPE_NORMAL | SHAPE_WIN_REL,
+                     remap);
+                } else if (!dosmode) {
                     /*
                     ** Hires power strip is too big to fit into a shape so it
                     ** is in two parts
@@ -211,7 +249,7 @@ void PowerClass::Draw_It(bool complete)
                 **	Determine how much the power production exceeds or falls short
                 **	of power demands.
                 */
-                int bottom = (POWER_Y + POWER_HEIGHT - 1) * RESFACTOR;
+                int bottom = RESFACTOR == 1 ? 176 : SeenBuff.Get_Height() - 49;
                 int power_height = (PowerHeight == DesiredPowerHeight)
                                        ? PowerHeight + (_modtable[PowerBounce] * PowerDir)
                                        : PowerHeight;
@@ -236,19 +274,6 @@ void PowerClass::Draw_It(bool complete)
                         color1 = 235;
                         color2 = 230;
                     }
-
-                    /*
-                    ** New power bar is in slightly different place
-                    **
-                    ** Old power bar was 107 pixels high. New bar is 153 pixels high.
-                    **
-                    ** ST - 5/2/96 11:23AM
-                    */
-                    if (!dosmode) {
-                        power_height = (power_height * (76 * RESFACTOR + 1)) / (53 * RESFACTOR + 1);
-                        drain_height = (drain_height * (76 * RESFACTOR + 1)) / (53 * RESFACTOR + 1);
-                    }
-                    bottom = (175 * RESFACTOR) + 1;
 
                     const auto x1 = RESFACTOR == 1 ? 245 : SeenBuff.Get_Width() - 150;
                     const auto x2 = RESFACTOR == 1 ? 246 : SeenBuff.Get_Width() - 148;

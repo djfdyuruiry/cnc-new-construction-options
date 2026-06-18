@@ -97,9 +97,11 @@ public:
         COLUMNS = 2 // Number of side strips on sidebar.
     };
 
-    static void* SidebarShape;
-    static void* SidebarMiddleShape; // Only used in Win95 version
-    static void* SidebarBottomShape; // Only used in Win95 version
+    static inline void* SidebarShape = nullptr;
+    static inline void* SidebarMiddleShape = nullptr; // Only used in Win95 version
+    static inline void* SidebarBottomShape = nullptr; // Only used in Win95 version
+    static inline void* SidebarFillShape = nullptr; // Only used in Win95 version
+    static inline void* SidebarFillSeperatorShape = nullptr; // Only used in Win95 version
 
     SidebarClass(void);
     SidebarClass(NoInitClass const& x);

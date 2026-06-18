@@ -45,12 +45,29 @@ boxes (Options menu etc.) in-game are also hi-res.
 ### Scenario View
 
 - The sidebar logic was reworked to use relative co-ordinates, anchoring all controls to the top-right hand side of the screen
-  - Sidebar resolution is unchanged, but an additional texture is drawn below it to fill the empty space
+  - Radar and Factory Strips resolution are unchanged
+  - Power strip logic has been updated to dynamically fill the entire height on the screen and scale meter to display (see tiberiandawn/power.cpp ::Draw_It())
+  - A background texture is rendered below the Factory Strips to fill the empty space between them and the bottom of the screen
 - Maps that are smaller than the current resolution can cause some problems but several changes were added to mitigate this:
   - All cells and objects outside the intended map size (set in scenario INI) are never rendered
   - Black rectangles are added on sides of the map to prevent artifacts from units at the edges of the map (which may be right of the map or below the map or both)
   - When a scenario like this is started/restarted or loaded from a save, the map view dimensions are refreshed to ensure it is displayed correctly before render
 - Save/load functionality was updated to ensure that the `TabClass::One_Time` method and base methods are called to refresh resolution dependant fields
+
+### Sidebar Background
+
+- The `BTEXTURE.SHP` shape is used as a texture in the background of menus throughout the game
+- We tile this shape below the Factory Strips using the `Texture` class as a wrapper to cache the texture shape
+- `MenuFillTexture` and `InGameFillTexture` globals are available so the textures are cached for the menu systems as well
+
+### Power Strip
+
+- Tiberian dawn uses the `HPWRBAR.SHP` shape to render the power strip
+- It contains 100 pixel tall cropped versions for partially drawing the bar and colored versions as well for low/high power
+- We use the shape for the bottom of the sidebar to draw 'segments' by drawing the top 10 pixels of the image over and over again
+- Since subsequent drawing operations draw over old pixels, this can be used to 'paste' as many segments as are needed to fill the screen
+- The full sidebar bottom shape is also drawn in full at the bottom of the screen, with correct end margin graphic
+- A similar technique is used to fill the bar with colour, but this uses a clipping window so only the appropriate power height is rendered (amount of power)
 
 ### CPS Images
 
@@ -74,12 +91,33 @@ boxes (Options menu etc.) in-game are also hi-res.
 ### Scenario View
 
 - The sidebar logic was reworked to use relative co-ordinates, anchoring all controls to the top-right hand side of the screen
-  - Sidebar resolution is unchanged, but a black rectangle is drawn below it to fill the empty space
+  - Radar and Factory Strips resolution are unchanged
+  - Power strip logic has been updated to dynamically fill the entire height on the screen and scale meter to display (see redalert/power.cpp ::Draw_It())
+  - A background texture is rendered below the Factory Strips to fill the empty space between them and the bottom of the screen
 - Maps that are smaller than the current resolution can cause some problems but several changes were added to mitigate this:
   - All cells and objects outside the intended map size (set in scenario INI) are never rendered
   - Black rectangles are added on sides of the map to prevent artifacts from units at the edges of the map (which may be right of the map or below the map or both)
   - When a scenario like this is started/restarted or loaded from a save, the map view dimensions are refreshed to ensure it is displayed correctly before render
 - Save/load functionality was updated to ensure that the `SidebarClass::One_Time` method and base methods are called to refresh resolution dependant fields
+
+### Sidebar Background
+
+- Red alert uses `DD-TOP.SHP` as a seperator graphic between the Factory Strips and the background, this is resued from menu borders
+- The `DD-BKGND.SHP` shape is also used in the menus throughout the game
+- We tile the top left and bottom left images from this shape below the Factory Strips
+- This is looped until the screen height has been filled (seperator -> tiled background images -> repeat)
+
+### Power Strip
+
+- Red alert uses the `POWERBAR.SHP` shape to render the power strip
+- It contains two 112 pixel tall segments for drawing the full strip
+- We draw the first shape as normal to render the top graphics
+- We then use the second (bottom) shape to draw 'segments' by drawing the top 8 pixels of the image over and over again
+- Since subsequent drawing operations draw over old pixels, this can be used to 'paste' as many segments as are needed to fill the screen
+- The full sidebar bottom shape is drawn at the end to anchor it to the end of the screen
+- Sidebar fill is done using a simple coloured rectangle, we have updated the rectangle dimensions calculation to work correctly with any screen height
+
+> NOTE: Unlike Tiberian Dawn, both the top and bottom sidebar segments have unique graphics at the top and bottom respectively, and the 'ticks' in the images curve at the top/bottom of the bar graphic
 
 ### PCX Images
 
