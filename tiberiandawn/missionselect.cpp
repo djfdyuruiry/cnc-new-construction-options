@@ -2,6 +2,7 @@
 #include "common/framelimit.h"
 #include "common/ini.h"
 
+#ifdef NEWMENU
 
 class EListClass : public ListClass
 {
@@ -10,15 +11,14 @@ public:
         : ListClass(id, x, y, w, h, flags, up, down){};
 
     void Clear() {
-        for (int i = 0; i < List.Count(); ++i) {
-            if (List[i] != nullptr) {
-                delete[] (char*)List[i];
-            }
-        }
         List.Clear();
-        if (IsScrollActive && List.Count() <= LineCount) {
+
+        
+        if (IsScrollActive) {
             Remove_Scroll_Bar();
         }
+
+        Set_Selected_Index(0);
     }
 
 protected:
@@ -123,7 +123,11 @@ static std::string Build_Mission_Description(
  * Country names are retrieved using the reference tables from map selection logic, if a scenario name is present in
  * the INI file it overrides country name.
  */
-static void Populate_Mission_List(EListClass& mission_list, std::vector<MissionVariables>& mission_metadata, const std::vector<ScenarioPlayerType>& players)
+static void Populate_Mission_List(
+    EListClass& mission_list,
+    std::vector<MissionVariables>& mission_metadata,
+    const std::vector<ScenarioPlayerType>& players
+)
 {
     for (const auto& player : players) {
         /*
@@ -182,6 +186,9 @@ static void Populate_Mission_List(EListClass& mission_list, std::vector<MissionV
                             player, mission, direction, variation, name, country
                         );
 
+                        CNC_LOG_WARN("Adding mission: player={}, mission={}, direction={}, variation={}, description={}", 
+                                      TdTypeConverter::To_String(player), mission, 
+                                      TdTypeConverter::To_String(direction), TdTypeConverter::To_String(variation), description);
                         mission_list.Add_Item(description);
                         mission_metadata.push_back({
                             mission,
@@ -242,7 +249,7 @@ bool Mission_Select_Dialog(void)
                     down_button);
 
     std::vector<MissionVariables> missions;
-    std::vector<ScenarioPlayerType> current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
+    std::vector current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
 
     Populate_Mission_List(list, missions, current_filter);
 
@@ -324,35 +331,41 @@ bool Mission_Select_Dialog(void)
             break;
 
         case 203 | KN_BUTTON:
-            current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
+            current_filter.clear();
+            current_filter.emplace_back(SCEN_PLAYER_GDI);
+            current_filter.emplace_back(SCEN_PLAYER_NOD);
+            current_filter.emplace_back(SCEN_PLAYER_JP);
+
             list.Clear();
             missions.clear();
             Populate_Mission_List(list, missions, current_filter);
-            list.Set_View_Index(0);
             display = true;
             break;
         case 204 | KN_BUTTON:
-            current_filter = { SCEN_PLAYER_GDI };
+            current_filter.clear();
+            current_filter.emplace_back(SCEN_PLAYER_GDI);
+
             list.Clear();
             missions.clear();
             Populate_Mission_List(list, missions, current_filter);
-            list.Set_View_Index(0);
             display = true;
             break;
         case 205 | KN_BUTTON:
-            current_filter = { SCEN_PLAYER_NOD };
+            current_filter.clear();
+            current_filter.emplace_back(SCEN_PLAYER_NOD);
+
             list.Clear();
             missions.clear();
             Populate_Mission_List(list, missions, current_filter);
-            list.Set_View_Index(0);
             display = true;
             break;
         case 206 | KN_BUTTON:
-            current_filter = { SCEN_PLAYER_JP };
+            current_filter.clear();
+            current_filter.emplace_back(SCEN_PLAYER_JP);
+
             list.Clear();
             missions.clear();
             Populate_Mission_List(list, missions, current_filter);
-            list.Set_View_Index(0);
             display = true;
             break;
 
@@ -381,3 +394,5 @@ bool Mission_Select_Dialog(void)
 
     return (okval);
 }
+
+#endif
