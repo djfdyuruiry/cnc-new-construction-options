@@ -330,7 +330,7 @@ struct gdistats
     int gdp;
     int conflict;
     int military;
-}; static const gdistats GDIStats[] = {
+} static const GDIStats[] = {
     // Name   Pop        Area  	  Capital	Government     GDP	    Conflict   Military
     {0, TXT_MAP_P01, TXT_MAP_A00, TXT_MAP_C00, 0, TXT_MAP_GDP00, TXT_MAP_PC00, 0},
     {1, TXT_MAP_P02, TXT_MAP_A01, TXT_MAP_C01, 1, TXT_MAP_GDP01, TXT_MAP_PC01, 3},
@@ -368,7 +368,7 @@ struct nodstats
     int conflict;
     int military;
     int probability;
-}; static const nodstats NodStats[] = {
+} static const NodStats[] = {
     // Name   Pop     Expendable   Capital	Government Corruptible   Worth	    Conflict   Military  Probability
     {16, TXT_MAP_P18, 38, TXT_MAP_C17, 8, 86, TXT_MAP_GDP14, TXT_MAP_PC20, 0, 23},
     {17, TXT_MAP_P19, 75, TXT_MAP_C18, 0, 18, TXT_MAP_GDP15, TXT_MAP_PC21, 1, 82},
