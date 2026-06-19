@@ -340,7 +340,21 @@ void RadarClass::Draw_It(bool forced)
         return;
 
     static HousesType _house = HOUSE_NONE;
-    if (PlayerPtr->ActLike != _house) {
+    static auto _playing_jurassic_campaign = false;
+
+    // check if we have entered/left funpark campaign
+    auto jurassic_flag_change = false;
+
+    if (Special.IsJurassic && !_playing_jurassic_campaign) {
+        _playing_jurassic_campaign = true;
+        jurassic_flag_change = true;
+    } else if (!Special.IsJurassic && _playing_jurassic_campaign) {
+        _playing_jurassic_campaign = false;
+        jurassic_flag_change = true;
+    }
+
+    // draw if the player's house has changed OR we have entered/left funpark campaign
+    if (PlayerPtr->ActLike != _house || jurassic_flag_change) {
         char name[_MAX_NAME + _MAX_EXT];
 
         if (Special.IsJurassic && AreThingiesEnabled) {

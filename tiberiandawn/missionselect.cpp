@@ -2,15 +2,24 @@
 #include "common/framelimit.h"
 #include "common/ini.h"
 
-#include <redalert/externs.h>
-
-#ifdef NEWMENU
 
 class EListClass : public ListClass
 {
 public:
     EListClass(int id, int x, int y, int w, int h, TextPrintType flags, void const* up, void const* down)
         : ListClass(id, x, y, w, h, flags, up, down){};
+
+    void Clear() {
+        for (int i = 0; i < List.Count(); ++i) {
+            if (List[i] != nullptr) {
+                delete[] (char*)List[i];
+            }
+        }
+        List.Clear();
+        if (IsScrollActive && List.Count() <= LineCount) {
+            Remove_Scroll_Bar();
+        }
+    }
 
 protected:
     void Draw_Entry(int index, int x, int y, int width, int selected) override
@@ -114,9 +123,9 @@ static std::string Build_Mission_Description(
  * Country names are retrieved using the reference tables from map selection logic, if a scenario name is present in
  * the INI file it overrides country name.
  */
-static void Populate_Mission_List(EListClass& mission_list, std::vector<MissionVariables>& mission_metadata)
+static void Populate_Mission_List(EListClass& mission_list, std::vector<MissionVariables>& mission_metadata, const std::vector<ScenarioPlayerType>& players)
 {
-    for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP }) {
+    for (const auto& player : players) {
         /*
         ** Load mix files for GDI/NOD so we can enumerate scenario INI files.
         */
@@ -213,10 +222,16 @@ bool Mission_Select_Dialog(void)
     TextButtonClass ok(
         200, TXT_OK, TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 25 * factor, option_y + option_height - 15 * factor);
     TextButtonClass cancel(201,
-                           TXT_CANCEL,
-                           TPF_6PT_GRAD | TPF_NOSHADOW,
-                           option_x + option_width - 50 * factor,
-                           option_y + option_height - 15 * factor);
+                            TXT_CANCEL,
+                            TPF_6PT_GRAD | TPF_NOSHADOW,
+                            option_x + option_width - 50 * factor,
+                            option_y + option_height - 15 * factor);
+
+    TextButtonClass btn_all(203, "All", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 10 * factor, option_y + 12 * factor, 50 * factor, 8 * factor);
+    TextButtonClass btn_gdi(204, "GDI", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 60 * factor, option_y + 12 * factor, 50 * factor, 8 * factor);
+    TextButtonClass btn_nod(205, "NOD", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 110 * factor, option_y + 12 * factor, 50 * factor, 8 * factor);
+    TextButtonClass btn_fun(206, "Funpark", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 160 * factor, option_y + 12 * factor, 60 * factor, 8 * factor);
+
     EListClass list(202,
                     option_x + 10 * factor,
                     option_y + 20 * factor,
@@ -225,13 +240,19 @@ bool Mission_Select_Dialog(void)
                     TPF_6PT_GRAD | TPF_NOSHADOW,
                     up_button,
                     down_button);
-    std::vector<MissionVariables> missions;
 
-    Populate_Mission_List(list, missions);
+    std::vector<MissionVariables> missions;
+    std::vector<ScenarioPlayerType> current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
+
+    Populate_Mission_List(list, missions, current_filter);
 
     buttons = &ok;
     cancel.Add(*buttons);
     list.Add(*buttons);
+    btn_all.Add(*buttons);
+    btn_gdi.Add(*buttons);
+    btn_nod.Add(*buttons);
+    btn_fun.Add(*buttons);
 
     Set_Logic_Page(SeenBuff);
     bool recalc = true;
@@ -280,6 +301,8 @@ bool Mission_Select_Dialog(void)
                 Whom = whom;
                 ScenDir = dir;
                 ScenVar = var;
+                Special.IsJurassic = player == SCEN_PLAYER_JP;
+                AreThingiesEnabled = player == SCEN_PLAYER_JP;
 
                 okval = true;
                 process = false;
@@ -293,9 +316,44 @@ bool Mission_Select_Dialog(void)
             Whom = HOUSE_GOOD;
             ScenDir = SCEN_DIR_EAST;
             ScenVar = SCEN_VAR_NONE;
+            Special.IsJurassic = false;
+            AreThingiesEnabled = false;
 
             process = false;
             okval = false;
+            break;
+
+        case 203 | KN_BUTTON:
+            current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
+            list.Clear();
+            missions.clear();
+            Populate_Mission_List(list, missions, current_filter);
+            list.Set_View_Index(0);
+            display = true;
+            break;
+        case 204 | KN_BUTTON:
+            current_filter = { SCEN_PLAYER_GDI };
+            list.Clear();
+            missions.clear();
+            Populate_Mission_List(list, missions, current_filter);
+            list.Set_View_Index(0);
+            display = true;
+            break;
+        case 205 | KN_BUTTON:
+            current_filter = { SCEN_PLAYER_NOD };
+            list.Clear();
+            missions.clear();
+            Populate_Mission_List(list, missions, current_filter);
+            list.Set_View_Index(0);
+            display = true;
+            break;
+        case 206 | KN_BUTTON:
+            current_filter = { SCEN_PLAYER_JP };
+            list.Clear();
+            missions.clear();
+            Populate_Mission_List(list, missions, current_filter);
+            list.Set_View_Index(0);
+            display = true;
             break;
 
         default:
@@ -323,5 +381,3 @@ bool Mission_Select_Dialog(void)
 
     return (okval);
 }
-
-#endif

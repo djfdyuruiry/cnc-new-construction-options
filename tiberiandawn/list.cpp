@@ -344,7 +344,7 @@ int ListClass::Draw_Me(int forced)
             for (int index = 0; index < LineCount; index++) {
                 int line = CurrentTopIndex + index;
 
-                if (List.Count() > line) {
+                if (line >= 0 && List.Count() > line) {
 
                     /*
                     **	Prints the text and handles right edge clipping and tabs.
