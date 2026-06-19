@@ -479,6 +479,8 @@ int Optimize_Moves(PathType* path, int (*callback)(CELL, FacingType), int thresh
 **	GOPTIONS.CPP
 */
 void Draw_Caption(int text, int x, int y, int w);
+void Draw_Caption(char const* text, int x, int y, int w);
+void Draw_Caption(char const* text, OptionControlType option, int x, int y, int w);
 
 /*
 **	INI.CPP
@@ -1136,5 +1138,7 @@ extern char* TitlePicture;
 extern Texture MenuFillTexture;
 // texture to fill in dialogs when in a scenario
 extern Texture InGameFillTexture;
+
+int Lookup_Country_Name(const ScenarioPlayerType& player, const int& index);
 
 #include "rulekeys-nco.h"

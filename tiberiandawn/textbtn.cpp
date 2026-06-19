@@ -86,6 +86,9 @@ TextButtonClass::TextButtonClass(unsigned id,
             //			if (SeenBuff.Get_Height() != 200) Height *= 2;
         }
     }
+
+    GradientActivatedStyle = TPF_USE_GRAD_PAL | TPF_BRIGHT_COLOR;
+    GradientDeactivatedStyle = TPF_USE_GRAD_PAL | TPF_MEDIUM_COLOR;
 }
 
 /***********************************************************************************************
@@ -107,6 +110,9 @@ TextButtonClass::TextButtonClass(void)
     IsBlackBorder = 0;
     String = 0;
     PrintFlags = TPF_8POINT;
+
+    GradientActivatedStyle = TPF_USE_GRAD_PAL | TPF_BRIGHT_COLOR;
+    GradientDeactivatedStyle = TPF_USE_GRAD_PAL | TPF_MEDIUM_COLOR;
 }
 
 /***********************************************************************************************
@@ -163,6 +169,9 @@ TextButtonClass::TextButtonClass(unsigned id,
             //			if (SeenBuff.Get_Height() != 200) Height *= 2;
         }
     }
+
+    GradientActivatedStyle = TPF_USE_GRAD_PAL | TPF_BRIGHT_COLOR;
+    GradientDeactivatedStyle = TPF_USE_GRAD_PAL | TPF_MEDIUM_COLOR;
 }
 
 /***********************************************************************************************
@@ -350,9 +359,9 @@ void TextButtonClass::Draw_Text(char const* text)
                 flags = (TextPrintType)0;
             } else {
                 if (IsPressed || IsOn) {
-                    flags = TPF_USE_GRAD_PAL | TPF_BRIGHT_COLOR;
+                    flags = GradientActivatedStyle;
                 } else {
-                    flags = TPF_USE_GRAD_PAL | TPF_MEDIUM_COLOR;
+                    flags = GradientDeactivatedStyle;
                 }
             }
 

@@ -498,6 +498,45 @@ void GameOptionsClass::Process(void)
     Map.Render();
 }
 
+void Draw_Caption(const char* text, OptionControlType option, const int x, const int y, const int w)
+{
+    int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+
+    /*
+    **	Draw the filigree at the corners of the dialog.
+    */
+    if (option != OPTION_NONE) {
+        CC_Draw_Shape(MFCD::Retrieve("OPTIONS.SHP"), (int)option, x + 12, y + 11, WINDOW_MAIN, SHAPE_CENTER);
+        CC_Draw_Shape(MFCD::Retrieve("OPTIONS.SHP"), (int)option + 1, x + w - 14, y + 11, WINDOW_MAIN, SHAPE_CENTER);
+    }
+
+    if (CncStringUtils::Is_Blank(std::string(text))) {
+        return;
+    }
+
+    /*
+    **	Draw the caption.
+    */
+    Fancy_Text_Print(text,
+                     w / 2 + x,
+                     5 * factor + y,
+                     CC_GREEN,
+                     TBLACK,
+                     TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+    int length = String_Pixel_Width(text);
+    LogicPage->Draw_Line((x + (w / 2)) - (length / 2),
+                         y + FontHeight + FontYSpacing + 5 * factor,
+                         (x + (w / 2)) + (length / 2),
+                         y + FontHeight + FontYSpacing + 5 * factor,
+                         CC_GREEN);
+}
+
+void Draw_Caption(const char* text, const int x, const int y, const int w)
+{
+    Draw_Caption(text, OPTION_NONE, x, y, w);
+}
+
 /***********************************************************************************************
  * Draw_Caption -- Draws a caption on a dialog box.                                            *
  *                                                                                             *
@@ -575,30 +614,5 @@ void Draw_Caption(int text, int x, int y, int w)
         break;
     }
 
-    /*
-    **	Draw the filigree at the corners of the dialog.
-    */
-    if (option != OPTION_NONE) {
-        CC_Draw_Shape(MFCD::Retrieve("OPTIONS.SHP"), (int)option, x + 12, y + 11, WINDOW_MAIN, SHAPE_CENTER);
-        CC_Draw_Shape(MFCD::Retrieve("OPTIONS.SHP"), (int)option + 1, x + w - 14, y + 11, WINDOW_MAIN, SHAPE_CENTER);
-    }
-
-    /*
-    **	Draw the caption.
-    */
-    if (text != TXT_NONE) {
-        Fancy_Text_Print(text,
-                         w / 2 + x,
-                         5 * factor + y,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        int length = String_Pixel_Width(Text_String(text));
-        LogicPage->Draw_Line((x + (w / 2)) - (length / 2),
-                             y + FontHeight + FontYSpacing + 5 * factor,
-                             (x + (w / 2)) + (length / 2),
-                             y + FontHeight + FontYSpacing + 5 * factor,
-                             CC_GREEN);
-    }
+    Draw_Caption(text == TXT_NONE ? "" : Text_String(text), option, x, y, w);
 }

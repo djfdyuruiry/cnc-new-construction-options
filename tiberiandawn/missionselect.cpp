@@ -13,7 +13,6 @@ public:
     void Clear() {
         List.Clear();
 
-        
         if (IsScrollActive) {
             Remove_Scroll_Bar();
         }
@@ -52,30 +51,9 @@ struct MissionVariables
     HousesType House;
     ScenarioDirType Direction;
     ScenarioVarType Variant;
+    std::string Description;
 };
 
-// lookups that use reference data from map selection screens to get the country name TXT value
-
-static const auto gdi_country_name_lookup = [](const int& index) {
-    if (index > 21) {
-        return -1;
-    }
-
-    // first two GDI missions have country stored at the end of the lookup, so treat wrap around negative indexes
-    if (index < 0) {
-        return CountryNames[GDIStats[21].nameindex];
-    }
-
-    return CountryNames[GDIStats[index].nameindex];
-};
-
-static const auto nod_country_name_lookup = [](const int& index) {
-    if (index > 22) {
-        return -1;
-    }
-
-    return CountryNames[NodStats[index].nameindex];
-};
 
 /**
  * Build a human readable description for a given mission using it's metadata.
@@ -118,18 +96,14 @@ static std::string Build_Mission_Description(
 
 /**
  * Find any missions between 1-20 for all three single player campaigns (GDI, NOD and Funpark). Any scenario INI
- * present will be loaded into the mission list, with required metadata to enable correct loading of the mission.
+ * present will be loaded into the mission cache, containing required metadata to enable correct loading of the mission.
  *
  * Country names are retrieved using the reference tables from map selection logic, if a scenario name is present in
  * the INI file it overrides country name.
  */
-static void Populate_Mission_List(
-    EListClass& mission_list,
-    std::vector<MissionVariables>& mission_metadata,
-    const std::vector<ScenarioPlayerType>& players
-)
+static void Fill_Mission_Cache(std::vector<MissionVariables>& mission_cache)
 {
-    for (const auto& player : players) {
+    for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP }) {
         /*
         ** Load mix files for GDI/NOD so we can enumerate scenario INI files.
         */
@@ -139,11 +113,7 @@ static void Populate_Mission_List(
             Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), player);
         }
 
-        const auto& country_name_lookup = player == SCEN_PLAYER_GDI
-            ? gdi_country_name_lookup
-            : nod_country_name_lookup;
-        // workaround for gdi mission 1 + 2 being at then end of the countries lookup
-        auto country_index = player == SCEN_PLAYER_GDI ? -2 : 0;
+        auto country_index = 0;
 
         // TODO: lookup point of conflict (see mapsel.cpp)
         for (auto mission = 1; mission < 20; mission++) {
@@ -162,19 +132,21 @@ static void Populate_Mission_List(
                         auto ini_name = ini.Get_String("Basic", "Name", no_name);
                         auto name = ini_name == no_name ? std::nullopt : std::optional(ini_name);
 
+                        // workaround for duplicate gdi scenario 13 INI files (A + B variants are the same mission)
+                        if (
+                            player == SCEN_PLAYER_GDI && mission == 14
+                        ) {
+                            country_index = 21;
+                        }
+
                         // read country name (if present)
-                        const auto txt_country = country_name_lookup(
-                            // workaround for duplicate gdi scenario 13 INI files (A + B variants are the same mission)
-                            player == SCEN_PLAYER_GDI && mission > 13 ? country_index - 1 : country_index
-                        );
+                        const auto txt_country = Lookup_Country_Name(player, country_index);
                         std::optional<std::string> country;
 
-                        // ignore country names for Funpark missions
-                        if (player != SCEN_PLAYER_JP && txt_country > -1) {
+                        if (txt_country != TXT_NONE) {
                             country = Text_String(txt_country);
                         }
 
-                        // only increment country index if not on final campaign mission
                         if (player == SCEN_PLAYER_GDI && mission < 15) {
                             ++country_index;
                         } else if (player == SCEN_PLAYER_NOD && mission < 13) {
@@ -182,23 +154,45 @@ static void Populate_Mission_List(
                         }
 
                         // store mission description and metadata for list logic
-                        const auto description = Build_Mission_Description(
+                        auto description = Build_Mission_Description(
                             player, mission, direction, variation, name, country
                         );
 
-                        CNC_LOG_WARN("Adding mission: player={}, mission={}, direction={}, variation={}, description={}", 
-                                      TdTypeConverter::To_String(player), mission, 
-                                      TdTypeConverter::To_String(direction), TdTypeConverter::To_String(variation), description);
-                        mission_list.Add_Item(description);
-                        mission_metadata.push_back({
+                        mission_cache.push_back({
                             mission,
                             player,
                             player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD,
                             direction,
-                            variation
+                            variation,
+                            std::move(description)
                         });
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Populate the given list variables with all cached missions matching the players_filter.
+ */
+static void Populate_Mission_List(
+    EListClass& mission_list,
+    std::vector<MissionVariables const*>& mission_metadata,
+    const std::vector<ScenarioPlayerType>& players_filter
+)
+{
+    static std::vector<MissionVariables> mission_cache;
+
+    if (mission_cache.empty()) {
+        Fill_Mission_Cache(mission_cache);
+    }
+
+    for (const auto& player : players_filter) {
+        for (const auto& mission : mission_cache) {
+            if (mission.Player == player) {
+                mission_list.Add_Item(mission.Description);
+                mission_metadata.push_back(&mission);
             }
         }
     }
@@ -234,21 +228,41 @@ bool Mission_Select_Dialog(void)
                             option_x + option_width - 50 * factor,
                             option_y + option_height - 15 * factor);
 
-    TextButtonClass btn_all(203, "All", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 10 * factor, option_y + 12 * factor, 50 * factor, 8 * factor);
-    TextButtonClass btn_gdi(204, "GDI", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 60 * factor, option_y + 12 * factor, 50 * factor, 8 * factor);
-    TextButtonClass btn_nod(205, "NOD", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 110 * factor, option_y + 12 * factor, 50 * factor, 8 * factor);
-    TextButtonClass btn_fun(206, "Funpark", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 160 * factor, option_y + 12 * factor, 60 * factor, 8 * factor);
+    // TODO: Locale file entry
+    TextButtonClass btn_all(203, "All", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 10 * factor, option_y + 17 * factor, 54 * factor, 8 * factor);
+    TextButtonClass btn_gdi(204, Text_String(TXT_G_D_I), TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 64 * factor, option_y + 17 * factor, 54 * factor, 8 * factor);
+    TextButtonClass btn_nod(205, Text_String(TXT_N_O_D), TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 118 * factor, option_y + 17 * factor, 54 * factor, 8 * factor);
+    // TODO: Locale file entry
+    TextButtonClass btn_fun(206, "Funpark", TPF_6PT_GRAD | TPF_NOSHADOW, option_x + 172 * factor, option_y + 17 * factor, 54 * factor, 8 * factor);
+
+    // setup helpers for managing the buttons as 'tabs'
+    const std::vector button_ptrs = { &btn_all, &btn_gdi, &btn_nod, &btn_fun };
+
+    // ensure the selected 'tab' is shown in bright text (the button which is not IsPressed)
+    for (const auto& button : button_ptrs) {
+        button->Set_Gradient_Activated_Style(TPF_USE_GRAD_PAL | TPF_MEDIUM_COLOR);
+        button->Set_Gradient_Deactivated_Style(TPF_USE_GRAD_PAL | TPF_BRIGHT_COLOR);
+    }
+
+    // press all button to make them 'tabs' in the background
+    const auto reset_button_styles = [&]() {
+        std::ranges::for_each(button_ptrs, [](auto& b) { b->IsPressed = true; });
+    };
+
+    // select 'All' tab by default
+    reset_button_styles();
+    btn_all.IsPressed = false;
 
     EListClass list(202,
                     option_x + 10 * factor,
-                    option_y + 20 * factor,
+                    option_y + 25 * factor,
                     option_width - 20 * factor,
-                    option_height - 40 * factor,
+                    option_height - 45 * factor,
                     TPF_6PT_GRAD | TPF_NOSHADOW,
                     up_button,
                     down_button);
 
-    std::vector<MissionVariables> missions;
+    std::vector<MissionVariables const*> missions;
     std::vector current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
 
     Populate_Mission_List(list, missions, current_filter);
@@ -291,7 +305,7 @@ bool Mission_Select_Dialog(void)
             Blit_Hid_Page_To_Seen_Buff();
 
             Dialog_Box(option_x, option_y, option_width, option_height);
-            Draw_Caption(TXT_MISSION_DESCRIPTION, option_x, option_y, option_width);
+            Draw_Caption("Campaign Selection", option_x, option_y, option_width); // TODO: Locale file entry
             buttons->Draw_All();
             Show_Mouse();
         }
@@ -301,7 +315,7 @@ bool Mission_Select_Dialog(void)
         case KN_RETURN:
         case 200 | KN_BUTTON:
             if (list.Current_Item()) {
-                const auto& [number, player, whom, dir, var] = missions[list.Current_Index()];
+                const auto& [number, player, whom, dir, var, _] = *(missions[list.Current_Index()]);
 
                 Scen.Scenario = number;
                 ScenPlayer = player;
@@ -331,41 +345,47 @@ bool Mission_Select_Dialog(void)
             break;
 
         case 203 | KN_BUTTON:
-            current_filter.clear();
-            current_filter.emplace_back(SCEN_PLAYER_GDI);
-            current_filter.emplace_back(SCEN_PLAYER_NOD);
-            current_filter.emplace_back(SCEN_PLAYER_JP);
-
+            reset_button_styles();
             list.Clear();
             missions.clear();
+
+            current_filter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
             Populate_Mission_List(list, missions, current_filter);
+
+            btn_all.IsPressed = false;
             display = true;
             break;
         case 204 | KN_BUTTON:
-            current_filter.clear();
-            current_filter.emplace_back(SCEN_PLAYER_GDI);
-
+            reset_button_styles();
             list.Clear();
             missions.clear();
+
+            current_filter = { SCEN_PLAYER_GDI };
             Populate_Mission_List(list, missions, current_filter);
+
+            btn_gdi.IsPressed = false;
             display = true;
             break;
         case 205 | KN_BUTTON:
-            current_filter.clear();
-            current_filter.emplace_back(SCEN_PLAYER_NOD);
-
+            reset_button_styles();
             list.Clear();
             missions.clear();
+
+            current_filter = { SCEN_PLAYER_NOD };
             Populate_Mission_List(list, missions, current_filter);
+
+            btn_nod.IsPressed = false;
             display = true;
             break;
         case 206 | KN_BUTTON:
-            current_filter.clear();
-            current_filter.emplace_back(SCEN_PLAYER_JP);
-
+            reset_button_styles();
             list.Clear();
             missions.clear();
+
+            current_filter = { SCEN_PLAYER_JP };
             Populate_Mission_List(list, missions, current_filter);
+
+            btn_fun.IsPressed = false;
             display = true;
             break;
 

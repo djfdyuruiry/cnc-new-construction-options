@@ -437,34 +437,4 @@ extern bool Server; // Is this player acting as client or server
 // used for multi wall enhancement placement logic
 extern const FacingType FacingCardinals[4];
 
-// CountryNames, GDIStats and NodStats have been made public to allow 'Mission Select' to lookup country name string
-
-extern int const CountryNames[];
-
-extern struct gdistats
-{
-    int nameindex;
-    int pop;
-    int area;
-    int capital;
-    int govt;
-    int gdp;
-    int conflict;
-    int military;
-} const GDIStats[];
-
-extern struct nodstats
-{
-    int nameindex;
-    int pop;
-    int expendable;
-    int capital;
-    int govt;
-    int corruptible;
-    int worth;
-    int conflict;
-    int military;
-    int probability;
-} const NodStats[];
-
 #endif
