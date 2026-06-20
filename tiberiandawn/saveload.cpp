@@ -415,6 +415,7 @@ bool Load_Game(const char* file_name)
 
     const auto& scenario = save_header->ScenarioID;
     const auto house = save_header->Parse_Player_House_Type();
+    const auto player = save_header->Parse_Player_Type();
 
     /*
     **	Set the required CD to be in the drive according to the scenario
@@ -445,6 +446,10 @@ bool Load_Game(const char* file_name)
     }
 
     Call_Back();
+
+    // ensure we restore any Funpark flags
+    Special.IsJurassic = player == SCEN_PLAYER_JP;
+    AreThingiesEnabled = player == SCEN_PLAYER_JP;
 
     // load theater data
     if (Map.Theater != LastTheater) {
