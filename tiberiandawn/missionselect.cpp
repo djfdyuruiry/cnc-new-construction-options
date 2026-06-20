@@ -105,12 +105,13 @@ static void Fill_Mission_Cache(std::vector<MissionVariables>& mission_cache)
 {
     for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP }) {
         /*
-        ** Load mix files for GDI/NOD so we can enumerate scenario INI files.
+        ** Attempt to load mix files for GDI/NOD so we can enumerate scenario INI files.
         */
+        auto old_cd = RequiredCD;
         RequiredCD = player;
 
         if (!Force_CD_Available(player)) {
-            Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), player);
+            RequiredCD = old_cd;
         }
 
         auto country_index = 0;
@@ -141,6 +142,9 @@ static void Fill_Mission_Cache(std::vector<MissionVariables>& mission_cache)
 
                         // read country name (if present)
                         const auto txt_country = Lookup_Country_Name(player, country_index);
+
+                        CNC_LOG_WARN("index: {} | mission: {} | txt_country: {}", country_index, buffer, txt_country);
+
                         std::optional<std::string> country;
 
                         if (txt_country != TXT_NONE) {
@@ -336,7 +340,7 @@ bool Mission_Select_Dialog(void)
             ScenPlayer = SCEN_PLAYER_GDI;
             Whom = HOUSE_GOOD;
             ScenDir = SCEN_DIR_EAST;
-            ScenVar = SCEN_VAR_NONE;
+            ScenVar = SCEN_VAR_A;
             Special.IsJurassic = false;
             AreThingiesEnabled = false;
 
@@ -407,7 +411,7 @@ bool Mission_Select_Dialog(void)
     if (okval) {
         RequiredCD = ScenPlayer;
 
-        if (!Force_CD_Available(ScenPlayer)) {
+        if (!Force_CD_Available(ScenPlayer) && !Is_Demo()) {
             Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), ScenPlayer);
         }
     }

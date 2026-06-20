@@ -933,18 +933,14 @@ public:
         SDL_UpdateTexture(texture, NULL, windowSurface->pixels, windowSurface->pitch);
         SDL_RenderClear(renderer);
 
-        std::unique_ptr<SDL_Rect> src_rect;
-
         if (CurrentResolutionMode == MODE_ZOOM) {
-            src_rect = std::make_unique<SDL_Rect>();
+            constexpr SDL_Rect src_rect = {0, 0, DefaultWidth, DefaultHeight};
 
-            src_rect->x = 0;
-            src_rect->y = 0;
-            src_rect->w = DefaultWidth;
-            src_rect->h = DefaultHeight;
+            SDL_RenderCopy(renderer, texture, &src_rect, &render_dst);
+        } else {
+            SDL_RenderCopy(renderer, texture, nullptr, &render_dst);
         }
 
-        SDL_RenderCopy(renderer, texture, src_rect.get(), &render_dst);
         SDL_RenderPresent(renderer);
     }
 
