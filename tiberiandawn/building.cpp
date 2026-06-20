@@ -5774,12 +5774,14 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	have been a success.
     */
 
+    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
     auto prevent_building_in_shroud = true;
     auto max_placement_distance = 1;
     auto max_wall_placement_distance = max_placement_distance;
 
-    const auto placement_filter = Resolve_Placement_Rules(
+    Resolve_Placement_Rules(
         this,
+        placement_filter,
         max_placement_distance,
         max_wall_placement_distance,
         prevent_building_in_shroud
@@ -5801,13 +5803,14 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
         CELL cell = homecell + *ptr++;
 
         if (
-            // TODO: Guard against building walls far away that are not in line with existing walls
             Scan_For_Proximity_Check(
                 cell,
                 House,
                 placement_filter,
                 max_placement_distance,
-                placement_filter != PLACEMENT_FILTER_WALLS ? max_placement_distance : max_wall_placement_distance
+                placement_filter != PLACEMENT_FILTER_WALLS
+                    ? max_placement_distance
+                    : max_wall_placement_distance
             )
         ) {
             return true;

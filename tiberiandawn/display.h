@@ -352,15 +352,17 @@ private:
     */
 };
 
-PlacementFilter Resolve_Placement_Rules(
+void Resolve_Placement_Rules(
     const std::optional<const BuildingTypeClass*>& placement_type,
+    PlacementFilter& placement_filter,
     int& max_placement_distance,
     int& max_wall_placement_distance,
     bool& prevent_building_in_shroud
 );
 
-PlacementFilter Resolve_Placement_Rules(
+void Resolve_Placement_Rules(
     const std::optional<const BuildingClass*>& placement_instance,
+    PlacementFilter& placement_filter,
     int& max_placement_distance,
     int& max_wall_placement_distance,
     bool& prevent_building_in_shroud

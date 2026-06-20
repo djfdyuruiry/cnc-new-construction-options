@@ -1019,12 +1019,14 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
+    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
     auto prevent_building_in_shroud = true;
     auto max_placement_distance = 1;
     auto max_wall_placement_distance = max_placement_distance;
 
-    const auto placement_filter = Resolve_Placement_Rules(
+    Resolve_Placement_Rules(
         dynamic_cast<const BuildingTypeClass*>(object),
+        placement_filter,
         max_placement_distance,
         max_wall_placement_distance,
         prevent_building_in_shroud
@@ -1049,14 +1051,15 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		CELL cell = trycell + *ptr++;
 
 		if (
-            // TODO: Guard against building walls far away that are not in line with existing walls
 		    Scan_For_Proximity(
                 cell,
                 house,
                 placement_filter,
                 prevent_building_in_shroud,
                 max_placement_distance,
-                placement_filter != PLACEMENT_FILTER_WALLS ? max_placement_distance : max_wall_placement_distance
+                placement_filter != PLACEMENT_FILTER_WALLS
+                    ? max_placement_distance
+                    : max_wall_placement_distance
             )
 		)
 		{
@@ -4858,8 +4861,9 @@ FROM_JSON(DisplayClass)
     p.One_Time(true);
 }
 
-PlacementFilter Resolve_Placement_Rules(
+void Resolve_Placement_Rules(
     const std::optional<const BuildingTypeClass*>& placement_type,
+    PlacementFilter& placement_filter,
     int& max_placement_distance,
     int& max_wall_placement_distance,
     bool& prevent_building_in_shroud
@@ -4879,18 +4883,25 @@ PlacementFilter Resolve_Placement_Rules(
     }
 
     if (!placement_type.has_value()) {
-        return PLACEMENT_FILTER_ANYWHERE;
+        placement_filter = PLACEMENT_FILTER_ANYWHERE;
+        return;
     }
 
     if ((*placement_type)->IsWall) {
-        return modern_walls || !allow_building_beside_walls ? PLACEMENT_FILTER_WALLS : PLACEMENT_FILTER_ANYWHERE;
+        placement_filter = modern_walls || !allow_building_beside_walls
+            ? PLACEMENT_FILTER_WALLS
+            : PLACEMENT_FILTER_ANYWHERE;
+        return;
     }
 
-    return !modern_walls && allow_building_beside_walls ? PLACEMENT_FILTER_ANYWHERE : PLACEMENT_FILTER_BUILDINGS;
+    placement_filter = !modern_walls && allow_building_beside_walls
+        ? PLACEMENT_FILTER_ANYWHERE
+        : PLACEMENT_FILTER_BUILDINGS;
 }
 
-PlacementFilter Resolve_Placement_Rules(
+void Resolve_Placement_Rules(
     const std::optional<const BuildingClass*>& placement_instance,
+    PlacementFilter& placement_filter,
     int& max_placement_distance,
     int& max_wall_placement_distance,
     bool& prevent_building_in_shroud
@@ -4902,8 +4913,9 @@ PlacementFilter Resolve_Placement_Rules(
         placement_type = (*placement_instance)->Class;
     };
 
-    return Resolve_Placement_Rules(
+    Resolve_Placement_Rules(
         placement_type,
+        placement_filter,
         max_placement_distance,
         max_wall_placement_distance,
         prevent_building_in_shroud
