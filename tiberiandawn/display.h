@@ -185,7 +185,7 @@ public:
     bool In_View(CELL cell);
     bool Passes_Proximity_Check(ObjectTypeClass const* object);
 #ifdef USE_RA_AI
-    bool Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance) const;
+    bool Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, PlacementFilter filter, int max_building_distance, int remaining_distance, int depth = 0) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
 #endif
     ObjectClass* Cell_Object(CELL cell, int x = 0, int y = 0);
@@ -351,5 +351,19 @@ private:
     *save/load
     */
 };
+
+PlacementFilter Resolve_Placement_Rules(
+    const std::optional<const BuildingTypeClass*>& placement_type,
+    int& max_placement_distance,
+    int& max_wall_placement_distance,
+    bool& prevent_building_in_shroud
+);
+
+PlacementFilter Resolve_Placement_Rules(
+    const std::optional<const BuildingClass*>& placement_instance,
+    int& max_placement_distance,
+    int& max_wall_placement_distance,
+    bool& prevent_building_in_shroud
+);
 
 #endif

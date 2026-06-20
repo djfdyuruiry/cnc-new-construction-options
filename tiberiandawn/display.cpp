@@ -833,7 +833,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const* object)
 }
 
 #ifdef USE_RA_AI
-bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance) const
+bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, PlacementFilter filter, int max_building_distance, int remaining_distance, int depth) const
 {
 	if (remaining_distance < 1) {
 		return false;
@@ -846,37 +846,44 @@ bool DisplayClass::Scan_For_Proximity(CELL cell, HousesType house, bool prevent_
 			continue;
 		}
 
-		if (prevent_building_in_shroud && !(*this)[newcell].Is_Visible(PlayerPtr))
+	    const auto& current_cell = (*this)[newcell];
+
+		if (prevent_building_in_shroud && !current_cell.Is_Visible(PlayerPtr))
 		{
 			return false;
 		}
+
+	    TechnoClass* base = current_cell.Cell_Techno();
+
+	    // TODO: could add a `build off allies base` rule by checking if
+	    //       house is friendly to current players house
+	    if ((filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance) && base && base->What_Am_I() == RTTI_BUILDING && base->House->Class->House == house) {
+	        return true;
+	    }
 
 		/*
 		**	The special cell ownership flag allows building adjacent
 		**	to friendly walls and bibs even though there is no official
 		**	building located there.
 		*/
-		if ((*this)[newcell].Owner == house) {
-			if (
-			    !allow_building_beside_walls
-			    && (*this)[newcell].Overlay != OVERLAY_NONE
-			    && OverlayTypeClass::As_Reference((*this)[newcell].Overlay).IsWall
-			) {
-				return false;
-			}
+		if (current_cell.Owner == house) {
+		    const auto is_wall = current_cell.Overlay != OVERLAY_NONE
+		        && OverlayTypeClass::As_Reference(current_cell.Overlay).IsWall;
+
+		    if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
+		        return false;
+		    }
+
+		    if (filter == PLACEMENT_FILTER_WALLS && !is_wall) {
+		        if (depth >= max_building_distance && current_cell.Overlay != OVERLAY_ROAD) {
+		            return false;
+		        }
+		    }
 
 		    return true;
 		}
 
-		TechnoClass* base = (*this)[newcell].Cell_Techno();
-
-		// TODO: could add a `build off allies base` rule by checking if 
-		//       house is friendly to current players house
-		if (base && base->What_Am_I() == RTTI_BUILDING && base->House->Class->House == house) {
-			return true;
-		}
-
-		if (Scan_For_Proximity(newcell, house, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1)) {
+		if (Scan_For_Proximity(newcell, house, prevent_building_in_shroud, filter, max_building_distance, remaining_distance - 1, depth + 1)) {
 			return true;
 		}
 	}
@@ -932,15 +939,16 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
-    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-    const auto max_wall_distance = modern_walls
-        ? Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE)
-        : max_placement_distance;
-	const auto prevent_building_in_shroud =
-	    Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	const auto allow_building_beside_walls =
-	    Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    auto prevent_building_in_shroud = true;
+    auto max_placement_distance = 1;
+    auto max_wall_placement_distance = max_placement_distance;
+
+    const auto placement_filter = Resolve_Placement_Rules(
+        dynamic_cast<const BuildingTypeClass*>(object),
+        max_placement_distance,
+        max_wall_placement_distance,
+        prevent_building_in_shroud
+    );
 
 	/*
 	**	Scan through all cells that the building foundation would cover. If any adjacent
@@ -960,24 +968,17 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	while (*ptr != REFRESH_EOL) {
 		CELL cell = trycell + *ptr++;
 
-		auto maximumDistance = max_placement_distance;
-		auto proximityDetected = !dynamic_cast<const BuildingTypeClass*>(object)->IsWall
-	        ? Scan_For_Proximity(
-	            cell,
-		        house,
-		        prevent_building_in_shroud,
-		        allow_building_beside_walls,
-		        maximumDistance
-		      )
-		    : Scan_For_Proximity(
-	            cell,
-		        house,
-		        prevent_building_in_shroud,
-		        trycell,
-		        max_wall_distance
-		      );
-
-		if (proximityDetected)
+		if (
+            // TODO: Guard against building walls far away that are not in line with existing walls
+		    Scan_For_Proximity(
+                cell,
+                house,
+                prevent_building_in_shroud,
+                placement_filter,
+                max_placement_distance,
+                placement_filter != PLACEMENT_FILTER_WALLS ? max_placement_distance : max_wall_placement_distance
+            )
+		)
 		{
 			return true;
 		}
@@ -4775,4 +4776,56 @@ FROM_JSON(DisplayClass)
 
     // ensure calculated constants are correct for current resolution
     p.One_Time(true);
+}
+
+PlacementFilter Resolve_Placement_Rules(
+    const std::optional<const BuildingTypeClass*>& placement_type,
+    int& max_placement_distance,
+    int& max_wall_placement_distance,
+    bool& prevent_building_in_shroud
+)
+{
+    max_wall_placement_distance = max_placement_distance =
+        Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+    prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+    const auto max_wall_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
+    const auto allow_building_beside_walls =
+        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+
+    if (modern_walls) {
+        max_wall_placement_distance = max_wall_distance;
+    }
+
+    if (!placement_type.has_value()) {
+        return PLACEMENT_FILTER_ANYWHERE;
+    }
+
+    if ((*placement_type)->IsWall) {
+        return modern_walls || !allow_building_beside_walls ? PLACEMENT_FILTER_WALLS : PLACEMENT_FILTER_ANYWHERE;
+    }
+
+    return !modern_walls && allow_building_beside_walls ? PLACEMENT_FILTER_ANYWHERE : PLACEMENT_FILTER_BUILDINGS;
+}
+
+PlacementFilter Resolve_Placement_Rules(
+    const std::optional<const BuildingClass*>& placement_instance,
+    int& max_placement_distance,
+    int& max_wall_placement_distance,
+    bool& prevent_building_in_shroud
+)
+{
+    std::optional<const BuildingTypeClass*> placement_type;
+
+    if (placement_instance.has_value()) {
+        placement_type = (*placement_instance)->Class;
+    };
+
+    return Resolve_Placement_Rules(
+        placement_type,
+        max_placement_distance,
+        max_wall_placement_distance,
+        prevent_building_in_shroud
+    );
 }

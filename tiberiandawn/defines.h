@@ -3090,4 +3090,11 @@ typedef enum StrategyType : unsigned char
 
 #endif // USE_RA_AI
 
+typedef enum PlacementFilter : signed char
+{
+    PLACEMENT_FILTER_ANYWHERE,
+    PLACEMENT_FILTER_BUILDINGS,
+    PLACEMENT_FILTER_WALLS
+} PlacementFilter;
+
 #endif

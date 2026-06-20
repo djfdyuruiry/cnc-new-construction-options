@@ -5616,7 +5616,7 @@ bool BuildingClass::Can_Player_Move(void) const
         || (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
-static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allow_building_beside_walls, int remaining_distance)
+static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, PlacementFilter filter, int max_building_distance, int remaining_distance, int depth = 0)
 {
     if (remaining_distance < 1) {
         return false;
@@ -5629,32 +5629,38 @@ static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allow_bu
             continue;
         }
 
+        const auto& current_cell = Map[newcell];
+
+        BuildingClass* base = current_cell.Cell_Building();
+
+        // TODO: could add a `build off allies base` rule by checking if
+        //       house is friendly to current players house
+        if ((filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance) && base && !base->Class->IsWall && base->House->Class->House == house->Class->House) {
+            return true;
+        }
         /*
         **	The special cell ownership flag allows building adjacent
         **	to friendly walls and bibs even though there is no official
         **	building located there.
         */
-        if (Map[newcell].Owner == house->Class->House) {
-            if (
-                !allow_building_beside_walls
-                && Map[newcell].Overlay != OVERLAY_NONE
-                && OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall
-            ) {
-                return false;
+        if (current_cell.Owner == house->Class->House) {
+            const auto is_wall = current_cell.Overlay != OVERLAY_NONE
+                && OverlayTypeClass::As_Reference(current_cell.Overlay).IsWall;
+
+            if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
+		        return false;
+            }
+
+            if (filter == PLACEMENT_FILTER_WALLS && !is_wall) {
+                if (depth >= max_building_distance && current_cell.Overlay != OVERLAY_ROAD) {
+                    return false;
+                }
             }
 
             return true;
         }
 
-        BuildingClass* base = Map[newcell].Cell_Building();
-
-        // TODO: could add a `build off allies base` rule by checking if 
-        //       house is friendly to current players house
-        if (base && base->House->Class->House == house->Class->House) {
-            return true;
-        }
-
-        if (Scan_For_Proximity_Check(newcell, house, allow_building_beside_walls, remaining_distance - 1)) {
+        if (Scan_For_Proximity_Check(newcell, house, filter, max_building_distance, remaining_distance - 1, depth + 1)) {
             return true;
         }
     }
@@ -5697,17 +5703,16 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	have been a success.
     */
 
-    // BUG: Need to ONLY ALLOW WALL BUILDING USING MODERN_WALL_MAX_LENGTH_RULE IF THE NEAREST PLACEMENT IS A WALL, OTHERWISE USE MAX BUILD DISTANCE - just remove this and default allow building off walls FALSE takes care of it
+    auto prevent_building_in_shroud = true;
+    auto max_placement_distance = 1;
+    auto max_wall_placement_distance = max_placement_distance;
 
-    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-    const auto max_wall_distance = modern_walls
-        ? Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE)
-        : max_placement_distance;
-    const auto prevent_building_in_shroud =
-        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-    const auto allow_building_beside_walls =
-        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    const auto placement_filter = Resolve_Placement_Rules(
+        this,
+        max_placement_distance,
+        max_wall_placement_distance,
+        prevent_building_in_shroud
+    );
 
     auto ptr = Occupy_List(true);
 
@@ -5724,11 +5729,16 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        auto proximity_detected = !Class->IsWall
-            ? Scan_For_Proximity_Check(cell, House, allow_building_beside_walls, max_placement_distance)
-            : Scan_For_Proximity_Check(cell, House, true, max_wall_distance);
-
-        if (proximity_detected) {
+        if (
+            // TODO: Guard against building walls far away that are not in line with existing walls
+            Scan_For_Proximity_Check(
+                cell,
+                House,
+                placement_filter,
+                max_placement_distance,
+                placement_filter != PLACEMENT_FILTER_WALLS ? max_placement_distance : max_wall_placement_distance
+            )
+        ) {
             return true;
         }
     }
