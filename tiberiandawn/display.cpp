@@ -932,10 +932,14 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
-	auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto prevent_building_in_shroud =
+    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+    const auto max_wall_distance = modern_walls
+        ? Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE)
+        : max_placement_distance;
+	const auto prevent_building_in_shroud =
 	    Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allow_building_beside_walls =
+	const auto allow_building_beside_walls =
 	    Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
 	/*
@@ -957,13 +961,21 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		CELL cell = trycell + *ptr++;
 
 		auto maximumDistance = max_placement_distance;
-		auto proximityDetected = Scan_For_Proximity(
-		    cell,
-		    house,
-		    prevent_building_in_shroud,
-		    allow_building_beside_walls,
-		    maximumDistance
-		);
+		auto proximityDetected = !dynamic_cast<const BuildingTypeClass*>(object)->IsWall
+	        ? Scan_For_Proximity(
+	            cell,
+		        house,
+		        prevent_building_in_shroud,
+		        allow_building_beside_walls,
+		        maximumDistance
+		      )
+		    : Scan_For_Proximity(
+	            cell,
+		        house,
+		        prevent_building_in_shroud,
+		        trycell,
+		        max_wall_distance
+		      );
 
 		if (proximityDetected)
 		{
@@ -2490,13 +2502,8 @@ void DisplayClass::Draw_It(bool forced)
  */
 void DisplayClass::Update_Placement_Cursor()
 {
-    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-
     const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-	const auto wall_length = min(
-	    Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE),
-	    max_placement_distance
-	);
+	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
 
 	if (!modern_walls || wall_length < 2 || !In_Radar(ZoneCell))
 	{

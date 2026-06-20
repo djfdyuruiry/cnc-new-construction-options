@@ -13,8 +13,8 @@
     {
       "name": "AllowBuildingBesideWalls",
       "type": "bool",
-      "default": true,
-      "comment": "Allow building structures off player walls."
+      "default": false,
+      "comment": "Allow building structures off player walls. Default is OFF since to balance ModernWallBuilding."
     },
     {
       "name": "TiberiumGrows",

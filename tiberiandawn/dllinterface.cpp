@@ -4487,9 +4487,13 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-	auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+    const auto max_wall_distance = modern_walls
+        ? Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE)
+        : max_placement_distance;
+    const auto prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+	const auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {
@@ -4500,7 +4504,9 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
                 || (Map[cell].Owner == PlayerPtr->Class->House)) {
 				placement_distance[cell] = 0U;
 
-				Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, max_placement_distance);
+                base->Class->IsWall
+                    ? Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, max_placement_distance)
+                    : Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, true, max_wall_distance);
             }
         }
     }

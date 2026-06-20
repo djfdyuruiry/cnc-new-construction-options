@@ -1392,14 +1392,9 @@ bool BuildingClass::Unlimbo_Wall(const COORDINATE coord)
         return false;
     }
 
-    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-
     // wall rules
     const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-	const auto wall_length = min(
-	    Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE),
-	    max_placement_distance
-	);
+	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
     const auto full_cost_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
 
 #ifdef REMASTER_BUILD
@@ -5701,7 +5696,14 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	cells to these are of friendly persuasion, then consider the proximity check to
     **	have been a success.
     */
+
+    // BUG: Need to ONLY ALLOW WALL BUILDING USING MODERN_WALL_MAX_LENGTH_RULE IF THE NEAREST PLACEMENT IS A WALL, OTHERWISE USE MAX BUILD DISTANCE - just remove this and default allow building off walls FALSE takes care of it
+
     const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+    const auto max_wall_distance = modern_walls
+        ? Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE)
+        : max_placement_distance;
     const auto prevent_building_in_shroud =
         Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
     const auto allow_building_beside_walls =
@@ -5722,7 +5724,9 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        auto proximity_detected = Scan_For_Proximity_Check(cell, House, allow_building_beside_walls, max_placement_distance);
+        auto proximity_detected = !Class->IsWall
+            ? Scan_For_Proximity_Check(cell, House, allow_building_beside_walls, max_placement_distance)
+            : Scan_For_Proximity_Check(cell, House, true, max_wall_distance);
 
         if (proximity_detected) {
             return true;
