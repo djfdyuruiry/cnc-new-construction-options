@@ -185,7 +185,7 @@ public:
     bool In_View(CELL cell);
     bool Passes_Proximity_Check(ObjectTypeClass const* object);
 #ifdef USE_RA_AI
-    bool Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, PlacementFilter filter, int max_building_distance, int remaining_distance, int depth = 0) const;
+    bool Scan_For_Proximity(const CELL& original_cell, const HousesType& house, const PlacementFilter& filter, const bool& prevent_building_in_shroud, const int& max_building_distance, int remaining_distance, int depth = 0, CELL previous_cell = -1) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
 #endif
     ObjectClass* Cell_Object(CELL cell, int x = 0, int y = 0);
