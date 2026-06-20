@@ -2156,6 +2156,9 @@ int MapClass::Scan_For_Overlay(
     const int maxLength
 ) const
 {
+    const auto prevent_building_in_shroud =
+        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
+
 	if (!In_Radar(origin))
 	{
 		return -1;
@@ -2174,7 +2177,9 @@ int MapClass::Scan_For_Overlay(
 
 		const auto& map_cell = Map[current];
 
-		if (map_cell.Overlay == overlay) {
+		if (map_cell.Overlay == overlay
+		    && map_cell.Owner == PlayerPtr->Class->House
+		    && (!prevent_building_in_shroud || map_cell.Is_Visible(PlayerPtr))) {
 			//Found a match
 			return i;
 		}
