@@ -140,6 +140,8 @@ static std::optional<std::string> Lookup_Country(const ScenarioPlayerType& playe
  * Build a human-readable description for a given mission using its metadata - country name, direction and variation
  * are used.
  *
+ * Country names are retrieved using the reference tables from map selection logic.
+ *
  * If mission_name is present, it is preferred over the above metadata, so setting the [Basic] -> Name field in the
  * scenario INI is a way to set your own descriptions for custom campaigns.
  */
@@ -221,11 +223,8 @@ static void Add_Mission_To_Cache_If_Present(
 }
 
 /**
- * Find any missions between 1-20 for all three single player campaigns (GDI, NOD and Funpark). Any scenario INI
+ * Find any missions between 1-20 for all three single player campaigns (GDI, NOD and Funpark). Any scenario INI files
  * present will be loaded into the mission cache, containing required metadata to enable correct loading of the mission.
- *
- * Country names are retrieved using the reference tables from map selection logic, if a scenario name is present in
- * the INI file it overrides country name.
  */
 static void Fill_Mission_Cache(std::vector<MissionVariables>& mission_cache)
 {
