@@ -353,19 +353,19 @@ private:
 };
 
 void Resolve_Placement_Rules(
-    const std::optional<const BuildingTypeClass*>& placement_type,
-    PlacementFilter& placement_filter,
+    const BuildingTypeClass* placement_type,
     int& max_placement_distance,
     int& max_wall_placement_distance,
-    bool& prevent_building_in_shroud
+    bool& prevent_building_in_shroud,
+    PlacementFilter& placement_filter
 );
 
 void Resolve_Placement_Rules(
-    const std::optional<const BuildingClass*>& placement_instance,
-    PlacementFilter& placement_filter,
+    const BuildingClass* placement_instance,
     int& max_placement_distance,
     int& max_wall_placement_distance,
-    bool& prevent_building_in_shroud
+    bool& prevent_building_in_shroud,
+    PlacementFilter& placement_filter
 );
 
 #endif

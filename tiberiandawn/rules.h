@@ -367,6 +367,8 @@ public:
         return Sections[section].Get<T>(rule);
     }
 
+    const RuleSection& operator[](std::string_view section_name) const;
+
     JSON_FUNCTIONS(RulesClass)
 
 private:

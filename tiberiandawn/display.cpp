@@ -861,19 +861,19 @@ bool DisplayClass::Scan_For_Proximity(
 
 	    const auto& current_cell = (*this)[newcell];
 
-		if (prevent_building_in_shroud && !current_cell.Is_Visible(PlayerPtr))
+		if (prevent_building_in_shroud && !current_cell.Is_Visible(house))
 		{
-			return false;
+		    return false;
 		}
 
-	    TechnoClass* base = current_cell.Cell_Techno();
+	    const auto base = current_cell.Cell_Building();
 
 	    // TODO: could add a `build off allies base` rule by checking if
 	    //       house is friendly to current players house
 	    // allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
 	    if (
 	        (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
-	        && !base ? false : base->What_Am_I() == RTTI_BUILDING && base->House->Class->House == house
+	        && (base == nullptr ? false : base->House->Class->House == house)
 	    ) {
 		    CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(newcell), Cell_Y(newcell));
 	        return true;
@@ -1019,17 +1019,17 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
-    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
     auto prevent_building_in_shroud = true;
     auto max_placement_distance = 1;
     auto max_wall_placement_distance = max_placement_distance;
+    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
 
     Resolve_Placement_Rules(
         dynamic_cast<const BuildingTypeClass*>(object),
-        placement_filter,
         max_placement_distance,
         max_wall_placement_distance,
-        prevent_building_in_shroud
+        prevent_building_in_shroud,
+        placement_filter
     );
 
 	/*
@@ -1041,8 +1041,8 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	while (*ptr != REFRESH_EOL) {
 		CELL cell = trycell + *ptr++;
 
-		if (prevent_building_in_shroud && !Map[cell].Is_Visible(PlayerPtr)) {
-			return false;
+		if (prevent_building_in_shroud && !Map[cell].Is_Visible(house)) {
+		    return false;
 		}
 	}
 
@@ -4862,62 +4862,76 @@ FROM_JSON(DisplayClass)
 }
 
 void Resolve_Placement_Rules(
-    const std::optional<const BuildingTypeClass*>& placement_type,
-    PlacementFilter& placement_filter,
+    const BuildingTypeClass* placement_type,
     int& max_placement_distance,
     int& max_wall_placement_distance,
-    bool& prevent_building_in_shroud
+    bool& prevent_building_in_shroud,
+    PlacementFilter& placement_filter
 )
 {
-    max_wall_placement_distance = max_placement_distance =
-        Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-    prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-
     const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
     const auto max_wall_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
-    const auto allow_building_beside_walls =
-        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    const auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(
+        GAME_MAP_SECTION,
+        ALLOW_BUILDING_BESIDE_WALLS_RULE
+    );
 
-    if (modern_walls) {
-        max_wall_placement_distance = max_wall_distance;
-    }
+    max_placement_distance = Rule[ENHANCEMENTS_SECTION].Get<int>(MAX_BUILD_DISTANCE_RULE);
+    // extend wall placement distance if modern walls enabled
+    max_wall_placement_distance = modern_walls ? max_wall_distance : max_placement_distance;
+    prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
 
-    if (!placement_type.has_value()) {
+    // no way to determine a sensible filter, allow placing anywhere
+    if (placement_type == nullptr) {
         placement_filter = PLACEMENT_FILTER_ANYWHERE;
         return;
     }
 
-    if ((*placement_type)->IsWall) {
+    /*
+    ** Resolve filter for walls by this logic:
+    **
+    **  - Modern walls enforces that you can only place walls of off walls (unless a building is near enough)
+    **  - Disabling ALLOW_BUILDING_BESIDE_WALLS_RULE enforces the same behaviuour as the above
+    **  - Otherwise treat walls as normal buildings, allow placing anywhere
+    */
+    if (placement_type->IsWall) {
         placement_filter = modern_walls || !allow_building_beside_walls
             ? PLACEMENT_FILTER_WALLS
             : PLACEMENT_FILTER_ANYWHERE;
         return;
     }
 
-    placement_filter = !modern_walls && allow_building_beside_walls
-        ? PLACEMENT_FILTER_ANYWHERE
-        : PLACEMENT_FILTER_BUILDINGS;
+    /*
+    ** Resolve filter for buildings by this logic:
+    **
+    **  - Modern walls enforces that you can only place buildings beside other buildings
+    **  - Disabling ALLOW_BUILDING_BESIDE_WALLS_RULE enforces the same behaviour as the above
+    **  - Otherwise allow placing anywhere
+    */
+    placement_filter = modern_walls || !allow_building_beside_walls
+        ? PLACEMENT_FILTER_BUILDINGS
+        : PLACEMENT_FILTER_ANYWHERE;
 }
 
 void Resolve_Placement_Rules(
-    const std::optional<const BuildingClass*>& placement_instance,
-    PlacementFilter& placement_filter,
+    const BuildingClass* placement_instance,
     int& max_placement_distance,
     int& max_wall_placement_distance,
-    bool& prevent_building_in_shroud
+    bool& prevent_building_in_shroud,
+    PlacementFilter& placement_filter
 )
 {
-    std::optional<const BuildingTypeClass*> placement_type;
+    const BuildingTypeClass* placement_type = nullptr;
 
-    if (placement_instance.has_value()) {
-        placement_type = (*placement_instance)->Class;
+    if (placement_instance != nullptr) {
+        placement_type = placement_instance->Class;
     };
 
     Resolve_Placement_Rules(
         placement_type,
-        placement_filter,
         max_placement_distance,
         max_wall_placement_distance,
-        prevent_building_in_shroud
+        prevent_building_in_shroud,
+        placement_filter
     );
 }

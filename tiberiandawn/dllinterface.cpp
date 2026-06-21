@@ -24,6 +24,7 @@
 **
 */
 
+#include <optional>
 #include <stdio.h>
 
 #include "function.h"
@@ -4434,31 +4435,162 @@ static const int _map_width_shift_bits = 7;
 static const int _map_width_shift_bits = 6;
 #endif
 
-static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance)
+static bool Check_Cell_Placement(
+    const CELL& current_cell_raw,
+    const CELL& original_cell,
+    const int& depth,
+    const PlacementFilter& filter,
+    const bool& prevent_building_in_shroud,
+    const int& max_building_distance
+)
+{
+    const auto& current_cell = Map[current_cell_raw];
+
+	if (prevent_building_in_shroud && !current_cell.Is_Visible(PlayerPtr))
+	{
+	    return false;
+	}
+
+	const auto base = current_cell.Cell_Building();
+
+	// TODO: could add a `build off allies base` rule by checking if
+	//       house is friendly to current players house
+	// allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
+	if (
+	    (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
+        && (base == nullptr ? false : base->House == PlayerPtr)
+    ) {
+	    CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(current_cell_raw), Cell_Y(current_cell_raw));
+	    return true;
+    }
+
+	/*
+	**	The special cell ownership flag allows building adjacent
+	**	to friendly walls and bibs even though there is no official
+	**	building located there.
+	*/
+	if (current_cell.Owner == PlayerPtr->Class->House) {
+		const auto is_wall = current_cell.Overlay != OVERLAY_NONE
+		    && OverlayTypeClass::As_Reference(current_cell.Overlay).IsWall;
+
+		// caller only wants valid placement beside buildings, reject any overlay
+		if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
+		    return false;
+		}
+
+		// don't allow placing a single wall piece far away from buildings
+		if (
+		    filter == PLACEMENT_FILTER_WALLS
+		    && !is_wall
+		    && depth >= max_building_distance
+		    && current_cell.Overlay != OVERLAY_ROAD
+		) {
+		    return false;
+		}
+
+		/*
+		** If we are placing a wall further away than max building distance, fail the check if the wall isn't
+        ** being placed in a straight line opposite the current cell
+        */
+		if (filter == PLACEMENT_FILTER_WALLS && depth >= max_building_distance) {
+		    const auto x1 = Cell_X(original_cell);
+		    const auto y1 = Cell_Y(original_cell);
+		    const auto x2 = Cell_X(current_cell_raw);
+		    const auto y2 = Cell_Y(current_cell_raw);
+
+		    const auto is_north = x1 == x2 && y1 < y2;
+		    const auto is_east = y1 == y2 && x1 > x2;
+		    const auto is_south = x1 == x2 && y1 > y2;
+		    const auto is_west = y1 == y2 && x1 < x2;
+
+		    // reject if direction is not a straight line
+		    if (!is_north && !is_east && !is_south && !is_west) {
+		        return false;
+		    }
+
+		    // next validate that the line is clear of obstacles for placement
+		    auto wall_check_x = x1;
+		    auto wall_check_y = y1;
+
+		    while (wall_check_x != x2 && wall_check_y != y2) {
+		        if (is_north) {
+		            wall_check_y -= 1;
+		        } else if (is_east) {
+		            wall_check_x += 1;
+		        } else if (is_south) {
+		            wall_check_y += 1;
+		        } else if (is_west) {
+		            wall_check_x -= 1;
+		        }
+
+		        const auto scan_cell = XY_Cell(wall_check_x, wall_check_y);
+
+		        // reject as there is an obstacle in the way
+		        if (!Map[scan_cell].Is_Generally_Clear()) {
+		            return false;
+		        }
+		    }
+		}
+
+		// allow building beside walls (if filter checks passed) and building bibs (these are owned by the player)
+		CNC_LOG_DEBUG("Found proximity with overlay at: {}x{}", Cell_X(current_cell_raw), Cell_Y(current_cell_raw));
+		return true;
+	}
+
+    return false;
+}
+
+static void Scan_For_Valid_Placement(
+    const CELL& original_cell,
+    unsigned char* placement_distance,
+    const PlacementFilter& filter,
+    const bool& prevent_building_in_shroud,
+    const int& max_building_distance,
+    int remaining_distance,
+    int depth = 0,
+    CELL previous_cell = -1
+)
 {
 	if (remaining_distance < 1)
 	{
 		return;
 	}
 
-	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-		CELL adjcell = Adjacent_Cell(cell, facing);
+    if (previous_cell == -1) {
+        previous_cell = original_cell;
+    }
+
+	for (FacingType facing = FACING_N; facing < FACING_COUNT; ++facing) {
+		const auto adjcell = Adjacent_Cell(previous_cell, facing);
 
 		//Out of bounds check
 		if (adjcell < 0 || adjcell >= MAP_CELL_TOTAL) {
 			continue;
 		}
 
-	    const auto adjcell_contains_wall = Map[adjcell].Overlay != OVERLAY_NONE
-            && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall;
+	    if (
+	        Check_Cell_Placement(
+	            adjcell,
+	            original_cell,
+	            depth,
+	            filter,
+	            prevent_building_in_shroud,
+	            max_building_distance
+	        )
+	    ) {
+	        placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
+	    }
 
-		if (!prevent_building_in_shroud || Map[adjcell].Is_Visible(PlayerPtr)) {
-		    if (!adjcell_contains_wall || allow_building_beside_walls) {
-		        placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
-		    }
-		}
-
-		Scan_For_Valid_Placement(adjcell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1);
+		Scan_For_Valid_Placement(
+		    original_cell,
+		    placement_distance,
+		    filter,
+		    prevent_building_in_shroud,
+		    max_building_distance,
+		    remaining_distance - 1,
+		    depth + 1,
+		    adjcell
+		);
 	}
 }
 
@@ -4487,26 +4619,38 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-    const auto max_wall_distance = modern_walls
-        ? Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE)
-        : max_placement_distance;
-    const auto prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	const auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    auto prevent_building_in_shroud = true;
+    auto max_placement_distance = 1;
+    auto max_wall_placement_distance = max_placement_distance;
+    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
+
+    Resolve_Placement_Rules(
+        placement_type,
+        max_placement_distance,
+        max_wall_placement_distance,
+        prevent_building_in_shroud,
+        placement_filter
+    );
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
             CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
-            BuildingClass* base = (BuildingClass*)Map[cell].Cell_Find_Object(RTTI_BUILDING);
-            if ((base && base->House->Class->House == PlayerPtr->Class->House)
-                || (Map[cell].Owner == PlayerPtr->Class->House)) {
+            BuildingClass* base = static_cast<BuildingClass*>(Map[cell].Cell_Find_Object(RTTI_BUILDING));
+            if ((base && base->House->Class->House == PlayerPtr->Class->House) || (Map[cell].Owner == PlayerPtr->Class->House)) {
 				placement_distance[cell] = 0U;
 
-                base->Class->IsWall
-                    ? Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, max_placement_distance)
-                    : Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, true, max_wall_distance);
+                // BUG: placement distance seems to be like 1 cell less than it should be
+                Scan_For_Valid_Placement(
+                    cell,
+                    placement_distance,
+                    placement_filter,
+                    prevent_building_in_shroud,
+                    max_placement_distance,
+                    placement_filter != PLACEMENT_FILTER_WALLS
+                        ? max_placement_distance
+                        : max_wall_placement_distance
+                );
             }
         }
     }

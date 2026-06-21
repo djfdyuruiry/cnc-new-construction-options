@@ -5643,14 +5643,14 @@ static bool Scan_For_Proximity_Check(
 
         const auto& current_cell = Map[newcell];
 
-        BuildingClass* base = current_cell.Cell_Building();
+        const auto base = current_cell.Cell_Building();
 
         // TODO: could add a `build off allies base` rule by checking if
         //       house is friendly to current players house
 	    // allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
         if (
             (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
-            && !base ? false : !base->Class->IsWall && base->House->Class->House == house->Class->House
+            && (base == nullptr ? false : !base->Class->IsWall && base->House == house)
         ) {
             CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(newcell), Cell_Y(newcell));
             return true;
@@ -5774,17 +5774,17 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	have been a success.
     */
 
-    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
     auto prevent_building_in_shroud = true;
     auto max_placement_distance = 1;
     auto max_wall_placement_distance = max_placement_distance;
+    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
 
     Resolve_Placement_Rules(
         this,
-        placement_filter,
         max_placement_distance,
         max_wall_placement_distance,
-        prevent_building_in_shroud
+        prevent_building_in_shroud,
+        placement_filter
     );
 
     auto ptr = Occupy_List(true);
@@ -5792,7 +5792,7 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        if (prevent_building_in_shroud && !Map[cell].Is_Visible(PlayerPtr)) {
+        if (prevent_building_in_shroud && !Map[cell].Is_Visible(House)) {
             return false;
         }
     }

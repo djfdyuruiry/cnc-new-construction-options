@@ -13,7 +13,7 @@
     {
       "name": "AllowBuildingBesideWalls",
       "type": "bool",
-      "default": false,
+      "default": true,
       "comment": "Allow building structures off player walls. Default is OFF since to balance ModernWallBuilding."
     },
     {
