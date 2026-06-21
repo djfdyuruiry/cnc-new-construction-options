@@ -4752,10 +4752,78 @@ bool DLLExportClass::Get_Placement_State(uint64 player_id, unsigned char* buffer
     return true;
 }
 
+static bool Scan_For_Proximity(
+    const CELL& original_cell,
+    const PlacementFilter& filter,
+    const bool& prevent_building_in_shroud,
+    const int& max_building_distance,
+    int remaining_distance,
+    int depth = 0,
+    CELL previous_cell = -1
+)
+{
+    if (remaining_distance < 1)
+    {
+        return false;
+    }
+
+    if (previous_cell == -1) {
+        previous_cell = original_cell;
+    }
+
+    for (FacingType facing = FACING_N; facing < FACING_COUNT; ++facing) {
+        const auto adjcell = Adjacent_Cell(previous_cell, facing);
+
+        //Out of bounds check
+        if (adjcell < 0 || adjcell >= MAP_CELL_TOTAL) {
+            return false;
+        }
+
+        if (
+            Check_Cell_Placement(
+                adjcell,
+                original_cell,
+                depth,
+                filter,
+                prevent_building_in_shroud,
+                max_building_distance
+            )
+        ) {
+            return true;
+        }
+
+        if (Scan_For_Proximity(
+            original_cell,
+            filter,
+            prevent_building_in_shroud,
+            max_building_distance,
+            remaining_distance - 1,
+            depth + 1,
+            adjcell))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool DLLExportClass::Passes_Proximity_Check(CELL cell_in,
                                             BuildingTypeClass* placement_type,
                                             unsigned char* placement_distance)
 {
+    auto prevent_building_in_shroud = true;
+    auto max_placement_distance = 1;
+    auto max_wall_placement_distance = max_placement_distance;
+    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
+
+    Resolve_Placement_Rules(
+        placement_type,
+        max_placement_distance,
+        max_wall_placement_distance,
+        prevent_building_in_shroud,
+        placement_filter
+    );
 
     /*
     **	Scan through all cells that the building foundation would cover. If any adjacent
@@ -4768,8 +4836,18 @@ bool DLLExportClass::Passes_Proximity_Check(CELL cell_in,
 
         CELL center_cell = cell_in + *occupy_list++;
 
-        if (!Map.In_Radar(center_cell)) {
-            return false;
+        if (
+            Scan_For_Proximity(
+                center_cell,
+                placement_filter,
+                prevent_building_in_shroud,
+                max_placement_distance,
+                placement_filter != PLACEMENT_FILTER_WALLS
+                    ? max_placement_distance
+                    : max_wall_placement_distance
+            )
+        ) {
+            return true;
         }
 
         if (placement_distance[center_cell] <= 1U) {
