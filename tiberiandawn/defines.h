@@ -3097,4 +3097,23 @@ typedef enum PlacementFilter : signed char
     PLACEMENT_FILTER_WALLS
 } PlacementFilter;
 
+/**
+ * Used to debug the DisplayClass::Scan_For_Proximity method cell scanning
+ * logic. The DisplayClass::Check_Cell_Proximity method will use this enum
+ * to write proximity scan outputs for each cell on the map. Use the special
+ * PR_INVALID_NOT_VISITED value to initialize the debug array
+ */
+typedef enum ProximityResult : signed char
+{
+    PR_VALID_BUILDING = 1,
+    PR_VALID_WALL,
+    PR_INVALID_CELL_IN_SHROUD,
+    PR_INVALID_WANTED_BUILDING_FOUND_WALL,
+    PR_INVALID_SINGLE_WALL_NOT_NEAR_BUILDING,
+    PR_INVALID_MODERN_WALL_NOT_STRAIGHT,
+    PR_INVALID_MODERN_WALL_LINE_OBSTACLE,
+    PR_INVALID_DEFAULT,
+    PR_INVALID_NOT_VISITED = 0
+} PlacementResult;
+
 #endif

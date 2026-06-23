@@ -185,8 +185,19 @@ public:
     bool In_View(CELL cell);
     bool Passes_Proximity_Check(ObjectTypeClass const* object);
 #ifdef USE_RA_AI
-    bool Scan_For_Proximity(const CELL& original_cell, const HousesType& house, const PlacementFilter& filter, const bool& prevent_building_in_shroud, const int& max_building_distance, int remaining_distance, int depth = 0, CELL previous_cell = -1) const;
+    bool Scan_For_Proximity(
+        CELL original_cell,
+        HousesType house,
+        PlacementFilter filter,
+        bool prevent_building_in_shroud,
+        int max_building_distance,
+        int max_wall_placement_distance,
+        ProximityResult* proximity_tracker = nullptr
+    ) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
+
+    static PlacementResult* Allocate_Proximity_Tracker();
+    static void Dump_Proximity_Tracker_To_File(PlacementResult*& tracker, const char* file_name = "placement_debug.txt");
 #endif
     ObjectClass* Cell_Object(CELL cell, int x = 0, int y = 0);
     ObjectClass* Next_Object(ObjectClass* object);
@@ -332,6 +343,31 @@ private:
     void Redraw_Shadow_Rects(void);
 
     void Update_Placement_Cursor();
+
+#ifdef USE_RA_AI
+    bool Check_Cell_Proximity(
+        CELL current_cell_raw,
+        CELL original_cell,
+        HousesType house,
+        PlacementFilter filter,
+        bool prevent_building_in_shroud,
+        int depth,
+        int max_building_distance,
+        ProximityResult* proximity_tracker
+    ) const;
+
+    bool Scan_For_Proximity(
+        CELL original_cell,
+        HousesType house,
+        PlacementFilter filter,
+        bool prevent_building_in_shroud,
+        int max_building_distance,
+        ProximityResult* proximity_tracker,
+        int remaining_distance,
+        int depth = 0,
+        CELL previous_cell = -1
+    ) const;
+#endif
 
     /*
     **	This bit array is used to flag cells to be redrawn. If the icon needs to

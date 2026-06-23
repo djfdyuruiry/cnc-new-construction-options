@@ -78,6 +78,7 @@
 #include "function.h"
 #include "common/fading.h"
 #include "ccini.h"
+#include "tiberiandawnsettings.h"
 
 /*
 **	These layer control elements are used to group the displayable objects
@@ -833,142 +834,235 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const* object)
 }
 
 #ifdef USE_RA_AI
+bool DisplayClass::Check_Cell_Proximity(
+    const CELL current_cell_raw,
+    const CELL original_cell,
+    const HousesType house,
+    const PlacementFilter filter,
+    const bool prevent_building_in_shroud,
+    const int depth,
+    const int max_building_distance,
+    PlacementResult* proximity_tracker
+) const
+{
+    const auto& current_cell = (*this)[current_cell_raw];
+
+	if (prevent_building_in_shroud && !current_cell.Is_Visible(house))
+	{
+	    if (proximity_tracker != nullptr) {
+	        proximity_tracker[current_cell_raw] = PR_INVALID_CELL_IN_SHROUD;
+	    }
+
+	    return false;
+	}
+
+	// TODO: could add a `build off allies base` rule by checking if
+	//       house is friendly to current players house
+	// allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
+	if (
+    	const auto base = current_cell.Cell_Building();
+	    (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
+        && (base == nullptr ? false : base->House->Class->House == house)
+    ) {
+	    CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(current_cell_raw), Cell_Y(current_cell_raw));
+
+	    if (proximity_tracker != nullptr) {
+	        proximity_tracker[current_cell_raw] = PR_VALID_BUILDING;
+	    }
+
+	    return true;
+    }
+
+	/*
+	**	The special cell ownership flag allows building adjacent
+	**	to friendly walls and bibs even though there is no official
+	**	building located there.
+	*/
+	if (current_cell.Owner == house) {
+		const auto is_wall = current_cell.Overlay != OVERLAY_NONE
+		    && OverlayTypeClass::As_Reference(current_cell.Overlay).IsWall;
+
+		// caller only wants valid placement beside buildings, reject any overlay
+		if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
+		    if (proximity_tracker != nullptr) {
+		        proximity_tracker[current_cell_raw] = PR_INVALID_WANTED_BUILDING_FOUND_WALL;
+		    }
+
+		    return false;
+		}
+
+		// don't allow placing a single wall piece far away from buildings
+		if (
+		    filter == PLACEMENT_FILTER_WALLS
+		    && !is_wall
+		    && depth >= max_building_distance
+		    && current_cell.Overlay != OVERLAY_ROAD
+		    ) {
+		    if (proximity_tracker != nullptr) {
+		        proximity_tracker[current_cell_raw] = PR_INVALID_SINGLE_WALL_NOT_NEAR_BUILDING;
+		    }
+
+		    return false;
+		}
+
+		/*
+		** If we are placing a wall further away than max building distance, fail the check if the wall isn't
+        ** being placed in a straight line opposite the current cell
+        */
+		if (filter == PLACEMENT_FILTER_WALLS && depth >= max_building_distance) {
+		    const auto x1 = Cell_X(original_cell);
+		    const auto y1 = Cell_Y(original_cell);
+		    const auto x2 = Cell_X(current_cell_raw);
+		    const auto y2 = Cell_Y(current_cell_raw);
+
+		    const auto is_north = x1 == x2 && y1 < y2;
+		    const auto is_east = y1 == y2 && x1 > x2;
+		    const auto is_south = x1 == x2 && y1 > y2;
+		    const auto is_west = y1 == y2 && x1 < x2;
+
+		    // reject if direction is not a straight line
+		    if (!is_north && !is_east && !is_south && !is_west) {
+		        if (proximity_tracker != nullptr) {
+		            proximity_tracker[current_cell_raw] = PR_INVALID_MODERN_WALL_NOT_STRAIGHT;
+		        }
+
+		        return false;
+		    }
+
+		    // next validate that the line is clear of obstacles for placement
+		    auto wall_check_x = x1;
+		    auto wall_check_y = y1;
+
+		    while (wall_check_x != x2 && wall_check_y != y2) {
+		        if (is_north) {
+		            wall_check_y -= 1;
+		        } else if (is_east) {
+		            wall_check_x += 1;
+		        } else if (is_south) {
+		            wall_check_y += 1;
+		        } else if (is_west) {
+		            wall_check_x -= 1;
+		        }
+
+		        const auto scan_cell = XY_Cell(wall_check_x, wall_check_y);
+
+		        // reject as there is an obstacle in the way
+		        if (!(*this)[scan_cell].Is_Generally_Clear()) {
+		            if (proximity_tracker != nullptr) {
+		                proximity_tracker[current_cell_raw] = PR_INVALID_MODERN_WALL_LINE_OBSTACLE;
+		            }
+
+		            return false;
+		        }
+		    }
+		}
+
+		// allow building beside walls (if filter checks passed) and building bibs (these are owned by the player)
+		CNC_LOG_DEBUG("Found proximity with overlay at: {}x{}", Cell_X(current_cell_raw), Cell_Y(current_cell_raw));
+
+	    if (proximity_tracker != nullptr) {
+	        proximity_tracker[current_cell_raw] = PR_VALID_WALL;
+	    }
+
+		return true;
+	}
+
+    if (proximity_tracker != nullptr) {
+        proximity_tracker[current_cell_raw] = PR_INVALID_DEFAULT;
+    }
+
+    return false;
+}
+
 bool DisplayClass::Scan_For_Proximity(
-    const CELL& original_cell,
-    const HousesType& house,
-    const PlacementFilter& filter,
-    const bool& prevent_building_in_shroud,
-    const int& max_building_distance,
-    int remaining_distance,
-    int depth,
+    const CELL original_cell,
+    const HousesType house,
+    const PlacementFilter filter,
+    const bool prevent_building_in_shroud,
+    const int max_building_distance,
+    ProximityResult* proximity_tracker,
+    const int remaining_distance,
+    const int depth,
     CELL previous_cell
 ) const
 {
-	if (remaining_distance < 1) {
-		return false;
-	}
+
+    if (remaining_distance < 1)
+    {
+        return false;
+    }
 
     if (previous_cell == -1) {
         previous_cell = original_cell;
     }
 
-	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-		CELL newcell = Adjacent_Cell(previous_cell, facing);
+    for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
+        const auto next_cell = Adjacent_Cell(previous_cell, facing);
 
-		if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
-			continue;
-		}
+        //Out of bounds check
+        if (next_cell < 0 || next_cell >= MAP_CELL_TOTAL) {
+            continue;
+        }
 
-	    const auto& current_cell = (*this)[newcell];
+        if (Check_Cell_Proximity(
+            next_cell,
+            original_cell,
+            house,
+            filter,
+            prevent_building_in_shroud,
+            depth,
+            max_building_distance,
+            proximity_tracker
+        )
+        ) {
+            return true;
+        }
 
-		if (prevent_building_in_shroud && !current_cell.Is_Visible(house))
-		{
-		    return false;
-		}
+        if (Scan_For_Proximity(
+            original_cell,
+            house,
+            filter,
+            prevent_building_in_shroud,
+            max_building_distance,
+            proximity_tracker,
+            remaining_distance - 1,
+            depth + 1,
+            next_cell
+        )) {
+            return true;
+        }
+    }
 
-	    const auto base = current_cell.Cell_Building();
+    return false;
+}
 
-	    // TODO: could add a `build off allies base` rule by checking if
-	    //       house is friendly to current players house
-	    // allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
-	    if (
-	        (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
-	        && (base == nullptr ? false : base->House->Class->House == house)
-	    ) {
-		    CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(newcell), Cell_Y(newcell));
-	        return true;
-	    }
-
-		/*
-		**	The special cell ownership flag allows building adjacent
-		**	to friendly walls and bibs even though there is no official
-		**	building located there.
-		*/
-		if (current_cell.Owner == house) {
-		    const auto is_wall = current_cell.Overlay != OVERLAY_NONE
-		        && OverlayTypeClass::As_Reference(current_cell.Overlay).IsWall;
-
-		    // caller only wants valid placement beside buildings, reject any overlay
-		    if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
-		        return false;
-		    }
-
-		    // don't allow placing a single wall piece far away from buildings
-		    if (
-		        filter == PLACEMENT_FILTER_WALLS
-		        && !is_wall
-		        && depth >= max_building_distance
-		        && current_cell.Overlay != OVERLAY_ROAD
-		    ) {
-		        return false;
-		    }
-
-		    /*
-		    ** If we are placing a wall further away than max building distance, fail the check if the wall isn't
-            ** being placed in a straight line opposite the current cell
-            */
-		    if (filter == PLACEMENT_FILTER_WALLS && depth >= max_building_distance) {
-		        const auto x1 = Cell_X(original_cell);
-		        const auto y1 = Cell_Y(original_cell);
-		        const auto x2 = Cell_X(newcell);
-		        const auto y2 = Cell_Y(newcell);
-
-		        const auto is_north = x1 == x2 && y1 < y2;
-		        const auto is_east = y1 == y2 && x1 > x2;
-		        const auto is_south = x1 == x2 && y1 > y2;
-		        const auto is_west = y1 == y2 && x1 < x2;
-
-		        // reject if direction is not a straight line
-		        if (!is_north && !is_east && !is_south && !is_west) {
-		            return false;
-		        }
-
-		        // next validate that the line is clear of obstacles for placement
-		        auto wall_check_x = x1;
-		        auto wall_check_y = y1;
-
-		        while (wall_check_x != x2 && wall_check_y != y2) {
-		            if (is_north) {
-		                wall_check_y -= 1;
-		            } else if (is_east) {
-		                wall_check_x += 1;
-		            } else if (is_south) {
-		                wall_check_y += 1;
-		            } else if (is_west) {
-		                wall_check_x -= 1;
-		            }
-
-		            const auto scan_cell = XY_Cell(wall_check_x, wall_check_y);
-
-		            // reject as there is an obstacle in the way
-		            if (!(*this)[scan_cell].Is_Generally_Clear()) {
-		                return false;
-		            }
-		        }
-		    }
-
-		    // allow building beside walls (if filter checks passed) and building bibs (these are owned by the player)
-		    CNC_LOG_DEBUG("Found proximity with overlay at: {}x{}", Cell_X(newcell), Cell_Y(newcell));
-		    return true;
-		}
-
-		if (
-		    Scan_For_Proximity(
-		        original_cell,
-		        house,
-		        filter,
-		        prevent_building_in_shroud,
-		        max_building_distance,
-		        remaining_distance - 1,
-		        depth + 1,
-		        newcell
-		    )
-		) {
-			return true;
-		}
-	}
-
-	return false;
+/**
+ * Scan through nearby cells based on the rules provided to determine if the given cell
+ * is in proximity of friendly structures and/or walls. proximity_tracker can be used to
+ * debug the behaviour of this method, ensure it points to an array that has MAP_CELL_TOTAL
+ * elements allocated. See: ProximityResult enum
+ */
+bool DisplayClass::Scan_For_Proximity(
+    const CELL original_cell,
+    const HousesType house,
+    const PlacementFilter filter,
+    const bool prevent_building_in_shroud,
+    const int max_building_distance,
+    const int max_wall_placement_distance,
+    ProximityResult* proximity_tracker
+) const
+{
+    return Scan_For_Proximity(
+        original_cell,
+        house,
+        filter,
+        prevent_building_in_shroud,
+        max_building_distance,
+        proximity_tracker,
+        filter != PLACEMENT_FILTER_WALLS
+            ? max_building_distance
+            : max_wall_placement_distance
+    );
 }
 
 /*
@@ -1041,7 +1135,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	while (*ptr != REFRESH_EOL) {
 		CELL cell = trycell + *ptr++;
 
-		if (prevent_building_in_shroud && !Map[cell].Is_Visible(house)) {
+		if (prevent_building_in_shroud && !(*this)[cell].Is_Visible(house)) {
 		    return false;
 		}
 	}
@@ -1067,6 +1161,88 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		}
 	}
 	return(false);
+}
+
+/**
+ * Allocates a proximity tracker array if debugging is enabled in CONQUER.INI, otherwise
+ * nullptr is returned.
+ */
+PlacementResult* DisplayClass::Allocate_Proximity_Tracker()
+{
+    ProximityResult* proximity_tracker = nullptr;
+
+    // enable this flag in CONQUER.INI to dump debug info to a file after a placement scan
+    if (TdSettings.Placement_Debugging_Is_Enabled()) {
+        proximity_tracker = new ProximityResult[MAP_CELL_TOTAL];
+        memset(proximity_tracker, PR_INVALID_NOT_VISITED, MAP_CELL_TOTAL);
+    }
+
+    return proximity_tracker;
+}
+
+/**
+ * Dumps a text representation of the map with a placement result written in each cells to a given file.
+ *
+ * This method also disposes of the tracker array memory, so it will be reset tracker to nullptr.
+ */
+void DisplayClass::Dump_Proximity_Tracker_To_File(PlacementResult*& tracker, const char* file_name)
+{
+#if defined TIBERIAN_DAWN && !defined MEGAMAPS
+    constexpr auto max_max_cell_width = 64;
+    constexpr auto max_max_cell_height = 64;
+#else
+    constexpr auto max_max_cell_width = 128;
+    constexpr auto max_max_cell_height = 128;
+#endif
+
+    if (tracker == nullptr) {
+        return;
+    }
+
+    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name);
+    int map_cell_x = Map.MapCellX;
+    int map_cell_y = Map.MapCellY;
+    int map_cell_width = Map.MapCellWidth;
+    int map_cell_height = Map.MapCellHeight;
+
+    if (map_cell_x > 0) {
+        map_cell_x--;
+        map_cell_width++;
+    }
+
+    if (map_cell_width < max_max_cell_width) {
+        map_cell_width++;
+    }
+
+    if (map_cell_y > 0) {
+        map_cell_y--;
+        map_cell_height++;
+    }
+
+    if (map_cell_height < max_max_cell_height) {
+        map_cell_height++;
+    }
+
+    if (CDFileClass out; out.Open(debug_proximity_path.c_str(), WRITE)) {
+        for (int y = 0; y < map_cell_height; y++) {
+            for (int x = 0; x < map_cell_width; x++) {
+#ifdef MEGAMAPS
+                constexpr auto map_width_shift_bits = 7;
+#else
+                constexpr auto map_width_shift_bits = 6;
+#endif
+
+                const CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << map_width_shift_bits);
+                out.Write(std::format("{}", static_cast<signed char>(tracker[cell])));
+            }
+
+            out.Write("\n");
+        }
+        out.Close();
+    }
+
+    delete[] tracker;
+    tracker = nullptr;
 }
 
 #endif // USE_RA_AI

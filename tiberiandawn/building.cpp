@@ -5616,129 +5616,6 @@ bool BuildingClass::Can_Player_Move(void) const
         || (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
-static bool Scan_For_Proximity_Check(
-    const CELL& original_cell,
-    const HouseClass* house,
-    const PlacementFilter& filter,
-    const int& max_building_distance,
-    int remaining_distance,
-    int depth = 0,
-    CELL previous_cell = -1
-)
-{
-    if (remaining_distance < 1) {
-        return false;
-    }
-
-    if (previous_cell == -1) {
-        previous_cell = original_cell;
-    }
-
-    for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-        CELL newcell = Adjacent_Cell(previous_cell, facing);
-
-        if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
-            continue;
-        }
-
-        const auto& current_cell = Map[newcell];
-
-        const auto base = current_cell.Cell_Building();
-
-        // TODO: could add a `build off allies base` rule by checking if
-        //       house is friendly to current players house
-	    // allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
-        if (
-            (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
-            && (base == nullptr ? false : !base->Class->IsWall && base->House == house)
-        ) {
-            CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(newcell), Cell_Y(newcell));
-            return true;
-        }
-
-        /*
-        **	The special cell ownership flag allows building adjacent
-        **	to friendly walls and bibs even though there is no official
-        **	building located there.
-        */
-        if (current_cell.Owner == house->Class->House) {
-            const auto is_wall = current_cell.Overlay != OVERLAY_NONE
-                && OverlayTypeClass::As_Reference(current_cell.Overlay).IsWall;
-
-            // caller only wants valid placement beside buildings, reject any overlay
-            if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
-		        return false;
-            }
-
-            // don't allow placing a single wall piece far away from buildings
-            if (
-                filter == PLACEMENT_FILTER_WALLS
-                && !is_wall
-                && depth >= max_building_distance
-                && current_cell.Overlay != OVERLAY_ROAD
-            ) {
-                return false;
-            }
-
-            /*
-            ** If we are placing a wall further away than max building distance, fail the check if the wall isn't
-            ** being placed in a straight line opposite the current cell
-            */
-            if (filter == PLACEMENT_FILTER_WALLS && depth >= max_building_distance) {
-                const auto x1 = Cell_X(original_cell);
-                const auto y1 = Cell_Y(original_cell);
-                const auto x2 = Cell_X(newcell);
-                const auto y2 = Cell_Y(newcell);
-
-                const auto is_north = x1 == x2 && y1 < y2;
-                const auto is_east = y1 == y2 && x1 > x2;
-                const auto is_south = x1 == x2 && y1 > y2;
-                const auto is_west = y1 == y2 && x1 < x2;
-
-                // reject if direction is not a straight line
-                if (!is_north && !is_east && !is_south && !is_west) {
-                    CNC_LOG_WARN("Rejecting multi wall !is_north {} !is_east {} !is_south {} !is_west {}", is_north, is_east, is_south, is_west);
-                    CNC_LOG_WARN("{}x{} -> {}x{}", x1, y1, x2, y2);
-                    return false;
-                }
-
-                // next validate that the line is clear of obstacles for placement
-                auto wall_check_x = x1;
-                auto wall_check_y = y1;
-
-                while (wall_check_x != x2 && wall_check_y != y2) {
-                    if (is_north) {
-                        wall_check_y -= 1;
-                    } else if (is_east) {
-                        wall_check_x += 1;
-                    } else if (is_south) {
-                        wall_check_y += 1;
-                    } else if (is_west) {
-                        wall_check_x -= 1;
-                    }
-
-                    const auto scan_cell = XY_Cell(wall_check_x, wall_check_y);
-
-                    // reject as there is an obstacle in the way
-                    if (!Map[scan_cell].Is_Generally_Clear()) {
-                        return false;
-                    }
-                }
-            }
-
-            // allow building beside walls (if filter checks passed) and building bibs (these are owned by the player)
-            CNC_LOG_DEBUG("Found proximity with overlay at: {}x{}", Cell_X(newcell), Cell_Y(newcell));
-            return true;
-        }
-
-        if (Scan_For_Proximity_Check(original_cell, house, filter, max_building_distance, remaining_distance - 1, depth + 1, newcell)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 /***********************************************************************************************
  * BuildingClass::Passes_Proximity_Check -- Determines if building placement is near friendly sq*
  *                                                                                             *
@@ -5803,14 +5680,13 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
         CELL cell = homecell + *ptr++;
 
         if (
-            Scan_For_Proximity_Check(
+            Map.Scan_For_Proximity(
                 cell,
-                House,
+                House->Class->House,
                 placement_filter,
+                prevent_building_in_shroud,
                 max_placement_distance,
-                placement_filter != PLACEMENT_FILTER_WALLS
-                    ? max_placement_distance
-                    : max_wall_placement_distance
+                max_wall_placement_distance
             )
         ) {
             return true;
