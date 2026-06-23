@@ -259,7 +259,7 @@ public:
                                        int buildable_type,
                                        int buildable_id);
     static bool
-    Passes_Proximity_Check(CELL cell_in, BuildingTypeClass* placement_type, unsigned char* placement_distance);
+    Passes_Proximity_Check(CELL cell_in, BuildingTypeClass *placement_type, unsigned char* placement_distance, unsigned char*& tracker);
     static void Calculate_Start_Positions(void);
     static void Computer_Message(bool last_player_taunt);
 
@@ -4438,6 +4438,7 @@ static const int _map_width_shift_bits = 6;
 static bool Check_Cell_Placement(
     const CELL& current_cell_raw,
     const CELL& original_cell,
+    unsigned char*& tracker,
     const int& depth,
     const PlacementFilter& filter,
     const bool& prevent_building_in_shroud,
@@ -4448,6 +4449,7 @@ static bool Check_Cell_Placement(
 
 	if (prevent_building_in_shroud && !current_cell.Is_Visible(PlayerPtr))
 	{
+	    tracker[current_cell_raw] = 1U;
 	    return false;
 	}
 
@@ -4461,6 +4463,7 @@ static bool Check_Cell_Placement(
         && (base == nullptr ? false : base->House == PlayerPtr)
     ) {
 	    CNC_LOG_DEBUG("Found proximity with building at: {}x{}", Cell_X(current_cell_raw), Cell_Y(current_cell_raw));
+	    tracker[current_cell_raw] = 9U;
 	    return true;
     }
 
@@ -4475,6 +4478,7 @@ static bool Check_Cell_Placement(
 
 		// caller only wants valid placement beside buildings, reject any overlay
 		if (is_wall && filter == PLACEMENT_FILTER_BUILDINGS) {
+	        tracker[current_cell_raw] = 2U;
 		    return false;
 		}
 
@@ -4485,6 +4489,7 @@ static bool Check_Cell_Placement(
 		    && depth >= max_building_distance
 		    && current_cell.Overlay != OVERLAY_ROAD
 		) {
+	        tracker[current_cell_raw] = 3U;
 		    return false;
 		}
 
@@ -4505,6 +4510,7 @@ static bool Check_Cell_Placement(
 
 		    // reject if direction is not a straight line
 		    if (!is_north && !is_east && !is_south && !is_west) {
+	            tracker[current_cell_raw] = 4U;
 		        return false;
 		    }
 
@@ -4527,6 +4533,7 @@ static bool Check_Cell_Placement(
 
 		        // reject as there is an obstacle in the way
 		        if (!Map[scan_cell].Is_Generally_Clear()) {
+	                tracker[current_cell_raw] = 5U;
 		            return false;
 		        }
 		    }
@@ -4534,15 +4541,18 @@ static bool Check_Cell_Placement(
 
 		// allow building beside walls (if filter checks passed) and building bibs (these are owned by the player)
 		CNC_LOG_DEBUG("Found proximity with overlay at: {}x{}", Cell_X(current_cell_raw), Cell_Y(current_cell_raw));
+	    tracker[current_cell_raw] = 8U;
 		return true;
 	}
 
+    tracker[current_cell_raw] = 6U;
     return false;
 }
 
-static void Scan_For_Valid_Placement(
+static bool Scan_For_Valid_Placement(
     const CELL& original_cell,
-    unsigned char* placement_distance,
+    unsigned char*& tracker,
+    unsigned char*& placement_distance,
     const PlacementFilter& filter,
     const bool& prevent_building_in_shroud,
     const int& max_building_distance,
@@ -4553,14 +4563,14 @@ static void Scan_For_Valid_Placement(
 {
 	if (remaining_distance < 1)
 	{
-		return;
+		return false;
 	}
 
     if (previous_cell == -1) {
         previous_cell = original_cell;
     }
 
-	for (FacingType facing = FACING_N; facing < FACING_COUNT; ++facing) {
+    for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
 		const auto adjcell = Adjacent_Cell(previous_cell, facing);
 
 		//Out of bounds check
@@ -4572,17 +4582,19 @@ static void Scan_For_Valid_Placement(
 	        Check_Cell_Placement(
 	            adjcell,
 	            original_cell,
+	            tracker,
 	            depth,
 	            filter,
 	            prevent_building_in_shroud,
 	            max_building_distance
 	        )
 	    ) {
-	        placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
+	        return true;
 	    }
 
-		Scan_For_Valid_Placement(
+		if (Scan_For_Valid_Placement(
 		    original_cell,
+		    tracker,
 		    placement_distance,
 		    filter,
 		    prevent_building_in_shroud,
@@ -4590,8 +4602,12 @@ static void Scan_For_Valid_Placement(
 		    remaining_distance - 1,
 		    depth + 1,
 		    adjcell
-		);
+		)) {
+		    return true;
+		}
 	}
+
+    return false;
 }
 
 void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_type, unsigned char* placement_distance)
@@ -4632,17 +4648,32 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         placement_filter
     );
 
+    unsigned char* tracker = new unsigned char[MAP_CELL_TOTAL];
+
+    memset(tracker, 0U, MAP_CELL_TOTAL);
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
-            CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
-            BuildingClass* base = static_cast<BuildingClass*>(Map[cell].Cell_Find_Object(RTTI_BUILDING));
-            if ((base && base->House->Class->House == PlayerPtr->Class->House) || (Map[cell].Owner == PlayerPtr->Class->House)) {
-				placement_distance[cell] = 0U;
+            const CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
+            const auto& current_cell = Map[cell];
+
+            if (!Map.In_View(cell) || !current_cell.Is_Generally_Clear()) {
+                continue;
+            }
+
+            if (prevent_building_in_shroud && !current_cell.Is_Visible(PlayerPtr)) {
+                continue;
+            }
+
+            bool placement_ok = false;
+            short const *ptr = placement_type->Occupy_List(true);;
+            while (*ptr != REFRESH_EOL) {
+                const CELL next_cell = cell + *ptr++;
 
                 // BUG: placement distance seems to be like 1 cell less than it should be
-                Scan_For_Valid_Placement(
-                    cell,
+                if (Scan_For_Valid_Placement(
+                    next_cell,
+                    tracker,
                     placement_distance,
                     placement_filter,
                     prevent_building_in_shroud,
@@ -4650,10 +4681,60 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
                     placement_filter != PLACEMENT_FILTER_WALLS
                         ? max_placement_distance
                         : max_wall_placement_distance
-                );
+                )) {
+                    placement_ok = true;
+                    break;
+                }
+            }
+
+            if (placement_ok) {
+                placement_distance[cell] = min(placement_distance[cell], 1U);
             }
         }
     }
+
+    if (CDFileClass out; out.Open(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), "debug.txt").c_str(), WRITE)) {
+        out.Write(std::string(placement_type->IniName));
+        out.Write("\n");
+
+        for (int y = 0; y < map_cell_height; y++) {
+            for (int x = 0; x < map_cell_width; x++) {
+                const CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
+                unsigned char invalid[4] = {0xF0, 0x9F, 0xAE, 0x8B }; // 🮋
+                unsigned char valid[4] = {0xF0, 0x9F, 0xAE, 0x99 }; // 🮙
+
+                const auto representation = placement_distance[cell] == 255U ? invalid : valid;
+
+                out.Write(representation, 4);
+            }
+
+            out.Write("\n");
+        }
+        out.Close();
+    }
+
+    if (CDFileClass out; out.Open(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), "debug-visit.txt").c_str(), WRITE)) {
+        out.Write(std::string(placement_type->IniName));
+        out.Write("\n");
+        const auto filter = (placement_filter == PLACEMENT_FILTER_ANYWHERE ? "ANY" : (placement_filter == PLACEMENT_FILTER_BUILDINGS ? "BUILDINGS" : "WALLS"));
+        const auto selected_distance = (placement_filter != PLACEMENT_FILTER_WALLS
+                        ? max_placement_distance
+                        : max_wall_placement_distance);
+        out.Write(std::format("{} | {} | {}", filter, max_placement_distance, selected_distance));
+        out.Write("\n");
+
+        for (int y = 0; y < map_cell_height; y++) {
+            for (int x = 0; x < map_cell_width; x++) {
+                const CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
+                out.Write(std::format("{}", tracker[cell]));
+            }
+
+            out.Write("\n");
+        }
+        out.Close();
+    }
+
+    delete[] tracker;
 }
 
 void Recalculate_Placement_Distances()
@@ -4693,7 +4774,7 @@ bool DLLExportClass::Get_Placement_State(uint64 player_id, unsigned char* buffer
         return false;
     }
 
-    CNCPlacementInfoStruct* placement_info = (CNCPlacementInfoStruct*)buffer_in;
+    auto placement_info = reinterpret_cast<CNCPlacementInfoStruct*>(buffer_in);
 
     unsigned int memory_needed =
         sizeof(*placement_info); // Base amount needed. Will need more depending on how many entries there are
@@ -4729,19 +4810,22 @@ bool DLLExportClass::Get_Placement_State(uint64 player_id, unsigned char* buffer
 
     placement_info->Count = map_cell_width * map_cell_height;
 
+    unsigned char* tracker = new unsigned char[MAP_CELL_TOTAL];
+    memset(tracker, 0U, MAP_CELL_TOTAL);
+
     int index = 0;
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
+            CELL cell = (CELL) map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
 
-            CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
+            bool pass = PlacementDistance[CurrentLocalPlayerIndex][cell] == 1U;
 
-            bool pass = Passes_Proximity_Check(
-                cell, PlacementType[CurrentLocalPlayerIndex], PlacementDistance[CurrentLocalPlayerIndex]);
+            //Passes_Proximity_Check(cell, PlacementType[CurrentLocalPlayerIndex], PlacementDistance[CurrentLocalPlayerIndex], tracker);
 
-            CellClass* cellptr = &Map[cell];
+            CellClass * cellptr = &Map[cell];
             bool clear = cellptr->Is_Generally_Clear();
 
-            CNCPlacementCellInfoStruct& placement_cell_info = placement_info->CellInfo[index++];
+            CNCPlacementCellInfoStruct &placement_cell_info = placement_info->CellInfo[index++];
             placement_cell_info.PassesProximityCheck = pass;
             placement_cell_info.GenerallyClear = clear;
         }
@@ -4749,114 +4833,59 @@ bool DLLExportClass::Get_Placement_State(uint64 player_id, unsigned char* buffer
 
     Map.ZoneOffset = 0;
 
+    if (CDFileClass out; out.Open(PathsClass::Concatenate_Paths(Paths.User_Save_Path(), "debug-out.txt").c_str(), WRITE)) {
+        out.Write(std::string(PlacementType[CurrentLocalPlayerIndex]->IniName));
+        out.Write("\n");
+
+        for (int y = 0; y < map_cell_height; y++) {
+            for (int x = 0; x < map_cell_width; x++) {
+                const CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
+                unsigned char invalid[4] = {0xF0, 0x9F, 0xAE, 0x8B }; // 🮋
+                unsigned char valid[4] = {0xF0, 0x9F, 0xAE, 0x99 }; // 🮙
+                unsigned char visited[4] = {0xF0, 0x9F, 0xAE, 0xBD  }; // 🮽
+
+                auto representation = tracker[cell] == 1U ? valid : invalid;
+
+                out.Write(representation, 4);
+            }
+
+            out.Write("\n");
+        }
+        out.Close();
+        delete[] tracker;
+    }
+
     return true;
 }
 
-static bool Scan_For_Proximity(
-    const CELL& original_cell,
-    const PlacementFilter& filter,
-    const bool& prevent_building_in_shroud,
-    const int& max_building_distance,
-    int remaining_distance,
-    int depth = 0,
-    CELL previous_cell = -1
-)
+bool DLLExportClass::Passes_Proximity_Check(CELL cell_in, BuildingTypeClass *placement_type, unsigned char* placement_distance, unsigned char*& tracker)
 {
-    if (remaining_distance < 1)
-    {
-        return false;
-    }
-
-    if (previous_cell == -1) {
-        previous_cell = original_cell;
-    }
-
-    for (FacingType facing = FACING_N; facing < FACING_COUNT; ++facing) {
-        const auto adjcell = Adjacent_Cell(previous_cell, facing);
-
-        //Out of bounds check
-        if (adjcell < 0 || adjcell >= MAP_CELL_TOTAL) {
-            return false;
-        }
-
-        if (
-            Check_Cell_Placement(
-                adjcell,
-                original_cell,
-                depth,
-                filter,
-                prevent_building_in_shroud,
-                max_building_distance
-            )
-        ) {
-            return true;
-        }
-
-        if (Scan_For_Proximity(
-            original_cell,
-            filter,
-            prevent_building_in_shroud,
-            max_building_distance,
-            remaining_distance - 1,
-            depth + 1,
-            adjcell))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool DLLExportClass::Passes_Proximity_Check(CELL cell_in,
-                                            BuildingTypeClass* placement_type,
-                                            unsigned char* placement_distance)
-{
-    auto prevent_building_in_shroud = true;
-    auto max_placement_distance = 1;
-    auto max_wall_placement_distance = max_placement_distance;
-    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
-
-    Resolve_Placement_Rules(
-        placement_type,
-        max_placement_distance,
-        max_wall_placement_distance,
-        prevent_building_in_shroud,
-        placement_filter
-    );
-
     /*
     **	Scan through all cells that the building foundation would cover. If any adjacent
     **	cells to these are of friendly persuasion, then consider the proximity check to
     **	have been a success.
     */
-    short const* occupy_list = placement_type->Occupy_List(true);
+    short const *occupy_list = placement_type->Occupy_List(true);
 
     while (*occupy_list != REFRESH_EOL) {
 
         CELL center_cell = cell_in + *occupy_list++;
 
-        if (
-            Scan_For_Proximity(
-                center_cell,
-                placement_filter,
-                prevent_building_in_shroud,
-                max_placement_distance,
-                placement_filter != PLACEMENT_FILTER_WALLS
-                    ? max_placement_distance
-                    : max_wall_placement_distance
-            )
-        ) {
-            return true;
+        if (!Map.In_Radar(center_cell)) {
+            tracker[center_cell] = 0U;
+            return false;
         }
 
         if (placement_distance[center_cell] <= 1U) {
+            tracker[center_cell] = 1U;
             return true;
         }
     }
 
+    tracker[cell_in] = 0U;
     return false;
 }
+
 
 /**************************************************************************************************
  * DLLExportClass::Start_Construction -- Start sidebar construction
