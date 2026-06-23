@@ -504,6 +504,13 @@ void BulletClass::Draw_It(int x, int y, WindowNumberType window)
         return;
 
     /*
+    **	Guard against object in shroud.
+    */
+    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
+    /*
     **	If there is no shape loaded for this object, then
     **	it obviously can't be rendered -- just bail.
     */

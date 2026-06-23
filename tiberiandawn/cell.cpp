@@ -919,6 +919,13 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
     }
 
     /*
+    **	Guard against cells in shroud.
+    */
+    if (!Debug_Map && !Map[cell].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
+    /*
     **	Fetch a pointer to the template type associated with this cell.
     */
     if (TType != TEMPLATE_NONE) {
