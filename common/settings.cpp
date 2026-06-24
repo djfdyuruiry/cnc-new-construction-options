@@ -104,6 +104,14 @@ void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
     });
 
     /*
+    ** Enforce a fixed resolution for DOS mode.
+    */
+    if (Video.DOSMode) {
+        Video.Width = 320;
+        Video.Height = 200;
+    }
+
+    /*
     ** VQA and WSA interpolation mode 0 = scanlines, 1 = vertical doubling, 2 = linear
     */
     Video.InterpolationMode = Bound(Video.InterpolationMode, 0, 2);

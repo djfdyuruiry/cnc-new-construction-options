@@ -400,6 +400,8 @@ bool Read_Scenario_Ini(char* root, SpecialClass special_options, bool allow_supe
 
         if (Special.IsJurassic) {
             PlayerPtr->ActLike = Whom;
+        } else {
+            PlayerPtr->ActLike = PlayerPtr->Class->House;
         }
 
         PlayerPtr->Assign_Handicap(Scen.Difficulty);
@@ -814,6 +816,8 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
 
         if (Special.IsJurassic) {
             PlayerPtr->ActLike = Whom;
+        } else {
+            PlayerPtr->ActLike = PlayerPtr->Class->House;
         }
 
         if (Special.IsEasy) {

@@ -55,6 +55,27 @@
 
 extern COORDINATE Coord_Add(COORDINATE coord1, COORDINATE coord2);
 
+class ProximityScanRules
+{
+    ProximityResult* ProximityTracker = nullptr;
+
+public:
+    CELL OriginalCell = -1;
+    HousesType House = HOUSE_NONE;
+    PlacementFilter Filter = PLACEMENT_FILTER_ANYWHERE;
+    OverlayType OverlayFilter = OVERLAY_NONE;
+    bool PreventBuildingInShroud = true;
+    bool ModernWallsBuildingPlacmentOverride = false;
+    int MaxBuildingDistance = 1;
+    int MaxWallPlacementDistance = 1;
+
+    ProximityScanRules(bool debug_placement = false);
+    ~ProximityScanRules();
+
+    void Update_Tracker_Cell(CELL cell, ProximityResult result) const;
+    void Dump_Tracker_To_File(const char* file_name = "placement_debug.txt") const;
+};
+
 class DisplayClass : public MapClass
 {
     // Need access to shadow shapes
@@ -185,8 +206,11 @@ public:
     bool In_View(CELL cell);
     bool Passes_Proximity_Check(ObjectTypeClass const* object);
 #ifdef USE_RA_AI
-    bool Scan_For_Proximity(CELL cell, HousesType house, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance) const;
+    bool Scan_For_Proximity(const ProximityScanRules& scan_rules) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
+
+    static PlacementResult* Allocate_Proximity_Tracker();
+    static void Dump_Proximity_Tracker_To_File(const ProximityScanRules& scan_rules, const PlacementResult* tracker, const char* file_name = "placement_debug.txt");
 #endif
     ObjectClass* Cell_Object(CELL cell, int x = 0, int y = 0);
     ObjectClass* Next_Object(ObjectClass* object);
@@ -333,6 +357,24 @@ private:
 
     void Update_Placement_Cursor();
 
+#ifdef USE_RA_AI
+    bool Check_Overlay_Proximity(
+        const ProximityScanRules& scan_rules,
+        const CellClass& current_cell,
+        CELL current_cell_raw,
+        int depth
+    ) const;
+
+    bool Check_Cell_Proximity(const ProximityScanRules& scan_rules, CELL current_cell_raw, int depth) const;
+
+    bool Scan_For_Proximity(
+        const ProximityScanRules& scan_rules,
+        int remaining_distance,
+        int depth = 0,
+        CELL previous_cell = -1
+    ) const;
+#endif
+
     /*
     **	This bit array is used to flag cells to be redrawn. If the icon needs to
     **	be redrawn for a cell, then the corresponding flag will be true.
@@ -351,5 +393,12 @@ private:
     *save/load
     */
 };
+
+ProximityScanRules Resolve_Placement_Rules(
+    const BuildingTypeClass* placement_type,
+    HousesType house,
+    bool debug_placement = false
+);
+ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance, bool debug_placement = false);
 
 #endif

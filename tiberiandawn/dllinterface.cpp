@@ -33,6 +33,7 @@
 #include "defines.h" // VOC_COUNT, VOX_COUNT
 #include "savegame_v1.h"
 #include "sidebarglyphx.h"
+#include "tiberiandawnsettings.h"
 #include "common/irandom.h"
 
 /*
@@ -257,8 +258,6 @@ public:
                                        uint64 player_id,
                                        int buildable_type,
                                        int buildable_id);
-    static bool
-    Passes_Proximity_Check(CELL cell_in, BuildingTypeClass* placement_type, unsigned char* placement_distance);
     static void Calculate_Start_Positions(void);
     static void Computer_Message(bool last_player_taunt);
 
@@ -4434,34 +4433,6 @@ static const int _map_width_shift_bits = 7;
 static const int _map_width_shift_bits = 6;
 #endif
 
-static void Scan_For_Valid_Placement(CELL cell, unsigned char* placement_distance, bool prevent_building_in_shroud, bool allow_building_beside_walls, int remaining_distance)
-{
-	if (remaining_distance < 1)
-	{
-		return;
-	}
-
-	for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-		CELL adjcell = Adjacent_Cell(cell, facing);
-
-		//Out of bounds check
-		if (adjcell < 0 || adjcell >= MAP_CELL_TOTAL) {
-			continue;
-		}
-
-	    const auto adjcell_contains_wall = Map[adjcell].Overlay != OVERLAY_NONE
-            && OverlayTypeClass::As_Reference(Map[adjcell].Overlay).IsWall;
-
-		if (!prevent_building_in_shroud || Map[adjcell].Is_Visible(PlayerPtr)) {
-		    if (!adjcell_contains_wall || allow_building_beside_walls) {
-		        placement_distance[adjcell] = min(placement_distance[adjcell], 1U);
-		    }
-		}
-
-		Scan_For_Valid_Placement(adjcell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, remaining_distance - 1);
-	}
-}
-
 void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_type, unsigned char* placement_distance)
 {
     int map_cell_x = Map.MapCellX;
@@ -4487,23 +4458,63 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-	auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-	auto prevent_building_in_shroud = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-	auto allow_building_beside_walls = Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+    const auto occupy_list = placement_type->Occupy_List(true);
+    auto scan_rules = Resolve_Placement_Rules(placement_type, PlayerPtr->Class->House);
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
+
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
-            CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
-            BuildingClass* base = (BuildingClass*)Map[cell].Cell_Find_Object(RTTI_BUILDING);
-            if ((base && base->House->Class->House == PlayerPtr->Class->House)
-                || (Map[cell].Owner == PlayerPtr->Class->House)) {
-				placement_distance[cell] = 0U;
+            const CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << _map_width_shift_bits);
 
-				Scan_For_Valid_Placement(cell, placement_distance, prevent_building_in_shroud, allow_building_beside_walls, max_placement_distance);
+            if (scan_rules.PreventBuildingInShroud && !Map[cell].Is_Visible(PlayerPtr)) {
+                // no point in checking, player can't build here anyway
+                continue;
+            }
+
+            bool placement_ok = false;
+            short const *ptr = occupy_list;
+            while (*ptr != REFRESH_EOL && !placement_ok) {
+                scan_rules.OriginalCell = cell + *ptr++;
+
+                if (Map.Scan_For_Proximity(scan_rules)) {
+                    placement_ok = true;
+                }
+            }
+
+            if (placement_ok) {
+                placement_distance[cell] = min(placement_distance[cell], 1U);
             }
         }
     }
+
+    if (!TdSettings.Placement_Debugging_Is_Enabled()) {
+        return;
+    }
+
+    // dump a text representation of the map to show which cells have been deemed valid for placement
+    auto debug_placement_path = PathsClass::Concatenate_Paths(Paths.User_Path(), "remaster_debug_placement.txt");
+    if (CDFileClass out; out.Open(debug_placement_path.c_str(), WRITE)) {
+        out.Write(std::string(placement_type->IniName));
+        out.Write("\n");
+
+        for (int y = 0; y < map_cell_height; y++) {
+            for (int x = 0; x < map_cell_width; x++) {
+                const CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << _map_width_shift_bits);
+                unsigned char invalid[4] = {0xF0, 0x9F, 0xAE, 0x8B }; // 🮋
+                unsigned char valid[4] = {0xF0, 0x9F, 0xAE, 0x99 }; // 🮙
+
+                const auto representation = placement_distance[cell] == 255U ? invalid : valid;
+
+                out.Write(representation, 4);
+            }
+
+            out.Write("\n");
+        }
+        out.Close();
+    }
+
+    scan_rules.Dump_Tracker_To_File();
 }
 
 void Recalculate_Placement_Distances()
@@ -4543,7 +4554,7 @@ bool DLLExportClass::Get_Placement_State(uint64 player_id, unsigned char* buffer
         return false;
     }
 
-    CNCPlacementInfoStruct* placement_info = (CNCPlacementInfoStruct*)buffer_in;
+    auto placement_info = reinterpret_cast<CNCPlacementInfoStruct*>(buffer_in);
 
     unsigned int memory_needed =
         sizeof(*placement_info); // Base amount needed. Will need more depending on how many entries there are
@@ -4582,52 +4593,17 @@ bool DLLExportClass::Get_Placement_State(uint64 player_id, unsigned char* buffer
     int index = 0;
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
+            CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << _map_width_shift_bits);
 
-            CELL cell = (CELL)map_cell_x + x + ((map_cell_y + y) << _map_width_shift_bits);
-
-            bool pass = Passes_Proximity_Check(
-                cell, PlacementType[CurrentLocalPlayerIndex], PlacementDistance[CurrentLocalPlayerIndex]);
-
-            CellClass* cellptr = &Map[cell];
-            bool clear = cellptr->Is_Generally_Clear();
-
-            CNCPlacementCellInfoStruct& placement_cell_info = placement_info->CellInfo[index++];
-            placement_cell_info.PassesProximityCheck = pass;
-            placement_cell_info.GenerallyClear = clear;
+            auto& [PassesProximityCheck, GenerallyClear] = placement_info->CellInfo[index++];
+            PassesProximityCheck = PlacementDistance[CurrentLocalPlayerIndex][cell] == 1U;
+            GenerallyClear = Map[cell].Is_Generally_Clear();
         }
     }
 
     Map.ZoneOffset = 0;
 
     return true;
-}
-
-bool DLLExportClass::Passes_Proximity_Check(CELL cell_in,
-                                            BuildingTypeClass* placement_type,
-                                            unsigned char* placement_distance)
-{
-
-    /*
-    **	Scan through all cells that the building foundation would cover. If any adjacent
-    **	cells to these are of friendly persuasion, then consider the proximity check to
-    **	have been a success.
-    */
-    short const* occupy_list = placement_type->Occupy_List(true);
-
-    while (*occupy_list != REFRESH_EOL) {
-
-        CELL center_cell = cell_in + *occupy_list++;
-
-        if (!Map.In_Radar(center_cell)) {
-            return false;
-        }
-
-        if (placement_distance[center_cell] <= 1U) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 /**************************************************************************************************
@@ -5186,17 +5162,6 @@ bool DLLExportClass::Place(uint64 player_id, int buildable_type, int buildable_i
     if (!DLLExportClass::Set_Player_Context(player_id)) {
         return false;
     }
-
-    /*
-    ** Need to check for proximity again here?
-    */
-#if (0)
-    Map.Passes_Proximity_Check
-
-        Map.Set_Cursor_Shape(Map.PendingObject->Occupy_List());
-
-    OutList.Add(EventClass(EventClass::PLACE, PendingObjectPtr->What_Am_I(), cell + ZoneOffset));
-#endif
 
     BuildingClass* building = Get_Pending_Placement_Object(player_id, buildable_type, buildable_id);
 

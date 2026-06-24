@@ -360,6 +360,13 @@ void TerrainClass::Draw_It(int x, int y, WindowNumberType window)
         int shapenum = 0;
 
         /*
+        **	Guard against crumbling objects in shroud.
+        */
+        if (!Debug_Map && IsCrumbling && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+            return;
+        }
+
+        /*
         **	Determine the animation stage to render the terrain object. If it is crumbling, then
         **	it will display the crumbling animation.
         */

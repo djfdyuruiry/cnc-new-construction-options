@@ -51,7 +51,16 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
     CNC_LOGGER_INFO("Loading Tiberian Dawn settings from INI file: {}", IniFileName);
 
     CommonSettings->Load(IniFileName, ini);
+
+    Get_Map_Section().With<IniRuleContext>(ini, [&](auto& c) {
+        c.Load("PlacementDebugging").With_Default(false);
+    });
     Load_MultiPlayer(ini);
+}
+
+bool TiberianDawnSettings::Placement_Debugging_Is_Enabled()
+{
+    return Get_Map_Section().Get<bool>("PlacementDebugging");
 }
 
 void TiberianDawnSettings::Update_MultiPlayer()
@@ -90,6 +99,11 @@ RuleSections& TiberianDawnSettings::Get_Common_Sections()
     }
 
     return CommonSettings->Get_Sections();
+}
+
+RuleSection& TiberianDawnSettings::Get_Map_Section()
+{
+    return Get_Common_Sections()[MapPlayerSection];
 }
 
 RuleSection& TiberianDawnSettings::Get_Multiplayer_Section()

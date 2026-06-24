@@ -531,8 +531,7 @@ int Main_Menu(unsigned int timeout)
     KeyNumType input; // input from user
     int retval;       // return value
     int curbutton;
-    const auto button_count = Is_Demo() ? 7 : 8;
-    std::vector<TextButtonClass*> buttons(button_count);
+    std::vector<TextButtonClass*> buttons(8);
 
     ControlClass* commands = NULL; // the button list
 
@@ -540,12 +539,10 @@ int Main_Menu(unsigned int timeout)
 #ifdef BONUS_MISSIONS
     int ystep = 13 * scale_factor;
 #else
-    const auto base_y_step = Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files() ? 13 : 15;
+    const auto base_y_step = Settings.Video.DOSMode || Is_Demo() || Is_DOS_Files() ? 11 : 13;
     int ystep = base_y_step * scale_factor;
 #endif // BONUS_MISSIONS
 
-    if (expansions)
-        ystep -= 2 * 2;
     TextButtonClass expandbtn(BUTTON_EXPAND,
                               TXT_NEW_MISSIONS,
                               TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
@@ -565,18 +562,14 @@ int Main_Menu(unsigned int timeout)
                              D_START_H);
     starty += ystep;
 
-    TextButtonClass selectbtn;
-
-    if (!Is_Demo()) {
-        selectbtn = TextButtonClass(BUTTON_SELECT,
-                                 "Mission Select", // TODO: TXT locale string
-                                 TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                                 D_SELECT_X,
-                                 starty,
-                                 D_SELECT_W,
-                                 D_SELECT_H);
-        starty += ystep;
-    }
+    TextButtonClass selectbtn(BUTTON_SELECT,
+                              "Mission Select", // TODO: TXT locale string
+                              TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                              D_SELECT_X,
+                              starty,
+                              D_SELECT_W,
+                              D_SELECT_H);
+    starty += ystep;
 
 #ifdef BONUS_MISSIONS
     TextButtonClass bonusbtn(BUTTON_BONUS,
@@ -746,10 +739,7 @@ int Main_Menu(unsigned int timeout)
     bonusbtn.Add_Tail(*commands);
 #endif // BONUS_MISSIONS
 
-    if (!Is_Demo()) {
-        selectbtn.Add_Tail(*commands);
-    }
-
+    selectbtn.Add_Tail(*commands);
     loadbtn.Add_Tail(*commands);
     multibtn.Add_Tail(*commands);
     editorbtn.Add_Tail(*commands);

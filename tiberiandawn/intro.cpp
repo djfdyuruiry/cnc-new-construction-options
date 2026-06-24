@@ -108,6 +108,10 @@ void Choose_Side(void)
     int gdi_start_palette;
     int scale_factor = Get_Resolution_Factor() + 1;
 
+    // reset funpark flags
+    Special.IsJurassic = false;
+    AreThingiesEnabled = false;
+
     TextPrintBuffer = new GraphicBufferClass(SeenBuff.Get_Width(), SeenBuff.Get_Height(), (void*)NULL);
     TextPrintBuffer->Clear();
     BlitList.Clear();

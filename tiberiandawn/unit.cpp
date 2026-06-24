@@ -2045,6 +2045,13 @@ void UnitClass::Draw_It(int x, int y, WindowNumberType window)
         return;
 
     /*
+    **	Guard against object in shroud.
+    */
+    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
+    /*
     **	If drawing of this unit is not explicitly prohibited, then proceed
     **	with the render process.
     */

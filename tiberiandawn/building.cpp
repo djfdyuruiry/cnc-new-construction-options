@@ -549,6 +549,13 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
     shapenum = Fetch_Stage();
 
     /*
+    **	Guard against object in shroud.
+    */
+    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
+    /*
     **	The shape file to use for rendering depends on whether the building
     **	is undergoing construction or not.
     */
@@ -1393,9 +1400,9 @@ bool BuildingClass::Unlimbo_Wall(const COORDINATE coord)
     }
 
     // wall rules
-    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
-    const auto full_cost_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_RULE);
+	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALLS_MAX_LENGTH_RULE);
+    const auto full_cost_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_FULL_COST_RULE);
 
 #ifdef REMASTER_BUILD
     bool ctrldown = DLL_Export_Get_Input_Key_State(KN_LCTRL);
@@ -5616,52 +5623,6 @@ bool BuildingClass::Can_Player_Move(void) const
         || (*this == STRUCT_CONST && (Mission == MISSION_GUARD) && Special.IsMCVDeploy);
 }
 
-static bool Scan_For_Proximity_Check(CELL cell, HouseClass* house, bool allow_building_beside_walls, int remaining_distance)
-{
-    if (remaining_distance < 1) {
-        return false;
-    }
-
-    for (FacingType facing = FACING_N; facing < FACING_COUNT; facing++) {
-        CELL newcell = Adjacent_Cell(cell, facing);
-
-        if (newcell < 0 || newcell >= MAP_CELL_TOTAL) {
-            continue;
-        }
-
-        /*
-        **	The special cell ownership flag allows building adjacent
-        **	to friendly walls and bibs even though there is no official
-        **	building located there.
-        */
-        if (Map[newcell].Owner == house->Class->House) {
-            if (
-                !allow_building_beside_walls
-                && Map[newcell].Overlay != OVERLAY_NONE
-                && OverlayTypeClass::As_Reference(Map[newcell].Overlay).IsWall
-            ) {
-                return false;
-            }
-
-            return true;
-        }
-
-        BuildingClass* base = Map[newcell].Cell_Building();
-
-        // TODO: could add a `build off allies base` rule by checking if 
-        //       house is friendly to current players house
-        if (base && base->House->Class->House == house->Class->House) {
-            return true;
-        }
-
-        if (Scan_For_Proximity_Check(newcell, house, allow_building_beside_walls, remaining_distance - 1)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 /***********************************************************************************************
  * BuildingClass::Passes_Proximity_Check -- Determines if building placement is near friendly sq*
  *                                                                                             *
@@ -5696,18 +5657,15 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	cells to these are of friendly persuasion, then consider the proximity check to
     **	have been a success.
     */
-    const auto max_placement_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MAX_BUILD_DISTANCE_RULE);
-    const auto prevent_building_in_shroud =
-        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, PREVENT_BUILDING_IN_SHROUD_RULE);
-    const auto allow_building_beside_walls =
-        Rule.Get_Rule_Value<bool>(GAME_MAP_SECTION, ALLOW_BUILDING_BESIDE_WALLS_RULE);
+
+    auto scan_rules = Resolve_Placement_Rules(this);
 
     auto ptr = Occupy_List(true);
 
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        if (prevent_building_in_shroud && !Map[cell].Is_Visible(PlayerPtr)) {
+        if (scan_rules.PreventBuildingInShroud && !Map[cell].Is_Visible(House)) {
             return false;
         }
     }
@@ -5715,11 +5673,9 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     ptr = Occupy_List(true);
 
     while (*ptr != REFRESH_EOL) {
-        CELL cell = homecell + *ptr++;
+        scan_rules.OriginalCell = homecell + *ptr++;
 
-        auto proximity_detected = Scan_For_Proximity_Check(cell, House, allow_building_beside_walls, max_placement_distance);
-
-        if (proximity_detected) {
+        if (Map.Scan_For_Proximity(scan_rules)) {
             return true;
         }
     }

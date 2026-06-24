@@ -19,10 +19,14 @@ class INIClass;
 class TiberianDawnSettings
 {
 public:
+    static constexpr auto MapPlayerSection = "Map";
     static constexpr auto MultiPlayerSection = "MultiPlayer";
 
     void Init(SettingsClass& common_settings);
     void Load(std::string ini_file_name, INIClass& ini);
+
+    // map
+    bool Placement_Debugging_Is_Enabled();
 
     void Update_MultiPlayer();
     void Update_Sections();
@@ -35,6 +39,7 @@ private:
     std::string IniFileName;
 
     RuleSections& Get_Common_Sections();
+    RuleSection& Get_Map_Section();
     RuleSection& Get_Multiplayer_Section();
 
     void Load_MultiPlayer(INIClass& ini);

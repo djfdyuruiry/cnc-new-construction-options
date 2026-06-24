@@ -585,6 +585,13 @@ void InfantryClass::Draw_It(int x, int y, WindowNumberType window)
     if (!shapefile)
         return;
 
+    /*
+    **	Guard against object in shroud.
+    */
+    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
     y += 4;
     x -= 2;
 

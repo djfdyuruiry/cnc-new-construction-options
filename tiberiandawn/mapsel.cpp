@@ -308,7 +308,7 @@ struct countrylist
      {{SDE, SDE, SDE}, {SDN, SDN, SDN}},
      {{SVA, SVB, SVC}, {SVN, SVN, SVN}}}};
 
-int const CountryNames[] = {
+static int const CountryNames[] = {
     TXT_MAP_COUNTRYNAME0,  TXT_MAP_COUNTRYNAME1,  TXT_MAP_COUNTRYNAME2,  TXT_MAP_COUNTRYNAME3,
     TXT_MAP_COUNTRYNAME4,  TXT_MAP_COUNTRYNAME5,  TXT_MAP_COUNTRYNAME6,  TXT_MAP_COUNTRYNAME7,
     TXT_MAP_COUNTRYNAME8,  TXT_MAP_COUNTRYNAME9,  TXT_MAP_COUNTRYNAME10, TXT_MAP_COUNTRYNAME11,
@@ -320,8 +320,18 @@ int const CountryNames[] = {
     TXT_MAP_COUNTRYNAME32, TXT_MAP_COUNTRYNAME33, TXT_MAP_COUNTRYNAME34
 };
 
-const gdistats GDIStats[] = {
-    // Name   Pop        Area  	  Capital	Government     GDP	    Conflict   Military
+struct gdistats
+{
+    int nameindex;
+    int pop;
+    int area;
+    int capital;
+    int govt;
+    int gdp;
+    int conflict;
+    int military;
+} static const GDIStats[] = {
+    //  Name         Pop               Area              Capital             Gov.    GDP                 Conflict             Military
     {0, TXT_MAP_P01, TXT_MAP_A00, TXT_MAP_C00, 0, TXT_MAP_GDP00, TXT_MAP_PC00, 0},
     {1, TXT_MAP_P02, TXT_MAP_A01, TXT_MAP_C01, 1, TXT_MAP_GDP01, TXT_MAP_PC01, 3},
     {1, TXT_MAP_P02, TXT_MAP_A01, TXT_MAP_C01, 1, TXT_MAP_GDP01, TXT_MAP_PC02, 3},
@@ -346,8 +356,20 @@ const gdistats GDIStats[] = {
     // Hack in a slot for Estonia
     {34, TXT_MAP_P17, TXT_MAP_A16, TXT_MAP_C16, 0, TXT_MAP_GDP00, TXT_MAP_PC19, 0}};
 
-const nodstats NodStats[] = {
-    // Name   Pop     Expendable   Capital	Government Corruptible   Worth	    Conflict   Military  Probability
+struct nodstats
+{
+    int nameindex;
+    int pop;
+    int expendable;
+    int capital;
+    int govt;
+    int corruptible;
+    int worth;
+    int conflict;
+    int military;
+    int probability;
+} static const NodStats[] = {
+    //  Name          Pop               Expendable    Capital             Gov.    Corruptible  Worth                Conflict             Military  Probability
     {16, TXT_MAP_P18, 38, TXT_MAP_C17, 8, 86, TXT_MAP_GDP14, TXT_MAP_PC20, 0, 23},
     {17, TXT_MAP_P19, 75, TXT_MAP_C18, 0, 18, TXT_MAP_GDP15, TXT_MAP_PC21, 1, 82},
     {17, TXT_MAP_P19, 75, TXT_MAP_C18, 0, 18, TXT_MAP_GDP15, TXT_MAP_PC22, 1, 82},
@@ -1592,4 +1614,42 @@ void Bit_It_In_Scale(int x,
 void Bit_It_In(int x, int y, int w, int h, GraphicBufferClass* src, GraphicBufferClass* dest, int delay, int dagger)
 {
     Bit_It_In_Scale(x, y, w, h, src, dest, NULL, delay, dagger);
+}
+
+/**
+ * Get the country name for a single player campaign mission, as shown on the map selection screen.
+ *
+ * @param player The campaign side (NOD/GDI)
+ * @param index The index of the mission, calculated by counting through all available scenarios from first to end,
+ *              counting all directions and variations. (zero indexed)
+ * @return Text string ID for the country name, or TXT_NONE if none exists.
+ */
+int Lookup_Country_Name(const ScenarioPlayerType& player, const int& index)
+{
+    switch (player) {
+        case SCEN_PLAYER_GDI: {
+            if (index - 2 > 21) {
+                return TXT_NONE;
+            }
+
+            // first two GDI missions have country stored at the end of the lookup
+            if (index < 2) {
+                return CountryNames[GDIStats[21].nameindex];
+            }
+
+            return CountryNames[GDIStats[index - 2].nameindex];
+        }
+
+        case SCEN_PLAYER_NOD: {
+            if (index > 22) {
+                return TXT_NONE;
+            }
+
+            return CountryNames[NodStats[index].nameindex];
+        }
+
+        // ignore country names for Funpark missions
+        default:
+            return TXT_NONE;
+    }
 }

@@ -65,6 +65,16 @@ public:
         PrintFlags = style;
     }
 
+    virtual void Set_Gradient_Activated_Style(TextPrintType style)
+    {
+        GradientActivatedStyle = style;
+    }
+
+    virtual void Set_Gradient_Deactivated_Style(TextPrintType style)
+    {
+        GradientDeactivatedStyle = style;
+    }
+
 protected:
     virtual void Draw_Background(void);
     virtual void Draw_Text(char const* text);
@@ -80,6 +90,9 @@ protected:
     **	This is the print flags to use when rendering this button's text.
     */
     TextPrintType PrintFlags;
+
+    TextPrintType GradientActivatedStyle;
+    TextPrintType GradientDeactivatedStyle;
 };
 
 #endif
