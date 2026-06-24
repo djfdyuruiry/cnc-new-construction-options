@@ -4805,11 +4805,11 @@ void HouseClass::Sell_Wall(CELL cell)
                     }
 
                     const auto modern_walls =
-                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
+                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_RULE);
                     const auto wall_length =
-                        Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
+                        Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALLS_MAX_LENGTH_RULE);
                     const auto full_cost_walls =
-                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
+                        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_FULL_COST_RULE);
 
                     if (!IsHuman || !modern_walls || wall_length < 2 || full_cost_walls) {
                         Refund_Money(btype->Cost_Of() / 2); // TODO: add modifier rule for wall sell value

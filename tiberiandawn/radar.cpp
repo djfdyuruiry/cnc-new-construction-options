@@ -353,7 +353,7 @@ void RadarClass::Draw_It(bool forced)
         jurassic_flag_change = true;
     }
 
-    // draw if the player's house has changed OR we have entered/left funpark campaign
+    // reload radar graphics if the player's house has changed OR we have entered/left funpark campaign
     if (PlayerPtr->ActLike != _house || jurassic_flag_change) {
         char name[_MAX_NAME + _MAX_EXT];
 

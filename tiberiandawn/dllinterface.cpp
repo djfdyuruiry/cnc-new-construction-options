@@ -4459,31 +4459,16 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         map_cell_height++;
     }
 
-    auto prevent_building_in_shroud = true;
-    auto max_placement_distance = 1;
-    auto max_wall_placement_distance = max_placement_distance;
-    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
-
-    Resolve_Placement_Rules(
-        placement_type,
-        max_placement_distance,
-        max_wall_placement_distance,
-        prevent_building_in_shroud,
-        placement_filter
-    );
-
     const auto occupy_list = placement_type->Occupy_List(true);
-
-    ProximityResult* proximity_tracker = DisplayClass::Allocate_Proximity_Tracker();
+    auto scan_rules = Resolve_Placement_Rules(placement_type, PlayerPtr->Class->House);
 
     memset(placement_distance, 255U, MAP_CELL_TOTAL);
 
     for (int y = 0; y < map_cell_height; y++) {
         for (int x = 0; x < map_cell_width; x++) {
             const CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << _map_width_shift_bits);
-            const auto& current_cell = Map[cell];
 
-            if (prevent_building_in_shroud && !current_cell.Is_Visible(PlayerPtr)) {
+            if (scan_rules.PreventBuildingInShroud && !Map[cell].Is_Visible(PlayerPtr)) {
                 // no point in checking, player can't build here anyway
                 continue;
             }
@@ -4491,18 +4476,9 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
             bool placement_ok = false;
             short const *ptr = occupy_list;
             while (*ptr != REFRESH_EOL && !placement_ok) {
-                const CELL next_cell = cell + *ptr++;
+                scan_rules.OriginalCell = cell + *ptr++;
 
-                if (Map.Scan_For_Proximity(
-                    next_cell,
-                    PlayerPtr->Class->House,
-                    placement_filter,
-                    placement_type->OverlayToPlace,
-                    prevent_building_in_shroud,
-                    max_placement_distance,
-                    max_wall_placement_distance,
-                    proximity_tracker
-                )) {
+                if (Map.Scan_For_Proximity(scan_rules)) {
                     placement_ok = true;
                 }
             }
@@ -4539,7 +4515,7 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
         out.Close();
     }
 
-    DisplayClass::Dump_Proximity_Tracker_To_File(proximity_tracker);
+    scan_rules.Dump_Tracker_To_File();
 }
 
 void Recalculate_Placement_Distances()

@@ -2315,6 +2315,4 @@ private:
     static SmudgeTypeClass const* const Pointers[SMUDGE_COUNT];
 };
 
-
-
 #endif

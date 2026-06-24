@@ -1400,9 +1400,9 @@ bool BuildingClass::Unlimbo_Wall(const COORDINATE coord)
     }
 
     // wall rules
-    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_BUILDING_RULE);
-	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALL_MAX_LENGTH_RULE);
-    const auto full_cost_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALL_FULL_COST_RULE);
+    const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_RULE);
+	const auto wall_length = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALLS_MAX_LENGTH_RULE);
+    const auto full_cost_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_FULL_COST_RULE);
 
 #ifdef REMASTER_BUILD
     bool ctrldown = DLL_Export_Get_Input_Key_State(KN_LCTRL);
@@ -5658,25 +5658,14 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     **	have been a success.
     */
 
-    auto prevent_building_in_shroud = true;
-    auto max_placement_distance = 1;
-    auto max_wall_placement_distance = max_placement_distance;
-    auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
-
-    Resolve_Placement_Rules(
-        this,
-        max_placement_distance,
-        max_wall_placement_distance,
-        prevent_building_in_shroud,
-        placement_filter
-    );
+    auto scan_rules = Resolve_Placement_Rules(this);
 
     auto ptr = Occupy_List(true);
 
     while (*ptr != REFRESH_EOL) {
         CELL cell = homecell + *ptr++;
 
-        if (prevent_building_in_shroud && !Map[cell].Is_Visible(House)) {
+        if (scan_rules.PreventBuildingInShroud && !Map[cell].Is_Visible(House)) {
             return false;
         }
     }
@@ -5684,18 +5673,10 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     ptr = Occupy_List(true);
 
     while (*ptr != REFRESH_EOL) {
-        CELL cell = homecell + *ptr++;
+        scan_rules.OriginalCell = homecell + *ptr++;
 
         if (
-            Map.Scan_For_Proximity(
-                cell,
-                House->Class->House,
-                placement_filter,
-                this->Class->OverlayToPlace,
-                prevent_building_in_shroud,
-                max_placement_distance,
-                max_wall_placement_distance
-            )
+            Map.Scan_For_Proximity(scan_rules)
         ) {
             return true;
         }

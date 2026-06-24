@@ -29,22 +29,28 @@
       "comment": "This controls how far away from an existing structure a player can place a building. _Note: values higher than 6 may cause performance problems._"
     },
     {
-      "name": "ModernWallBuilding",
+      "name": "ModernWalls",
       "type": "bool",
       "default": true,
-      "comment": "Two wall pieces are connected automatically when placed in line of sight of each-other. See ModernWallMaxLength and ModernWallFullCost."
+      "comment": "Two wall pieces are connected automatically when placed in line of sight of each-other and walls can be built further away. To ensure balance, when enabled you cannot place buildings beside walls (see ModernWallsAllowBuildings)."
     },
     {
-      "name": "ModernWallMaxLength",
+      "name": "ModernWallsAllowBuildings",
+      "type": "bool",
+      "default": false,
+      "comment": "Can the player place buildings beside wall pieces when ModernWalls is on?"
+    },
+    {
+      "name": "ModernWallsFullCost",
+      "type": "bool",
+      "default": true,
+      "comment": "When connecting two wall pieces, should the player pay for each piece of connecting wall? Requires ModernWalls to be on"
+    },
+    {
+      "name": "ModernWallsMaxLength",
       "type": "int",
       "default": 4,
       "comment": "How far apart are two wall pieces allowed to be to allow them to be connected? Respects MaxBuildDistance and [Game.Map]->AllowBuildingBesideWalls"
-    },
-    {
-      "name": "ModernWallFullCost",
-      "type": "bool",
-      "default": true,
-      "comment": "When connecting two wall pieces, should the player pay for each piece of connecting wall? Requires ModernWallBuilding to be on"
     },
     {
       "name": "CommandoGuard",

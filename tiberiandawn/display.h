@@ -55,6 +55,27 @@
 
 extern COORDINATE Coord_Add(COORDINATE coord1, COORDINATE coord2);
 
+class ProximityScanRules
+{
+    ProximityResult* ProximityTracker = nullptr;
+
+public:
+    CELL OriginalCell = -1;
+    HousesType House = HOUSE_NONE;
+    PlacementFilter Filter = PLACEMENT_FILTER_ANYWHERE;
+    OverlayType OverlayFilter = OVERLAY_NONE;
+    bool PreventBuildingInShroud = true;
+    bool ModernWallsBuildingPlacmentOverride = false;
+    int MaxBuildingDistance = 1;
+    int MaxWallPlacementDistance = 1;
+
+    ProximityScanRules(bool debug_placement = false);
+    ~ProximityScanRules();
+
+    void Update_Tracker_Cell(CELL cell, ProximityResult result) const;
+    void Dump_Tracker_To_File(const char* file_name = "placement_debug.txt") const;
+};
+
 class DisplayClass : public MapClass
 {
     // Need access to shadow shapes
@@ -185,20 +206,11 @@ public:
     bool In_View(CELL cell);
     bool Passes_Proximity_Check(ObjectTypeClass const* object);
 #ifdef USE_RA_AI
-    bool Scan_For_Proximity(
-        CELL original_cell,
-        HousesType house,
-        PlacementFilter filter,
-        OverlayType overlay_filter,
-        bool prevent_building_in_shroud,
-        int max_building_distance,
-        int max_wall_placement_distance,
-        ProximityResult* proximity_tracker = nullptr
-    ) const;
+    bool Scan_For_Proximity(const ProximityScanRules& scan_rules) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
 
     static PlacementResult* Allocate_Proximity_Tracker();
-    static void Dump_Proximity_Tracker_To_File(PlacementResult*& tracker, const char* file_name = "placement_debug.txt");
+    static void Dump_Proximity_Tracker_To_File(const ProximityScanRules& scan_rules, const PlacementResult* tracker, const char* file_name = "placement_debug.txt");
 #endif
     ObjectClass* Cell_Object(CELL cell, int x = 0, int y = 0);
     ObjectClass* Next_Object(ObjectClass* object);
@@ -346,26 +358,17 @@ private:
     void Update_Placement_Cursor();
 
 #ifdef USE_RA_AI
-    bool Check_Cell_Proximity(
+    bool Check_Overlay_Proximity(
+        const ProximityScanRules& scan_rules,
+        const CellClass& current_cell,
         CELL current_cell_raw,
-        CELL original_cell,
-        HousesType house,
-        PlacementFilter filter,
-        OverlayType overlay_filter,
-        bool prevent_building_in_shroud,
-        int depth,
-        int max_building_distance,
-        ProximityResult* proximity_tracker
+        int depth
     ) const;
 
+    bool Check_Cell_Proximity(const ProximityScanRules& scan_rules, CELL current_cell_raw, int depth) const;
+
     bool Scan_For_Proximity(
-        CELL original_cell,
-        HousesType house,
-        PlacementFilter filter,
-        OverlayType overlay_filter,
-        bool prevent_building_in_shroud,
-        int max_building_distance,
-        ProximityResult* proximity_tracker,
+        const ProximityScanRules& scan_rules,
         int remaining_distance,
         int depth = 0,
         CELL previous_cell = -1
@@ -391,20 +394,11 @@ private:
     */
 };
 
-void Resolve_Placement_Rules(
+ProximityScanRules Resolve_Placement_Rules(
     const BuildingTypeClass* placement_type,
-    int& max_placement_distance,
-    int& max_wall_placement_distance,
-    bool& prevent_building_in_shroud,
-    PlacementFilter& placement_filter
+    HousesType house,
+    bool debug_placement = false
 );
-
-void Resolve_Placement_Rules(
-    const BuildingClass* placement_instance,
-    int& max_placement_distance,
-    int& max_wall_placement_distance,
-    bool& prevent_building_in_shroud,
-    PlacementFilter& placement_filter
-);
+ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance, bool debug_placement = false);
 
 #endif
