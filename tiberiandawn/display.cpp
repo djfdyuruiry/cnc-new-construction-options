@@ -858,7 +858,7 @@ bool DisplayClass::Check_Cell_Proximity(
 
 	// TODO: could add a `build off allies base` rule by checking if
 	//       house is friendly to current players house
-	// allow placing beside buildings (unless excluded by filter OR target is within the max building distance)
+	// allow placing beside buildings (unless excluded by filter AND target is further than max building distance)
 	if (
     	const auto base = current_cell.Cell_Building();
 	    (filter != PLACEMENT_FILTER_WALLS || depth < max_building_distance)
@@ -873,6 +873,8 @@ bool DisplayClass::Check_Cell_Proximity(
 	    return true;
     }
 
+    // TODO: could add a `build off allies base` rule by checking if
+    //       house is friendly to current players house
 	/*
 	**	The special cell ownership flag allows building adjacent
 	**	to friendly walls and bibs even though there is no official
@@ -910,6 +912,8 @@ bool DisplayClass::Check_Cell_Proximity(
         ** being placed in a straight line opposite the current cell
         */
 		if (filter == PLACEMENT_FILTER_WALLS && depth >= max_building_distance) {
+		    // TODO: Enforce overlay is the same on each end of the line (need to pass this into logic from placement type)
+
 		    const auto x1 = Cell_X(original_cell);
 		    const auto y1 = Cell_Y(original_cell);
 		    const auto x2 = Cell_X(current_cell_raw);
@@ -919,41 +923,35 @@ bool DisplayClass::Check_Cell_Proximity(
 		    const auto is_east = y1 == y2 && x1 > x2;
 		    const auto is_south = x1 == x2 && y1 > y2;
 		    const auto is_west = y1 == y2 && x1 < x2;
-
-		    // reject if direction is not a straight line
-		    if (!is_north && !is_east && !is_south && !is_west) {
+		    
+		    // Determine facing direction and step through the line
+		    FacingType facing;
+		    if (is_north) {
+		        facing = FACING_N;
+		    } else if (is_east) {
+		        facing = FACING_E;
+		    } else if (is_south) {
+		        facing = FACING_S;
+		    } else if (is_west) {
+		        facing = FACING_W;
+		    } else {
+    		    // reject if direction is not a straight line
 		        if (proximity_tracker != nullptr) {
 		            proximity_tracker[current_cell_raw] = PR_INVALID_MODERN_WALL_NOT_STRAIGHT;
 		        }
-
 		        return false;
 		    }
 
 		    // next validate that the line is clear of obstacles for placement
-		    auto wall_check_x = x1;
-		    auto wall_check_y = y1;
-
-		    while (wall_check_x != x2 && wall_check_y != y2) {
-		        if (is_north) {
-		            wall_check_y -= 1;
-		        } else if (is_east) {
-		            wall_check_x += 1;
-		        } else if (is_south) {
-		            wall_check_y += 1;
-		        } else if (is_west) {
-		            wall_check_x -= 1;
-		        }
-
-		        const auto scan_cell = XY_Cell(wall_check_x, wall_check_y);
-
-		        // reject as there is an obstacle in the way
-		        if (!(*this)[scan_cell].Is_Generally_Clear()) {
+		    auto check_cell = Adjacent_Cell(current_cell_raw, facing);
+		    while (check_cell != original_cell) {
+		        if (!(*this)[check_cell].Is_Generally_Clear()) {
 		            if (proximity_tracker != nullptr) {
 		                proximity_tracker[current_cell_raw] = PR_INVALID_MODERN_WALL_LINE_OBSTACLE;
 		            }
-
 		            return false;
 		        }
+		        check_cell = Adjacent_Cell(check_cell, facing);
 		    }
 		}
 
