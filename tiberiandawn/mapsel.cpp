@@ -1628,16 +1628,16 @@ int Lookup_Country_Name(const ScenarioPlayerType& player, const int& index)
 {
     switch (player) {
         case SCEN_PLAYER_GDI: {
-                if (index - 2 > 21) {
-                    return TXT_NONE;
-                }
+            if (index - 2 > 21) {
+                return TXT_NONE;
+            }
 
-                // first two GDI missions have country stored at the end of the lookup
-                if (index < 2) {
-                    return CountryNames[GDIStats[21].nameindex];
-                }
+            // first two GDI missions have country stored at the end of the lookup
+            if (index < 2) {
+                return CountryNames[GDIStats[21].nameindex];
+            }
 
-                return CountryNames[GDIStats[index - 2].nameindex];
+            return CountryNames[GDIStats[index - 2].nameindex];
         }
 
         case SCEN_PLAYER_NOD: {

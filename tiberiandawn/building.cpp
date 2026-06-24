@@ -5675,9 +5675,7 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
     while (*ptr != REFRESH_EOL) {
         scan_rules.OriginalCell = homecell + *ptr++;
 
-        if (
-            Map.Scan_For_Proximity(scan_rules)
-        ) {
+        if (Map.Scan_For_Proximity(scan_rules)) {
             return true;
         }
     }

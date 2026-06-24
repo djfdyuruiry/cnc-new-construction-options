@@ -24,7 +24,6 @@
 **
 */
 
-#include <optional>
 #include <stdio.h>
 
 #include "function.h"
