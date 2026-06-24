@@ -4497,6 +4497,7 @@ void DLLExportClass::Calculate_Placement_Distances(BuildingTypeClass* placement_
                     next_cell,
                     PlayerPtr->Class->House,
                     placement_filter,
+                    placement_type->OverlayToPlace,
                     prevent_building_in_shroud,
                     max_placement_distance,
                     max_wall_placement_distance,

@@ -839,6 +839,7 @@ bool DisplayClass::Check_Cell_Proximity(
     const CELL original_cell,
     const HousesType house,
     const PlacementFilter filter,
+    OverlayType overlay_filter,
     const bool prevent_building_in_shroud,
     const int depth,
     const int max_building_distance,
@@ -912,27 +913,30 @@ bool DisplayClass::Check_Cell_Proximity(
         ** being placed in a straight line opposite the current cell
         */
 		if (filter == PLACEMENT_FILTER_WALLS && depth >= max_building_distance) {
-		    // TODO: Enforce overlay is the same on each end of the line (need to pass this into logic from placement type)
+		    // modern wall lines can only join two overlay pieces of the same type
+		    if (current_cell.Overlay != overlay_filter) {
+		        if (proximity_tracker != nullptr) {
+		            proximity_tracker[current_cell_raw] = PR_INVALID_MODERN_WALL_MISMATCH;
+		        }
+
+		        return false;
+		    }
 
 		    const auto x1 = Cell_X(original_cell);
 		    const auto y1 = Cell_Y(original_cell);
 		    const auto x2 = Cell_X(current_cell_raw);
 		    const auto y2 = Cell_Y(current_cell_raw);
-
-		    const auto is_north = x1 == x2 && y1 < y2;
-		    const auto is_east = y1 == y2 && x1 > x2;
-		    const auto is_south = x1 == x2 && y1 > y2;
-		    const auto is_west = y1 == y2 && x1 < x2;
 		    
-		    // Determine facing direction and step through the line
+		    // Determine facing direction of the potential wall line
 		    FacingType facing;
-		    if (is_north) {
+
+		    if (x1 == x2 && y1 < y2) {
 		        facing = FACING_N;
-		    } else if (is_east) {
+		    } else if (y1 == y2 && x1 > x2) {
 		        facing = FACING_E;
-		    } else if (is_south) {
+		    } else if (x1 == x2 && y1 > y2) {
 		        facing = FACING_S;
-		    } else if (is_west) {
+		    } else if (y1 == y2 && x1 < x2) {
 		        facing = FACING_W;
 		    } else {
     		    // reject if direction is not a straight line
@@ -976,6 +980,7 @@ bool DisplayClass::Scan_For_Proximity(
     const CELL original_cell,
     const HousesType house,
     const PlacementFilter filter,
+    const OverlayType overlay_filter,
     const bool prevent_building_in_shroud,
     const int max_building_distance,
     ProximityResult* proximity_tracker,
@@ -1007,6 +1012,7 @@ bool DisplayClass::Scan_For_Proximity(
             original_cell,
             house,
             filter,
+            overlay_filter,
             prevent_building_in_shroud,
             depth,
             max_building_distance,
@@ -1020,6 +1026,7 @@ bool DisplayClass::Scan_For_Proximity(
             original_cell,
             house,
             filter,
+            overlay_filter,
             prevent_building_in_shroud,
             max_building_distance,
             proximity_tracker,
@@ -1044,6 +1051,7 @@ bool DisplayClass::Scan_For_Proximity(
     const CELL original_cell,
     const HousesType house,
     const PlacementFilter filter,
+    OverlayType overlay_filter,
     const bool prevent_building_in_shroud,
     const int max_building_distance,
     const int max_wall_placement_distance,
@@ -1054,6 +1062,7 @@ bool DisplayClass::Scan_For_Proximity(
         original_cell,
         house,
         filter,
+        overlay_filter,
         prevent_building_in_shroud,
         max_building_distance,
         proximity_tracker,
@@ -1111,13 +1120,15 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 		return(true);
 	}
 
+    auto building_type = dynamic_cast<const BuildingTypeClass*>(object);
+
     auto prevent_building_in_shroud = true;
     auto max_placement_distance = 1;
     auto max_wall_placement_distance = max_placement_distance;
     auto placement_filter = PLACEMENT_FILTER_ANYWHERE;
 
     Resolve_Placement_Rules(
-        dynamic_cast<const BuildingTypeClass*>(object),
+        building_type,
         max_placement_distance,
         max_wall_placement_distance,
         prevent_building_in_shroud,
@@ -1147,6 +1158,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
                 cell,
                 house,
                 placement_filter,
+                building_type->OverlayToPlace,
                 prevent_building_in_shroud,
                 max_placement_distance,
                 placement_filter != PLACEMENT_FILTER_WALLS

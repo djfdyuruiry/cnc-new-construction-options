@@ -5691,6 +5691,7 @@ bool BuildingClass::Passes_Proximity_Check(CELL homecell)
                 cell,
                 House->Class->House,
                 placement_filter,
+                this->Class->OverlayToPlace,
                 prevent_building_in_shroud,
                 max_placement_distance,
                 max_wall_placement_distance
