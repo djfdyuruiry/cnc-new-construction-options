@@ -641,7 +641,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
                 strcpy(fdata->Descr, Text_String(TXT_OLD_GAME));
             } else {
                 if (game_type == GAME_SKIRMISH) {
-                    sprintf(fdata->Descr, "%s", "(Skirmish)");
+                    sprintf(fdata->Descr, "%s", "(Skirmish) "); // TODO: Locale file entry
                 } else if (house == HOUSE_BAD) {
                     sprintf(fdata->Descr, "(%s) ", Text_String(TXT_N_O_D));
                 } else {

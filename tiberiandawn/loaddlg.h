@@ -38,7 +38,7 @@
 class FileEntryClass
 {
 public:
-    char Descr[80];        // save-game description
+    char Descr[85];        // save-game description
     unsigned Scenario;     // scenario #
     HousesType House;      // house
     int Num;               // save file number (from the extension)
