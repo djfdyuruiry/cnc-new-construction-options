@@ -74,7 +74,7 @@ GameType Select_MPlayer_Game(void)
 #ifdef REMASTER_BUILD // PG_TO_FIX
     return GAME_NORMAL;
 #else
-    static const char TXT_SKIRMISH[] = "Skirmish";
+    static const char TXT_SKIRMISH[] = "Skirmish"; // TODO: Locale file entry
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     bool ipx_avail = false;
     int number_of_buttons;

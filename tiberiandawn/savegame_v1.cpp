@@ -82,27 +82,20 @@ bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
         { NAMEOF(ActionMovieName), ActionMovieName }
     };
 
-    for (const auto& [field, value] : stringFields) {
-        const auto bufferSize = GlobalBufferSizes.at(field);
+    for (const auto& [field, jsonString] : stringFields) {
+        const auto& bufferSize = GlobalBufferSizes.at(field);
 
-        if (
-            (scenario_game_type == GAME_SKIRMISH || scenario_game_type == GAME_GLYPHX_MULTIPLAYER)
-            && field == NAMEOF(BriefText)
-        ) {
-            // don't validate briefing text for Skirmish scenarios
-            continue;
-        }
-
-        // BriefText is blank in Skirmish scenarios
-        if (CncStringUtils::Is_Blank(value)) {
+        if (field == NAMEOF(ScenarioFileName) && CncStringUtils::Is_Blank(jsonString)) {
             CNC_LOGGER_ERROR("Blank/missing ScenarioState.{} save game value", field);
 
             result = false;
-        } else if (bufferSize < value.length() + 1) {
+        }
+
+        if (bufferSize < jsonString.length() + 1) {
             CNC_LOGGER_ERROR(
                 "Invalid ScenarioState.{} save game value '{}', value is longer than max allowed size: {}",
                 field,
-                value.length(),
+                jsonString.length() + 1,
                 bufferSize
             );
 
