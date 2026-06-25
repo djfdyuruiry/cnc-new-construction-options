@@ -1150,7 +1150,7 @@ void DisplayClass::Dump_Proximity_Tracker_To_File(
         return;
     }
 
-    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name);
+    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Path(), file_name);
     int map_cell_x = Map.MapCellX;
     int map_cell_y = Map.MapCellY;
     int map_cell_width = Map.MapCellWidth;
@@ -2757,7 +2757,7 @@ void DisplayClass::Update_Placement_Cursor()
 
 	for (const auto& dir : FacingCardinals)
 	{
-		const auto scan_distance = Scan_For_Overlay(ZoneCell, dir, wall_overlay, wall_length);
+		const auto scan_distance = Scan_For_Overlay(ZoneCell, PlayerPtr->Class->House, dir, wall_overlay, wall_length);
 
 		//Break out if we're going to overflow the buffer
 		if (offsets_length + scan_distance > max_offsets) {
