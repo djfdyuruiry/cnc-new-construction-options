@@ -735,6 +735,18 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
         if (IsRepairing && IsWrenchVisible) {
             CC_Draw_Shape(ObjectTypeClass::SelectShapes, SELECT_WRENCH, x, y, window, SHAPE_CENTER | SHAPE_WIN_REL);
         }
+
+#ifdef REMASTER_BUILD
+        // remaster requires CC_Draw_Line call to show rally point line in its client renderer
+        if (Map.VisibleRallyPointSource == this) {
+            int startX, startY, endX, endY;
+
+            Map.Coord_To_Pixel(Center_Coord(), startX, startY);
+            Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
+
+            CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
+        }
+#endif
     }
 
     TechnoClass::Draw_It(x, y, window);
