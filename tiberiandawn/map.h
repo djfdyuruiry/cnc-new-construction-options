@@ -168,7 +168,7 @@ public:
     bool Is_Smaller_Than_Screen() const;
     bool Redraw_If_Smaller_Then_Screen();
 
-    int Scan_For_Overlay(CELL origin, FacingType dir, OverlayType overlay, int maxLength) const;
+    int Scan_For_Overlay(CELL origin, HousesType house, FacingType dir, OverlayType overlay, int maxLength) const;
 protected:
     /*
     **	This is the array of cell objects.

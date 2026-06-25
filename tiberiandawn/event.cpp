@@ -355,7 +355,7 @@ static void Select_Objects_Of_Type(TFixedIHeapClass<T>& object_heap, const U ins
     for (auto i = 0; i < object_heap.Count(); i++) {
         auto object = object_heap.Ptr(i);
 
-        // if object matches the instance_type, is owned by the played and is selectable...
+        // if object matches the instance_type, is owned by the player and is selectable...
         if (object->Is_Owned_By_Player() && object->Class->Type == instance_type && !object->IsInLimbo) {
             int x = -1;
             int y = -1;

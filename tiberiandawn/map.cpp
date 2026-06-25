@@ -2151,6 +2151,7 @@ bool MapClass::Redraw_If_Smaller_Then_Screen()
  */
 int MapClass::Scan_For_Overlay(
     const CELL origin,
+    const HousesType house,
     const FacingType dir,
     const OverlayType overlay,
     const int maxLength
@@ -2178,13 +2179,13 @@ int MapClass::Scan_For_Overlay(
 		const auto& map_cell = Map[current];
 
 		if (map_cell.Overlay == overlay
-		    && map_cell.Owner == PlayerPtr->Class->House
-		    && (!prevent_building_in_shroud || map_cell.Is_Visible(PlayerPtr))) {
+		    && map_cell.Owner == house
+		    && (!prevent_building_in_shroud || map_cell.Is_Visible(house))) {
 			//Found a match
 			return i;
 		}
 
-	    if (!Map[current].Is_Generally_Clear()) {
+	    if (!map_cell.Is_Generally_Clear()) {
 			//Blocked by an object
 			break;
 		}

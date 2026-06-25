@@ -393,6 +393,10 @@ void Main_Game(int argc, char* argv[])
 
 static signed char Get_Selectable_Object_Instance_Id(ObjectClass* object)
 {
+    if (object == nullptr) {
+        return -1;
+    }
+
     if (object->What_Am_I() == RTTI_AIRCRAFT) {
         const auto aircraft = dynamic_cast<AircraftClass*>(object);
         return aircraft->Is_Owned_By_Player() ? aircraft->Class->Type : -1;
@@ -414,7 +418,7 @@ static signed char Get_Selectable_Object_Instance_Id(ObjectClass* object)
 static void Select_Objects_Of_Same_Type()
 {
     const auto first_tech = CurrentObject[0];
-    const auto first_type = first_tech->What_Am_I();
+    const auto first_type = first_tech ? first_tech->What_Am_I() : RTTI_NONE;
     const auto first_instance = Get_Selectable_Object_Instance_Id(first_tech);
 
     // unsupported type (or not owned by player)
@@ -426,7 +430,7 @@ static void Select_Objects_Of_Same_Type()
     for (auto index = 1; index < CurrentObject.Count(); index++) {
         const auto tech = CurrentObject[index];
 
-        if (tech->What_Am_I() != first_type || Get_Selectable_Object_Instance_Id(tech) != first_instance) {
+        if ((tech && tech->What_Am_I() != first_type) || Get_Selectable_Object_Instance_Id(tech) != first_instance) {
             // mixed types selected, so can't determine type to select
             return;
         }

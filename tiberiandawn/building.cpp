@@ -735,6 +735,18 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
         if (IsRepairing && IsWrenchVisible) {
             CC_Draw_Shape(ObjectTypeClass::SelectShapes, SELECT_WRENCH, x, y, window, SHAPE_CENTER | SHAPE_WIN_REL);
         }
+
+#ifdef REMASTER_BUILD
+        // remaster requires CC_Draw_Line call to show rally point line in its client renderer
+        if (Map.VisibleRallyPointSource == this) {
+            int startX, startY, endX, endY;
+
+            Map.Coord_To_Pixel(Center_Coord(), startX, startY);
+            Map.Coord_To_Pixel(As_Coord(RallyPoint), endX, endY);
+
+            CC_Draw_Line(startX, startY, endX, endY, LTGREEN, 1, window);
+        }
+#endif
     }
 
     TechnoClass::Draw_It(x, y, window);
@@ -1416,7 +1428,13 @@ bool BuildingClass::Unlimbo_Wall(const COORDINATE coord)
          * Then place new wall overlays and transfer cell ownership up to the scan result distance
          */
         for (const auto& dir : FacingCardinals) {
-            const auto scan_dist = Map.Scan_For_Overlay(placement_cell, dir, overlay_type, wall_length);
+            const auto scan_dist = Map.Scan_For_Overlay(
+                placement_cell,
+                House->Class->House,
+                dir,
+                overlay_type,
+                wall_length
+            );
             auto adjacent_cell = placement_cell;
 
             for (auto i = 0; i < scan_dist; ++i) {
