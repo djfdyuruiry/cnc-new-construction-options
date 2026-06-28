@@ -1424,7 +1424,7 @@ void MapClass::Logic(void)
         /*
         ** Use the Tiberium setting as a multiplier on growth rate. ST - 7/1/2020 3:05PM
         */
-        if (GameToPlay == GAME_GLYPHX_MULTIPLAYER) {
+        if (GameToPlay != GAME_NORMAL) {
             if (MPlayerTiberium > 1) {
                 tries += (MPlayerTiberium - 1) << 1;
             }

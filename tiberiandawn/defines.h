@@ -228,7 +228,8 @@ typedef enum DiffType : unsigned char
 
     DIFF_COUNT,
     DIFF_FIRST = 0,
-    DIFF_LAST = DIFF_HARD
+    DIFF_LAST = DIFF_HARD,
+    DIFF_NONE = 3
 } DiffType;
 
 /**********************************************************************

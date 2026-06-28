@@ -80,6 +80,9 @@ public:
     virtual void Remove_Item(int);
     virtual int Remove_Scroll_Bar(void);
     virtual void Set_Selected_Index(int index);
+    virtual bool Index_Changed();
+    virtual int Get_Previous_Index();
+    virtual void Reset_Index_Change();
     virtual void Set_Tabs(int const* tabs);
     virtual int Set_View_Index(int index);
     virtual void Step(int up);
@@ -146,6 +149,8 @@ protected:
     **	This specifies the line (index) that is at the top of the list box.
     */
     int CurrentTopIndex;
+
+    std::optional<int> PreviousIndex;
 };
 
 #endif

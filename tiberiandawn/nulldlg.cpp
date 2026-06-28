@@ -97,6 +97,16 @@ int Com_Scenario_Dialog(void)
     int d_margin1 = 10 * factor;    // margin width/height
     int d_margin2 = 4 * factor;    // margin width/height
 
+    int d_ok_w = 45 * factor;
+    int d_ok_h = 9 * factor;
+    int d_ok_x = d_dialog_x + (d_dialog_w / 6) - (d_ok_w / 2);
+    int d_ok_y = d_dialog_y + d_dialog_h - d_ok_h - d_margin1 - factor * 6;
+
+    int d_cancel_w = 45 * factor;
+    int d_cancel_h = 9 * factor;
+    int d_cancel_x = d_dialog_x + d_dialog_w - (d_dialog_w / 6) - (d_cancel_w / 2) /*d_dialog_cx - (d_cancel_w / 2)*/;
+    int d_cancel_y = d_dialog_y + d_dialog_h - d_cancel_h - d_margin1 - factor * 6;
+
     int d_name_w = 70 * factor;
     int d_name_h = 9 * factor;
     int d_name_x = d_dialog_x + 5 + (d_dialog_w / 4) - (d_name_w / 2);
@@ -120,15 +130,26 @@ int Com_Scenario_Dialog(void)
     int d_opponent_x = d_name_x;
     int d_opponent_y = d_color_y + d_color_h + d_margin2;
 
-    int d_scenariolist_w = 182 * factor;
-    int d_scenariolist_h = 27 * factor;
-    int d_scenariolist_x = d_dialog_cx - (d_scenariolist_w / 2);
-    int d_scenariolist_y = d_opponent_y + d_txt6_h + 3 * factor + d_txt6_h;
+    int d_scenariolist_w = 152 * factor;
+    int d_scenariolist_h = 30 * factor;
+    int d_scenariolist_x = (d_cancel_x + nearbyint(d_cancel_w * 0.8)) - d_scenariolist_w + (10 * factor);
+    int d_scenariolist_y = d_color_y + d_txt6_h + 5 * factor + d_txt6_h;
     d_scenariolist_h *= 2;
+
+    int d_aihouse_w = d_house_w / 3;
+    int d_aihouse_h = (6 * 5 * factor);
+    int d_aihouse_x = d_scenariolist_x - d_aihouse_w - (10 * factor);
+    int d_aihouse_y = d_scenariolist_y + (2 * factor);
+    int d_aihouse_ystep = 10 * factor;
+
+    int d_options_w = nearbyint(d_scenariolist_w * 0.6);
+    int d_options_h = (5 * 6 * factor) + 5 * factor;
+    int d_options_x = (d_scenariolist_x + d_scenariolist_w) - d_options_w;
+    int d_options_y = d_scenariolist_y + d_scenariolist_h + d_margin1 - 2 * factor;
 
     int d_count_w = 25 * factor;
     int d_count_h = 7 * factor;
-    int d_count_y = d_scenariolist_y + d_scenariolist_h + d_margin2;
+    int d_count_y = d_options_y;
     int d_count_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged
 
     int d_level_w = 25 * factor;
@@ -146,20 +167,10 @@ int Com_Scenario_Dialog(void)
     int d_aiplayers_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
     int d_aiplayers_y = d_credits_y + d_credits_h;
 
-    int d_options_w = 110 * factor;
-    int d_options_h = (5 * 6 * factor) + 4 * factor;
-    int d_options_x = d_dialog_x + 10 + d_dialog_w - 143 * factor;
-    int d_options_y = d_scenariolist_y + d_scenariolist_h + d_margin1 - 2 * factor;
-
-    int d_ok_w = 45 * factor;
-    int d_ok_h = 9 * factor;
-    int d_ok_x = d_dialog_x + (d_dialog_w / 6) - (d_ok_w / 2);
-    int d_ok_y = d_dialog_y + d_dialog_h - d_ok_h - d_margin1 - factor * 6;
-
-    int d_cancel_w = 45 * factor;
-    int d_cancel_h = 9 * factor;
-    int d_cancel_x = d_dialog_x + d_dialog_w - (d_dialog_w / 6) - (d_cancel_w / 2) /*d_dialog_cx - (d_cancel_w / 2)*/;
-    int d_cancel_y = d_dialog_y + d_dialog_h - d_cancel_h - d_margin1 - factor * 6;
+    int d_tiberiumscale_w = 25 * factor;
+    int d_tiberiumscale_h = 7 * factor;
+    int d_tiberiumscale_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
+    int d_tiberiumscale_y = d_aiplayers_y + d_aiplayers_h;
 
     /*........................................................................
     Button Enumerations
@@ -168,8 +179,14 @@ int Com_Scenario_Dialog(void)
     {
         BUTTON_NAME = 100,
         BUTTON_HOUSE,
+        BUTTON_AI_HOUSE_1,
+        BUTTON_AI_HOUSE_2,
+        BUTTON_AI_HOUSE_3,
+        BUTTON_AI_HOUSE_4,
+        BUTTON_AI_HOUSE_5,
         BUTTON_CREDITS,
         BUTTON_AIPLAYERS,
+        BUTTON_TIBERIUMSCALE,
         BUTTON_OPTIONS,
         BUTTON_SCENARIOLIST,
         BUTTON_COUNT,
@@ -267,6 +284,47 @@ int Com_Scenario_Dialog(void)
                            up_button,
                            down_button);
 
+    std::vector<std::unique_ptr<char[]>> ai_diff_strings(5);
+    std::vector<DropListClass> ai_diff_dropdowns;
+    std::vector<std::unique_ptr<char[]>> ai_house_strings(5);
+    std::vector<DropListClass> ai_house_dropdowns;
+
+    auto cur_ai_house_y = d_aihouse_y;
+
+    for (auto h = BUTTON_AI_HOUSE_1; h <= BUTTON_AI_HOUSE_5; ++h) {
+        constexpr auto label_str_length = 25;
+        ai_diff_strings.emplace_back() = std::make_unique<char[]>(label_str_length);
+        ai_house_strings.emplace_back() = std::make_unique<char[]>(label_str_length);
+
+        ai_diff_dropdowns.emplace_back(
+            h,
+            ai_diff_strings.back().get(),
+            label_str_length,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            d_aihouse_x - (nearbyint(d_aihouse_w * 1.5)) - (10 * factor),
+            cur_ai_house_y,
+            nearbyint(d_aihouse_w * 1.5),
+            d_aihouse_h,
+            up_button,
+            down_button
+        );
+
+        ai_house_dropdowns.emplace_back(
+            h,
+            ai_house_strings.back().get(),
+            label_str_length,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            d_aihouse_x,
+            cur_ai_house_y,
+            d_aihouse_w,
+            d_aihouse_h,
+            up_button,
+            down_button
+        );
+
+        cur_ai_house_y += d_aihouse_ystep;
+    }
+
     ListClass scenariolist(BUTTON_SCENARIOLIST,
                            d_scenariolist_x,
                            d_scenariolist_y,
@@ -283,6 +341,8 @@ int Com_Scenario_Dialog(void)
     GaugeClass creditsgauge(BUTTON_CREDITS, d_credits_x, d_credits_y, d_credits_w, d_credits_h);
 
     GaugeClass aiplayersgauge(BUTTON_AIPLAYERS, d_aiplayers_x, d_aiplayers_y, d_aiplayers_w, d_aiplayers_h);
+
+    GaugeClass tiberiumscalegauge(BUTTON_TIBERIUMSCALE, d_tiberiumscale_x, d_tiberiumscale_y, d_tiberiumscale_w, d_tiberiumscale_h);
 
     CheckListClass optionlist(BUTTON_OPTIONS,
                               d_options_x,
@@ -306,7 +366,7 @@ int Com_Scenario_Dialog(void)
 
     SliderClass difficulty(BUTTON_DIFFICULTY,
                            d_name_x,
-                           optionlist.Y + optionlist.Height + d_margin1 + d_margin1,
+                           d_ok_y - (8 * factor) - d_margin1,
                            d_dialog_w - (d_name_x - d_dialog_x) * 2,
                            8 * factor,
                            true);
@@ -324,10 +384,20 @@ int Com_Scenario_Dialog(void)
     commands = &name_edt;
     difficulty.Add_Tail(*commands);
     scenariolist.Add_Tail(*commands);
+
+    for (auto& dropdown : ai_diff_dropdowns) {
+        dropdown.Add_Tail(*commands);
+    }
+
+    for (auto& dropdown : ai_house_dropdowns) {
+        dropdown.Add_Tail(*commands);
+    }
+
     countgauge.Add_Tail(*commands);
     levelgauge.Add_Tail(*commands);
     creditsgauge.Add_Tail(*commands);
     aiplayersgauge.Add_Tail(*commands);
+    tiberiumscalegauge.Add_Tail(*commands);
     optionlist.Add_Tail(*commands);
     okbtn.Add_Tail(*commands);
     cancelbtn.Add_Tail(*commands);
@@ -346,8 +416,38 @@ int Com_Scenario_Dialog(void)
 
     housebtn.Add_Item(Text_String(TXT_G_D_I));
     housebtn.Add_Item(Text_String(TXT_N_O_D));
+    //housebtn.Add_Item("Dino");
     housebtn.Set_Selected_Index(MPlayerHouse - HOUSE_GOOD);
     housebtn.Set_Read_Only(true);
+
+    int maxp = 4 /*Rule.MaxPlayers - 2*/;
+    aiplayersgauge.Set_Maximum(maxp);
+
+    if (MPlayerGhosts > 5) {
+        MPlayerGhosts = 5;
+    }
+    MPlayerGhosts = max(MPlayerGhosts, 1);
+
+    aiplayersgauge.Set_Value(MPlayerGhosts - 1);
+
+    for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
+        ai_diff_dropdowns[idx].Add_Item("Disabled");
+        ai_diff_dropdowns[idx].Add_Item("Easy");
+        ai_diff_dropdowns[idx].Add_Item("Normal");
+        ai_diff_dropdowns[idx].Add_Item("Hard");
+        ai_diff_dropdowns[idx].Set_Selected_Index(idx < MPlayerGhosts ? 2 : 0);
+        ai_diff_dropdowns[idx].List.Reset_Index_Change();
+        ai_diff_dropdowns[idx].Set_Read_Only(true);
+
+        ai_house_dropdowns[idx].Add_Item("None");
+        ai_house_dropdowns[idx].Add_Item("?");
+        ai_house_dropdowns[idx].Add_Item(Text_String(TXT_G_D_I));
+        ai_house_dropdowns[idx].Add_Item(Text_String(TXT_N_O_D));
+        //ai_house_dropdowns[idx].Add_Item("Dino");
+        ai_house_dropdowns[idx].Set_Selected_Index(idx < MPlayerGhosts ? 1 : 0);
+        ai_house_dropdowns[idx].List.Reset_Index_Change();
+        ai_house_dropdowns[idx].Set_Read_Only(true);
+    }
 
     /*........................................................................
     Init scenario values, only the first time through
@@ -359,7 +459,16 @@ int Com_Scenario_Dialog(void)
         MPlayerCredits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_DEFAULT_RULE); // init credits & credit buffer
         MPlayerGhosts = 1;
         MPlayerUnitCount = (MPlayerCountMax[MPlayerBases] + MPlayerCountMin[MPlayerBases]) / 2;
+        MPlayerTiberium = 1;
         first_time = false;
+
+        for (auto& player_house : MPlayerHouses) {
+            player_house = HOUSE_NONE;
+        }
+
+        for (auto& player_difficulty : MPlayerDifficulty) {
+            player_difficulty = DIFF_NONE;
+        }
     }
 
     /*........................................................................
@@ -389,15 +498,8 @@ int Com_Scenario_Dialog(void)
     creditsgauge.Set_Maximum(Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_MAX_RULE));
     creditsgauge.Set_Value(MPlayerCredits);
 
-    int maxp = 4 /*Rule.MaxPlayers - 2*/;
-    aiplayersgauge.Set_Maximum(maxp);
-
-    if (MPlayerGhosts > 5) {
-        MPlayerGhosts = 5;
-    }
-    MPlayerGhosts = max(MPlayerGhosts, 1);
-
-    aiplayersgauge.Set_Value(MPlayerGhosts - 1);
+    tiberiumscalegauge.Set_Maximum(4);
+    tiberiumscalegauge.Set_Value(MPlayerTiberium < 2 ? 0 : MPlayerTiberium - 1);
 
     /*........................................................................
     Init other scenario parameters
@@ -505,21 +607,21 @@ int Com_Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Easy",
+                Fancy_Text_Print("Easy", // TODO: Locale file entry
                                  difficulty.X,
                                  difficulty.Y - 8 * factor,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Hard",
+                Fancy_Text_Print("Hard", // TODO: Locale file entry
                                  difficulty.X + difficulty.Width,
                                  difficulty.Y - 8 * factor,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Normal",
+                Fancy_Text_Print("Normal", // TODO: Locale file entry
                                  difficulty.X + difficulty.Width / 2,
                                  difficulty.Y - 8 * factor,
                                  CC_GREEN,
@@ -528,7 +630,7 @@ int Com_Scenario_Dialog(void)
 
                 Fancy_Text_Print(TXT_SCENARIOS,
                                  d_scenariolist_x + (d_scenariolist_w / 2),
-                                 d_scenariolist_y - d_txt6_h,
+                                 d_scenariolist_y - d_txt6_h - (1 * factor),
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -557,6 +659,13 @@ int Com_Scenario_Dialog(void)
                 Fancy_Text_Print(TXT_AI_PLAYERS_COLON,
                                  d_aiplayers_x - 3 * factor,
                                  d_aiplayers_y,
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                Fancy_Text_Print("Tiberium Growth:", // TODO: Locale file entry
+                                 d_tiberiumscale_x - 3 * factor,
+                                 d_tiberiumscale_y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -620,6 +729,13 @@ int Com_Scenario_Dialog(void)
                                  CC_GREEN,
                                  BLACK,
                                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+                sprintf(txt, "%dx ", tiberiumscalegauge.Get_Value() + 1);
+                Fancy_Text_Print(txt,
+                                 d_tiberiumscale_x + d_tiberiumscale_w + 3 * factor,
+                                 d_tiberiumscale_y,
+                                 CC_GREEN,
+                                 BLACK,
+                                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
             }
 
             /*
@@ -637,19 +753,83 @@ int Com_Scenario_Dialog(void)
         ........................... Get user input ............................
         */
         bool droplist_is_dropped = housebtn.IsDropped;
+        std::vector<int> ai_diffs_collapsed;
+        std::vector<int> ai_houses_collapsed;
+
+        for (auto idx = 0; idx < ai_houses_collapsed.size(); idx++) {
+            if (ai_diff_dropdowns[idx].IsDropped) {
+                ai_diffs_collapsed.emplace_back(idx);
+            }
+
+            if (ai_house_dropdowns[idx].IsDropped) {
+                ai_houses_collapsed.emplace_back(idx);
+            }
+        }
+
         input = commands->Input();
 
         /*
-        ** Redraw everything if the droplist collapsed
+        ** Redraw everything if the player house droplist collapsed
         */
         if (droplist_is_dropped && !housebtn.IsDropped) {
             display = REDRAW_BACKGROUND;
         }
 
-        if (input & KN_BUTTON) {
+        /*
+        ** Redraw everything if am AI house droplist collapsed
+        */
+        for (const auto& idx: ai_diffs_collapsed) {
+            if (!ai_diff_dropdowns[idx].IsDropped) {
+                display = REDRAW_BACKGROUND;
+            }
+        }
+
+        for (const auto& idx: ai_houses_collapsed) {
+            if (!ai_house_dropdowns[idx].IsDropped) {
+                display = REDRAW_BACKGROUND;
+            }
+        }
+
+        const auto collapse_visible_dropdowns = [&]() {
             if (housebtn.IsDropped) {
                 housebtn.Collapse();
                 display = REDRAW_BACKGROUND;
+            }
+
+            for (auto idx = 0; idx < ai_houses_collapsed.size(); idx++) {
+                if (ai_diff_dropdowns[i].IsDropped) {
+                    ai_diff_dropdowns[i].Collapse();
+                    display = REDRAW_BACKGROUND;
+                }
+
+                if (ai_house_dropdowns[i].IsDropped) {
+                    ai_house_dropdowns[i].Collapse();
+                    display = REDRAW_BACKGROUND;
+                }
+            }
+        };
+
+        if (input & KN_BUTTON) {
+            // user is interacting with a button, so hide dropdown lists
+            collapse_visible_dropdowns();
+        }
+
+        // for any visible AI house dropdown, if mouse input is received outside it's bounds, hide it
+        for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
+            if (ai_diff_dropdowns[idx].IsDropped) {
+                if ((Keyboard->MouseQX < ai_diff_dropdowns[idx].X || Keyboard->MouseQX > ai_diff_dropdowns[idx].X + ai_diff_dropdowns[idx].Width)
+                && (Keyboard->MouseQY < ai_diff_dropdowns[idx].Y || Keyboard->MouseQY > ai_diff_dropdowns[idx].Y + ai_diff_dropdowns[idx].Height)) {
+                    ai_diff_dropdowns[idx].Collapse();
+                    display = REDRAW_BACKGROUND;
+                }
+            }
+
+            if (ai_house_dropdowns[idx].IsDropped) {
+                if ((Keyboard->MouseQX < ai_house_dropdowns[idx].X || Keyboard->MouseQX > ai_house_dropdowns[idx].X + ai_house_dropdowns[idx].Width)
+                && (Keyboard->MouseQY < ai_house_dropdowns[idx].Y || Keyboard->MouseQY > ai_house_dropdowns[idx].Y + ai_house_dropdowns[idx].Height)) {
+                    ai_house_dropdowns[idx].Collapse();
+                    display = REDRAW_BACKGROUND;
+                }
             }
         }
 
@@ -671,6 +851,8 @@ int Com_Scenario_Dialog(void)
                     name_edt.Set_Color(MPlayerTColors[MPlayerColorIdx]);
                     name_edt.Flag_To_Redraw();
                     strcpy(MPlayerName, namebuf);
+
+                    collapse_visible_dropdowns();
                     transmit = 1;
                 }
             }
@@ -683,6 +865,7 @@ int Com_Scenario_Dialog(void)
             if (!ready_to_go) {
                 strcpy(MPlayerName, namebuf);
                 transmit = 1;
+                collapse_visible_dropdowns();
             }
             break;
 
@@ -692,6 +875,9 @@ int Com_Scenario_Dialog(void)
         case (BUTTON_HOUSE | KN_BUTTON):
             MPlayerHouse = HousesType(housebtn.Current_Index() + HOUSE_GOOD);
             strcpy(MPlayerName, namebuf);
+
+            collapse_visible_dropdowns();
+
             display = REDRAW_BACKGROUND;
             transmit = true;
             break;
@@ -712,6 +898,76 @@ int Com_Scenario_Dialog(void)
             }
             break;
 
+        case (BUTTON_AI_HOUSE_1 | KN_BUTTON):
+        case (BUTTON_AI_HOUSE_2 | KN_BUTTON):
+        case (BUTTON_AI_HOUSE_3 | KN_BUTTON):
+        case (BUTTON_AI_HOUSE_4 | KN_BUTTON):
+        case (BUTTON_AI_HOUSE_5 | KN_BUTTON):
+            for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
+                auto& diff_dropdown = ai_diff_dropdowns[idx];
+                auto& house_dropdown = ai_house_dropdowns[idx];
+                const auto selected_diff_changed = diff_dropdown.List.Index_Changed();
+                const auto selected_house_changed = house_dropdown.List.Index_Changed();
+
+                // one of the two house dropdowns was changed
+                if (selected_diff_changed || selected_house_changed) {
+                    auto selected_diff_idx = diff_dropdown.Current_Index();
+                    auto selected_house_idx = house_dropdown.Current_Index();
+
+                    const auto diff_was_disabled =  selected_diff_idx == 0 && selected_diff_changed;
+                    const auto house_was_disabled = selected_house_idx == 0 && selected_house_changed;
+                    const auto diff_was_activated =  selected_diff_changed && diff_dropdown.List.Get_Previous_Index() == 0;
+                    const auto house_was_activated = selected_house_changed && house_dropdown.List.Get_Previous_Index() == 0;
+
+                    if (diff_was_disabled) {
+                        // reset house to match disabled AI diff
+                        selected_house_idx = 0;
+                        house_dropdown.Set_Selected_Index(selected_house_idx);
+                        diff_dropdown.List.Reset_Index_Change();
+                    } else if (house_was_disabled) {
+                        // reset diff to match disabled AI house
+                        selected_diff_idx = 0;
+                        diff_dropdown.Set_Selected_Index(selected_diff_idx);
+                        diff_dropdown.List.Reset_Index_Change();
+                    } else if (diff_was_activated && selected_house_idx == 0) {
+                        // select a default house of '?' since none is selected
+                        selected_house_idx = 1;
+                        house_dropdown.Set_Selected_Index(selected_house_idx);
+                        house_dropdown.List.Reset_Index_Change();
+                    } else if (house_was_activated && selected_diff_idx == 0) {
+                        // select a default diff of 'Normal' since none is selected
+                        selected_diff_idx = 2;
+                        diff_dropdown.Set_Selected_Index(selected_diff_idx);
+                        diff_dropdown.List.Reset_Index_Change();
+                    }
+
+                    // adjust indices to match appropriate enum values
+                    const auto house_idx = idx + 1;
+                    const auto selected_diff = selected_diff_idx == 0
+                        ? DIFF_NONE
+                        : static_cast<DiffType>(selected_diff_idx - 1);
+                    const auto selected_house = selected_house_idx < 2
+                        ? HOUSE_NONE
+                        : static_cast<HousesType>(selected_house_idx - 2);
+
+                    CNC_LOG_WARN(
+                        "Setting MUTI{} house to '{}' and acts like: {}",
+                        house_idx,
+                        TdTypeConverter::To_String(selected_diff), TdTypeConverter::To_String(selected_house)
+                    );
+
+                    MPlayerHouses[idx + 1] = selected_house;
+                    MPlayerDifficulty[idx] = selected_diff;
+
+                    diff_dropdown.Collapse();
+                    house_dropdown.Collapse();
+                    display = REDRAW_BACKGROUND;
+                    transmit = true;
+                }
+            }
+
+            break;
+
         /*------------------------------------------------------------------
         User adjusts max # units
         ------------------------------------------------------------------*/
@@ -721,10 +977,7 @@ int Com_Scenario_Dialog(void)
                 if (display < REDRAW_MESSAGE) {
                     display = REDRAW_MESSAGE;
                 }
-                if (housebtn.IsDropped) {
-                    housebtn.Collapse();
-                    display = REDRAW_BACKGROUND;
-                }
+                collapse_visible_dropdowns();
                 transmit = 1;
             }
             break;
@@ -740,10 +993,7 @@ int Com_Scenario_Dialog(void)
                 if (display < REDRAW_MESSAGE) {
                     display = REDRAW_MESSAGE;
                 }
-                if (housebtn.IsDropped) {
-                    housebtn.Collapse();
-                    display = REDRAW_BACKGROUND;
-                }
+                collapse_visible_dropdowns();
                 transmit = 1;
             }
             break;
@@ -763,10 +1013,7 @@ int Com_Scenario_Dialog(void)
                 if (display < REDRAW_MESSAGE) {
                     display = REDRAW_MESSAGE;
                 }
-                if (housebtn.IsDropped) {
-                    housebtn.Collapse();
-                    display = REDRAW_BACKGROUND;
-                }
+                collapse_visible_dropdowns();
                 transmit = 1;
             }
             break;
@@ -787,12 +1034,25 @@ int Com_Scenario_Dialog(void)
                 if (display < REDRAW_MESSAGE)
                     display = REDRAW_MESSAGE;
 
-                if (housebtn.IsDropped) {
-                    housebtn.Collapse();
-                    display = REDRAW_BACKGROUND;
-                }
+                collapse_visible_dropdowns();
 
                 break;
+            }
+            break;
+
+        case (BUTTON_TIBERIUMSCALE | KN_BUTTON):
+            if (!ready_to_go) {
+                MPlayerTiberium = tiberiumscalegauge.Get_Value() + 1;
+
+                optionlist.Check_Item(1, MPlayerTiberium > 0);
+
+                Special.IsTGrowth = MPlayerTiberium;
+                Special.IsTSpread = MPlayerTiberium;
+
+                if (display < REDRAW_MESSAGE)
+                    display = REDRAW_MESSAGE;
+
+                collapse_visible_dropdowns();
             }
             break;
 
@@ -803,7 +1063,7 @@ int Com_Scenario_Dialog(void)
         Also, if Tiberium gets toggled, we have to set the flags
         in SpecialClass.
         ------------------------------------------------------------------*/
-        case (BUTTON_OPTIONS | KN_BUTTON):
+        case (BUTTON_OPTIONS | KN_BUTTON): {
             if (MPlayerBases != optionlist.Is_Checked(0)) {
                 MPlayerBases = optionlist.Is_Checked(0);
                 if (MPlayerBases) {
@@ -820,7 +1080,14 @@ int Com_Scenario_Dialog(void)
                 countgauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
                 countgauge.Set_Value(MPlayerUnitCount - MPlayerCountMin[MPlayerBases]);
             }
-            MPlayerTiberium = optionlist.Is_Checked(1);
+            MPlayerTiberium = optionlist.Is_Checked(1) ? 1 : 0;
+
+            if (tiberiumscalegauge.Get_Value() + 1 > 1) {
+                MPlayerTiberium = tiberiumscalegauge.Get_Value() + 1;
+            }
+
+            tiberiumscalegauge.Set_Value(MPlayerTiberium < 2 ? 0 : MPlayerTiberium - 1);
+
             Special.IsTGrowth = MPlayerTiberium;
             // Rule.IsTGrowth = MPlayerTiberium;
             Special.IsTSpread = MPlayerTiberium;
@@ -832,11 +1099,10 @@ int Com_Scenario_Dialog(void)
             transmit = true;
             if (display < REDRAW_MESSAGE)
                 display = REDRAW_MESSAGE;
-            if (housebtn.IsDropped) {
-                housebtn.Collapse();
-                display = REDRAW_BACKGROUND;
-            }
+
+            collapse_visible_dropdowns();
             break;
+        }
 
         /*------------------------------------------------------------------
         OK: exit loop with true status

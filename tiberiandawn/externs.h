@@ -290,6 +290,7 @@ extern unsigned int MPlayerMaxAhead;
 extern unsigned int FrameSendRate;
 extern unsigned char MPlayerID[MAX_PLAYERS];
 extern HousesType MPlayerHouses[MAX_PLAYERS];
+extern DiffType MPlayerDifficulty[MAX_PLAYERS];
 extern char MPlayerNames[MAX_PLAYERS][MPLAYER_NAME_MAX];
 extern MessageListClass Messages;
 #ifdef NETWORKING
