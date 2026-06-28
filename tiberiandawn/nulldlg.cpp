@@ -940,7 +940,7 @@ int Com_Scenario_Dialog(void)
         case (BUTTON_AI_DIFF_3 | KN_BUTTON):
         case (BUTTON_AI_DIFF_4 | KN_BUTTON):
         case (BUTTON_AI_DIFF_5 | KN_BUTTON): {
-            for (auto idx = BUTTON_AI_DIFF_1; idx < BUTTON_AI_DIFF_5; ++idx) {
+            for (auto idx = BUTTON_AI_DIFF_1; idx <= BUTTON_AI_DIFF_5; ++idx) {
                 if (input != (idx | KN_BUTTON)) {
                     continue;
                 }
@@ -966,6 +966,7 @@ int Com_Scenario_Dialog(void)
                     house_dropdown.Set_Selected_Index(1);
                 }
 
+                CNC_LOG_WARN("REDRAW: {}", (int)idx);
                 diff_dropdown.Collapse();
                 house_dropdown.Collapse();
                 display = REDRAW_BACKGROUND;
@@ -984,7 +985,7 @@ int Com_Scenario_Dialog(void)
         case (BUTTON_AI_HOUSE_3 | KN_BUTTON):
         case (BUTTON_AI_HOUSE_4 | KN_BUTTON):
         case (BUTTON_AI_HOUSE_5 | KN_BUTTON): {
-            for (auto idx = BUTTON_AI_HOUSE_1; idx < BUTTON_AI_HOUSE_5; ++idx) {
+            for (auto idx = BUTTON_AI_HOUSE_1; idx <= BUTTON_AI_HOUSE_5; ++idx) {
                 if (input != (idx | KN_BUTTON)) {
                     continue;
                 }
@@ -1010,6 +1011,7 @@ int Com_Scenario_Dialog(void)
                     diff_dropdown.Set_Selected_Index(2);
                 }
 
+                CNC_LOG_WARN("REDRAW: {}", (int)idx);
                 house_dropdown.Collapse();
                 diff_dropdown.Collapse();
                 display = REDRAW_BACKGROUND;
