@@ -211,7 +211,7 @@ extern void GlyphX_Assign_Houses(void); // ST - 6/25/2019 11:08AM
  * HISTORY:                                                                                    *
  *   10/07/1992 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool Read_Scenario_Ini(char* root, SpecialClass special_options, bool allow_superweapons, bool fresh)
+bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::optional<bool> allow_superweapons, bool fresh)
 {
     char fname[_MAX_FNAME + _MAX_EXT]; // full INI filename
     char buf[128];                     // Working string staging buffer.
@@ -1279,13 +1279,17 @@ static void Assign_Houses(void)
     */
     for (i = MPlayerCount; i < MPlayerCount + MPlayerGhosts; i++) {
         if (house_used[i] == false) {
+            const auto house_override = MPlayerHouses[i];
+            const auto difficulty_override = MPlayerDifficulty[i];
 
             /*
             **	Set the house, preferred house (GDI/NOD), and color; get a pointer
             **	to the house instance
             */
             house = (HousesType)(i + (int)HOUSE_MULTI1);
-            pref_house = (HousesType)(Random_Pick(0, 1) + (int)HOUSE_GOOD);
+            pref_house = house_override != HOUSE_NONE
+                ? house_override
+                : (HousesType)(Random_Pick(0, 1) + (int)HOUSE_GOOD);
             for (;;) {
                 color = Random_Pick(REMAP_FIRST, REMAP_LAST);
                 if (color_used[color] == false) {
@@ -1311,7 +1315,7 @@ static void Assign_Houses(void)
             if (Players.Count() > 1 && Rule.IsCompEasyBonus && difficulty > DIFF_EASY) {
                 difficulty = (DiffType)(difficulty - 1);
             }
-            housep->Assign_Handicap(difficulty);
+            housep->Assign_Handicap(difficulty_override != DIFF_NONE ? difficulty_override : difficulty);
         }
     }
 

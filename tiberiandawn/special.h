@@ -44,40 +44,7 @@
 class BITFIELD_STRUCT SpecialClass
 {
 public:
-    void Init(void)
-    {
-        IsScrollMod = false;
-        IsGross = false;
-        IsEasy = false;
-        IsDifficult = false;
-        IsSpeedBuild = false;
-        IsDefenderAdvantage = true;
-        IsVisibleTarget = false;
-        IsVariation = false;
-        IsJurassic = false;
-        IsJuvenile = false;
-        IsSmartDefense = false;
-        IsTreeTarget = false;
-        IsMCVDeploy = false;
-        IsVisceroids = false;
-        IsMonoEnabled = false;
-        IsInert = false;
-        IsShowPath = false;
-        IsThreePoint = false;
-        IsTGrowth = true;
-        IsTSpread = true;
-        IsTFast = true;
-        IsRoad = false;
-        IsScatter = false;
-        IsCaptureTheFlag = false;
-        IsNamed = false;
-        IsFromInstall = false;
-        IsSeparate = false;
-        IsEarlyWin = false;
-        HealthBarDisplayMode = HB_SELECTED;
-        ResourceBarDisplayMode = RB_SELECTED;
-        ModernBalance = false;
-    }
+    void Init();
 
     /*
     **	Is the game flagged for easy mode?
@@ -273,6 +240,11 @@ public:
     // Fixes issue from Change 738397 2020/07/17 14:06:03
     //
     //
+    RuleSections* RuleOverrides;
+
+    RuleSections& Overrides();
+
+    const RuleSections& Overrides() const;
 
     /**
      * Set values in this instance based on rule section values.

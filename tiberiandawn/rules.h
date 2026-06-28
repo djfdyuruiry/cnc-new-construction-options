@@ -324,8 +324,8 @@ public:
     void Init_For_Scenario(
         const ScenarioClass& scenario,
         const GameType& game_to_play,
-        SpecialClass special_options,
-        std::optional<bool> superweapons_allowed
+        const SpecialClass& special_options,
+        std::optional<bool> superweapons_allowed = std::nullopt
     );
 
     const RuleSections& Get_Rule_Sections() const;

@@ -254,12 +254,12 @@ bool Read_Scenario(char* root)
     CCDebugString("C&C95 - In Read_Scenario.\n");
 
     // capture any setup that was done for a skirmish scenario before clear
-    const auto special_options = Special;
-    const auto allow_superweapons = Rule.AllowSuperWeapons;
+    auto special_options = Special;
+    Special.RuleOverrides = nullptr; // detach rule overrides from global instance
 
     Clear_Scenario();
     ScenarioInit++;
-    if (Read_Scenario_Ini(root, special_options, allow_superweapons)) {
+    if (Read_Scenario_Ini(root, special_options)) {
 
         Fill_In_Data();
 

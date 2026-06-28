@@ -271,7 +271,7 @@ void RulesClass::Init(CCINIClass& ini)
 void RulesClass::Init_For_Scenario(
     const ScenarioClass& scenario,
     const GameType& game_to_play,
-    const SpecialClass special_options,
+    const SpecialClass& special_options,
     const std::optional<bool> superweapons_allowed
 )
 {
@@ -341,8 +341,9 @@ RuleSections& RulesClass::Get_Editable_Rule_Sections()
  */
 void RulesClass::Reset()
 {
-    Sections = RuleSections();
+    Sections.Clear();
     TypeRules.clear();
+    Special.Init();
 }
 
 /**
