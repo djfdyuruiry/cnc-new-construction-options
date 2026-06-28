@@ -1333,6 +1333,7 @@ static void Assign_Houses(void)
                 default: break;
             }
 
+<<<<<<< HEAD
             CNC_LOG_INFO("Assigning {} handicap: {} (override: {})", house, difficulty, difficulty_override);
             housep->Assign_Handicap(difficulty);
         }

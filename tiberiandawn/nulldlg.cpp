@@ -1011,7 +1011,6 @@ int Com_Scenario_Dialog(void)
                     diff_dropdown.Set_Selected_Index(2);
                 }
 
-                CNC_LOG_WARN("REDRAW: {}", (int)idx);
                 house_dropdown.Collapse();
                 diff_dropdown.Collapse();
                 display = REDRAW_BACKGROUND;
