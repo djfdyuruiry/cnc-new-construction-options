@@ -560,3 +560,19 @@ private:
 
     TdTypeConverter() = delete;
 };
+
+// std::format support for TD enum types
+template <SupportedByTdTypeConverter T>
+struct std::formatter<T> : std::formatter<std::string> {
+    auto format(T value, format_context& ctx) const {
+        return formatter<string>::format(TdTypeConverter::To_String(value), ctx);
+    }
+};
+
+// spdlog fmt library support for TD enum types
+template <SupportedByTdTypeConverter T>
+struct fmt::formatter<T> : fmt::formatter<std::string> {
+    auto format(const T& value, format_context& ctx) const {
+        return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
+    }
+};
