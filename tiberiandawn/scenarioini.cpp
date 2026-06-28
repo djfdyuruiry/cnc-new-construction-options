@@ -1308,6 +1308,7 @@ static void Assign_Houses(void)
             **	Set the house's IsHuman, Credits, ActLike, & RemapTable
             */
             housep->IsHuman = false;
+            CNC_LOG_WARN("Assigning {} acts like: {}", TdTypeConverter::To_String(house), TdTypeConverter::To_String(pref_house));
             housep->Init_Data(color, pref_house, MPlayerCredits);
 
             DiffType difficulty = Scen.CDifficulty;
@@ -1315,7 +1316,23 @@ static void Assign_Houses(void)
             if (Players.Count() > 1 && Rule.IsCompEasyBonus && difficulty > DIFF_EASY) {
                 difficulty = (DiffType)(difficulty - 1);
             }
-            housep->Assign_Handicap(difficulty_override != DIFF_NONE ? difficulty_override : difficulty);
+
+            switch (difficulty_override) {
+                // give the house a nerf
+                case DIFF_EASY:
+                    difficulty = DIFF_HARD;
+                    break;
+                // give the house a buff
+                case DIFF_HARD:
+                    difficulty = DIFF_EASY;
+                    break;
+
+                // just use 'difficulty' as calculated based on given scenario and rules
+                default: break;
+            }
+
+            CNC_LOG_WARN("Assigning {} handicap: {} (override: {})", TdTypeConverter::To_String(house), TdTypeConverter::To_String(difficulty), TdTypeConverter::To_String(difficulty_override));
+            housep->Assign_Handicap(difficulty);
         }
     }
 

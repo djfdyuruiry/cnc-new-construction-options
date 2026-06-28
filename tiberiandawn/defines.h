@@ -220,16 +220,16 @@ typedef enum FactoryType : unsigned char {
 /**********************************************************************
 **	These are the difficulty settings of the game.
 */
-typedef enum DiffType : unsigned char
+typedef enum DiffType : signed char
 {
+    DIFF_NONE = -1,
     DIFF_EASY,
     DIFF_NORMAL,
     DIFF_HARD,
 
     DIFF_COUNT,
     DIFF_FIRST = 0,
-    DIFF_LAST = DIFF_HARD,
-    DIFF_NONE = 3
+    DIFF_LAST = DIFF_HARD
 } DiffType;
 
 /**********************************************************************

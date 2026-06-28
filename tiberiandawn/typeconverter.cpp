@@ -31,6 +31,7 @@ static const TwoWayMap<CCPaletteType, std::string> CCPalettePatchTable = {{ CC_G
  */
 static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
 static const std::vector VocExcludes = {VOC_FIRST, VOC_COUNT};
+static const std::vector DiffExcludes = {DIFF_FIRST, DIFF_LAST};
 static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 
 #define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
@@ -57,7 +58,7 @@ const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter:
     ENUM_TYPE_PAIR(VocType,                      "VOC_",         VOC_NONE,                               VOC_BEACON,                               {},                  VocExcludes,         false),
     ENUM_TYPE_PAIR(PlayerColorType,              "REMAP_",       REMAP_NONE,                             REMAP_LAST,                               {},                  {},                  false),
     ENUM_TYPE_PAIR(HouseColorType,               "HOUSE_COLOR_", HOUSE_COLOR_BAD,                        HOUSE_COLOR_NEUTRAL,                      {},                  {},                  false),
-    ENUM_TYPE_PAIR(DiffType,                     "DIFF_",        DIFF_FIRST,                             DIFF_LAST,                                {},                  {},                  false),
+    ENUM_TYPE_PAIR(DiffType,                     "DIFF_",        DIFF_NONE,                              DIFF_LAST,                                {},                  {},                  false),
     ENUM_TYPE_PAIR(ScenarioDirType,              "SCEN_DIR_",    SCEN_DIR_NONE,                          SCEN_DIR_LAST,                            {},                  {},                  false),
     ENUM_TYPE_PAIR(ScenarioVarType,              "SCEN_VAR_",    SCEN_VAR_NONE,                          SCEN_VAR_LOSE,                            {},                  ScenarioVarExcludes, false),
     ENUM_TYPE_PAIR(SourceType,                   "SOURCE_",      SOURCE_NONE,                            SOURCE_OCEAN,                             {},                  {},                  false),

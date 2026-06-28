@@ -132,17 +132,17 @@ int Com_Scenario_Dialog(void)
 
     int d_scenariolist_w = 152 * factor;
     int d_scenariolist_h = 30 * factor;
-    int d_scenariolist_x = (d_cancel_x + nearbyint(d_cancel_w * 0.8)) - d_scenariolist_w + (10 * factor);
+    int d_scenariolist_x = (d_cancel_x + static_cast<int>(nearbyint(d_cancel_w * 0.8))) - d_scenariolist_w + (10 * factor);
     int d_scenariolist_y = d_color_y + d_txt6_h + 5 * factor + d_txt6_h;
     d_scenariolist_h *= 2;
 
     int d_aihouse_w = d_house_w / 3;
     int d_aihouse_h = (6 * 5 * factor);
     int d_aihouse_x = d_scenariolist_x - d_aihouse_w - (10 * factor);
-    int d_aihouse_y = d_scenariolist_y + (2 * factor);
+    int d_aihouse_y = d_scenariolist_y + (5 * factor);
     int d_aihouse_ystep = 10 * factor;
 
-    int d_options_w = nearbyint(d_scenariolist_w * 0.6);
+    int d_options_w = static_cast<int>(nearbyint(d_scenariolist_w * 0.6));
     int d_options_h = (5 * 6 * factor) + 5 * factor;
     int d_options_x = (d_scenariolist_x + d_scenariolist_w) - d_options_w;
     int d_options_y = d_scenariolist_y + d_scenariolist_h + d_margin1 - 2 * factor;
@@ -162,15 +162,15 @@ int Com_Scenario_Dialog(void)
     int d_credits_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
     int d_credits_y = d_level_y + d_level_h;
 
-    int d_aiplayers_w = 25 * factor;
-    int d_aiplayers_h = 7 * factor;
-    int d_aiplayers_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
-    int d_aiplayers_y = d_credits_y + d_credits_h;
+    //int d_aiplayers_w = 25 * factor;
+    //int d_aiplayers_h = 7 * factor;
+    //int d_aiplayers_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
+    //int d_aiplayers_y = d_credits_y + d_credits_h;
 
     int d_tiberiumscale_w = 25 * factor;
     int d_tiberiumscale_h = 7 * factor;
     int d_tiberiumscale_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
-    int d_tiberiumscale_y = d_aiplayers_y + d_aiplayers_h;
+    int d_tiberiumscale_y = d_credits_y + d_credits_h;
 
     /*........................................................................
     Button Enumerations
@@ -179,13 +179,18 @@ int Com_Scenario_Dialog(void)
     {
         BUTTON_NAME = 100,
         BUTTON_HOUSE,
+        BUTTON_AI_DIFF_1,
+        BUTTON_AI_DIFF_2,
+        BUTTON_AI_DIFF_3,
+        BUTTON_AI_DIFF_4,
+        BUTTON_AI_DIFF_5,
         BUTTON_AI_HOUSE_1,
         BUTTON_AI_HOUSE_2,
         BUTTON_AI_HOUSE_3,
         BUTTON_AI_HOUSE_4,
         BUTTON_AI_HOUSE_5,
         BUTTON_CREDITS,
-        BUTTON_AIPLAYERS,
+        //BUTTON_AIPLAYERS,
         BUTTON_TIBERIUMSCALE,
         BUTTON_OPTIONS,
         BUTTON_SCENARIOLIST,
@@ -291,7 +296,7 @@ int Com_Scenario_Dialog(void)
 
     auto cur_ai_house_y = d_aihouse_y;
 
-    for (auto h = BUTTON_AI_HOUSE_1; h <= BUTTON_AI_HOUSE_5; ++h) {
+    for (auto h = BUTTON_AI_DIFF_1; h <= BUTTON_AI_DIFF_5; ++h) {
         constexpr auto label_str_length = 25;
         ai_diff_strings.emplace_back() = std::make_unique<char[]>(label_str_length);
         ai_house_strings.emplace_back() = std::make_unique<char[]>(label_str_length);
@@ -301,16 +306,16 @@ int Com_Scenario_Dialog(void)
             ai_diff_strings.back().get(),
             label_str_length,
             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            d_aihouse_x - (nearbyint(d_aihouse_w * 1.5)) - (10 * factor),
+            d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5)) - (10 * factor),
             cur_ai_house_y,
-            nearbyint(d_aihouse_w * 1.5),
+            static_cast<int>(nearbyint(d_aihouse_w * 1.5)),
             d_aihouse_h,
             up_button,
             down_button
         );
 
         ai_house_dropdowns.emplace_back(
-            h,
+            h + 5,
             ai_house_strings.back().get(),
             label_str_length,
             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
@@ -340,7 +345,7 @@ int Com_Scenario_Dialog(void)
 
     GaugeClass creditsgauge(BUTTON_CREDITS, d_credits_x, d_credits_y, d_credits_w, d_credits_h);
 
-    GaugeClass aiplayersgauge(BUTTON_AIPLAYERS, d_aiplayers_x, d_aiplayers_y, d_aiplayers_w, d_aiplayers_h);
+    //GaugeClass aiplayersgauge(BUTTON_AIPLAYERS, d_aiplayers_x, d_aiplayers_y, d_aiplayers_w, d_aiplayers_h);
 
     GaugeClass tiberiumscalegauge(BUTTON_TIBERIUMSCALE, d_tiberiumscale_x, d_tiberiumscale_y, d_tiberiumscale_w, d_tiberiumscale_h);
 
@@ -396,7 +401,7 @@ int Com_Scenario_Dialog(void)
     countgauge.Add_Tail(*commands);
     levelgauge.Add_Tail(*commands);
     creditsgauge.Add_Tail(*commands);
-    aiplayersgauge.Add_Tail(*commands);
+    //aiplayersgauge.Add_Tail(*commands);
     tiberiumscalegauge.Add_Tail(*commands);
     optionlist.Add_Tail(*commands);
     okbtn.Add_Tail(*commands);
@@ -421,14 +426,14 @@ int Com_Scenario_Dialog(void)
     housebtn.Set_Read_Only(true);
 
     int maxp = 4 /*Rule.MaxPlayers - 2*/;
-    aiplayersgauge.Set_Maximum(maxp);
+    //aiplayersgauge.Set_Maximum(maxp);
 
     if (MPlayerGhosts > 5) {
         MPlayerGhosts = 5;
     }
     MPlayerGhosts = max(MPlayerGhosts, 1);
 
-    aiplayersgauge.Set_Value(MPlayerGhosts - 1);
+    //aiplayersgauge.Set_Value(MPlayerGhosts - 1);
 
     for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
         ai_diff_dropdowns[idx].Add_Item("Disabled");
@@ -436,7 +441,6 @@ int Com_Scenario_Dialog(void)
         ai_diff_dropdowns[idx].Add_Item("Normal");
         ai_diff_dropdowns[idx].Add_Item("Hard");
         ai_diff_dropdowns[idx].Set_Selected_Index(idx < MPlayerGhosts ? 2 : 0);
-        ai_diff_dropdowns[idx].List.Reset_Index_Change();
         ai_diff_dropdowns[idx].Set_Read_Only(true);
 
         ai_house_dropdowns[idx].Add_Item("None");
@@ -445,7 +449,6 @@ int Com_Scenario_Dialog(void)
         ai_house_dropdowns[idx].Add_Item(Text_String(TXT_N_O_D));
         //ai_house_dropdowns[idx].Add_Item("Dino");
         ai_house_dropdowns[idx].Set_Selected_Index(idx < MPlayerGhosts ? 1 : 0);
-        ai_house_dropdowns[idx].List.Reset_Index_Change();
         ai_house_dropdowns[idx].Set_Read_Only(true);
     }
 
@@ -588,21 +591,21 @@ int Com_Scenario_Dialog(void)
 
                 Fancy_Text_Print(TXT_YOUR_NAME,
                                  d_name_x + (d_name_w / 2),
-                                 d_name_y - d_txt6_h,
+                                 d_name_y - d_txt6_h - (1 * factor),
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
                 Fancy_Text_Print(TXT_SIDE_COLON,
                                  d_house_x + (d_house_w / 2),
-                                 d_house_y - d_txt6_h,
+                                 d_house_y - d_txt6_h - (1 * factor),
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
                 Fancy_Text_Print(TXT_COLOR_COLON,
                                  d_dialog_x + ((d_dialog_w / 4) * 3),
-                                 d_color_y - d_txt6_h,
+                                 d_color_y - d_txt6_h - (1 * factor),
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -656,12 +659,12 @@ int Com_Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print(TXT_AI_PLAYERS_COLON,
-                                 d_aiplayers_x - 3 * factor,
-                                 d_aiplayers_y,
-                                 CC_GREEN,
-                                 TBLACK,
-                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+                // Fancy_Text_Print(TXT_AI_PLAYERS_COLON,
+                //                  d_aiplayers_x - 3 * factor,
+                //                  d_aiplayers_y,
+                //                  CC_GREEN,
+                //                  TBLACK,
+                //                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
                 Fancy_Text_Print("Tiberium Growth:", // TODO: Locale file entry
                                  d_tiberiumscale_x - 3 * factor,
@@ -669,6 +672,37 @@ int Com_Scenario_Dialog(void)
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                Fancy_Text_Print("Player", // TODO: Locale file entry
+                                 (d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5)) - (10 * factor))
+                                    + (static_cast<int>((d_aihouse_w * 1.5) / 1.25)),
+                                 d_aihouse_y - d_txt6_h - (2 * factor),
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                Fancy_Text_Print("Side", // TODO: Locale file entry
+                                 d_aihouse_x + static_cast<int>(nearbyint(d_aihouse_w / 1.25)),
+                                 d_aihouse_y - d_txt6_h - (2 * factor),
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                // AI player difficulty and house checkbox labels
+                const auto cur_ai_house_label_x = (d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5))
+                    - (10 * factor)) - 3 * factor;
+                auto cur_ai_house_label_y = d_aihouse_y;
+
+                for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
+                    Fancy_Text_Print(std::format("AI {}:", idx + 1).c_str(), // TODO: Locale file entry
+                                     cur_ai_house_label_x,
+                                     cur_ai_house_label_y,
+                                     CC_GREEN,
+                                     TBLACK,
+                                     TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                    cur_ai_house_label_y += d_aihouse_ystep;
+                }
             }
 
             /*..................................................................
@@ -722,13 +756,13 @@ int Com_Scenario_Dialog(void)
                                  BLACK,
                                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                sprintf(txt, "%d ", MPlayerGhosts);
-                Fancy_Text_Print(txt,
-                                 d_aiplayers_x + d_aiplayers_w + 3 * factor,
-                                 d_aiplayers_y,
-                                 CC_GREEN,
-                                 BLACK,
-                                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+                // sprintf(txt, "%d ", MPlayerGhosts);
+                // Fancy_Text_Print(txt,
+                //                  d_aiplayers_x + d_aiplayers_w + 3 * factor,
+                //                  d_aiplayers_y,
+                //                  CC_GREEN,
+                //                  BLACK,
+                //                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
                 sprintf(txt, "%dx ", tiberiumscalegauge.Get_Value() + 1);
                 Fancy_Text_Print(txt,
                                  d_tiberiumscale_x + d_tiberiumscale_w + 3 * factor,
@@ -855,12 +889,12 @@ int Com_Scenario_Dialog(void)
                     collapse_visible_dropdowns();
                     transmit = 1;
                 }
-            }
+                }
             break;
 
-        /*------------------------------------------------------------------
-        User edits the name field; retransmit new game options
-        ------------------------------------------------------------------*/
+            /*------------------------------------------------------------------
+            User edits the name field; retransmit new game options
+            ------------------------------------------------------------------*/
         case (BUTTON_NAME | KN_BUTTON):
             if (!ready_to_go) {
                 strcpy(MPlayerName, namebuf);
@@ -869,9 +903,9 @@ int Com_Scenario_Dialog(void)
             }
             break;
 
-        /*------------------------------------------------------------------
-        House Buttons: set the player's desired House
-        ------------------------------------------------------------------*/
+            /*------------------------------------------------------------------
+            House Buttons: set the player's desired House
+            ------------------------------------------------------------------*/
         case (BUTTON_HOUSE | KN_BUTTON):
             MPlayerHouse = HousesType(housebtn.Current_Index() + HOUSE_GOOD);
             strcpy(MPlayerName, namebuf);
@@ -882,9 +916,9 @@ int Com_Scenario_Dialog(void)
             transmit = true;
             break;
 
-        /*------------------------------------------------------------------
-        New Scenario selected.
-        ------------------------------------------------------------------*/
+            /*------------------------------------------------------------------
+            New Scenario selected.
+            ------------------------------------------------------------------*/
         case (BUTTON_SCENARIOLIST | KN_BUTTON):
             if (scenariolist.Current_Index() != ScenarioIdx && !ready_to_go) {
                 ScenarioIdx = scenariolist.Current_Index();
@@ -898,75 +932,92 @@ int Com_Scenario_Dialog(void)
             }
             break;
 
+            /*------------------------------------------------------------------
+            AI player difficulty dropdown selection changed.
+            ------------------------------------------------------------------*/
+        case (BUTTON_AI_DIFF_1 | KN_BUTTON):
+        case (BUTTON_AI_DIFF_2 | KN_BUTTON):
+        case (BUTTON_AI_DIFF_3 | KN_BUTTON):
+        case (BUTTON_AI_DIFF_4 | KN_BUTTON):
+        case (BUTTON_AI_DIFF_5 | KN_BUTTON): {
+            for (auto idx = BUTTON_AI_DIFF_1; idx < BUTTON_AI_DIFF_5; ++idx) {
+                if (input != (idx | KN_BUTTON)) {
+                    continue;
+                }
+
+                auto& diff_dropdown = ai_diff_dropdowns[idx - BUTTON_AI_DIFF_1];
+
+                // nothing changed, ignore input
+                if (!diff_dropdown.List.Index_Changed()) {
+                    break;
+                }
+
+                auto& house_dropdown = ai_house_dropdowns[idx - BUTTON_AI_DIFF_1];
+
+                const auto diff_was_disabled = diff_dropdown.Current_Index() == 0;
+                const auto diff_was_activated = diff_dropdown.List.Get_Previous_Index() == 0;
+                const auto house_is_disabled = house_dropdown.Current_Index() == 0;
+
+                if (diff_was_disabled) {
+                    // reset house to match disabled AI diff
+                    house_dropdown.Set_Selected_Index(0);
+                } else if (diff_was_activated && house_is_disabled) {
+                    // select a default house of '?' since none is selected
+                    house_dropdown.Set_Selected_Index(1);
+                }
+
+                diff_dropdown.Collapse();
+                house_dropdown.Collapse();
+                display = REDRAW_BACKGROUND;
+                transmit = true;
+                break;
+            }
+
+            break;
+        }
+
+            /*------------------------------------------------------------------
+            AI player house dropdown selection changed.
+            ------------------------------------------------------------------*/
         case (BUTTON_AI_HOUSE_1 | KN_BUTTON):
         case (BUTTON_AI_HOUSE_2 | KN_BUTTON):
         case (BUTTON_AI_HOUSE_3 | KN_BUTTON):
         case (BUTTON_AI_HOUSE_4 | KN_BUTTON):
-        case (BUTTON_AI_HOUSE_5 | KN_BUTTON):
-            for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
-                auto& diff_dropdown = ai_diff_dropdowns[idx];
-                auto& house_dropdown = ai_house_dropdowns[idx];
-                const auto selected_diff_changed = diff_dropdown.List.Index_Changed();
-                const auto selected_house_changed = house_dropdown.List.Index_Changed();
-
-                // one of the two house dropdowns was changed
-                if (selected_diff_changed || selected_house_changed) {
-                    auto selected_diff_idx = diff_dropdown.Current_Index();
-                    auto selected_house_idx = house_dropdown.Current_Index();
-
-                    const auto diff_was_disabled =  selected_diff_idx == 0 && selected_diff_changed;
-                    const auto house_was_disabled = selected_house_idx == 0 && selected_house_changed;
-                    const auto diff_was_activated =  selected_diff_changed && diff_dropdown.List.Get_Previous_Index() == 0;
-                    const auto house_was_activated = selected_house_changed && house_dropdown.List.Get_Previous_Index() == 0;
-
-                    if (diff_was_disabled) {
-                        // reset house to match disabled AI diff
-                        selected_house_idx = 0;
-                        house_dropdown.Set_Selected_Index(selected_house_idx);
-                        diff_dropdown.List.Reset_Index_Change();
-                    } else if (house_was_disabled) {
-                        // reset diff to match disabled AI house
-                        selected_diff_idx = 0;
-                        diff_dropdown.Set_Selected_Index(selected_diff_idx);
-                        diff_dropdown.List.Reset_Index_Change();
-                    } else if (diff_was_activated && selected_house_idx == 0) {
-                        // select a default house of '?' since none is selected
-                        selected_house_idx = 1;
-                        house_dropdown.Set_Selected_Index(selected_house_idx);
-                        house_dropdown.List.Reset_Index_Change();
-                    } else if (house_was_activated && selected_diff_idx == 0) {
-                        // select a default diff of 'Normal' since none is selected
-                        selected_diff_idx = 2;
-                        diff_dropdown.Set_Selected_Index(selected_diff_idx);
-                        diff_dropdown.List.Reset_Index_Change();
-                    }
-
-                    // adjust indices to match appropriate enum values
-                    const auto house_idx = idx + 1;
-                    const auto selected_diff = selected_diff_idx == 0
-                        ? DIFF_NONE
-                        : static_cast<DiffType>(selected_diff_idx - 1);
-                    const auto selected_house = selected_house_idx < 2
-                        ? HOUSE_NONE
-                        : static_cast<HousesType>(selected_house_idx - 2);
-
-                    CNC_LOG_WARN(
-                        "Setting MUTI{} house to '{}' and acts like: {}",
-                        house_idx,
-                        TdTypeConverter::To_String(selected_diff), TdTypeConverter::To_String(selected_house)
-                    );
-
-                    MPlayerHouses[idx + 1] = selected_house;
-                    MPlayerDifficulty[idx] = selected_diff;
-
-                    diff_dropdown.Collapse();
-                    house_dropdown.Collapse();
-                    display = REDRAW_BACKGROUND;
-                    transmit = true;
+        case (BUTTON_AI_HOUSE_5 | KN_BUTTON): {
+            for (auto idx = BUTTON_AI_HOUSE_1; idx < BUTTON_AI_HOUSE_5; ++idx) {
+                if (input != (idx | KN_BUTTON)) {
+                    continue;
                 }
+
+                auto& house_dropdown = ai_house_dropdowns[idx - BUTTON_AI_HOUSE_1];
+
+                // nothing changed, ignore input
+                if (!house_dropdown.List.Index_Changed()) {
+                    break;
+                }
+
+                auto& diff_dropdown = ai_diff_dropdowns[idx - BUTTON_AI_HOUSE_1];
+
+                const auto house_was_disabled = house_dropdown.Current_Index() == 0;
+                const auto house_was_activated = house_dropdown.List.Get_Previous_Index() == 0;
+                const auto diff_is_disabled = diff_dropdown.Current_Index() == 0;
+
+                if (house_was_disabled) {
+                    // reset diff to match disabled AI house
+                    diff_dropdown.Set_Selected_Index(0);
+                } else if (house_was_activated && diff_is_disabled) {
+                    // select a default diff of 'Normal' since none is selected
+                    diff_dropdown.Set_Selected_Index(2);
+                }
+
+                house_dropdown.Collapse();
+                diff_dropdown.Collapse();
+                display = REDRAW_BACKGROUND;
+                transmit = true;
             }
 
             break;
+        }
 
         /*------------------------------------------------------------------
         User adjusts max # units
@@ -1021,24 +1072,24 @@ int Com_Scenario_Dialog(void)
         /*------------------------------------------------------------------
         User adjusts # of AI players
         ------------------------------------------------------------------*/
-        case (BUTTON_AIPLAYERS | KN_BUTTON):
-            if (!ready_to_go) {
-                MPlayerGhosts = aiplayersgauge.Get_Value();
-                int humans = 1; // One humans.
-                MPlayerGhosts += 1;
-                if (MPlayerGhosts + humans >= 6 /*Rule.MaxPlayers*/) { // if it's pegged, max it out
-                    MPlayerGhosts = 6 /*Rule.MaxPlayers*/ - humans;
-                    aiplayersgauge.Set_Value(MPlayerGhosts - 1);
-                }
-                transmit = true;
-                if (display < REDRAW_MESSAGE)
-                    display = REDRAW_MESSAGE;
-
-                collapse_visible_dropdowns();
-
-                break;
-            }
-            break;
+        // case (BUTTON_AIPLAYERS | KN_BUTTON):
+        //     if (!ready_to_go) {
+        //         MPlayerGhosts = aiplayersgauge.Get_Value();
+        //         int humans = 1; // One humans.
+        //         MPlayerGhosts += 1;
+        //         if (MPlayerGhosts + humans >= 6 /*Rule.MaxPlayers*/) { // if it's pegged, max it out
+        //             MPlayerGhosts = 6 /*Rule.MaxPlayers*/ - humans;
+        //             aiplayersgauge.Set_Value(MPlayerGhosts - 1);
+        //         }
+        //         transmit = true;
+        //         if (display < REDRAW_MESSAGE)
+        //             display = REDRAW_MESSAGE;
+        //
+        //         collapse_visible_dropdowns();
+        //
+        //         break;
+        //     }
+        //     break;
 
         case (BUTTON_TIBERIUMSCALE | KN_BUTTON):
             if (!ready_to_go) {
@@ -1211,6 +1262,35 @@ int Com_Scenario_Dialog(void)
             Scen.CDifficulty = DIFF_EASY;
             Scen.Difficulty = DIFF_HARD;
             break;
+        }
+
+        // set AI player variables from difficulty/house dropdowns
+        MPlayerGhosts = 0;
+
+        for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
+            auto& diff_dropdown = ai_diff_dropdowns[idx];
+            auto& house_dropdown = ai_house_dropdowns[idx];
+
+            // skip disabled slots
+            if (diff_dropdown.Current_Index() == 0) {
+                continue;
+            }
+
+            // populate 'slot' with correct difficulty and house overrides
+            const auto selected_diff_idx = diff_dropdown.Current_Index();
+            const auto selected_house_idx = house_dropdown.Current_Index();
+
+            const auto selected_diff = selected_diff_idx == 0
+                ? DIFF_NONE
+                : static_cast<DiffType>(selected_diff_idx - 1);
+            const auto selected_house = selected_house_idx < 2
+                ? HOUSE_NONE
+                : static_cast<HousesType>(selected_house_idx - 2);
+
+            MPlayerHouses[MPlayerGhosts + 1] = selected_house;
+            MPlayerDifficulty[MPlayerGhosts + 1] = selected_diff;
+
+            MPlayerGhosts++;
         }
     }
 
