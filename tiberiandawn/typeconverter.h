@@ -1,9 +1,12 @@
 #pragma once
 
+#include <format>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+
+#include <fmt/format.h>
 
 #include "common/enum.h"
 #include "common/json.h"
@@ -569,10 +572,10 @@ struct std::formatter<T> : std::formatter<std::string> {
     }
 };
 
-// spdlog fmt library support for TD enum types
+// spdlog fmt library support for TD enum types (used by spdlog
 template <SupportedByTdTypeConverter T>
 struct fmt::formatter<T> : fmt::formatter<std::string> {
-    auto format(const T& value, format_context& ctx) const {
+    auto format(const T& value, fmt::format_context& ctx) const {
         return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
     }
 };
