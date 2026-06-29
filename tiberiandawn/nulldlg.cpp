@@ -123,26 +123,21 @@ int Com_Scenario_Dialog(void)
     int d_color_x = d_dialog_x + ((d_dialog_w / 4) * 3) - (d_color_w * 3);
 
     int d_playerlist_w = 118 * factor;
-    int d_playerlist_h = (6 * 6 * factor) + 3 * factor; // 6 rows high
     int d_playerlist_x = d_dialog_x + d_margin1 + d_margin1 + 5 * factor;
-    int d_playerlist_y = d_color_y + d_color_h + d_margin2 + 2 * factor /*KO + d_txt6_h*/;
 
-    int d_opponent_x = d_name_x;
-    int d_opponent_y = d_color_y + d_color_h + d_margin2;
-
-    int d_scenariolist_w = 152 * factor;
+    int d_scenariolist_w = 140 * factor;
     int d_scenariolist_h = 30 * factor;
-    int d_scenariolist_x = (d_cancel_x + static_cast<int>(nearbyint(d_cancel_w * 0.8))) - d_scenariolist_w + (10 * factor);
+    int d_scenariolist_x = (d_cancel_x + static_cast<int>(nearbyint(d_cancel_w * 0.8))) - d_scenariolist_w + (20 * factor);
     int d_scenariolist_y = d_color_y + d_txt6_h + 5 * factor + d_txt6_h;
     d_scenariolist_h *= 2;
 
-    int d_aihouse_w = d_house_w / 3;
+    int d_aihouse_w = static_cast<int>(nearbyint(d_house_w / 1.75));
     int d_aihouse_h = (6 * 5 * factor);
     int d_aihouse_x = d_scenariolist_x - d_aihouse_w - (10 * factor);
     int d_aihouse_y = d_scenariolist_y + (5 * factor);
     int d_aihouse_ystep = 10 * factor;
 
-    int d_options_w = static_cast<int>(nearbyint(d_scenariolist_w * 0.6));
+    int d_options_w = static_cast<int>(nearbyint(d_scenariolist_w * 0.8));
     int d_options_h = (5 * 6 * factor) + 5 * factor;
     int d_options_x = (d_scenariolist_x + d_scenariolist_w) - d_options_w;
     int d_options_y = d_scenariolist_y + d_scenariolist_h + d_margin1 - 2 * factor;
@@ -161,11 +156,6 @@ int Com_Scenario_Dialog(void)
     int d_credits_h = 7 * factor;
     int d_credits_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
     int d_credits_y = d_level_y + d_level_h;
-
-    //int d_aiplayers_w = 25 * factor;
-    //int d_aiplayers_h = 7 * factor;
-    //int d_aiplayers_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * factor; // fudged;
-    //int d_aiplayers_y = d_credits_y + d_credits_h;
 
     int d_tiberiumscale_w = 25 * factor;
     int d_tiberiumscale_h = 7 * factor;
@@ -190,7 +180,6 @@ int Com_Scenario_Dialog(void)
         BUTTON_AI_HOUSE_4,
         BUTTON_AI_HOUSE_5,
         BUTTON_CREDITS,
-        //BUTTON_AIPLAYERS,
         BUTTON_TIBERIUMSCALE,
         BUTTON_OPTIONS,
         BUTTON_SCENARIOLIST,
@@ -224,28 +213,18 @@ int Com_Scenario_Dialog(void)
 
     int optiontabs[] = {8};               // tabs for player list box
     char namebuf[MPLAYER_NAME_MAX] = {0}; // buffer for player's name
-    int transmit;                         // 1 = re-transmit new game options
     int cbox_x[] = {d_color_x,
                     d_color_x + d_color_w,
                     d_color_x + (d_color_w * 2),
                     d_color_x + (d_color_w * 3),
                     d_color_x + (d_color_w * 4),
                     d_color_x + (d_color_w * 5)};
-    int parms_received = 0; // 1 = game options received
 
     int rc;
-    int recsignedoff = false;
     int i;
     char txt[80];
-    unsigned int timingtime;
-    unsigned int lastmsgtime;
-    unsigned int lastredrawtime;
-    unsigned int transmittime = 0;
-    unsigned int theirresponsetime;
     static bool first_time = true;
-    bool oppscorescreen = false;
     bool gameoptions = GameToPlay == GAME_SKIRMISH;
-    unsigned int msg_timeout = 1200; // init to 20 seconds
 
     bool ready_to_go = false;
     CountDownTimerClass ready_time;
@@ -289,6 +268,7 @@ int Com_Scenario_Dialog(void)
                            up_button,
                            down_button);
 
+    // dropdowns for AI player options
     std::vector<std::unique_ptr<char[]>> ai_diff_strings(5);
     std::vector<DropListClass> ai_diff_dropdowns;
     std::vector<std::unique_ptr<char[]>> ai_house_strings(5);
@@ -345,8 +325,6 @@ int Com_Scenario_Dialog(void)
 
     GaugeClass creditsgauge(BUTTON_CREDITS, d_credits_x, d_credits_y, d_credits_w, d_credits_h);
 
-    //GaugeClass aiplayersgauge(BUTTON_AIPLAYERS, d_aiplayers_x, d_aiplayers_y, d_aiplayers_w, d_aiplayers_h);
-
     GaugeClass tiberiumscalegauge(BUTTON_TIBERIUMSCALE, d_tiberiumscale_x, d_tiberiumscale_y, d_tiberiumscale_w, d_tiberiumscale_h);
 
     CheckListClass optionlist(BUTTON_OPTIONS,
@@ -401,7 +379,6 @@ int Com_Scenario_Dialog(void)
     countgauge.Add_Tail(*commands);
     levelgauge.Add_Tail(*commands);
     creditsgauge.Add_Tail(*commands);
-    //aiplayersgauge.Add_Tail(*commands);
     tiberiumscalegauge.Add_Tail(*commands);
     optionlist.Add_Tail(*commands);
     okbtn.Add_Tail(*commands);
@@ -419,35 +396,31 @@ int Com_Scenario_Dialog(void)
     name_edt.Set_Text(namebuf, MPLAYER_NAME_MAX);
     name_edt.Set_Color(MPlayerTColors[MPlayerColorIdx]);
 
+    // TODO: Add mystery option ? (random house selection)
     housebtn.Add_Item(Text_String(TXT_G_D_I));
     housebtn.Add_Item(Text_String(TXT_N_O_D));
-    //housebtn.Add_Item("Dino");
+    // TODO: Add dinosaur support (no bases ONLY)
     housebtn.Set_Selected_Index(MPlayerHouse - HOUSE_GOOD);
     housebtn.Set_Read_Only(true);
-
-    int maxp = 4 /*Rule.MaxPlayers - 2*/;
-    //aiplayersgauge.Set_Maximum(maxp);
 
     if (MPlayerGhosts > 5) {
         MPlayerGhosts = 5;
     }
     MPlayerGhosts = max(MPlayerGhosts, 1);
 
-    //aiplayersgauge.Set_Value(MPlayerGhosts - 1);
-
     for (auto idx = 0; idx < ai_diff_dropdowns.size(); idx++) {
-        ai_diff_dropdowns[idx].Add_Item("Disabled");
+        ai_diff_dropdowns[idx].Add_Item("Disabled"); // TODO: Locale file entries
         ai_diff_dropdowns[idx].Add_Item("Easy");
         ai_diff_dropdowns[idx].Add_Item("Normal");
         ai_diff_dropdowns[idx].Add_Item("Hard");
         ai_diff_dropdowns[idx].Set_Selected_Index(idx < MPlayerGhosts ? 2 : 0);
         ai_diff_dropdowns[idx].Set_Read_Only(true);
 
-        ai_house_dropdowns[idx].Add_Item("None");
+        ai_house_dropdowns[idx].Add_Item("None"); // TODO: Locale file entries
         ai_house_dropdowns[idx].Add_Item("?");
         ai_house_dropdowns[idx].Add_Item(Text_String(TXT_G_D_I));
         ai_house_dropdowns[idx].Add_Item(Text_String(TXT_N_O_D));
-        //ai_house_dropdowns[idx].Add_Item("Dino");
+        // TODO: Add dinosaur support (no bases ONLY)
         ai_house_dropdowns[idx].Set_Selected_Index(idx < MPlayerGhosts ? 1 : 0);
         ai_house_dropdowns[idx].Set_Read_Only(true);
     }
@@ -459,7 +432,8 @@ int Com_Scenario_Dialog(void)
         // GB 2022 set defaults for skirmish also:
         BuildLevel = 7;
 
-        MPlayerCredits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_DEFAULT_RULE); // init credits & credit buffer
+        // init credits & credit buffer
+        MPlayerCredits = Rule.Get_Rule_Value<int>(GAME_MULTIPLAYER_SECTION, START_CREDITS_DEFAULT_RULE);
         MPlayerGhosts = 1;
         MPlayerUnitCount = (MPlayerCountMax[MPlayerBases] + MPlayerCountMin[MPlayerBases]) / 2;
         MPlayerTiberium = 1;
@@ -509,8 +483,7 @@ int Com_Scenario_Dialog(void)
     ........................................................................*/
     Special.IsTGrowth = MPlayerTiberium;
     Special.IsTSpread = MPlayerTiberium;
-    transmit = 1;
-
+    
     /*........................................................................
     Init scenario description list box
     ........................................................................*/
@@ -539,8 +512,6 @@ int Com_Scenario_Dialog(void)
     Blit_Hid_Page_To_Seen_Buff();
     Set_Palette(Palette);
 
-    theirresponsetime = 10000; // initialize to an invalid value
-    timingtime = lastmsgtime = lastredrawtime = WinTickCount.Time();
     while (Get_Mouse_State() > 0)
         Show_Mouse();
 
@@ -659,13 +630,6 @@ int Com_Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                // Fancy_Text_Print(TXT_AI_PLAYERS_COLON,
-                //                  d_aiplayers_x - 3 * factor,
-                //                  d_aiplayers_y,
-                //                  CC_GREEN,
-                //                  TBLACK,
-                //                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
                 Fancy_Text_Print("Tiberium Growth:", // TODO: Locale file entry
                                  d_tiberiumscale_x - 3 * factor,
                                  d_tiberiumscale_y,
@@ -673,6 +637,7 @@ int Com_Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
+                // AI player setting headers
                 Fancy_Text_Print("Player", // TODO: Locale file entry
                                  (d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5)) - (10 * factor))
                                     + (static_cast<int>((d_aihouse_w * 1.5) / 1.25)),
@@ -756,13 +721,6 @@ int Com_Scenario_Dialog(void)
                                  BLACK,
                                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                // sprintf(txt, "%d ", MPlayerGhosts);
-                // Fancy_Text_Print(txt,
-                //                  d_aiplayers_x + d_aiplayers_w + 3 * factor,
-                //                  d_aiplayers_y,
-                //                  CC_GREEN,
-                //                  BLACK,
-                //                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
                 sprintf(txt, "%dx ", tiberiumscalegauge.Get_Value() + 1);
                 Fancy_Text_Print(txt,
                                  d_tiberiumscale_x + d_tiberiumscale_w + 3 * factor,
@@ -810,7 +768,7 @@ int Com_Scenario_Dialog(void)
         }
 
         /*
-        ** Redraw everything if am AI house droplist collapsed
+        ** Redraw everything if an AI house droplist collapsed
         */
         for (const auto& idx: ai_diffs_collapsed) {
             if (!ai_diff_dropdowns[idx].IsDropped) {
@@ -887,9 +845,8 @@ int Com_Scenario_Dialog(void)
                     strcpy(MPlayerName, namebuf);
 
                     collapse_visible_dropdowns();
-                    transmit = 1;
                 }
-                }
+            }
             break;
 
             /*------------------------------------------------------------------
@@ -898,8 +855,7 @@ int Com_Scenario_Dialog(void)
         case (BUTTON_NAME | KN_BUTTON):
             if (!ready_to_go) {
                 strcpy(MPlayerName, namebuf);
-                transmit = 1;
-                collapse_visible_dropdowns();
+                                collapse_visible_dropdowns();
             }
             break;
 
@@ -913,7 +869,6 @@ int Com_Scenario_Dialog(void)
             collapse_visible_dropdowns();
 
             display = REDRAW_BACKGROUND;
-            transmit = true;
             break;
 
             /*------------------------------------------------------------------
@@ -928,7 +883,6 @@ int Com_Scenario_Dialog(void)
                 MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
 
                 strcpy(MPlayerName, namebuf);
-                transmit = 1;
             }
             break;
 
@@ -970,8 +924,7 @@ int Com_Scenario_Dialog(void)
                 diff_dropdown.Collapse();
                 house_dropdown.Collapse();
                 display = REDRAW_BACKGROUND;
-                transmit = true;
-                break;
+                                break;
             }
 
             break;
@@ -1014,7 +967,6 @@ int Com_Scenario_Dialog(void)
                 house_dropdown.Collapse();
                 diff_dropdown.Collapse();
                 display = REDRAW_BACKGROUND;
-                transmit = true;
             }
 
             break;
@@ -1030,7 +982,6 @@ int Com_Scenario_Dialog(void)
                     display = REDRAW_MESSAGE;
                 }
                 collapse_visible_dropdowns();
-                transmit = 1;
             }
             break;
 
@@ -1046,7 +997,6 @@ int Com_Scenario_Dialog(void)
                     display = REDRAW_MESSAGE;
                 }
                 collapse_visible_dropdowns();
-                transmit = 1;
             }
             break;
 
@@ -1066,31 +1016,8 @@ int Com_Scenario_Dialog(void)
                     display = REDRAW_MESSAGE;
                 }
                 collapse_visible_dropdowns();
-                transmit = 1;
             }
             break;
-
-        /*------------------------------------------------------------------
-        User adjusts # of AI players
-        ------------------------------------------------------------------*/
-        // case (BUTTON_AIPLAYERS | KN_BUTTON):
-        //     if (!ready_to_go) {
-        //         MPlayerGhosts = aiplayersgauge.Get_Value();
-        //         int humans = 1; // One humans.
-        //         MPlayerGhosts += 1;
-        //         if (MPlayerGhosts + humans >= 6 /*Rule.MaxPlayers*/) { // if it's pegged, max it out
-        //             MPlayerGhosts = 6 /*Rule.MaxPlayers*/ - humans;
-        //             aiplayersgauge.Set_Value(MPlayerGhosts - 1);
-        //         }
-        //         transmit = true;
-        //         if (display < REDRAW_MESSAGE)
-        //             display = REDRAW_MESSAGE;
-        //
-        //         collapse_visible_dropdowns();
-        //
-        //         break;
-        //     }
-        //     break;
 
         case (BUTTON_TIBERIUMSCALE | KN_BUTTON):
             if (!ready_to_go) {
@@ -1141,14 +1068,11 @@ int Com_Scenario_Dialog(void)
             tiberiumscalegauge.Set_Value(MPlayerTiberium < 2 ? 0 : MPlayerTiberium - 1);
 
             Special.IsTGrowth = MPlayerTiberium;
-            // Rule.IsTGrowth = MPlayerTiberium;
             Special.IsTSpread = MPlayerTiberium;
-            // Rule.IsTSpread = MPlayerTiberium;
 
             MPlayerGoodies = optionlist.Is_Checked(2);
             Special.IsCaptureTheFlag = optionlist.Is_Checked(3);
 
-            transmit = true;
             if (display < REDRAW_MESSAGE)
                 display = REDRAW_MESSAGE;
 
@@ -1171,10 +1095,6 @@ int Com_Scenario_Dialog(void)
                     // force transmitting of game options packet one last time
 
                     ready_to_go = true;
-
-                    transmit = 1;
-                    transmittime = 0;
-
                 } else {
                     WWMessageBox().Process(TXT_ONLY_ONE, TXT_OOPS);
                     display = REDRAW_ALL;
