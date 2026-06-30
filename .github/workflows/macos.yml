@@ -84,7 +84,10 @@ jobs:
       run: |
         PRESET=""
 
-        if [ "${{ steps.changes.outputs.nco }}" = "true" ]; then
+        if [ "${{ github.event_name}}" != "pull_request" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "Main branch detected - building everything using cmake preset: release"
+          PRESET="release"
+        elif [ "${{ steps.changes.outputs.nco }}" = "true" ]; then
           echo "Changes to shared files detected - building everything using cmake preset: release"
           PRESET="release"
         elif [ "${{ steps.changes.outputs.ra }}" = "true" ] && [ "${{ steps.changes.outputs.td }}" = "true" ]; then
