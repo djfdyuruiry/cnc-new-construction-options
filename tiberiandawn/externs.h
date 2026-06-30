@@ -250,8 +250,8 @@ extern int AllowAttract;
 ** Modem globals
 */
 extern bool ModemService;
-// extern NullModemClass 								NullModem;
-// extern DynamicVectorClass<PhoneEntryClass *>	PhoneBook;
+extern NullModemClass NullModem;
+extern DynamicVectorClass<PhoneEntryClass*>PhoneBook;
 extern int CurPhoneIdx;
 extern DynamicVectorClass<char*> InitStrings;
 extern SerialSettingsType SerialDefaults;

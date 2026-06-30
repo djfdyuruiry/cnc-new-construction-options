@@ -16,10 +16,10 @@
 #pragma once
 class ModemRegistryEntryClass
 {
-
 public:
-    ModemRegistryEntryClass(int modem_number);
-    ~ModemRegistryEntryClass(void);
+    ModemRegistryEntryClass(int modem_number) {}
+
+    ~ModemRegistryEntryClass(void) {}
 
     char* Get_Modem_Name(void)
     {
