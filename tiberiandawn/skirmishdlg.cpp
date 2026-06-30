@@ -1,682 +1,136 @@
 #include "function.h"
-#include "dialog.h"
 #include "drop.h"
+#include "framelimit.h"
 
-typedef enum
+struct ControlDimension
 {
-    // player setup
-    BUTTON_NAME = 100,
-    BUTTON_HOUSE,
-    BUTTON_COLOR_1,
-    BUTTON_COLOR_2,
-    BUTTON_COLOR_3,
-    BUTTON_COLOR_4,
-    BUTTON_COLOR_5,
-    BUTTON_COLOR_6,
-    // scenario selection
-    BUTTON_SCENARIO_LIST,
-    BUTTON_MINIMAP,
-    // scenario setup
-    BUTTON_AI_DIFF_1,
-    BUTTON_AI_DIFF_2,
-    BUTTON_AI_DIFF_3,
-    BUTTON_AI_DIFF_4,
-    BUTTON_AI_DIFF_5,
-    BUTTON_AI_HOUSE_1,
-    BUTTON_AI_HOUSE_2,
-    BUTTON_AI_HOUSE_3,
-    BUTTON_AI_HOUSE_4,
-    BUTTON_AI_HOUSE_5,
-    BUTTON_COUNT,
-    BUTTON_LEVEL,
-    BUTTON_CREDITS,
-    BUTTON_TIBERIUM_SCALE,
-    BUTTON_OPTIONS,
-    // dialog buttons
-    BUTTON_OK,
-    BUTTON_CANCEL
-} SkirmishControls;
+    int X = 0;
+    int Y = 0;
+    int W = 0;
+    int H = 0;
+};
 
-class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
+class SkirmishScenarioDialog final
 {
+    /*........................................................................
+    Button Enumerations
+    ........................................................................*/
+    typedef enum
+    {
+        BUTTON_NAME = 100,
+        BUTTON_HOUSE,
+        BUTTON_AI_DIFF_1,
+        BUTTON_AI_DIFF_2,
+        BUTTON_AI_DIFF_3,
+        BUTTON_AI_DIFF_4,
+        BUTTON_AI_DIFF_5,
+        BUTTON_AI_HOUSE_1,
+        BUTTON_AI_HOUSE_2,
+        BUTTON_AI_HOUSE_3,
+        BUTTON_AI_HOUSE_4,
+        BUTTON_AI_HOUSE_5,
+        BUTTON_OPTIONS,
+        BUTTON_SCENARIO_LIST,
+        BUTTON_COUNT,
+        BUTTON_LEVEL,
+        BUTTON_CREDITS,
+        BUTTON_TIBERIUM_SCALE,
+        BUTTON_OK,
+        BUTTON_LOAD,
+        BUTTON_CANCEL,
+        BUTTON_DIFFICULTY,
+        BUTTON_COLOR_1,
+        BUTTON_COLOR_2,
+        BUTTON_COLOR_3,
+        BUTTON_COLOR_4,
+        BUTTON_COLOR_5,
+        BUTTON_COLOR_6,
+        BUTTON_PLAYER_LIST // not used
+    } ControlType;
+
+    /*........................................................................
+    Redraw values: in order from "top" to "bottom" layer of the dialog
+    ........................................................................*/
+    typedef enum
+    {
+        REDRAW_NONE = 0,
+        REDRAW_MESSAGE,
+        REDRAW_COLORS,
+        REDRAW_BUTTONS,
+        REDRAW_BACKGROUND,
+        REDRAW_ALL = REDRAW_BACKGROUND
+    } RedrawType;
+
     static constexpr auto DropdownTextLength = 25;
     static inline int OptionTabs[] = {8};
 
-    void Collapse_Visible_Dropdowns(DialogRedrawType& display)
+    // display scale
+    int Factor;
+
+    // dimensions
+
+    int X;
+    int Y;
+    int Width;
+    int Height;
+    int Center;
+
+    int TextHeight;
+    int MarginWidth;
+    int MarginHeight;
+
+    // button shapes
+
+    void const* UpButtonShape;
+    void const* DownButtonShape;
+
+    // controls
+
+    std::map<ControlType, ControlDimension> Dimensions;
+    std::map<ControlType, std::unique_ptr<char[]>> Text;
+    std::map<ControlType, std::unique_ptr<GadgetClass>> Controls;
+    GadgetClass* CommandChain;
+
+    bool Is_Mouse_Over_Rectangle(const int start_x, const int start_y, const int end_x, const int end_y)
+    {
+        return Keyboard->MouseQX >= start_x
+            && Keyboard->MouseQX <= end_x
+            && Keyboard->MouseQY >= start_y
+            && Keyboard->MouseQY <= end_y;
+    }
+
+    bool Is_Mouse_Outside_Control_Dimensions(const GadgetClass& control)
+    {
+        return (Keyboard->MouseQX < control.X || Keyboard->MouseQX > control.X + control.Width)
+            && (Keyboard->MouseQY < control.Y || Keyboard->MouseQY > control.Y + control.Height);
+    }
+
+    template<class T>
+    T& Get_Control(const ControlType type)
+    {
+        return *reinterpret_cast<T*>(Controls[type].get());
+    }
+
+    KeyNumType Get_Input(RedrawType& display)
     {
         auto& house_dropdown = Get_Control<DropListClass>(BUTTON_HOUSE);
-
-        if (house_dropdown.IsDropped) {
-            house_dropdown.Collapse();
-            display = REDRAW_BACKGROUND;
-        }
-
-        for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            const auto house_btn = static_cast<SkirmishControls>(control + 5);
-            auto& ai_diff_dropdown = Get_Control<DropListClass>(control);
-            auto& ai_house_dropdown = Get_Control<DropListClass>(house_btn);
-
-            if (ai_diff_dropdown.IsDropped) {
-                ai_diff_dropdown.Collapse();
-                display = REDRAW_BACKGROUND;
-            }
-
-            if (ai_house_dropdown.IsDropped) {
-                ai_house_dropdown.Collapse();
-                display = REDRAW_BACKGROUND;
-            }
-        }
-    }
-
-    void Toggle_AI_Players()
-    {
-        for (auto diff_control = BUTTON_AI_DIFF_1; diff_control <= BUTTON_AI_DIFF_5; ++diff_control) {
-            auto house_control = static_cast<SkirmishControls>(diff_control + 5);
-
-            auto& diff_dropdown = Get_Control<DropListClass>(diff_control);
-            auto& house_dropdown = Get_Control<DropListClass>(house_control);
-
-            if (diff_control - BUTTON_AI_DIFF_1 < MPlayerMax - 1) {
-                house_dropdown.DropButton.Enable();
-                diff_dropdown.DropButton.Enable();
-            } else {
-                house_dropdown.Set_Selected_Index(0);
-                diff_dropdown.Set_Selected_Index(0);
-
-                house_dropdown.DropButton.Disable();
-                diff_dropdown.DropButton.Disable();
-            }
-        }
-    }
-
-    int Get_Menu_Color_For_Cell(const CELL raw_cell)
-    {
-        const auto& cell = Map[raw_cell];
-
-        if (cell.IsWaypoint) {
-            for (auto i = 0; i < 6; i++) {
-                if (raw_cell == Scen.Waypoint[i]) {
-                    // player start location
-                    return 127;
-                }
-            }
-        }
-
-        auto occupier = cell.Cell_Occupier();
-
-        if (occupier != nullptr) {
-            // pick a color based on occupier type
-            switch (occupier->What_Am_I()) {
-                case RTTI_TEMPLATE: {
-                    return 0x1A;
-                }
-
-                case RTTI_TERRAIN: {
-                    const auto terrain = reinterpret_cast<TerrainClass*>(occupier);
-                    // trees or rocks
-                    return terrain->Full_Name() == TXT_TREE ? 0x03 : 0x0E;
-                }
-
-                case RTTI_INFANTRY:
-                case RTTI_UNIT:
-                case RTTI_BUILDING: {
-                    const auto techno = reinterpret_cast<TechnoClass*>(occupier);
-
-                    // only render objects for neutral house
-                    // (random unit placement for multiplayer houses is generated by read scenario logic)
-                    if (techno->Owner() < HOUSE_MULTI1) {
-                        return 0x05; // default to gold (used for neutral house anyway)
-                    }
-                    break;
-                }
-
-                default: break;
-            }
-        }
-
-        // pick a color based on land type
-        switch (cell.Land_Type()) {
-            case LAND_WATER:
-                return 0x02;
-            case LAND_WALL:
-            case LAND_ROCK:
-                return 0x0E;
-            case LAND_TIBERIUM:
-                return 0x04;
-
-            default: {
-                if (cell.TType >= TEMPLATE_ROAD1 && cell.TType <= TEMPLATE_ROAD43) {
-                    // road
-                    return 0x10;
-                }
-
-                if (cell.TType >= TEMPLATE_BRIDGE1 && cell.TType <= TEMPLATE_BRIDGE4D) {
-                    // bridge
-                    return 0x0;
-                }
-
-                if (Map.Theater == THEATER_SNOW) {
-                    return 0xFF;
-                }
-
-                if (Map.Theater == THEATER_DESERT) {
-                    return 0x14;
-                }
-
-                return 0xA0;
-            }
-        }
-    }
-
-    void Iterate_Map_Cells(const std::function<void(CELL)>& callback)
-    {
-        if (MPlayerScenarioNumber == -1) {
-            return;
-        }
-
-        const auto old_build_level = BuildLevel;
-
-        Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
-        GameToPlay = GAME_NORMAL;
-
-        if (!Read_Scenario_Ini(Scen.ScenarioName, Special, false, false)) {
-            Clear_Scenario(false);
-            GameToPlay = GAME_SKIRMISH;
-            BuildLevel = old_build_level;
-            return;
-        }
-
-        for (CELL raw_cell = 0; raw_cell < MAP_CELL_TOTAL; raw_cell++) {
-            if (Map.In_Radar(raw_cell)) {
-                callback(raw_cell);
-            }
-        }
-
-        Clear_Scenario(false);
-        GameToPlay = GAME_SKIRMISH;
-        BuildLevel = old_build_level;
-    }
-
-    int Calculate_Player_Count()
-    {
-        auto player_count = 0;
-
-        Iterate_Map_Cells([&](const auto raw_cell) {
-            const auto& cell = Map[raw_cell];
-
-            if (!cell.IsWaypoint) {
-                return;
-            }
-
-            for (auto i = 0; i < 6; i++) {
-                if (raw_cell == Scen.Waypoint[i]) {
-                    player_count++;
-                }
-            }
-        });
-
-        return player_count;
-    }
-
-    void Render_Minimap()
-    {
-        const auto minimap_bottom_right_x = Dimensions[BUTTON_MINIMAP].X + Dimensions[BUTTON_MINIMAP].W;
-        const auto minimap_bottom_right_y = Dimensions[BUTTON_MINIMAP].Y + Dimensions[BUTTON_MINIMAP].H;
-
-        // draw minimap background
-        LogicPage->Fill_Rect(
-            Dimensions[BUTTON_MINIMAP].X + 1,
-            Dimensions[BUTTON_MINIMAP].Y + 1,
-            minimap_bottom_right_x - 1,
-            minimap_bottom_right_y - 1,
-            BLACK
-        );
-
-        Hide_Mouse();
-        LogicPage->Lock();
-
-        bool scale_map = false;
-        bool first_cell = true;
-
-        Iterate_Map_Cells([&](const auto raw_cell) {
-            if (first_cell) {
-                #ifdef MEGAMAPS
-                scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
-                #else
-                scale_map = true;
-                #endif
-                first_cell = false;
-            }
-
-            const auto color = Get_Menu_Color_For_Cell(raw_cell);
-
-            if (scale_map) {
-                for (int x = 0; x < 2; ++x) {
-                    for (int y = 0; y < 2; ++y) {
-                        LogicPage->Put_Pixel(
-                            Dimensions[BUTTON_MINIMAP].X + (Cell_X(raw_cell) * 2) + x + 1,
-                            Dimensions[BUTTON_MINIMAP].Y + (Cell_Y(raw_cell) * 2) + y + 1,
-                            color
-                        );
-                    }
-                }
-            } else {
-                LogicPage->Put_Pixel(
-                    Dimensions[BUTTON_MINIMAP].X + Cell_X(raw_cell) + 1,
-                    Dimensions[BUTTON_MINIMAP].Y + Cell_Y(raw_cell) + 1,
-                    color
-                );
-            }
-        });
-
-        LogicPage->Unlock();
-
-        // draw minimap border
-        LogicPage->Draw_Rect(
-            Dimensions[BUTTON_MINIMAP].X,
-            Dimensions[BUTTON_MINIMAP].Y,
-            minimap_bottom_right_x,
-            minimap_bottom_right_y,
-            GRAY
-        );
-
-        Show_Mouse();
-    }
-
-protected:
-    std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
-    {
-        switch (input) {
-            /*------------------------------------------------------------------
-            User clicks on a color button
-            ------------------------------------------------------------------*/
-            case KN_LMOUSE:
-                if (
-                    Is_Mouse_Over_Rectangle(
-                        Dimensions[BUTTON_COLOR_1].X,
-                        Dimensions[BUTTON_COLOR_1].Y,
-                        (Dimensions[BUTTON_COLOR_6].X + Dimensions[BUTTON_COLOR_6].W),
-                        (Dimensions[BUTTON_COLOR_6].Y + Dimensions[BUTTON_COLOR_6].H)
-                    )
-                ) {
-                    MPlayerPrefColor = (Keyboard->MouseQX - Dimensions[BUTTON_COLOR_1].X)
-                        / Dimensions[BUTTON_COLOR_1].W;
-                    MPlayerColorIdx = MPlayerPrefColor;
-                    display = REDRAW_FOREGROUND;
-
-                    auto& name_edt = Get_Control<EditClass>(BUTTON_NAME);
-                    name_edt.Set_Color(MPlayerTColors[MPlayerColorIdx]);
-                    name_edt.Flag_To_Redraw();
-
-                    strcpy(MPlayerName, Text[BUTTON_NAME].get());
-
-                    Collapse_Visible_Dropdowns(display);
-                }
-                break;
-
-                /*------------------------------------------------------------------
-                User edits the name field; retransmit new game options
-                ------------------------------------------------------------------*/
-            case (BUTTON_NAME | KN_BUTTON): {
-                strcpy(MPlayerName, Text[BUTTON_NAME].get());
-
-                Collapse_Visible_Dropdowns(display);
-                break;
-            }
-
-                /*------------------------------------------------------------------
-                House Buttons: set the player's desired House
-                ------------------------------------------------------------------*/
-            case (BUTTON_HOUSE | KN_BUTTON): {
-                MPlayerHouse = static_cast<HousesType>(
-                    Get_Control<DropListClass>(BUTTON_HOUSE).Current_Index() + HOUSE_GOOD
-                );
-                strcpy(MPlayerName, Text[BUTTON_NAME].get());
-
-                Collapse_Visible_Dropdowns(display);
-                display = REDRAW_BACKGROUND;
-                break;
-            }
-
-                /*------------------------------------------------------------------
-                New Scenario selected.
-                ------------------------------------------------------------------*/
-            case (BUTTON_SCENARIO_LIST | KN_BUTTON): {
-                auto& scenario_list = Get_Control<ListClass>(BUTTON_SCENARIO_LIST);
-
-                if (scenario_list.Current_Index() != ScenarioIdx) {
-                    ScenarioIdx = scenario_list.Current_Index();
-
-                    // store the scenario number rather than current scenario list index
-                    // (index will change if maps are added/removed by player)
-                    MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
-
-                    strcpy(MPlayerName, Text[BUTTON_NAME].get());
-
-                    MPlayerMax = Calculate_Player_Count();
-                    Toggle_AI_Players();
-                    display = REDRAW_ALL;
-                }
-                break;
-            }
-
-                /*------------------------------------------------------------------
-                AI player difficulty dropdown selection changed.
-                ------------------------------------------------------------------*/
-            case (BUTTON_AI_DIFF_1 | KN_BUTTON):
-            case (BUTTON_AI_DIFF_2 | KN_BUTTON):
-            case (BUTTON_AI_DIFF_3 | KN_BUTTON):
-            case (BUTTON_AI_DIFF_4 | KN_BUTTON):
-            case (BUTTON_AI_DIFF_5 | KN_BUTTON): {
-                for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-                    if (input != (control | KN_BUTTON)) {
-                        continue;
-                    }
-
-                    const auto house_btn = static_cast<SkirmishControls>(control + 5);
-                    auto& ai_diff_dropdown = Get_Control<DropListClass>(control);
-                    auto& ai_house_dropdown = Get_Control<DropListClass>(house_btn);
-
-                    // nothing changed, ignore input
-                    if (!ai_diff_dropdown.List.Index_Changed()) {
-                        break;
-                    }
-
-                    const auto diff_was_disabled = ai_diff_dropdown.Current_Index() == 0;
-                    const auto diff_was_activated = ai_diff_dropdown.List.Get_Previous_Index() == 0;
-                    const auto house_is_disabled = ai_house_dropdown.Current_Index() == 0;
-
-                    if (diff_was_disabled) {
-                        // reset house to match disabled AI diff
-                        ai_house_dropdown.Set_Selected_Index(0);
-                    } else if (diff_was_activated && house_is_disabled) {
-                        // select a default house of '?' since none is selected
-                        ai_house_dropdown.Set_Selected_Index(1);
-                    }
-
-                    ai_diff_dropdown.Collapse();
-                    ai_house_dropdown.Collapse();
-                    display = REDRAW_BACKGROUND;
-                    break;
-                }
-
-                break;
-            }
-
-                /*------------------------------------------------------------------
-                AI player house dropdown selection changed.
-                ------------------------------------------------------------------*/
-            case (BUTTON_AI_HOUSE_1 | KN_BUTTON):
-            case (BUTTON_AI_HOUSE_2 | KN_BUTTON):
-            case (BUTTON_AI_HOUSE_3 | KN_BUTTON):
-            case (BUTTON_AI_HOUSE_4 | KN_BUTTON):
-            case (BUTTON_AI_HOUSE_5 | KN_BUTTON): {
-                for (auto control = BUTTON_AI_HOUSE_1; control <= BUTTON_AI_HOUSE_5; ++control) {
-                    if (input != (control | KN_BUTTON)) {
-                        continue;
-                    }
-
-                    const auto diff_btn = static_cast<SkirmishControls>(control - 5);
-                    auto& ai_diff_dropdown = Get_Control<DropListClass>(diff_btn);
-                    auto& ai_house_dropdown = Get_Control<DropListClass>(control);
-
-                    // nothing changed, ignore input
-                    if (!ai_house_dropdown.List.Index_Changed()) {
-                        break;
-                    }
-
-                    const auto house_was_disabled = ai_house_dropdown.Current_Index() == 0;
-                    const auto house_was_activated = ai_house_dropdown.List.Get_Previous_Index() == 0;
-                    const auto diff_is_disabled = ai_diff_dropdown.Current_Index() == 0;
-
-                    if (house_was_disabled) {
-                        // reset diff to match disabled AI house
-                        ai_diff_dropdown.Set_Selected_Index(0);
-                    } else if (house_was_activated && diff_is_disabled) {
-                        // select a default diff of 'Normal' since none is selected
-                        ai_diff_dropdown.Set_Selected_Index(2);
-                    }
-
-                    ai_house_dropdown.Collapse();
-                    ai_diff_dropdown.Collapse();
-                    display = REDRAW_BACKGROUND;
-                }
-
-                break;
-            }
-
-            /*------------------------------------------------------------------
-            User adjusts max # units
-            ------------------------------------------------------------------*/
-            case (BUTTON_COUNT | KN_BUTTON): {
-                MPlayerUnitCount = Get_Control<GaugeClass>(BUTTON_COUNT).Get_Value()
-                    + MPlayerCountMin[MPlayerBases];
-
-                if (display < REDRAW_BACKGROUND) {
-                    display = REDRAW_BACKGROUND;
-                }
-                Collapse_Visible_Dropdowns(display);
-                break;
-            }
-
-            /*------------------------------------------------------------------
-            User adjusts build level
-            ------------------------------------------------------------------*/
-            case (BUTTON_LEVEL | KN_BUTTON): {
-                BuildLevel = Get_Control<GaugeClass>(BUTTON_LEVEL).Get_Value() + 1;
-                if (BuildLevel > MPLAYER_BUILD_LEVEL_MAX) {
-                    // if it's pegged, max it out
-                    BuildLevel = MPLAYER_BUILD_LEVEL_MAX;
-                }
-
-                if (display < REDRAW_BACKGROUND) {
-                    display = REDRAW_BACKGROUND;
-                }
-                Collapse_Visible_Dropdowns(display);
-                break;
-            }
-
-            /*------------------------------------------------------------------
-            User edits the credits value; retransmit new game options
-            ------------------------------------------------------------------*/
-            case (BUTTON_CREDITS | KN_BUTTON): {
-                MPlayerCredits = Get_Control<GaugeClass>(BUTTON_CREDITS).Get_Value();
-
-                if (MPlayerCredits == 0) {
-                    // clear lingering digits when player quickly slides to zero
-                    display = REDRAW_ALL;
-                }
-
-                if (display < REDRAW_BACKGROUND) {
-                    display = REDRAW_BACKGROUND;
-                }
-                Collapse_Visible_Dropdowns(display);
-                break;
-            }
-
-            case (BUTTON_TIBERIUM_SCALE | KN_BUTTON): {
-                MPlayerTiberium = Get_Control<GaugeClass>(BUTTON_TIBERIUM_SCALE).Get_Value() + 1;
-
-                Get_Control<CheckListClass>(BUTTON_OPTIONS).Check_Item(1, MPlayerTiberium > 0);
-
-                Special.IsTGrowth = MPlayerTiberium;
-                Special.IsTSpread = MPlayerTiberium;
-
-                if (display < REDRAW_BACKGROUND) {
-                    display = REDRAW_BACKGROUND;
-                }
-                Collapse_Visible_Dropdowns(display);
-                break;
-            }
-
-            /*------------------------------------------------------------------
-            Toggle-able options:
-            If 'Bases' gets toggled, we have to change the range of the
-            UnitCount slider.
-            Also, if Tiberium gets toggled, we have to set the flags
-            in SpecialClass.
-            ------------------------------------------------------------------*/
-            case (BUTTON_OPTIONS | KN_BUTTON): {
-                auto& option_list = Get_Control<CheckListClass>(BUTTON_OPTIONS);
-                auto count_gauge = Get_Control<GaugeClass>(BUTTON_COUNT);
-                auto tiberium_scale_gauge = Get_Control<GaugeClass>(BUTTON_TIBERIUM_SCALE);
-
-                if (MPlayerBases != option_list.Is_Checked(0)) {
-                    MPlayerBases = option_list.Is_Checked(0);
-
-                    if (MPlayerBases) {
-                        MPlayerUnitCount = static_cast<int>(
-                            Fixed_To_Cardinal(
-                                MPlayerCountMax[1] - MPlayerCountMin[1],
-                                Cardinal_To_Fixed(
-                                    MPlayerCountMax[0] - MPlayerCountMin[0],
-                                    MPlayerUnitCount - MPlayerCountMin[0]
-                                )
-                            )
-                        ) + MPlayerCountMin[1];
-                    } else {
-                        MPlayerUnitCount = static_cast<int>(
-                            Fixed_To_Cardinal(
-                                MPlayerCountMax[0] - MPlayerCountMin[0],
-                                Cardinal_To_Fixed(
-                                    MPlayerCountMax[1] - MPlayerCountMin[1],
-                                    MPlayerUnitCount - MPlayerCountMin[1]
-                                )
-                            )
-                        ) + MPlayerCountMin[0];
-                    }
-
-                    count_gauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
-                    count_gauge.Set_Value(MPlayerUnitCount - MPlayerCountMin[MPlayerBases]);
-                }
-
-                MPlayerTiberium = option_list.Is_Checked(1) ? 1 : 0;
-
-                if (tiberium_scale_gauge.Get_Value() + 1 > 1) {
-                    MPlayerTiberium = tiberium_scale_gauge.Get_Value() + 1;
-                }
-
-                tiberium_scale_gauge.Set_Value(MPlayerTiberium < 2 ? 0 : MPlayerTiberium - 1);
-
-                Special.IsTGrowth = MPlayerTiberium;
-                Special.IsTSpread = MPlayerTiberium;
-
-                MPlayerGoodies = option_list.Is_Checked(2);
-                Special.IsCaptureTheFlag = option_list.Is_Checked(3);
-
-                if (display < REDRAW_BACKGROUND) {
-                    display = REDRAW_BACKGROUND;
-                }
-                Collapse_Visible_Dropdowns(display);
-                break;
-            }
-
-            /*------------------------------------------------------------------
-            OK: exit loop with true status
-            ------------------------------------------------------------------*/
-            case (BUTTON_OK | KN_BUTTON): {
-                // check if at least one AI player enabled
-                auto ai_players = false;
-
-                for (auto button = BUTTON_AI_DIFF_1; button <= BUTTON_AI_DIFF_5; ++button) {
-                    if (Get_Control<DropListClass>(button).Current_Index() > 0) {
-                        ai_players = true;
-                        break;
-                    }
-                }
-
-                if (ai_players) {
-                    // at least one AI player enabled, proceed to select difficulty
-                    const auto difficulty = Fetch_Difficulty();
-
-                    if (difficulty == -1) {
-                        // user canceled the difficulty popup
-                        display = REDRAW_ALL;
-                        break;
-                    }
-
-                    switch (difficulty) {
-                        case 0:
-                            Scen.CDifficulty = DIFF_HARD;
-                            Scen.Difficulty = DIFF_EASY;
-                            break;
-
-                        case 1:
-                            Scen.CDifficulty = DIFF_HARD;
-                            Scen.Difficulty = DIFF_NORMAL;
-                            break;
-
-                        case 2:
-                            Scen.CDifficulty = DIFF_NORMAL;
-                            Scen.Difficulty = DIFF_NORMAL;
-                            break;
-
-                        case 3:
-                            Scen.CDifficulty = DIFF_EASY;
-                            Scen.Difficulty = DIFF_NORMAL;
-                            break;
-
-                        case 4:
-                            Scen.CDifficulty = DIFF_EASY;
-                            Scen.Difficulty = DIFF_HARD;
-                            break;
-                    }
-
-                    return true;
-                }
-
-                // warn that no AI players are enabled
-                WWMessageBox().Process(TXT_ONLY_ONE, TXT_OOPS);
-
-                display = REDRAW_ALL;
-                break;
-            }
-
-            /*------------------------------------------------------------------
-            CANCEL: send a SIGN_OFF, bail out with error code
-            ------------------------------------------------------------------*/
-            case (KN_ESC): {
-                if (Messages.Get_Edit_Buf() != nullptr) {
-                    Messages.Input(input);
-
-                    if (display < REDRAW_BACKGROUND) {
-                        display = REDRAW_BACKGROUND;
-                    }
-
-                    break;
-                }
-            }
-            case (BUTTON_CANCEL | KN_BUTTON): {
-                MPlayerMax = 6;
-                return false;
-            }
-
-            default: break;
-        } /* end of input processing */
-
-        return std::nullopt;
-    }
-
-    KeyNumType Get_Input(DialogRedrawType& display) override
-    {
-        const auto& house_dropdown = Get_Control<DropListClass>(BUTTON_HOUSE);
         const bool droplist_is_dropped = house_dropdown.IsDropped;
-        std::vector<SkirmishControls> ai_diffs_collapsed;
-        std::vector<SkirmishControls> ai_houses_collapsed;
+        std::vector<ControlType> ai_diffs_collapsed;
+        std::vector<ControlType> ai_houses_collapsed;
 
         for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
             if (Get_Control<DropListClass>(control).IsDropped) {
                 ai_diffs_collapsed.emplace_back(control);
             }
 
-            const auto house_btn = static_cast<SkirmishControls>(control + 5);
+            const auto house_btn = static_cast<ControlType>(control + 5);
 
             if (Get_Control<DropListClass>(house_btn).IsDropped) {
                 ai_houses_collapsed.emplace_back(house_btn);
             }
         }
 
-        auto input = Dialog::Get_Input(display);
+        const auto input = CommandChain->Input();
 
         /*
         ** Redraw everything if the player house droplist collapsed
@@ -707,7 +161,7 @@ protected:
 
         // for any visible AI house dropdown, if mouse input is received outside it's bounds, hide it
         for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            const auto house_btn = static_cast<SkirmishControls>(control + 5);
+            const auto house_btn = static_cast<ControlType>(control + 5);
             auto& diff_dropdown = Get_Control<DropListClass>(control);
             auto& ai_house_dropdown = Get_Control<DropListClass>(house_btn);
 
@@ -725,174 +179,255 @@ protected:
         return input;
     }
 
-    void Render_Foreground(DialogRedrawType& display) override
+    void Render(RedrawType& display)
     {
-        for (auto control = BUTTON_COLOR_1; control <= BUTTON_COLOR_6; ++control) {
-            const auto mplayer_idx = control - BUTTON_COLOR_1;
-
-            LogicPage->Fill_Rect(Dimensions[control].X + 1 * Factor,
-                                 Dimensions[control].Y + 1 * Factor,
-                                 Dimensions[control].X + 1 * Factor + Dimensions[control].W - 2 * Factor,
-                                 Dimensions[control].Y + 1 * Factor + Dimensions[control].H - 2 * Factor,
-                                 MPlayerGColors[mplayer_idx]);
-
-            Draw_Box(
-                Dimensions[control].X,
-                Dimensions[control].Y,
-                Dimensions[control].W,
-                Dimensions[control].H,
-                mplayer_idx == MPlayerColorIdx ? BOXSTYLE_GREEN_DOWN : BOXSTYLE_GREEN_RAISED,
-                false
-            );
+        if (!display) {
+            return;
         }
-
         char txt[80];
 
-        sprintf(txt, "%d ", MPlayerUnitCount);
-        Fancy_Text_Print(txt,
-                         Dimensions[BUTTON_COUNT].X + Dimensions[BUTTON_COUNT].W + 3 * Factor,
-                         Dimensions[BUTTON_COUNT].Y,
-                         CC_GREEN,
-                         BLACK,
-                         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        Hide_Mouse();
+        /*
+        .................. Redraw background & dialog box ...................
+        */
+        if (display >= REDRAW_BACKGROUND) {
+            Dialog_Box(X, Y, Width, Height);
 
-        if (BuildLevel <= MPLAYER_BUILD_LEVEL_MAX) {
-            sprintf(txt, "%d ", BuildLevel);
-        } else {
-            sprintf(txt, "**");
-        }
-        Fancy_Text_Print(txt,
-                         Dimensions[BUTTON_LEVEL].X + Dimensions[BUTTON_LEVEL].W + 3 * Factor,
-                         Dimensions[BUTTON_LEVEL].Y,
-                         CC_GREEN,
-                         BLACK,
-                         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        sprintf(txt, "%d ", MPlayerCredits);
-        Fancy_Text_Print(txt,
-                         Dimensions[BUTTON_CREDITS].X + Dimensions[BUTTON_CREDITS].W + 3 * Factor,
-                         Dimensions[BUTTON_CREDITS].Y,
-                         CC_GREEN,
-                         BLACK,
-                         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+            // init font variables
 
-        sprintf(txt, "%dx ", Get_Control<GaugeClass>(BUTTON_TIBERIUM_SCALE).Get_Value() + 1);
-        Fancy_Text_Print(txt,
-                         Dimensions[BUTTON_TIBERIUM_SCALE].X + Dimensions[BUTTON_TIBERIUM_SCALE].W + 3 * Factor,
-                         Dimensions[BUTTON_TIBERIUM_SCALE].Y,
-                         CC_GREEN,
-                         BLACK,
-                         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+            Fancy_Text_Print(
+                TXT_NONE, 0, 0, TBLACK, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW
+            );
 
-        static const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
+            /*...............................................................
+            Dialog & Field labels
+            ...............................................................*/
+#ifdef FORCE_WINSOCK
+            if (Winsock.Get_Connected()) {
+                Draw_Caption(TXT_HOST_INTERNET_GAME, X, Y, Width);
+            } else {
+                Draw_Caption(TXT_HOST_SERIAL_GAME, X, Y, Width);
+            }
+#else
+            Draw_Caption(TXT_NONE, X, Y, Width);
+#endif // FORCE_WINSOCK
 
-        // TODO: add button and show preview mini-map in a popup since DOS dialog is too small
-        if (!is_dos) {
-            Render_Minimap();
-        }
-    }
-
-    void Render_Background(DialogRedrawType& display) override
-    {
-        Dialog::Render_Background(display);
-
-        Fancy_Text_Print(TXT_YOUR_NAME,
-                         Dimensions[BUTTON_NAME].X + (Dimensions[BUTTON_NAME].W / 2),
-                         Dimensions[BUTTON_NAME].Y - TextHeight - (1 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print(TXT_SIDE_COLON,
-                         Dimensions[BUTTON_HOUSE].X + (Dimensions[BUTTON_HOUSE].W / 2),
-                         Dimensions[BUTTON_HOUSE].Y - TextHeight - (1 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print(TXT_COLOR_COLON,
-                         X + ((Width / 4) * 3),
-                         Dimensions[BUTTON_COLOR_1].Y - TextHeight - (1 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print(TXT_SCENARIOS,
-                         Dimensions[BUTTON_SCENARIO_LIST].X + (Dimensions[BUTTON_SCENARIO_LIST].W / 2),
-                         Dimensions[BUTTON_SCENARIO_LIST].Y - TextHeight - (1 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print(std::format("{} Players", MPlayerMax).c_str(),
-                         Dimensions[BUTTON_MINIMAP].X + (Dimensions[BUTTON_MINIMAP].W / 2),
-                         Dimensions[BUTTON_MINIMAP].Y - TextHeight - (1 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print(TXT_COUNT,
-                         Dimensions[BUTTON_COUNT].X - 3 * Factor,
-                         Dimensions[BUTTON_COUNT].Y,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_RIGHT);
-
-        Fancy_Text_Print(TXT_LEVEL,
-                         Dimensions[BUTTON_LEVEL].X - 3 * Factor,
-                         Dimensions[BUTTON_LEVEL].Y,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_RIGHT);
-
-        Fancy_Text_Print(TXT_START_CREDITS_COLON,
-                         Dimensions[BUTTON_CREDITS].X - 3 * Factor,
-                         Dimensions[BUTTON_CREDITS].Y,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print("Tiberium Growth:", // TODO: Locale file entry
-                         Dimensions[BUTTON_TIBERIUM_SCALE].X - 3 * Factor,
-                         Dimensions[BUTTON_TIBERIUM_SCALE].Y,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        // AI player setting headers
-        Fancy_Text_Print("Difficulty", // TODO: Locale file entry
-                         (Dimensions[BUTTON_AI_HOUSE_1].X
-                            - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W * 1.5)) - (10 * Factor))
-                            + (static_cast<int>((Dimensions[BUTTON_AI_HOUSE_1].W * 1.5) / 1.25)),
-                         Dimensions[BUTTON_AI_HOUSE_1].Y - TextHeight - (2 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print(TXT_SIDE_COLON,
-                         Dimensions[BUTTON_AI_HOUSE_1].X
-                            + static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W / 1.25)),
-                         Dimensions[BUTTON_AI_HOUSE_1].Y - TextHeight - (2 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        // AI player difficulty and house dropwdown labels
-        const auto cur_ai_house_label_x = (Dimensions[BUTTON_AI_HOUSE_1].X
-            - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W * 1.5))
-            - (10 * Factor)) - 3 * Factor;
-
-        for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            // TODO: Locale file entry
-            Fancy_Text_Print(std::format("AI {}:", control - BUTTON_AI_DIFF_1 + 1).c_str(),
-                             cur_ai_house_label_x,
-                             Dimensions[control].Y,
+            Fancy_Text_Print(TXT_YOUR_NAME,
+                             Dimensions[BUTTON_NAME].X + (Dimensions[BUTTON_NAME].W / 2),
+                             Dimensions[BUTTON_NAME].Y - TextHeight - (1 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print(TXT_SIDE_COLON,
+                             Dimensions[BUTTON_HOUSE].X + (Dimensions[BUTTON_HOUSE].W / 2),
+                             Dimensions[BUTTON_HOUSE].Y - TextHeight - (1 * Factor),
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print(TXT_COLOR_COLON,
+                             X + ((Width / 4) * 3),
+                             Dimensions[BUTTON_COLOR_1].Y - TextHeight - (1 * Factor),
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            auto& difficulty = Get_Control<SliderClass>(BUTTON_DIFFICULTY);
+
+            Fancy_Text_Print("Easy", // TODO: Locale file entry
+                             difficulty.X,
+                             difficulty.Y - 8 * Factor,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print("Hard", // TODO: Locale file entry
+                             difficulty.X + difficulty.Width,
+                             difficulty.Y - 8 * Factor,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print("Normal", // TODO: Locale file entry
+                             difficulty.X + difficulty.Width / 2,
+                             difficulty.Y - 8 * Factor,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print(TXT_SCENARIOS,
+                             Dimensions[BUTTON_SCENARIO_LIST].X + (Dimensions[BUTTON_SCENARIO_LIST].W / 2),
+                             Dimensions[BUTTON_SCENARIO_LIST].Y - TextHeight - (1 * Factor),
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print(TXT_COUNT,
+                             Dimensions[BUTTON_COUNT].X - 3 * Factor,
+                             Dimensions[BUTTON_COUNT].Y,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_RIGHT);
+
+            Fancy_Text_Print(TXT_LEVEL,
+                             Dimensions[BUTTON_LEVEL].X - 3 * Factor,
+                             Dimensions[BUTTON_LEVEL].Y,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_RIGHT);
+
+            Fancy_Text_Print(TXT_START_CREDITS_COLON,
+                             Dimensions[BUTTON_CREDITS].X - 3 * Factor,
+                             Dimensions[BUTTON_CREDITS].Y,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print("Tiberium Growth:", // TODO: Locale file entry
+                             Dimensions[BUTTON_TIBERIUM_SCALE].X - 3 * Factor,
+                             Dimensions[BUTTON_TIBERIUM_SCALE].Y,
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            // AI player setting headers
+            Fancy_Text_Print("Player", // TODO: Locale file entry
+                             (Dimensions[BUTTON_AI_HOUSE_1].X
+                                - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W * 1.5)) - (10 * Factor))
+                                + (static_cast<int>((Dimensions[BUTTON_AI_HOUSE_1].W * 1.5) / 1.25)),
+                             Dimensions[BUTTON_AI_HOUSE_1].Y - TextHeight - (2 * Factor),
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            Fancy_Text_Print("Side", // TODO: Locale file entry
+                             Dimensions[BUTTON_AI_HOUSE_1].X
+                                + static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W / 1.25)),
+                             Dimensions[BUTTON_AI_HOUSE_1].Y - TextHeight - (2 * Factor),
+                             CC_GREEN,
+                             TBLACK,
+                             TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            // AI player difficulty and house checkbox labels
+            const auto cur_ai_house_label_x = (Dimensions[BUTTON_AI_HOUSE_1].X
+                - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W * 1.5))
+                - (10 * Factor)) - 3 * Factor;
+
+            for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
+                // TODO: Locale file entry
+                Fancy_Text_Print(std::format("AI {}:", control - BUTTON_HOUSE).c_str(),
+                                 cur_ai_house_label_x,
+                                 Dimensions[control].Y,
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+            }
+        }
+
+        /*..................................................................
+        Draw the color boxes
+        ..................................................................*/
+        if (display >= REDRAW_COLORS) {
+            for (auto control = BUTTON_COLOR_1; control <= BUTTON_COLOR_6; ++control) {
+                const auto mplayer_idx = control - BUTTON_COLOR_1;
+
+                LogicPage->Fill_Rect(Dimensions[control].X + 1 * Factor,
+                                     Dimensions[control].Y + 1 * Factor,
+                                     Dimensions[control].X + 1 * Factor + Dimensions[control].W - 2 * Factor,
+                                     Dimensions[control].Y + 1 * Factor + Dimensions[control].H - 2 * Factor,
+                                     MPlayerGColors[mplayer_idx]);
+
+                Draw_Box(
+                    Dimensions[control].X,
+                    Dimensions[control].Y,
+                    Dimensions[control].W,
+                    Dimensions[control].H,
+                    mplayer_idx == MPlayerColorIdx ? BOXSTYLE_GREEN_DOWN : BOXSTYLE_GREEN_RAISED,
+                    false
+                );
+            }
+        }
+
+        /*..................................................................
+        Draw the message:
+        - Erase an old message first
+        ..................................................................*/
+        if (display >= REDRAW_MESSAGE) {
+            sprintf(txt, "%d ", MPlayerUnitCount);
+            Fancy_Text_Print(txt,
+                             Dimensions[BUTTON_COUNT].X + Dimensions[BUTTON_COUNT].W + 3 * Factor,
+                             Dimensions[BUTTON_COUNT].Y,
+                             CC_GREEN,
+                             BLACK,
+                             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            if (BuildLevel <= MPLAYER_BUILD_LEVEL_MAX) {
+                sprintf(txt, "%d ", BuildLevel);
+            } else {
+                sprintf(txt, "**");
+            }
+            Fancy_Text_Print(txt,
+                             Dimensions[BUTTON_LEVEL].X + Dimensions[BUTTON_LEVEL].W + 3 * Factor,
+                             Dimensions[BUTTON_LEVEL].Y,
+                             CC_GREEN,
+                             BLACK,
+                             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+            sprintf(txt, "%d ", MPlayerCredits);
+            Fancy_Text_Print(txt,
+                             Dimensions[BUTTON_CREDITS].X + Dimensions[BUTTON_CREDITS].W + 3 * Factor,
+                             Dimensions[BUTTON_CREDITS].Y,
+                             CC_GREEN,
+                             BLACK,
+                             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            sprintf(txt, "%dx ", Get_Control<GaugeClass>(BUTTON_TIBERIUM_SCALE).Get_Value() + 1);
+            Fancy_Text_Print(txt,
+                             Dimensions[BUTTON_TIBERIUM_SCALE].X + Dimensions[BUTTON_TIBERIUM_SCALE].W + 3 * Factor,
+                             Dimensions[BUTTON_TIBERIUM_SCALE].Y,
+                             CC_GREEN,
+                             BLACK,
+                             TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        }
+
+        /*
+        .......................... Redraw buttons ..........................
+        */
+        if (display >= REDRAW_BUTTONS) {
+            CommandChain->Flag_List_To_Redraw();
+        }
+
+        Show_Mouse();
+        display = REDRAW_NONE;
+    }
+
+    void Collapse_Visible_Dropdowns(RedrawType& display)
+    {
+        auto& house_dropdown = Get_Control<DropListClass>(BUTTON_HOUSE);
+
+        if (house_dropdown.IsDropped) {
+            house_dropdown.Collapse();
+            display = REDRAW_BACKGROUND;
+        }
+
+        for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
+            const auto house_btn = static_cast<ControlType>(control + 5);
+            auto& ai_diff_dropdown = Get_Control<DropListClass>(control);
+            auto& ai_house_dropdown = Get_Control<DropListClass>(house_btn);
+
+            if (ai_diff_dropdown.IsDropped) {
+                ai_diff_dropdown.Collapse();
+                display = REDRAW_BACKGROUND;
+            }
+
+            if (ai_house_dropdown.IsDropped) {
+                ai_house_dropdown.Collapse();
+                display = REDRAW_BACKGROUND;
+            }
         }
     }
 
-    void Init_UI_State() override
+    void Init_UI_State()
     {
         auto& option_list = Get_Control<CheckListClass>(BUTTON_OPTIONS);
 
@@ -913,7 +448,7 @@ protected:
 
         auto& level_gauge = Get_Control<GaugeClass>(BUTTON_LEVEL);
         level_gauge.Set_Maximum(MPLAYER_BUILD_LEVEL_MAX - 1);
-        level_gauge.Set_Value(static_cast<int>(BuildLevel) - 1);
+        level_gauge.Set_Value(BuildLevel - 1);
 
         auto& count_gauge = Get_Control<GaugeClass>(BUTTON_COUNT);
         count_gauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
@@ -932,46 +467,20 @@ protected:
         for (auto i = 0; i < MPlayerScenarios.Count(); i++) {
             scenario_list.Add_Item(strupr(MPlayerScenarios[i]));
         }
+        ScenarioIdx = 0; // 1st scenario is selected
 
-        scenario_list.Set_Selected_Index(ScenarioIdx);
-
-        Toggle_AI_Players();
-    }
-
-    void Init_Data() override
-    {
-        if (MPlayerFilenum.Count() != 0) {
-            // select the last scenario chosen by the player (if present)
-            auto first_scenario_number = -1;
-            auto preferred_scenario_found = false;
-
-            for (auto i = 0; i < MPlayerFilenum.Count(); i++) {
-                if (first_scenario_number == -1) {
-                    first_scenario_number = i;
-                }
-
-                if (MPlayerFilenum[i] != MPlayerScenarioNumber) {
-                    continue;
-                }
-
+        // select the last scenario chosen by the player (if present)
+        for (auto i = 0; i < MPlayerFilenum.Count(); i++) {
+            if (MPlayerFilenum[i] == MPlayerScenarioNumber) {
                 ScenarioIdx = i;
-
-                preferred_scenario_found = true;
+                scenario_list.Set_Selected_Index(i);
                 break;
             }
-
-            if (!preferred_scenario_found) {
-                // preferred scenario no longer present in game data, default to first scenario in the list
-                MPlayerScenarioNumber = ScenarioIdx = first_scenario_number;
-            }
-
-            MPlayerMax = Calculate_Player_Count();
-        } else {
-            // no scenarios available
-            MPlayerScenarioNumber = ScenarioIdx = -1;
-            MPlayerMax = 1;
         }
+    }
 
+    void Init_Data()
+    {
         MPlayerColorIdx = MPlayerPrefColor; // init my preferred color
 
         strcpy(Text[BUTTON_NAME].get(), MPlayerName);       // set my name
@@ -1041,70 +550,116 @@ protected:
 
     void Init_Dialog_Buttons()
     {
-        Add_Control<BUTTON_OK, TextButtonClass>(
-            TXT_OK,
-            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            Dimensions[BUTTON_OK].X,
-            Dimensions[BUTTON_OK].Y,
-            Dimensions[BUTTON_OK].W,
-            Dimensions[BUTTON_OK].H
+        Controls[BUTTON_OK] = std::unique_ptr<GadgetClass>(
+            new TextButtonClass(
+                BUTTON_OK,
+                TXT_OK,
+                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[BUTTON_OK].X,
+                Dimensions[BUTTON_OK].Y,
+                Dimensions[BUTTON_OK].W,
+                Dimensions[BUTTON_OK].H
+            )
+        );
+        Get_Control<TextButtonClass>(BUTTON_OK).Add_Tail(*CommandChain);
+
+        Controls[BUTTON_CANCEL] = std::unique_ptr<GadgetClass>(
+            new TextButtonClass(
+                BUTTON_CANCEL,
+                TXT_CANCEL,
+                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[BUTTON_CANCEL].X,
+                Dimensions[BUTTON_CANCEL].Y,
+                Dimensions[BUTTON_CANCEL].W,
+                Dimensions[BUTTON_CANCEL].H
+            )
+        );
+        Get_Control<TextButtonClass>(BUTTON_CANCEL).Add_Tail(*CommandChain);
+    }
+
+    void Init_Difficulty_Slider()
+    {
+        Controls[BUTTON_DIFFICULTY] = std::unique_ptr<GadgetClass>(
+            new SliderClass(
+                BUTTON_DIFFICULTY,
+                Dimensions[BUTTON_NAME].X,
+                Dimensions[BUTTON_OK].Y - (8 * Factor) - MarginWidth,
+                Width - (Dimensions[BUTTON_NAME].X - X) * 2,
+                8 * Factor,
+                true
+            )
         );
 
-        Add_Control<BUTTON_CANCEL, TextButtonClass>(
-            TXT_CANCEL,
-            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            Dimensions[BUTTON_CANCEL].X,
-            Dimensions[BUTTON_CANCEL].Y,
-            Dimensions[BUTTON_CANCEL].W,
-            Dimensions[BUTTON_CANCEL].H
-        );
+        auto& difficulty = Get_Control<SliderClass>(BUTTON_DIFFICULTY);
+
+        difficulty.Add_Tail(*CommandChain);
+
+        if (Rule.IsFineDifficulty) {
+            difficulty.Set_Maximum(5);
+            difficulty.Set_Value(2);
+        } else {
+            difficulty.Set_Maximum(3);
+            difficulty.Set_Value(1);
+        }
     }
 
     void Init_Bottom_Row()
     {
         // init gauges
         for (auto control = BUTTON_COUNT; control <= BUTTON_TIBERIUM_SCALE; ++control) {
-            Add_Control<GaugeClass>(
-                control,
-                Dimensions[control].X,
-                Dimensions[control].Y,
-                Dimensions[control].W,
-                Dimensions[control].H
+            Controls[control] = std::unique_ptr<GadgetClass>(
+                new GaugeClass(
+                    control,
+                    Dimensions[control].X,
+                    Dimensions[control].Y,
+                    Dimensions[control].W,
+                    Dimensions[control].H
+                )
             );
+            Get_Control<GaugeClass>(control).Add_Tail(*CommandChain);
         }
 
-        Add_Control<BUTTON_OPTIONS, CheckListClass>(
-            Dimensions[BUTTON_OPTIONS].X,
-            Dimensions[BUTTON_OPTIONS].Y,
-            Dimensions[BUTTON_OPTIONS].W,
-            Dimensions[BUTTON_OPTIONS].H,
-            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            UpButtonShape,
-            DownButtonShape
+        Controls[BUTTON_OPTIONS] = std::unique_ptr<GadgetClass>(
+            new CheckListClass(
+                BUTTON_OPTIONS,
+                Dimensions[BUTTON_OPTIONS].X,
+                Dimensions[BUTTON_OPTIONS].Y,
+                Dimensions[BUTTON_OPTIONS].W,
+                Dimensions[BUTTON_OPTIONS].H,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                UpButtonShape,
+                DownButtonShape
+            )
         );
+        Get_Control<GaugeClass>(BUTTON_OPTIONS).Add_Tail(*CommandChain);
     }
 
     void Init_Middle_Row()
     {
         for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            const auto house_control = static_cast<SkirmishControls>(control + 5);
+            const auto house_control = static_cast<ControlType>(control + 5);
 
             Text[control] = std::make_unique<char[]>(DropdownTextLength);
-            Add_Control<DropListClass>(
-                control,
-                Text[control].get(),
-                DropdownTextLength,
-                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                Dimensions[control].X,
-                Dimensions[control].Y,
-                Dimensions[control].W,
-                Dimensions[control].H,
-                UpButtonShape,
-                DownButtonShape
-            );
-
             Text[house_control] = std::make_unique<char[]>(DropdownTextLength);
-            Add_Control<DropListClass>(
+
+            Controls[control] = std::unique_ptr<GadgetClass>(
+                new DropListClass(
+                    control,
+                    Text[control].get(),
+                    DropdownTextLength,
+                    TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                    Dimensions[control].X,
+                    Dimensions[control].Y,
+                    Dimensions[control].W,
+                    Dimensions[control].H,
+                    UpButtonShape,
+                    DownButtonShape
+                )
+            );
+            Get_Control<DropListClass>(control).Add_Tail(*CommandChain);
+
+            Controls[house_control] = std::unique_ptr<GadgetClass>(
+                new DropListClass(
                     house_control,
                     Text[house_control].get(),
                     DropdownTextLength,
@@ -1115,71 +670,111 @@ protected:
                     Dimensions[house_control].H,
                     UpButtonShape,
                     DownButtonShape
+                )
             );
+            Get_Control<DropListClass>(house_control).Add_Tail(*CommandChain);
         }
 
-        Add_Control<BUTTON_SCENARIO_LIST, ListClass>(
-            Dimensions[BUTTON_SCENARIO_LIST].X,
-            Dimensions[BUTTON_SCENARIO_LIST].Y,
-            Dimensions[BUTTON_SCENARIO_LIST].W,
-            Dimensions[BUTTON_SCENARIO_LIST].H,
-            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            UpButtonShape,
-            DownButtonShape
+        Controls[BUTTON_SCENARIO_LIST] = std::unique_ptr<GadgetClass>(
+            new ListClass(
+                BUTTON_SCENARIO_LIST,
+                Dimensions[BUTTON_SCENARIO_LIST].X,
+                Dimensions[BUTTON_SCENARIO_LIST].Y,
+                Dimensions[BUTTON_SCENARIO_LIST].W,
+                Dimensions[BUTTON_SCENARIO_LIST].H,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                UpButtonShape,
+                DownButtonShape
+            )
         );
+        Get_Control<ListClass>(BUTTON_SCENARIO_LIST).Add_Tail(*CommandChain);
     }
 
     void Init_Top_Row()
     {
         Text[BUTTON_NAME] = std::make_unique<char[]>(MPLAYER_NAME_MAX);
-        Add_Control<BUTTON_NAME, EditClass>(
-            Text[BUTTON_NAME].get(),
-            MPLAYER_NAME_MAX,
-            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            Dimensions[BUTTON_NAME].X,
-            Dimensions[BUTTON_NAME].Y,
-            Dimensions[BUTTON_NAME].W,
-            Dimensions[BUTTON_NAME].H,
-            EditClass::ALPHANUMERIC
+        Controls[BUTTON_NAME] = std::unique_ptr<GadgetClass>(
+            new EditClass(
+                BUTTON_NAME,
+                Text[BUTTON_NAME].get(),
+                MPLAYER_NAME_MAX,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[BUTTON_NAME].X,
+                Dimensions[BUTTON_NAME].Y,
+                Dimensions[BUTTON_NAME].W,
+                Dimensions[BUTTON_NAME].H,
+                EditClass::ALPHANUMERIC
+            )
         );
+        CommandChain = Controls[BUTTON_NAME].get();
 
         Text[BUTTON_HOUSE] = std::make_unique<char[]>(DropdownTextLength);
-        Add_Control<BUTTON_HOUSE, DropListClass>(
-            Text[BUTTON_HOUSE].get(),
-            DropdownTextLength,
-            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-            Dimensions[BUTTON_HOUSE].X,
-            Dimensions[BUTTON_HOUSE].Y,
-            Dimensions[BUTTON_HOUSE].W,
-            Dimensions[BUTTON_HOUSE].H,
-            UpButtonShape,
-            DownButtonShape
+        Controls[BUTTON_HOUSE] = std::unique_ptr<GadgetClass>(
+            new DropListClass(BUTTON_HOUSE,
+                Text[BUTTON_HOUSE].get(),
+                DropdownTextLength,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[BUTTON_HOUSE].X,
+                Dimensions[BUTTON_HOUSE].Y,
+                Dimensions[BUTTON_HOUSE].W,
+                Dimensions[BUTTON_HOUSE].H,
+                UpButtonShape,
+                DownButtonShape
+            )
         );
+        Get_Control<DropListClass>(BUTTON_HOUSE).Add_Tail(*CommandChain);
     }
 
-    void Init_Controls() override
+    void Init_Controls()
     {
-        Dialog::Init_Controls();
+        Text.clear();
+        Controls.clear();
+        CommandChain = nullptr;
 
         Init_Top_Row();
         Init_Middle_Row();
         Init_Bottom_Row();
+        Init_Difficulty_Slider();
         Init_Dialog_Buttons();
     }
 
-    void Init_Dimensions(const int screen_width, const int screen_height, const int factor) override
+    void Init_Shapes()
     {
-        Dialog::Init_Dimensions(screen_width, screen_height, factor);
+        if (InMainLoop || Factor == 1) {
+            UpButtonShape = UpButtonShape == nullptr ? Hires_Retrieve("BTN-UP.SHP") : UpButtonShape;
+            DownButtonShape = DownButtonShape == nullptr ? Hires_Retrieve("BTN-DN.SHP") : DownButtonShape;
+        } else {
+            UpButtonShape = UpButtonShape == nullptr ? Hires_Retrieve("BTN-UP2.SHP") : UpButtonShape;
+            DownButtonShape = DownButtonShape == nullptr ? Hires_Retrieve("BTN-DN2.SHP") : DownButtonShape;
+        }
+    }
+
+    void Init_Dimensions(const int screen_width, const int screen_height)
+    {
+        /*........................................................................
+        Dialog & button dimensions
+        ........................................................................*/
+        Width = 300 * Factor;
+        Height = 195 * Factor;
+        X = (screen_width - Width) / 2;
+        Y = (screen_height - Height) / 2;
+        Center = X + (Width / 2);
+
+        TextHeight = 6 * Factor + 1; // ht of 6-pt text
+        MarginWidth = 10 * Factor;
+        MarginHeight = 4 * Factor;
+
+        Dimensions.clear();
 
         Dimensions[BUTTON_OK].W = 45 * Factor;
         Dimensions[BUTTON_OK].H = 9 * Factor;
-        Dimensions[BUTTON_OK].X = X + (5 * Factor);
-        Dimensions[BUTTON_OK].Y = Y + Height - Dimensions[BUTTON_OK].H - (5 * Factor);
+        Dimensions[BUTTON_OK].X = X + (Width / 6) - (Dimensions[BUTTON_OK].W / 2);
+        Dimensions[BUTTON_OK].Y = Y + Height - Dimensions[BUTTON_OK].H - MarginWidth - Factor * 6;
 
         Dimensions[BUTTON_CANCEL].W = 45 * Factor;
         Dimensions[BUTTON_CANCEL].H = 9 * Factor;
-        Dimensions[BUTTON_CANCEL].X = X + Width - Dimensions[BUTTON_CANCEL].W - (5 * Factor);
-        Dimensions[BUTTON_CANCEL].Y = Y + Height - Dimensions[BUTTON_CANCEL].H - (5 * Factor);
+        Dimensions[BUTTON_CANCEL].X = X + Width - (Width / 6) - (Dimensions[BUTTON_CANCEL].W / 2);
+        Dimensions[BUTTON_CANCEL].Y = Y + Height - Dimensions[BUTTON_CANCEL].H - MarginWidth - Factor * 6;
 
         Dimensions[BUTTON_NAME].W = 70 * Factor;
         Dimensions[BUTTON_NAME].H = 9 * Factor;
@@ -1188,7 +783,7 @@ protected:
 
         Dimensions[BUTTON_HOUSE].W = 60 * Factor;
         Dimensions[BUTTON_HOUSE].H = (3 * 5 * Factor);
-        Dimensions[BUTTON_HOUSE].X = CenterX - (Dimensions[BUTTON_HOUSE].W / 2);
+        Dimensions[BUTTON_HOUSE].X = Center - (Dimensions[BUTTON_HOUSE].W / 2);
         Dimensions[BUTTON_HOUSE].Y = Dimensions[BUTTON_NAME].Y;
 
         Dimensions[BUTTON_COLOR_1].W = 10 * Factor;
@@ -1201,25 +796,27 @@ protected:
             Dimensions[control].X = Dimensions[control].X + (Dimensions[control].W * (control - BUTTON_COLOR_1));
         }
 
-        Dimensions[BUTTON_SCENARIO_LIST].W = 220 * Factor;
-        Dimensions[BUTTON_SCENARIO_LIST].H = (35 * Factor) * 2;
-        Dimensions[BUTTON_SCENARIO_LIST].X = Dimensions[BUTTON_OK].X;
-        Dimensions[BUTTON_SCENARIO_LIST].Y = (Y + (Height / 2)) - Dimensions[BUTTON_SCENARIO_LIST].H + (5 * Factor);
+        Dimensions[BUTTON_PLAYER_LIST].W = 118 * Factor;
+        Dimensions[BUTTON_PLAYER_LIST].X = X + MarginWidth + MarginWidth + 5 * Factor;
 
-        Dimensions[BUTTON_MINIMAP].W = MAP_CELL_W + 1;
-        Dimensions[BUTTON_MINIMAP].H = MAP_CELL_H + 1;
-        Dimensions[BUTTON_MINIMAP].X = X + Width - Dimensions[BUTTON_MINIMAP].W - (MarginWidth / 2);
-        Dimensions[BUTTON_MINIMAP].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + (2 * Factor);
+        Dimensions[BUTTON_SCENARIO_LIST].W = 140 * Factor;
+        Dimensions[BUTTON_SCENARIO_LIST].H = 30 * Factor;
+        Dimensions[BUTTON_SCENARIO_LIST].X =
+            (Dimensions[BUTTON_CANCEL].X + static_cast<int>(nearbyint(Dimensions[BUTTON_CANCEL].W * 0.8)))
+            - Dimensions[BUTTON_SCENARIO_LIST].W + (20 * Factor);
+        Dimensions[BUTTON_SCENARIO_LIST].Y = Dimensions[BUTTON_COLOR_1].Y + TextHeight + 5 * Factor + TextHeight;
+
+        Dimensions[BUTTON_SCENARIO_LIST].H *= 2;
 
         // right column of AI house controls
         Dimensions[BUTTON_AI_HOUSE_1].W = static_cast<int>(nearbyint(Dimensions[BUTTON_HOUSE].W / 1.75));
         Dimensions[BUTTON_AI_HOUSE_1].H = (6 * 5 * Factor);
         Dimensions[BUTTON_AI_HOUSE_1].X = Dimensions[BUTTON_SCENARIO_LIST].X
-             + (Dimensions[BUTTON_SCENARIO_LIST].W / 2) - (Dimensions[BUTTON_AI_HOUSE_1].W / 2);
-        Dimensions[BUTTON_AI_HOUSE_1].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + Dimensions[BUTTON_SCENARIO_LIST].H + (15 * Factor);
+            - Dimensions[BUTTON_AI_HOUSE_1].W - (10 * Factor);
+        Dimensions[BUTTON_AI_HOUSE_1].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + (5 * Factor);
 
         for (auto control = BUTTON_AI_HOUSE_2; control <= BUTTON_AI_HOUSE_5; ++control) {
-            const auto previous_control = static_cast<SkirmishControls>(control - 1);
+            const auto previous_control = static_cast<ControlType>(control - 1);
 
             Dimensions[control] = Dimensions[BUTTON_AI_HOUSE_1];
             Dimensions[control].Y = Dimensions[previous_control].Y + 10 * Factor;
@@ -1233,45 +830,56 @@ protected:
         Dimensions[BUTTON_AI_DIFF_1].Y = Dimensions[BUTTON_AI_HOUSE_1].Y;
 
         for (auto control = BUTTON_AI_DIFF_2; control <= BUTTON_AI_DIFF_5; ++control) {
-            const auto previous_control = static_cast<SkirmishControls>(control - 1);
+            const auto previous_control = static_cast<ControlType>(control - 1);
 
             Dimensions[control] = Dimensions[BUTTON_AI_DIFF_1];
             Dimensions[control].Y = Dimensions[previous_control].Y + 10 * Factor;
         }
 
-        Dimensions[BUTTON_OPTIONS].W = static_cast<int>(nearbyint(Dimensions[BUTTON_CANCEL].W * 2.5));
+        Dimensions[BUTTON_OPTIONS].W = static_cast<int>(nearbyint(Dimensions[BUTTON_SCENARIO_LIST].W * 0.8));
         Dimensions[BUTTON_OPTIONS].H = (5 * 6 * Factor) + 5 * Factor;
-        Dimensions[BUTTON_OPTIONS].X = Dimensions[BUTTON_CANCEL].X
-            - static_cast<int>(nearbyint(Dimensions[BUTTON_OPTIONS].W * 0.8));
-        Dimensions[BUTTON_OPTIONS].Y = Dimensions[BUTTON_CANCEL].Y - 3 * Factor - Dimensions[BUTTON_OPTIONS].H;
+        Dimensions[BUTTON_OPTIONS].X = (Dimensions[BUTTON_SCENARIO_LIST].X + Dimensions[BUTTON_SCENARIO_LIST].W)
+            - Dimensions[BUTTON_OPTIONS].W;
+        Dimensions[BUTTON_OPTIONS].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + Dimensions[BUTTON_SCENARIO_LIST].H
+            + MarginWidth - 2 * Factor;
 
         Dimensions[BUTTON_COUNT].W = 25 * Factor;
         Dimensions[BUTTON_COUNT].H = 7 * Factor;
-        Dimensions[BUTTON_COUNT].X = Dimensions[BUTTON_OPTIONS].X + (Dimensions[BUTTON_OPTIONS].W / 2) + 5 * Factor;
-        Dimensions[BUTTON_COUNT].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + Dimensions[BUTTON_SCENARIO_LIST].H + (5 * Factor);
+        Dimensions[BUTTON_COUNT].Y = Dimensions[BUTTON_OPTIONS].Y;
+        Dimensions[BUTTON_COUNT].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
+            + 20 * Factor;
 
         Dimensions[BUTTON_LEVEL].W = 25 * Factor;
         Dimensions[BUTTON_LEVEL].H = 7 * Factor;
-        Dimensions[BUTTON_LEVEL].X = Dimensions[BUTTON_COUNT].X;
         Dimensions[BUTTON_LEVEL].Y = Dimensions[BUTTON_COUNT].Y + Dimensions[BUTTON_COUNT].H;
+        Dimensions[BUTTON_LEVEL].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
+            + 20 * Factor;
 
         Dimensions[BUTTON_CREDITS].W = 25 * Factor;
         Dimensions[BUTTON_CREDITS].H = 7 * Factor;
-        Dimensions[BUTTON_CREDITS].X = Dimensions[BUTTON_COUNT].X;
+        Dimensions[BUTTON_CREDITS].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
+            + 20 * Factor;
         Dimensions[BUTTON_CREDITS].Y = Dimensions[BUTTON_LEVEL].Y + Dimensions[BUTTON_LEVEL].H;
 
         Dimensions[BUTTON_TIBERIUM_SCALE].W = 25 * Factor;
         Dimensions[BUTTON_TIBERIUM_SCALE].H = 7 * Factor;
-        Dimensions[BUTTON_TIBERIUM_SCALE].X = Dimensions[BUTTON_COUNT].X;
+        Dimensions[BUTTON_TIBERIUM_SCALE].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
+            + 20 * Factor;
         Dimensions[BUTTON_TIBERIUM_SCALE].Y = Dimensions[BUTTON_CREDITS].Y + Dimensions[BUTTON_CREDITS].H;
     }
 
 public:
-    SkirmishScenarioDialog() : Dialog(300, 195, 10, 4) {}
-
-    ~SkirmishScenarioDialog() override
+    SkirmishScenarioDialog(const int factor)
     {
-        if (!Controls.contains(BUTTON_SCENARIO_LIST) && Controls[BUTTON_SCENARIO_LIST].get() != nullptr) {
+        Factor = factor;
+        UpButtonShape = nullptr;
+        DownButtonShape = nullptr;
+        CommandChain = nullptr;
+    }
+
+    ~SkirmishScenarioDialog()
+    {
+        if (!Controls.contains(BUTTON_SCENARIO_LIST) || Controls[BUTTON_SCENARIO_LIST].get() == nullptr) {
             return;
         }
 
@@ -1280,6 +888,363 @@ public:
         while (scenario_list.Count()) {
             // free dynamically allocated strings
             scenario_list.Remove_Item(scenario_list.Get_Item(0));
+        }
+    }
+
+    void Init(const int screen_width, const int screen_height)
+    {
+        Init_Dimensions(screen_width, screen_height);
+        Init_Shapes();
+        Init_Controls();
+        Init_Data();
+        Init_UI_State();
+    }
+
+    bool Present()
+    {
+        auto display = REDRAW_ALL; // redraw level
+
+        while (true) {
+            /*
+            ** If we have just received input focus again after running in the background then
+            ** we need to redraw.
+            */
+            if (AllSurfaces.SurfacesRestored) {
+                AllSurfaces.SurfacesRestored = false;
+                display = REDRAW_ALL;
+            }
+
+            Call_Back();
+            Render(display);
+
+            auto input = Get_Input(display);
+
+            /*
+            ---------------------------- Process input ----------------------------
+            */
+            switch (input) {
+                /*------------------------------------------------------------------
+                User clicks on a color button
+                ------------------------------------------------------------------*/
+                case KN_LMOUSE:
+                    if (
+                        Is_Mouse_Over_Rectangle(
+                            Dimensions[BUTTON_COLOR_1].X,
+                            Dimensions[BUTTON_COLOR_1].Y,
+                            (Dimensions[BUTTON_COLOR_6].X + Dimensions[BUTTON_COLOR_6].W),
+                            (Dimensions[BUTTON_COLOR_6].Y + Dimensions[BUTTON_COLOR_6].H)
+                        )
+                    ) {
+                        MPlayerPrefColor = (Keyboard->MouseQX - Dimensions[BUTTON_COLOR_1].X)
+                            / Dimensions[BUTTON_COLOR_1].W;
+                        MPlayerColorIdx = MPlayerPrefColor;
+                        display = REDRAW_COLORS;
+
+                        auto& name_edt = Get_Control<EditClass>(BUTTON_NAME);
+                        name_edt.Set_Color(MPlayerTColors[MPlayerColorIdx]);
+                        name_edt.Flag_To_Redraw();
+
+                        strcpy(MPlayerName, Text[BUTTON_NAME].get());
+
+                        Collapse_Visible_Dropdowns(display);
+                    }
+                    break;
+
+                    /*------------------------------------------------------------------
+                    User edits the name field; retransmit new game options
+                    ------------------------------------------------------------------*/
+                case (BUTTON_NAME | KN_BUTTON): {
+                    strcpy(MPlayerName, Text[BUTTON_NAME].get());
+
+                    Collapse_Visible_Dropdowns(display);
+                    break;
+                }
+
+                    /*------------------------------------------------------------------
+                    House Buttons: set the player's desired House
+                    ------------------------------------------------------------------*/
+                case (BUTTON_HOUSE | KN_BUTTON): {
+                    MPlayerHouse = static_cast<HousesType>(
+                        Get_Control<DropListClass>(BUTTON_HOUSE).Current_Index() + HOUSE_GOOD
+                    );
+                    strcpy(MPlayerName, Text[BUTTON_NAME].get());
+
+                    Collapse_Visible_Dropdowns(display);
+                    display = REDRAW_BACKGROUND;
+                    break;
+                }
+
+                    /*------------------------------------------------------------------
+                    New Scenario selected.
+                    ------------------------------------------------------------------*/
+                case (BUTTON_SCENARIO_LIST | KN_BUTTON): {
+                    auto& scenario_list = Get_Control<ListClass>(BUTTON_SCENARIO_LIST);
+
+                    if (scenario_list.Current_Index() != ScenarioIdx) {
+                        ScenarioIdx = scenario_list.Current_Index();
+
+                        // store the scenario number rather than current scenario list index
+                        // (index will change if maps are added/removed by player)
+                        MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
+
+                        strcpy(MPlayerName, Text[BUTTON_NAME].get());
+                    }
+                    break;
+                }
+
+                    /*------------------------------------------------------------------
+                    AI player difficulty dropdown selection changed.
+                    ------------------------------------------------------------------*/
+                case (BUTTON_AI_DIFF_1 | KN_BUTTON):
+                case (BUTTON_AI_DIFF_2 | KN_BUTTON):
+                case (BUTTON_AI_DIFF_3 | KN_BUTTON):
+                case (BUTTON_AI_DIFF_4 | KN_BUTTON):
+                case (BUTTON_AI_DIFF_5 | KN_BUTTON): {
+                    for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
+                        if (input != (control | KN_BUTTON)) {
+                            continue;
+                        }
+
+                        const auto house_btn = static_cast<ControlType>(control + 5);
+                        auto& ai_diff_dropdown = Get_Control<DropListClass>(control);
+                        auto& ai_house_dropdown = Get_Control<DropListClass>(house_btn);
+
+                        // nothing changed, ignore input
+                        if (!ai_diff_dropdown.List.Index_Changed()) {
+                            break;
+                        }
+
+                        const auto diff_was_disabled = ai_diff_dropdown.Current_Index() == 0;
+                        const auto diff_was_activated = ai_diff_dropdown.List.Get_Previous_Index() == 0;
+                        const auto house_is_disabled = ai_house_dropdown.Current_Index() == 0;
+
+                        if (diff_was_disabled) {
+                            // reset house to match disabled AI diff
+                            ai_house_dropdown.Set_Selected_Index(0);
+                        } else if (diff_was_activated && house_is_disabled) {
+                            // select a default house of '?' since none is selected
+                            ai_house_dropdown.Set_Selected_Index(1);
+                        }
+
+                        ai_diff_dropdown.Collapse();
+                        ai_house_dropdown.Collapse();
+                        display = REDRAW_BACKGROUND;
+                        break;
+                    }
+
+                    break;
+                }
+
+                    /*------------------------------------------------------------------
+                    AI player house dropdown selection changed.
+                    ------------------------------------------------------------------*/
+                case (BUTTON_AI_HOUSE_1 | KN_BUTTON):
+                case (BUTTON_AI_HOUSE_2 | KN_BUTTON):
+                case (BUTTON_AI_HOUSE_3 | KN_BUTTON):
+                case (BUTTON_AI_HOUSE_4 | KN_BUTTON):
+                case (BUTTON_AI_HOUSE_5 | KN_BUTTON): {
+                    for (auto control = BUTTON_AI_HOUSE_1; control <= BUTTON_AI_HOUSE_5; ++control) {
+                        if (input != (control | KN_BUTTON)) {
+                            continue;
+                        }
+
+                        const auto diff_btn = static_cast<ControlType>(control - 5);
+                        auto& ai_diff_dropdown = Get_Control<DropListClass>(diff_btn);
+                        auto& ai_house_dropdown = Get_Control<DropListClass>(control);
+
+                        // nothing changed, ignore input
+                        if (!ai_house_dropdown.List.Index_Changed()) {
+                            break;
+                        }
+
+                        const auto house_was_disabled = ai_house_dropdown.Current_Index() == 0;
+                        const auto house_was_activated = ai_house_dropdown.List.Get_Previous_Index() == 0;
+                        const auto diff_is_disabled = ai_diff_dropdown.Current_Index() == 0;
+
+                        if (house_was_disabled) {
+                            // reset diff to match disabled AI house
+                            ai_diff_dropdown.Set_Selected_Index(0);
+                        } else if (house_was_activated && diff_is_disabled) {
+                            // select a default diff of 'Normal' since none is selected
+                            ai_diff_dropdown.Set_Selected_Index(2);
+                        }
+
+                        ai_house_dropdown.Collapse();
+                        ai_diff_dropdown.Collapse();
+                        display = REDRAW_BACKGROUND;
+                    }
+
+                    break;
+                }
+
+                /*------------------------------------------------------------------
+                User adjusts max # units
+                ------------------------------------------------------------------*/
+                case (BUTTON_COUNT | KN_BUTTON): {
+                    MPlayerUnitCount = Get_Control<GaugeClass>(BUTTON_COUNT).Get_Value()
+                        + MPlayerCountMin[MPlayerBases];
+
+                    if (display < REDRAW_MESSAGE) {
+                        display = REDRAW_MESSAGE;
+                    }
+                    Collapse_Visible_Dropdowns(display);
+                    break;
+                }
+
+                /*------------------------------------------------------------------
+                User adjusts build level
+                ------------------------------------------------------------------*/
+                case (BUTTON_LEVEL | KN_BUTTON): {
+                    BuildLevel = Get_Control<GaugeClass>(BUTTON_LEVEL).Get_Value() + 1;
+                    if (BuildLevel > MPLAYER_BUILD_LEVEL_MAX) {
+                        // if it's pegged, max it out
+                        BuildLevel = MPLAYER_BUILD_LEVEL_MAX;
+                    }
+
+                    if (display < REDRAW_MESSAGE) {
+                        display = REDRAW_MESSAGE;
+                    }
+                    Collapse_Visible_Dropdowns(display);
+                    break;
+                }
+
+                /*------------------------------------------------------------------
+                User edits the credits value; retransmit new game options
+                ------------------------------------------------------------------*/
+                case (BUTTON_CREDITS | KN_BUTTON): {
+                    MPlayerCredits = Get_Control<GaugeClass>(BUTTON_CREDITS).Get_Value();
+
+                    if (MPlayerCredits == 0) {
+                        // clear lingering digits when player quickly slides to zero
+                        display = REDRAW_ALL;
+                    }
+
+                    if (display < REDRAW_MESSAGE) {
+                        display = REDRAW_MESSAGE;
+                    }
+                    Collapse_Visible_Dropdowns(display);
+                    break;
+                }
+
+                case (BUTTON_TIBERIUM_SCALE | KN_BUTTON): {
+                    MPlayerTiberium = Get_Control<GaugeClass>(BUTTON_TIBERIUM_SCALE).Get_Value() + 1;
+
+                    Get_Control<CheckListClass>(BUTTON_OPTIONS).Check_Item(1, MPlayerTiberium > 0);
+
+                    Special.IsTGrowth = MPlayerTiberium;
+                    Special.IsTSpread = MPlayerTiberium;
+
+                    if (display < REDRAW_MESSAGE) {
+                        display = REDRAW_MESSAGE;
+                    }
+                    Collapse_Visible_Dropdowns(display);
+                    break;
+                }
+
+                /*------------------------------------------------------------------
+                Toggle-able options:
+                If 'Bases' gets toggled, we have to change the range of the
+                UnitCount slider.
+                Also, if Tiberium gets toggled, we have to set the flags
+                in SpecialClass.
+                ------------------------------------------------------------------*/
+                case (BUTTON_OPTIONS | KN_BUTTON): {
+                    auto& option_list = Get_Control<CheckListClass>(BUTTON_OPTIONS);
+                    auto count_gauge = Get_Control<GaugeClass>(BUTTON_COUNT);
+                    auto tiberium_scale_gauge = Get_Control<GaugeClass>(BUTTON_TIBERIUM_SCALE);
+
+                    if (MPlayerBases != option_list.Is_Checked(0)) {
+                        MPlayerBases = option_list.Is_Checked(0);
+
+                        if (MPlayerBases) {
+                            MPlayerUnitCount = Fixed_To_Cardinal(
+                                MPlayerCountMax[1] - MPlayerCountMin[1],
+                                Cardinal_To_Fixed(
+                                    MPlayerCountMax[0] - MPlayerCountMin[0],
+                                    MPlayerUnitCount - MPlayerCountMin[0]
+                                )
+                            ) + MPlayerCountMin[1];
+                        } else {
+                            MPlayerUnitCount = Fixed_To_Cardinal(
+                                MPlayerCountMax[0] - MPlayerCountMin[0],
+                                Cardinal_To_Fixed(
+                                    MPlayerCountMax[1] - MPlayerCountMin[1],
+                                    MPlayerUnitCount - MPlayerCountMin[1]
+                                )
+                            ) + MPlayerCountMin[0];
+                        }
+
+                        count_gauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
+                        count_gauge.Set_Value(MPlayerUnitCount - MPlayerCountMin[MPlayerBases]);
+                    }
+
+                    MPlayerTiberium = option_list.Is_Checked(1) ? 1 : 0;
+
+                    if (tiberium_scale_gauge.Get_Value() + 1 > 1) {
+                        MPlayerTiberium = tiberium_scale_gauge.Get_Value() + 1;
+                    }
+
+                    tiberium_scale_gauge.Set_Value(MPlayerTiberium < 2 ? 0 : MPlayerTiberium - 1);
+
+                    Special.IsTGrowth = MPlayerTiberium;
+                    Special.IsTSpread = MPlayerTiberium;
+
+                    MPlayerGoodies = option_list.Is_Checked(2);
+                    Special.IsCaptureTheFlag = option_list.Is_Checked(3);
+
+                    if (display < REDRAW_MESSAGE) {
+                        display = REDRAW_MESSAGE;
+                    }
+                    Collapse_Visible_Dropdowns(display);
+                    break;
+                }
+
+                /*------------------------------------------------------------------
+                OK: exit loop with true status
+                ------------------------------------------------------------------*/
+                case (BUTTON_OK | KN_BUTTON): {
+                    // check if at least one AI player enabled
+                    auto ai_players = false;
+
+                    for (auto button = BUTTON_AI_DIFF_1; button <= BUTTON_AI_DIFF_5; ++button) {
+                        if (Get_Control<DropListClass>(button).Current_Index() > 0) {
+                            ai_players = true;
+                            break;
+                        }
+                    }
+
+                    if (ai_players) {
+                        // at least one AI player enabled, allow user to proceed
+                        return true;
+                    }
+
+                    // warn that no AI players are enabled
+                    WWMessageBox().Process(TXT_ONLY_ONE, TXT_OOPS);
+
+                    display = REDRAW_ALL;
+                    break;
+                }
+
+                /*------------------------------------------------------------------
+                CANCEL: send a SIGN_OFF, bail out with error code
+                ------------------------------------------------------------------*/
+                case (KN_ESC): {
+                    if (Messages.Get_Edit_Buf() != nullptr) {
+                        Messages.Input(input);
+
+                        if (display < REDRAW_MESSAGE) {
+                            display = REDRAW_MESSAGE;
+                        }
+
+                        break;
+                    }
+                }
+                case (BUTTON_CANCEL | KN_BUTTON): return false;
+
+                default: break;
+            } /* end of input processing */
+
+            Frame_Limiter();
         }
     }
 
@@ -1305,11 +1270,42 @@ public:
         .....................................................................*/
         Scen.Scenario = MPlayerFilenum[ScenarioIdx];
 
+        switch (
+            Get_Control<SliderClass>(BUTTON_DIFFICULTY).Get_Value() * (Rule.IsFineDifficulty ? 1 : 2)
+        ) {
+            case 0:
+                Scen.CDifficulty = DIFF_HARD;
+                Scen.Difficulty = DIFF_EASY;
+                break;
+
+            case 1:
+                Scen.CDifficulty = DIFF_HARD;
+                Scen.Difficulty = DIFF_NORMAL;
+                break;
+
+            case 2:
+                Scen.CDifficulty = DIFF_NORMAL;
+                Scen.Difficulty = DIFF_NORMAL;
+                break;
+
+            case 3:
+                Scen.CDifficulty = DIFF_EASY;
+                Scen.Difficulty = DIFF_NORMAL;
+                break;
+
+            case 4:
+                Scen.CDifficulty = DIFF_EASY;
+                Scen.Difficulty = DIFF_HARD;
+                break;
+
+            default: break; // do nothing
+        }
+
         // set AI player variables from difficulty/house dropdowns
         MPlayerGhosts = 0;
 
         for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            const auto house_btn = static_cast<SkirmishControls>(control + 5);
+            const auto house_btn = static_cast<ControlType>(control + 5);
             auto& diff_dropdown = Get_Control<DropListClass>(control);
             auto& house_dropdown = Get_Control<DropListClass>(house_btn);
 
@@ -1329,8 +1325,6 @@ public:
                 ? HOUSE_NONE
                 : static_cast<HousesType>(selected_house_idx - 2);
 
-            CNC_LOG_WARN("idx: {} house: {}", MPlayerGhosts + 1, selected_house);
-
             MPlayerHouses[MPlayerGhosts + 1] = selected_house;
             MPlayerDifficulty[MPlayerGhosts + 1] = selected_diff;
 
@@ -1344,12 +1338,12 @@ public:
  */
 int Skirmish_Scenario_Dialog()
 {
+    const auto factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
     const auto width = Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width());
     const auto height = Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height());
-    const auto factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
 
-    auto dialog = SkirmishScenarioDialog();
-    dialog.Init(width, height, factor);
+    auto dialog = SkirmishScenarioDialog(factor);
+    dialog.Init(width, height);
 
     Load_Title_Screen(TitlePicture, &HidPage, Palette);
     Blit_Hid_Page_To_Seen_Buff();
