@@ -73,6 +73,13 @@ class SkirmishScenarioDialog final
         BUTTON_LOAD,
         BUTTON_CANCEL,
         BUTTON_DIFFICULTY,
+        BUTTON_COLOR_1,
+        BUTTON_COLOR_2,
+        BUTTON_COLOR_3,
+        BUTTON_COLOR_4,
+        BUTTON_COLOR_5,
+        BUTTON_COLOR_6,
+        BUTTON_PLAYERLIST // not used
     } ButtonType;
 
     /*........................................................................
@@ -103,72 +110,6 @@ class SkirmishScenarioDialog final
     int TextHeight;
     int MarginWidth;
     int MarginHeight;
-
-    int d_ok_w;
-    int d_ok_h;
-    int d_ok_x;
-    int d_ok_y;
-
-    int d_cancel_w;
-    int d_cancel_h;
-    int d_cancel_x;
-    int d_cancel_y;
-
-    int d_name_w;
-    int d_name_h;
-    int d_name_x;
-    int d_name_y;
-
-    int d_house_w;
-    int d_house_h;
-    int d_house_x;
-    int d_house_y;
-
-    int d_color_w;
-    int d_color_h;
-    int d_color_y;
-    int d_color_x;
-
-    int d_playerlist_w;
-    int d_playerlist_x;
-
-    int d_scenariolist_w;
-    int d_scenariolist_h;
-    int d_scenariolist_x;
-    int d_scenariolist_y;
-
-    int d_aihouse_w;
-    int d_aihouse_h;
-    int d_aihouse_x;
-    int d_aihouse_y;
-    int d_aihouse_ystep;
-
-    int d_options_w;
-    int d_options_h;
-    int d_options_x;
-    int d_options_y;
-
-    int d_count_w;
-    int d_count_h;
-    int d_count_y;
-    int d_count_x;
-
-    int d_level_w;
-    int d_level_h;
-    int d_level_y;
-    int d_level_x;
-
-    int d_credits_w;
-    int d_credits_h;
-    int d_credits_x;
-    int d_credits_y;
-
-    int d_tiberiumscale_w;
-    int d_tiberiumscale_h;
-    int d_tiberiumscale_x;
-    int d_tiberiumscale_y;
-
-    int ColorBoxes[6];
 
     // button shapes
     void const* UpButtonShape;
@@ -218,22 +159,22 @@ class SkirmishScenarioDialog final
 #endif // FORCE_WINSOCK
 
             Fancy_Text_Print(TXT_YOUR_NAME,
-                             d_name_x + (d_name_w / 2),
-                             d_name_y - TextHeight - (1 * Factor),
+                             Dimensions[BUTTON_NAME].x + (Dimensions[BUTTON_NAME].w / 2),
+                             Dimensions[BUTTON_NAME].y - TextHeight - (1 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             Fancy_Text_Print(TXT_SIDE_COLON,
-                             d_house_x + (d_house_w / 2),
-                             d_house_y - TextHeight - (1 * Factor),
+                             Dimensions[BUTTON_HOUSE].x + (Dimensions[BUTTON_HOUSE].w / 2),
+                             Dimensions[BUTTON_HOUSE].y - TextHeight - (1 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             Fancy_Text_Print(TXT_COLOR_COLON,
                              X + ((Width / 4) * 3),
-                             d_color_y - TextHeight - (1 * Factor),
+                             Dimensions[BUTTON_COLOR_1].y - TextHeight - (1 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -262,70 +203,70 @@ class SkirmishScenarioDialog final
                              TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             Fancy_Text_Print(TXT_SCENARIOS,
-                             d_scenariolist_x + (d_scenariolist_w / 2),
-                             d_scenariolist_y - TextHeight - (1 * Factor),
+                             Dimensions[BUTTON_SCENARIOLIST].x + (Dimensions[BUTTON_SCENARIOLIST].w / 2),
+                             Dimensions[BUTTON_SCENARIOLIST].y - TextHeight - (1 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             Fancy_Text_Print(TXT_COUNT,
-                             d_count_x - 3 * Factor,
-                             d_count_y,
+                             Dimensions[BUTTON_COUNT].x - 3 * Factor,
+                             Dimensions[BUTTON_COUNT].y,
                              CC_GREEN,
                              TBLACK,
                              TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_RIGHT);
 
             Fancy_Text_Print(TXT_LEVEL,
-                             d_level_x - 3 * Factor,
-                             d_level_y,
+                             Dimensions[BUTTON_LEVEL].x - 3 * Factor,
+                             Dimensions[BUTTON_LEVEL].y,
                              CC_GREEN,
                              TBLACK,
                              TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_RIGHT);
 
             Fancy_Text_Print(TXT_START_CREDITS_COLON,
-                             d_credits_x - 3 * Factor,
-                             d_credits_y,
+                             Dimensions[BUTTON_CREDITS].x - 3 * Factor,
+                             Dimensions[BUTTON_CREDITS].y,
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             Fancy_Text_Print("Tiberium Growth:", // TODO: Locale file entry
-                             d_tiberiumscale_x - 3 * Factor,
-                             d_tiberiumscale_y,
+                             Dimensions[BUTTON_TIBERIUMSCALE].x - 3 * Factor,
+                             Dimensions[BUTTON_TIBERIUMSCALE].y,
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             // AI player setting headers
             Fancy_Text_Print("Player", // TODO: Locale file entry
-                             (d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5)) - (10 * Factor))
-                                + (static_cast<int>((d_aihouse_w * 1.5) / 1.25)),
-                             d_aihouse_y - TextHeight - (2 * Factor),
+                             (Dimensions[BUTTON_AI_HOUSE_1].x
+                                - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].w * 1.5)) - (10 * Factor))
+                                + (static_cast<int>((Dimensions[BUTTON_AI_HOUSE_1].w * 1.5) / 1.25)),
+                             Dimensions[BUTTON_AI_HOUSE_1].y - TextHeight - (2 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             Fancy_Text_Print("Side", // TODO: Locale file entry
-                             d_aihouse_x + static_cast<int>(nearbyint(d_aihouse_w / 1.25)),
-                             d_aihouse_y - TextHeight - (2 * Factor),
+                             Dimensions[BUTTON_AI_HOUSE_1].x
+                                + static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].w / 1.25)),
+                             Dimensions[BUTTON_AI_HOUSE_1].y - TextHeight - (2 * Factor),
                              CC_GREEN,
                              TBLACK,
                              TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             // AI player difficulty and house checkbox labels
-            const auto cur_ai_house_label_x = (d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5))
+            const auto cur_ai_house_label_x = (Dimensions[BUTTON_AI_HOUSE_1].x
+                - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].w * 1.5))
                 - (10 * Factor)) - 3 * Factor;
-            auto cur_ai_house_label_y = d_aihouse_y;
 
-            for (int idx = BUTTON_AI_DIFF_1; idx <= BUTTON_AI_DIFF_5; idx++) {
-                Fancy_Text_Print(std::format("AI {}:", idx - BUTTON_HOUSE).c_str(), // TODO: Locale file entry
+            for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
+                Fancy_Text_Print(std::format("AI {}:", control - BUTTON_HOUSE).c_str(), // TODO: Locale file entry
                                  cur_ai_house_label_x,
-                                 cur_ai_house_label_y,
+                                 Dimensions[control].y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-                cur_ai_house_label_y += d_aihouse_ystep;
             }
         }
 
@@ -333,18 +274,23 @@ class SkirmishScenarioDialog final
         Draw the color boxes
         ..................................................................*/
         if (display >= REDRAW_COLORS) {
-            for (auto i = 0; i < MAX_MPLAYER_COLORS; i++) {
-                LogicPage->Fill_Rect(ColorBoxes[i] + 1 * Factor,
-                                     d_color_y + 1 * Factor,
-                                     ColorBoxes[i] + 1 * Factor + d_color_w - 2 * Factor,
-                                     d_color_y + 1 * Factor + d_color_h - 2 * Factor,
-                                     MPlayerGColors[i]);
+            for (auto control = BUTTON_COLOR_1; control <= BUTTON_COLOR_6; ++control) {
+                const auto mplayer_idx = control - BUTTON_COLOR_1;
 
-                if (i == MPlayerColorIdx) {
-                    Draw_Box(ColorBoxes[i], d_color_y, d_color_w, d_color_h, BOXSTYLE_GREEN_DOWN, false);
-                } else {
-                    Draw_Box(ColorBoxes[i], d_color_y, d_color_w, d_color_h, BOXSTYLE_GREEN_RAISED, false);
-                }
+                LogicPage->Fill_Rect(Dimensions[control].x + 1 * Factor,
+                                     Dimensions[control].y + 1 * Factor,
+                                     Dimensions[control].x + 1 * Factor + Dimensions[control].w - 2 * Factor,
+                                     Dimensions[control].y + 1 * Factor + Dimensions[control].h - 2 * Factor,
+                                     MPlayerGColors[mplayer_idx]);
+
+                Draw_Box(
+                    Dimensions[control].x,
+                    Dimensions[control].y,
+                    Dimensions[control].w,
+                    Dimensions[control].h,
+                    mplayer_idx == MPlayerColorIdx ? BOXSTYLE_GREEN_DOWN : BOXSTYLE_GREEN_RAISED,
+                    false
+                );
             }
         }
 
@@ -355,8 +301,8 @@ class SkirmishScenarioDialog final
         if (display >= REDRAW_MESSAGE) {
             sprintf(txt, "%d ", MPlayerUnitCount);
             Fancy_Text_Print(txt,
-                             d_count_x + d_count_w + 3 * Factor,
-                             d_count_y,
+                             Dimensions[BUTTON_COUNT].x + Dimensions[BUTTON_COUNT].w + 3 * Factor,
+                             Dimensions[BUTTON_COUNT].y,
                              CC_GREEN,
                              BLACK,
                              TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -367,23 +313,23 @@ class SkirmishScenarioDialog final
                 sprintf(txt, "**");
             }
             Fancy_Text_Print(txt,
-                             d_level_x + d_level_w + 3 * Factor,
-                             d_level_y,
+                             Dimensions[BUTTON_LEVEL].x + Dimensions[BUTTON_LEVEL].w + 3 * Factor,
+                             Dimensions[BUTTON_LEVEL].y,
                              CC_GREEN,
                              BLACK,
                              TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
             sprintf(txt, "%d ", MPlayerCredits);
             Fancy_Text_Print(txt,
-                             d_credits_x + d_credits_w + 3 * Factor,
-                             d_credits_y,
+                             Dimensions[BUTTON_CREDITS].x + Dimensions[BUTTON_CREDITS].w + 3 * Factor,
+                             Dimensions[BUTTON_CREDITS].y,
                              CC_GREEN,
                              BLACK,
                              TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
             sprintf(txt, "%dx ", Get_Control<GaugeClass>(BUTTON_TIBERIUMSCALE).Get_Value() + 1);
             Fancy_Text_Print(txt,
-                             d_tiberiumscale_x + d_tiberiumscale_w + 3 * Factor,
-                             d_tiberiumscale_y,
+                             Dimensions[BUTTON_TIBERIUMSCALE].x + Dimensions[BUTTON_TIBERIUMSCALE].w + 3 * Factor,
+                             Dimensions[BUTTON_TIBERIUMSCALE].y,
                              CC_GREEN,
                              BLACK,
                              TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -528,10 +474,10 @@ class SkirmishScenarioDialog final
                 BUTTON_OK,
                 TXT_OK,
                 TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                d_ok_x,
-                d_ok_y,
-                d_ok_w,
-                d_ok_h
+                Dimensions[BUTTON_OK].x,
+                Dimensions[BUTTON_OK].y,
+                Dimensions[BUTTON_OK].w,
+                Dimensions[BUTTON_OK].h
             )
         );
         Get_Control<TextButtonClass>(BUTTON_OK).Add_Tail(*CommandChain);
@@ -541,10 +487,10 @@ class SkirmishScenarioDialog final
                 BUTTON_CANCEL,
                 TXT_CANCEL,
                 TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                d_cancel_x,
-                d_cancel_y,
-                d_cancel_w,
-                d_cancel_h
+                Dimensions[BUTTON_CANCEL].x,
+                Dimensions[BUTTON_CANCEL].y,
+                Dimensions[BUTTON_CANCEL].w,
+                Dimensions[BUTTON_CANCEL].h
             )
         );
         Get_Control<TextButtonClass>(BUTTON_CANCEL).Add_Tail(*CommandChain);
@@ -555,9 +501,9 @@ class SkirmishScenarioDialog final
         Controls[BUTTON_DIFFICULTY] = std::unique_ptr<GadgetClass>(
             new SliderClass(
                 BUTTON_DIFFICULTY,
-                d_name_x,
-                d_ok_y - (8 * Factor) - MarginWidth,
-                Width - (d_name_x - X) * 2,
+                Dimensions[BUTTON_NAME].x,
+                Dimensions[BUTTON_OK].y - (8 * Factor) - MarginWidth,
+                Width - (Dimensions[BUTTON_NAME].x - X) * 2,
                 8 * Factor,
                 true
             )
@@ -579,27 +525,27 @@ class SkirmishScenarioDialog final
     void Init_Bottom_Row()
     {
         Controls[BUTTON_COUNT] = std::unique_ptr<GadgetClass>(
-            new GaugeClass(BUTTON_COUNT, d_count_x, d_count_y, d_count_w, d_count_h)
+            new GaugeClass(BUTTON_COUNT, Dimensions[BUTTON_COUNT].x, Dimensions[BUTTON_COUNT].y, Dimensions[BUTTON_COUNT].w, Dimensions[BUTTON_COUNT].h)
         );
         Get_Control<GaugeClass>(BUTTON_COUNT).Add_Tail(*CommandChain);
 
         Controls[BUTTON_LEVEL] = std::unique_ptr<GadgetClass>(
-            new GaugeClass(BUTTON_LEVEL, d_level_x, d_level_y, d_level_w, d_level_h)
+            new GaugeClass(BUTTON_LEVEL, Dimensions[BUTTON_LEVEL].x, Dimensions[BUTTON_LEVEL].y, Dimensions[BUTTON_LEVEL].w, Dimensions[BUTTON_LEVEL].h)
         );
         Get_Control<GaugeClass>(BUTTON_LEVEL).Add_Tail(*CommandChain);
 
         Controls[BUTTON_CREDITS] = std::unique_ptr<GadgetClass>(
-            new GaugeClass(BUTTON_CREDITS, d_credits_x, d_credits_y, d_credits_w, d_credits_h)
+            new GaugeClass(BUTTON_CREDITS, Dimensions[BUTTON_CREDITS].x, Dimensions[BUTTON_CREDITS].y, Dimensions[BUTTON_CREDITS].w, Dimensions[BUTTON_CREDITS].h)
         );
         Get_Control<GaugeClass>(BUTTON_CREDITS).Add_Tail(*CommandChain);
 
         Controls[BUTTON_TIBERIUMSCALE] = std::unique_ptr<GadgetClass>(
             new GaugeClass(
                 BUTTON_TIBERIUMSCALE,
-                d_tiberiumscale_x,
-                d_tiberiumscale_y,
-                d_tiberiumscale_w,
-                d_tiberiumscale_h
+                Dimensions[BUTTON_TIBERIUMSCALE].x,
+                Dimensions[BUTTON_TIBERIUMSCALE].y,
+                Dimensions[BUTTON_TIBERIUMSCALE].w,
+                Dimensions[BUTTON_TIBERIUMSCALE].h
             )
         );
         Get_Control<GaugeClass>(BUTTON_TIBERIUMSCALE).Add_Tail(*CommandChain);
@@ -607,10 +553,10 @@ class SkirmishScenarioDialog final
         Controls[BUTTON_OPTIONS] = std::unique_ptr<GadgetClass>(
             new CheckListClass(
                 BUTTON_OPTIONS,
-                d_options_x,
-                d_options_y,
-                d_options_w,
-                d_options_h,
+                Dimensions[BUTTON_OPTIONS].x,
+                Dimensions[BUTTON_OPTIONS].y,
+                Dimensions[BUTTON_OPTIONS].w,
+                Dimensions[BUTTON_OPTIONS].h,
                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                 UpButtonShape,
                 DownButtonShape
@@ -621,56 +567,52 @@ class SkirmishScenarioDialog final
 
     void Init_Middle_Row()
     {
-        auto cur_ai_house_y = d_aihouse_y;
+        for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
+            const auto house_control = static_cast<ButtonType>(control + 5);
 
-        for (auto h = BUTTON_AI_DIFF_1; h <= BUTTON_AI_DIFF_5; ++h) {
-            const auto house_button = static_cast<ButtonType>(h + 5);
+            Text[control] = std::make_unique<char[]>(DropdownTextLength);
+            Text[house_control] = std::make_unique<char[]>(DropdownTextLength);
 
-            Text[h] = std::make_unique<char[]>(DropdownTextLength);
-            Text[house_button] = std::make_unique<char[]>(DropdownTextLength);
-
-            Controls[h] = std::unique_ptr<GadgetClass>(
+            Controls[control] = std::unique_ptr<GadgetClass>(
                 new DropListClass(
-                    h,
-                    Text[h].get(),
+                    control,
+                    Text[control].get(),
                     DropdownTextLength,
                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                    d_aihouse_x - static_cast<int>(nearbyint(d_aihouse_w * 1.5)) - (10 * Factor),
-                    cur_ai_house_y,
-                    static_cast<int>(nearbyint(d_aihouse_w * 1.5)),
-                    d_aihouse_h,
+                    Dimensions[control].x,
+                    Dimensions[control].y,
+                    Dimensions[control].w,
+                    Dimensions[control].h,
                     UpButtonShape,
                     DownButtonShape
                 )
             );
-            Get_Control<DropListClass>(h).Add_Tail(*CommandChain);
+            Get_Control<DropListClass>(control).Add_Tail(*CommandChain);
 
-            Controls[house_button] = std::unique_ptr<GadgetClass>(
+            Controls[house_control] = std::unique_ptr<GadgetClass>(
                 new DropListClass(
-                    house_button,
-                    Text[house_button].get(),
+                    house_control,
+                    Text[house_control].get(),
                     DropdownTextLength,
                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                    d_aihouse_x,
-                    cur_ai_house_y,
-                    d_aihouse_w,
-                    d_aihouse_h,
+                    Dimensions[house_control].x,
+                    Dimensions[house_control].y,
+                    Dimensions[house_control].w,
+                    Dimensions[house_control].h,
                     UpButtonShape,
                     DownButtonShape
                 )
             );
-            Get_Control<DropListClass>(house_button).Add_Tail(*CommandChain);
-
-            cur_ai_house_y += d_aihouse_ystep;
+            Get_Control<DropListClass>(house_control).Add_Tail(*CommandChain);
         }
 
         Controls[BUTTON_SCENARIOLIST] = std::unique_ptr<GadgetClass>(
             new ListClass(
                 BUTTON_SCENARIOLIST,
-                d_scenariolist_x,
-                d_scenariolist_y,
-                d_scenariolist_w,
-                d_scenariolist_h,
+                Dimensions[BUTTON_SCENARIOLIST].x,
+                Dimensions[BUTTON_SCENARIOLIST].y,
+                Dimensions[BUTTON_SCENARIOLIST].w,
+                Dimensions[BUTTON_SCENARIOLIST].h,
                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                 UpButtonShape,
                 DownButtonShape
@@ -688,10 +630,10 @@ class SkirmishScenarioDialog final
                 Text[BUTTON_NAME].get(),
                 MPLAYER_NAME_MAX,
                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                d_name_x,
-                d_name_y,
-                d_name_w,
-                d_name_h,
+                Dimensions[BUTTON_NAME].x,
+                Dimensions[BUTTON_NAME].y,
+                Dimensions[BUTTON_NAME].w,
+                Dimensions[BUTTON_NAME].h,
                 EditClass::ALPHANUMERIC
             )
         );
@@ -703,10 +645,10 @@ class SkirmishScenarioDialog final
                 Text[BUTTON_HOUSE].get(),
                 DropdownTextLength,
                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                d_house_x,
-                d_house_y,
-                d_house_w,
-                d_house_h,
+                Dimensions[BUTTON_HOUSE].x,
+                Dimensions[BUTTON_HOUSE].y,
+                Dimensions[BUTTON_HOUSE].w,
+                Dimensions[BUTTON_HOUSE].h,
                 UpButtonShape,
                 DownButtonShape
             )
@@ -743,15 +685,17 @@ class SkirmishScenarioDialog final
         /*........................................................................
         Dialog & button dimensions
         ........................................................................*/
-        Width = 300 * Factor;                      // dialog width
-        Height = 195 * Factor;                      // dialog height
-        X = (screen_width - Width) / 2; // dialog x-coord
-        Y = (screen_height - Height) / 2; // dialog y-coord
-        Center = X + (Width / 2);    // center x-coord
+        Width = 300 * Factor;
+        Height = 195 * Factor;
+        X = (screen_width - Width) / 2;
+        Y = (screen_height - Height) / 2;
+        Center = X + (Width / 2);
 
         TextHeight = 6 * Factor + 1; // ht of 6-pt text
-        MarginWidth = 10 * Factor;    // margin width/height
-        MarginHeight = 4 * Factor;    // margin width/height
+        MarginWidth = 10 * Factor;
+        MarginHeight = 4 * Factor;
+
+        Dimensions.clear();
 
         Dimensions[BUTTON_OK].w = 45 * Factor;
         Dimensions[BUTTON_OK].h = 9 * Factor;
@@ -763,78 +707,96 @@ class SkirmishScenarioDialog final
         Dimensions[BUTTON_CANCEL].x = X + Width - (Width / 6) - (Dimensions[BUTTON_CANCEL].w / 2);
         Dimensions[BUTTON_CANCEL].y = Y + Height - Dimensions[BUTTON_CANCEL].h - MarginWidth - Factor * 6;
 
-        d_ok_w = 45 * Factor;
-        d_ok_h = 9 * Factor;
-        d_ok_x = X + (Width / 6) - (d_ok_w / 2);
-        d_ok_y = Y + Height - d_ok_h - MarginWidth - Factor * 6;
+        Dimensions[BUTTON_NAME].w = 70 * Factor;
+        Dimensions[BUTTON_NAME].h = 9 * Factor;
+        Dimensions[BUTTON_NAME].x = X + 5 + (Width / 4) - (Dimensions[BUTTON_NAME].w / 2);
+        Dimensions[BUTTON_NAME].y = Y + MarginHeight + TextHeight + 1 * Factor;
 
-        d_cancel_w = 45 * Factor;
-        d_cancel_h = 9 * Factor;
-        d_cancel_x = X + Width - (Width / 6) - (d_cancel_w / 2);
-        d_cancel_y = Y + Height - d_cancel_h - MarginWidth - Factor * 6;
+        Dimensions[BUTTON_HOUSE].w = 60 * Factor;
+        Dimensions[BUTTON_HOUSE].h = (3 * 5 * Factor);
+        Dimensions[BUTTON_HOUSE].x = Center - (Dimensions[BUTTON_HOUSE].w / 2);
+        Dimensions[BUTTON_HOUSE].y = Dimensions[BUTTON_NAME].y;
 
-        d_name_w = 70 * Factor;
-        d_name_h = 9 * Factor;
-        d_name_x = X + 5 + (Width / 4) - (d_name_w / 2);
-        d_name_y = Y + MarginHeight + TextHeight + 1 * Factor;
+        Dimensions[BUTTON_COLOR_1].w = 10 * Factor;
+        Dimensions[BUTTON_COLOR_1].h = 9 * Factor;
+        Dimensions[BUTTON_COLOR_1].y = Dimensions[BUTTON_NAME].y;
+        Dimensions[BUTTON_COLOR_1].x = X + ((Width / 4) * 3) - (Dimensions[BUTTON_COLOR_1].w * 3);
 
-        d_house_w = 60 * Factor;
-        d_house_h = (3 * 5 * Factor);
-        d_house_x = Center - (d_house_w / 2);
-        d_house_y = d_name_y;
+        for (auto control = BUTTON_COLOR_2; control <= BUTTON_COLOR_6; ++control) {
+            Dimensions[control] = Dimensions[BUTTON_COLOR_1];
+            Dimensions[control].x = Dimensions[control].x + (Dimensions[control].w * (control - BUTTON_COLOR_1));
+        }
 
-        d_color_w = 10 * Factor;
-        d_color_h = 9 * Factor;
-        d_color_y = d_name_y;
-        d_color_x = X + ((Width / 4) * 3) - (d_color_w * 3);
+        Dimensions[BUTTON_PLAYERLIST].w = 118 * Factor;
+        Dimensions[BUTTON_PLAYERLIST].x = X + MarginWidth + MarginWidth + 5 * Factor;
 
-        d_playerlist_w = 118 * Factor;
-        d_playerlist_x = X + MarginWidth + MarginWidth + 5 * Factor;
+        Dimensions[BUTTON_SCENARIOLIST].w = 140 * Factor;
+        Dimensions[BUTTON_SCENARIOLIST].h = 30 * Factor;
+        Dimensions[BUTTON_SCENARIOLIST].x =
+            (Dimensions[BUTTON_CANCEL].x + static_cast<int>(nearbyint(Dimensions[BUTTON_CANCEL].w * 0.8)))
+            - Dimensions[BUTTON_SCENARIOLIST].w + (20 * Factor);
+        Dimensions[BUTTON_SCENARIOLIST].y = Dimensions[BUTTON_COLOR_1].y + TextHeight + 5 * Factor + TextHeight;
 
-        d_scenariolist_w = 140 * Factor;
-        d_scenariolist_h = 30 * Factor;
-        d_scenariolist_x = (d_cancel_x + static_cast<int>(nearbyint(d_cancel_w * 0.8))) - d_scenariolist_w + (20 * Factor);
-        d_scenariolist_y = d_color_y + TextHeight + 5 * Factor + TextHeight;
+        Dimensions[BUTTON_SCENARIOLIST].h *= 2;
 
-        d_scenariolist_h *= 2;
+        // right column of AI house controls
+        Dimensions[BUTTON_AI_HOUSE_1].w = static_cast<int>(nearbyint(Dimensions[BUTTON_HOUSE].w / 1.75));
+        Dimensions[BUTTON_AI_HOUSE_1].h = (6 * 5 * Factor);
+        Dimensions[BUTTON_AI_HOUSE_1].x = Dimensions[BUTTON_SCENARIOLIST].x
+            - Dimensions[BUTTON_AI_HOUSE_1].w - (10 * Factor);
+        Dimensions[BUTTON_AI_HOUSE_1].y = Dimensions[BUTTON_SCENARIOLIST].y + (5 * Factor);
 
-        d_aihouse_w = static_cast<int>(nearbyint(d_house_w / 1.75));
-        d_aihouse_h = (6 * 5 * Factor);
-        d_aihouse_x = d_scenariolist_x - d_aihouse_w - (10 * Factor);
-        d_aihouse_y = d_scenariolist_y + (5 * Factor);
-        d_aihouse_ystep = 10 * Factor;
+        for (auto control = BUTTON_AI_HOUSE_2; control <= BUTTON_AI_HOUSE_5; ++control) {
+            const auto previous_control = static_cast<ButtonType>(control - 1);
 
-        d_options_w = static_cast<int>(nearbyint(d_scenariolist_w * 0.8));
-        d_options_h = (5 * 6 * Factor) + 5 * Factor;
-        d_options_x = (d_scenariolist_x + d_scenariolist_w) - d_options_w;
-        d_options_y = d_scenariolist_y + d_scenariolist_h + MarginWidth - 2 * Factor;
+            Dimensions[control] = Dimensions[BUTTON_AI_HOUSE_1];
+            Dimensions[control].y = Dimensions[previous_control].y + 10 * Factor;
+        }
 
-        d_count_w = 25 * Factor;
-        d_count_h = 7 * Factor;
-        d_count_y = d_options_y;
-        d_count_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * Factor; // fudged
+        // left column of AI house controls
+        Dimensions[BUTTON_AI_DIFF_1].w = static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].w * 1.5));
+        Dimensions[BUTTON_AI_DIFF_1].h = Dimensions[BUTTON_AI_HOUSE_1].h;
+        Dimensions[BUTTON_AI_DIFF_1].x = Dimensions[BUTTON_AI_HOUSE_1].x
+            - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].w * 1.5)) - (10 * Factor);
+        Dimensions[BUTTON_AI_DIFF_1].y = Dimensions[BUTTON_AI_HOUSE_1].y;
 
-        d_level_w = 25 * Factor;
-        d_level_h = 7 * Factor;
-        d_level_y = d_count_y + d_count_h;
-        d_level_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * Factor; // fudged
+        for (auto control = BUTTON_AI_DIFF_2; control <= BUTTON_AI_DIFF_5; ++control) {
+            const auto previous_control = static_cast<ButtonType>(control - 1);
 
-        d_credits_w = 25 * Factor;
-        d_credits_h = 7 * Factor;
-        d_credits_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * Factor; // fudged;
-        d_credits_y = d_level_y + d_level_h;
+            Dimensions[control] = Dimensions[BUTTON_AI_DIFF_1];
+            Dimensions[control].y = Dimensions[previous_control].y + 10 * Factor;
+        }
 
-        d_tiberiumscale_w = 25 * Factor;
-        d_tiberiumscale_h = 7 * Factor;
-        d_tiberiumscale_x = d_playerlist_x + (d_playerlist_w / 2) + 20 * Factor; // fudged;
-        d_tiberiumscale_y = d_credits_y + d_credits_h;
+        Dimensions[BUTTON_OPTIONS].w = static_cast<int>(nearbyint(Dimensions[BUTTON_SCENARIOLIST].w * 0.8));
+        Dimensions[BUTTON_OPTIONS].h = (5 * 6 * Factor) + 5 * Factor;
+        Dimensions[BUTTON_OPTIONS].x = (Dimensions[BUTTON_SCENARIOLIST].x + Dimensions[BUTTON_SCENARIOLIST].w)
+            - Dimensions[BUTTON_OPTIONS].w;
+        Dimensions[BUTTON_OPTIONS].y = Dimensions[BUTTON_SCENARIOLIST].y + Dimensions[BUTTON_SCENARIOLIST].h
+            + MarginWidth - 2 * Factor;
 
-        ColorBoxes[0] = d_color_x;
-        ColorBoxes[1] = d_color_x + d_color_w;
-        ColorBoxes[2] = d_color_x + (d_color_w * 2);
-        ColorBoxes[3] = d_color_x + (d_color_w * 3);
-        ColorBoxes[4] = d_color_x + (d_color_w * 4);
-        ColorBoxes[5] = d_color_x + (d_color_w * 5);
+        Dimensions[BUTTON_COUNT].w = 25 * Factor;
+        Dimensions[BUTTON_COUNT].h = 7 * Factor;
+        Dimensions[BUTTON_COUNT].y = Dimensions[BUTTON_OPTIONS].y;
+        Dimensions[BUTTON_COUNT].x = Dimensions[BUTTON_PLAYERLIST].x + (Dimensions[BUTTON_PLAYERLIST].w / 2)
+            + 20 * Factor;
+
+        Dimensions[BUTTON_LEVEL].w = 25 * Factor;
+        Dimensions[BUTTON_LEVEL].h = 7 * Factor;
+        Dimensions[BUTTON_LEVEL].y = Dimensions[BUTTON_COUNT].y + Dimensions[BUTTON_COUNT].h;
+        Dimensions[BUTTON_LEVEL].x = Dimensions[BUTTON_PLAYERLIST].x + (Dimensions[BUTTON_PLAYERLIST].w / 2)
+            + 20 * Factor;
+
+        Dimensions[BUTTON_CREDITS].w = 25 * Factor;
+        Dimensions[BUTTON_CREDITS].h = 7 * Factor;
+        Dimensions[BUTTON_CREDITS].x = Dimensions[BUTTON_PLAYERLIST].x + (Dimensions[BUTTON_PLAYERLIST].w / 2)
+            + 20 * Factor;
+        Dimensions[BUTTON_CREDITS].y = Dimensions[BUTTON_LEVEL].y + Dimensions[BUTTON_LEVEL].h;
+
+        Dimensions[BUTTON_TIBERIUMSCALE].w = 25 * Factor;
+        Dimensions[BUTTON_TIBERIUMSCALE].h = 7 * Factor;
+        Dimensions[BUTTON_TIBERIUMSCALE].x = Dimensions[BUTTON_PLAYERLIST].x + (Dimensions[BUTTON_PLAYERLIST].w / 2)
+            + 20 * Factor;
+        Dimensions[BUTTON_TIBERIUMSCALE].y = Dimensions[BUTTON_CREDITS].y + Dimensions[BUTTON_CREDITS].h;
     }
 
 public:
@@ -996,9 +958,9 @@ public:
                 User clicks on a color button
                 ------------------------------------------------------------------*/
                 case KN_LMOUSE:
-                    if (Keyboard->MouseQX > ColorBoxes[0] && Keyboard->MouseQX < (ColorBoxes[MAX_MPLAYER_COLORS - 1] + d_color_w)
-                        && Keyboard->MouseQY > d_color_y && Keyboard->MouseQY < (d_color_y + d_color_h)) {
-                        MPlayerPrefColor = (Keyboard->MouseQX - ColorBoxes[0]) / d_color_w;
+                    if (Keyboard->MouseQX > Dimensions[BUTTON_COLOR_1].x && Keyboard->MouseQX < (Dimensions[BUTTON_COLOR_6].x + Dimensions[BUTTON_COLOR_6].w)
+                        && Keyboard->MouseQY > Dimensions[BUTTON_COLOR_1].y && Keyboard->MouseQY < (Dimensions[BUTTON_COLOR_6].y + Dimensions[BUTTON_COLOR_6].h)) {
+                        MPlayerPrefColor = (Keyboard->MouseQX - Dimensions[BUTTON_COLOR_1].x) / Dimensions[BUTTON_COLOR_1].w;
                         MPlayerColorIdx = MPlayerPrefColor;
                         display = REDRAW_COLORS;
 

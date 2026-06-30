@@ -1308,7 +1308,7 @@ static void Assign_Houses(void)
             **	Set the house's IsHuman, Credits, ActLike, & RemapTable
             */
             housep->IsHuman = false;
-            CNC_LOG_WARN("Assigning {} acts like: {} (override: {})", house, pref_house, house_override);
+            CNC_LOG_INFO("Assigning {} acts like: {} (override: {})", house, pref_house, house_override);
             housep->Init_Data(color, pref_house, MPlayerCredits);
 
             DiffType difficulty = Scen.CDifficulty;
@@ -1331,7 +1331,7 @@ static void Assign_Houses(void)
                 default: break;
             }
 
-            CNC_LOG_DEBUG("Assigning {} handicap: {} (override: {})", house, difficulty, difficulty_override);
+            CNC_LOG_INFO("Assigning {} handicap: {} (override: {})", house, difficulty, difficulty_override);
             housep->Assign_Handicap(difficulty);
         }
     }
