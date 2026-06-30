@@ -104,6 +104,7 @@ ListClass::ListClass(int id, int x, int y, int w, int h, TextPrintType flags, vo
     Fancy_Text_Print(TXT_NONE, 0, 0, TBLACK, TBLACK, TextFlags);
     LineHeight = FontHeight + FontYSpacing - 1;
     LineCount = (h - 1) / LineHeight;
+    PreviousIndex = std::nullopt;
 }
 
 /***********************************************************************************************
@@ -195,6 +196,8 @@ int ListClass::Add_Item(const std::string& text)
 void ListClass::Remove_Item(int index)
 {
     if (index < List.Count()) {
+        PreviousIndex = Current_Index();
+
         List.Delete(index);
 
         /*
@@ -216,6 +219,8 @@ void ListClass::Remove_Item(int index)
         ** If we just removed the selected entry, select the previous one
         */
         if (SelectedIndex >= List.Count()) {
+            PreviousIndex = SelectedIndex;
+
             SelectedIndex--;
             if (SelectedIndex < 0) {
                 SelectedIndex = 0;
@@ -301,6 +306,8 @@ int ListClass::Action(unsigned flags, KeyNumType& key)
 
             int index = Get_Mouse_Y() - (Y + 1);
             index = index / LineHeight;
+
+            PreviousIndex = SelectedIndex;
             SelectedIndex = CurrentTopIndex + index;
             SelectedIndex = MIN(SelectedIndex, List.Count() - 1);
         }
@@ -864,6 +871,8 @@ GadgetClass* ListClass::Remove(void)
  *=============================================================================================*/
 void ListClass::Set_Selected_Index(int index)
 {
+    PreviousIndex = SelectedIndex;
+
     if (List.Count() == 0 || index >= List.Count()) {
         SelectedIndex = 0;
     } else if (index < 0) {
@@ -879,6 +888,21 @@ void ListClass::Set_Selected_Index(int index)
     if (SelectedIndex >= CurrentTopIndex + LineCount) {
         Set_View_Index(SelectedIndex - (LineCount - 1));
     }
+}
+
+bool ListClass::Index_Changed()
+{
+    return PreviousIndex.has_value() && PreviousIndex != Current_Index();
+}
+
+int ListClass::Get_Previous_Index()
+{
+    return PreviousIndex.value_or(-1);
+}
+
+void ListClass::Reset_Index_Change()
+{
+    PreviousIndex = std::nullopt;
 }
 
 /***********************************************************************************************

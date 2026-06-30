@@ -1164,7 +1164,7 @@ bool Select_Game(bool fade)
 
                 case GAME_SKIRMISH:
 #ifndef REMASTER_BUILD
-                    if (!Com_Scenario_Dialog()) {
+                    if (!Skirmish_Scenario_Dialog()) {
                         GameToPlay = Select_MPlayer_Game();
                         if (GameToPlay == GAME_NORMAL) { // user hit Cancel
                             display = true;

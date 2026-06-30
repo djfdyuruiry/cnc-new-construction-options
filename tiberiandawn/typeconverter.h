@@ -1,9 +1,12 @@
 #pragma once
 
+#include <format>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+
+#include <fmt/format.h>
 
 #include "common/enum.h"
 #include "common/json.h"
@@ -85,7 +88,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static const TwoWayMap<T, std::string>& Get_Type_Map()
     {
-        static std::shared_ptr<TwoWayMap<T, std::string>> type_map;
+        static std::unique_ptr<TwoWayMap<T, std::string>> type_map;
         static std::once_flag once_flag;
 
         // create type map once, the first time T is requested
@@ -559,4 +562,20 @@ private:
     static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
 
     TdTypeConverter() = delete;
+};
+
+// std::format support for TD enum types
+template <SupportedByTdTypeConverter T>
+struct std::formatter<T> : std::formatter<std::string> {
+    auto format(T value, format_context& ctx) const {
+        return formatter<string>::format(TdTypeConverter::To_String(value), ctx);
+    }
+};
+
+// spdlog fmt library support for TD enum types (used by spdlog
+template <SupportedByTdTypeConverter T>
+struct fmt::formatter<T> : fmt::formatter<std::string> {
+    auto format(const T& value, fmt::format_context& ctx) const {
+        return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
+    }
 };

@@ -367,7 +367,7 @@ GameType Select_MPlayer_Game(void)
             case (BUTTON_SKIRMISH):
                 GameToPlay = GAME_SKIRMISH;
                 Read_MultiPlayer_Settings();
-                if (Com_Scenario_Dialog()) {
+                if (Skirmish_Scenario_Dialog()) {
                     retval = GAME_SKIRMISH;
                     process = false;
                 } else {

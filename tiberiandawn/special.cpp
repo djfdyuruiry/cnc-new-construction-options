@@ -419,6 +419,47 @@ int Fetch_Difficulty(void)
     return (slider.Get_Value() * (Rule.IsFineDifficulty ? 1 : 2));
 }
 
+void SpecialClass::Init()
+{
+    IsScrollMod = false;
+    IsGross = false;
+    IsEasy = false;
+    IsDifficult = false;
+    IsSpeedBuild = false;
+    IsDefenderAdvantage = true;
+    IsVisibleTarget = false;
+    IsVariation = false;
+    IsJurassic = false;
+    IsJuvenile = false;
+    IsSmartDefense = false;
+    IsTreeTarget = false;
+    IsMCVDeploy = false;
+    IsVisceroids = false;
+    IsMonoEnabled = false;
+    IsInert = false;
+    IsShowPath = false;
+    IsThreePoint = false;
+    IsTGrowth = true;
+    IsTSpread = true;
+    IsTFast = true;
+    IsRoad = false;
+    IsScatter = false;
+    IsCaptureTheFlag = false;
+    IsNamed = false;
+    IsFromInstall = false;
+    IsSeparate = false;
+    IsEarlyWin = false;
+    HealthBarDisplayMode = HB_SELECTED;
+    ResourceBarDisplayMode = RB_SELECTED;
+    ModernBalance = false;
+
+    if (RuleOverrides != nullptr) {
+        delete RuleOverrides;
+    }
+
+    RuleOverrides = new RuleSections();
+}
+
 TO_JSON(SpecialClass)
 {
     BITFIELD_TO_JSON(IsEasy);
@@ -452,10 +493,18 @@ TO_JSON(SpecialClass)
     FIELD_VALUE_TO_JSON(HealthBarDisplayMode, static_cast<int>(p.HealthBarDisplayMode));
     FIELD_VALUE_TO_JSON(ResourceBarDisplayMode, static_cast<int>(p.ResourceBarDisplayMode));
     BITFIELD_TO_JSON(ModernBalance);
+
+    if (p.RuleOverrides != nullptr) {
+        FIELD_VALUE_TO_JSON(RuleOverrides, *p.RuleOverrides);
+    } else {
+        j[NAMEOF(RuleOverrides)] = nlohmann::json::object();
+    }
 }
 
 FROM_JSON(SpecialClass)
 {
+    p.Init();
+
     BITFIELD_FROM_JSON(IsEasy);
     BITFIELD_FROM_JSON(IsDifficult);
     BITFIELD_FROM_JSON(IsSpeedBuild);
@@ -516,4 +565,11 @@ FROM_JSON(SpecialClass)
     );
 
     BITFIELD_FROM_JSON(ModernBalance);
+
+    if (p.RuleOverrides == nullptr) {
+        throw CncJsonException("Attempted to deserialize SpecialClass from json when RuleOverrides was nullptr");
+    }
+
+    p.RuleOverrides->Clear();
+    FIELD_FROM_JSON_TO_VALUE(NAMEOF(RuleOverrides), *p.RuleOverrides);
 }

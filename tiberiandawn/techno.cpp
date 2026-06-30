@@ -1048,13 +1048,6 @@ void TechnoClass::Draw_It(int x, int y, WindowNumberType window)
 {
     Clear_Redraw_Flag();
 
-    /*
-    **	Guard against object in shroud.
-    */
-    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
-        return;
-    }
-
 #ifdef REMASTER_BUILD
     WindowNumberType line_frame_cmp = WINDOW_VIRTUAL;
 #else

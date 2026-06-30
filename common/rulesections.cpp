@@ -381,6 +381,11 @@ std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_v
     return std::nullopt;
 }
 
+RuleValueVariant RuleSection::operator[](const std::string_view name) const
+{
+    return Get_Variant(name);
+}
+
 TO_JSON(RuleSection)
 {
     for (const auto& [ name, value ] : p.Rules) {
@@ -469,6 +474,12 @@ RuleSection& RuleSections::Add_Section(std::string_view name)
             OnRulesChangedDefault.value()(s, r, v);
         }
     });
+}
+
+void RuleSections::Clear()
+{
+    Sections.clear();
+    OnRulesChangedDefault.reset();
 }
 
 RuleSection& RuleSections::operator[](std::string_view name)

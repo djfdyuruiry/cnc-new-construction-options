@@ -335,9 +335,9 @@ void AircraftClass::Draw_It(int x, int y, WindowNumberType window)
     int facing = Facing_To_32(SecondaryFacing);
 
     /*
-    **	Guard against object in shroud.
+    **	Guard against flying aircraft in shroud.
     */
-    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+    if (!Debug_Map && Altitude == FLIGHT_LEVEL && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
         return;
     }
 

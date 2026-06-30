@@ -428,6 +428,8 @@ public:
     RuleSection& Set_Rule_Comment(std::string_view name, std::string comment);
     std::optional<std::string> Try_Get_Rule_Comment(std::string_view name) const;
 
+    RuleValueVariant operator[](std::string_view name) const;
+
     // TODO: Handle OnRulesChanged, if needed
     JSON_FUNCTIONS(RuleSection)
 private:
@@ -828,6 +830,8 @@ public:
     RuleSection& Add_Section(std::string_view name, std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed);
 
     RuleSection& Add_Section(std::string_view name);
+
+    void Clear();
 
     RuleSection& operator[](std::string_view name);
 

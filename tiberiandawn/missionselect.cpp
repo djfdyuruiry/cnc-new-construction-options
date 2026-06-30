@@ -167,7 +167,7 @@ static std::string Build_Mission_Description(
 
         // {country name} {direction} ({variation})
         mission_description = country_name_str + (country.has_value() ? " " : "") +
-            std::format("({} {})", direction_str, TdTypeConverter::To_String(variation));
+            std::format("({} {})", direction_str, variation);
     }
 
     // {campaign player}: Mission {number} - {mission description}
@@ -237,7 +237,7 @@ static void Fill_Mission_Cache(std::vector<MissionVariables>& mission_cache)
         RequiredCD = player;
 
         if (!Force_CD_Available(player)) {
-            CNC_LOG_WARN("Missing CD data detected when looking for {} missions", TdTypeConverter::To_String(player));
+            CNC_LOG_WARN("Missing CD data detected when looking for {} missions", player);
             RequiredCD = old_cd;
         }
 

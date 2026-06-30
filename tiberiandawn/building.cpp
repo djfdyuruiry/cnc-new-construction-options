@@ -549,13 +549,6 @@ void BuildingClass::Draw_It(int x, int y, WindowNumberType window)
     shapenum = Fetch_Stage();
 
     /*
-    **	Guard against object in shroud.
-    */
-    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
-        return;
-    }
-
-    /*
     **	The shape file to use for rendering depends on whether the building
     **	is undergoing construction or not.
     */

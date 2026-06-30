@@ -547,6 +547,7 @@ unsigned char MPlayerID[MAX_PLAYERS];
 ** This array stores the actual HousesType for all players (MULT1, etc).
 */
 HousesType MPlayerHouses[MAX_PLAYERS];
+DiffType MPlayerDifficulty[MAX_PLAYERS];
 
 /***************************************************************************
 ** This array stores the names of all players in a multiplayer game.
