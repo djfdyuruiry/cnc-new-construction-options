@@ -422,7 +422,6 @@ int AllowAttract = 0; // 1 = allow attract mode
 ** perform any allocations;
 ** the class itself is ?? bytes.
 */
-#if (0)                      // PG_TO_FIX
 bool ModemService = true;    // When false disable servicing modem.
 NullModemClass NullModem(16, // number of send entries
                          64, // number of receive entries
@@ -443,7 +442,6 @@ SerialSettingsType SerialDefaults; // serial port default settings
 char* DialMethodCheck[DIAL_METHODS] = {"T", "P"};
 
 char* CallWaitStrings[CALL_WAIT_STRINGS_NUM] = {"*70,", "70#,", "1170,", "CUSTOM -                "};
-#endif
 
 ModemGameType ModemGameToPlay; // type of modem play Dialer, answerer, null
 

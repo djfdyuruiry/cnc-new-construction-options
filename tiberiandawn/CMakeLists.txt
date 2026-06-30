@@ -92,6 +92,10 @@ set(TIBDAWN_SRC
     mplayer.cpp
     msgbox.cpp
     msglist.cpp
+    noseqcon.cpp
+    nullconn.cpp
+    nulldlg.cpp
+    nullmgr.cpp
     object.cpp
     odata.cpp
     options.cpp
