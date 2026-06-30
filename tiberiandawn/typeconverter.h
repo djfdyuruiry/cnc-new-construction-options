@@ -88,7 +88,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static const TwoWayMap<T, std::string>& Get_Type_Map()
     {
-        static std::shared_ptr<TwoWayMap<T, std::string>> type_map;
+        static std::unique_ptr<TwoWayMap<T, std::string>> type_map;
         static std::once_flag once_flag;
 
         // create type map once, the first time T is requested
