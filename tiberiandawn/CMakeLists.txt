@@ -92,7 +92,6 @@ set(TIBDAWN_SRC
     mplayer.cpp
     msgbox.cpp
     msglist.cpp
-    nulldlg.cpp
     object.cpp
     odata.cpp
     options.cpp
@@ -156,6 +155,7 @@ set(TIBDAWN_SRC
     savegame_v1.cpp
     savegameheader.cpp
     savegameresolver.cpp
+    skirmishdlg.cpp
     technotypejsonreference.cpp
     tiberiandawnsettings.cpp
     typeconverter.cpp

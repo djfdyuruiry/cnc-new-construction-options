@@ -581,6 +581,11 @@ uint32_t Compute_Name_CRC(char* name);
 void Net_Reconnect_Dialog(int reconn, int fresh, int oldest_index, unsigned int timeval);
 
 /*
+** SKIRMISHDLG.CPP
+*/
+int Skirmish_Scenario_Dialog(void);
+
+/*
 ** NULLDLG.CPP
 */
 int Init_Null_Modem(SerialSettingsType* settings);
