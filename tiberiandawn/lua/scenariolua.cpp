@@ -209,7 +209,7 @@ void ScenarioLua::On_Clear_Scenario()
 void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
 {
     events.Access([](auto& q) {
-        if (q->size() == 0) {
+        if (q.size() == 0) {
             CNC_LOGGER_TRACE("No Lua Events to process");
             return;
         }
@@ -218,9 +218,9 @@ void ScenarioLua::Process_Lua_Events(AtomicQueue<LuaEvent>& events)
 
         const auto& engine = Get_Engine();
 
-        while (!q->empty()) {
-            q->front()->Execute(engine);
-            q->pop();
+        while (!q.empty()) {
+            q.front()->Execute(engine);
+            q.pop();
         }
     });
 }
