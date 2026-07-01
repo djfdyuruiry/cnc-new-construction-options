@@ -270,7 +270,7 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
         "Exporting rule to INI: [{}] -> {} = {}",
         SectionName,
         name,
-        Variant_To_String(value_variant)
+        value_variant
     );
 
     const auto comment = Try_Get_Rule_Comment(name);
@@ -331,7 +331,7 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
         "Updating rule at runtime: [{}] -> {} = {}",
         SectionName,
         name,
-        Variant_To_String(value)
+        value
     );
 
     const auto existing_rule = Try_Get_Variant(name);

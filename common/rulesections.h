@@ -141,14 +141,14 @@ public:
                 "Existing value for rule detected: [{}] -> {} (value = {})",
                 SectionName,
                 name,
-                Variant_To_String(resolved_default_value)
+                resolved_default_value
             );
         }
 
         if (!ini.Section_Present(SectionName.data())) {
             CNC_LOGGER_DEBUG(
                 "Loading value '{}' for '{}', rule section not found in provided INI: [{}]",
-                Variant_To_String(resolved_default_value),
+                resolved_default_value,
                 name,
                 SectionName
             );
@@ -161,7 +161,7 @@ public:
             "Attempting to find rule in INI: [{}] -> {} (with default = {})",
             SectionName,
             name,
-            Variant_To_String(resolved_default_value)
+            resolved_default_value
         );
 
         auto value = resolved_default_value;
@@ -228,7 +228,7 @@ public:
             "Imported rule from INI: [{}] -> {} = {}",
             SectionName,
             name,
-            Variant_To_String(value)
+            value
         );
 
         Rules[name.data()] = value;

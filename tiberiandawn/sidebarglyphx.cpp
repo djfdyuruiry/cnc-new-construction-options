@@ -822,7 +822,7 @@ FROM_JSON(SidebarGlyphxClass::StripClass::BuildType)
         CncJsonUtils::Throw_Json_Assert_Failure(
             NAMEOF(BuildableID),
             CncJsonUtils::Build_Parse_Error(
-                std::format("RTTI type '{}'", TdTypeConverter::To_String(p.BuildableType)),
+                std::format("RTTI type '{}'", p.BuildableType),
                 buildable_id_str
             )
         );
