@@ -572,10 +572,26 @@ struct std::formatter<T> : std::formatter<std::string> {
     }
 };
 
-// spdlog fmt library support for TD enum types (used by spdlog
+// spdlog fmt library support for TD enum types (used by spdlog)
 template <SupportedByTdTypeConverter T>
 struct fmt::formatter<T> : fmt::formatter<std::string> {
     auto format(const T& value, fmt::format_context& ctx) const {
         return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
+    }
+};
+
+// std::format support for TD enum variant
+template <>
+struct std::formatter<ConverterTypeVariant> : std::formatter<std::string> {
+    auto format(ConverterTypeVariant value, format_context& ctx) const {
+        return formatter<string>::format(TdTypeConverter::To_String_Variant(value), ctx);
+    }
+};
+
+// spdlog fmt library support for TD enum variant (used by spdlog)
+template <>
+struct fmt::formatter<ConverterTypeVariant> : fmt::formatter<std::string> {
+    auto format(const ConverterTypeVariant& value, fmt::format_context& ctx) const {
+        return formatter<std::string>::format(TdTypeConverter::To_String_Variant(value), ctx);
     }
 };
