@@ -10,6 +10,19 @@ struct ControlDimension
     int H = 0;
 };
 
+// used to store various subclasses of Gadget together in one stl container
+using GadgetVariant = std::variant<CheckListClass, DropListClass, EditClass, GaugeClass, ListClass, SliderClass, TextButtonClass>;
+template<typename T>
+concept GadgetVariantCompatible = (
+    std::is_same_v<T, CheckListClass> ||
+    std::is_same_v<T, DropListClass> ||
+    std::is_same_v<T, EditClass> ||
+    std::is_same_v<T, GaugeClass> ||
+    std::is_same_v<T, ListClass> ||
+    std::is_same_v<T, SliderClass> ||
+    std::is_same_v<T, TextButtonClass>
+);
+
 class SkirmishScenarioDialog final
 {
     /*........................................................................
@@ -88,7 +101,7 @@ class SkirmishScenarioDialog final
 
     std::map<ControlType, ControlDimension> Dimensions;
     std::map<ControlType, std::unique_ptr<char[]>> Text;
-    std::map<ControlType, std::unique_ptr<GadgetClass>> Controls;
+    std::map<ControlType, GadgetVariant> Controls;
     GadgetClass* CommandChain;
 
     bool Is_Mouse_Over_Rectangle(const int start_x, const int start_y, const int end_x, const int end_y)
@@ -105,10 +118,35 @@ class SkirmishScenarioDialog final
             && (Keyboard->MouseQY < control.Y || Keyboard->MouseQY > control.Y + control.Height);
     }
 
-    template<class T>
+    template<GadgetVariantCompatible T>
     T& Get_Control(const ControlType type)
     {
-        return *reinterpret_cast<T*>(Controls[type].get());
+        return std::get<T>(Controls.at(type));
+    }
+
+    template<GadgetVariantCompatible T, typename... Args>
+    T& Add_Control(const ControlType type, Args&&... args)
+    {
+        Controls.emplace(type, T(type, std::forward<Args>(args)...));
+
+        auto& control = Get_Control<T>(type);
+
+        // add control to command chain so we can capture input
+        if (CommandChain == nullptr) {
+            // first element in chain
+            CommandChain = &control;
+        } else {
+            // nth element in chain
+            control.Add_Tail(*CommandChain);
+        }
+
+        return control;
+    }
+
+    template<ControlType type, GadgetVariantCompatible T, typename... Args>
+    T& Add_Control(Args&&... args)
+    {
+        return Add_Control<T>(type, std::forward<Args>(args)...);
     }
 
     KeyNumType Get_Input(RedrawType& display)
@@ -550,49 +588,34 @@ class SkirmishScenarioDialog final
 
     void Init_Dialog_Buttons()
     {
-        Controls[BUTTON_OK] = std::unique_ptr<GadgetClass>(
-            new TextButtonClass(
-                BUTTON_OK,
-                TXT_OK,
-                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                Dimensions[BUTTON_OK].X,
-                Dimensions[BUTTON_OK].Y,
-                Dimensions[BUTTON_OK].W,
-                Dimensions[BUTTON_OK].H
-            )
+        Add_Control<BUTTON_OK, TextButtonClass>(
+            TXT_OK,
+            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            Dimensions[BUTTON_OK].X,
+            Dimensions[BUTTON_OK].Y,
+            Dimensions[BUTTON_OK].W,
+            Dimensions[BUTTON_OK].H
         );
-        Get_Control<TextButtonClass>(BUTTON_OK).Add_Tail(*CommandChain);
 
-        Controls[BUTTON_CANCEL] = std::unique_ptr<GadgetClass>(
-            new TextButtonClass(
-                BUTTON_CANCEL,
-                TXT_CANCEL,
-                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                Dimensions[BUTTON_CANCEL].X,
-                Dimensions[BUTTON_CANCEL].Y,
-                Dimensions[BUTTON_CANCEL].W,
-                Dimensions[BUTTON_CANCEL].H
-            )
+        Add_Control<BUTTON_CANCEL, TextButtonClass>(
+            TXT_CANCEL,
+            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            Dimensions[BUTTON_CANCEL].X,
+            Dimensions[BUTTON_CANCEL].Y,
+            Dimensions[BUTTON_CANCEL].W,
+            Dimensions[BUTTON_CANCEL].H
         );
-        Get_Control<TextButtonClass>(BUTTON_CANCEL).Add_Tail(*CommandChain);
     }
 
     void Init_Difficulty_Slider()
     {
-        Controls[BUTTON_DIFFICULTY] = std::unique_ptr<GadgetClass>(
-            new SliderClass(
-                BUTTON_DIFFICULTY,
-                Dimensions[BUTTON_NAME].X,
-                Dimensions[BUTTON_OK].Y - (8 * Factor) - MarginWidth,
-                Width - (Dimensions[BUTTON_NAME].X - X) * 2,
-                8 * Factor,
-                true
-            )
+        auto& difficulty = Add_Control<BUTTON_DIFFICULTY, SliderClass>(
+            Dimensions[BUTTON_NAME].X,
+            Dimensions[BUTTON_OK].Y - (8 * Factor) - MarginWidth,
+            Width - (Dimensions[BUTTON_NAME].X - X) * 2,
+            8 * Factor,
+            true
         );
-
-        auto& difficulty = Get_Control<SliderClass>(BUTTON_DIFFICULTY);
-
-        difficulty.Add_Tail(*CommandChain);
 
         if (Rule.IsFineDifficulty) {
             difficulty.Set_Maximum(5);
@@ -607,31 +630,24 @@ class SkirmishScenarioDialog final
     {
         // init gauges
         for (auto control = BUTTON_COUNT; control <= BUTTON_TIBERIUM_SCALE; ++control) {
-            Controls[control] = std::unique_ptr<GadgetClass>(
-                new GaugeClass(
-                    control,
-                    Dimensions[control].X,
-                    Dimensions[control].Y,
-                    Dimensions[control].W,
-                    Dimensions[control].H
-                )
+            Add_Control<GaugeClass>(
+                control,
+                Dimensions[control].X,
+                Dimensions[control].Y,
+                Dimensions[control].W,
+                Dimensions[control].H
             );
-            Get_Control<GaugeClass>(control).Add_Tail(*CommandChain);
         }
 
-        Controls[BUTTON_OPTIONS] = std::unique_ptr<GadgetClass>(
-            new CheckListClass(
-                BUTTON_OPTIONS,
-                Dimensions[BUTTON_OPTIONS].X,
-                Dimensions[BUTTON_OPTIONS].Y,
-                Dimensions[BUTTON_OPTIONS].W,
-                Dimensions[BUTTON_OPTIONS].H,
-                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                UpButtonShape,
-                DownButtonShape
-            )
+        Add_Control<BUTTON_OPTIONS, CheckListClass>(
+            Dimensions[BUTTON_OPTIONS].X,
+            Dimensions[BUTTON_OPTIONS].Y,
+            Dimensions[BUTTON_OPTIONS].W,
+            Dimensions[BUTTON_OPTIONS].H,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            UpButtonShape,
+            DownButtonShape
         );
-        Get_Control<GaugeClass>(BUTTON_OPTIONS).Add_Tail(*CommandChain);
     }
 
     void Init_Middle_Row()
@@ -640,26 +656,21 @@ class SkirmishScenarioDialog final
             const auto house_control = static_cast<ControlType>(control + 5);
 
             Text[control] = std::make_unique<char[]>(DropdownTextLength);
-            Text[house_control] = std::make_unique<char[]>(DropdownTextLength);
-
-            Controls[control] = std::unique_ptr<GadgetClass>(
-                new DropListClass(
-                    control,
-                    Text[control].get(),
-                    DropdownTextLength,
-                    TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                    Dimensions[control].X,
-                    Dimensions[control].Y,
-                    Dimensions[control].W,
-                    Dimensions[control].H,
-                    UpButtonShape,
-                    DownButtonShape
-                )
+            Add_Control<DropListClass>(
+                control,
+                Text[control].get(),
+                DropdownTextLength,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[control].X,
+                Dimensions[control].Y,
+                Dimensions[control].W,
+                Dimensions[control].H,
+                UpButtonShape,
+                DownButtonShape
             );
-            Get_Control<DropListClass>(control).Add_Tail(*CommandChain);
 
-            Controls[house_control] = std::unique_ptr<GadgetClass>(
-                new DropListClass(
+            Text[house_control] = std::make_unique<char[]>(DropdownTextLength);
+            Add_Control<DropListClass>(
                     house_control,
                     Text[house_control].get(),
                     DropdownTextLength,
@@ -670,59 +681,46 @@ class SkirmishScenarioDialog final
                     Dimensions[house_control].H,
                     UpButtonShape,
                     DownButtonShape
-                )
             );
-            Get_Control<DropListClass>(house_control).Add_Tail(*CommandChain);
         }
 
-        Controls[BUTTON_SCENARIO_LIST] = std::unique_ptr<GadgetClass>(
-            new ListClass(
-                BUTTON_SCENARIO_LIST,
-                Dimensions[BUTTON_SCENARIO_LIST].X,
-                Dimensions[BUTTON_SCENARIO_LIST].Y,
-                Dimensions[BUTTON_SCENARIO_LIST].W,
-                Dimensions[BUTTON_SCENARIO_LIST].H,
-                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                UpButtonShape,
-                DownButtonShape
-            )
+        Add_Control<BUTTON_SCENARIO_LIST, ListClass>(
+            Dimensions[BUTTON_SCENARIO_LIST].X,
+            Dimensions[BUTTON_SCENARIO_LIST].Y,
+            Dimensions[BUTTON_SCENARIO_LIST].W,
+            Dimensions[BUTTON_SCENARIO_LIST].H,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            UpButtonShape,
+            DownButtonShape
         );
-        Get_Control<ListClass>(BUTTON_SCENARIO_LIST).Add_Tail(*CommandChain);
     }
 
     void Init_Top_Row()
     {
         Text[BUTTON_NAME] = std::make_unique<char[]>(MPLAYER_NAME_MAX);
-        Controls[BUTTON_NAME] = std::unique_ptr<GadgetClass>(
-            new EditClass(
-                BUTTON_NAME,
-                Text[BUTTON_NAME].get(),
-                MPLAYER_NAME_MAX,
-                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                Dimensions[BUTTON_NAME].X,
-                Dimensions[BUTTON_NAME].Y,
-                Dimensions[BUTTON_NAME].W,
-                Dimensions[BUTTON_NAME].H,
-                EditClass::ALPHANUMERIC
-            )
+        Add_Control<BUTTON_NAME, EditClass>(
+            Text[BUTTON_NAME].get(),
+            MPLAYER_NAME_MAX,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            Dimensions[BUTTON_NAME].X,
+            Dimensions[BUTTON_NAME].Y,
+            Dimensions[BUTTON_NAME].W,
+            Dimensions[BUTTON_NAME].H,
+            EditClass::ALPHANUMERIC
         );
-        CommandChain = Controls[BUTTON_NAME].get();
 
         Text[BUTTON_HOUSE] = std::make_unique<char[]>(DropdownTextLength);
-        Controls[BUTTON_HOUSE] = std::unique_ptr<GadgetClass>(
-            new DropListClass(BUTTON_HOUSE,
-                Text[BUTTON_HOUSE].get(),
-                DropdownTextLength,
-                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                Dimensions[BUTTON_HOUSE].X,
-                Dimensions[BUTTON_HOUSE].Y,
-                Dimensions[BUTTON_HOUSE].W,
-                Dimensions[BUTTON_HOUSE].H,
-                UpButtonShape,
-                DownButtonShape
-            )
+        Add_Control<BUTTON_HOUSE, DropListClass>(
+            Text[BUTTON_HOUSE].get(),
+            DropdownTextLength,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            Dimensions[BUTTON_HOUSE].X,
+            Dimensions[BUTTON_HOUSE].Y,
+            Dimensions[BUTTON_HOUSE].W,
+            Dimensions[BUTTON_HOUSE].H,
+            UpButtonShape,
+            DownButtonShape
         );
-        Get_Control<DropListClass>(BUTTON_HOUSE).Add_Tail(*CommandChain);
     }
 
     void Init_Controls()
@@ -879,7 +877,7 @@ public:
 
     ~SkirmishScenarioDialog()
     {
-        if (!Controls.contains(BUTTON_SCENARIO_LIST) || Controls[BUTTON_SCENARIO_LIST].get() == nullptr) {
+        if (!Controls.contains(BUTTON_SCENARIO_LIST)) {
             return;
         }
 
