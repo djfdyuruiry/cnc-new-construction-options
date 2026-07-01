@@ -388,6 +388,8 @@ RuleValueVariant RuleSection::operator[](const std::string_view name) const
 
 TO_JSON(RuleSection)
 {
+    j = nlohmann::json::object();
+
     for (const auto& [ name, value ] : p.Rules) {
         to_json(j[name], value);
     }
@@ -502,6 +504,8 @@ const RuleSection& RuleSections::operator[](std::string_view name) const
 
 TO_JSON(RuleSections)
 {
+    j = nlohmann::json::object();
+
     for (const auto& [ name, section ] : p.Sections) {
         j[name] = section;
     }

@@ -253,7 +253,12 @@ ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
 
 SpecialClass SaveGameScenarioState_v1::Parse_MultiPlayer_Special() const
 {
-    return MultiSpecial;
+    SpecialClass multi_special;
+    multi_special.Init();
+
+    multi_special = MultiSpecial;
+
+    return multi_special;
 }
 
 bool SaveGameScenarioState_v1::Write_Globals() const
