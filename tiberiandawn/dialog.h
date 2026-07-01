@@ -1,6 +1,12 @@
 #pragma once
-#include "framelimit.h"
-#include "gadget.h"
+
+#include <optional>
+#include <map>
+#include <memory>
+#include <type_traits>
+
+#include "common/framelimit.h"
+#include "common/gadget.h"
 
 struct DialogControlDimension
 {
@@ -195,14 +201,28 @@ protected:
         const int height,
         const int margin_width,
         const int margin_height
-    ) : BaseWidth(width),
-        BaseHeight(height),
-        BaseMarginWidth(margin_width),
-        BaseMarginHeight(margin_height),
-        UpButtonShape(nullptr),
-        DownButtonShape(nullptr),
-        CommandChain(nullptr)
-    {}
+    )
+        : BaseWidth(width)
+        , BaseHeight(height)
+        , BaseMarginWidth(margin_width)
+        , BaseMarginHeight(margin_height)
+        , Factor(0)
+        , X(0)
+        , Y(0)
+        , Width(0)
+        , Height(0)
+        , Center(0)
+        , TextHeight(0)
+        , MarginWidth(0)
+        , MarginHeight(0)
+        , UpButtonShape(nullptr)
+        , DownButtonShape(nullptr)
+        , Dimensions()
+        , Text()
+        , Controls()
+        , CommandChain(nullptr)
+    {
+    }
     virtual ~Dialog() = default;
 
 public:
