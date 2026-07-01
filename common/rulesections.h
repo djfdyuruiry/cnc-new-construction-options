@@ -844,3 +844,19 @@ private:
     std::map<std::string, RuleSection> Sections;
     std::optional<std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)>> OnRulesChangedDefault;
 };
+
+// std::format support for rule value variant
+template <>
+struct std::formatter<RuleValueVariant> : std::formatter<std::string> {
+    auto format(RuleValueVariant value, format_context& ctx) const {
+        return formatter<string>::format(RuleSection::Variant_To_String(value), ctx);
+    }
+};
+
+// spdlog fmt library support for rule value variant (used by spdlog)
+template <>
+struct fmt::formatter<RuleValueVariant> : fmt::formatter<std::string> {
+    auto format(const RuleValueVariant& value, fmt::format_context& ctx) const {
+        return formatter<std::string>::format(RuleSection::Variant_To_String(value), ctx);
+    }
+};
