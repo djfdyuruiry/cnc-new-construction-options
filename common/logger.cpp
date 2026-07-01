@@ -28,16 +28,13 @@ public:
 
     void log(const spdlog::details::log_msg& msg) override
     {
-        static const std::unordered_map<char, std::string> sanitize_map {
-            {'\n', "\\n"},
-            {'"', "\\\""}
-        };
-
         std::string sanitized_payload;
 
         for (const auto& c : msg.payload) {
-            if (auto sanitize_pair = sanitize_map.find(c); sanitize_pair != sanitize_map.end()) {
-                sanitized_payload += sanitize_pair->second;
+            if (c == '\n') {
+                sanitized_payload += "\\n";
+            } else if (c == '"') {
+                sanitized_payload += "\\\"";
             } else {
                 sanitized_payload += c;
             }
