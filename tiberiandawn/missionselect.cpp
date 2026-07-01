@@ -171,6 +171,7 @@ static std::string Build_Mission_Description(
     }
 
     // {campaign player}: Mission {number} - {mission description}
+    // (Note: 'Mission ' is omitted when running in DOS mode to ensure description fits EListClass control bounds)
     return std::format(
         "{}{}:{} {:>2} - {}",
         std::string(sizeof(int), ' '), // leading spaces are to maintain compatibility with drawing logic
