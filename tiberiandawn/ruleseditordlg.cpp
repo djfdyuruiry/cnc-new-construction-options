@@ -154,14 +154,14 @@ protected:
             top_row_x,
             top_row_y,
             static_cast<int>(nearbyint(control_width * 1.2)),
-            10 * dropdown_item_width // 10 visible items (excluding selected value)
+            5 * dropdown_item_width // 5 visible items (excluding selected value)
         };
 
         Dimensions[SECTION_DROPDOWN] = {
             top_row_x + Dimensions[FILE_DROPDOWN].W + (horizontal_spacing * 4),
             top_row_y,
             static_cast<int>(nearbyint(control_width * 1.75)),
-            Dimensions[FILE_DROPDOWN].H // 10 visible items (excluding selected value)
+            10 * dropdown_item_width // 10 visible items (excluding selected value)
         };
 
         Dimensions[SEARCH_BUTTON] = {
