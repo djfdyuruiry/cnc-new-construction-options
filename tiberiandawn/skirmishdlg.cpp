@@ -622,7 +622,7 @@ protected:
                          TBLACK,
                          TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-        // AI player difficulty and house checkbox labels
+        // AI player difficulty and house dropwdown labels
         const auto cur_ai_house_label_x = (Dimensions[BUTTON_AI_HOUSE_1].X
             - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W * 1.5))
             - (10 * Factor)) - 3 * Factor;

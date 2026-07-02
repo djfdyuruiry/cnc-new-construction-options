@@ -1,49 +1,10 @@
-#include "dialog.h"
-#include "function.h"
-#include "common/framelimit.h"
 #include "common/ini.h"
 
+#include "dialog.h"
+#include "elist.h"
+#include "function.h"
+
 #ifdef NEWMENU
-
-class EListClass : public ListClass
-{
-public:
-    EListClass(int id, int x, int y, int w, int h, TextPrintType flags, void const* up, void const* down)
-        : ListClass(id, x, y, w, h, flags, up, down){};
-
-    void Clear() {
-        List.Clear();
-
-        if (IsScrollActive) {
-            Remove_Scroll_Bar();
-        }
-
-        Set_Selected_Index(0);
-    }
-
-protected:
-    void Draw_Entry(int index, int x, int y, int width, int selected) override
-    {
-        if (TextFlags & TPF_6PT_GRAD) {
-            TextPrintType flags = TextFlags;
-
-            if (selected) {
-                flags = flags | TPF_BRIGHT_COLOR;
-                LogicPage->Fill_Rect(x, y, x + width - 1, y + LineHeight - 1, CC_GREEN_SHADOW);
-            } else {
-                if (!(flags & TPF_USE_GRAD_PAL)) {
-                    flags = flags | TPF_MEDIUM_COLOR;
-                }
-            }
-
-            Conquer_Clip_Text_Print(List[index], x, y, CC_GREEN, TBLACK, flags, width, Tabs);
-
-        } else {
-            Conquer_Clip_Text_Print(
-                List[index], x, y, (selected ? BLUE : WHITE), TBLACK, TextFlags, width, Tabs);
-        }
-    }
-};
 
 typedef enum
 {
@@ -289,11 +250,6 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
         }
     }
 
-    std::vector<MissionVariables> MissionCache;
-    std::vector<ScenarioPlayerType> MissionFilter;
-    std::vector<MissionVariables> MissionsToDisplay;
-
-protected:
     void Reset_Tab_Styles()
     {
         for (auto control = BUTTON_ALL; control <= BUTTON_FUNPARK; ++control) {
@@ -311,6 +267,12 @@ protected:
         Get_Control<TextButtonClass>(control).IsPressed = false;
     }
 
+    static inline std::vector<MissionVariables> MissionCache;
+
+    std::vector<ScenarioPlayerType> MissionFilter;
+    std::vector<MissionVariables> MissionsToDisplay;
+
+protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
         switch (input) {
@@ -392,7 +354,9 @@ protected:
 
     void Init_Data() override
     {
-        Fill_Mission_Cache();
+        if (MissionCache.empty()) {
+            Fill_Mission_Cache();
+        }
 
         MissionFilter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
         Populate_Mission_List();
@@ -402,55 +366,12 @@ protected:
     {
         Dialog::Init_Controls();
 
-        Add_Control<BUTTON_OK, TextButtonClass>(
-            TXT_OK,
-            TPF_6PT_GRAD | TPF_NOSHADOW,
-            Dimensions[BUTTON_OK].X,
-            Dimensions[BUTTON_OK].Y
-        );
-
-        Add_Control<BUTTON_CANCEL, TextButtonClass>(
-            TXT_CANCEL,
-            TPF_6PT_GRAD | TPF_NOSHADOW,
-            Dimensions[BUTTON_CANCEL].X,
-            Dimensions[BUTTON_CANCEL].Y
-        );
-
-        Add_Control<BUTTON_ALL,TextButtonClass>(
-            "All",
-            TPF_6PT_GRAD | TPF_NOSHADOW,
-            Dimensions[BUTTON_ALL].X,
-            Dimensions[BUTTON_ALL].Y,
-            Dimensions[BUTTON_ALL].W,
-            Dimensions[BUTTON_ALL].H
-        );
-
-        Add_Control<BUTTON_GDI, TextButtonClass>(
-            TXT_G_D_I,
-            TPF_6PT_GRAD | TPF_NOSHADOW,
-            Dimensions[BUTTON_GDI].X,
-            Dimensions[BUTTON_GDI].Y,
-            Dimensions[BUTTON_GDI].W,
-            Dimensions[BUTTON_GDI].H
-        );
-
-        Add_Control<BUTTON_NOD, TextButtonClass>(
-            TXT_N_O_D,
-            TPF_6PT_GRAD | TPF_NOSHADOW,
-            Dimensions[BUTTON_NOD].X,
-            Dimensions[BUTTON_NOD].Y,
-            Dimensions[BUTTON_NOD].W,
-            Dimensions[BUTTON_NOD].H
-        );
-
-        Add_Control<BUTTON_FUNPARK, TextButtonClass>(
-            "Funpark",
-            TPF_6PT_GRAD | TPF_NOSHADOW,
-            Dimensions[BUTTON_FUNPARK].X,
-            Dimensions[BUTTON_FUNPARK].Y,
-            Dimensions[BUTTON_FUNPARK].W,
-            Dimensions[BUTTON_FUNPARK].H
-        );
+        Add_Button(BUTTON_OK, TXT_OK);
+        Add_Button(BUTTON_CANCEL, TXT_CANCEL);
+        Add_Button(BUTTON_ALL, "All"); // TODO: Locale string
+        Add_Button(BUTTON_GDI, TXT_G_D_I);
+        Add_Button(BUTTON_NOD, TXT_N_O_D);
+        Add_Button(BUTTON_FUNPARK, "Funpark"); // TODO: Locale string
 
         Add_Control<BUTTON_MISSIONS, EListClass>(
             Dimensions[BUTTON_MISSIONS].X,
@@ -469,9 +390,13 @@ protected:
 
         Dimensions[BUTTON_OK].X = X + 25 * Factor;
         Dimensions[BUTTON_OK].Y = Y + Height - 15 * Factor;
+        Dimensions[BUTTON_OK].W = -1;
+        Dimensions[BUTTON_OK].H = -1;
 
         Dimensions[BUTTON_CANCEL].X = X + Width - 50 * Factor;
         Dimensions[BUTTON_CANCEL].Y = Y + Height - 15 * Factor;
+        Dimensions[BUTTON_CANCEL].W = -1;
+        Dimensions[BUTTON_CANCEL].H = -1;
 
         auto tab_x = X + 10 * Factor;
 

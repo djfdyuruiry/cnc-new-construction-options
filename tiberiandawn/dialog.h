@@ -7,7 +7,10 @@
 
 #include "common/framelimit.h"
 #include "common/gadget.h"
+#include "common/logger.h"
+
 #include "function.h"
+#include "drop.h"
 
 struct DialogControlDimension
 {
@@ -34,6 +37,8 @@ protected:
         REDRAW_BACKGROUND, // static text, decorations
         REDRAW_ALL = REDRAW_BACKGROUND
     } DialogRedrawType;
+
+    static inline const auto& Logger = CncLogger::For(Dialog);
 
     // base dimensions (not scaled)
 
@@ -107,6 +112,13 @@ protected:
 
         // add control to command chain so we can capture input
         if (CommandChain == nullptr) {
+            if constexpr (std::is_same_v<U, DropListClass>) {
+                CNC_LOGGER_FATAL(
+                    "Attempted to use DropListClass as first control in command chain, "
+                    "this results in a broken dropdown."
+                );
+            }
+
             // first element in chain
             CommandChain = &control;
         } else {
@@ -121,6 +133,36 @@ protected:
     U& Add_Control(Args&&... args)
     {
         return Add_Control<U>(type, std::forward<Args>(args)...);
+    }
+
+    TextButtonClass& Add_Button(
+        T control,
+        std::variant<const char*, int> text,
+        const TextPrintType font_style = TPF_6PT_GRAD | TPF_NOSHADOW
+    )
+    {
+        if (std::holds_alternative<const char*>(text)) {
+            // hard coded label
+            return Add_Control<TextButtonClass>(
+                control,
+                std::get<const char*>(text),
+                font_style,
+                Dimensions[control].X,
+                Dimensions[control].Y,
+                Dimensions[control].W,
+                Dimensions[control].H
+            );
+        }
+
+        return Add_Control<TextButtonClass>(
+            control,
+            std::get<int>(text),
+            font_style,
+            Dimensions[control].X,
+            Dimensions[control].Y,
+            Dimensions[control].W,
+            Dimensions[control].H
+        );
     }
 
     virtual std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) = 0;
@@ -142,8 +184,10 @@ protected:
         );
 
         if (CaptionText.has_value()) {
+            // OPTION_DIALOG param will draw the decoration in the corners of the dialog
             Draw_Caption(CaptionText->c_str(), OPTION_DIALOG, X, Y, Width);
         } else {
+            // the text id param will determine the dialog decorations (if any, see: OptionControlType)
             Draw_Caption(CaptionTextId, X, Y, Width);
         }
     }

@@ -905,7 +905,7 @@ bool Select_Game(bool fade)
             */
             case SEL_NEW_SCENARIO:
                 Scen.CarryOverMoney = 0;
-                if (Expansion_Dialog()) {
+                if (Rules_Editor_Dialog()) {
                     int difficulty = Fetch_Difficulty();
                     if (difficulty != -1) {
                         switch (difficulty) {
