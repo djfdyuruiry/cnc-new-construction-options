@@ -109,6 +109,7 @@ protected:
         const auto panel_width = (Width - (MarginWidth * 2)) / 2;
         const auto control_height = 9 * Factor;
 
+        // left panel border
         LogicPage->Draw_Rect(
             X + MarginWidth,
             Dimensions[FILE_DROPDOWN].Y + control_height + (2 * Factor),
@@ -117,6 +118,7 @@ protected:
             LTGREEN
         );
 
+        // right panel border
         LogicPage->Draw_Rect(
             X + Width - MarginWidth - panel_width + 1,
             Dimensions[FILE_DROPDOWN].Y + control_height + (2 * Factor),
