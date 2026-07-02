@@ -102,6 +102,30 @@ protected:
         return std::nullopt;
     }
 
+    void Render_Background(DialogRedrawType& display) override
+    {
+        Dialog::Render_Background(display);
+
+        const auto panel_width = (Width - (MarginWidth * 2)) / 2;
+        const auto control_height = 9 * Factor;
+
+        LogicPage->Draw_Rect(
+            X + MarginWidth,
+            Dimensions[FILE_DROPDOWN].Y + control_height + (2 * Factor),
+            X + Width - MarginWidth - panel_width - 1 - 2,
+            Dimensions[NEXT_BUTTON].Y - (2 * Factor),
+            LTGREEN
+        );
+
+        LogicPage->Draw_Rect(
+            X + Width - MarginWidth - panel_width + 1,
+            Dimensions[FILE_DROPDOWN].Y + control_height + (2 * Factor),
+            X + Width - MarginWidth - 2,
+            Dimensions[NEXT_BUTTON].Y - (2 * Factor),
+            LTGREEN
+        );
+    }
+
     void Init_UI_State() override
     {
     }
@@ -147,7 +171,7 @@ protected:
         const auto horizontal_spacing = 3 * Factor;
         const auto vertical_spacing = 2 * Factor;
 
-        const auto top_row_x = X + MarginWidth + (8 * Factor);
+        const auto top_row_x = X + MarginWidth;
         const auto top_row_y = Y + MarginHeight + (13 * Factor);
 
         Dimensions[FILE_DROPDOWN]= {
@@ -171,19 +195,15 @@ protected:
             control_height
         };
 
-        Dimensions[SEARCH_TEXTBOX] = {
-            Dimensions[SEARCH_BUTTON].X - (control_width * 2) - horizontal_spacing,
-            top_row_y,
-            control_width * 2,
-            control_height
-        };
+        Dimensions[SEARCH_TEXTBOX].X = Dimensions[SEARCH_BUTTON].X - (control_width * 2) - horizontal_spacing,
+        Dimensions[SEARCH_TEXTBOX].Y = top_row_y;
+        Dimensions[SEARCH_TEXTBOX].W = control_width * 2;
+        Dimensions[SEARCH_TEXTBOX].H = control_height;
 
-        Dimensions[EXIT_BUTTON] = {
-            X + Width - control_width - MarginWidth,
-            Y + Height - control_height - MarginHeight,
-            control_width,
-            control_height
-        };
+        Dimensions[EXIT_BUTTON].X = X + Width - control_width - MarginWidth;
+        Dimensions[EXIT_BUTTON].Y = Y + Height - control_height - MarginHeight;
+        Dimensions[EXIT_BUTTON].W = control_width;
+        Dimensions[EXIT_BUTTON].H = control_height;
 
         Dimensions[NEXT_BUTTON] = {
             Dimensions[EXIT_BUTTON].X,
