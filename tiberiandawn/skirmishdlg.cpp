@@ -928,7 +928,7 @@ protected:
 
         Dimensions[BUTTON_HOUSE].W = 60 * Factor;
         Dimensions[BUTTON_HOUSE].H = (3 * 5 * Factor);
-        Dimensions[BUTTON_HOUSE].X = Center - (Dimensions[BUTTON_HOUSE].W / 2);
+        Dimensions[BUTTON_HOUSE].X = CenterX - (Dimensions[BUTTON_HOUSE].W / 2);
         Dimensions[BUTTON_HOUSE].Y = Dimensions[BUTTON_NAME].Y;
 
         Dimensions[BUTTON_COLOR_1].W = 10 * Factor;

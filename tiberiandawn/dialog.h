@@ -7,6 +7,7 @@
 
 #include "common/framelimit.h"
 #include "common/gadget.h"
+#include "function.h"
 
 struct DialogControlDimension
 {
@@ -50,7 +51,8 @@ protected:
     int Y;
     int Width;
     int Height;
-    int Center;
+    int CenterX;
+    int CenterY;
 
     int TextHeight;
     int MarginWidth;
@@ -63,6 +65,8 @@ protected:
 
     // controls
 
+    int CaptionTextId;
+    std::optional<std::string> CaptionText;
     std::map<T, DialogControlDimension> Dimensions;
     std::map<T, std::unique_ptr<char[]>> Text;
     std::map<T, std::unique_ptr<GadgetClass>> Controls;
@@ -86,6 +90,12 @@ protected:
     U& Get_Control(const T type)
     {
         return *reinterpret_cast<U*>(Controls[type].get());
+    }
+
+    template<T type, std::derived_from<GadgetClass> U>
+    U& Get_Control()
+    {
+        return Get_Control<U>(type);
     }
 
     template<std::derived_from<GadgetClass> U, typename... Args>
@@ -120,7 +130,7 @@ protected:
         return CommandChain != nullptr ? CommandChain->Input() : KN_NONE;
     }
 
-    virtual void Render_Foreground(DialogRedrawType& display) = 0;
+    virtual void Render_Foreground(DialogRedrawType& display) {}
 
     virtual void Render_Background(DialogRedrawType& display)
     {
@@ -131,7 +141,11 @@ protected:
             TXT_NONE, 0, 0, TBLACK, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW
         );
 
-        Draw_Caption(TXT_NONE, X, Y, Width);
+        if (CaptionText.has_value()) {
+            Draw_Caption(CaptionText->c_str(), OPTION_DIALOG, X, Y, Width);
+        } else {
+            Draw_Caption(CaptionTextId, X, Y, Width);
+        }
     }
 
     void Render(DialogRedrawType& display)
@@ -187,7 +201,8 @@ protected:
         Height = BaseHeight * Factor;
         X = (screen_width - Width) / 2;
         Y = (screen_height - Height) / 2;
-        Center = X + (Width / 2);
+        CenterX = X + (Width / 2);
+        CenterY = Y + (Height / 2);
 
         TextHeight = 6 * Factor + 1; // ht of 6-pt text
         MarginWidth = BaseMarginWidth * Factor;
@@ -199,8 +214,8 @@ protected:
     Dialog(
         const int width,
         const int height,
-        const int margin_width,
-        const int margin_height
+        const int margin_width = 0,
+        const int margin_height = 0
     )
         : BaseWidth(width)
         , BaseHeight(height)
@@ -211,12 +226,14 @@ protected:
         , Y(0)
         , Width(0)
         , Height(0)
-        , Center(0)
+        , CenterX(0)
         , TextHeight(0)
         , MarginWidth(0)
         , MarginHeight(0)
         , UpButtonShape(nullptr)
         , DownButtonShape(nullptr)
+        , CaptionTextId(TXT_NONE)
+        , CaptionText(std::nullopt)
         , Dimensions()
         , Text()
         , Controls()
