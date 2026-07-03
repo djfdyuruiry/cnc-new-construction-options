@@ -214,6 +214,24 @@ protected:
             ControlHeight
         };
 
+        // panels (middle row)
+        const auto panel_width = ((Width - (MarginWidth * 2)) - VerticalSpacing) / 2 - 1;
+        const auto panel_height = BottomRowY - MiddleRowY - VerticalSpacing;
+
+        Dimensions[LEFT_PANEL] = {
+            ControlsX,
+            MiddleRowY,
+            panel_width,
+            panel_height
+        };
+
+        Dimensions[RIGHT_PANEL] = {
+            ControlsX + panel_width + VerticalSpacing,
+            MiddleRowY,
+            panel_width,
+            panel_height
+        };
+
         // bottom row
         Dimensions[EXIT_BUTTON] = {ControlsX, BottomRowY, ControlWidth, ControlHeight};
 
@@ -229,24 +247,6 @@ protected:
             BottomRowY,
             ControlWidth,
             ControlHeight
-        };
-
-        // panels (middle row)
-        const auto panel_width = ((Width - (MarginWidth * 2)) / 2) - VerticalSpacing;
-        const auto panel_height = Dimensions[NEXT_BUTTON].Y - MiddleRowY - VerticalSpacing;
-
-        Dimensions[LEFT_PANEL] = {
-            ControlsX,
-            MiddleRowY,
-            panel_width,
-            panel_height
-        };
-
-        Dimensions[RIGHT_PANEL] = {
-            X + Width - MarginWidth - panel_width,
-            MiddleRowY,
-            panel_width,
-            panel_height
         };
     }
 
