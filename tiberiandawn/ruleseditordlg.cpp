@@ -116,23 +116,16 @@ protected:
     {
         Dialog::Render_Background(display);
 
-        // left panel border
-        LogicPage->Draw_Rect(
-            Dimensions[LEFT_PANEL].X,
-            Dimensions[LEFT_PANEL].Y,
-            Dimensions[LEFT_PANEL].X + Dimensions[LEFT_PANEL].W,
-            Dimensions[LEFT_PANEL].Y + Dimensions[LEFT_PANEL].H,
-            LTGRAY
-        );
-
-        // right panel border
-        LogicPage->Draw_Rect(
-            Dimensions[RIGHT_PANEL].X,
-            Dimensions[RIGHT_PANEL].Y,
-            Dimensions[RIGHT_PANEL].X + Dimensions[RIGHT_PANEL].W,
-            Dimensions[RIGHT_PANEL].Y + Dimensions[RIGHT_PANEL].H,
-            LTGRAY
-        );
+        // panel borders
+        for (const auto& panel : { LEFT_PANEL, RIGHT_PANEL }) {
+            LogicPage->Draw_Rect(
+                Dimensions[panel].X,
+                Dimensions[panel].Y,
+                Dimensions[panel].X + Dimensions[panel].W,
+                Dimensions[panel].Y + Dimensions[panel].H,
+                LTGRAY
+            );
+        }
     }
 
     void Init_UI_State() override
