@@ -120,6 +120,7 @@ GadgetClass::GadgetClass(int x, int y, int w, int h, unsigned flags, int sticky)
     , IsSticky(sticky)
     , IsDisabled(false)
     , Flags(flags)
+    , DisableDrawing(false)
 {
     if (IsSticky) {
         Flags |= LEFTPRESS | LEFTRELEASE;
@@ -150,6 +151,7 @@ GadgetClass::GadgetClass(GadgetClass const& gadget)
     , IsSticky(gadget.IsSticky)
     , IsDisabled(gadget.IsDisabled)
     , Flags(gadget.Flags)
+    , DisableDrawing(gadget.DisableDrawing)
 {
 }
 
@@ -243,6 +245,7 @@ void GadgetClass::Enable(void)
 {
     IsDisabled = false;
     IsToRepaint = true;
+    DisableDrawing = false;
     Clear_Focus();
 }
 
@@ -252,7 +255,8 @@ void GadgetClass::Enable(void)
  *    This routine will disable the gadget. A disabled gadget might be rendered, but is        *
  *    ignored for input processing.                                                            *
  *                                                                                             *
- * INPUT:   none                                                                               *
+ * INPUT:   disable_drawing  -- As well as disabling this gadget, should rendering also be     *
+ *                   disabled?                                                                 *
  *                                                                                             *
  * OUTPUT:  none                                                                               *
  *                                                                                             *
@@ -261,10 +265,12 @@ void GadgetClass::Enable(void)
  * HISTORY:                                                                                    *
  *   01/15/1995 JLB : Created.                                                                 *
  *=============================================================================================*/
-void GadgetClass::Disable(void)
+void GadgetClass::Disable(const bool disable_drawing)
 {
     IsDisabled = true;
     IsToRepaint = true;
+    DisableDrawing = disable_drawing;
+
     Clear_Focus();
 }
 
@@ -422,6 +428,10 @@ int GadgetClass::Action(unsigned flags, KeyNumType&)
  *=============================================================================================*/
 int GadgetClass::Draw_Me(int forced)
 {
+    if (DisableDrawing) {
+        return false;
+    }
+
     if (forced || IsToRepaint) {
         IsToRepaint = false;
         return (true);

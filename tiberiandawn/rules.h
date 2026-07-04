@@ -331,6 +331,9 @@ public:
     const RuleSections& Get_Rule_Sections() const;
     RuleSections& Get_Editable_Rule_Sections();
 
+    const std::map<std::string_view, RuleSections>& Get_Type_Rules() const;
+    std::map<std::string_view, RuleSections>& Get_Editable_Type_Rules();
+
     template<EnumSignedChar T>
     const RuleSections& Get_Rule_Sections_For_Type() const
     {
@@ -375,7 +378,7 @@ private:
     // TODO: Roll other sections into this and centrally manage RULES.INI (will benefit loading rules overloads for scenarios)
     RuleSections Sections;
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
-    std::unordered_map<std::string_view, RuleSections> TypeRules;
+    std::map<std::string_view, RuleSections> TypeRules;
 
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);

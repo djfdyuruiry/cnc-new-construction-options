@@ -335,6 +335,16 @@ RuleSections& RulesClass::Get_Editable_Rule_Sections()
     return Sections;
 }
 
+const std::map<std::string_view, RuleSections>& RulesClass::Get_Type_Rules() const
+{
+    return TypeRules;
+}
+
+std::map<std::string_view, RuleSections>& RulesClass::Get_Editable_Type_Rules()
+{
+    return TypeRules;
+}
+
 /**
  * Purge all existing rule definitions, leaving the rule sections
  * and type rules blank.
@@ -674,7 +684,7 @@ static void Init_Type(RuleSections& sections, U first, U count, const CncLogger&
  * type.
  */
 template <EnumSignedChar T>
-RuleSections& Sections_For(std::unordered_map<std::string_view, RuleSections>& type_rules)
+RuleSections& Sections_For(std::map<std::string_view, RuleSections>& type_rules)
 {
     static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
 

@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include "function.h"
 
 #include "dialog.h"
@@ -10,12 +12,12 @@ typedef enum
     SEARCH_TEXTBOX,
     SEARCH_BUTTON,
     LEFT_PANEL, // virtual panel used for drawing
-    LEFT_RULE_VALUE_CONTROL, // 6 controls
-    LEFT_RULE_HELP_CONTROL = 211, // 6 controls
-    RIGHT_PANEL = 217, // virtual panel used for drawing
-    RIGHT_RULE_VALUE_CONTROL,  // 6 controls
-    RIGHT_RULE_HELP_CONTROL = 223, // 6 controls
-    PREVIOUS_BUTTON = 229,
+    LEFT_RULE_VALUE_CONTROL, // 7 controls
+    LEFT_RULE_HELP_CONTROL = 212, // 7 controls
+    RIGHT_PANEL = 219, // virtual panel used for drawing
+    RIGHT_RULE_VALUE_CONTROL,  // 7 controls
+    RIGHT_RULE_HELP_CONTROL = 227, // 7 controls
+    PREVIOUS_BUTTON = 234,
     NEXT_BUTTON,
     EXIT_BUTTON
 } RulesEditorControls;
@@ -23,6 +25,161 @@ typedef enum
 class RulesEditorDialog : public Dialog<RulesEditorControls>
 {
     static constexpr auto DropdownTextLength = 25;
+    static constexpr auto RulesPerPanel = 7;
+    static constexpr auto RulesPerPage = RulesPerPanel * 2;
+
+    void Load_Current_Rules_Page()
+    {
+        if (ActiveRuleSection == nullptr) {
+            CNC_LOGGER_FATAL("Attempted to load rules page with null rule section");
+        }
+
+        /*
+         * Load rule values for current page (up to 14 rules) into edit dialogs
+         */
+        const auto rule_names = ActiveRuleSection->Rule_Names();
+        const auto rule_count = rule_names.size();
+
+        const auto offset = RulesPerPage * RulePageIndex;
+        auto idx = offset;
+        auto control = LEFT_RULE_VALUE_CONTROL;
+
+        // left panel
+        while (idx < offset + RulesPerPanel && idx < rule_count) {
+            auto rule_string = RuleSection::Variant_To_String(
+                ActiveRuleSection->Get_Variant(rule_names[idx])
+            );
+
+            // load rule value into edit control and enable
+            strncpy(Text[control].get(), rule_string.c_str(), 25);
+            Get_Control<EditClass>(control).Enable();
+
+            idx++;
+            ++control;
+        }
+
+        if (idx < offset + RulesPerPanel && idx >= rule_count) {
+            while (idx < offset + RulesPerPanel) {
+                // clear and disable unneeded controls
+                strcpy(Text[control].get(), "");
+                Get_Control<EditClass>(control).Disable(true);
+
+                idx++;
+                ++control;
+            }
+        }
+
+        // right panel
+        control = RIGHT_RULE_VALUE_CONTROL;
+
+        while (idx < offset + RulesPerPage && idx < rule_count) {
+            auto rule_string = RuleSection::Variant_To_String(
+                ActiveRuleSection->Get_Variant(rule_names[idx])
+            );
+
+            // load rule value into edit control and enable
+            strncpy(Text[control].get(), rule_string.c_str(), 25);
+            Get_Control<EditClass>(control).Enable();
+
+            idx++;
+            ++control;
+        }
+
+        if (idx < offset + RulesPerPage && idx >= rule_count) {
+            while (idx < offset + RulesPerPage) {
+                // clear and disable unneeded controls
+                strcpy(Text[control].get(), "");
+                Get_Control<EditClass>(control).Disable(true);
+
+                idx++;
+                ++control;
+            }
+        }
+    }
+
+    bool Load_Previous_Rules_Page()
+    {
+        if (RulePageIndex < 1) {
+            return false;
+        }
+
+        RulePageIndex--;
+        Load_Current_Rules_Page();
+    }
+
+    bool Load_Next_Rules_Page()
+    {
+        if (RulePageIndex == RulePageCount - 1) {
+            return false;
+        }
+
+        RulePageIndex++;
+        Load_Current_Rules_Page();
+    }
+
+    void Set_Active_Rule_Section(RuleSection& section)
+    {
+        ActiveRuleSection = &section;
+
+        // init pagination
+        RulePageIndex = 0;
+        RulePageCount = static_cast<int>(
+            ceil(ActiveRuleSection->Rule_Names().size() / static_cast<double>(RulesPerPage))
+        );
+
+        // load first page data
+        Load_Current_Rules_Page();
+    }
+
+    void Set_Active_Rule_Sections(RuleSections& sections)
+    {
+        ActiveRuleSections = &sections;
+
+        auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+
+        // clear any existing sections in the dropdown
+        while (section_dropdown.List.Count() > 0) {
+            section_dropdown.List.Remove_Item(0);
+        }
+
+        auto first_section = true;
+
+        for (const auto& section_name : sections.Section_Names()) {
+            if (first_section) {
+                // show player the first rule section
+                Set_Active_Rule_Section(sections[section_name]);
+                first_section = false;
+            }
+
+            section_dropdown.Add_Item(section_name.data());
+        }
+
+        section_dropdown.Set_Selected_Index(0);
+        section_dropdown.Set_Read_Only(true);
+    }
+
+    static void Init_Rule_File_Names_If_Empty()
+    {
+        if (!RuleFileNames.empty()) {
+            return;
+        }
+
+        // prepare type rule file names
+        std::vector<std::string> type_files;
+
+        for (const auto& type_name : Rule.Get_Type_Rules() | std::views::keys) {
+            type_files.emplace_back(std::format("{}.ini", type_name));
+            CncStringUtils::To_Lower(type_files.back());
+        }
+
+        // add rules file names
+        RuleFileNames.emplace_back(RulesClass::RulesFilename);
+        CncStringUtils::To_Lower(RuleFileNames.back());
+
+        for (const auto& type_file : type_files) {
+            RuleFileNames.emplace_back(type_file);
+        }
+    }
 
     void Init_Bottom_Row()
     {
@@ -33,10 +190,38 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void Init_Right_Rules_Panel()
     {
+        for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
+            Text[control] = std::make_unique<char[]>(25);
+            Add_Control<EditClass>(
+                control,
+                Text[control].get(),
+                25,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[control].X,
+                Dimensions[control].Y,
+                Dimensions[control].W,
+                Dimensions[control].H,
+                EditClass::ALPHANUMERIC
+            );
+        }
     }
 
     void Init_Left_Rules_Panel()
     {
+        for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
+            Text[control] = std::make_unique<char[]>(25);
+            Add_Control<EditClass>(
+                control,
+                Text[control].get(),
+                25,
+                TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                Dimensions[control].X,
+                Dimensions[control].Y,
+                Dimensions[control].W,
+                Dimensions[control].H,
+                EditClass::ALPHANUMERIC
+            );
+        }
     }
 
     void Init_Top_Row()
@@ -82,6 +267,12 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         );
     }
 
+    static inline std::vector<std::string> RuleFileNames;
+    RuleSections* ActiveRuleSections;
+    RuleSection* ActiveRuleSection;
+    int RulePageIndex;
+    int RulePageCount;
+
     int ControlWidth;
     int ControlHeight;
     int DropdownItemWidth;
@@ -92,10 +283,66 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     int TopRowY;
     int MiddleRowY;
     int BottomRowY;
+
 protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
         switch (input) {
+            case FILE_DROPDOWN | KN_BUTTON: {
+                auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+
+                const auto idx = file_dropdown.Current_Index();
+
+                if (idx == 0) {
+                    Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
+                } else {
+                    auto& type_rules = Rule.Get_Editable_Type_Rules();
+                    auto type_key_idx = 0;
+
+                    for (const auto& type_name : type_rules | std::ranges::views::keys) {
+                        if (type_key_idx == idx - 1) {
+                            Set_Active_Rule_Sections(type_rules[type_name]);
+                            break;
+                        }
+
+                        type_key_idx++;
+                    }
+                }
+
+                file_dropdown.Collapse();
+
+                display = REDRAW_ALL;
+                break;
+            }
+
+            case SECTION_DROPDOWN | KN_BUTTON: {
+                auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+
+                std::string_view section = section_dropdown.Current_Item();
+
+                if (ActiveRuleSections == nullptr) {
+                    CNC_LOGGER_FATAL("Attempted to load section from null rule sections");
+                }
+
+                Set_Active_Rule_Section((*ActiveRuleSections)[section]);
+                section_dropdown.Collapse();
+
+                display = REDRAW_ALL;
+                break;
+            }
+
+            case PREVIOUS_BUTTON | KN_BUTTON: {
+                Load_Previous_Rules_Page();
+                display = REDRAW_ALL;
+                break;
+            }
+
+            case NEXT_BUTTON | KN_BUTTON: {
+                Load_Next_Rules_Page();
+                display = REDRAW_ALL;
+                break;
+            }
+
             case KN_RETURN:
             case EXIT_BUTTON | KN_BUTTON: {
                 return false;
@@ -126,31 +373,63 @@ protected:
                 LTGRAY
             );
         }
+
+        const auto rule_names = ActiveRuleSection->Rule_Names();
+        const auto rule_count = rule_names.size();
+        auto idx = 0;
+
+        // left column
+        auto left_column_y = Dimensions[LEFT_PANEL].Y + VerticalSpacing;
+
+        while (idx < 7 && idx < rule_count) {
+            Fancy_Text_Print(rule_names[idx].data(),
+                 Dimensions[LEFT_PANEL].X + HorizontalSpacing,
+                 left_column_y,
+                 CC_GREEN,
+                 TBLACK,
+                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            left_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
+
+            idx++;
+        }
+
+        // right column
+        auto right_column_y = Dimensions[RIGHT_PANEL].Y + VerticalSpacing;
+
+        while (idx < 14 && idx < rule_count) {
+            Fancy_Text_Print(rule_names[idx].data(),
+                 Dimensions[RIGHT_PANEL].X + HorizontalSpacing,
+                 right_column_y,
+                 CC_GREEN,
+                 TBLACK,
+                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+            right_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
+
+            idx++;
+        }
     }
 
     void Init_UI_State() override
     {
+        auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+
+        for (const auto& file : RuleFileNames) {
+            file_dropdown.Add_Item(file.data());
+        }
+
+        // default to rules.ini
+        file_dropdown.Set_Selected_Index(0);
+        file_dropdown.Set_Read_Only(true);
+
+        // default to show rules.ini sections
+        Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
     }
 
     void Init_Data() override
     {
-        auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
-        auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
-
-        file_dropdown.Add_Item("rules.ini");
-        file_dropdown.Add_Item("infantry.ini");
-        file_dropdown.Add_Item("unit.ini");
-        file_dropdown.Add_Item("aircraft.ini");
-        file_dropdown.Add_Item("building.ini");
-        file_dropdown.Set_Selected_Index(0);
-        file_dropdown.Set_Read_Only(true);
-
-        for (const auto& section_name : Rule.Get_Rule_Sections().Section_Names()) {
-            section_dropdown.Add_Item(section_name.data());
-        }
-
-        section_dropdown.Set_Selected_Index(0);
-        section_dropdown.Set_Read_Only(true);
+        Init_Rule_File_Names_If_Empty();
     }
 
     void Init_Controls() override
@@ -218,12 +497,42 @@ protected:
             panel_height
         };
 
+        auto left_control_y = Dimensions[LEFT_PANEL].Y;
+
+        for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
+            left_control_y += VerticalSpacing + (10 * Factor);
+
+            Dimensions[control] = {
+                Dimensions[LEFT_PANEL].X + HorizontalSpacing,
+                left_control_y,
+                ControlWidth,
+                ControlHeight
+            };
+
+            left_control_y += ControlHeight;
+        }
+
         Dimensions[RIGHT_PANEL] = {
             ControlsX + panel_width + VerticalSpacing,
             MiddleRowY,
             panel_width,
             panel_height
         };
+
+        auto right_control_y = Dimensions[RIGHT_PANEL].Y;
+
+        for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
+            right_control_y += VerticalSpacing + (10 * Factor);
+
+            Dimensions[control] = {
+                Dimensions[RIGHT_PANEL].X + HorizontalSpacing,
+                right_control_y,
+                ControlWidth,
+                ControlHeight
+            };
+
+            right_control_y += ControlHeight;
+        }
 
         // bottom row
         Dimensions[EXIT_BUTTON] = {ControlsX, BottomRowY, ControlWidth, ControlHeight};

@@ -211,6 +211,10 @@ unsigned ControlClass::Get_ID(void) const
  *=============================================================================================*/
 int ControlClass::Draw_Me(int forced)
 {
+    if (DisableDrawing) {
+        return false;
+    }
+
     if (Peer) {
         Peer->Draw_Me();
     }
