@@ -4,6 +4,7 @@
 
 #include "dialog.h"
 #include "drop.h"
+#include "typeconverter.h"
 
 typedef enum
 {
@@ -30,92 +31,165 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     static constexpr auto RulesPerPanel = 7;
     static constexpr auto RulesPerPage = RulesPerPanel * 2;
 
-    void Load_Current_Rules_Page()
+    void Iterate_Over_Rules_Page(
+        std::function<
+            void(const std::string_view&, const RuleValueVariant&, const std::string&, const RulesEditorControls&)
+        > page_slot_handler,
+        std::function<void(const RulesEditorControls&)> empty_page_slot_handler = [](const auto&){}
+    )
     {
-        if (ActiveRuleSection == nullptr) {
-            CNC_LOGGER_WARN("Attempted to load active rule section when pointer was null");
-            return;
-        }
+        const auto& active_rule_section = ActiveSectionsAreType
+            ? Rule.Get_Type_Rules().at(ActionSectionsTypeName)[ActiveRuleSectionName]
+            : Rule.Get_Rule_Sections()[ActiveRuleSectionName];
 
-        /*
-         * Load rule values for current page (up to RulesPerPage rules) into edit dialogs
-         */
-        const auto rule_names = ActiveRuleSection->Rule_Names();
+        const auto rule_names = active_rule_section.Rule_Names();
         const auto rule_count = rule_names.size();
 
         const auto offset = RulesPerPage * RulePageIndex;
         auto idx = offset;
         auto control = LEFT_RULE_VALUE_CONTROL;
 
-        // left panel
-        while (idx < offset + RulesPerPanel && idx < rule_count) {
-            auto rule_string = RuleSection::Variant_To_String(
-                ActiveRuleSection->Get_Variant(rule_names[idx])
-            );
-
-            // lowercase text will fit more characters on screen
-            CncStringUtils::To_Lower(rule_string);
-
-            // load rule value into edit control and enable
-            auto edit_buffer = Text[control].get();
-
-            strncpy(edit_buffer, rule_string.c_str(), RuleValueTextLength);
-            edit_buffer[RuleValueTextLength - 1] = '\0';
-
-            Get_Control<EditClass>(control).Enable();
-            Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
-
-            idx++;
-            ++control;
-        }
-
-        if (idx < offset + RulesPerPanel && idx >= rule_count) {
-            while (idx < offset + RulesPerPanel) {
-                // clear and disable unneeded controls
-                strcpy(Text[control].get(), "");
-                Get_Control<EditClass>(control).Disable(true);
-                Get_Control<EditClass>(control).Set_Text(Text[control].get(), RuleValueTextLength);
-
-                idx++;
-                ++control;
-            }
-        }
-
-        // right panel
-        control = RIGHT_RULE_VALUE_CONTROL;
-
         while (idx < offset + RulesPerPage && idx < rule_count) {
-            auto rule_string = RuleSection::Variant_To_String(
-                ActiveRuleSection->Get_Variant(rule_names[idx])
-            );
+            auto rule_name = rule_names[idx];
+            auto rule_value = active_rule_section.Get_Variant(rule_name);
+            auto rule_string = RuleSection::Variant_To_String(rule_value);
 
             // lowercase text will fit more characters on screen
             CncStringUtils::To_Lower(rule_string);
 
-            // load rule value into edit control and enable
-            auto edit_buffer = Text[control].get();
-
-            strncpy(edit_buffer, rule_string.c_str(), RuleValueTextLength);
-            edit_buffer[RuleValueTextLength - 1] = '\0';
-
-            Get_Control<EditClass>(control).Enable();
-            Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
+            page_slot_handler(rule_name, rule_value, rule_string, control);
 
             idx++;
             ++control;
+
+            if (control == LEFT_RULE_HELP_CONTROL) {
+                control = RIGHT_RULE_VALUE_CONTROL;
+            }
         }
 
         if (idx < offset + RulesPerPage && idx >= rule_count) {
             while (idx < offset + RulesPerPage) {
+                empty_page_slot_handler(control);
+
+                idx++;
+                ++control;
+
+                if (control == LEFT_RULE_HELP_CONTROL) {
+                    control = RIGHT_RULE_VALUE_CONTROL;
+                }
+            }
+        }
+    }
+
+    void Save_Updated_Rules()
+    {
+        // TODO: Check Has_Changed() on EditClass instances and save each, with validation errors shown to user
+        auto& active_rule_sections = ActiveSectionsAreType
+            ? Rule.Get_Editable_Type_Rules()[ActionSectionsTypeName]
+            : Rule.Get_Editable_Rule_Sections();
+        auto& active_rule_section = active_rule_sections[ActiveRuleSectionName];
+
+        Iterate_Over_Rules_Page(
+            [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
+                auto& edit_box = Get_Control<EditClass>(control);
+
+                if (!edit_box.Has_Changed()) {
+                    return;
+                }
+
+                std::string new_value = Text[control].get();
+
+                CNC_LOGGER_WARN("Saving rule change BEFORE [{}] -> {} = {}", active_rule_section.SectionName, name, new_value);
+
+                auto type_name = active_rule_section.Get_Converter_Section_Type_Name();
+                std::string rule_name = name.data();
+
+                if (type_name.has_value()) {
+                    // rule is of special type that needs a non-trival conversion from a string value
+                    if (TdTypeConverter::Rule_Requires_Converter(*type_name, rule_name)) {
+                        if (TdTypeConverter::Rule_Requires_Csv_Converter(*type_name, rule_name)) {
+                            auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(*type_name, rule_name);
+
+                            CNC_LOGGER_WARN("Set_Csv_Rule_With_Variant: {}", name);
+
+                            try {
+                                // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
+                                TdTypeConverter::Set_Csv_Rule_With_Variant(
+                                    active_rule_section,
+                                    rule_name,
+                                    new_value,
+                                    converter_variant
+                                );
+                            } catch (const std::invalid_argument& ex) {
+                                // TODO: catch conversion errors and show popuop
+                                CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                            }
+                        } else {
+                            auto converter_variant = TdTypeConverter::Get_Rule_Variant(*type_name, rule_name);
+
+                            CNC_LOGGER_WARN("Set_Rule_With_Variant: {}", name);
+
+                            try {
+                                // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
+                                TdTypeConverter::Set_Rule_With_Variant(
+                                    active_rule_section,
+                                    rule_name,
+                                    new_value,
+                                    converter_variant
+                                );
+                            } catch (const std::invalid_argument& ex) {
+                                // TODO: catch conversion errors and show popuop
+                                CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                            }
+                        }
+                    }
+                } else if (active_rule_section.Get_Type(name) == "string") {
+                    CNC_LOGGER_WARN("Set string");
+                    active_rule_section.Set(name, new_value);
+                } else {
+                    CNC_LOGGER_ERROR("No implementation");
+                    // TODO: impl string parse method in RuleSection similar to Load_From_Ini
+                }
+
+                CNC_LOGGER_WARN("Saving rule change AFTER [{}] -> {} = {}", ActiveRuleSectionName, name, active_rule_section.Get_Variant(name));
+
+                const auto rules_filename = Get_Control<FILE_DROPDOWN, DropListClass>().Current_Item();
+
+                CCFileClass ini_file(rules_filename);
+                INIClass ini;
+
+                active_rule_sections.Save_All_To_Ini(ini);
+                ini.Save(ini_file);
+                ini_file.Close();
+
+                edit_box.Clear_Changed();
+            }
+        );
+    }
+
+    void Load_Current_Rules_Page()
+    {
+        /*
+         * Load rule values for current page (up to RulesPerPage rules) into edit dialogs
+         */
+        Iterate_Over_Rules_Page(
+            [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
+                // load rule value into edit control and enable
+                auto edit_buffer = Text[control].get();
+
+                strncpy(edit_buffer, value_string.c_str(), RuleValueTextLength);
+                edit_buffer[RuleValueTextLength - 1] = '\0';
+
+                Get_Control<EditClass>(control).Enable();
+                Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
+            },
+            [&] (auto& control) {
                 // clear and disable unneeded controls
                 strcpy(Text[control].get(), "");
                 Get_Control<EditClass>(control).Disable(true);
                 Get_Control<EditClass>(control).Set_Text(Text[control].get(), RuleValueTextLength);
-
-                idx++;
-                ++control;
             }
-        }
+        );
     }
 
     bool Load_Previous_Rules_Page()
@@ -140,24 +214,31 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         return true;
     }
 
-    void Set_Active_Rule_Section(RuleSection& section)
+    void Set_Active_Rule_Section(std::string_view section)
     {
-        ActiveRuleSection = &section;
+        ActiveRuleSectionName = section;
+
+        const auto& active_rule_section = ActiveSectionsAreType
+            ? Rule.Get_Type_Rules().at(ActionSectionsTypeName)[section]
+            : Rule.Get_Rule_Sections()[section];
 
         // init pagination
         RulePageIndex = 0;
         RulePageCount = static_cast<int>(
-            ceil(ActiveRuleSection->Rule_Names().size() / static_cast<double>(RulesPerPage))
+            ceil(active_rule_section.Rule_Names().size() / static_cast<double>(RulesPerPage))
         );
 
         // load first page data
         Load_Current_Rules_Page();
     }
 
-    void Set_Active_Rule_Sections(RuleSections& sections)
+    void Set_Active_Rule_Sections(RuleSections& sections, std::optional<std::string_view> type_name = std::nullopt)
     {
-        ActiveRuleSections = &sections;
-        ActiveRuleSection = nullptr;
+        ActiveSectionsAreType = type_name.has_value();
+
+        if (ActiveSectionsAreType) {
+            ActionSectionsTypeName = *type_name;
+        }
 
         RulePageIndex = 0;
         RulePageCount = 0;
@@ -169,10 +250,13 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             section_dropdown.List.Remove_Item(0);
         }
 
+        auto first = true;
+
         for (const auto& section_name : sections.Section_Names()) {
-            if (ActiveRuleSection == nullptr) {
-                // show player the first rule section
-                Set_Active_Rule_Section(sections[section_name]);
+            // show player the first rule section
+            if (first) {
+                Set_Active_Rule_Section(section_name);
+                first = false;
             }
 
             section_dropdown.Add_Item(section_name.data());
@@ -294,8 +378,9 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     static inline std::vector<std::string> RuleFileNames;
 
-    RuleSections* ActiveRuleSections;
-    RuleSection* ActiveRuleSection;
+    bool ActiveSectionsAreType;
+    std::string_view ActionSectionsTypeName;
+    std::string_view ActiveRuleSectionName;
     int RulePageIndex;
     int RulePageCount;
 
@@ -327,7 +412,7 @@ protected:
 
                     for (const auto& type_name : type_rules | std::ranges::views::keys) {
                         if (type_key_idx == idx - 1) {
-                            Set_Active_Rule_Sections(type_rules[type_name]);
+                            Set_Active_Rule_Sections(type_rules[type_name], type_name);
                             break;
                         }
 
@@ -344,14 +429,7 @@ protected:
             case SECTION_DROPDOWN | KN_BUTTON: {
                 auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
 
-                std::string_view section = section_dropdown.Current_Item();
-
-                if (ActiveRuleSections == nullptr) {
-                    CNC_LOGGER_WARN("Attempted to load section from rule sections when it was null");
-                    break;
-                }
-
-                Set_Active_Rule_Section((*ActiveRuleSections)[section]);
+                Set_Active_Rule_Section(section_dropdown.Current_Item());
                 section_dropdown.Collapse();
 
                 display = REDRAW_ALL;
@@ -373,7 +451,7 @@ protected:
             }
 
             case SAVE_BUTTON | KN_BUTTON: {
-                // TODO: Check Has_Changed() on EditClass instances and save each, with validation errors shown to user
+                Save_Updated_Rules();
                 display = REDRAW_ALL;
                 break;
             }
@@ -410,48 +488,28 @@ protected:
             );
         }
 
-        if (ActiveRuleSection == nullptr) {
-            CNC_LOGGER_WARN("Attempted to render labels for rule section when it was null");
-            return;
-        }
-
-        const auto rule_names = ActiveRuleSection->Rule_Names();
-        const auto rule_count = rule_names.size();
-
-        const auto offset = RulesPerPage * RulePageIndex;
-        auto idx = offset;
-
-        // left column rule labels
         auto left_column_y = Dimensions[LEFT_PANEL].Y + VerticalSpacing;
-
-        while (idx < offset + RulesPerPanel && idx < rule_count) {
-            Fancy_Text_Print(rule_names[idx].data(),
-                 Dimensions[LEFT_PANEL].X + HorizontalSpacing,
-                 left_column_y,
-                 CC_GREEN,
-                 TBLACK,
-                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-            left_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
-
-            idx++;
-        }
-
-        // right column rule labels
         auto right_column_y = Dimensions[RIGHT_PANEL].Y + VerticalSpacing;
 
-        while (idx < offset + RulesPerPage && idx < rule_count) {
-            Fancy_Text_Print(rule_names[idx].data(),
-                 Dimensions[RIGHT_PANEL].X + HorizontalSpacing,
-                 right_column_y,
-                 CC_GREEN,
-                 TBLACK,
-                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        Iterate_Over_Rules_Page(
+            [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
+                auto x = control < RIGHT_RULE_VALUE_CONTROL ? Dimensions[LEFT_PANEL].X : Dimensions[RIGHT_PANEL].X;
+                auto y = control < RIGHT_RULE_VALUE_CONTROL ? left_column_y : right_column_y;
 
-            right_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
+                Fancy_Text_Print(name.data(),
+                     x + HorizontalSpacing,
+                     y,
+                     CC_GREEN,
+                     TBLACK,
+                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-            idx++;
-        }
+                if (control < RIGHT_RULE_VALUE_CONTROL) {
+                    left_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
+                } else {
+                    right_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
+                }
+            }
+        );
     }
 
     void Init_UI_State() override
@@ -607,8 +665,6 @@ protected:
 
 public:
     RulesEditorDialog() : Dialog(300, 195, 5, 5),
-        ActiveRuleSections(nullptr),
-        ActiveRuleSection(nullptr),
         RulePageIndex(0),
         RulePageCount(0)
     {

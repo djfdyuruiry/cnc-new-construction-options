@@ -75,6 +75,11 @@ public:
         return Changed;
     }
 
+    void Clear_Changed()
+    {
+        Changed = false;
+    }
+
 protected:
     /*
     **	These are the text size and style flags to be used when displaying the text
