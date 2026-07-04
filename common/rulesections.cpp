@@ -174,7 +174,7 @@ std::string RuleSection::Variant_To_String(const RuleValueVariant& value_variant
         return std::format("{}", *value);
     }
     if (const auto value = std::get_if<float>(&value_variant)) {
-        return std::format("{}", *value);
+        return std::format("{:.2f}", *value);
     }
     if (const auto value = std::get_if<ushort>(&value_variant)) {
         return std::format("{}", *value);

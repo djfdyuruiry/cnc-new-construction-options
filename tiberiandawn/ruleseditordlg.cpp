@@ -25,17 +25,19 @@ typedef enum
 class RulesEditorDialog : public Dialog<RulesEditorControls>
 {
     static constexpr auto DropdownTextLength = 25;
+    static constexpr auto RuleValueTextLength = 45;
     static constexpr auto RulesPerPanel = 7;
     static constexpr auto RulesPerPage = RulesPerPanel * 2;
 
     void Load_Current_Rules_Page()
     {
         if (ActiveRuleSection == nullptr) {
-            CNC_LOGGER_FATAL("Attempted to load rules page with null rule section");
+            CNC_LOGGER_WARN("Attempted to load active rule section when pointer was null");
+            return;
         }
 
         /*
-         * Load rule values for current page (up to 14 rules) into edit dialogs
+         * Load rule values for current page (up to RulesPerPage rules) into edit dialogs
          */
         const auto rule_names = ActiveRuleSection->Rule_Names();
         const auto rule_count = rule_names.size();
@@ -50,9 +52,17 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 ActiveRuleSection->Get_Variant(rule_names[idx])
             );
 
+            // lowercase text will fit more characters on screen
+            CncStringUtils::To_Lower(rule_string);
+
             // load rule value into edit control and enable
-            strncpy(Text[control].get(), rule_string.c_str(), 25);
+            auto edit_buffer = Text[control].get();
+
+            strncpy(edit_buffer, rule_string.c_str(), RuleValueTextLength);
+            edit_buffer[RuleValueTextLength - 1] = '\0';
+
             Get_Control<EditClass>(control).Enable();
+            Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
 
             idx++;
             ++control;
@@ -63,6 +73,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 // clear and disable unneeded controls
                 strcpy(Text[control].get(), "");
                 Get_Control<EditClass>(control).Disable(true);
+                Get_Control<EditClass>(control).Set_Text(Text[control].get(), RuleValueTextLength);
 
                 idx++;
                 ++control;
@@ -77,9 +88,17 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 ActiveRuleSection->Get_Variant(rule_names[idx])
             );
 
+            // lowercase text will fit more characters on screen
+            CncStringUtils::To_Lower(rule_string);
+
             // load rule value into edit control and enable
-            strncpy(Text[control].get(), rule_string.c_str(), 25);
+            auto edit_buffer = Text[control].get();
+
+            strncpy(edit_buffer, rule_string.c_str(), RuleValueTextLength);
+            edit_buffer[RuleValueTextLength - 1] = '\0';
+
             Get_Control<EditClass>(control).Enable();
+            Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
 
             idx++;
             ++control;
@@ -90,6 +109,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 // clear and disable unneeded controls
                 strcpy(Text[control].get(), "");
                 Get_Control<EditClass>(control).Disable(true);
+                Get_Control<EditClass>(control).Set_Text(Text[control].get(), RuleValueTextLength);
 
                 idx++;
                 ++control;
@@ -105,6 +125,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
         RulePageIndex--;
         Load_Current_Rules_Page();
+        return true;
     }
 
     bool Load_Next_Rules_Page()
@@ -115,6 +136,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
         RulePageIndex++;
         Load_Current_Rules_Page();
+        return true;
     }
 
     void Set_Active_Rule_Section(RuleSection& section)
@@ -134,6 +156,10 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     void Set_Active_Rule_Sections(RuleSections& sections)
     {
         ActiveRuleSections = &sections;
+        ActiveRuleSection = nullptr;
+
+        RulePageIndex = 0;
+        RulePageCount = 0;
 
         auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
 
@@ -142,13 +168,10 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             section_dropdown.List.Remove_Item(0);
         }
 
-        auto first_section = true;
-
         for (const auto& section_name : sections.Section_Names()) {
-            if (first_section) {
+            if (ActiveRuleSection == nullptr) {
                 // show player the first rule section
                 Set_Active_Rule_Section(sections[section_name]);
-                first_section = false;
             }
 
             section_dropdown.Add_Item(section_name.data());
@@ -191,11 +214,11 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     void Init_Right_Rules_Panel()
     {
         for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
-            Text[control] = std::make_unique<char[]>(25);
+            Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
                 control,
                 Text[control].get(),
-                25,
+                RuleValueTextLength,
                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                 Dimensions[control].X,
                 Dimensions[control].Y,
@@ -209,11 +232,11 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     void Init_Left_Rules_Panel()
     {
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
-            Text[control] = std::make_unique<char[]>(25);
+            Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
                 control,
                 Text[control].get(),
-                25,
+                RuleValueTextLength,
                 TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                 Dimensions[control].X,
                 Dimensions[control].Y,
@@ -268,6 +291,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     }
 
     static inline std::vector<std::string> RuleFileNames;
+
     RuleSections* ActiveRuleSections;
     RuleSection* ActiveRuleSection;
     int RulePageIndex;
@@ -321,7 +345,8 @@ protected:
                 std::string_view section = section_dropdown.Current_Item();
 
                 if (ActiveRuleSections == nullptr) {
-                    CNC_LOGGER_FATAL("Attempted to load section from null rule sections");
+                    CNC_LOGGER_WARN("Attempted to load section from rule sections when it was null");
+                    break;
                 }
 
                 Set_Active_Rule_Section((*ActiveRuleSections)[section]);
@@ -374,14 +399,21 @@ protected:
             );
         }
 
+        if (ActiveRuleSection == nullptr) {
+            CNC_LOGGER_WARN("Attempted to render labels for rule section when it was null");
+            return;
+        }
+
         const auto rule_names = ActiveRuleSection->Rule_Names();
         const auto rule_count = rule_names.size();
-        auto idx = 0;
 
-        // left column
+        const auto offset = RulesPerPage * RulePageIndex;
+        auto idx = offset;
+
+        // left column rule labels
         auto left_column_y = Dimensions[LEFT_PANEL].Y + VerticalSpacing;
 
-        while (idx < 7 && idx < rule_count) {
+        while (idx < offset + RulesPerPanel && idx < rule_count) {
             Fancy_Text_Print(rule_names[idx].data(),
                  Dimensions[LEFT_PANEL].X + HorizontalSpacing,
                  left_column_y,
@@ -394,10 +426,10 @@ protected:
             idx++;
         }
 
-        // right column
+        // right column rule labels
         auto right_column_y = Dimensions[RIGHT_PANEL].Y + VerticalSpacing;
 
-        while (idx < 14 && idx < rule_count) {
+        while (idx < offset + RulesPerPage && idx < rule_count) {
             Fancy_Text_Print(rule_names[idx].data(),
                  Dimensions[RIGHT_PANEL].X + HorizontalSpacing,
                  right_column_y,
@@ -490,6 +522,7 @@ protected:
         const auto panel_width = ((Width - (MarginWidth * 2)) - VerticalSpacing) / 2 - 1;
         const auto panel_height = BottomRowY - MiddleRowY - VerticalSpacing;
 
+        // left panel
         Dimensions[LEFT_PANEL] = {
             ControlsX,
             MiddleRowY,
@@ -505,13 +538,14 @@ protected:
             Dimensions[control] = {
                 Dimensions[LEFT_PANEL].X + HorizontalSpacing,
                 left_control_y,
-                ControlWidth,
+                panel_width - (HorizontalSpacing * 2),
                 ControlHeight
             };
 
             left_control_y += ControlHeight;
         }
 
+        // right panel
         Dimensions[RIGHT_PANEL] = {
             ControlsX + panel_width + VerticalSpacing,
             MiddleRowY,
@@ -527,7 +561,7 @@ protected:
             Dimensions[control] = {
                 Dimensions[RIGHT_PANEL].X + HorizontalSpacing,
                 right_control_y,
-                ControlWidth,
+                panel_width - (HorizontalSpacing * 2),
                 ControlHeight
             };
 
@@ -553,13 +587,13 @@ protected:
     }
 
 public:
-    RulesEditorDialog() : Dialog(300, 195, 5, 5)
+    RulesEditorDialog() : Dialog(300, 195, 5, 5),
+        ActiveRuleSections(nullptr),
+        ActiveRuleSection(nullptr),
+        RulePageIndex(0),
+        RulePageCount(0)
     {
         CaptionText = "Rules Editor";
-    }
-
-    ~RulesEditorDialog() override
-    {
     }
 };
 
