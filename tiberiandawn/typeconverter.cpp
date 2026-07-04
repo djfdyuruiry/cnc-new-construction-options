@@ -98,7 +98,8 @@ bool TdTypeConverter::Rule_Requires_Converter(
     const std::string_view& rule
 )
 {
-    return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
+    return (RegisteredRuleTypes.contains(type_name.data())
+            && RegisteredRuleTypes[type_name.data()].contains(rule.data()))
         || Rule_Requires_Csv_Converter(type_name, rule);
 }
 
@@ -107,7 +108,8 @@ bool TdTypeConverter::Rule_Requires_Csv_Converter(
     const std::string_view& rule
 )
 {
-    return RegisteredCsvRuleTypes.contains(type_name) && RegisteredCsvRuleTypes[type_name].contains(rule);
+    return RegisteredCsvRuleTypes.contains(type_name.data())
+        && RegisteredCsvRuleTypes[type_name.data()].contains(rule.data());
 }
 
 ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(
@@ -115,7 +117,7 @@ ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(
     const std::string_view& rule
 )
 {
-    return RegisteredRuleTypes[type_name][rule];
+    return RegisteredRuleTypes[type_name.data()][rule.data()];
 }
 
 ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(
@@ -123,7 +125,7 @@ ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(
     const std::string_view& rule
 )
 {
-    return RegisteredCsvRuleTypes[type_name][rule];
+    return RegisteredCsvRuleTypes[type_name.data()][rule.data()];
 }
 
 #define RULE_VARIANT(TYPE) if (std::holds_alternative<TYPE>(variant)) { \

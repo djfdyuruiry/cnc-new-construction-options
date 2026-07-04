@@ -54,9 +54,6 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             auto rule_value = active_rule_section.Get_Variant(rule_name);
             auto rule_string = RuleSection::Variant_To_String(rule_value);
 
-            // lowercase text will fit more characters on screen
-            CncStringUtils::To_Lower(rule_string);
-
             page_slot_handler(rule_name, rule_value, rule_string, control);
 
             idx++;

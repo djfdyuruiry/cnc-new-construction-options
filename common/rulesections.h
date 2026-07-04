@@ -395,6 +395,8 @@ public:
             );
         }
 
+        CncStringUtils::To_Upper(instance_string);
+
         return Set(name, instance_string);
     }
 

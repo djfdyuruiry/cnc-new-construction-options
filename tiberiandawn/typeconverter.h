@@ -310,11 +310,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static void Register_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
-        if (!RegisteredRuleTypes.contains(type_name)) {
-            RegisteredRuleTypes[type_name] = {};
-        }
-
-        RegisteredRuleTypes[type_name][rule] = Get_Default_Value<T>();
+        RegisteredRuleTypes[type_name.data()][rule.data()] = Get_Default_Value<T>();
     }
 
     /**
@@ -324,11 +320,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static void Register_Csv_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
-        if (!RegisteredCsvRuleTypes.contains(type_name)) {
-            RegisteredCsvRuleTypes[type_name] = {};
-        }
-
-        RegisteredCsvRuleTypes[type_name][rule] = Get_Default_Value<T>();
+        RegisteredCsvRuleTypes[type_name.data()][rule.data()] = Get_Default_Value<T>();
     }
 
     /**
@@ -558,8 +550,8 @@ public:
 
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
-    static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
-    static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
+    static inline std::unordered_map<std::string, std::unordered_map<std::string, ConverterTypeVariant>> RegisteredRuleTypes;
+    static inline std::unordered_map<std::string, std::unordered_map<std::string, ConverterTypeVariant>> RegisteredCsvRuleTypes;
 
     TdTypeConverter() = delete;
 };
