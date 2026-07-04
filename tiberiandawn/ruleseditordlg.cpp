@@ -19,7 +19,8 @@ typedef enum
     RIGHT_RULE_HELP_CONTROL = 227, // 7 controls
     PREVIOUS_BUTTON = 234,
     NEXT_BUTTON,
-    EXIT_BUTTON
+    EXIT_BUTTON,
+    SAVE_BUTTON
 } RulesEditorControls;
 
 class RulesEditorDialog : public Dialog<RulesEditorControls>
@@ -209,6 +210,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         Add_Button(PREVIOUS_BUTTON, "Previous");
         Add_Button(NEXT_BUTTON, "Next");
         Add_Button(EXIT_BUTTON, "Exit");
+        Add_Button(SAVE_BUTTON, "Save");
     }
 
     void Init_Right_Rules_Panel()
@@ -299,7 +301,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     int ControlWidth;
     int ControlHeight;
-    int DropdownItemWidth;
+    int DropdownItemHeight;
     int HorizontalSpacing;
     int VerticalSpacing;
 
@@ -357,13 +359,21 @@ protected:
             }
 
             case PREVIOUS_BUTTON | KN_BUTTON: {
+                // TODO: Check Has_Changed() on EditClass instances and prompt if unsaved changes (save/discard/cancel)
                 Load_Previous_Rules_Page();
                 display = REDRAW_ALL;
                 break;
             }
 
             case NEXT_BUTTON | KN_BUTTON: {
+                // TODO: Check Has_Changed() on EditClass instances and prompt if unsaved changes (save/discard/cancel)
                 Load_Next_Rules_Page();
+                display = REDRAW_ALL;
+                break;
+            }
+
+            case SAVE_BUTTON | KN_BUTTON: {
+                // TODO: Check Has_Changed() on EditClass instances and save each, with validation errors shown to user
                 display = REDRAW_ALL;
                 break;
             }
@@ -474,13 +484,14 @@ protected:
         Init_Bottom_Row();
     }
 
+    //  TODO: use String_Pixel_Width() more
     void Init_Dimensions(const int screen_width, const int screen_height, const int factor) override
     {
         Dialog::Init_Dimensions(screen_width, screen_height, factor);
 
         ControlWidth = 40 * Factor;
         ControlHeight = 9 * Factor;
-        DropdownItemWidth = 8 * Factor;
+        DropdownItemHeight = 8 * Factor;
         HorizontalSpacing = 3 * Factor;
         VerticalSpacing = 2 * Factor;
 
@@ -494,14 +505,14 @@ protected:
             ControlsX,
             TopRowY,
             static_cast<int>(nearbyint(ControlWidth * 1.2)),
-            5 * DropdownItemWidth // 5 visible items (excluding selected value)
+            5 * DropdownItemHeight // 5 visible items (excluding selected value)
         };
 
         Dimensions[SECTION_DROPDOWN] = {
             ControlsX + Dimensions[FILE_DROPDOWN].W + (HorizontalSpacing * 4),
             TopRowY,
             static_cast<int>(nearbyint(ControlWidth * 1.75)),
-            10 * DropdownItemWidth // 10 visible items (excluding selected value)
+            10 * DropdownItemHeight // 10 visible items (excluding selected value)
         };
 
         Dimensions[SEARCH_BUTTON] = {
@@ -570,6 +581,13 @@ protected:
 
         // bottom row
         Dimensions[EXIT_BUTTON] = {ControlsX, BottomRowY, ControlWidth, ControlHeight};
+
+        Dimensions[SAVE_BUTTON] = {
+            ControlsX + ControlWidth + VerticalSpacing,
+            BottomRowY,
+            ControlWidth,
+            ControlHeight
+        };
 
         Dimensions[NEXT_BUTTON] = {
             X + Width - ControlWidth - MarginWidth,
