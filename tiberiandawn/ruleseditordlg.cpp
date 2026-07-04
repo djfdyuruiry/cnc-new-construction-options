@@ -380,6 +380,7 @@ protected:
 
             case KN_RETURN:
             case EXIT_BUTTON | KN_BUTTON: {
+                // TODO: Check Has_Changed() on EditClass instances and prompt if unsaved changes (save/discard/cancel)
                 return false;
             }
 
