@@ -8,10 +8,10 @@
 
 typedef enum
 {
-    FILE_DROPDOWN = 200,
-    SECTION_DROPDOWN,
+    SEARCH_BUTTON = 200,
     SEARCH_TEXTBOX,
-    SEARCH_BUTTON,
+    FILE_DROPDOWN,
+    SECTION_DROPDOWN,
     LEFT_PANEL, // virtual panel used for drawing
     LEFT_RULE_VALUE_CONTROL, // 7 controls
     LEFT_RULE_HELP_CONTROL = 212, // 7 controls
@@ -78,6 +78,17 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         }
     }
 
+    int Present_Unsaved_Changes_Prompt()
+    {
+        // TODO: Locale file entry
+        return WWMessageBox().Process(
+            "You have unsaved changes, you must either save or discard before navigating.",
+            Text_String(TXT_SAVE_BUTTON),
+            Text_String(TXT_CANCEL),
+            "Discard"
+        );
+    }
+
     bool Unsaved_Changes_Present()
     {
         auto changes_present = false;
@@ -87,14 +98,54 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 changes_present = changes_present || Get_Control<EditClass>(control).Has_Changed();
             }
         );
+
+        return changes_present;
     }
 
-    void Save_Updated_Rules()
+    /**
+     * Resolve any unsaved changes by saving or discarding them. Returns false if player
+     * refused to do either action.
+     */
+    bool Ensure_Unsaved_Changes_Resolved()
+    {
+        if (!Unsaved_Changes_Present()) {
+            return true;
+        }
+
+        const auto prompt_result = Present_Unsaved_Changes_Prompt();
+
+        if (prompt_result == 1) {
+            // player discarded changes
+            return true;
+        }
+
+        if (prompt_result == 2) {
+            // player canceled
+            return false;
+        }
+
+        return Save_Updated_Rules();
+    }
+
+    void Show_Update_Error_Popup(const std::invalid_argument& error)
+    {
+        // TODO: Locale file entry
+        const auto full_message = std::format(
+            "Unable to save your changes, check the values you entered are valid. ({})",
+            error.what()
+        );
+
+        WWMessageBox().Process(full_message.c_str());
+    }
+
+    bool Save_Updated_Rules()
     {
         auto& active_rule_sections = ActiveSectionsAreType
             ? Rule.Get_Editable_Type_Rules()[ActionSectionsTypeName]
             : Rule.Get_Editable_Rule_Sections();
         auto& active_rule_section = active_rule_sections[ActiveRuleSectionName];
+
+        auto update_succeeded = true;
 
         Iterate_Over_Rules_Page(
             [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
@@ -104,9 +155,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                     return;
                 }
 
-                std::string new_value = Text[control].get();
-
                 const auto& type_name = active_rule_section.Get_Converter_Section_Type_Name();
+                std::string new_value = Text[control].get();
 
                 // rule is of special type that needs a non-trivial conversion from a string value
                 if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(*type_name, name)) {
@@ -126,8 +176,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                                 converter_variant
                             );
                         } catch (const std::invalid_argument& ex) {
-                            // TODO: catch conversion errors and show pop-up
-                            CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                            Show_Update_Error_Popup(ex);
+                            update_succeeded = false;
                             return;
                         }
                     } else {
@@ -146,8 +196,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                                 converter_variant
                             );
                         } catch (const std::invalid_argument& ex) {
-                            // TODO: catch conversion errors and show popup
-                            CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                            Show_Update_Error_Popup(ex);
+                            update_succeeded = false;
                             return;
                         }
                     }
@@ -158,8 +208,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                         // parse new value from edit box string
                         active_rule_section.Parse_String(name, new_value, current_value);
                     } catch (const std::invalid_argument& ex) {
-                        // TODO: catch conversion errors and show popup
-                        CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                        Show_Update_Error_Popup(ex);
+                        update_succeeded = false;
                         return;
                     }
                 }
@@ -178,6 +228,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 edit_box.Clear_Changed();
             }
         );
+
+        return update_succeeded;
     }
 
     void Load_Current_Rules_Page()
@@ -227,6 +279,22 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         return true;
     }
 
+    void Collapse_Visible_Dropdowns(DialogRedrawType& redraw_type)
+    {
+        auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+        auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+
+        if (file_dropdown.IsDropped) {
+            file_dropdown.Collapse();
+            redraw_type = REDRAW_BACKGROUND;
+        }
+
+        if (section_dropdown.IsDropped) {
+            section_dropdown.Collapse();
+            redraw_type = REDRAW_BACKGROUND;
+        }
+    }
+
     void Set_Active_Rule_Section(std::string_view section)
     {
         ActiveRuleSectionName = section;
@@ -255,6 +323,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
         RulePageIndex = 0;
         RulePageCount = 0;
+        PreviousSectionIndex = 0;
 
         auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
 
@@ -396,6 +465,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     std::string_view ActiveRuleSectionName;
     int RulePageIndex;
     int RulePageCount;
+    int PreviousFileIndex;
+    int PreviousSectionIndex;
 
     int ControlWidth;
     int ControlHeight;
@@ -417,24 +488,29 @@ protected:
 
                 const auto idx = file_dropdown.Current_Index();
 
-                if (idx == 0) {
-                    Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
-                } else {
-                    auto& type_rules = Rule.Get_Editable_Type_Rules();
-                    auto type_key_idx = 0;
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    if (idx == 0) {
+                        Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
+                    } else {
+                        auto& type_rules = Rule.Get_Editable_Type_Rules();
+                        auto type_key_idx = 0;
 
-                    for (const auto& type_name : type_rules | std::ranges::views::keys) {
-                        if (type_key_idx == idx - 1) {
-                            Set_Active_Rule_Sections(type_rules[type_name], type_name);
-                            break;
+                        for (const auto& type_name : type_rules | std::ranges::views::keys) {
+                            if (type_key_idx == idx - 1) {
+                                Set_Active_Rule_Sections(type_rules[type_name], type_name);
+                                break;
+                            }
+
+                            type_key_idx++;
                         }
-
-                        type_key_idx++;
                     }
+
+                    PreviousFileIndex = idx;
+                } else {
+                    file_dropdown.Set_Selected_Index(PreviousFileIndex);
                 }
 
-                file_dropdown.Collapse();
-
+                Collapse_Visible_Dropdowns(display);
                 display = REDRAW_ALL;
                 break;
             }
@@ -442,41 +518,54 @@ protected:
             case SECTION_DROPDOWN | KN_BUTTON: {
                 auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
 
-                Set_Active_Rule_Section(section_dropdown.Current_Item());
-                section_dropdown.Collapse();
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    Set_Active_Rule_Section(section_dropdown.Current_Item());
+                    PreviousSectionIndex = section_dropdown.Current_Index();
+                } else {
+                    section_dropdown.Set_Selected_Index(PreviousSectionIndex);
+                }
 
+                Collapse_Visible_Dropdowns(display);
                 display = REDRAW_ALL;
                 break;
             }
 
             case PREVIOUS_BUTTON | KN_BUTTON: {
-                // TODO: Check Has_Changed() on EditClass instances and prompt if unsaved changes (save/discard/cancel)
-                Load_Previous_Rules_Page();
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    Load_Previous_Rules_Page();
+                }
+
+                Collapse_Visible_Dropdowns(display);
                 display = REDRAW_ALL;
                 break;
             }
 
             case NEXT_BUTTON | KN_BUTTON: {
-                // TODO: Check Has_Changed() on EditClass instances and prompt if unsaved changes (save/discard/cancel)
-                Load_Next_Rules_Page();
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    Load_Next_Rules_Page();
+                }
+
+                Collapse_Visible_Dropdowns(display);
                 display = REDRAW_ALL;
                 break;
             }
 
             case SAVE_BUTTON | KN_BUTTON: {
                 Save_Updated_Rules();
+
+                Collapse_Visible_Dropdowns(display);
                 display = REDRAW_ALL;
                 break;
             }
 
-            case KN_RETURN:
+            case KN_ESC:
             case EXIT_BUTTON | KN_BUTTON: {
-                // TODO: Check Has_Changed() on EditClass instances and prompt if unsaved changes (save/discard/cancel)
-                return false;
-            }
+                Collapse_Visible_Dropdowns(display);
 
-            case KN_ESC: {
-                return false;
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    return false;
+                }
+                display = REDRAW_ALL;
             }
 
             default:
@@ -484,6 +573,68 @@ protected:
         }
 
         return std::nullopt;
+    }
+
+    KeyNumType Get_Input(DialogRedrawType& display) override
+    {
+        std::vector<RulesEditorControls> unfocused_controls;
+
+        // collect edit box state before processing input
+        for (auto control = LEFT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
+            if (!Get_Control<EditClass>(control).Has_Focus()) {
+                unfocused_controls.emplace_back(control);
+            }
+
+            if (control == LEFT_RULE_HELP_CONTROL - 1) {
+                control = RIGHT_PANEL;
+            }
+        }
+
+        auto file_was_dropped = Get_Control<FILE_DROPDOWN, DropListClass>().IsDropped;
+        auto section_was_dropped = Get_Control<SECTION_DROPDOWN, DropListClass>().IsDropped;
+
+        const auto input = Dialog::Get_Input(display);
+
+        if (file_was_dropped && !Get_Control<FILE_DROPDOWN, DropListClass>().IsDropped) {
+            display = REDRAW_ALL;
+        }
+
+        if (section_was_dropped && !Get_Control<SECTION_DROPDOWN, DropListClass>().IsDropped) {
+            display = REDRAW_ALL;
+        }
+
+        if (input & KN_BUTTON) {
+            // user is interacting with a button, so hide dropdown lists
+            Collapse_Visible_Dropdowns(display);
+        }
+
+        // if player clicks on an edit box ensure dropdowns are collapsed
+        for (auto control = LEFT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
+            // check state changed to focused
+            if (std::ranges::contains(unfocused_controls, control) && Get_Control<EditClass>(control).Has_Focus()) {
+                Collapse_Visible_Dropdowns(display);
+                break;
+            }
+
+            if (control == LEFT_RULE_HELP_CONTROL - 1) {
+                control = RIGHT_PANEL;
+            }
+        }
+
+        // for any visible dropdown, if mouse input is received outside it's bounds, hide it
+        for (auto control = FILE_DROPDOWN; control <= SECTION_DROPDOWN; ++control) {
+            auto& dropdown = Get_Control<DropListClass>(control);
+
+            if (Is_Mouse_Outside_Dropdown_Dimensions(dropdown)) {
+                if (dropdown.IsDropped) {
+                    display = REDRAW_BACKGROUND;
+                }
+
+                dropdown.Collapse();
+            }
+        }
+
+        return input;
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -505,7 +656,7 @@ protected:
         auto right_column_y = Dimensions[RIGHT_PANEL].Y + VerticalSpacing;
 
         Iterate_Over_Rules_Page(
-            [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
+            [&] (const auto& name, const auto& v, const auto& s, const auto& control) {
                 auto x = control < RIGHT_RULE_VALUE_CONTROL ? Dimensions[LEFT_PANEL].X : Dimensions[RIGHT_PANEL].X;
                 auto y = control < RIGHT_RULE_VALUE_CONTROL ? left_column_y : right_column_y;
 
@@ -527,6 +678,8 @@ protected:
 
     void Init_UI_State() override
     {
+        PreviousFileIndex = 0;
+
         auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
 
         for (const auto& file : RuleFileNames) {

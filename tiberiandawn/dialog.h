@@ -85,10 +85,17 @@ protected:
             && Keyboard->MouseQY <= end_y;
     }
 
-    bool Is_Mouse_Outside_Control_Dimensions(const GadgetClass& control)
+    bool Is_Mouse_Outside_Control_Dimensions(const ControlClass& control)
     {
         return (Keyboard->MouseQX < control.X || Keyboard->MouseQX > control.X + control.Width)
             && (Keyboard->MouseQY < control.Y || Keyboard->MouseQY > control.Y + control.Height);
+    }
+
+    bool Is_Mouse_Outside_Dropdown_Dimensions(const DropListClass& control)
+    {
+        return Is_Mouse_Outside_Control_Dimensions(control)
+            && Is_Mouse_Outside_Control_Dimensions(control.List)
+            && Is_Mouse_Outside_Control_Dimensions(control.DropButton);
     }
 
     template<std::derived_from<GadgetClass> U>
