@@ -262,6 +262,145 @@ const std::optional<std::string>& RuleSection::Get_Ini_Comment() const
     return Comment;
 }
 
+RuleSection& RuleSection::Parse_String(
+    std::string_view name,
+    const std::string& value_string,
+    const RuleValueVariant& default_value,
+    const std::optional<std::function<bool(std::string)>>& str_validator
+)
+{
+    // if entry has an existing value, keep it if parsing fails - apply default_value when no existing value found
+    const auto entry_has_existing_value = Has_Key(name);
+    const auto resolved_default_value = entry_has_existing_value ? Get_Variant(name) : default_value;
+
+    if (entry_has_existing_value) {
+        CNC_LOGGER_DEBUG(
+            "Existing value for rule detected: [{}] -> {} (value = {})",
+            SectionName,
+            name,
+            resolved_default_value
+        );
+
+        if (!Variants_Have_Same_Type(resolved_default_value, default_value)) {
+            throw std::invalid_argument(
+                std::format(
+                    "Attempted to set rule using wrong type '{}' (correct type: {}), found in section: [{}] -> {}",
+                    Get_Variant_Type(default_value),
+                    Get_Variant_Type(resolved_default_value),
+                    SectionName,
+                    name
+                )
+            );
+        }
+    }
+
+    CNC_LOGGER_DEBUG(
+        "Attempting to parse rule from string: [{}] -> {} (with default = {})",
+        SectionName,
+        name,
+        resolved_default_value
+    );
+
+    auto value = resolved_default_value;
+
+    if (std::holds_alternative<int>(resolved_default_value)) {
+        Parse<int>(
+            name,
+            value_string,
+            std::get<int>(value),
+            ParseInt
+        );
+    } else if (std::holds_alternative<bool>(resolved_default_value)) {
+        Parse<bool>(
+            name,
+            value_string,
+            std::get<bool>(value),
+            ParseBool
+        );
+    } else if (std::holds_alternative<float>(resolved_default_value)) {
+        Parse<float>(
+            name,
+            value_string,
+            std::get<float>(value),
+            ParseFloat
+        );
+    } else if (std::holds_alternative<std::string>(resolved_default_value)) {
+        auto str_value = value_string;
+
+        if (SanitizeIniStrings) {
+            // TODO: trim string to forgive spacing around rule string
+            // forgive incorrect casing in rule values
+            CncStringUtils::To_Upper(str_value);
+        }
+
+        if (str_validator.has_value() && !(*str_validator)(str_value)) {
+            throw std::invalid_argument(
+                std::format("Validation failed for value: {}", value_string)
+            );
+        }
+
+        value = str_value;
+    } else if (std::holds_alternative<uint>(resolved_default_value)) {
+        Parse<uint, ulong>(
+            name,
+            value_string,
+            std::get<uint>(value),
+            ParseULong,
+            ValidateUInt
+        );
+    } else if (
+        std::holds_alternative<ushort>(resolved_default_value)
+        || std::holds_alternative<char>(resolved_default_value)
+        || std::holds_alternative<uchar>(resolved_default_value)
+    ) {
+        auto int_value = 0;
+
+        Parse<int>(
+            name,
+            value_string,
+            int_value,
+            ParseInt
+        );
+
+        if (std::holds_alternative<ushort>(resolved_default_value)) {
+            Parse_Int<ushort>(
+                name,
+                int_value,
+                std::get<ushort>(value),
+                ValidateUShort
+            );
+        } else if (std::holds_alternative<char>(resolved_default_value)) {
+            Parse_Int<char>(
+                name,
+                int_value,
+                std::get<char>(value),
+                ValidateChar
+            );
+        } else if (std::holds_alternative<uchar>(resolved_default_value)) {
+            Parse_Int<uchar>(
+                name,
+                int_value,
+                std::get<uchar>(value),
+                ValidateUChar
+            );
+        }
+    } else {
+        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type "
+                                    "list being updated without updating supporting code");
+    }
+
+    CNC_LOGGER_DEBUG(
+        "Parsed rule from string: [{}] -> {} = {}",
+        SectionName,
+        name,
+        value
+    );
+
+    Set(name, value);
+
+    return *this;
+}
+
 const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name) const
 {
     auto value_variant = Get_Variant(name);

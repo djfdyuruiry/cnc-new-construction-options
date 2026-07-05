@@ -78,9 +78,19 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         }
     }
 
+    bool Unsaved_Changes_Present()
+    {
+        auto changes_present = false;
+
+        Iterate_Over_Rules_Page(
+            [&] (const auto& n, const auto& v, const auto& s, const auto& control) {
+                changes_present = changes_present || Get_Control<EditClass>(control).Has_Changed();
+            }
+        );
+    }
+
     void Save_Updated_Rules()
     {
-        // TODO: Check Has_Changed() on EditClass instances and save each, with validation errors shown to user
         auto& active_rule_sections = ActiveSectionsAreType
             ? Rule.Get_Editable_Type_Rules()[ActionSectionsTypeName]
             : Rule.Get_Editable_Rule_Sections();
@@ -96,60 +106,65 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
                 std::string new_value = Text[control].get();
 
-                CNC_LOGGER_WARN("Saving rule change BEFORE [{}] -> {} = {}", active_rule_section.SectionName, name, new_value);
+                const auto& type_name = active_rule_section.Get_Converter_Section_Type_Name();
 
-                auto type_name = active_rule_section.Get_Converter_Section_Type_Name();
-                std::string rule_name = name.data();
+                // rule is of special type that needs a non-trivial conversion from a string value
+                if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(*type_name, name)) {
+                    if (TdTypeConverter::Rule_Requires_Csv_Converter(*type_name, name)) {
+                        const auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(
+                            *type_name,
+                            name
+                        );
 
-                if (type_name.has_value()) {
-                    // rule is of special type that needs a non-trival conversion from a string value
-                    if (TdTypeConverter::Rule_Requires_Converter(*type_name, rule_name)) {
-                        if (TdTypeConverter::Rule_Requires_Csv_Converter(*type_name, rule_name)) {
-                            auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(*type_name, rule_name);
+                        try {
+                            // convert string and set rule value
+                            // (class_instance is updated by OnRulesChanged handler in section)
+                            TdTypeConverter::Set_Csv_Rule_With_Variant(
+                                active_rule_section,
+                                name,
+                                new_value,
+                                converter_variant
+                            );
+                        } catch (const std::invalid_argument& ex) {
+                            // TODO: catch conversion errors and show pop-up
+                            CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                            return;
+                        }
+                    } else {
+                        const auto converter_variant = TdTypeConverter::Get_Rule_Variant(
+                            *type_name,
+                            name
+                        );
 
-                            CNC_LOGGER_WARN("Set_Csv_Rule_With_Variant: {}", name);
-
-                            try {
-                                // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
-                                TdTypeConverter::Set_Csv_Rule_With_Variant(
-                                    active_rule_section,
-                                    rule_name,
-                                    new_value,
-                                    converter_variant
-                                );
-                            } catch (const std::invalid_argument& ex) {
-                                // TODO: catch conversion errors and show popuop
-                                CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
-                            }
-                        } else {
-                            auto converter_variant = TdTypeConverter::Get_Rule_Variant(*type_name, rule_name);
-
-                            CNC_LOGGER_WARN("Set_Rule_With_Variant: {}", name);
-
-                            try {
-                                // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
-                                TdTypeConverter::Set_Rule_With_Variant(
-                                    active_rule_section,
-                                    rule_name,
-                                    new_value,
-                                    converter_variant
-                                );
-                            } catch (const std::invalid_argument& ex) {
-                                // TODO: catch conversion errors and show popuop
-                                CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
-                            }
+                        try {
+                            // convert string and set rule value
+                            // (class_instance is updated by OnRulesChanged handler in section)
+                            TdTypeConverter::Set_Rule_With_Variant(
+                                active_rule_section,
+                                name,
+                                new_value,
+                                converter_variant
+                            );
+                        } catch (const std::invalid_argument& ex) {
+                            // TODO: catch conversion errors and show popup
+                            CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                            return;
                         }
                     }
-                } else if (active_rule_section.Get_Type(name) == "string") {
-                    CNC_LOGGER_WARN("Set string");
-                    active_rule_section.Set(name, new_value);
                 } else {
-                    CNC_LOGGER_ERROR("No implementation");
-                    // TODO: impl string parse method in RuleSection similar to Load_From_Ini
+                    try {
+                        const auto current_value = active_rule_section.Get_Variant(name);
+
+                        // parse new value from edit box string
+                        active_rule_section.Parse_String(name, new_value, current_value);
+                    } catch (const std::invalid_argument& ex) {
+                        // TODO: catch conversion errors and show popup
+                        CNC_LOGGER_ERROR("Set rule failed: {}", ex.what());
+                        return;
+                    }
                 }
 
-                CNC_LOGGER_WARN("Saving rule change AFTER [{}] -> {} = {}", ActiveRuleSectionName, name, active_rule_section.Get_Variant(name));
-
+                // save rules back to INI file
                 const auto rules_filename = Get_Control<FILE_DROPDOWN, DropListClass>().Current_Item();
 
                 CCFileClass ini_file(rules_filename);
@@ -159,6 +174,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 ini.Save(ini_file);
                 ini_file.Close();
 
+                // wait for player to edit again
                 edit_box.Clear_Changed();
             }
         );
@@ -170,7 +186,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
          * Load rule values for current page (up to RulesPerPage rules) into edit dialogs
          */
         Iterate_Over_Rules_Page(
-            [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
+            [&] (const auto& n, const auto& v, const auto& value_string, const auto& control) {
                 // load rule value into edit control and enable
                 auto edit_buffer = Text[control].get();
 

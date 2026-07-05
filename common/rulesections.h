@@ -236,6 +236,13 @@ public:
         return *this;
     }
 
+    RuleSection& Parse_String(
+        std::string_view name,
+        const std::string& value_string,
+        const RuleValueVariant& default_value,
+        const std::optional<std::function<bool(std::string)>>& str_validator = std::nullopt
+    );
+
     const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const;
 
     void Save_All_To_Ini(INIClass& ini) const;
@@ -437,6 +444,24 @@ public:
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
 
+    static inline const std::function<bool(const std::string&)> ParseBool = [](const auto& s) {
+        auto potential_value = s;
+
+        CncStringUtils::To_Lower(potential_value);
+
+        if (potential_value == "true" || potential_value == "yes") {
+            return true;
+        }
+
+        if (potential_value == "false" || potential_value == "no") {
+            return false;
+        }
+
+        throw std::out_of_range(
+            std::format("String '{}' could not be parsed as boolean value, true/yes/false/no expected.", s)
+        );
+    };
+    static inline const std::function<int(const std::string&)> ParseInt = [](const auto& s) { return std::stoi(s); };
     static inline const std::function<float(const std::string&)> ParseFloat = [](const auto& s) { return std::stof(s); };
     static inline const std::function<ulong(const std::string&)> ParseULong = [](const auto& s) { return std::stoul(s); };
 
@@ -511,6 +536,63 @@ private:
     )
     {
         Safe_Parse<T, int, int>(
+            name,
+            source,
+            target,
+            [](const int& v) { return v; },
+            validate
+        );
+    }
+
+    template<class T, class U = T, class V = std::string>
+    void Parse(
+        std::string_view name,
+        const V& source,
+        T& target,
+        std::function<U(const V&)> parse,
+        std::function<bool(U)> validate = [](U _) { return true; }
+    )
+    {
+        std::optional<U> parsed_value;
+        std::string err;
+
+        try {
+            U result = parse(source);
+            parsed_value = result;
+
+            if (validate(result)) {
+                target = static_cast<T>(result);
+                return;
+            }
+
+            err = "validation_failure";
+        } catch (const std::invalid_argument& _) {
+            err = "invalid_argument";
+        } catch (const std::out_of_range& _) {
+            err = "out_of_range";
+        }
+
+        auto parse_msg = parsed_value.has_value() ? std::format(" | parsed_value={}", parsed_value.value()) : "";
+
+        throw std::invalid_argument(
+            std::format(
+                "Parse error for value '{}': {}{}",
+                source,
+                err,
+                parse_msg
+            )
+        );
+    }
+
+    template<class T>
+    void Parse_Int(
+        std::string_view name,
+        const int& source,
+        T& target,
+        std::function<bool(int)> validate
+    )
+    {
+        Parse<T, int, int>(
             name,
             source,
             target,
