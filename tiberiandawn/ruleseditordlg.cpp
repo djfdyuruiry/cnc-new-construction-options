@@ -483,93 +483,93 @@ protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
         switch (input) {
-            case FILE_DROPDOWN | KN_BUTTON: {
-                auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+        case FILE_DROPDOWN | KN_BUTTON: {
+            auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
 
-                const auto idx = file_dropdown.Current_Index();
+            const auto idx = file_dropdown.Current_Index();
 
-                if (Ensure_Unsaved_Changes_Resolved()) {
-                    if (idx == 0) {
-                        Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
-                    } else {
-                        auto& type_rules = Rule.Get_Editable_Type_Rules();
-                        auto type_key_idx = 0;
+            if (Ensure_Unsaved_Changes_Resolved()) {
+                if (idx == 0) {
+                    Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
+                } else {
+                    auto& type_rules = Rule.Get_Editable_Type_Rules();
+                    auto type_key_idx = 0;
 
-                        for (const auto& type_name : type_rules | std::ranges::views::keys) {
-                            if (type_key_idx == idx - 1) {
-                                Set_Active_Rule_Sections(type_rules[type_name], type_name);
-                                break;
-                            }
-
-                            type_key_idx++;
+                    for (const auto& type_name : type_rules | std::ranges::views::keys) {
+                        if (type_key_idx == idx - 1) {
+                            Set_Active_Rule_Sections(type_rules[type_name], type_name);
+                            break;
                         }
+
+                        type_key_idx++;
                     }
-
-                    PreviousFileIndex = idx;
-                } else {
-                    file_dropdown.Set_Selected_Index(PreviousFileIndex);
                 }
 
-                Collapse_Visible_Dropdowns(display);
-                display = REDRAW_ALL;
-                break;
+                PreviousFileIndex = idx;
+            } else {
+                file_dropdown.Set_Selected_Index(PreviousFileIndex);
             }
 
-            case SECTION_DROPDOWN | KN_BUTTON: {
-                auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+            Collapse_Visible_Dropdowns(display);
+            display = REDRAW_ALL;
+            break;
+        }
 
-                if (Ensure_Unsaved_Changes_Resolved()) {
-                    Set_Active_Rule_Section(section_dropdown.Current_Item());
-                    PreviousSectionIndex = section_dropdown.Current_Index();
-                } else {
-                    section_dropdown.Set_Selected_Index(PreviousSectionIndex);
-                }
+        case SECTION_DROPDOWN | KN_BUTTON: {
+            auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
 
-                Collapse_Visible_Dropdowns(display);
-                display = REDRAW_ALL;
-                break;
+            if (Ensure_Unsaved_Changes_Resolved()) {
+                Set_Active_Rule_Section(section_dropdown.Current_Item());
+                PreviousSectionIndex = section_dropdown.Current_Index();
+            } else {
+                section_dropdown.Set_Selected_Index(PreviousSectionIndex);
             }
 
-            case PREVIOUS_BUTTON | KN_BUTTON: {
-                if (Ensure_Unsaved_Changes_Resolved()) {
-                    Load_Previous_Rules_Page();
-                }
+            Collapse_Visible_Dropdowns(display);
+            display = REDRAW_ALL;
+            break;
+        }
 
-                Collapse_Visible_Dropdowns(display);
-                display = REDRAW_ALL;
-                break;
+        case PREVIOUS_BUTTON | KN_BUTTON: {
+            if (Ensure_Unsaved_Changes_Resolved()) {
+                Load_Previous_Rules_Page();
             }
 
-            case NEXT_BUTTON | KN_BUTTON: {
-                if (Ensure_Unsaved_Changes_Resolved()) {
-                    Load_Next_Rules_Page();
-                }
+            Collapse_Visible_Dropdowns(display);
+            display = REDRAW_ALL;
+            break;
+        }
 
-                Collapse_Visible_Dropdowns(display);
-                display = REDRAW_ALL;
-                break;
+        case NEXT_BUTTON | KN_BUTTON: {
+            if (Ensure_Unsaved_Changes_Resolved()) {
+                Load_Next_Rules_Page();
             }
 
-            case SAVE_BUTTON | KN_BUTTON: {
-                Save_Updated_Rules();
+            Collapse_Visible_Dropdowns(display);
+            display = REDRAW_ALL;
+            break;
+        }
 
-                Collapse_Visible_Dropdowns(display);
-                display = REDRAW_ALL;
-                break;
+        case SAVE_BUTTON | KN_BUTTON: {
+            Save_Updated_Rules();
+
+            Collapse_Visible_Dropdowns(display);
+            display = REDRAW_ALL;
+            break;
+        }
+
+        case KN_ESC:
+        case EXIT_BUTTON | KN_BUTTON: {
+            Collapse_Visible_Dropdowns(display);
+
+            if (Ensure_Unsaved_Changes_Resolved()) {
+                return false;
             }
+            display = REDRAW_ALL;
+        }
 
-            case KN_ESC:
-            case EXIT_BUTTON | KN_BUTTON: {
-                Collapse_Visible_Dropdowns(display);
-
-                if (Ensure_Unsaved_Changes_Resolved()) {
-                    return false;
-                }
-                display = REDRAW_ALL;
-            }
-
-            default:
-                break;
+        default:
+            break;
         }
 
         return std::nullopt;
@@ -850,5 +850,22 @@ bool Rules_Editor_Dialog()
         factor
     );
 
-    return dialog.Present();
+    Load_Title_Screen(TitlePicture, &HidPage, Palette);
+    Blit_Hid_Page_To_Seen_Buff();
+    Set_Palette(Palette);
+
+    while (Get_Mouse_State() > 0)
+        Show_Mouse();
+
+    const auto result = dialog.Present();
+
+    /*------------------------------------------------------------------------
+    Restore screen
+    ------------------------------------------------------------------------*/
+    Hide_Mouse();
+    Load_Title_Screen(TitlePicture, &HidPage, Palette);
+    Blit_Hid_Page_To_Seen_Buff();
+    Show_Mouse();
+
+    return result;
 }
