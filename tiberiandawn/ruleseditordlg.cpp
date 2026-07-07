@@ -388,8 +388,11 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     void Init_Right_Rules_Panel()
     {
         auto edit_button = RIGHT_RULE_EDIT_BUTTON;
+        auto help_button = RIGHT_RULE_HELP_CONTROL;
+
         for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
             Add_Button(edit_button, "Edit");
+            Add_Button(help_button, "?");
 
             Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
@@ -405,14 +408,18 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             );
 
             ++edit_button;
+            ++help_button;
         }
     }
 
     void Init_Left_Rules_Panel()
     {
         auto edit_button = LEFT_RULE_EDIT_BUTTON;
+        auto help_button = LEFT_RULE_HELP_CONTROL;
+
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
             Add_Button(edit_button, "Edit");
+            Add_Button(help_button, "?");
 
             Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
@@ -428,6 +435,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             );
 
             ++edit_button;
+            ++help_button;
         }
     }
 
@@ -783,13 +791,21 @@ protected:
         };
 
         auto left_control_y = Dimensions[LEFT_PANEL].Y;
+        auto help_btn = LEFT_RULE_HELP_CONTROL;
         auto edit_btn = LEFT_RULE_EDIT_BUTTON;
 
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
             left_control_y += VerticalSpacing;
 
+            Dimensions[help_btn] = {
+                Dimensions[LEFT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 3),
+                left_control_y,
+                ControlWidth / 3,
+                ControlHeight
+            };
+
             Dimensions[edit_btn] = {
-                Dimensions[LEFT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 2),
+                Dimensions[help_btn].X - HorizontalSpacing - (ControlWidth / 2),
                 left_control_y,
                 ControlWidth / 2,
                 ControlHeight
@@ -805,6 +821,7 @@ protected:
             };
 
             left_control_y += ControlHeight;
+            ++help_btn;
             ++edit_btn;
         }
 
@@ -818,13 +835,21 @@ protected:
 
         auto right_control_y = Dimensions[RIGHT_PANEL].Y;
         edit_btn = RIGHT_RULE_EDIT_BUTTON;
+        help_btn = RIGHT_RULE_HELP_CONTROL;
 
         for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
             right_control_y += VerticalSpacing;
 
+            Dimensions[help_btn] = {
+                Dimensions[RIGHT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 3),
+                left_control_y,
+                ControlWidth / 3,
+                ControlHeight
+            };
+
             Dimensions[edit_btn] = {
-                Dimensions[RIGHT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 2),
-                right_control_y,
+                Dimensions[help_btn].X - HorizontalSpacing - (ControlWidth / 2),
+                left_control_y,
                 ControlWidth / 2,
                 ControlHeight
             };
@@ -839,6 +864,7 @@ protected:
             };
 
             right_control_y += ControlHeight;
+            ++help_btn;
             ++edit_btn;
         }
 
