@@ -317,7 +317,7 @@ public:
         return *this;
     }
 
-    const std::optional<std::string>& Get_Converter_Section_Type_Name();
+    const std::optional<std::string>& Get_Converter_Section_Type_Name() const;
 
     template<class T, TypeConverter<T> C>
     T Get_With_Converter(std::string_view name) const
@@ -914,6 +914,8 @@ public:
     RuleSection& Add_Section(std::string_view name, std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed);
 
     RuleSection& Add_Section(std::string_view name);
+
+    RuleSection& Get_Section(std::string_view name);
 
     void Clear();
 

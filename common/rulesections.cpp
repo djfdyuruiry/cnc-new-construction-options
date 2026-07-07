@@ -499,7 +499,7 @@ RuleSection& RuleSection::Set(std::string_view name, const char* value)
     return Set(name, std::string(value));
 }
 
-const std::optional<std::string>& RuleSection::Get_Converter_Section_Type_Name()
+const std::optional<std::string>& RuleSection::Get_Converter_Section_Type_Name() const
 {
     return ConverterSectionTypeName;
 }
@@ -615,6 +615,15 @@ RuleSection& RuleSections::Add_Section(std::string_view name)
             OnRulesChangedDefault.value()(s, r, v);
         }
     });
+}
+
+RuleSection& RuleSections::Get_Section(std::string_view name)
+{
+    if (!Sections.contains(name.data())) {
+        throw std::out_of_range(std::format("Attempted to access missing rule section: {}'", name));
+    }
+
+    return Sections.at(name.data());
 }
 
 void RuleSections::Clear()

@@ -15,10 +15,12 @@ typedef enum
     LEFT_PANEL, // virtual panel used for drawing
     LEFT_RULE_VALUE_CONTROL, // 7 controls
     LEFT_RULE_HELP_CONTROL = 212, // 7 controls
-    RIGHT_PANEL = 219, // virtual panel used for drawing
+    LEFT_RULE_EDIT_BUTTON = 219, // 7 controls
+    RIGHT_PANEL = 226, // virtual panel used for drawing
     RIGHT_RULE_VALUE_CONTROL,  // 7 controls
-    RIGHT_RULE_HELP_CONTROL = 227, // 7 controls
-    PREVIOUS_BUTTON = 234,
+    RIGHT_RULE_HELP_CONTROL = 234, // 7 controls
+    RIGHT_RULE_EDIT_BUTTON = 241, // 7 controls
+    PREVIOUS_BUTTON = 248,
     NEXT_BUTTON,
     EXIT_BUTTON,
     SAVE_BUTTON
@@ -31,16 +33,19 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     static constexpr auto RulesPerPanel = 7;
     static constexpr auto RulesPerPage = RulesPerPanel * 2;
 
+    RuleSections& Get_Active_Rule_Sections()
+    {
+        return ActiveSectionsAreType
+            ? Rule.Get_Editable_Type_Rules().at(ActionSectionsTypeName)
+            : Rule.Get_Editable_Rule_Sections();
+    }
+
     void Iterate_Over_Rules_Page(
-        std::function<
-            void(const std::string_view&, const RuleValueVariant&, const std::string&, const RulesEditorControls&)
-        > page_slot_handler,
-        std::function<void(const RulesEditorControls&)> empty_page_slot_handler = [](const auto&){}
+        const std::function<void(RuleSection&, const std::string&, const RulesEditorControls&, const RulesEditorControls&)>& page_slot_handler,
+        const std::function<void(const RulesEditorControls&, const RulesEditorControls&)>& empty_page_slot_handler = [](const auto&, const auto&){}
     )
     {
-        const auto& active_rule_section = ActiveSectionsAreType
-            ? Rule.Get_Type_Rules().at(ActionSectionsTypeName)[ActiveRuleSectionName]
-            : Rule.Get_Rule_Sections()[ActiveRuleSectionName];
+        auto& active_rule_section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
 
         const auto rule_names = active_rule_section.Rule_Names();
         const auto rule_count = rule_names.size();
@@ -48,31 +53,34 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         const auto offset = RulesPerPage * RulePageIndex;
         auto idx = offset;
         auto control = LEFT_RULE_VALUE_CONTROL;
+        auto edit_btn = LEFT_RULE_EDIT_BUTTON;
 
         while (idx < offset + RulesPerPage && idx < rule_count) {
-            auto rule_name = rule_names[idx];
-            auto rule_value = active_rule_section.Get_Variant(rule_name);
-            auto rule_string = RuleSection::Variant_To_String(rule_value);
+            const std::string rule_name = rule_names[idx].data();
 
-            page_slot_handler(rule_name, rule_value, rule_string, control);
+            page_slot_handler(active_rule_section, rule_name, edit_btn, control);
 
             idx++;
             ++control;
+            ++edit_btn;
 
             if (control == LEFT_RULE_HELP_CONTROL) {
                 control = RIGHT_RULE_VALUE_CONTROL;
+                edit_btn = RIGHT_RULE_EDIT_BUTTON;
             }
         }
 
         if (idx < offset + RulesPerPage && idx >= rule_count) {
             while (idx < offset + RulesPerPage) {
-                empty_page_slot_handler(control);
+                empty_page_slot_handler(edit_btn, control);
 
                 idx++;
                 ++control;
+                ++edit_btn;
 
                 if (control == LEFT_RULE_HELP_CONTROL) {
                     control = RIGHT_RULE_VALUE_CONTROL;
+                    edit_btn = RIGHT_RULE_EDIT_BUTTON;
                 }
             }
         }
@@ -94,7 +102,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         auto changes_present = false;
 
         Iterate_Over_Rules_Page(
-            [&] (const auto& n, const auto& v, const auto& s, const auto& control) {
+            [&] (const auto& s, const auto& n, const auto& e, const auto& control) {
                 changes_present = changes_present || Get_Control<EditClass>(control).Has_Changed();
             }
         );
@@ -138,94 +146,82 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         WWMessageBox().Process(full_message.c_str());
     }
 
+    void Save_Updated_Rule(
+        RuleSection& section,
+        const std::string_view& name,
+        const RulesEditorControls& control
+    )
+    {
+        const std::string new_value = Text[control].get();
+
+        // rule is of special type that needs a non-trivial conversion from a string value
+        if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(section, name)) {
+            const auto& type_name = section.Get_Converter_Section_Type_Name();
+
+            if (TdTypeConverter::Rule_Requires_Csv_Converter(section, name)) {
+                const auto csv_converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(
+                    *type_name,
+                    name
+                );
+
+                // convert string and set rule value
+                // (class_instance is updated by OnRulesChanged handler in section)
+                TdTypeConverter::Set_Csv_Rule_With_Variant(
+                    section,
+                    name,
+                    new_value,
+                    csv_converter_variant
+                );
+            } else {
+                const auto converter_variant = TdTypeConverter::Get_Rule_Variant(
+                    *type_name,
+                    name
+                );
+
+                // convert string and set rule value
+                // (class_instance is updated by OnRulesChanged handler in section)
+                TdTypeConverter::Set_Rule_With_Variant(
+                    section,
+                    name,
+                    new_value,
+                    converter_variant
+                );
+            }
+        } else {
+            const auto current_value = section.Get_Variant(name);
+
+            // parse new value from edit box string
+            section.Parse_String(name, new_value, current_value);
+        }
+
+        // save rules back to INI file
+        const auto rules_filename = Get_Control<FILE_DROPDOWN, DropListClass>().Current_Item();
+
+        CCFileClass ini_file(rules_filename);
+        INIClass ini;
+
+        Get_Active_Rule_Sections().Save_All_To_Ini(ini);
+        ini.Save(ini_file);
+        ini_file.Close();
+
+        // wait for player to edit again
+        Get_Control<EditClass>(control).Clear_Changed();
+    }
+
     bool Save_Updated_Rules()
     {
-        auto& active_rule_sections = ActiveSectionsAreType
-            ? Rule.Get_Editable_Type_Rules()[ActionSectionsTypeName]
-            : Rule.Get_Editable_Rule_Sections();
-        auto& active_rule_section = active_rule_sections[ActiveRuleSectionName];
-
         auto update_succeeded = true;
 
         Iterate_Over_Rules_Page(
-            [&] (const auto& name, const auto& value, const auto& value_string, const auto& control) {
-                auto& edit_box = Get_Control<EditClass>(control);
-
-                if (!edit_box.Has_Changed()) {
-                    return;
-                }
-
-                const auto& type_name = active_rule_section.Get_Converter_Section_Type_Name();
-                std::string new_value = Text[control].get();
-
-                // rule is of special type that needs a non-trivial conversion from a string value
-                if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(*type_name, name)) {
-                    if (TdTypeConverter::Rule_Requires_Csv_Converter(*type_name, name)) {
-                        const auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(
-                            *type_name,
-                            name
-                        );
-
-                        try {
-                            // convert string and set rule value
-                            // (class_instance is updated by OnRulesChanged handler in section)
-                            TdTypeConverter::Set_Csv_Rule_With_Variant(
-                                active_rule_section,
-                                name,
-                                new_value,
-                                converter_variant
-                            );
-                        } catch (const std::invalid_argument& ex) {
-                            Show_Update_Error_Popup(ex);
-                            update_succeeded = false;
-                            return;
-                        }
-                    } else {
-                        const auto converter_variant = TdTypeConverter::Get_Rule_Variant(
-                            *type_name,
-                            name
-                        );
-
-                        try {
-                            // convert string and set rule value
-                            // (class_instance is updated by OnRulesChanged handler in section)
-                            TdTypeConverter::Set_Rule_With_Variant(
-                                active_rule_section,
-                                name,
-                                new_value,
-                                converter_variant
-                            );
-                        } catch (const std::invalid_argument& ex) {
-                            Show_Update_Error_Popup(ex);
-                            update_succeeded = false;
-                            return;
-                        }
-                    }
-                } else {
+            [&] (auto& section, const auto& name, const auto& e, const auto& control) {
+                if (Get_Control<EditClass>(control).Has_Changed()) {
                     try {
-                        const auto current_value = active_rule_section.Get_Variant(name);
-
-                        // parse new value from edit box string
-                        active_rule_section.Parse_String(name, new_value, current_value);
+                        Save_Updated_Rule(section, name, control);
                     } catch (const std::invalid_argument& ex) {
                         Show_Update_Error_Popup(ex);
                         update_succeeded = false;
-                        return;
                     }
                 }
-
-                // save rules back to INI file
-                const auto rules_filename = Get_Control<FILE_DROPDOWN, DropListClass>().Current_Item();
-
-                CCFileClass ini_file(rules_filename);
-                INIClass ini;
-
-                active_rule_sections.Save_All_To_Ini(ini);
-                ini.Save(ini_file);
-                ini_file.Close();
-
-                // wait for player to edit again
-                edit_box.Clear_Changed();
             }
         );
 
@@ -238,21 +234,31 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
          * Load rule values for current page (up to RulesPerPage rules) into edit dialogs
          */
         Iterate_Over_Rules_Page(
-            [&] (const auto& n, const auto& v, const auto& value_string, const auto& control) {
+            [&] (const auto& section, const auto& name, const auto& edit_btn, const auto& control) {
                 // load rule value into edit control and enable
                 auto edit_buffer = Text[control].get();
+                const auto value_string = RuleSection::Variant_To_String(section.Get_Variant(name));
 
                 strncpy(edit_buffer, value_string.c_str(), RuleValueTextLength);
                 edit_buffer[RuleValueTextLength - 1] = '\0';
 
-                Get_Control<EditClass>(control).Enable();
                 Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
+
+                if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(section, name)) {
+                    // don't allow player to manually edit converter type values, show an edit button instead
+                    Get_Control<EditClass>(control).Disable();
+                    Get_Control<TextButtonClass>(edit_btn).Enable();
+                } else {
+                    Get_Control<EditClass>(control).Enable();
+                    Get_Control<TextButtonClass>(edit_btn).Disable(true);
+                }
             },
-            [&] (auto& control) {
+            [&] (const auto& edit_btn, const auto& control) {
                 // clear and disable unneeded controls
                 strcpy(Text[control].get(), "");
                 Get_Control<EditClass>(control).Disable(true);
                 Get_Control<EditClass>(control).Set_Text(Text[control].get(), RuleValueTextLength);
+                Get_Control<TextButtonClass>(edit_btn).Disable(true);
             }
         );
     }
@@ -381,7 +387,10 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void Init_Right_Rules_Panel()
     {
+        auto edit_button = RIGHT_RULE_EDIT_BUTTON;
         for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
+            Add_Button(edit_button, "Edit");
+
             Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
                 control,
@@ -394,12 +403,17 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 Dimensions[control].H,
                 EditClass::ALPHANUMERIC
             );
+
+            ++edit_button;
         }
     }
 
     void Init_Left_Rules_Panel()
     {
+        auto edit_button = LEFT_RULE_EDIT_BUTTON;
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
+            Add_Button(edit_button, "Edit");
+
             Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
                 control,
@@ -412,6 +426,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 Dimensions[control].H,
                 EditClass::ALPHANUMERIC
             );
+
+            ++edit_button;
         }
     }
 
@@ -656,7 +672,7 @@ protected:
         auto right_column_y = Dimensions[RIGHT_PANEL].Y + VerticalSpacing;
 
         Iterate_Over_Rules_Page(
-            [&] (const auto& name, const auto& v, const auto& s, const auto& control) {
+            [&] (const auto& s, const auto& name, const auto& e, const auto& control) {
                 auto x = control < RIGHT_RULE_VALUE_CONTROL ? Dimensions[LEFT_PANEL].X : Dimensions[RIGHT_PANEL].X;
                 auto y = control < RIGHT_RULE_VALUE_CONTROL ? left_column_y : right_column_y;
 
@@ -767,9 +783,19 @@ protected:
         };
 
         auto left_control_y = Dimensions[LEFT_PANEL].Y;
+        auto edit_btn = LEFT_RULE_EDIT_BUTTON;
 
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
-            left_control_y += VerticalSpacing + (10 * Factor);
+            left_control_y += VerticalSpacing;
+
+            Dimensions[edit_btn] = {
+                Dimensions[LEFT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 2),
+                left_control_y,
+                ControlWidth / 2,
+                ControlHeight
+            };
+
+            left_control_y += (10 * Factor);
 
             Dimensions[control] = {
                 Dimensions[LEFT_PANEL].X + HorizontalSpacing,
@@ -779,6 +805,7 @@ protected:
             };
 
             left_control_y += ControlHeight;
+            ++edit_btn;
         }
 
         // right panel
@@ -790,9 +817,19 @@ protected:
         };
 
         auto right_control_y = Dimensions[RIGHT_PANEL].Y;
+        edit_btn = RIGHT_RULE_EDIT_BUTTON;
 
         for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
-            right_control_y += VerticalSpacing + (10 * Factor);
+            right_control_y += VerticalSpacing;
+
+            Dimensions[edit_btn] = {
+                Dimensions[RIGHT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 2),
+                right_control_y,
+                ControlWidth / 2,
+                ControlHeight
+            };
+
+            right_control_y += (10 * Factor);
 
             Dimensions[control] = {
                 Dimensions[RIGHT_PANEL].X + HorizontalSpacing,
@@ -802,6 +839,7 @@ protected:
             };
 
             right_control_y += ControlHeight;
+            ++edit_btn;
         }
 
         // bottom row

@@ -329,9 +329,25 @@ public:
     static bool Rule_Requires_Converter(const std::string_view& type_name, const std::string_view& rule);
 
     /**
+     * Overload for Rule_Requires_Converter to allow providing source RuleSection directly.
+     */
+    static bool Rule_Requires_Converter(
+        const RuleSection& section,
+        const std::string_view& rule
+    );
+
+    /**
      * Does the given type name rule require a CSV converter to read/write from?
      */
     static bool Rule_Requires_Csv_Converter(const std::string_view& type_name, const std::string_view& rule);
+
+    /**
+     * Overload for Rule_Requires_Csv_Converter to allow providing source RuleSection directly.
+     */
+    static bool Rule_Requires_Csv_Converter(
+        const RuleSection& section,
+        const std::string_view& rule
+    );
 
     /**
      * Get the corresponding variant for a given type rule, it must have been registered by calling
