@@ -8,6 +8,58 @@
 
 typedef enum
 {
+    VALUE_DROPDOWN = 200,
+    CR_HELP_BUTTON,
+    CR_SAVE_BUTTON,
+    CR_CANCEL_BUTTON
+} ConverterRuleEditorControls;
+
+class ConverterRuleEditorDialog : public Dialog<ConverterRuleEditorControls>
+{
+    RuleSection& Section;
+    const std::string& RuleName;
+
+    void Init_Dimensions(const int screen_width, const int screen_height, const int factor) override
+    {
+
+    }
+
+public:
+    ConverterRuleEditorDialog(RuleSection& section, const std::string& rule_name)
+        : Dialog(90, 60, 5, 5),
+          Section(section),
+          RuleName(rule_name)
+    {
+        CaptionText = RuleName;
+    }
+};
+
+typedef enum
+{
+    VALUES_CHECKLIST = 200,
+    CCR_HELP_BUTTON,
+    CCR_SAVE_BUTTON,
+    CCR_CANCEL_BUTTON
+} ConverterCsvRuleEditorControls;
+
+
+class ConverterCsvRuleEditorDialog : public Dialog<ConverterCsvRuleEditorControls>
+{
+    RuleSection& Section;
+    const std::string& RuleName;
+
+public:
+    ConverterCsvRuleEditorDialog(RuleSection& section, const std::string& rule_name)
+        : Dialog(90, 60, 5, 5),
+          Section(section),
+          RuleName(rule_name)
+    {
+        CaptionText = RuleName;
+    }
+};
+
+typedef enum
+{
     SEARCH_BUTTON = 200,
     SEARCH_TEXTBOX,
     FILE_DROPDOWN,
@@ -23,7 +75,7 @@ typedef enum
     PREVIOUS_BUTTON = 248,
     NEXT_BUTTON,
     EXIT_BUTTON,
-    SAVE_BUTTON
+    SAVE_CHANGES_BUTTON
 } RulesEditorControls;
 
 class RulesEditorDialog : public Dialog<RulesEditorControls>
@@ -33,6 +85,9 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     static constexpr auto RulesPerPanel = 7;
     static constexpr auto RulesPerPage = RulesPerPanel * 2;
 
+    /**
+     * Group of controls that represent a rule value on the screen.
+     */
     struct RuleControls
     {
         RulesEditorControls edit_button;
@@ -325,7 +380,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
         auto& section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
 
-        // TODO: Proper dialog call
+        // TODO: Proper dialog call - drop drown list with valid values (current selected) and Options Check List for CSV
         WWMessageBox().Process(
             std::format("Rule [{}] -> {}", section.SectionName, section.Rule_Names()[rule_index]).c_str()
         );
@@ -428,7 +483,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         Add_Button(PREVIOUS_BUTTON, "Previous");
         Add_Button(NEXT_BUTTON, "Next");
         Add_Button(EXIT_BUTTON, "Exit");
-        Add_Button(SAVE_BUTTON, "Save");
+        Add_Button(SAVE_CHANGES_BUTTON, "Save");
     }
 
     void Init_Right_Rules_Panel()
@@ -620,7 +675,7 @@ protected:
                 break;
             }
 
-            case SAVE_BUTTON | KN_BUTTON: {
+            case SAVE_CHANGES_BUTTON | KN_BUTTON: {
                 Save_Updated_Rules();
 
                 Collapse_Visible_Dropdowns(display);
@@ -944,7 +999,7 @@ protected:
         // bottom row
         Dimensions[EXIT_BUTTON] = {ControlsX, BottomRowY, ControlWidth, ControlHeight};
 
-        Dimensions[SAVE_BUTTON] = {
+        Dimensions[SAVE_CHANGES_BUTTON] = {
             ControlsX + ControlWidth + VerticalSpacing,
             BottomRowY,
             ControlWidth,
