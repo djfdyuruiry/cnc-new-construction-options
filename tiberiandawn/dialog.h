@@ -278,6 +278,7 @@ protected:
         , Width(0)
         , Height(0)
         , CenterX(0)
+        , CenterY(0)
         , TextHeight(0)
         , MarginWidth(0)
         , MarginHeight(0)

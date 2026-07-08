@@ -18,19 +18,167 @@ class ConverterRuleEditorDialog : public Dialog<ConverterRuleEditorControls>
 {
     RuleSection& Section;
     const std::string& RuleName;
+    std::vector<std::string> ValidValues;
+
+protected:
+    void Init_UI_State() override
+    {
+    }
+
+    void Init_Data() override
+    {
+        const auto rule_variant = Section.Get_Variant(RuleName.data());
+        const auto string_value = RuleSection::Variant_To_String(rule_variant);
+
+        const auto converter_variant = TdTypeConverter::Get_Rule_Variant(
+            Section.Get_Converter_Section_Type_Name()->data(),
+            RuleName.data()
+        );
+        auto& dropdown = Get_Control<VALUE_DROPDOWN, DropListClass>();
+        auto value_index = 0;
+
+        std::visit([&](auto t) {
+            using T = std::decay_t<decltype(t)>;
+            ValidValues = TdTypeConverter::Get_Valid_Strings<T>();
+        }, converter_variant);
+
+        for (const auto& str : ValidValues) {
+            dropdown.Add_Item(str.c_str());
+
+            // select the current rule value
+            if (str == string_value) {
+                value_index = dropdown.Count() - 1;
+            }
+        }
+
+        dropdown.Set_Selected_Index(value_index);
+    }
 
     void Init_Dimensions(const int screen_width, const int screen_height, const int factor) override
     {
+        Dialog::Init_Dimensions(screen_width, screen_height, factor);
 
+        Dimensions[VALUE_DROPDOWN] = {
+            X + MarginWidth,
+            Y + MarginHeight + 25 * factor,
+            100 * factor,
+            8 * (8 * Factor) // 8 visible items
+        };
+        Dimensions[CR_SAVE_BUTTON] = {
+            X + Width - MarginWidth - 30 * factor,
+            Y + Height - MarginHeight - 10 * factor,
+            30 * factor,
+            10 * factor
+        };
+        Dimensions[CR_CANCEL_BUTTON] = {
+            X + MarginWidth,
+            Y + Height - MarginHeight - 10 * factor,
+            30 * factor,
+            10 * factor
+        };
+    }
+
+    void Init_Controls() override
+    {
+        Dialog::Init_Controls();
+
+        Add_Button(CR_CANCEL_BUTTON, "Cancel");
+        Add_Button(CR_SAVE_BUTTON, "Save");
+
+        Text[VALUE_DROPDOWN] = std::make_unique<char[]>(25);
+        Add_Control<VALUE_DROPDOWN, DropListClass>(
+            Text[VALUE_DROPDOWN].get(),
+            25,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            Dimensions[VALUE_DROPDOWN].X,
+            Dimensions[VALUE_DROPDOWN].Y,
+            Dimensions[VALUE_DROPDOWN].W,
+            Dimensions[VALUE_DROPDOWN].H,
+            UpButtonShape,
+            DownButtonShape
+        );
+    }
+
+    std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
+    {
+        switch (input) {
+            case (VALUE_DROPDOWN | KN_BUTTON): {
+                Get_Control<VALUE_DROPDOWN, DropListClass>().Collapse();
+                display = REDRAW_ALL;
+                break;
+            }
+
+            case CR_SAVE_BUTTON | KN_BUTTON: {
+                auto& dropdown = Get_Control<VALUE_DROPDOWN, DropListClass>();
+                const std::string selected_value = dropdown.Current_Item();
+
+                const auto variant = TdTypeConverter::Get_Rule_Variant(
+                    Section.Get_Converter_Section_Type_Name()->data(),
+                    RuleName.data()
+                );
+
+                TdTypeConverter::Set_Rule_With_Variant(Section, RuleName, selected_value, variant);
+                return true;
+            }
+
+            case KN_ESC:
+            case CR_CANCEL_BUTTON | KN_BUTTON: {
+                return false;
+            }
+
+            default: break;
+        }
+
+        return std::nullopt;
+    }
+
+    KeyNumType Get_Input(DialogRedrawType& display) override
+    {
+        static auto was_dropped = false;
+
+        const auto is_dropped = Get_Control<VALUE_DROPDOWN, DropListClass>().IsDropped;
+
+        // hide buttons when dropdown is visible to prevent input conflicts
+        if (!was_dropped && is_dropped) {
+            Get_Control<CR_CANCEL_BUTTON, TextButtonClass>().Disable(true);
+            Get_Control<CR_SAVE_BUTTON, TextButtonClass>().Disable(true);
+
+            was_dropped = true;
+        } else if (was_dropped && !is_dropped) {
+            Get_Control<CR_CANCEL_BUTTON, TextButtonClass>().Enable();
+            Get_Control<CR_SAVE_BUTTON, TextButtonClass>().Enable();
+
+            was_dropped = false;
+        }
+
+        return Dialog::Get_Input(display);
+    }
+
+    void Render_Background(DialogRedrawType& display) override
+    {
+        Dialog::Render_Background(display);
+
+        const auto variant = TdTypeConverter::Get_Rule_Variant(
+            Section.Get_Converter_Section_Type_Name()->data(),
+            RuleName.data()
+        );
+        const auto variant_name = TdTypeConverter::Get_Type_Name_Variant(variant);
+
+        Fancy_Text_Print(std::format("Rule type: {}", variant_name.data()).c_str(),
+                        X + MarginWidth,
+                        Y + MarginHeight + 15 * Factor,
+                        CC_GREEN,
+                        TBLACK,
+                        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
     }
 
 public:
     ConverterRuleEditorDialog(RuleSection& section, const std::string& rule_name)
-        : Dialog(90, 60, 5, 5),
+        : Dialog(120, 120, 5, 5),
           Section(section),
           RuleName(rule_name)
     {
-        CaptionText = RuleName;
+        CaptionText = std::format("{}: {}", section.SectionName, RuleName);
     }
 };
 
@@ -47,14 +195,149 @@ class ConverterCsvRuleEditorDialog : public Dialog<ConverterCsvRuleEditorControl
 {
     RuleSection& Section;
     const std::string& RuleName;
+    std::vector<std::string> ValidValues;
+
+protected:
+
+    void Init_UI_State() override
+    {
+    }
+
+    void Init_Data() override
+    {
+        const auto csv_variant = TdTypeConverter::Get_Csv_Rule_Variant(
+            *Section.Get_Converter_Section_Type_Name(),
+            RuleName
+        );
+
+        auto& checklist = Get_Control<VALUES_CHECKLIST, CheckListClass>();
+
+        std::visit([&](auto t) {
+            using T = std::decay_t<decltype(t)>;
+            ValidValues = TdTypeConverter::Get_Valid_Strings<T>();
+        }, csv_variant);
+
+        for (const auto& str : ValidValues) {
+            checklist.Add_Item(str.data());
+        }
+
+        const auto current_value_csv = RuleSection::Variant_To_String(Section.Get_Variant(RuleName));
+
+        // Set initial checked state
+        for (auto i = 0; i < checklist.Count(); ++i) {
+            const auto item_text = checklist.Get_Item(i);
+
+            if (current_value_csv.find(item_text) != std::string::npos) {
+                checklist.Check_Item(i, true);
+            }
+        }
+    }
+
+    void Init_Dimensions(const int screen_width, const int screen_height, const int factor) override
+    {
+        Dialog::Init_Dimensions(screen_width, screen_height, factor);
+
+        Dimensions[CCR_SAVE_BUTTON] = {
+            X + Width - MarginWidth - 30 * factor,
+            Y + Height - MarginHeight - 10 * factor,
+            30 * factor,
+            10 * factor
+        };
+        Dimensions[CCR_CANCEL_BUTTON] = {
+            X + MarginWidth,
+            Y + Height - MarginHeight - 10 * factor,
+            30 * factor,
+            10 * factor
+        };
+
+        Dimensions[VALUES_CHECKLIST].X = X + MarginWidth;
+        Dimensions[VALUES_CHECKLIST].Y = Y + MarginHeight + (20 * Factor);
+        Dimensions[VALUES_CHECKLIST].W = Width - (MarginWidth * 2);
+        Dimensions[VALUES_CHECKLIST].H = Dimensions[CCR_SAVE_BUTTON].X - (5 * Factor) - Dimensions[VALUES_CHECKLIST].X;
+    }
+
+    void Init_Controls() override
+    {
+        Dialog::Init_Controls();
+
+        Add_Button(CCR_CANCEL_BUTTON, "Cancel");
+        Add_Button(CCR_SAVE_BUTTON, "Save");
+
+        Add_Control<VALUES_CHECKLIST, CheckListClass>(
+            Dimensions[VALUES_CHECKLIST].X,
+            Dimensions[VALUES_CHECKLIST].Y,
+            Dimensions[VALUES_CHECKLIST].W,
+            Dimensions[VALUES_CHECKLIST].H,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            UpButtonShape,
+            DownButtonShape
+        );
+    }
+
+    std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
+    {
+        switch (input) {
+            case CCR_SAVE_BUTTON | KN_BUTTON: {
+                const auto& checklist = Get_Control<VALUES_CHECKLIST, CheckListClass>();
+                std::vector<std::string> selected_values;
+
+                for (int i = 0; i < checklist.Count(); ++i) {
+                    if (checklist.Is_Checked(i)) {
+                        selected_values.emplace_back(checklist.Get_Item(i));
+                    }
+                }
+
+                if (selected_values.empty()) {
+                    WWMessageBox().Process("You must check at least one value in the list");
+                    break;
+                }
+
+                const auto csv_value = CncStringUtils::To_Csv(selected_values);
+                const auto variant = TdTypeConverter::Get_Csv_Rule_Variant(
+                    Section.Get_Converter_Section_Type_Name()->data(),
+                    RuleName.data()
+                );
+
+                TdTypeConverter::Set_Csv_Rule_With_Variant(Section, RuleName, csv_value, variant);
+                return true;
+            }
+
+            case KN_ESC:
+            case CCR_CANCEL_BUTTON | KN_BUTTON: {
+                return false;
+            }
+
+            default: break;
+        }
+
+        return std::nullopt;
+    }
+
+    void Render_Background(DialogRedrawType& display) override
+    {
+        Dialog::Render_Background(display);
+
+        const auto variant = TdTypeConverter::Get_Csv_Rule_Variant(
+            Section.Get_Converter_Section_Type_Name()->data(),
+            RuleName.data()
+        );
+        const auto& variant_name = TdTypeConverter::Get_Type_Name_Variant(variant);
+
+        Fancy_Text_Print(std::format("Rule type: {}", variant_name.data()).c_str(),
+                        Dimensions[VALUES_CHECKLIST].X,
+                        Dimensions[VALUES_CHECKLIST].Y - (10 * Factor),
+                        CC_GREEN,
+                        TBLACK,
+                        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+    }
 
 public:
     ConverterCsvRuleEditorDialog(RuleSection& section, const std::string& rule_name)
-        : Dialog(90, 60, 5, 5),
+        : Dialog(150, 150, 5, 5),
           Section(section),
           RuleName(rule_name)
     {
-        CaptionText = RuleName;
+        CaptionText = std::format("{}: {}", section.SectionName, RuleName);
     }
 };
 
@@ -213,6 +496,19 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         WWMessageBox().Process(full_message.c_str());
     }
 
+    void Update_Ini_File()
+    {
+        // save rules back to INI file
+        const auto rules_filename = Get_Control<FILE_DROPDOWN, DropListClass>().Current_Item();
+
+        CCFileClass ini_file(rules_filename);
+        INIClass ini;
+
+        Get_Active_Rule_Sections().Save_All_To_Ini(ini);
+        ini.Save(ini_file);
+        ini_file.Close();
+    }
+
     void Save_Updated_Rule(
         RuleSection& section,
         const std::string_view& name,
@@ -261,15 +557,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             section.Parse_String(name, new_value, current_value);
         }
 
-        // save rules back to INI file
-        const auto rules_filename = Get_Control<FILE_DROPDOWN, DropListClass>().Current_Item();
-
-        CCFileClass ini_file(rules_filename);
-        INIClass ini;
-
-        Get_Active_Rule_Sections().Save_All_To_Ini(ini);
-        ini.Save(ini_file);
-        ini_file.Close();
+        Update_Ini_File();
 
         // wait for player to edit again
         Get_Control<EditClass>(control).Clear_Changed();
@@ -360,9 +648,11 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void On_Help_Click(const RulesEditorControls& control)
     {
-        const auto rule_index = control < LEFT_RULE_EDIT_BUTTON
+        auto rule_index = control < LEFT_RULE_EDIT_BUTTON
             ? control - LEFT_RULE_HELP_CONTROL
             : 7 + (control - RIGHT_RULE_HELP_CONTROL);
+
+        rule_index += RulePageIndex * RulesPerPage;
 
         auto& section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
         const auto name = section.Rule_Names()[rule_index];
@@ -374,16 +664,41 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void On_Edit_Click(const RulesEditorControls& control)
     {
-        const auto rule_index = control < RIGHT_PANEL
+        auto rule_index = control < RIGHT_PANEL
             ? control - LEFT_RULE_EDIT_BUTTON
             : 7 + (control - RIGHT_RULE_EDIT_BUTTON);
 
+        rule_index += RulePageIndex * RulesPerPage;
+
         auto& section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
 
-        // TODO: Proper dialog call - drop drown list with valid values (current selected) and Options Check List for CSV
-        WWMessageBox().Process(
-            std::format("Rule [{}] -> {}", section.SectionName, section.Rule_Names()[rule_index]).c_str()
-        );
+        const std::string rule_name = section.Rule_Names()[rule_index].data();
+
+        auto update_to_save = false;
+        const auto factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+
+        if (TdTypeConverter::Rule_Requires_Csv_Converter(section, rule_name)) {
+            ConverterCsvRuleEditorDialog csv_dialog(section, rule_name);
+            csv_dialog.Init(
+                Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()),
+                Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()),
+                factor
+            );
+            update_to_save = csv_dialog.Present();
+        } else {
+            ConverterRuleEditorDialog rule_dialog(section, rule_name);
+            rule_dialog.Init(
+                Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()),
+                Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()),
+                factor
+            );
+            update_to_save = rule_dialog.Present();
+        }
+
+        if (update_to_save) {
+            Update_Ini_File();
+            Load_Current_Rules_Page();
+        }
     }
 
     void Collapse_Visible_Dropdowns(DialogRedrawType& redraw_type)

@@ -136,9 +136,7 @@ public:
                     continue;
                 }
 
-                const auto ini_string = std::format("{}", i);
-
-                std::pair<T, std::string> pair = { instance, ini_string };
+                std::pair<T, std::string> pair = { instance, std::format("{}", i) };
 
                 instance_pairs.emplace_back(pair);
             }
