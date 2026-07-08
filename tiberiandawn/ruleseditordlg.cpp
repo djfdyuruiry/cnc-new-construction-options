@@ -33,6 +33,13 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     static constexpr auto RulesPerPanel = 7;
     static constexpr auto RulesPerPage = RulesPerPanel * 2;
 
+    struct RuleControls
+    {
+        RulesEditorControls edit_button;
+        RulesEditorControls help_button;
+        RulesEditorControls value_control;
+    };
+
     RuleSections& Get_Active_Rule_Sections()
     {
         return ActiveSectionsAreType
@@ -41,8 +48,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     }
 
     void Iterate_Over_Rules_Page(
-        const std::function<void(RuleSection&, const std::string&, const RulesEditorControls&, const RulesEditorControls&)>& page_slot_handler,
-        const std::function<void(const RulesEditorControls&, const RulesEditorControls&)>& empty_page_slot_handler = [](const auto&, const auto&){}
+        const std::function<void(RuleSection&, const std::string&, const RuleControls&)>& page_slot_handler,
+        const std::function<void(const RuleControls&)>& empty_page_slot_handler = [](const auto&){}
     )
     {
         auto& active_rule_section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
@@ -54,33 +61,38 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         auto idx = offset;
         auto control = LEFT_RULE_VALUE_CONTROL;
         auto edit_btn = LEFT_RULE_EDIT_BUTTON;
+        auto help_btn = LEFT_RULE_HELP_CONTROL;
 
         while (idx < offset + RulesPerPage && idx < rule_count) {
             const std::string rule_name = rule_names[idx].data();
 
-            page_slot_handler(active_rule_section, rule_name, edit_btn, control);
+            page_slot_handler(active_rule_section, rule_name, { edit_btn, help_btn, control});
 
             idx++;
             ++control;
             ++edit_btn;
+            ++help_btn;
 
             if (control == LEFT_RULE_HELP_CONTROL) {
                 control = RIGHT_RULE_VALUE_CONTROL;
                 edit_btn = RIGHT_RULE_EDIT_BUTTON;
+                help_btn = RIGHT_RULE_HELP_CONTROL;
             }
         }
 
         if (idx < offset + RulesPerPage && idx >= rule_count) {
             while (idx < offset + RulesPerPage) {
-                empty_page_slot_handler(edit_btn, control);
+                empty_page_slot_handler({ edit_btn, help_btn, control});
 
                 idx++;
                 ++control;
                 ++edit_btn;
+                ++help_btn;
 
                 if (control == LEFT_RULE_HELP_CONTROL) {
                     control = RIGHT_RULE_VALUE_CONTROL;
                     edit_btn = RIGHT_RULE_EDIT_BUTTON;
+                    help_btn = RIGHT_RULE_HELP_CONTROL;
                 }
             }
         }
@@ -102,8 +114,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         auto changes_present = false;
 
         Iterate_Over_Rules_Page(
-            [&] (const auto& s, const auto& n, const auto& e, const auto& control) {
-                changes_present = changes_present || Get_Control<EditClass>(control).Has_Changed();
+            [&] (const auto& s, const auto& n, const auto& controls) {
+                changes_present = changes_present || Get_Control<EditClass>(controls.value_control).Has_Changed();
             }
         );
 
@@ -213,10 +225,10 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         auto update_succeeded = true;
 
         Iterate_Over_Rules_Page(
-            [&] (auto& section, const auto& name, const auto& e, const auto& control) {
-                if (Get_Control<EditClass>(control).Has_Changed()) {
+            [&] (auto& section, const auto& name, const auto& controls) {
+                if (Get_Control<EditClass>(controls.value_control).Has_Changed()) {
                     try {
-                        Save_Updated_Rule(section, name, control);
+                        Save_Updated_Rule(section, name, controls.value_control);
                     } catch (const std::invalid_argument& ex) {
                         Show_Update_Error_Popup(ex);
                         update_succeeded = false;
@@ -234,31 +246,37 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
          * Load rule values for current page (up to RulesPerPage rules) into edit dialogs
          */
         Iterate_Over_Rules_Page(
-            [&] (const auto& section, const auto& name, const auto& edit_btn, const auto& control) {
+            [&] (const auto& section, const auto& name, const auto& controls) {
                 // load rule value into edit control and enable
-                auto edit_buffer = Text[control].get();
+                const auto& [edit_button, help_button, value_control] = controls;
+
+                auto edit_buffer = Text[controls.value_control].get();
                 const auto value_string = RuleSection::Variant_To_String(section.Get_Variant(name));
 
                 strncpy(edit_buffer, value_string.c_str(), RuleValueTextLength);
                 edit_buffer[RuleValueTextLength - 1] = '\0';
 
-                Get_Control<EditClass>(control).Set_Text(edit_buffer, RuleValueTextLength);
+                Get_Control<EditClass>(value_control).Set_Text(edit_buffer, RuleValueTextLength);
 
                 if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(section, name)) {
                     // don't allow player to manually edit converter type values, show an edit button instead
-                    Get_Control<EditClass>(control).Disable();
-                    Get_Control<TextButtonClass>(edit_btn).Enable();
+                    Get_Control<EditClass>(value_control).Disable();
+                    Get_Control<TextButtonClass>(edit_button).Enable();
                 } else {
-                    Get_Control<EditClass>(control).Enable();
-                    Get_Control<TextButtonClass>(edit_btn).Disable(true);
+                    Get_Control<EditClass>(value_control).Enable();
+                    Get_Control<TextButtonClass>(edit_button).Disable(true);
+                    Get_Control<TextButtonClass>(help_button).Enable();
                 }
             },
-            [&] (const auto& edit_btn, const auto& control) {
+            [&] (const auto& controls) {
                 // clear and disable unneeded controls
-                strcpy(Text[control].get(), "");
-                Get_Control<EditClass>(control).Disable(true);
-                Get_Control<EditClass>(control).Set_Text(Text[control].get(), RuleValueTextLength);
-                Get_Control<TextButtonClass>(edit_btn).Disable(true);
+                const auto& [edit_button, help_button, value_control] = controls;
+
+                strcpy(Text[value_control].get(), "");
+                Get_Control<EditClass>(value_control).Disable(true);
+                Get_Control<EditClass>(value_control).Set_Text(Text[value_control].get(), RuleValueTextLength);
+                Get_Control<TextButtonClass>(edit_button).Disable(true);
+                Get_Control<TextButtonClass>(help_button).Disable(true);
             }
         );
     }
@@ -283,6 +301,34 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         RulePageIndex++;
         Load_Current_Rules_Page();
         return true;
+    }
+
+    void On_Help_Click(const RulesEditorControls& control)
+    {
+        const auto rule_index = control < LEFT_RULE_EDIT_BUTTON
+            ? control - LEFT_RULE_HELP_CONTROL
+            : 7 + (control - RIGHT_RULE_HELP_CONTROL);
+
+        auto& section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
+        const auto name = section.Rule_Names()[rule_index];
+
+        WWMessageBox().Process(
+            section.Try_Get_Rule_Comment(name).value_or("No help available").c_str()
+        );
+    }
+
+    void On_Edit_Click(const RulesEditorControls& control)
+    {
+        const auto rule_index = control < RIGHT_PANEL
+            ? control - LEFT_RULE_EDIT_BUTTON
+            : 7 + (control - RIGHT_RULE_EDIT_BUTTON);
+
+        auto& section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
+
+        // TODO: Proper dialog call
+        WWMessageBox().Process(
+            std::format("Rule [{}] -> {}", section.SectionName, section.Rule_Names()[rule_index]).c_str()
+        );
     }
 
     void Collapse_Visible_Dropdowns(DialogRedrawType& redraw_type)
@@ -391,8 +437,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         auto help_button = RIGHT_RULE_HELP_CONTROL;
 
         for (auto control = RIGHT_RULE_VALUE_CONTROL; control < RIGHT_RULE_HELP_CONTROL; ++control) {
-            Add_Button(edit_button, "Edit");
-            Add_Button(help_button, "?");
+            Add_Button(edit_button, "Edit"); // TODO: Locale file string
+            Add_Button(help_button, "?"); // TODO: Locale file string
 
             Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
@@ -418,8 +464,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         auto help_button = LEFT_RULE_HELP_CONTROL;
 
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
-            Add_Button(edit_button, "Edit");
-            Add_Button(help_button, "?");
+            Add_Button(edit_button, "Edit"); // TODO: Locale file string
+            Add_Button(help_button, "?"); // TODO: Locale file string
 
             Text[control] = std::make_unique<char[]>(RuleValueTextLength);
             Add_Control<EditClass>(
@@ -507,93 +553,117 @@ protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
         switch (input) {
-        case FILE_DROPDOWN | KN_BUTTON: {
-            auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+            case FILE_DROPDOWN | KN_BUTTON: {
+                auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
 
-            const auto idx = file_dropdown.Current_Index();
+                const auto idx = file_dropdown.Current_Index();
 
-            if (Ensure_Unsaved_Changes_Resolved()) {
-                if (idx == 0) {
-                    Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
-                } else {
-                    auto& type_rules = Rule.Get_Editable_Type_Rules();
-                    auto type_key_idx = 0;
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    if (idx == 0) {
+                        Set_Active_Rule_Sections(Rule.Get_Editable_Rule_Sections());
+                    } else {
+                        auto& type_rules = Rule.Get_Editable_Type_Rules();
+                        auto type_key_idx = 0;
 
-                    for (const auto& type_name : type_rules | std::ranges::views::keys) {
-                        if (type_key_idx == idx - 1) {
-                            Set_Active_Rule_Sections(type_rules[type_name], type_name);
-                            break;
+                        for (const auto& type_name : type_rules | std::ranges::views::keys) {
+                            if (type_key_idx == idx - 1) {
+                                Set_Active_Rule_Sections(type_rules[type_name], type_name);
+                                break;
+                            }
+
+                            type_key_idx++;
                         }
-
-                        type_key_idx++;
                     }
+
+                    PreviousFileIndex = idx;
+                } else {
+                    file_dropdown.Set_Selected_Index(PreviousFileIndex);
                 }
 
-                PreviousFileIndex = idx;
-            } else {
-                file_dropdown.Set_Selected_Index(PreviousFileIndex);
+                Collapse_Visible_Dropdowns(display);
+                display = REDRAW_ALL;
+                break;
             }
 
-            Collapse_Visible_Dropdowns(display);
-            display = REDRAW_ALL;
-            break;
-        }
+            case SECTION_DROPDOWN | KN_BUTTON: {
+                auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
 
-        case SECTION_DROPDOWN | KN_BUTTON: {
-            auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    Set_Active_Rule_Section(section_dropdown.Current_Item());
+                    PreviousSectionIndex = section_dropdown.Current_Index();
+                } else {
+                    section_dropdown.Set_Selected_Index(PreviousSectionIndex);
+                }
 
-            if (Ensure_Unsaved_Changes_Resolved()) {
-                Set_Active_Rule_Section(section_dropdown.Current_Item());
-                PreviousSectionIndex = section_dropdown.Current_Index();
-            } else {
-                section_dropdown.Set_Selected_Index(PreviousSectionIndex);
+                Collapse_Visible_Dropdowns(display);
+                display = REDRAW_ALL;
+                break;
             }
 
-            Collapse_Visible_Dropdowns(display);
-            display = REDRAW_ALL;
-            break;
-        }
+            case PREVIOUS_BUTTON | KN_BUTTON: {
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    Load_Previous_Rules_Page();
+                }
 
-        case PREVIOUS_BUTTON | KN_BUTTON: {
-            if (Ensure_Unsaved_Changes_Resolved()) {
-                Load_Previous_Rules_Page();
+                Collapse_Visible_Dropdowns(display);
+                display = REDRAW_ALL;
+                break;
             }
 
-            Collapse_Visible_Dropdowns(display);
-            display = REDRAW_ALL;
-            break;
-        }
+            case NEXT_BUTTON | KN_BUTTON: {
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    Load_Next_Rules_Page();
+                }
 
-        case NEXT_BUTTON | KN_BUTTON: {
-            if (Ensure_Unsaved_Changes_Resolved()) {
-                Load_Next_Rules_Page();
+                Collapse_Visible_Dropdowns(display);
+                display = REDRAW_ALL;
+                break;
             }
 
-            Collapse_Visible_Dropdowns(display);
-            display = REDRAW_ALL;
-            break;
-        }
+            case SAVE_BUTTON | KN_BUTTON: {
+                Save_Updated_Rules();
 
-        case SAVE_BUTTON | KN_BUTTON: {
-            Save_Updated_Rules();
-
-            Collapse_Visible_Dropdowns(display);
-            display = REDRAW_ALL;
-            break;
-        }
-
-        case KN_ESC:
-        case EXIT_BUTTON | KN_BUTTON: {
-            Collapse_Visible_Dropdowns(display);
-
-            if (Ensure_Unsaved_Changes_Resolved()) {
-                return false;
+                Collapse_Visible_Dropdowns(display);
+                display = REDRAW_ALL;
+                break;
             }
-            display = REDRAW_ALL;
+
+            case KN_ESC:
+            case EXIT_BUTTON | KN_BUTTON: {
+                Collapse_Visible_Dropdowns(display);
+
+                if (Ensure_Unsaved_Changes_Resolved()) {
+                    return false;
+                }
+                display = REDRAW_ALL;
+            }
+
+            default:
+                break;
         }
 
-        default:
-            break;
+        // panel edit buttons
+        for (auto control = LEFT_RULE_EDIT_BUTTON; control < PREVIOUS_BUTTON; ++control) {
+            if (control == RIGHT_PANEL) {
+                control = RIGHT_RULE_EDIT_BUTTON;
+            }
+
+            if (input == (control | KN_BUTTON)) {
+                On_Edit_Click(control);
+                display = REDRAW_ALL;
+            }
+        }
+
+        // panel help buttons
+        for (auto control = LEFT_RULE_HELP_CONTROL; control < RIGHT_RULE_EDIT_BUTTON; ++control) {
+            if (control == LEFT_RULE_EDIT_BUTTON) {
+                control = RIGHT_RULE_HELP_CONTROL;
+            }
+
+            if (input == (control | KN_BUTTON)) {
+                On_Help_Click(control);
+                display = REDRAW_ALL;
+            }
         }
 
         return std::nullopt;
@@ -680,9 +750,12 @@ protected:
         auto right_column_y = Dimensions[RIGHT_PANEL].Y + VerticalSpacing;
 
         Iterate_Over_Rules_Page(
-            [&] (const auto& s, const auto& name, const auto& e, const auto& control) {
-                auto x = control < RIGHT_RULE_VALUE_CONTROL ? Dimensions[LEFT_PANEL].X : Dimensions[RIGHT_PANEL].X;
-                auto y = control < RIGHT_RULE_VALUE_CONTROL ? left_column_y : right_column_y;
+            [&] (const auto& s, const auto& name, const auto& controls) {
+                const auto value_control = controls.value_control;
+                auto x = value_control < RIGHT_RULE_VALUE_CONTROL
+                    ? Dimensions[LEFT_PANEL].X
+                    : Dimensions[RIGHT_PANEL].X;
+                auto y = value_control < RIGHT_RULE_VALUE_CONTROL ? left_column_y : right_column_y;
 
                 Fancy_Text_Print(name.data(),
                      x + HorizontalSpacing,
@@ -691,7 +764,7 @@ protected:
                      TBLACK,
                      TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                if (control < RIGHT_RULE_VALUE_CONTROL) {
+                if (value_control < RIGHT_RULE_VALUE_CONTROL) {
                     left_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
                 } else {
                     right_column_y += ControlHeight + VerticalSpacing + (10 * Factor);
@@ -842,14 +915,14 @@ protected:
 
             Dimensions[help_btn] = {
                 Dimensions[RIGHT_PANEL].X + panel_width - HorizontalSpacing - (ControlWidth / 3),
-                left_control_y,
+                right_control_y,
                 ControlWidth / 3,
                 ControlHeight
             };
 
             Dimensions[edit_btn] = {
                 Dimensions[help_btn].X - HorizontalSpacing - (ControlWidth / 2),
-                left_control_y,
+                right_control_y,
                 ControlWidth / 2,
                 ControlHeight
             };
