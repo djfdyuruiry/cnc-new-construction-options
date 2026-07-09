@@ -902,10 +902,13 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void Init_Bottom_Row()
     {
-        Add_Button(PREVIOUS_BUTTON, "Previous Page").Disable();
-        Add_Button(NEXT_BUTTON, "Next Page");
+        const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
+
+        Add_Button(PREVIOUS_BUTTON, is_dos ? "Previous" : "Previous Page").Disable();
+
+        Add_Button(NEXT_BUTTON, is_dos ? "Next" : "Next Page");
         Add_Button(EXIT_BUTTON, "Exit");
-        Add_Button(LOAD_DEFAULTS_BUTTON, "Load Defaults");
+        Add_Button(LOAD_DEFAULTS_BUTTON, is_dos ? "Defaults" : "Load Defaults");
         Add_Button(SAVE_CHANGES_BUTTON, "Save");
     }
 
@@ -1353,6 +1356,8 @@ protected:
         auto help_btn = LEFT_RULE_HELP_CONTROL;
         auto edit_btn = LEFT_RULE_EDIT_BUTTON;
 
+        const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
+
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
             left_control_y += VerticalSpacing;
 
@@ -1366,7 +1371,7 @@ protected:
             Dimensions[edit_btn] = {
                 Dimensions[help_btn].X - HorizontalSpacing - (ControlWidth / 2),
                 left_control_y,
-                ControlWidth / 2,
+                is_dos ? ControlWidth : ControlWidth / 2,
                 ControlHeight
             };
 
@@ -1409,7 +1414,7 @@ protected:
             Dimensions[edit_btn] = {
                 Dimensions[help_btn].X - HorizontalSpacing - (ControlWidth / 2),
                 right_control_y,
-                ControlWidth / 2,
+                is_dos ? ControlWidth : ControlWidth / 2,
                 ControlHeight
             };
 

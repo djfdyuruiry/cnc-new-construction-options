@@ -732,6 +732,7 @@ bool Select_Game(bool fade)
         SEL_SELECT_MISSION,   // select any mission from main campaigns
         SEL_LOAD_MISSION,     // load a saved game
         SEL_MULTIPLAYER_GAME, // play modem/null-modem/network game
+        SEL_RULES_EDITOR,       // open map editor mode
         SEL_MAP_EDITOR,       // open map editor mode
         SEL_INTRO,            // replay the intro
         SEL_EXIT,             // exit to DOS
@@ -906,7 +907,7 @@ bool Select_Game(bool fade)
             */
             case SEL_NEW_SCENARIO:
                 Scen.CarryOverMoney = 0;
-                if (Rules_Editor_Dialog()) {
+                if (Expansion_Dialog()) {
                     int difficulty = Fetch_Difficulty();
                     if (difficulty != -1) {
                         switch (difficulty) {
@@ -984,6 +985,16 @@ bool Select_Game(bool fade)
                 break;
 
 #endif // BONUS_MISSIONS
+
+            /*
+            ** Rules Editor mode
+            */
+            case SEL_RULES_EDITOR:
+                Rules_Editor_Dialog();
+                display = true;
+                selection = SEL_NONE;
+
+                break;
 
             /*
             ** Map Editor mode
