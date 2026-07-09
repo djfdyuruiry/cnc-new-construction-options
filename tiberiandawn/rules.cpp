@@ -354,6 +354,67 @@ void RulesClass::Reset()
     Sections.Clear();
     TypeRules.clear();
     Special.Init();
+
+    Restore_Type_Defaults();
+    TdTypeConverter::Reset_Rule_Type_Registry();
+}
+
+/**
+ * Read hardcoded defaults from the game engine and record these in a dedicate map
+ * to enable restore. This is required because type instance fields are trashed during
+ * rules load, meaning there is no default stored in instances to restore.
+ */
+void RulesClass::Record_Type_Defaults()
+{
+    CCINIClass ini; // dummy INI source so we just get pure defaults
+
+    Init_Types(ini);
+
+    DefaultTypeRules = TypeRules;
+    TypeRules.clear();
+}
+
+template<EnumSignedChar U, RulesTypeClass<U> T>
+static void Restore_Defaults_For_Type(RuleSections& sections, U first, U count, const CncLogger& Logger)
+{
+    CNC_LOGGER_INFO("Restoring defaults for type: {}", TdTypeConverter::Get_Type_Name<U>());
+
+    for (auto i = first; i < count; ++i) {
+        auto& type_instance = T::As_Mutable_Reference(i);
+        auto name = std::string(type_instance.Name());
+
+        type_instance.Read_Rules(sections.Get_Section(name));
+    }
+}
+
+/**
+ * Convenience function to get or create a RuleSections instance for a given
+ * type.
+ */
+template <EnumSignedChar T>
+RuleSections& Sections_For(std::map<std::string_view, RuleSections>& type_rules)
+{
+    static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
+
+    return type_rules[type_name];
+}
+
+/**
+ * Restore type instance fields to hardcoded defaults - Record_Type_Defaults() must have been called
+ * before loading rules from INI files for this to work.
+ */
+void RulesClass::Restore_Type_Defaults()
+{
+    // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
+    Restore_Defaults_For_Type<AnimType, AnimTypeClass>(Sections_For<AnimType>(DefaultTypeRules), ANIM_FIRST, ANIM_COUNT, Logger);
+    Restore_Defaults_For_Type<WarheadType, WarheadTypeClass>(Sections_For<WarheadType>(DefaultTypeRules), WARHEAD_FIRST, WARHEAD_COUNT, Logger);
+    Restore_Defaults_For_Type<BulletType, BulletTypeClass>(Sections_For<BulletType>(DefaultTypeRules), BULLET_FIRST, BULLET_COUNT, Logger);
+    Restore_Defaults_For_Type<WeaponType, WeaponTypeClass>(Sections_For<WeaponType>(DefaultTypeRules), WEAPON_FIRST, WEAPON_COUNT, Logger);
+    Restore_Defaults_For_Type<AircraftType, AircraftTypeClass>(Sections_For<AircraftType>(DefaultTypeRules), AIRCRAFT_FIRST, AIRCRAFT_COUNT, Logger);
+    Restore_Defaults_For_Type<StructType, BuildingTypeClass>(Sections_For<StructType>(DefaultTypeRules), STRUCT_FIRST, STRUCT_COUNT, Logger);
+    Restore_Defaults_For_Type<InfantryType, InfantryTypeClass>(Sections_For<InfantryType>(DefaultTypeRules), INFANTRY_FIRST, INFANTRY_COUNT, Logger);
+    Restore_Defaults_For_Type<UnitType, UnitTypeClass>(Sections_For<UnitType>(DefaultTypeRules), UNIT_FIRST, UNIT_COUNT, Logger);
+    Restore_Defaults_For_Type<HousesType, HouseTypeClass>(Sections_For<HousesType>(DefaultTypeRules), HOUSE_FIRST, HOUSE_COUNT, Logger);
 }
 
 /**
@@ -677,18 +738,6 @@ static void Init_Type(RuleSections& sections, U first, U count, const CncLogger&
     }
 
     ini_file.Close();
-}
-
-/**
- * Convenience function to get or create a RuleSections instance for a given
- * type.
- */
-template <EnumSignedChar T>
-RuleSections& Sections_For(std::map<std::string_view, RuleSections>& type_rules)
-{
-    static const auto type_name = TdTypeConverter::Get_Type_Name<T>();
-
-    return type_rules[type_name];
 }
 
 void RulesClass::Init_Types()

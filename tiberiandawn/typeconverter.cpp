@@ -93,6 +93,12 @@ const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter:
     ENUM_TYPE_PAIR(KeyNumType,                   "KN_",          KN_NONE,                                KN_MOUSEWHEEL_DOWN,                       {},                  {},                  false)
 };
 
+void TdTypeConverter::Reset_Rule_Type_Registry()
+{
+    RegisteredRuleTypes.clear();
+    RegisteredCsvRuleTypes.clear();
+}
+
 bool TdTypeConverter::Rule_Requires_Converter(
     const std::string_view& type_name,
     const std::string_view& rule

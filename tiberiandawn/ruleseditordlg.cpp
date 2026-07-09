@@ -440,8 +440,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     {
         CCFileClass ini_file(file_name);
 
-        if (!ini_file.Is_Available() || ini_file.Delete()) {
-            // file doesn't exist or delete was successful
+        if (ini_file.Delete()) {
+            // file delete was successful
             return true;
         }
 

@@ -315,6 +315,9 @@ public:
 
     RulesClass(void);
 
+    void Record_Type_Defaults();
+    void Restore_Type_Defaults();
+
     void Init();
     void Init(CCINIClass& ini);
 
@@ -379,6 +382,9 @@ private:
     RuleSections Sections;
     // TODO: Add existing subclasses of ObjectTypeClass Overlay, Smudge, Template and Terrain
     std::map<std::string_view, RuleSections> TypeRules;
+
+    // game engine type defaults are recorded here as type instance values get overridden during rule loading
+    std::map<std::string_view, RuleSections> DefaultTypeRules;
 
     void AI(CCINIClass& ini);
     void IQ(CCINIClass& ini);

@@ -447,6 +447,7 @@ bool Init_Game(int, char*[])
     **	Find and process any rules for this game.
     */
     CNC_LOG_DEBUG("Initialising RulesClass global instance: Rule");
+    Rule.Record_Type_Defaults();
     Rule.Init();
 
     /*

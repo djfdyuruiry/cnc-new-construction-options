@@ -301,6 +301,8 @@ public:
         return std::make_optional(instances);
     }
 
+    static void Reset_Rule_Type_Registry();
+
     /**
      * Record that a rule for the given type name requires a converter to read/write from.
      */
