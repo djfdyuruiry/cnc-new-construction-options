@@ -190,7 +190,6 @@ typedef enum
     CCR_CANCEL_BUTTON
 } ConverterCsvRuleEditorControls;
 
-
 class ConverterCsvRuleEditorDialog : public Dialog<ConverterCsvRuleEditorControls>
 {
     RuleSection& Section;
@@ -358,6 +357,7 @@ typedef enum
     PREVIOUS_BUTTON = 248,
     NEXT_BUTTON,
     EXIT_BUTTON,
+    LOAD_DEFAULTS_BUTTON,
     SAVE_CHANGES_BUTTON
 } RulesEditorControls;
 
@@ -434,6 +434,90 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 }
             }
         }
+    }
+
+    bool Delete_INI_File_If_Exists(const char* file_name)
+    {
+        CCFileClass ini_file(file_name);
+
+        if (!ini_file.Is_Available() || ini_file.Delete()) {
+            // file doesn't exist or delete was successful
+            return true;
+        }
+
+        WWMessageBox().Process(
+            std::format("Error deleting existing INI file: {}", file_name).c_str(),
+            Text_String(TXT_OK)
+        );
+        return false;
+    }
+
+    void Load_Defaults()
+    {
+        auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+
+        // confirmation popup
+        const auto file_name = file_dropdown.Current_Item();
+        const auto confirm_msg = std::format(
+            "Do you want to reset all rule INI files or only '{}'?",
+            file_name
+        );
+        const auto only_button_text = std::format("Only Reset '{}'", file_name);
+
+        const auto response = WWMessageBox().Process(
+            confirm_msg.c_str(),
+            Text_String(TXT_CANCEL),
+            "Reset All Files",
+            only_button_text.c_str()
+        );
+
+        if (response == 0) {
+            return;
+        }
+
+        if (response == 1) {
+            // purge just the current INI file
+            if (!Delete_INI_File_If_Exists(file_dropdown.Current_Item())) {
+                return;
+            }
+        } else {
+            // purge all existing INI files
+            for (auto i = 0; i < file_dropdown.Count(); ++i) {
+                if (!Delete_INI_File_If_Exists(file_dropdown.Get_Item(i))) {
+                    return;
+                }
+            }
+        }
+
+        // init method will write fresh INI files
+        Rule.Init();
+
+        /**
+         * Refresh UI to ensure UI matches loaded defaults
+         */
+        const auto active_section = ActiveRuleSectionName;
+        const auto active_rule_page = RulePageIndex;
+
+        // refresh sections list
+        ActiveSectionsAreType
+            ? Set_Active_Rule_Sections(Get_Active_Rule_Sections(), ActionSectionsTypeName)
+            : Set_Active_Rule_Sections(Get_Active_Rule_Sections());
+
+        // refresh active section selection
+        auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+        for (auto i = 0; i < section_dropdown.Count(); ++i) {
+            if (active_section == section_dropdown.Get_Item(i) ) {
+                section_dropdown.Set_Selected_Index(i);
+                break;
+            }
+        }
+
+        // refresh active section
+        Set_Active_Rule_Section(active_section);
+
+        // navigate to correct page
+        RulePageIndex = active_rule_page;
+        Load_Current_Rules_Page();
     }
 
     int Present_Unsaved_Changes_Prompt()
@@ -630,6 +714,12 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             return false;
         }
 
+        if (RulePageIndex - 1 < 1) {
+            Get_Control<PREVIOUS_BUTTON, TextButtonClass>().Disable();
+        } else {
+            Get_Control<NEXT_BUTTON, TextButtonClass>().Enable();
+        }
+
         RulePageIndex--;
         Load_Current_Rules_Page();
         return true;
@@ -637,8 +727,14 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     bool Load_Next_Rules_Page()
     {
-        if (RulePageIndex == RulePageCount - 1) {
+        if (RulePageIndex >= RulePageCount - 1) {
             return false;
+        }
+
+        if (RulePageIndex + 1 >= RulePageCount - 1) {
+            Get_Control<NEXT_BUTTON, TextButtonClass>().Disable();
+        } else {
+            Get_Control<PREVIOUS_BUTTON, TextButtonClass>().Enable();
         }
 
         RulePageIndex++;
@@ -717,25 +813,36 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         }
     }
 
-    void Set_Active_Rule_Section(std::string_view section)
+    void Set_Active_Rule_Section(const std::string_view section)
     {
         ActiveRuleSectionName = section;
 
-        const auto& active_rule_section = ActiveSectionsAreType
-            ? Rule.Get_Type_Rules().at(ActionSectionsTypeName)[section]
-            : Rule.Get_Rule_Sections()[section];
+        const auto& active_rule_section = Get_Active_Rule_Sections().Get_Section(section);
+        const auto rule_count = active_rule_section.Rule_Names().size();
 
         // init pagination
         RulePageIndex = 0;
         RulePageCount = static_cast<int>(
-            ceil(active_rule_section.Rule_Names().size() / static_cast<double>(RulesPerPage))
+            ceil(static_cast<int>(rule_count) / static_cast<double>(RulesPerPage))
         );
+
+        // show/hide pagination controls
+        Get_Control<PREVIOUS_BUTTON, TextButtonClass>().Disable();
+
+        if (rule_count <= RulesPerPage) {
+            Get_Control<NEXT_BUTTON, TextButtonClass>().Disable();
+        } else {
+            Get_Control<NEXT_BUTTON, TextButtonClass>().Enable();
+        }
 
         // load first page data
         Load_Current_Rules_Page();
     }
 
-    void Set_Active_Rule_Sections(RuleSections& sections, std::optional<std::string_view> type_name = std::nullopt)
+    void Set_Active_Rule_Sections(
+        const RuleSections& sections,
+        const std::optional<std::string_view>& type_name = std::nullopt
+    )
     {
         ActiveSectionsAreType = type_name.has_value();
 
@@ -795,9 +902,10 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void Init_Bottom_Row()
     {
-        Add_Button(PREVIOUS_BUTTON, "Previous");
-        Add_Button(NEXT_BUTTON, "Next");
+        Add_Button(PREVIOUS_BUTTON, "Previous Page").Disable();
+        Add_Button(NEXT_BUTTON, "Next Page");
         Add_Button(EXIT_BUTTON, "Exit");
+        Add_Button(LOAD_DEFAULTS_BUTTON, "Load Defaults");
         Add_Button(SAVE_CHANGES_BUTTON, "Save");
     }
 
@@ -857,7 +965,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void Init_Top_Row()
     {
-        Add_Button(SEARCH_BUTTON, "Search");
+        Add_Button(SEARCH_BUTTON, "Search").Disable(true); // TODO: implement search
 
         Text[SEARCH_TEXTBOX] = std::make_unique<char[]>(25);
         Add_Control<SEARCH_TEXTBOX, EditClass>(
@@ -869,7 +977,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             Dimensions[SEARCH_TEXTBOX].W,
             Dimensions[SEARCH_TEXTBOX].H,
             EditClass::ALPHANUMERIC
-        );
+        ).Disable(true); // TODO: implement search
 
         Text[SECTION_DROPDOWN] = std::make_unique<char[]>(DropdownTextLength);
         Add_Control<SECTION_DROPDOWN, DropListClass>(
@@ -901,8 +1009,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     static inline std::vector<std::string> RuleFileNames;
 
     bool ActiveSectionsAreType;
-    std::string_view ActionSectionsTypeName;
-    std::string_view ActiveRuleSectionName;
+    std::string ActionSectionsTypeName;
+    std::string ActiveRuleSectionName;
     int RulePageIndex;
     int RulePageCount;
     int PreviousFileIndex;
@@ -984,6 +1092,14 @@ protected:
                 if (Ensure_Unsaved_Changes_Resolved()) {
                     Load_Next_Rules_Page();
                 }
+
+                Collapse_Visible_Dropdowns(display);
+                display = REDRAW_ALL;
+                break;
+            }
+
+            case LOAD_DEFAULTS_BUTTON | KN_BUTTON: {
+                Load_Defaults();
 
                 Collapse_Visible_Dropdowns(display);
                 display = REDRAW_ALL;
@@ -1270,7 +1386,7 @@ protected:
 
         // right panel
         Dimensions[RIGHT_PANEL] = {
-            ControlsX + panel_width + VerticalSpacing,
+            ControlsX + panel_width + HorizontalSpacing,
             MiddleRowY,
             panel_width,
             panel_height
@@ -1312,26 +1428,38 @@ protected:
         }
 
         // bottom row
-        Dimensions[EXIT_BUTTON] = {ControlsX, BottomRowY, ControlWidth, ControlHeight};
-
-        Dimensions[SAVE_CHANGES_BUTTON] = {
-            ControlsX + ControlWidth + VerticalSpacing,
+        Dimensions[EXIT_BUTTON] = {
+            ControlsX,
             BottomRowY,
-            ControlWidth,
+            static_cast<int>(nearbyint(ControlWidth * 0.8)),
             ControlHeight
         };
 
         Dimensions[NEXT_BUTTON] = {
-            X + Width - ControlWidth - MarginWidth,
+            Dimensions[RIGHT_PANEL].X,
             BottomRowY,
-            ControlWidth,
+            static_cast<int>(nearbyint(ControlWidth * 1.25)),
             ControlHeight
         };
 
         Dimensions[PREVIOUS_BUTTON] = {
-            Dimensions[NEXT_BUTTON].X - ControlWidth - HorizontalSpacing,
+            Dimensions[NEXT_BUTTON].X - static_cast<int>(nearbyint(ControlWidth * 1.25)) - HorizontalSpacing + 1,
             BottomRowY,
-            ControlWidth,
+            static_cast<int>(nearbyint(ControlWidth * 1.25)),
+            ControlHeight
+        };
+
+        Dimensions[SAVE_CHANGES_BUTTON] = {
+            X + Width - static_cast<int>(nearbyint(ControlWidth * 0.8)) - MarginWidth + 1,
+            BottomRowY,
+            static_cast<int>(nearbyint(ControlWidth * 0.8)),
+            ControlHeight
+        };
+
+        Dimensions[LOAD_DEFAULTS_BUTTON] = {
+            Dimensions[SAVE_CHANGES_BUTTON].X - HorizontalSpacing - static_cast<int>(nearbyint(ControlWidth * 1.2)),
+            BottomRowY,
+            static_cast<int>(nearbyint(ControlWidth * 1.2)),
             ControlHeight
         };
     }
