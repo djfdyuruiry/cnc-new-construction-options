@@ -195,6 +195,11 @@ std::string RuleSection::Variant_To_String(const RuleValueVariant& value_variant
     throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
 }
 
+const std::string& RuleSection::Get_Section_Name() const
+{
+    return SectionName;
+}
+
 bool RuleSection::Has_Key(std::string_view name) const
 {
     return Rules.contains(name.data());

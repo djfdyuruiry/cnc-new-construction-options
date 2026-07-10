@@ -81,15 +81,16 @@ concept TypeConverter = requires(
 class RuleSection
 {
 public:
-    const std::string SectionName;
-
     static bool Variants_Have_Same_Type(const RuleValueVariant& value_variant_a, const RuleValueVariant& value_variant_b);
+
 
     static std::string_view Get_Variant_Type(const RuleValueVariant& value_variant);
 
     static std::string Get_Variant_Values(const RuleValueVariant& value_variant);
 
     static std::string Variant_To_String(const RuleValueVariant& value_variant);
+
+    const std::string& Get_Section_Name() const;
 
     RuleSection(
         std::string section_name,
@@ -443,6 +444,7 @@ public:
     JSON_FUNCTIONS(RuleSection)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
+    std::string SectionName;
 
     static inline const std::function<bool(const std::string&)> ParseBool = [](const auto& s) {
         auto potential_value = s;
@@ -672,7 +674,7 @@ public:
                     CNC_LOGGER_ERROR(
                          "Invalid INI value '{}' for rule: [{}] -> {} | rule_type={} | valid_values={} | parse_error=invalid_argument",
                          s,
-                         Section.SectionName,
+                         Section.Get_Section_Name(),
                          name,
                          C::template Get_Type_Name<T>(),
                          CncStringUtils::To_Csv(type_strings)
@@ -706,7 +708,7 @@ public:
                     CNC_LOGGER_ERROR(
                          "Invalid INI value '{}' for rule: [{}] -> {} | type=list of {}",
                          csv,
-                         Section.SectionName,
+                         Section.Get_Section_Name(),
                          name,
                          C::template Get_Type_Name<T>()
                     );

@@ -178,7 +178,7 @@ public:
           Section(section),
           RuleName(rule_name)
     {
-        CaptionText = std::format("{}: {}", section.SectionName, RuleName);
+        CaptionText = std::format("{}: {}", section.Get_Section_Name(), RuleName);
     }
 };
 
@@ -336,7 +336,7 @@ public:
           Section(section),
           RuleName(rule_name)
     {
-        CaptionText = std::format("{}: {}", section.SectionName, RuleName);
+        CaptionText = std::format("{}: {}", section.Get_Section_Name(), RuleName);
     }
 };
 
