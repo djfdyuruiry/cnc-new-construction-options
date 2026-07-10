@@ -678,7 +678,13 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 const auto& [edit_button, help_button, value_control] = controls;
 
                 auto edit_buffer = Text[controls.value_control].get();
-                const auto value_string = RuleSection::Variant_To_String(section.Get_Variant(name));
+                auto rule_variant = section.Get_Variant(name);
+                auto value_string = RuleSection::Variant_To_String(rule_variant);
+
+                if (std::holds_alternative<bool>(rule_variant)) {
+                    const auto bool_value = std::get<bool>(rule_variant);
+                    value_string = bool_value ? "yes" : "no";
+                }
 
                 strncpy(edit_buffer, value_string.c_str(), RuleValueTextLength);
                 edit_buffer[RuleValueTextLength - 1] = '\0';
