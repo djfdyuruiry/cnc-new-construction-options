@@ -5,43 +5,43 @@
   "comment": "Change game rules for specific single player scenarios, mainly used to modify the player tech tree.",
   "rules": [
     {
-      "name": "SetBuildLevelTo1InGdiScenario2",
+      "name": "BuildLevel1InGdi2",
       "type": "bool",
       "default": true,
       "comment": "When player is in GDI mission 2 set the build level to 1"
     },
     {
-      "name": "RenameTechCenterToPrisonInNodScenario3",
+      "name": "PrisonTechCenterInNod3",
       "type": "bool",
       "default": true,
       "comment": "When playing NOD mission 3 rename Tech Centers to `Prison`"
     },
     {
-      "name": "HideBazookaFromGdiUntilScenario8",
+      "name": "HideBazookaUntilGdi8",
       "type": "bool",
       "default": true,
       "comment": "-"
     },
     {
-      "name": "HideRocketLauncherFromGdiUntilScenario9",
+      "name": "HideRocketLauncherUntilGdi9",
       "type": "bool",
       "default": true,
       "comment": "-"
     },
     {
-      "name": "HideSandbagFromGdiUntilScenario9",
+      "name": "HideSandbagUntilGdi9",
       "type": "bool",
       "default": true,
       "comment": "-"
     },
     {
-      "name": "AllowNodToBuildAdvancedPowerInScenario12",
+      "name": "AdvancedPowerInNod12",
       "type": "bool",
       "default": true,
       "comment": "-"
     },
     {
-      "name": "RequireTechCentreForStealthTankInNodScenario11",
+      "name": "TechCentreForStealthTankInNod11",
       "type": "bool",
       "default": true,
       "comment": "-"
