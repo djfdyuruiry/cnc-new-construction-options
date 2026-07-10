@@ -35,6 +35,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include <algorithm>
+#include <map>
 
 #include "common/logger.h"
 #include "common/rulesections.h"
