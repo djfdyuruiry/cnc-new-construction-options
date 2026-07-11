@@ -927,3 +927,10 @@ int ListClass::Step_Selected_Index(int step)
     Set_Selected_Index(old + step);
     return (old);
 }
+
+void ListClass::Redraw_Scroll_Bar(bool forced)
+{
+    UpGadget.Draw_Me(forced);
+    ScrollGadget.Draw_Me(forced);
+    DownGadget.Draw_Me(forced);
+}

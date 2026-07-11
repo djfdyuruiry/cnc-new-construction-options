@@ -134,24 +134,30 @@ protected:
 
     KeyNumType Get_Input(DialogRedrawType& display) override
     {
-        static auto was_dropped = false;
+        static auto previous_dropped_value = false;
 
-        const auto is_dropped = Get_Control<VALUE_DROPDOWN, DropListClass>().IsDropped;
+        auto& value_dropdown = Get_Control<VALUE_DROPDOWN, DropListClass>();
+        const auto was_dropped = value_dropdown.IsDropped;
 
         // hide buttons when dropdown is visible to prevent input conflicts
-        if (!was_dropped && is_dropped) {
+        if (!previous_dropped_value && was_dropped) {
             Get_Control<CR_CANCEL_BUTTON, TextButtonClass>().Disable(true);
             Get_Control<CR_SAVE_BUTTON, TextButtonClass>().Disable(true);
-
-            was_dropped = true;
-        } else if (was_dropped && !is_dropped) {
+        } else if (previous_dropped_value && !was_dropped) {
             Get_Control<CR_CANCEL_BUTTON, TextButtonClass>().Enable();
             Get_Control<CR_SAVE_BUTTON, TextButtonClass>().Enable();
-
-            was_dropped = false;
         }
 
-        return Dialog::Get_Input(display);
+        previous_dropped_value = was_dropped;
+
+        const auto input = Dialog::Get_Input(display);
+
+        if (!was_dropped && value_dropdown.IsDropped) {
+            // BUG: workaround for scrollbars not rendering reliably
+            value_dropdown.List.Redraw_Scroll_Bar(true);
+        }
+
+        return input;
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -908,12 +914,15 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void Init_Bottom_Row()
     {
-        const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
+        static const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
+        static const auto previous_str = std::format("{} {}", Text_String(TXT_LEFT), (is_dos ? "Previous" : "Previous Page"));
+        static const auto next_str = std::format("{} {}", (is_dos ? "Next" : "Next Page"), Text_String(TXT_RIGHT));
 
-        Add_Button(PREVIOUS_BUTTON, is_dos ? "Previous" : "Previous Page").Disable();
-
-        Add_Button(NEXT_BUTTON, is_dos ? "Next" : "Next Page");
         Add_Button(EXIT_BUTTON, "Exit");
+
+        Add_Button(PREVIOUS_BUTTON, previous_str.c_str()).Disable();
+        Add_Button(NEXT_BUTTON, next_str.c_str());
+
         Add_Button(LOAD_DEFAULTS_BUTTON, is_dos ? "Defaults" : "Load Defaults");
         Add_Button(SAVE_CHANGES_BUTTON, "Save");
     }
@@ -1179,17 +1188,25 @@ protected:
             }
         }
 
-        auto file_was_dropped = Get_Control<FILE_DROPDOWN, DropListClass>().IsDropped;
-        auto section_was_dropped = Get_Control<SECTION_DROPDOWN, DropListClass>().IsDropped;
+        auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
+        auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
+        auto file_was_dropped = file_dropdown.IsDropped;
+        auto section_was_dropped = section_dropdown.IsDropped;
 
         const auto input = Dialog::Get_Input(display);
 
-        if (file_was_dropped && !Get_Control<FILE_DROPDOWN, DropListClass>().IsDropped) {
+        if (file_was_dropped && !file_dropdown.IsDropped) {
             display = REDRAW_ALL;
+        } else if (!file_was_dropped && file_dropdown.IsDropped) {
+            // BUG: workaround for scrollbars not rendering reliably
+            file_dropdown.List.Redraw_Scroll_Bar(true);
         }
 
-        if (section_was_dropped && !Get_Control<SECTION_DROPDOWN, DropListClass>().IsDropped) {
+        if (section_was_dropped && !section_dropdown.IsDropped) {
             display = REDRAW_ALL;
+        } else if (!section_was_dropped && section_dropdown.IsDropped) {
+            // BUG: workaround for scrollbars not rendering reliably
+            section_dropdown.List.Redraw_Scroll_Bar(true);
         }
 
         if (input & KN_BUTTON) {
@@ -1362,7 +1379,7 @@ protected:
         auto help_btn = LEFT_RULE_HELP_CONTROL;
         auto edit_btn = LEFT_RULE_EDIT_BUTTON;
 
-        const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
+        static const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
 
         for (auto control = LEFT_RULE_VALUE_CONTROL; control < LEFT_RULE_HELP_CONTROL; ++control) {
             left_control_y += VerticalSpacing;
@@ -1453,10 +1470,12 @@ protected:
             ControlHeight
         };
 
+        static auto scale = is_dos ? 1.25 : 1.4;
+
         Dimensions[PREVIOUS_BUTTON] = {
-            Dimensions[NEXT_BUTTON].X - static_cast<int>(nearbyint(ControlWidth * 1.25)) - HorizontalSpacing + 1,
+            Dimensions[NEXT_BUTTON].X - static_cast<int>(nearbyint(ControlWidth * scale)) - HorizontalSpacing + 1,
             BottomRowY,
-            static_cast<int>(nearbyint(ControlWidth * 1.25)),
+            static_cast<int>(nearbyint(ControlWidth * scale)),
             ControlHeight
         };
 
