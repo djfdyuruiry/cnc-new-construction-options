@@ -96,6 +96,8 @@ public:
     virtual LinkClass& Add_Head(LinkClass& object);
     virtual GadgetClass* Remove(void);
 
+    void Redraw_Scroll_Bar(bool forced = false);
+
 protected:
     virtual int Action(unsigned flags, KeyNumType& key);
     virtual void Draw_Entry(int index, int x, int y, int width, int selected);
