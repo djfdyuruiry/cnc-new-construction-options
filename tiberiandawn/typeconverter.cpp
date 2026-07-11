@@ -93,13 +93,30 @@ const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter:
     ENUM_TYPE_PAIR(KeyNumType,                   "KN_",          KN_NONE,                                KN_MOUSEWHEEL_DOWN,                       {},                  {},                  false)
 };
 
+void TdTypeConverter::Reset_Rule_Type_Registry()
+{
+    RegisteredRuleTypes.clear();
+    RegisteredCsvRuleTypes.clear();
+}
+
 bool TdTypeConverter::Rule_Requires_Converter(
     const std::string_view& type_name,
     const std::string_view& rule
 )
 {
-    return (RegisteredRuleTypes.contains(type_name) && RegisteredRuleTypes[type_name].contains(rule))
+    return (RegisteredRuleTypes.contains(type_name.data())
+            && RegisteredRuleTypes[type_name.data()].contains(rule.data()))
         || Rule_Requires_Csv_Converter(type_name, rule);
+}
+
+bool TdTypeConverter::Rule_Requires_Converter(
+    const RuleSection& section,
+    const std::string_view& rule
+)
+{
+    const auto& type_name = section.Get_Converter_Section_Type_Name();
+
+    return type_name.has_value() && Rule_Requires_Converter(type_name->data(), rule);
 }
 
 bool TdTypeConverter::Rule_Requires_Csv_Converter(
@@ -107,7 +124,18 @@ bool TdTypeConverter::Rule_Requires_Csv_Converter(
     const std::string_view& rule
 )
 {
-    return RegisteredCsvRuleTypes.contains(type_name) && RegisteredCsvRuleTypes[type_name].contains(rule);
+    return RegisteredCsvRuleTypes.contains(type_name.data())
+        && RegisteredCsvRuleTypes[type_name.data()].contains(rule.data());
+}
+
+bool TdTypeConverter::Rule_Requires_Csv_Converter(
+    const RuleSection& section,
+    const std::string_view& rule
+)
+{
+    const auto& type_name = section.Get_Converter_Section_Type_Name();
+
+    return type_name.has_value() && Rule_Requires_Csv_Converter(type_name->data(), rule);
 }
 
 ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(
@@ -115,7 +143,7 @@ ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(
     const std::string_view& rule
 )
 {
-    return RegisteredRuleTypes[type_name][rule];
+    return RegisteredRuleTypes[type_name.data()][rule.data()];
 }
 
 ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(
@@ -123,7 +151,7 @@ ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(
     const std::string_view& rule
 )
 {
-    return RegisteredCsvRuleTypes[type_name][rule];
+    return RegisteredCsvRuleTypes[type_name.data()][rule.data()];
 }
 
 #define RULE_VARIANT(TYPE) if (std::holds_alternative<TYPE>(variant)) { \

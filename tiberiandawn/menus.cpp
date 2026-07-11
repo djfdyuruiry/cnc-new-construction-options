@@ -482,8 +482,8 @@ int Main_Menu(unsigned int timeout)
         D_MULTI_W = 125 * scale_factor, D_MULTI_H = 9 * scale_factor, D_MULTI_X = 98 * scale_factor,
         D_MULTI_Y = 71 * scale_factor,
 
+        D_RULESEDITOR_W = 125 * scale_factor, D_RULESEDITOR_H = 9 * scale_factor, D_RULESEDITOR_X = 98 * scale_factor,
         D_MAPEDITOR_W = 125 * scale_factor, D_MAPEDITOR_H = 9 * scale_factor, D_MAPEDITOR_X = 98 * scale_factor,
-        D_MAPEDITOR_Y = 89 * scale_factor,
 
         D_INTRO_W = 125 * scale_factor, D_INTRO_H = 9 * scale_factor, D_INTRO_X = 98 * scale_factor,
         D_INTRO_Y = 111 * scale_factor,
@@ -501,7 +501,7 @@ int Main_Menu(unsigned int timeout)
         D_EXIT_Y = 133 * scale_factor;
 
 #ifdef NEWMENU
-    int starty = 25 * scale_factor - (Settings.Video.DOSMode || Is_DOS_Files() ? 0 : 9 * scale_factor);
+    int starty = 22 * scale_factor - (Settings.Video.DOSMode || Is_DOS_Files() ? 0 : 9 * scale_factor);
 #endif
 
     // Make sure any changes to buttons here are also reflected in the enum and handling in Select_Game in init.cpp.
@@ -520,6 +520,7 @@ int Main_Menu(unsigned int timeout)
 #endif
         BUTTON_LOAD,
         BUTTON_MULTI,
+        BUTTON_RULESEDITOR,
         BUTTON_MAPEDITOR,
         BUTTON_INTRO,
         BUTTON_EXIT,
@@ -531,7 +532,7 @@ int Main_Menu(unsigned int timeout)
     KeyNumType input; // input from user
     int retval;       // return value
     int curbutton;
-    std::vector<TextButtonClass*> buttons(8);
+    std::vector<TextButtonClass*> buttons(9);
 
     ControlClass* commands = NULL; // the button list
 
@@ -630,7 +631,16 @@ int Main_Menu(unsigned int timeout)
                              D_MULTI_H);
     starty += ystep;
 
-    TextButtonClass editorbtn(BUTTON_MAPEDITOR,
+    TextButtonClass ruleseditorbtn(BUTTON_RULESEDITOR,
+                             "Rules Editor", // TODO: Add mechanism for extending existing locale strings (support non-english)
+                             TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                             D_RULESEDITOR_X,
+                             starty,
+                             D_RULESEDITOR_W,
+                             D_RULESEDITOR_H);
+    starty += ystep;
+
+    TextButtonClass mapeditorbtn(BUTTON_MAPEDITOR,
                              "Scenario Editor", // TODO: Add mechanism for extending existing locale strings (support non-english)
                              TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                              D_MAPEDITOR_X,
@@ -742,7 +752,8 @@ int Main_Menu(unsigned int timeout)
     selectbtn.Add_Tail(*commands);
     loadbtn.Add_Tail(*commands);
     multibtn.Add_Tail(*commands);
-    editorbtn.Add_Tail(*commands);
+    ruleseditorbtn.Add_Tail(*commands);
+    mapeditorbtn.Add_Tail(*commands);
     introbtn.Add_Tail(*commands);
     exitbtn.Add_Tail(*commands);
 
@@ -765,7 +776,8 @@ int Main_Menu(unsigned int timeout)
     buttons[butt++] = &selectbtn;
     buttons[butt++] = &loadbtn;
     buttons[butt++] = &multibtn;
-    buttons[butt++] = &editorbtn;
+    buttons[butt++] = &ruleseditorbtn;
+    buttons[butt++] = &mapeditorbtn;
     buttons[butt++] = &introbtn;
     buttons[butt++] = &exitbtn;
 #else
@@ -918,6 +930,14 @@ int Main_Menu(unsigned int timeout)
             break;
 
         case (BUTTON_INTRO | KN_BUTTON):
+            retval = (input & 0x7FFF) - BUTTON_EXPAND;
+#ifdef DEMO
+            retval += 1;
+#endif // DEMO
+            process = false;
+            break;
+
+        case (BUTTON_RULESEDITOR | KN_BUTTON):
             retval = (input & 0x7FFF) - BUTTON_EXPAND;
 #ifdef DEMO
             retval += 1;

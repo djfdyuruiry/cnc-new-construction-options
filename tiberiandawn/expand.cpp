@@ -32,9 +32,11 @@
  * Functions:                                                                                  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#include "function.h"
 #include "common/framelimit.h"
 #include "common/ini.h"
+
+#include "elist.h"
+#include "function.h"
 
 #ifdef NEWMENU
 
@@ -44,35 +46,6 @@ bool Expansion_Present(void)
 
     return (file.Is_Available());
 }
-
-class EListClass : public ListClass
-{
-public:
-    EListClass(int id, int x, int y, int w, int h, TextPrintType flags, void const* up, void const* down)
-        : ListClass(id, x, y, w, h, flags, up, down){};
-
-protected:
-    void Draw_Entry(int index, int x, int y, int width, int selected) override
-    {
-        if (TextFlags & TPF_6PT_GRAD) {
-            TextPrintType flags = TextFlags;
-
-            if (selected) {
-                flags = flags | TPF_BRIGHT_COLOR;
-                LogicPage->Fill_Rect(x, y, x + width - 1, y + LineHeight - 1, CC_GREEN_SHADOW);
-            } else {
-                if (!(flags & TPF_USE_GRAD_PAL)) {
-                    flags = flags | TPF_MEDIUM_COLOR;
-                }
-            }
-
-            Conquer_Clip_Text_Print(List[index] + sizeof(int), x, y, CC_GREEN, TBLACK, flags, width, Tabs);
-        } else {
-            Conquer_Clip_Text_Print(
-                List[index] + sizeof(int), x, y, (selected ? BLUE : WHITE), TBLACK, TextFlags, width, Tabs);
-        }
-    }
-};
 
 bool Expansion_Dialog(void)
 {
@@ -110,7 +83,8 @@ bool Expansion_Dialog(void)
                     option_height - 40 * factor,
                     TPF_6PT_GRAD | TPF_NOSHADOW,
                     up_button,
-                    down_button);
+                    down_button,
+                    sizeof(int));
 
     buttons = &ok;
     cancel.Add(*buttons);

@@ -1146,4 +1146,6 @@ extern Texture InGameFillTexture;
 
 int Lookup_Country_Name(const ScenarioPlayerType& player, const int& index);
 
+bool Rules_Editor_Dialog();
+
 #include "rulekeys-nco.h"

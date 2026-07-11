@@ -25,8 +25,8 @@ template<typename A, typename B>
 class TwoWayMap : private TwoWayMapStatic
 {
 private:
-    std::unordered_map<A, B> ForwardMap;
-    std::unordered_map<B, A> BackwardMap;
+    std::map<A, B> ForwardMap;
+    std::map<B, A> BackwardMap;
 
 public:
     TwoWayMap(std::initializer_list<std::pair<A, B>> pairs)

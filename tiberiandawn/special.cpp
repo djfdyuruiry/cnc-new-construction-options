@@ -571,5 +571,5 @@ FROM_JSON(SpecialClass)
     }
 
     p.RuleOverrides->Clear();
-    FIELD_FROM_JSON_TO_VALUE(NAMEOF(RuleOverrides), *p.RuleOverrides);
+    from_json(j[NAMEOF(RuleOverrides)], *p.RuleOverrides);
 }

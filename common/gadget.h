@@ -116,7 +116,7 @@ public:
     GadgetClass(int x, int y, int w, int h, unsigned flags, int sticky = false);
     GadgetClass(NoInitClass const& x)
         : LinkClass(x){};
-    GadgetClass(void){};
+    GadgetClass(void) { DisableDrawing = false; };
     GadgetClass(GadgetClass const& gadget);
     virtual ~GadgetClass(void);
 
@@ -138,7 +138,7 @@ public:
     /*
     **	Manages individual gadget states and actions.
     */
-    virtual void Disable(void);
+    virtual void Disable(bool disable_drawing = false);
     virtual void Enable(void);
     virtual unsigned Get_ID(void) const
     {
@@ -228,6 +228,11 @@ public: // HACK HACK HACK.. this is here because the sidebar buttons are static.
     **	buttons.
     */
     unsigned IsSticky : 1;
+
+    /*
+    **	Prevent control from being draw at all when Draw_Me method is called.
+    */
+    unsigned DisableDrawing : 1;
 
     //	ajw - Publicized StuckOn 7/30/98 (was protected)
     /*

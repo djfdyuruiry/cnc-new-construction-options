@@ -624,7 +624,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_BAD && type->What_Am_I() == RTTI_UNITTYPE && ((UnitTypeClass const*)type)->Type == UNIT_STANK
         && level == 11
-        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, REQUIRE_TECH_CENTRE_FOR_STEALTH_TANK_IN_NOD_SCENARIO_11_RULE)) {
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, TECH_CENTRE_FOR_STEALTH_TANK_IN_NOD_11_RULE)) {
         CNC_LOGGER_TRACE("NOD scenario 11 detected, changing Stealth Tank prerequisite to Tech Centre");
 
         pre = STRUCTF_MISSION;
@@ -637,7 +637,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_GOOD && type->What_Am_I() == RTTI_INFANTRYTYPE
         && ((InfantryTypeClass const*)type)->Type == INFANTRY_E3 && level < 7
-        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, HIDE_BAZOOKA_FROM_GDI_UNTIL_SCENARIO_8_RULE)) {
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, HIDE_BAZOOKA_UNTIL_GDI_8_RULE)) {
         CNC_LOGGER_TRACE("GDI scenario earlier than #8 detected, hiding Bazooka infantry from player");
 
         return (false);
@@ -649,7 +649,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_GOOD && type->What_Am_I() == RTTI_UNITTYPE && ((UnitTypeClass const*)type)->Type == UNIT_MLRS
         && level < 9
-        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, HIDE_ROCKET_LAUNCHER_FROM_GDI_UNTIL_SCENARIO_9_RULE)) {
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, HIDE_ROCKET_LAUNCHER_UNTIL_GDI_9_RULE)) {
         CNC_LOGGER_TRACE("GDI scenario earlier than #9 detected, hiding Rocket Launcher unit from player");
 
         return (false);
@@ -716,7 +716,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_BAD && level >= 12 && type->What_Am_I() == RTTI_BUILDINGTYPE
         && ((BuildingTypeClass const*)type)->Type == STRUCT_ADVANCED_POWER
-        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, ALLOW_NOD_TO_BUILD_ADVANCED_POWER_IN_SCENARIO_12_RULE)) {
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, ADVANCED_POWER_IN_NOD_12_RULE)) {
         CNC_LOGGER_TRACE("NOD scenario 12 detected, making Advanced Power Plant available");
 
         level = type->Scenario;
@@ -738,7 +738,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     */
     if (house == HOUSE_GOOD && level < 8 && type->What_Am_I() == RTTI_BUILDINGTYPE
         && ((BuildingTypeClass const*)type)->Type == STRUCT_SANDBAG_WALL
-        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, HIDE_SANDBAG_FROM_GDI_UNTIL_SCENARIO_9_RULE)) {
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, HIDE_SANDBAG_UNTIL_GDI_9_RULE)) {
         CNC_LOGGER_TRACE("GDI scenario earlier than #9 detected, hiding sandbags from player");
 
         return (false);
@@ -749,7 +749,7 @@ bool HouseClass::Can_Build(TechnoTypeClass const* type, HousesType house) const
     **	scenario two will still feel like scenario #1.
     */
     if (house == HOUSE_GOOD && level == 2 
-        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, SET_BUILD_LEVEL_TO_1_IN_GDI_SCENARIO_2_RULE)) {
+        && Rule.Get_Rule_Value<bool>(GAME_SCENARIOS_SECTION, BUILD_LEVEL_1_IN_GDI_2_RULE)) {
         CNC_LOGGER_TRACE("GDI scenario 2 detected, limiting tech level to 1");
 
         level = 1;

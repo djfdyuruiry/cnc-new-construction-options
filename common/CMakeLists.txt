@@ -98,7 +98,6 @@ set(COMMON_SRC
     xpipe.cpp
     xstraw.cpp
     # nco
-    json.cpp
     lua/event_luaapi.cpp
     lua/logging_luaapi.cpp
     lua/luaapi.cpp
@@ -108,6 +107,7 @@ set(COMMON_SRC
     lua/luatablebuilder.cpp
     lua/rulesluaadapter.cpp
     lua/system_luaapi.cpp
+    json.cpp
     logger.cpp
     rulesections.cpp
     stringutils.cpp

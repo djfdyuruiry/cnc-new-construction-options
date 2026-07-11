@@ -81,15 +81,16 @@ concept TypeConverter = requires(
 class RuleSection
 {
 public:
-    const std::string SectionName;
-
     static bool Variants_Have_Same_Type(const RuleValueVariant& value_variant_a, const RuleValueVariant& value_variant_b);
+
 
     static std::string_view Get_Variant_Type(const RuleValueVariant& value_variant);
 
     static std::string Get_Variant_Values(const RuleValueVariant& value_variant);
 
     static std::string Variant_To_String(const RuleValueVariant& value_variant);
+
+    const std::string& Get_Section_Name() const;
 
     RuleSection(
         std::string section_name,
@@ -141,14 +142,14 @@ public:
                 "Existing value for rule detected: [{}] -> {} (value = {})",
                 SectionName,
                 name,
-                Variant_To_String(resolved_default_value)
+                resolved_default_value
             );
         }
 
         if (!ini.Section_Present(SectionName.data())) {
             CNC_LOGGER_DEBUG(
                 "Loading value '{}' for '{}', rule section not found in provided INI: [{}]",
-                Variant_To_String(resolved_default_value),
+                resolved_default_value,
                 name,
                 SectionName
             );
@@ -161,7 +162,7 @@ public:
             "Attempting to find rule in INI: [{}] -> {} (with default = {})",
             SectionName,
             name,
-            Variant_To_String(resolved_default_value)
+            resolved_default_value
         );
 
         auto value = resolved_default_value;
@@ -228,13 +229,20 @@ public:
             "Imported rule from INI: [{}] -> {} = {}",
             SectionName,
             name,
-            Variant_To_String(value)
+            value
         );
 
         Rules[name.data()] = value;
 
         return *this;
     }
+
+    RuleSection& Parse_String(
+        std::string_view name,
+        const std::string& value_string,
+        const RuleValueVariant& default_value,
+        const std::optional<std::function<bool(std::string)>>& str_validator = std::nullopt
+    );
 
     const RuleSection& Save_To_Ini(INIClass& ini, std::string_view name) const;
 
@@ -310,7 +318,7 @@ public:
         return *this;
     }
 
-    const std::optional<std::string>& Get_Converter_Section_Type_Name();
+    const std::optional<std::string>& Get_Converter_Section_Type_Name() const;
 
     template<class T, TypeConverter<T> C>
     T Get_With_Converter(std::string_view name) const
@@ -395,6 +403,8 @@ public:
             );
         }
 
+        CncStringUtils::To_Upper(instance_string);
+
         return Set(name, instance_string);
     }
 
@@ -434,7 +444,26 @@ public:
     JSON_FUNCTIONS(RuleSection)
 private:
     static inline const auto& Logger = CncLogger::For(RuleSection);
+    std::string SectionName;
 
+    static inline const std::function<bool(const std::string&)> ParseBool = [](const auto& s) {
+        auto potential_value = s;
+
+        CncStringUtils::To_Lower(potential_value);
+
+        if (potential_value == "true" || potential_value == "yes") {
+            return true;
+        }
+
+        if (potential_value == "false" || potential_value == "no") {
+            return false;
+        }
+
+        throw std::out_of_range(
+            std::format("String '{}' could not be parsed as boolean value, true/yes/false/no expected.", s)
+        );
+    };
+    static inline const std::function<int(const std::string&)> ParseInt = [](const auto& s) { return std::stoi(s); };
     static inline const std::function<float(const std::string&)> ParseFloat = [](const auto& s) { return std::stof(s); };
     static inline const std::function<ulong(const std::string&)> ParseULong = [](const auto& s) { return std::stoul(s); };
 
@@ -516,6 +545,63 @@ private:
             validate
         );
     }
+
+    template<class T, class U = T, class V = std::string>
+    void Parse(
+        std::string_view name,
+        const V& source,
+        T& target,
+        std::function<U(const V&)> parse,
+        std::function<bool(U)> validate = [](U _) { return true; }
+    )
+    {
+        std::optional<U> parsed_value;
+        std::string err;
+
+        try {
+            U result = parse(source);
+            parsed_value = result;
+
+            if (validate(result)) {
+                target = static_cast<T>(result);
+                return;
+            }
+
+            err = "validation_failure";
+        } catch (const std::invalid_argument& _) {
+            err = "invalid_argument";
+        } catch (const std::out_of_range& _) {
+            err = "out_of_range";
+        }
+
+        auto parse_msg = parsed_value.has_value() ? std::format(" | parsed_value={}", parsed_value.value()) : "";
+
+        throw std::invalid_argument(
+            std::format(
+                "Parse error for value '{}': {}{}",
+                source,
+                err,
+                parse_msg
+            )
+        );
+    }
+
+    template<class T>
+    void Parse_Int(
+        std::string_view name,
+        const int& source,
+        T& target,
+        std::function<bool(int)> validate
+    )
+    {
+        Parse<T, int, int>(
+            name,
+            source,
+            target,
+            [](const int& v) { return v; },
+            validate
+        );
+    }
 };
 
 // RuleSection macro 'methods' - useful for setting variables and class members from rules
@@ -588,7 +674,7 @@ public:
                     CNC_LOGGER_ERROR(
                          "Invalid INI value '{}' for rule: [{}] -> {} | rule_type={} | valid_values={} | parse_error=invalid_argument",
                          s,
-                         Section.SectionName,
+                         Section.Get_Section_Name(),
                          name,
                          C::template Get_Type_Name<T>(),
                          CncStringUtils::To_Csv(type_strings)
@@ -622,7 +708,7 @@ public:
                     CNC_LOGGER_ERROR(
                          "Invalid INI value '{}' for rule: [{}] -> {} | type=list of {}",
                          csv,
-                         Section.SectionName,
+                         Section.Get_Section_Name(),
                          name,
                          C::template Get_Type_Name<T>()
                     );
@@ -831,6 +917,8 @@ public:
 
     RuleSection& Add_Section(std::string_view name);
 
+    RuleSection& Get_Section(std::string_view name);
+
     void Clear();
 
     RuleSection& operator[](std::string_view name);
@@ -843,4 +931,20 @@ private:
 
     std::map<std::string, RuleSection> Sections;
     std::optional<std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)>> OnRulesChangedDefault;
+};
+
+// std::format support for rule value variant
+template <>
+struct std::formatter<RuleValueVariant> : std::formatter<std::string> {
+    auto format(RuleValueVariant value, format_context& ctx) const {
+        return formatter<string>::format(RuleSection::Variant_To_String(value), ctx);
+    }
+};
+
+// spdlog fmt library support for rule value variant (used by spdlog)
+template <>
+struct fmt::formatter<RuleValueVariant> : fmt::formatter<std::string> {
+    auto format(const RuleValueVariant& value, fmt::format_context& ctx) const {
+        return formatter<std::string>::format(RuleSection::Variant_To_String(value), ctx);
+    }
 };

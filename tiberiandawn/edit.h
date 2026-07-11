@@ -70,6 +70,16 @@ public:
         IsReadOnly = rdonly;
     }
 
+    bool Has_Changed() const
+    {
+        return Changed;
+    }
+
+    void Clear_Changed()
+    {
+        Changed = false;
+    }
+
 protected:
     /*
     **	These are the text size and style flags to be used when displaying the text
@@ -107,6 +117,7 @@ protected:
 
 private:
     int IsReadOnly;
+    bool Changed;
 };
 
 // inline EditClass::EditStyle operator |(EditClass::EditStyle, EditClass::EditStyle);

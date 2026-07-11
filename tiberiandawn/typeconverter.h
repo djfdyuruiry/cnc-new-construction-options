@@ -136,9 +136,7 @@ public:
                     continue;
                 }
 
-                const auto ini_string = std::format("{}", i);
-
-                std::pair<T, std::string> pair = { instance, ini_string };
+                std::pair<T, std::string> pair = { instance, std::format("{}", i) };
 
                 instance_pairs.emplace_back(pair);
             }
@@ -303,6 +301,8 @@ public:
         return std::make_optional(instances);
     }
 
+    static void Reset_Rule_Type_Registry();
+
     /**
      * Record that a rule for the given type name requires a converter to read/write from.
      */
@@ -310,11 +310,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static void Register_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
-        if (!RegisteredRuleTypes.contains(type_name)) {
-            RegisteredRuleTypes[type_name] = {};
-        }
-
-        RegisteredRuleTypes[type_name][rule] = Get_Default_Value<T>();
+        RegisteredRuleTypes[type_name.data()][rule.data()] = Get_Default_Value<T>();
     }
 
     /**
@@ -324,11 +320,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static void Register_Csv_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
     {
-        if (!RegisteredCsvRuleTypes.contains(type_name)) {
-            RegisteredCsvRuleTypes[type_name] = {};
-        }
-
-        RegisteredCsvRuleTypes[type_name][rule] = Get_Default_Value<T>();
+        RegisteredCsvRuleTypes[type_name.data()][rule.data()] = Get_Default_Value<T>();
     }
 
     /**
@@ -337,9 +329,25 @@ public:
     static bool Rule_Requires_Converter(const std::string_view& type_name, const std::string_view& rule);
 
     /**
+     * Overload for Rule_Requires_Converter to allow providing source RuleSection directly.
+     */
+    static bool Rule_Requires_Converter(
+        const RuleSection& section,
+        const std::string_view& rule
+    );
+
+    /**
      * Does the given type name rule require a CSV converter to read/write from?
      */
     static bool Rule_Requires_Csv_Converter(const std::string_view& type_name, const std::string_view& rule);
+
+    /**
+     * Overload for Rule_Requires_Csv_Converter to allow providing source RuleSection directly.
+     */
+    static bool Rule_Requires_Csv_Converter(
+        const RuleSection& section,
+        const std::string_view& rule
+    );
 
     /**
      * Get the corresponding variant for a given type rule, it must have been registered by calling
@@ -558,8 +566,8 @@ public:
 
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
-    static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredRuleTypes;
-    static inline std::unordered_map<std::string_view, std::unordered_map<std::string_view, ConverterTypeVariant>> RegisteredCsvRuleTypes;
+    static inline std::unordered_map<std::string, std::unordered_map<std::string, ConverterTypeVariant>> RegisteredRuleTypes;
+    static inline std::unordered_map<std::string, std::unordered_map<std::string, ConverterTypeVariant>> RegisteredCsvRuleTypes;
 
     TdTypeConverter() = delete;
 };
@@ -572,10 +580,26 @@ struct std::formatter<T> : std::formatter<std::string> {
     }
 };
 
-// spdlog fmt library support for TD enum types (used by spdlog
+// spdlog fmt library support for TD enum types (used by spdlog)
 template <SupportedByTdTypeConverter T>
 struct fmt::formatter<T> : fmt::formatter<std::string> {
     auto format(const T& value, fmt::format_context& ctx) const {
         return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
+    }
+};
+
+// std::format support for TD enum variant
+template <>
+struct std::formatter<ConverterTypeVariant> : std::formatter<std::string> {
+    auto format(ConverterTypeVariant value, format_context& ctx) const {
+        return formatter<string>::format(TdTypeConverter::To_String_Variant(value), ctx);
+    }
+};
+
+// spdlog fmt library support for TD enum variant (used by spdlog)
+template <>
+struct fmt::formatter<ConverterTypeVariant> : fmt::formatter<std::string> {
+    auto format(const ConverterTypeVariant& value, fmt::format_context& ctx) const {
+        return formatter<std::string>::format(TdTypeConverter::To_String_Variant(value), ctx);
     }
 };

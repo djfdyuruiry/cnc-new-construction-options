@@ -79,6 +79,7 @@
 EditClass::EditClass(int id, char* text, int max_len, TextPrintType flags, int x, int y, int w, int h, EditStyle style)
     : ControlClass(id, x, y, w, h, LEFTPRESS)
     , String(text)
+    , Changed(false)
 {
     TextFlags = flags;
     EditFlags = style;
@@ -142,6 +143,7 @@ void EditClass::Set_Text(char* text, int max_len)
     String = text;
     MaxLength = max_len - 1;
     Length = strlen(String);
+    Changed = false;
     Flag_To_Redraw();
 }
 
@@ -453,6 +455,7 @@ bool EditClass::Handle_Key(KeyASCIIType ascii)
         */
         String[Length++] = ascii;
         String[Length] = '\0';
+        Changed = true;
         Flag_To_Redraw();
         break;
     }
