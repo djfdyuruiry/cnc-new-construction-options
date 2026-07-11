@@ -1,8 +1,8 @@
 #include "common/ini.h"
 
+#include "function.h"
 #include "dialog.h"
 #include "elist.h"
-#include "function.h"
 
 #ifdef NEWMENU
 
