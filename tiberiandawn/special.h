@@ -242,10 +242,6 @@ public:
     //
     RuleSections* RuleOverrides;
 
-    RuleSections& Overrides();
-
-    const RuleSections& Overrides() const;
-
     /**
      * Set values in this instance based on rule section values.
      */
