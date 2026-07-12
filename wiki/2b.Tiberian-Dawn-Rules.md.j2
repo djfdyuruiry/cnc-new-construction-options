@@ -1,8 +1,31 @@
-Rules files:
+## Rules Editor
+
+The easiest way to change game rules for Tiberian Dawn is to use the in-game editor.
+
+- Launch the game and select `Rules Editor` on the main menu selection screen:
+
+    [<img src="img/td-rules-editor-menu.png" width="400">](img/td-rules-editor-menu.png)
+
+    [<img src="img/td-rules-editor-enhancements.png" width="400">](img/td-rules-editor-enhancements.png)
+
+- You can select an INI file to edit in the top left, use the next dropdown to select a section (See [Rules Files](#rules-files))
+- Navigate through rules using the `Next Page` and `Previous Page` buttons
+- Press the `?` button beside any rule to get help
+- Certain rules will require you to click an `Edit` button to bring up a separate dialog
+
+    [<img src="img/td-rules-editor.png" width="400">](img/td-rules-editor.png)
+
+### Reset Rules
+
+You can reset a single INI file or all rules at once when in the Rules Editor, simply click `Load Defaults`
+
+## Rules Files
+
+You can manually edit game rules by opening one of the following INI text files:
 
 - [rules.ini](#rulesini)
 {% for type in concrete_types %}- [{{ type.name | lower }}.ini](#{{ type.name | lower }}ini)
-{% endfor %} - [Scenario INI](#scenario-ini)
+{% endfor %}- [Scenario INI Files](#scenario-ini)
 
 All rules files are created for you when you first run the game, so run the game once before trying to edit the files.
 
@@ -68,7 +91,7 @@ Rule Sections:
 {% endfor %}```
 {% endfor %}
 
-## Scenario INI
+## Scenario INI Files
 
 You can override any rule from `rules.ini` or from the type ini files (`infantry.ini`, `unit.ini` etc.) inside of the INI file for a given scenario. This is similar to the way Red Alert behaves, but not identical.
 
