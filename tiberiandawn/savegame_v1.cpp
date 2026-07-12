@@ -254,6 +254,8 @@ ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
 SpecialClass SaveGameScenarioState_v1::Parse_MultiPlayer_Special() const
 {
     SpecialClass multi_special;
+    multi_special.RuleOverrides = nullptr;
+
     multi_special.Init();
 
     multi_special = MultiSpecial;
