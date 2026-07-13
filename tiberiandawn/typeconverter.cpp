@@ -90,7 +90,8 @@ const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter:
     ENUM_TYPE_PAIR(UrgencyType,                  "URGENCY_",     URGENCY_NONE,                           URGENCY_FIRST,                            {},                  {},                  false),
     ENUM_TYPE_PAIR(CCPaletteType,                "CC_",          static_cast<CCPaletteType>(TBLACK),     static_cast<CCPaletteType>(WHITE),        CCPalettePatchTable, {},                  false),
     ENUM_TYPE_PAIR(GameType,                     "GAME_",        GAME_NORMAL,                            GAME_GLYPHX_MULTIPLAYER,                  {},                  {},                  false),
-    ENUM_TYPE_PAIR(KeyNumType,                   "KN_",          KN_NONE,                                KN_MOUSEWHEEL_DOWN,                       {},                  {},                  false)
+    ENUM_TYPE_PAIR(KeyNumType,                   "KN_",          KN_NONE,                                KN_MOUSEWHEEL_DOWN,                       {},                  {},                  false),
+    ENUM_TYPE_PAIR(SpecialWeaponType,            "SPC_",         SPC_NONE,                               SPC_AIR_STRIKE,                           {},                  {},                  false)
 };
 
 void TdTypeConverter::Reset_Rule_Type_Registry()
@@ -218,6 +219,7 @@ void TdTypeConverter::Set_Rule_With_Variant(
     RULE_VARIANT(CCPaletteType)
     RULE_VARIANT(GameType)
     RULE_VARIANT(KeyNumType)
+    RULE_VARIANT(SpecialWeaponType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -286,6 +288,7 @@ void TdTypeConverter::Set_Csv_Rule_With_Variant(
     CSV_RULE_VARIANT(CCPaletteType)
     CSV_RULE_VARIANT(GameType)
     CSV_RULE_VARIANT(KeyNumType)
+    CSV_RULE_VARIANT(SpecialWeaponType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -347,6 +350,7 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVaria
     TYPE_NAME_VARIANT(CCPaletteType)
     TYPE_NAME_VARIANT(GameType)
     TYPE_NAME_VARIANT(KeyNumType)
+    TYPE_NAME_VARIANT(SpecialWeaponType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -409,6 +413,7 @@ std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& varia
     TO_STRING_VARIANT(CCPaletteType)
     TO_STRING_VARIANT(GameType)
     TO_STRING_VARIANT(KeyNumType)
+    TO_STRING_VARIANT(SpecialWeaponType)
 
     throw std::invalid_argument("Unsupported ConverterTypeVariant type - this is normally caused by variant being updated without updating supporting code");
 }
@@ -432,6 +437,7 @@ std::optional<std::string> TdTypeConverter::RTTI_Instance_To_String(const RTTITy
         RTTI_TYPE_TO_STRING(RTTI_SMUDGETYPE, SmudgeType, instance_id)
         RTTI_TYPE_TO_STRING(RTTI_TEMPLATETYPE, TemplateType, instance_id)
         RTTI_TYPE_TO_STRING(RTTI_TERRAINTYPE, TerrainType, instance_id)
+        RTTI_TYPE_TO_STRING(RTTI_SPECIAL, SpecialWeaponType, instance_id)
 
         default:
             throw std::invalid_argument(
@@ -467,6 +473,7 @@ std::optional<int> TdTypeConverter::Try_Parse_RTTI_Instance(const RTTIType& type
         TRY_PARSE_RTTI_TYPE(RTTI_SMUDGETYPE, SmudgeType, instance)
         TRY_PARSE_RTTI_TYPE(RTTI_TEMPLATETYPE, TemplateType, instance)
         TRY_PARSE_RTTI_TYPE(RTTI_TERRAINTYPE, TerrainType, instance)
+        TRY_PARSE_RTTI_TYPE(RTTI_SPECIAL, SpecialWeaponType, instance)
 
         default:
             throw std::invalid_argument(

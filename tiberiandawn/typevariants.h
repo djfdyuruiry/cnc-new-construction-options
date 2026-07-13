@@ -58,7 +58,8 @@ concept SupportedByTdTypeConverter = (
     std::is_same_v<T, UrgencyType> ||
     std::is_same_v<T, CCPaletteType> ||
     std::is_same_v<T, GameType> ||
-    std::is_same_v<T, KeyNumType>
+    std::is_same_v<T, KeyNumType> ||
+    std::is_same_v<T, SpecialWeaponType>
 );
 
 // Matches the SupportedByTdTypeConverter Concept types
@@ -114,5 +115,6 @@ using ConverterTypeVariant = std::variant<
     UrgencyType,
     CCPaletteType,
     GameType,
-    KeyNumType
+    KeyNumType,
+    SpecialWeaponType
 >;
