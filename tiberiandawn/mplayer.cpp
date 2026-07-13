@@ -618,7 +618,7 @@ void Read_Scenario_Descriptions(void)
     Loop through all possible scenario numbers; if a file is available, add
     its number to the FileNum list.
     ------------------------------------------------------------------------*/
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < 200; i++) {
         Set_Scenario_Name(Scen.ScenarioName, i, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
         sprintf(fname, "%s.INI", Scen.ScenarioName);
         file.Set_Name(fname);

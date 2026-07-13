@@ -512,6 +512,13 @@ void BulletClass::Draw_It(int x, int y, WindowNumberType window)
         return;
 
     /*
+    **	Guard against shroud.
+    */
+    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
+    /*
     **	Get the basic shape number for this projectile.
     */
     int shapenum = 0;
