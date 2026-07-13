@@ -37,6 +37,8 @@ bool SaveGameResolver::Save(CDFileClass& file, const char* description)
         error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
         error_message = e.what();
+    } catch (const std::invalid_argument& e) {
+        error_message = e.what();
     }
 
     CNC_LOG_ERROR("Error reading game state into {} instance: {}", CURRENT_SAVE_CLASS_NAME, error_message);
@@ -85,6 +87,8 @@ std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
                 } catch (const CncJsonException& e) {
                     error_message = e.what();
                 } catch (const nlohmann::json::exception& e) {
+                    error_message = e.what();
+                } catch (const std::invalid_argument& e) {
                     error_message = e.what();
                 }
 

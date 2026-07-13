@@ -145,5 +145,6 @@ using EnumTypeInfoVariant = std::variant<
     EnumTypeInfo<UrgencyType>,
     EnumTypeInfo<CCPaletteType>,
     EnumTypeInfo<GameType>,
-    EnumTypeInfo<KeyNumType>
+    EnumTypeInfo<KeyNumType>,
+    EnumTypeInfo<SpecialWeaponType>
 >;
