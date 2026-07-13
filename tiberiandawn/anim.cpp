@@ -231,6 +231,14 @@ void AnimClass::Draw_It(int x, int y, WindowNumberType window)
 
     bool render_legacy = !IsInvisible && (Class->VirtualAnim == ANIM_NONE || window != WINDOW_VIRTUAL);
     bool render_virtual = VirtualAnim != NULL && window == WINDOW_VIRTUAL;
+
+    /*
+    **	Guard against shroud.
+    */
+    if (!Debug_Map && !Map[Coord_Cell(Map.Pixel_To_Coord(x, y))].Is_Visible(PlayerPtr)) {
+        return;
+    }
+
     if (render_legacy) {
         void const* shapefile = Class->Get_Image_Data();
         if (shapefile) {
