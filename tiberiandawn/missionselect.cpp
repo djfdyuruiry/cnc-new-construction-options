@@ -157,7 +157,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
         );
     }
 
-    void Add_Mission_To_Cache_If_Present(
+    static void Add_Mission_To_Cache_If_Present(
         const ScenarioPlayerType& player,
         const int& mission,
         const ScenarioDirType& direction,
@@ -201,7 +201,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
      * Find any missions between 1-20 for all three single player campaigns (GDI, NOD and Funpark). Any scenario INI files
      * present will be loaded into the mission cache, containing required metadata to enable correct loading of the mission.
      */
-    void Fill_Mission_Cache()
+    static void Fill_Mission_Cache()
     {
         MissionCache.clear();
 

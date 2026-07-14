@@ -6,8 +6,7 @@
 #include "common/lua/luaengine.h"
 #include "common/atomicqueue.h"
 #include "common/logger.h"
-
-#include "scenario.h"
+#include "common/rulesections.h"
 
 /**
  * Adapter for Lua API to pull in static RulesClass variable.
@@ -47,7 +46,7 @@ public:
         const GameEnum& game_type,
         const ScenarioClass& scenario,
         const HouseClass& player,
-        const std::optional<std::string>& ini,
+        const std::optional<std::string>& ini_script_path,
         bool was_loaded_from_save = false
     );
 
@@ -100,8 +99,8 @@ private:
     static constexpr std::string_view NotFoundStr = "__NOT_FOUND__";
     static inline const auto& Logger = CncLogger::For(ScenarioLua);
     static inline std::optional<UniqueLuaEngine> Engine;
-    static inline std::vector<std::string> ScenarioScripts;
     static inline std::vector<std::string> LuaConsoleInputHistory;
+    static inline std::vector<std::string> ScenarioScripts;
 
     /**
      * API management for TD Lua; think of this like

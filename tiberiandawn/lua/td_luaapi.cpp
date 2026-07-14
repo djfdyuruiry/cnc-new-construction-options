@@ -2,19 +2,21 @@
 
 #include <algorithm>
 
-TiberianDawnLuaApi::TiberianDawnLuaApi(const std::string_view name, const bool has_native_module, const std::vector<std::filesystem::path> scripts): LuaApi(name, has_native_module)
+TiberianDawnLuaApi::TiberianDawnLuaApi(
+    const std::string_view name,
+    const bool has_native_module,
+    const std::vector<std::filesystem::path>& scripts
+): LuaApi(name, has_native_module)
 {
-    std::vector<std::filesystem::path> td_scripts;
+    Scripts.clear();
 
     // Update all scripts to be in the @property{TiberianDawnLuaApi::Td_Directory}
     // subdirectory of the nco library.
     std::ranges::transform(
         scripts,
-        std::back_inserter(td_scripts),
+        std::back_inserter(Scripts),
         [](const auto& s) { return Td_Directory / s; }
     );
-
-    Scripts = td_scripts;
 }
 
 const std::string& TiberianDawnLuaApi::Get_Parent_Lua_Module_Path() const

@@ -12,12 +12,17 @@ void ModifyHouseMoneyLuaEvent::Execute() const
 {
     LuaEvent::Execute();
 
-    auto house = HouseClass::As_Pointer(HouseType);
+    const auto house = HouseClass::As_Pointer(HouseType);
+
+    if (house == nullptr) {
+        CNC_LOG_ERROR("Failed to resolve house type instance: {}", HouseType);
+        return;
+    }
 
     if (MoneyModifier < 0)
     {
         // event wants to take money away from the house
-        auto money_to_spend = -MoneyModifier;
+        const auto money_to_spend = -MoneyModifier;
 
         if (house->Available_Money() - money_to_spend > -1) {
             house->Spend_Money(money_to_spend);

@@ -11,10 +11,9 @@ void DeleteTriggerLuaEvent::Execute() const
 {
     LuaEvent::Execute();
 
-    auto trigger = TriggerClass::As_Pointer(Name.c_str());
-    const auto trigger_exists = trigger != NULL;
+    const auto trigger = TriggerClass::As_Pointer(Name.c_str());
 
-    if (!trigger_exists) {
+    if (trigger == nullptr) {
       CNC_LOGGER_WARN("Ignoring DeleteTrigger event as trigger doesn't exist: {}", Name);
       return;
     }

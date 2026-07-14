@@ -5,7 +5,7 @@
 class PopupLuaEvent : public LuaEvent
 {
 public:
-    PopupLuaEvent(std::string message) ;
+    PopupLuaEvent(std::string message);
 
     void Execute() const override;
 

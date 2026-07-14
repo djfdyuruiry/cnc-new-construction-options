@@ -12,13 +12,13 @@ local function onF5()
 
   Logger.debug("Houses: %s", Utils.arrayToCsv(Scenario.houses.getNames()))
 
-  local value = Rules["Game.Map"].MaxBuildDistance
+  local value = Rules["Enhancements"].MaxBuildDistance
 
   Messages.sendToPlayer(
-    "HELLO THERE, Game.Map=>MaxBuildDistance type: %s",
-    Rules["Game.Map"].getRuleType("MaxBuildDistance")
+    "HELLO THERE, Enhancements=>MaxBuildDistance type: %s",
+    Rules["Enhancements"].getRuleType("MaxBuildDistance")
   )
-  UI.showPopup("OK", "This message came from Lua. Game.Map=>MaxBuildDistance: %d", value)
+  UI.showPopup("OK", "This message came from Lua. Enhancements=>MaxBuildDistance: %d", value)
 
   Rules["Game.Harvesting"].CreditsPerTiberiumScoop = 250
 

@@ -14,7 +14,7 @@ public:
 
     TiberianDawnLuaApi(const std::string_view name, const bool has_native_module) : LuaApi(name, has_native_module) {}
 
-    TiberianDawnLuaApi(std::string_view name, bool has_native_module, std::vector<std::filesystem::path> scripts);
+    TiberianDawnLuaApi(std::string_view name, bool has_native_module, const std::vector<std::filesystem::path>& scripts);
 
 protected:
     const std::string& Get_Parent_Lua_Module_Path() const override;

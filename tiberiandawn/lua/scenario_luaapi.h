@@ -4,8 +4,6 @@
 
 #include "common/lua/luaengine.h"
 
-#include "defines.h"
-
 #include "td_luaapi.h"
 
 class ScenarioLuaApi: public TiberianDawnLuaApi

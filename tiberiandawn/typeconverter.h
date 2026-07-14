@@ -19,8 +19,8 @@
 #include "target.h"
 #include "technotypejsonreference.h"
 #include "type.h"
-#include "typevariants.h"
 #include "typeconvertermacros.h"
+#include "typevariants.h"
 
 /**
  * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.

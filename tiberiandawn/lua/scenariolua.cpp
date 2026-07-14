@@ -49,10 +49,10 @@ void ScenarioLua::On_Scenario_Load(
 
     CNC_LOGGER_INFO("Game engine called Lua hook: On_Scenario_Load");
 
-    auto scenario_name = std::string(scenario.ScenarioName);
+    std::string scenario_name = scenario.ScenarioName;
     std::string scenario_type_name = game_type == GAME_NORMAL ? "single-player" : "multiplayer";
     std::string faction = player.ActLike == HOUSE_GOOD ? "gdi" : "nod";
-    auto house_name = std::string(player.Class->IniName);
+    std::string house_name = player.Class->IniName;
 
     CncStringUtils::To_Lower(scenario_name);
 
@@ -99,7 +99,8 @@ void ScenarioLua::On_Scenario_Load(
     const HouseClass& player,
     const bool was_loaded_from_save
 )
-{    const std::string scenario_ini_file = scenario.FileName;
+{
+    const std::string scenario_ini_file = scenario.FileName;
 
     if (CncStringUtils::Is_Blank(scenario_ini_file)) {
         CNC_LOGGER_DEBUG("Not checking scenario INI for lua scripts - no filename provided");

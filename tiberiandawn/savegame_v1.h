@@ -74,7 +74,7 @@ public:
     std::vector<std::string> ScenarioScripts;
 
     void Read_Globals();
-    bool Validate(GameType scenario_game_type) const;
+    bool Validate() const;
     ScenarioDirType Parse_Scenario_Direction() const;
     ScenarioVarType Parse_Scenario_Variation() const;
     SpecialClass Parse_MultiPlayer_Special() const;
@@ -256,7 +256,7 @@ public:
 
     bool Load_From_File(const std::string& path);
     void Read_Globals();
-    bool Validate(GameType scenario_game_type) const;
+    bool Validate() const;
     bool Write_Globals() const;
     SaveGameData Export_SaveGameData() const;
     void Dump_Json(std::string& output) const;

@@ -58,7 +58,7 @@ void SaveGameScenarioState_v1::Read_Globals()
     ScenarioScripts = ScenarioLua::Get_Scenario_Scripts();
 }
 
-bool SaveGameScenarioState_v1::Validate(const GameType scenario_game_type) const
+bool SaveGameScenarioState_v1::Validate() const
 {
     auto result = true;
 
@@ -265,7 +265,7 @@ SpecialClass SaveGameScenarioState_v1::Parse_MultiPlayer_Special() const
 
 bool SaveGameScenarioState_v1::Write_Globals() const
 {
-    if (!Validate(GameToPlay)) {
+    if (!Validate()) {
         CNC_LOGGER_ERROR("Refusing to write globals from invalid save data");
         return false;
     }
@@ -471,7 +471,7 @@ bool SaveGame_v1::Load_From_File(const std::string& path)
     try {
         from_json(nlohmann::json::parse(save_line), *this);
 
-        return Validate(header.Parse_Game_Type());
+        return Validate();
     } catch (const CncJsonException& e) {
         error_message = e.what();
     } catch (const nlohmann::json::exception& e) {
@@ -505,11 +505,11 @@ void SaveGame_v1::Read_Globals()
     Rules = Rule;
 }
 
-bool SaveGame_v1::Validate(const GameType scenario_game_type) const
+bool SaveGame_v1::Validate() const
 {
     auto result = true;
 
-    result = ScenarioState.Validate(scenario_game_type) && result;
+    result = ScenarioState.Validate() && result;
     result = Objects.Validate() && result;
 
     if (!GameCellTriggers.is_object()) {
@@ -618,7 +618,7 @@ bool SaveGame_v1::Validate(const GameType scenario_game_type) const
 
 bool SaveGame_v1::Write_Globals() const
 {
-    if (!Validate(GameToPlay)) {
+    if (!Validate()) {
         CNC_LOGGER_ERROR("Refusing to write to globals from invalid save data");
         return false;
     }
@@ -648,7 +648,7 @@ bool SaveGame_v1::Write_Globals() const
 
 SaveGameData SaveGame_v1::Export_SaveGameData() const
 {
-    if (!Validate(GameToPlay)) {
+    if (!Validate()) {
         throw std::runtime_error("Refusing to export data from invalid save game");
     }
 
@@ -676,7 +676,7 @@ bool SaveGame_v1::To_File(CDFileClass& save_file, const SaveGameHeader& header) 
         return false;
     }
 
-    if (!header.Validate() || !Validate(header.Parse_Game_Type())) {
+    if (!header.Validate() || !Validate()) {
         save_file.Delete();
         return false;
     }

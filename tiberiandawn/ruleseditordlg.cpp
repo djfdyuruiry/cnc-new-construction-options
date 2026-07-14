@@ -162,8 +162,8 @@ protected:
         Dialog::Render_Background(display);
 
         const auto variant = TdTypeConverter::Get_Rule_Variant(
-            Section.Get_Converter_Section_Type_Name()->data(),
-            RuleName.data()
+            *Section.Get_Converter_Section_Type_Name(),
+            RuleName
         );
         const auto variant_name = TdTypeConverter::Get_Type_Name_Variant(variant);
 
@@ -293,8 +293,8 @@ protected:
 
                 const auto csv_value = CncStringUtils::To_Csv(selected_values);
                 const auto variant = TdTypeConverter::Get_Csv_Rule_Variant(
-                    Section.Get_Converter_Section_Type_Name()->data(),
-                    RuleName.data()
+                    *Section.Get_Converter_Section_Type_Name(),
+                    RuleName
                 );
 
                 TdTypeConverter::Set_Csv_Rule_With_Variant(Section, RuleName, csv_value, variant);
@@ -378,7 +378,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         RulesEditorControls value_control;
     };
 
-    RuleSections& Get_Active_Rule_Sections()
+    RuleSections& Get_Active_Rule_Sections() const
     {
         return ActiveSectionsAreType
             ? Rule.Get_Editable_Type_Rules().at(ActionSectionsTypeName)
@@ -388,7 +388,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     void Iterate_Over_Rules_Page(
         const std::function<void(RuleSection&, const std::string&, const RuleControls&)>& page_slot_handler,
         const std::function<void(const RuleControls&)>& empty_page_slot_handler = [](const auto&){}
-    )
+    ) const
     {
         auto& active_rule_section = Get_Active_Rule_Sections().Get_Section(ActiveRuleSectionName);
 
@@ -436,11 +436,9 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         }
     }
 
-    bool Delete_INI_File_If_Exists(const char* file_name)
+    static bool Delete_INI_File_If_Exists(const char* file_name)
     {
-        CCFileClass ini_file(file_name);
-
-        if (ini_file.Delete()) {
+        if (CCFileClass(file_name).Delete()) {
             // file delete was successful
             return true;
         }
@@ -520,7 +518,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         Load_Current_Rules_Page();
     }
 
-    int Present_Unsaved_Changes_Prompt()
+    static int Present_Unsaved_Changes_Prompt()
     {
         // TODO: Locale file entry
         return WWMessageBox().Process(
@@ -569,7 +567,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         return Save_Updated_Rules();
     }
 
-    void Show_Update_Error_Popup(const std::invalid_argument& error)
+    static void Show_Update_Error_Popup(const std::invalid_argument& error)
     {
         // TODO: Locale file entry
         const auto full_message = std::format(
@@ -748,7 +746,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         return true;
     }
 
-    void On_Help_Click(const RulesEditorControls& control)
+    void On_Help_Click(const RulesEditorControls& control) const
     {
         auto rule_index = control < LEFT_RULE_EDIT_BUTTON
             ? control - LEFT_RULE_HELP_CONTROL
