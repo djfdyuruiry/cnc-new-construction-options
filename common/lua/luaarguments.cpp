@@ -117,7 +117,7 @@ bool LuaArguments::Assert()
         StreamIsValid = false;
     }
 
-    auto result = StreamIsValid.value();
+    const auto result = StreamIsValid.value();
 
     if (!result) {
         Lua.Raise_Error(

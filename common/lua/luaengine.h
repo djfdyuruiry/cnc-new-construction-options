@@ -81,7 +81,7 @@ public:
     static const TwoWayMap<int, std::string_view> LuaTypeMap;
 
     template<LuaVariantCompatible T>
-    static std::string_view Get_Type_Name_For_Variant_Compatible()
+    static const std::string_view& Get_Type_Name_For_Variant_Compatible()
     {
         if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> || std::is_same_v<T, float>) {
             return LuaTypeMap[LUA_TNUMBER].value();
@@ -118,9 +118,9 @@ public:
         RegisteredApis.emplace_back(api.Name);
     }
 
-    luabridge::Namespace Get_Api_Namespace(const std::string_view name) const;
+    luabridge::Namespace Get_Api_Namespace(std::string_view name) const;
 
-    void With_Api_Namespace(const std::string_view name, const std::function<void(luabridge::Namespace&)>& action) const;
+    void With_Api_Namespace(std::string_view name, const std::function<void(luabridge::Namespace&)>& action) const;
 
     #pragma endregion
 
@@ -214,7 +214,7 @@ public:
 
     int Get_Lua_Type_Code(int stack_index = -1) const;
 
-    std::string_view Get_Lua_Type(const int& stack_index = -1) const;
+    const std::string_view& Get_Lua_Type(const int& stack_index = -1) const;
 
     bool Is_Nil(int stack_index = -1) const;
 
@@ -245,7 +245,7 @@ public:
      * Read a value from the stack, with type checking.
      */
     template<LuaVariantCompatible T>
-    LuaResultWithValue<T> Try_Read(int stack_index = -1) const
+    LuaResultWithValue<T> Try_Read(const int stack_index = -1) const
     {
         return Get_Value_From_State<LuaResultWithValue<T>>([&](auto L) {
             if (!Is_Type<T>(stack_index)) {
@@ -270,7 +270,7 @@ public:
                 );
             } else if constexpr (std::is_same_v<T, float>) {
                 return LuaResultWithValue<T>(
-                    (float)lua_tonumber(L, stack_index)
+                    static_cast<float>(lua_tonumber(L, stack_index))
                 );
             } else if constexpr (std::is_same_v<T, bool>) {
                 return LuaResultWithValue<T>(
@@ -288,7 +288,7 @@ public:
 
     LuaResultWithValue<LuaVariant> Try_Read_Variant(const int& stack_index = -1) const;
 
-    const std::string_view Get_Variant_Type(const LuaVariant& lua_variant) const;
+    const std::string_view& Get_Variant_Type(const LuaVariant& lua_variant) const;
 
     template<LuaVariantCompatible T>
     LuaResultWithValue<T> Try_Read_Table_Field(

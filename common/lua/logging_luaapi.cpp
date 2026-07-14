@@ -57,7 +57,7 @@ void LoggingLuaApi::Register_Functions(LuaEngine& engine) const
             arguments.Assert_String_Parameter_Is_Valid("location", location);
             Assert_Level_Value(engine, level);
 
-             const auto log_level = spdlog::level::from_str(level);
+            const auto log_level = spdlog::level::from_str(level);
 
             LuaLogger()->log(
                 log_level,

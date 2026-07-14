@@ -110,7 +110,7 @@ bool CncLogger::Load_Env_Log_Levels()
     return log_env_defined;
 }
 
-std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string name)
+std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string& name)
 {
     auto logger = std::make_shared<spdlog::async_logger>(
         name,
@@ -121,7 +121,7 @@ std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string 
     );
 
 #ifndef REMASTER_BUILD
-    // ensure any error/critical messages trigger a flush, due to increased likelyhood that the process might crash
+    // ensure any error/critical messages trigger a flush, due to increased likelihood that the process might crash
     logger->flush_on(spdlog::level::err);
 #else
     // BUG: not all log messages reach the file in remaster, so make everything other than debug/trace trigger a flush

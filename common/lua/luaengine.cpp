@@ -108,8 +108,8 @@ std::future<LuaResult> LuaEngine::Exec_Async(const std::string& script) const
     std::thread([this, script, promise]() {
         const auto result = Exec(script);
 
-        // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend
-        //       , user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
+        // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend,
+        //       user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
         if (!result.Is_Ok()) {
             CNC_LOGGER_ERROR(
                 "Error from background lua script: {} | script: {}",
@@ -134,7 +134,6 @@ LuaResult LuaEngine::Exec_File(const std::filesystem::path& script_path) const
         auto status = luaL_loadfile(L, full_script_path.string().c_str());
 
         if (status != LUA_OK) {
-            return LuaResult(L, status);
             auto result = LuaResult(L, status);
 
             CNC_LOGGER_TRACE(
@@ -142,6 +141,7 @@ LuaResult LuaEngine::Exec_File(const std::filesystem::path& script_path) const
                 full_script_path.string(),
                 result.Error_Message()
             );
+
             return result;
         }
 
@@ -182,8 +182,8 @@ std::future<LuaResult> LuaEngine::Exec_File_Async(const std::filesystem::path& s
     std::thread([this, script_path, promise]() {
         const auto result = Exec_File(script_path);
 
-        // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend
-        //       , user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
+        // TODO: Idea - fire a popup/show message event, have some hook to report errors for game engine to extend,
+        //       user would get a nice popup/message with the lua error (we could have a lua debug rule to control this)
         if (!result.Is_Ok()) {
             // TODO: output debug info - maybe have a method in LuaEvent that builds a standard error message for logging or logs directly
             CNC_LOGGER_ERROR(
@@ -230,7 +230,7 @@ int LuaEngine::Get_Lua_Type_Code(int stack_index) const
     });
 }
 
-std::string_view LuaEngine::Get_Lua_Type(const int& stack_index) const
+const std::string_view& LuaEngine::Get_Lua_Type(const int& stack_index) const
 {
     const auto type_code = Get_Lua_Type_Code(stack_index);
 
@@ -351,7 +351,7 @@ LuaResultWithValue<LuaVariant> LuaEngine::Try_Read_Variant(const int& stack_inde
     });
 }
 
-const std::string_view LuaEngine::Get_Variant_Type(const LuaVariant& lua_variant) const
+const std::string_view& LuaEngine::Get_Variant_Type(const LuaVariant& lua_variant) const
 {
     if (std::holds_alternative<std::string>(lua_variant)) {
         return LuaTypeMap[LUA_TSTRING].value();

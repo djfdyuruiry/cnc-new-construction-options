@@ -10,8 +10,8 @@ public:
     static void Push_Rule_Type(
         const LuaEngine& engine,
         const RuleSections& sections,
-        std::string section,
-        std::string key
+        const std::string& section,
+        const std::string& key
     );
 
     /**
@@ -22,8 +22,8 @@ public:
     static void Push_Rule_Value(
         const LuaEngine& engine,
         const RuleSections& sections,
-        std::string section,
-        std::string key
+        const std::string& section,
+        const std::string& key
     );
 
     template<LuaVariantCompatible T, RuleValueVariantCompatible U>

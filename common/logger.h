@@ -79,7 +79,7 @@ private:
 
     static bool Load_Env_Log_Levels();
 
-    static std::shared_ptr<spdlog::async_logger> Build_Logger(std::string name);
+    static std::shared_ptr<spdlog::async_logger> Build_Logger(const std::string& name);
 
     static void Init_SpdLog();
 

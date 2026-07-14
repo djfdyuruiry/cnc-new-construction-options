@@ -45,12 +45,12 @@ void CncStringUtils::To_Title_Case(std::string& subject, const std::vector<char>
     auto last_char_was_separator = false;
 
     // transform the first character to uppercase
-    subject[0] = std::toupper(subject[0]);
+    subject[0] = static_cast<char>(std::toupper(subject[0]));
 
     // transform any character that comes directly after a word separator to uppercase
     for (auto& c : subject) {
         if (last_char_was_separator) {
-            c = std::toupper(c);
+            c = static_cast<char>(std::toupper(c));
         }
 
         last_char_was_separator = c == ' ' || c == '/';
