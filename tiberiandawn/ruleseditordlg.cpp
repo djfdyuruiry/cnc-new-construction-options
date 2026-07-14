@@ -27,20 +27,17 @@ protected:
 
     void Init_Data() override
     {
-        const auto rule_variant = Section.Get_Variant(RuleName.data());
+        const auto rule_variant = Section.Get_Variant(RuleName);
         const auto string_value = RuleSection::Variant_To_String(rule_variant);
 
         const auto converter_variant = TdTypeConverter::Get_Rule_Variant(
-            Section.Get_Converter_Section_Type_Name()->data(),
-            RuleName.data()
+            *Section.Get_Converter_Section_Type_Name(),
+            RuleName
         );
         auto& dropdown = Get_Control<VALUE_DROPDOWN, DropListClass>();
         auto value_index = 0;
 
-        std::visit([&](auto t) {
-            using T = std::decay_t<decltype(t)>;
-            ValidValues = TdTypeConverter::Get_Valid_Strings<T>();
-        }, converter_variant);
+        ValidValues = TdTypeConverter::Get_Valid_Strings_Variant(converter_variant);
 
         for (const auto& str : ValidValues) {
             dropdown.Add_Item(str.c_str());
@@ -113,8 +110,8 @@ protected:
                 const std::string selected_value = dropdown.Current_Item();
 
                 const auto variant = TdTypeConverter::Get_Rule_Variant(
-                    Section.Get_Converter_Section_Type_Name()->data(),
-                    RuleName.data()
+                    *Section.Get_Converter_Section_Type_Name(),
+                    RuleName
                 );
 
                 TdTypeConverter::Set_Rule_With_Variant(Section, RuleName, selected_value, variant);
@@ -217,10 +214,7 @@ protected:
 
         auto& checklist = Get_Control<VALUES_CHECKLIST, CheckListClass>();
 
-        std::visit([&](auto t) {
-            using T = std::decay_t<decltype(t)>;
-            ValidValues = TdTypeConverter::Get_Valid_Strings<T>();
-        }, csv_variant);
+        ValidValues = TdTypeConverter::Get_Valid_Strings_Variant(csv_variant);
 
         for (const auto& str : ValidValues) {
             checklist.Add_Item(str.data());
@@ -323,8 +317,8 @@ protected:
         Dialog::Render_Background(display);
 
         const auto variant = TdTypeConverter::Get_Csv_Rule_Variant(
-            Section.Get_Converter_Section_Type_Name()->data(),
-            RuleName.data()
+            *Section.Get_Converter_Section_Type_Name(),
+            RuleName
         );
         const auto& variant_name = TdTypeConverter::Get_Type_Name_Variant(variant);
 
@@ -1190,8 +1184,8 @@ protected:
 
         auto& file_dropdown = Get_Control<FILE_DROPDOWN, DropListClass>();
         auto& section_dropdown = Get_Control<SECTION_DROPDOWN, DropListClass>();
-        auto file_was_dropped = file_dropdown.IsDropped;
-        auto section_was_dropped = section_dropdown.IsDropped;
+        const auto file_was_dropped = file_dropdown.IsDropped;
+        const auto section_was_dropped = section_dropdown.IsDropped;
 
         const auto input = Dialog::Get_Input(display);
 

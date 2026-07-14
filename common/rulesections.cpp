@@ -6,25 +6,11 @@ TO_JSON(RuleValueVariant)
 {
     j["type"]= RuleSection::Get_Variant_Type(p);
 
-    if (const auto value = std::get_if<int>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<bool>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<float>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<ushort>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<std::string>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<uint>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<char>(&p)) {
-        j["value"] = *value;
-    } else if (const auto value = std::get_if<uchar>(&p)) {
-        j["value"] = *value;
-    } else {
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-    }
+    std::visit([&](const auto& t) {
+        using T = std::decay_t<decltype(t)>;
+
+        j["value"] = std::get<T>(p);
+    }, p);
 }
 
 FROM_JSON(RuleValueVariant)
@@ -141,7 +127,7 @@ std::string RuleSection::Get_Variant_Values(const RuleValueVariant& value_varian
         return std::format("{}-{}", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     }
     if (std::holds_alternative<bool>(value_variant)) {
-        return "true/false";
+        return "true/false/yes/no";
     }
     if (std::holds_alternative<float>(value_variant)) {
         return std::format("{}-{}", std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
@@ -167,32 +153,15 @@ std::string RuleSection::Get_Variant_Values(const RuleValueVariant& value_varian
 
 std::string RuleSection::Variant_To_String(const RuleValueVariant& value_variant)
 {
-    if (const auto value = std::get_if<int>(&value_variant)) {
-        return std::format("{}", *value);
-    }
-    if (const auto value = std::get_if<bool>(&value_variant)) {
-        return std::format("{}", *value);
-    }
-    if (const auto value = std::get_if<float>(&value_variant)) {
-        return std::format("{:.2f}", *value);
-    }
-    if (const auto value = std::get_if<ushort>(&value_variant)) {
-        return std::format("{}", *value);
-    }
-    if (const auto value = std::get_if<std::string>(&value_variant)) {
-        return *value;
-    }
-    if (const auto value = std::get_if<uint>(&value_variant)) {
-        return std::format("{}", *value);
-    }
-    if (const auto value = std::get_if<char>(&value_variant)) {
-        return std::format("{}", static_cast<int>(*value));
-    }
-    if (const auto value = std::get_if<uchar>(&value_variant)) {
-        return std::format("{}", static_cast<unsigned int>(*value));
-    }
+    return std::visit([&](const auto& t) {
+        using T = std::decay_t<decltype(t)>;
 
-    throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
+        if constexpr (std::is_same_v<T, float>) {
+            return std::format("{:.2f}", std::get<T>(value_variant));
+        }
+
+        return std::format("{}", std::get<T>(value_variant));
+    }, value_variant);
 }
 
 const std::string& RuleSection::Get_Section_Name() const

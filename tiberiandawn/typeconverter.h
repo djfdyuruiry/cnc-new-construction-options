@@ -417,6 +417,8 @@ public:
 
     static std::string To_String_Variant(const ConverterTypeVariant& variant);
 
+    static std::vector<std::string> Get_Valid_Strings_Variant(const ConverterTypeVariant& variant);
+
     static std::optional<std::string> RTTI_Instance_To_String(const RTTIType& type, const int& instance_id);
 
     static std::optional<int> Try_Parse_RTTI_Instance(const RTTIType& type, const std::string& instance);
