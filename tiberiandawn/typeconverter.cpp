@@ -1,4 +1,5 @@
 #include "function.h"
+
 #include "typeconverter.h"
 
 /**
@@ -66,7 +67,7 @@ const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter:
     ENUM_TYPE_PAIR(MPHType,                      "MPH_",         MPH_IMMOBILE,                           MPH_LIGHT_SPEED,                          {},                  {},                  true),
     ENUM_TYPE_PAIR(OverlayType,                  "OVERLAY_",     OVERLAY_NONE,                           OVERLAY_LAST,                             {},                  {},                  false),
     ENUM_TYPE_PAIR(PlayerColorType,              "REMAP_",       REMAP_NONE,                             REMAP_LAST,                               {},                  {},                  false),
-    ENUM_TYPE_PAIR(RadarEnum,                    "RADAR_",       RADAR_NONE,                             RADAR_OFF,                                {},                  {},                  false),
+    ENUM_TYPE_PAIR(RadarEnum,                    "RADAR_",       RADAR_NONE,                             RADAR_ON,                                 {},                  {},                  false),
     ENUM_TYPE_PAIR(RadioMessageType,             "RADIO_",       RADIO_STATIC,                           RADIO_ON_DEPOT,                           {},                  {},                  false),
     ENUM_TYPE_PAIR(RTTIType,                     "RTTI_",        RTTI_NONE,                              RTTI_LAST,                                {},                  {},                  false),
     ENUM_TYPE_PAIR(ScenarioDirType,              "SCEN_DIR_",    SCEN_DIR_NONE,                          SCEN_DIR_LAST,                            {},                  {},                  false),
