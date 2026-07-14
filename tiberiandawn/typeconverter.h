@@ -22,6 +22,8 @@
 #include "typeconvertermacros.h"
 #include "typevariants.h"
 
+#define TYPE_ID(TYPE) typeid(TYPE).hash_code()
+
 /**
  * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.
  *
@@ -42,30 +44,28 @@
  *
  * To add a new type to the converter:
  *
- *   - Add type to SupportedByTdTypeConverter, ConverterTypeVariant and EnumTypeInfoVariant (see typevariants.h)
+ *   - Add type to TD_ENUMS_FORMAT macro (see typevariants.h)
  *   - Add entry to TdTypeConverter::EnumTypes with relevant values (see enumtypeinfo.h)
- *   - Update Variant method bodies in typeconverter.cpp to handle new types
+ *
  */
 class TdTypeConverter final
 {
 public:
     static constexpr std::string_view EnumPostfix = "Type";
-    static const std::unordered_map<std::string, std::string_view> TypeNamePatchTable;
-    static const std::unordered_map<std::string_view, EnumTypeInfoVariant> EnumTypes;
+    static const std::unordered_map<size_t, std::string_view> TypeNamePatchTable;
+    static const std::unordered_map<size_t, EnumTypeInfoVariant> EnumTypes;
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static const EnumTypeInfo<T>& Get_Info_For_Type()
     {
-        const auto type_name = Get_Type_Name<T>();
-
-        if (!EnumTypes.contains(type_name)) {
+        if (!EnumTypes.contains(TYPE_ID(T))) {
             throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
                                         "this is normally caused by variant being updated without updating "
                                         "supporting code");
         }
 
-        const auto& type_info_variant = EnumTypes.at(type_name);
+        const auto& type_info_variant = EnumTypes.at(TYPE_ID(T));
         const auto type_info_ptr = std::get_if<EnumTypeInfo<T>>(&type_info_variant);
 
         if (type_info_ptr == nullptr) {
@@ -396,8 +396,8 @@ public:
             // get enum type name and remove EnumPostfix
             const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
 
-            if (TypeNamePatchTable.contains(raw_type_name)) {
-                type_name = TypeNamePatchTable.at(raw_type_name);
+            if (TypeNamePatchTable.contains(TYPE_ID(T))) {
+                type_name = TypeNamePatchTable.at(TYPE_ID(T));
                 return;
             }
 
@@ -578,7 +578,7 @@ private:
 template <SupportedByTdTypeConverter T>
 struct std::formatter<T> : std::formatter<std::string> {
     auto format(T value, format_context& ctx) const {
-        return formatter<string>::format(TdTypeConverter::To_String(value), ctx);
+        return formatter<string>::format(TdTypeConverter::To_String_Variant(value), ctx);
     }
 };
 
@@ -586,7 +586,7 @@ struct std::formatter<T> : std::formatter<std::string> {
 template <SupportedByTdTypeConverter T>
 struct fmt::formatter<T> : fmt::formatter<std::string> {
     auto format(const T& value, fmt::format_context& ctx) const {
-        return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
+        return formatter<std::string>::format(TdTypeConverter::To_String_Variant(value), ctx);
     }
 };
 

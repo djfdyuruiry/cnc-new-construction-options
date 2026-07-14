@@ -5,10 +5,10 @@
 /**
  * Make some type names more human-readable or less confusing.
  */
-const std::unordered_map<std::string, std::string_view> TdTypeConverter::TypeNamePatchTable = {
-    { NAMEOF(AnimType), "Animation" },
-    { NAMEOF(HousesType), "House" },
-    { NAMEOF(StructType), "Building" }
+const std::unordered_map<size_t, std::string_view> TdTypeConverter::TypeNamePatchTable = {
+    { TYPE_ID(AnimType), "Animation" },
+    { TYPE_ID(HousesType), "House" },
+    { TYPE_ID(StructType), "Building" }
 };
 
 /**
@@ -34,11 +34,11 @@ static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
 static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 static const std::vector VocExcludes = {VOC_FIRST, VOC_COUNT};
 
-#define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
+#define ENUM_TYPE_PAIR(TYPE, ...) { typeid(TYPE).hash_code(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
 // Info about each enum supported type, indexed against it's typename
-const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
-    //            [Typename]                    [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]    [Excluded Vals]      [Allow non-enum values?]
+const std::unordered_map<size_t, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
+    //             [Typename]                    [Prefix]        [Min Valid Val]                         [Max Valid Val]                           [INI Patch Table]    [Excluded Vals]      [Allow non-enum values?]
     ENUM_TYPE_PAIR(AircraftType,                 "AIRCRAFT_",    AIRCRAFT_NONE,                          AIRCRAFT_LAST,                            AircraftPatchTable,  {},                  false),
     ENUM_TYPE_PAIR(AnimType,                     "ANIM_",        ANIM_NONE,                              ANIM_LAST,                                AnimPatchTable,      {},                  false),
     ENUM_TYPE_PAIR(ArmorType,                    "ARMOR_",       ARMOR_NONE,                             ARMOR_LAST,                               {},                  {},                  false),

@@ -696,8 +696,9 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
                 } else {
                     Get_Control<EditClass>(value_control).Enable();
                     Get_Control<TextButtonClass>(edit_button).Disable(true);
-                    Get_Control<TextButtonClass>(help_button).Enable();
                 }
+
+                Get_Control<TextButtonClass>(help_button).Enable();
             },
             [&] (const auto& controls) {
                 // clear and disable unneeded controls
