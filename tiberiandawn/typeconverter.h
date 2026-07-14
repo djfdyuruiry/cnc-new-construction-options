@@ -19,8 +19,8 @@
 #include "target.h"
 #include "technotypejsonreference.h"
 #include "type.h"
-#include "typevariants.h"
 #include "typeconvertermacros.h"
+#include "typevariants.h"
 
 /**
  * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.
@@ -416,6 +416,8 @@ public:
     static std::string_view Get_Type_Name_Variant(const ConverterTypeVariant& variant);
 
     static std::string To_String_Variant(const ConverterTypeVariant& variant);
+
+    static std::vector<std::string> Get_Valid_Strings_Variant(const ConverterTypeVariant& variant);
 
     static std::optional<std::string> RTTI_Instance_To_String(const RTTIType& type, const int& instance_id);
 

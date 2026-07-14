@@ -304,19 +304,23 @@ protected:
                     MPlayerBases = option_list.Is_Checked(0);
 
                     if (MPlayerBases) {
-                        MPlayerUnitCount = Fixed_To_Cardinal(
-                            MPlayerCountMax[1] - MPlayerCountMin[1],
-                            Cardinal_To_Fixed(
-                                MPlayerCountMax[0] - MPlayerCountMin[0],
-                                MPlayerUnitCount - MPlayerCountMin[0]
+                        MPlayerUnitCount = static_cast<int>(
+                            Fixed_To_Cardinal(
+                                MPlayerCountMax[1] - MPlayerCountMin[1],
+                                Cardinal_To_Fixed(
+                                    MPlayerCountMax[0] - MPlayerCountMin[0],
+                                    MPlayerUnitCount - MPlayerCountMin[0]
+                                )
                             )
                         ) + MPlayerCountMin[1];
                     } else {
-                        MPlayerUnitCount = Fixed_To_Cardinal(
-                            MPlayerCountMax[0] - MPlayerCountMin[0],
-                            Cardinal_To_Fixed(
-                                MPlayerCountMax[1] - MPlayerCountMin[1],
-                                MPlayerUnitCount - MPlayerCountMin[1]
+                        MPlayerUnitCount = static_cast<int>(
+                            Fixed_To_Cardinal(
+                                MPlayerCountMax[0] - MPlayerCountMin[0],
+                                Cardinal_To_Fixed(
+                                    MPlayerCountMax[1] - MPlayerCountMin[1],
+                                    MPlayerUnitCount - MPlayerCountMin[1]
+                                )
                             )
                         ) + MPlayerCountMin[0];
                     }
@@ -396,7 +400,7 @@ protected:
 
     KeyNumType Get_Input(DialogRedrawType& display) override
     {
-        auto& house_dropdown = Get_Control<DropListClass>(BUTTON_HOUSE);
+        const auto& house_dropdown = Get_Control<DropListClass>(BUTTON_HOUSE);
         const bool droplist_is_dropped = house_dropdown.IsDropped;
         std::vector<SkirmishControls> ai_diffs_collapsed;
         std::vector<SkirmishControls> ai_houses_collapsed;
@@ -659,7 +663,7 @@ protected:
 
         auto& level_gauge = Get_Control<GaugeClass>(BUTTON_LEVEL);
         level_gauge.Set_Maximum(MPLAYER_BUILD_LEVEL_MAX - 1);
-        level_gauge.Set_Value(BuildLevel - 1);
+        level_gauge.Set_Value(static_cast<int>(BuildLevel) - 1);
 
         auto& count_gauge = Get_Control<GaugeClass>(BUTTON_COUNT);
         count_gauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);

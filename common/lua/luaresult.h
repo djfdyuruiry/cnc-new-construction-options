@@ -76,7 +76,7 @@ public:
     }
 
     // L param is to prevent conflicts when T == std::string
-    LuaResultWithValue(lua_State* L, std::string error) : LuaResult(error) {}
+    LuaResultWithValue(lua_State* L, std::string error) : LuaResult(std::move(error)) {}
 
     const LuaResultWithValue& If_Value(std::function<void(T)> action) const
     {

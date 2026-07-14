@@ -4,7 +4,6 @@
 #include "common/rulesections.h"
 
 #include "function.h"
-#include "object.h"
 #include "type.h"
 #include "typeconverter.h"
 

@@ -3,8 +3,8 @@
 void RulesLuaAdapter::Push_Rule_Type(
     const LuaEngine& engine,
     const RuleSections& sections,
-    std::string section,
-    std::string key
+    const std::string& section,
+    const std::string& key
 )
 {
     Assert_Rule_Exists(engine, sections, section, key);
@@ -37,32 +37,18 @@ void RulesLuaAdapter::Push_Rule_Type(
 
 void RulesLuaAdapter::Push_Rule_Variant(const LuaEngine& engine, const RuleValueVariant& variant)
 {
-    if (const auto value = std::get_if<int>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<uint>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<char>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<uchar>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<ushort>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<float>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<bool>(&variant)) {
-        engine.Push_Value(*value);
-    } else if (const auto value = std::get_if<std::string>(&variant)) {
-        engine.Push_Value(*value);
-    } else {
-        throw std::invalid_argument("Unsupported RuleValueVariant type - this is normally caused by variant type list being updated without updating supporting code");
-    }
+    std::visit([&](const auto& t) {
+        using T = std::decay_t<decltype(t)>;
+
+        engine.Push_Value(std::get<T>(variant));
+    }, variant);
 }
 
 void RulesLuaAdapter::Push_Rule_Value(
     const LuaEngine& engine,
     const RuleSections& sections,
-    std::string section,
-    std::string key
+    const std::string& section,
+    const std::string& key
 )
 {
     Assert_Rule_Exists(engine, sections, section, key);

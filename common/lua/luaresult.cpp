@@ -27,7 +27,7 @@ LuaResult::LuaResult(lua_State* L, int code): LuaCode(code)
 
 LuaResult::LuaResult(std::string error): LuaCode(LUA_ERRERR + 1)
 {
-    Error = std::make_optional(error);
+    Error = std::make_optional(std::move(error));
 }
 
 bool LuaResult::Is_Ok() const{

@@ -18,18 +18,22 @@ void AddTriggerLuaEvent::Execute() const
         Definition
     );
 
-    auto trigger = new TriggerClass();
+    const auto trigger = new TriggerClass();
 
     trigger->Fill_In(
         Name.c_str(),
         Definition.c_str()
     );
 
-    if (trigger->House != HOUSE_NONE) {
-        if (trigger->Action == TriggerClass::ActionType::ACTION_ALLOWWIN) {
-            HouseClass::As_Pointer(trigger->House)->Blockage++;
-        }
-        HouseTriggers[trigger->House].Add(trigger);
-        trigger->AttachCount++;
+    if (trigger->House == HOUSE_NONE) {
+        // not a house trigger
+        return;
     }
+
+    if (trigger->Action == TriggerClass::ActionType::ACTION_ALLOWWIN) {
+        HouseClass::As_Pointer(trigger->House)->Blockage++;
+    }
+
+    HouseTriggers[trigger->House].Add(trigger);
+    trigger->AttachCount++;
 }

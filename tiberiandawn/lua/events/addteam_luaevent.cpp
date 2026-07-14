@@ -19,8 +19,7 @@ void AddTeamLuaEvent::Execute() const
         Definition
     );
 
-    auto team_type = new TeamTypeClass();
+    const auto team_type = new TeamTypeClass();
 
     team_type->Fill_In(Name.c_str(), Definition.c_str());
 }
-

@@ -8,7 +8,7 @@ void GameLuaApi::Register_Functions(LuaEngine& engine) const
         n.addCFunction("win", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            if (!PlayerPtr) {
+            if (PlayerPtr == nullptr) {
                 engine.Raise_Error("Attempted to lose game when PlayerPtr was null");
             }
 
@@ -19,7 +19,7 @@ void GameLuaApi::Register_Functions(LuaEngine& engine) const
         .addCFunction("lose", [](auto L) {
             const auto engine = SharedLuaEngine(L);
 
-            if (!PlayerPtr) {
+            if (PlayerPtr == nullptr) {
                 engine.Raise_Error("Attempted to lose game when PlayerPtr was null");
             }
 

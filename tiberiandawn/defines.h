@@ -226,10 +226,9 @@ typedef enum DiffType : signed char
     DIFF_EASY,
     DIFF_NORMAL,
     DIFF_HARD,
-
-    DIFF_COUNT,
-    DIFF_FIRST = 0,
-    DIFF_LAST = DIFF_HARD
+    DIFF_FIRST = DIFF_EASY,
+    DIFF_LAST = DIFF_HARD,
+    DIFF_COUNT
 } DiffType;
 
 /**********************************************************************

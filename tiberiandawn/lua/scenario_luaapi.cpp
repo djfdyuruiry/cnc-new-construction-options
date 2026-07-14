@@ -50,7 +50,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             auto house_name_table = LuaTableBuilder::Push_New_Table(engine);
 
-            for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; i++) {
+            for(auto i = HOUSE_FIRST; i < HOUSE_COUNT; ++i) {
                 house_name_table.With_Index_Value(
                     HouseTypeClass::As_Reference(i).IniName
                 );
@@ -66,9 +66,12 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             const auto name = arguments.Read_First<std::string>().Unpack();
 
-            const auto house = HouseClass::As_Pointer(
-                TdTypeConverter::Assert_Parse_Lua_String<HousesType>(engine, name)
-            );
+            const auto house_type = TdTypeConverter::Assert_Parse_Lua_String<HousesType>(engine, name);
+            const auto house = HouseClass::As_Pointer(house_type);
+
+            if (house == nullptr) {
+                engine.Raise_Error_Format("Failed to resolve instance for house: {}", house_type);
+            }
 
             engine.Push_Value(
                 house->Available_Money()
@@ -117,9 +120,9 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             auto team_type_name = arguments.Read_First<std::string>().Unpack();
 
-            auto team_type = TeamTypeClass::As_Pointer(team_type_name.data());
+            const auto team_type = TeamTypeClass::As_Pointer(team_type_name.data());
 
-            if (team_type == NULL) {
+            if (team_type == nullptr) {
                 engine.Raise_Error_Format("TeamType not found: {}", team_type_name);
             }
 
@@ -186,9 +189,9 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             const auto trigger_name = arguments.Read_First<std::string>().Unpack();
 
-            auto trigger = TriggerClass::As_Pointer(trigger_name.c_str());
+            const auto trigger = TriggerClass::As_Pointer(trigger_name.c_str());
 
-            if (trigger == NULL) {
+            if (trigger == nullptr) {
                 engine.Raise_Error_Format("Trigger not found: {}", trigger_name);
             }
 
@@ -232,7 +235,7 @@ void ScenarioLuaApi::Register_Functions(LuaEngine& engine) const
 
             // return value
             const auto trigger = TriggerClass::As_Pointer(name.c_str());
-            auto trigger_exists = trigger != NULL;
+            const auto trigger_exists = trigger != nullptr;
 
             engine.Push_Value(trigger_exists);
 

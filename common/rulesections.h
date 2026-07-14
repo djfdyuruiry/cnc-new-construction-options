@@ -27,10 +27,8 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <typeinfo>
 #include <variant>
 
-#include "fixed.h"
 #include "ini.h"
 #include "json.h"
 #include "logger.h"
@@ -135,7 +133,7 @@ public:
     {
         // if entry has an existing value, keep it if parsing fails - apply default_value when no existing value found
         const auto entry_has_existing_value = Has_Key(name);
-        const auto resolved_default_value = entry_has_existing_value ? Get<T>(name) : default_value;
+        const auto resolved_default_value = entry_has_existing_value ? Get<T>(name) : std::move(default_value);
 
         if (entry_has_existing_value) {
             CNC_LOGGER_DEBUG(
@@ -647,7 +645,7 @@ public:
     template<RuleValueVariantCompatible T>
     IniRuleContext& Load(std::string_view name, T default_value)
     {
-        Section.Load_From_Ini(Context, name, default_value);
+        Section.Load_From_Ini(Context, name, std::move(default_value));
 
         ValueInStream = Section.Get<T>(name);
 
@@ -787,7 +785,7 @@ public:
             CNC_LOGGER_FATAL("Load(..) must be called before With_Default(..)");
         }
 
-        Load(NameInStream.value(), default_value);
+        Load(NameInStream.value(), std::move(default_value));
 
         return *this;
     }

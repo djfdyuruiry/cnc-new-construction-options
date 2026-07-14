@@ -5,8 +5,8 @@
 #include "logger.h"
 
 #include "luaapi.h"
-#include "luaengine.h"
 #include "luaarguments.h"
+#include "luaengine.h"
 
 // Method implementations
 void LuaApi::With_Api_Namespace(const LuaEngine& engine, const std::function<void(luabridge::Namespace&)>& action) const

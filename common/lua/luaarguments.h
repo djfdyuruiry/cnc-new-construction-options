@@ -1,9 +1,9 @@
 #pragma once
 
 #include <algorithm>
-#include <map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "logger.h"
@@ -63,7 +63,7 @@ public:
     }
 
     template<LuaVariantCompatible T>
-    T Get(std::string key)
+    T Get(const std::string& key)
     {
         return std::get<T>(Data[key]);
     }
@@ -131,7 +131,7 @@ public:
     // TODO: With_Values<T> to assert entire array is of type
 
     template<LuaVariantCompatible T>
-    T Get(int idx)
+    T Get(const int idx)
     {
         return std::get<T>(Data[idx]);
     }

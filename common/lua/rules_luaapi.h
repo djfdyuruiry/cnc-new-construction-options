@@ -37,7 +37,7 @@ public:
             n.addCFunction("getSectionNames", [](auto L) {
                 auto engine = SharedLuaEngine(L);
 
-                auto section_names = R::Sections().Section_Names();
+                const auto section_names = R::Sections().Section_Names();
                 auto table_builder = LuaTableBuilder::Push_New_Table(engine);
 
                 for (const auto& name : section_names) {
@@ -53,7 +53,7 @@ public:
                     .First_Argument_Is<std::string>()
                     .Assert();
 
-                auto section = arguments.Read_First<std::string>().Unpack();
+                const auto section = arguments.Read_First<std::string>().Unpack();
 
                 if (!R::Sections().Has_Section(section)) {
                     engine.Raise_Error(
@@ -64,7 +64,7 @@ public:
                     );
                 }
 
-                auto rule_names = R::Sections()[section].Rule_Names();
+                const auto rule_names = R::Sections()[section].Rule_Names();
                 auto table_builder = LuaTableBuilder::Push_New_Table(engine);
 
                 for (const auto& name : rule_names) {
@@ -81,8 +81,8 @@ public:
                     .Next_Argument_Is<std::string>()
                     .Assert();
 
-                auto section = arguments.Read_First<std::string>().Unpack();
-                auto key = arguments.Read_Next<std::string>().Unpack();
+                const auto section = arguments.Read_First<std::string>().Unpack();
+                const auto key = arguments.Read_Next<std::string>().Unpack();
 
                 RulesLuaAdapter::Push_Rule_Type(engine, R::Sections(), section, key);
 
@@ -96,8 +96,8 @@ public:
                     .Next_Argument_Is<std::string>()
                     .Assert();
 
-                auto section = arguments.Read_First<std::string>().Unpack();
-                auto key = arguments.Read_Next<std::string>().Unpack();
+                const auto section = arguments.Read_First<std::string>().Unpack();
+                const auto key = arguments.Read_Next<std::string>().Unpack();
 
                 RulesLuaAdapter::Push_Rule_Value(engine, R::Sections(), section, key);
 
@@ -112,8 +112,8 @@ public:
                     .Next_Argument_Is_Not_None()
                     .Assert();
 
-                auto section = arguments.Read_First<std::string>().Unpack();
-                auto key = arguments.Read_Next<std::string>().Unpack();
+                const auto section = arguments.Read_First<std::string>().Unpack();
+                const auto key = arguments.Read_Next<std::string>().Unpack();
 
                 RulesLuaAdapter::Set_Rule_Value(engine, arguments, R::Editable_Sections(), section, key);
 
