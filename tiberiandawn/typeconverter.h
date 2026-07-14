@@ -8,7 +8,6 @@
 
 #include <fmt/format.h>
 
-#include "common/enum.h"
 #include "common/json.h"
 #include "common/twowaymap.h"
 #include "common/rulesections.h"
@@ -21,6 +20,11 @@
 #include "type.h"
 #include "typeconvertermacros.h"
 #include "typevariants.h"
+
+#define TD_TYPE_NAME(TYPE) TdTypeConverter::Get_Type_Names().at(typeid(TYPE).hash_code())
+#define TD_TYPE_MAP(TYPE) std::get<TwoWayMap<TYPE>>( \
+    TdTypeConverter::Get_Type_Maps().at(typeid(TYPE).hash_code()) \
+)
 
 /**
  * Implementation of TypeConverter concept found in common/rulesections.h for Tiberian Dawn.
@@ -42,9 +46,9 @@
  *
  * To add a new type to the converter:
  *
- *   - Add type to SupportedByTdTypeConverter, ConverterTypeVariant and EnumTypeInfoVariant (see typevariants.h)
+ *   - Update TD_ENUMS_FORMAT macro definition to include the new type (see typevariants.h)
  *   - Add entry to TdTypeConverter::EnumTypes with relevant values (see enumtypeinfo.h)
- *   - Update Variant method bodies in typeconverter.cpp to handle new types
+ *
  */
 class TdTypeConverter final
 {
@@ -57,7 +61,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static const EnumTypeInfo<T>& Get_Info_For_Type()
     {
-        const auto type_name = Get_Type_Name<T>();
+        const auto type_name = TD_TYPE_NAME(T);
 
         if (!EnumTypes.contains(type_name)) {
             throw std::invalid_argument("Attempted to get info for an unsupported EnumTypeInfoVariant type, "
@@ -86,119 +90,30 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static const TwoWayMap<T, std::string>& Get_Type_Map()
+    static const TwoWayMap<T>& Get_Type_Map()
     {
-        static std::unique_ptr<TwoWayMap<T, std::string>> type_map;
-        static std::once_flag once_flag;
-
-        // create type map once, the first time T is requested
-        std::call_once(once_flag, [&] {
-            const auto& enum_info = Get_Info_For_Type<T>();
-            const auto enum_pairs = magic_enum::enum_entries<T>();
-
-            std::vector<std::pair<T, std::string>> instance_pairs;
-
-            // take the magic_enum pairs and add those that are included (patching name string as needed)
-            for (const auto& [instance, instance_string] : enum_pairs) {
-                if (enum_info.Is_Excluded(instance)) {
-                    continue;
-                }
-
-                auto patch_string = enum_info.Get_Patch_String(instance);
-                auto ini_string = patch_string.has_value()
-                    ? *patch_string
-                    : enum_info.Strip_Prefix(instance_string);
-
-                std::pair<T, std::string> pair = { instance, ini_string };
-
-                instance_pairs.emplace_back(pair);
-            }
-
-            if (!enum_info.AllowNonEnumValuesInRange) {
-                type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
-                return;
-            }
-
-            const auto min = static_cast<int>(enum_info.MinimumToInclude);
-            const auto max = static_cast<int>(enum_info.MaximumToInclude);
-
-            // we need to fill in the gaps between types as declared enum instances
-            // (since AllowNonEnumValuesInRange is true)
-            for (auto i = min; i <= max; ++i) {
-                const auto instance = static_cast<T>(i);
-
-                if (enum_info.Is_Excluded(instance)) {
-                    continue;
-                }
-
-                // if there is no enum entry declared for the current value, magic_enum::enum_name returns blank
-                if (!CncStringUtils::Is_Blank(magic_enum::enum_name<T>(instance))) {
-                    continue;
-                }
-
-                std::pair<T, std::string> pair = { instance, std::format("{}", i) };
-
-                instance_pairs.emplace_back(pair);
-            }
-
-            type_map.reset(new TwoWayMap<T, std::string>(instance_pairs));
-        });
-
-        return *type_map;
+        return TD_TYPE_MAP(T);
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static std::vector<std::string> Get_Valid_Strings()
     {
-        return Get_Type_Map<T>().Get_Backward_Keys();
+        return TD_TYPE_MAP(T).Get_Backward_Keys();
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static std::vector<T> Get_Valid_Instances()
     {
-        return Get_Type_Map<T>().Get_Forward_Keys();
-    }
-
-    template<class T>
-    requires SupportedByTdTypeConverter<T>
-    static std::string To_String(const T& instance)
-    {
-        const auto& type_map = Get_Type_Map<T>();
-        const auto instance_string = type_map[instance];
-
-        if (!instance_string.has_value()) {
-            CNC_LOGGER_DEBUG(
-                "Attempt was made to convert an invalid {} value to string: {}",
-                Get_Type_Name<T>(),
-                static_cast<int>(instance)
-            );
-        }
-
-        // use first value as default (either X_NONE or first valid value)
-        const auto result = instance_string.has_value()
-            ? *instance_string
-            : To_String(type_map.First_Forward());
-
-        if (!instance_string.has_value()) {
-            CNC_LOGGER_WARN(
-                "Attempt was made to convert excluded value (string='{}' | int={}) of type '{}' to string, returning default value: {}",
-                magic_enum::enum_name(instance),
-                static_cast<int>(instance),
-                Get_Type_Name<T>(),
-                result
-            );
-        }
-
-        return result;
+        return TD_TYPE_MAP(T).Get_Forward_Keys();
     }
 
     template<class T>
     requires SupportedByTdTypeConverter<T>
     static std::string To_Csv_String(const std::vector<T>& instances)
     {
-        static const std::function<std::string (const T&)> to_string = [](const T& v) { return To_String<T>(v); };
+        static const std::function<std::string (const T&)> to_string = [](const T& v) { return To_String(v); };
 
         return CncStringUtils::To_Csv(instances, to_string);
     }
@@ -225,7 +140,7 @@ public:
         // forgive bad casing for type instance
         CncStringUtils::To_Upper(str);
 
-        auto result = Get_Type_Map<T>()[str];
+        auto result = TD_TYPE_MAP(T)[str];
 
         return result;
     }
@@ -252,7 +167,7 @@ public:
         const auto instance = Try_Parse<T>(instance_string);
 
         if (!instance.has_value()) {
-            engine.Raise_Error_Format("Failed to parse {} from string: {}", Get_Type_Name<T>(), instance_string);
+            engine.Raise_Error_Format("Failed to parse {} from string: {}", TD_TYPE_NAME(T), instance_string);
         }
 
         return *instance;
@@ -262,7 +177,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static T Get_Default_Value()
     {
-        return Get_Type_Map<T>().First_Forward();
+        return TD_TYPE_MAP(T).First_Forward();
     }
 
     template<class T>
@@ -388,26 +303,7 @@ public:
     requires SupportedByTdTypeConverter<T>
     static std::string_view Get_Type_Name()
     {
-        static std::string type_name;
-        static std::once_flag once_flag;
-
-        // resolve type name once, the first time T is requested
-        std::call_once(once_flag, [&] {
-            // get enum type name and remove EnumPostfix
-            const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
-
-            if (TypeNamePatchTable.contains(raw_type_name)) {
-                type_name = TypeNamePatchTable.at(raw_type_name);
-                return;
-            }
-
-            type_name = raw_type_name.substr(
-                0,
-                raw_type_name.length() - EnumPostfix.length()
-            );
-        });
-
-        return type_name;
+        return TD_TYPE_NAME(T);
     }
 
     /**
@@ -415,7 +311,7 @@ public:
      */
     static std::string_view Get_Type_Name_Variant(const ConverterTypeVariant& variant);
 
-    static std::string To_String_Variant(const ConverterTypeVariant& variant);
+    static std::string To_String(const ConverterTypeVariant& variant);
 
     static std::vector<std::string> Get_Valid_Strings_Variant(const ConverterTypeVariant& variant);
 
@@ -451,7 +347,7 @@ public:
             CncJsonUtils::Throw_Json_Assert_Failure(
                 json_path,
                 CncJsonUtils::Build_Parse_Error(
-                    std::format("{} instance", Get_Type_Name<T>()),
+                    std::format("{} instance", TD_TYPE_NAME(T)),
                     json_string
                 )
             );
@@ -482,7 +378,7 @@ public:
             CncJsonUtils::Throw_Json_Assert_Failure(
                 json_path,
                 CncJsonUtils::Build_Parse_Error(
-                    std::format("csv string of {} instances", Get_Type_Name<T>()),
+                    std::format("csv string of {} instances", TD_TYPE_NAME(T)),
                     json_string
                 )
             );
@@ -493,7 +389,7 @@ public:
                 json_path,
                 " expected csv of {} {} instances, actual length: {}",
                 expected_length,
-                Get_Type_Name<T>(),
+                TD_TYPE_NAME(T),
                 parse_result->size()
             );
         }
@@ -557,7 +453,7 @@ public:
             CncJsonUtils::Throw_Json_Assert_Failure(
                 std::format("{}.{}", json_path, NAMEOF(Instance)),
                 CncJsonUtils::Build_Parse_Error(
-                    std::format("techno type target instance of type {}", Get_Type_Name<U>()),
+                    std::format("techno type target instance of type {}", TD_TYPE_NAME(U)),
                     instance_str
                 )
             );
@@ -568,8 +464,15 @@ public:
 
 private:
     static inline const auto& Logger = CncLogger::For(TdTypeConverter);
+
+    static inline std::unordered_map<size_t, std::string_view> TypeNames;
+    static inline std::unordered_map<size_t, EnumTwoWayMapVariant> TypeMaps;
+
     static inline std::unordered_map<std::string, std::unordered_map<std::string, ConverterTypeVariant>> RegisteredRuleTypes;
     static inline std::unordered_map<std::string, std::unordered_map<std::string, ConverterTypeVariant>> RegisteredCsvRuleTypes;
+
+    static const std::unordered_map<size_t, std::string_view>& Get_Type_Names();
+    static const std::unordered_map<size_t, EnumTwoWayMapVariant>& Get_Type_Maps();
 
     TdTypeConverter() = delete;
 };
@@ -594,7 +497,7 @@ struct fmt::formatter<T> : fmt::formatter<std::string> {
 template <>
 struct std::formatter<ConverterTypeVariant> : std::formatter<std::string> {
     auto format(ConverterTypeVariant value, format_context& ctx) const {
-        return formatter<string>::format(TdTypeConverter::To_String_Variant(value), ctx);
+        return formatter<string>::format(TdTypeConverter::To_String(value), ctx);
     }
 };
 
@@ -602,6 +505,6 @@ struct std::formatter<ConverterTypeVariant> : std::formatter<std::string> {
 template <>
 struct fmt::formatter<ConverterTypeVariant> : fmt::formatter<std::string> {
     auto format(const ConverterTypeVariant& value, fmt::format_context& ctx) const {
-        return formatter<std::string>::format(TdTypeConverter::To_String_Variant(value), ctx);
+        return formatter<std::string>::format(TdTypeConverter::To_String(value), ctx);
     }
 };

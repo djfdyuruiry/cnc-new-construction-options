@@ -24,6 +24,8 @@ function main()
     exit 1
   fi
 
+  mkdir -p "${ANALYZER_PATH}"
+
   local binFile="${ANALYZER_PATH}/${target}.bin"
 
   pushd "${ANALYZER_PATH}" &> /dev/null

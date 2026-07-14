@@ -1,3 +1,5 @@
+#include "common/enum.h"
+
 #include "function.h"
 
 #include "typeconverter.h"
@@ -34,7 +36,7 @@ static const std::vector ScenarioVarExcludes = {SCEN_VAR_COUNT};
 static const std::vector TemplateExcludes = {TEMPLATE_COUNT};
 static const std::vector VocExcludes = {VOC_FIRST, VOC_COUNT};
 
-#define ENUM_TYPE_PAIR(TYPE, ...) { Get_Type_Name<TYPE>(), EnumTypeInfo<TYPE>(__VA_ARGS__) }
+#define ENUM_TYPE_PAIR(TYPE, ...) { TD_TYPE_NAME(TYPE), EnumTypeInfo<TYPE>(__VA_ARGS__) }
 
 // Info about each enum supported type, indexed against it's typename
 const std::unordered_map<std::string_view, EnumTypeInfoVariant> TdTypeConverter::EnumTypes = {
@@ -188,16 +190,45 @@ std::string_view TdTypeConverter::Get_Type_Name_Variant(const ConverterTypeVaria
     return std::visit([&](const auto& t) {
         using T = std::decay_t<decltype(t)>;
 
-        return Get_Type_Name<T>();
+        return TD_TYPE_NAME(T);
     }, variant);
 }
 
-std::string TdTypeConverter::To_String_Variant(const ConverterTypeVariant& variant)
+std::string TdTypeConverter::To_String(const ConverterTypeVariant& variant)
 {
     return std::visit([&](const auto& t) {
         using T = std::decay_t<decltype(t)>;
 
-        return To_String<T>(std::get<T>(variant));
+        const auto value = std::get<T>(variant);
+
+        const auto& type_map = std::get<TwoWayMap<T>>(
+            Get_Type_Maps().at(typeid(T).hash_code())
+        );
+        const auto instance_string = type_map[value];
+
+        if (!instance_string.has_value()) {
+            CNC_LOGGER_DEBUG(
+                "Attempt was made to convert an invalid {} value to string: {}",
+                Get_Type_Name_Variant(variant),
+                static_cast<int>(value)
+            );
+        }
+
+        // use first value as default (either X_NONE or first valid value)
+        const auto result = instance_string.has_value()
+            ? *instance_string
+            : To_String(type_map.First_Forward());
+
+        if (!instance_string.has_value()) {
+            CNC_LOGGER_WARN(
+                "Attempt was made to convert excluded value (int={}) of type '{}' to string, returning default value: {}",
+                static_cast<int>(value),
+                Get_Type_Name_Variant(variant),
+                result
+            );
+        }
+
+        return result;
     }, variant);
 }
 
@@ -210,7 +241,7 @@ std::vector<std::string> TdTypeConverter::Get_Valid_Strings_Variant(const Conver
 }
 
 #define RTTI_TYPE_TO_STRING(RTTI, TYPE, ID) case RTTI: \
-    return To_String<TYPE>(static_cast<TYPE>(ID));
+    return To_String(static_cast<TYPE>(ID));
 
 std::optional<std::string> TdTypeConverter::RTTI_Instance_To_String(const RTTIType& type, const int& instance_id)
 {
@@ -333,4 +364,201 @@ TechnoTypeClassJsonReference TdTypeConverter::Techno_Type_Reference_From_Json(
     TechnoTypeClassJsonReference ref = source;
 
     return ref;
+}
+
+template<class T>
+requires SupportedByTdTypeConverter<T>
+static void Register_Type_Name(std::unordered_map<size_t, std::string_view>& type_names)
+{
+    // get enum type name and remove EnumPostfix
+    const auto raw_type_name = std::string(magic_enum::enum_type_name<T>());
+
+    if (TdTypeConverter::TypeNamePatchTable.contains(raw_type_name)) {
+        type_names[typeid(T).hash_code()] = TdTypeConverter::TypeNamePatchTable.at(raw_type_name);
+        return;
+    }
+
+    static auto sanitized_name = raw_type_name.substr(
+        0,
+        raw_type_name.length() - TdTypeConverter::EnumPostfix.length()
+    );
+
+    type_names[typeid(T).hash_code()] = sanitized_name;
+}
+
+const std::unordered_map<size_t, std::string_view>& TdTypeConverter::Get_Type_Names()
+{
+    if (TypeNames.empty()) {
+        Register_Type_Name<AircraftType>(TypeNames);
+        Register_Type_Name<AnimType>(TypeNames);
+        Register_Type_Name<ArmorType>(TypeNames);
+        Register_Type_Name<BulletType>(TypeNames);
+        Register_Type_Name<BSizeType>(TypeNames);
+        Register_Type_Name<BStateType>(TypeNames);
+        Register_Type_Name<CCPaletteType>(TypeNames);
+        Register_Type_Name<CloakType>(TypeNames);
+        Register_Type_Name<DiffType>(TypeNames);
+        Register_Type_Name<DirType>(TypeNames);
+        Register_Type_Name<DoorClass::DoorStateType>(TypeNames);
+        Register_Type_Name<DoType>(TypeNames);
+        Register_Type_Name<EventType>(TypeNames);
+        Register_Type_Name<FacingType>(TypeNames);
+        Register_Type_Name<FactoryType>(TypeNames);
+        Register_Type_Name<GameType>(TypeNames);
+        Register_Type_Name<HouseColorType>(TypeNames);
+        Register_Type_Name<HousesType>(TypeNames);
+        Register_Type_Name<InfantryType>(TypeNames);
+        Register_Type_Name<KeyNumType>(TypeNames);
+        Register_Type_Name<KindType>(TypeNames);
+        Register_Type_Name<LandType>(TypeNames);
+        Register_Type_Name<LayerType>(TypeNames);
+        Register_Type_Name<MissionType>(TypeNames);
+        Register_Type_Name<MouseType>(TypeNames);
+        Register_Type_Name<MPHType>(TypeNames);
+        Register_Type_Name<OverlayType>(TypeNames);
+        Register_Type_Name<PlayerColorType>(TypeNames);
+        Register_Type_Name<RadarEnum>(TypeNames);
+        Register_Type_Name<RadioMessageType>(TypeNames);
+        Register_Type_Name<RTTIType>(TypeNames);
+        Register_Type_Name<ScenarioDirType>(TypeNames);
+        Register_Type_Name<ScenarioPlayerType>(TypeNames);
+        Register_Type_Name<ScenarioVarType>(TypeNames);
+        Register_Type_Name<SpecialWeaponType>(TypeNames);
+        Register_Type_Name<SmudgeType>(TypeNames);
+        Register_Type_Name<SourceType>(TypeNames);
+        Register_Type_Name<SpeedType>(TypeNames);
+        Register_Type_Name<StateType>(TypeNames);
+        Register_Type_Name<StructType>(TypeNames);
+        Register_Type_Name<TeamMissionType>(TypeNames);
+        Register_Type_Name<TemplateType>(TypeNames);
+        Register_Type_Name<TerrainType>(TypeNames);
+        Register_Type_Name<TheaterType>(TypeNames);
+        Register_Type_Name<TriggerClass::ActionType>(TypeNames);
+        Register_Type_Name<TriggerClass::PersistantType>(TypeNames);
+        Register_Type_Name<UnitType>(TypeNames);
+        Register_Type_Name<UrgencyType>(TypeNames);
+        Register_Type_Name<VocType>(TypeNames);
+        Register_Type_Name<VoxType>(TypeNames);
+        Register_Type_Name<WarheadType>(TypeNames);
+        Register_Type_Name<WeaponType>(TypeNames);
+        Register_Type_Name<ZoneType>(TypeNames);
+    }
+
+    return TypeNames;
+}
+
+template<class T>
+requires SupportedByTdTypeConverter<T>
+static void Register_Type_Map(std::unordered_map<size_t, EnumTwoWayMapVariant>& type_maps)
+{
+    const auto& enum_info = TdTypeConverter::Get_Info_For_Type<T>();
+    const auto enum_pairs = magic_enum::enum_entries<T>();
+
+    std::vector<std::pair<T, std::string>> instance_pairs;
+
+    // take the magic_enum pairs and add those that are included (patching name string as needed)
+    for (const auto& [instance, instance_string] : enum_pairs) {
+        if (enum_info.Is_Excluded(instance)) {
+            continue;
+        }
+
+        auto patch_string = enum_info.Get_Patch_String(instance);
+        auto ini_string = patch_string.has_value()
+            ? *patch_string
+            : enum_info.Strip_Prefix(instance_string);
+
+        std::pair<T, std::string> pair = { instance, ini_string };
+
+        instance_pairs.emplace_back(pair);
+    }
+
+    if (!enum_info.AllowNonEnumValuesInRange) {
+        type_maps.emplace(typeid(T).hash_code(), TwoWayMap<T>(instance_pairs));
+        return;
+    }
+
+    const auto min = static_cast<int>(enum_info.MinimumToInclude);
+    const auto max = static_cast<int>(enum_info.MaximumToInclude);
+
+    // we need to fill in the gaps between types as declared enum instances
+    // (since AllowNonEnumValuesInRange is true)
+    for (auto i = min; i <= max; ++i) {
+        const auto instance = static_cast<T>(i);
+
+        if (enum_info.Is_Excluded(instance)) {
+            continue;
+        }
+
+        // if there is no enum entry declared for the current value, magic_enum::enum_name returns blank
+        if (!CncStringUtils::Is_Blank(magic_enum::enum_name<T>(instance))) {
+            continue;
+        }
+
+        std::pair<T, std::string> pair = { instance, std::format("{}", i) };
+
+        instance_pairs.emplace_back(pair);
+    }
+
+    type_maps.emplace(typeid(T).hash_code(), TwoWayMap<T>(instance_pairs));
+}
+
+const std::unordered_map<size_t, EnumTwoWayMapVariant>& TdTypeConverter::Get_Type_Maps()
+{
+    if (TypeMaps.empty()) {
+        Register_Type_Map<AircraftType>(TypeMaps);
+        Register_Type_Map<AnimType>(TypeMaps);
+        Register_Type_Map<ArmorType>(TypeMaps);
+        Register_Type_Map<BulletType>(TypeMaps);
+        Register_Type_Map<BSizeType>(TypeMaps);
+        Register_Type_Map<BStateType>(TypeMaps);
+        Register_Type_Map<CCPaletteType>(TypeMaps);
+        Register_Type_Map<CloakType>(TypeMaps);
+        Register_Type_Map<DiffType>(TypeMaps);
+        Register_Type_Map<DirType>(TypeMaps);
+        Register_Type_Map<DoorClass::DoorStateType>(TypeMaps);
+        Register_Type_Map<DoType>(TypeMaps);
+        Register_Type_Map<EventType>(TypeMaps);
+        Register_Type_Map<FacingType>(TypeMaps);
+        Register_Type_Map<FactoryType>(TypeMaps);
+        Register_Type_Map<GameType>(TypeMaps);
+        Register_Type_Map<HouseColorType>(TypeMaps);
+        Register_Type_Map<HousesType>(TypeMaps);
+        Register_Type_Map<InfantryType>(TypeMaps);
+        Register_Type_Map<KeyNumType>(TypeMaps);
+        Register_Type_Map<KindType>(TypeMaps);
+        Register_Type_Map<LandType>(TypeMaps);
+        Register_Type_Map<LayerType>(TypeMaps);
+        Register_Type_Map<MissionType>(TypeMaps);
+        Register_Type_Map<MouseType>(TypeMaps);
+        Register_Type_Map<MPHType>(TypeMaps);
+        Register_Type_Map<OverlayType>(TypeMaps);
+        Register_Type_Map<PlayerColorType>(TypeMaps);
+        Register_Type_Map<RadarEnum>(TypeMaps);
+        Register_Type_Map<RadioMessageType>(TypeMaps);
+        Register_Type_Map<RTTIType>(TypeMaps);
+        Register_Type_Map<ScenarioDirType>(TypeMaps);
+        Register_Type_Map<ScenarioPlayerType>(TypeMaps);
+        Register_Type_Map<ScenarioVarType>(TypeMaps);
+        Register_Type_Map<SpecialWeaponType>(TypeMaps);
+        Register_Type_Map<SmudgeType>(TypeMaps);
+        Register_Type_Map<SourceType>(TypeMaps);
+        Register_Type_Map<SpeedType>(TypeMaps);
+        Register_Type_Map<StateType>(TypeMaps);
+        Register_Type_Map<StructType>(TypeMaps);
+        Register_Type_Map<TeamMissionType>(TypeMaps);
+        Register_Type_Map<TemplateType>(TypeMaps);
+        Register_Type_Map<TerrainType>(TypeMaps);
+        Register_Type_Map<TheaterType>(TypeMaps);
+        Register_Type_Map<TriggerClass::ActionType>(TypeMaps);
+        Register_Type_Map<TriggerClass::PersistantType>(TypeMaps);
+        Register_Type_Map<UnitType>(TypeMaps);
+        Register_Type_Map<UrgencyType>(TypeMaps);
+        Register_Type_Map<VocType>(TypeMaps);
+        Register_Type_Map<VoxType>(TypeMaps);
+        Register_Type_Map<WarheadType>(TypeMaps);
+        Register_Type_Map<WeaponType>(TypeMaps);
+        Register_Type_Map<ZoneType>(TypeMaps);
+    }
+
+    return TypeMaps;
 }

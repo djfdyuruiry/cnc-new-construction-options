@@ -5,116 +5,77 @@
 #include "teamtype.h"
 #include "trigger.h"
 
+// convenience macro for using commas as a parameter to other macros
+#define MACRO_COMMA ,
+
+// convenience macro to allow re-using the tiberian dawn enum type list to create variants and concepts
+#define TD_ENUMS_FORMAT(PREFIX, POSTFIX, POSTFIX_LAST) \
+    PREFIX AircraftType POSTFIX \
+    PREFIX AnimType POSTFIX \
+    PREFIX ArmorType POSTFIX \
+    PREFIX BulletType POSTFIX \
+    PREFIX BSizeType POSTFIX \
+    PREFIX BStateType POSTFIX \
+    PREFIX CCPaletteType POSTFIX \
+    PREFIX CloakType POSTFIX \
+    PREFIX DiffType POSTFIX \
+    PREFIX DirType POSTFIX \
+    PREFIX DoorClass::DoorStateType POSTFIX \
+    PREFIX DoType POSTFIX \
+    PREFIX EventType POSTFIX \
+    PREFIX FacingType POSTFIX \
+    PREFIX FactoryType POSTFIX \
+    PREFIX GameType POSTFIX \
+    PREFIX HouseColorType POSTFIX \
+    PREFIX HousesType POSTFIX \
+    PREFIX InfantryType POSTFIX \
+    PREFIX KeyNumType POSTFIX \
+    PREFIX KindType POSTFIX \
+    PREFIX LandType POSTFIX \
+    PREFIX LayerType POSTFIX \
+    PREFIX MissionType POSTFIX \
+    PREFIX MouseType POSTFIX \
+    PREFIX MPHType POSTFIX \
+    PREFIX OverlayType POSTFIX \
+    PREFIX PlayerColorType POSTFIX \
+    PREFIX RadarEnum POSTFIX \
+    PREFIX RadioMessageType POSTFIX \
+    PREFIX RTTIType POSTFIX \
+    PREFIX ScenarioDirType POSTFIX \
+    PREFIX ScenarioPlayerType POSTFIX \
+    PREFIX ScenarioVarType POSTFIX \
+    PREFIX SpecialWeaponType POSTFIX \
+    PREFIX SmudgeType POSTFIX \
+    PREFIX SourceType POSTFIX \
+    PREFIX SpeedType POSTFIX \
+    PREFIX StateType POSTFIX \
+    PREFIX StructType POSTFIX \
+    PREFIX TeamMissionType POSTFIX \
+    PREFIX TemplateType POSTFIX \
+    PREFIX TerrainType POSTFIX \
+    PREFIX TheaterType POSTFIX \
+    PREFIX TriggerClass::ActionType POSTFIX \
+    PREFIX TriggerClass::PersistantType POSTFIX \
+    PREFIX UnitType POSTFIX \
+    PREFIX UrgencyType POSTFIX \
+    PREFIX VocType POSTFIX \
+    PREFIX VoxType POSTFIX \
+    PREFIX WarheadType POSTFIX \
+    PREFIX WeaponType POSTFIX \
+    PREFIX ZoneType POSTFIX_LAST
+
+// type constraint for converter methods
 template<typename T>
 concept SupportedByTdTypeConverter = (
-    std::is_same_v<T, AircraftType> ||
-    std::is_same_v<T, AnimType> ||
-    std::is_same_v<T, ArmorType> ||
-    std::is_same_v<T, BulletType> ||
-    std::is_same_v<T, BSizeType> ||
-    std::is_same_v<T, BStateType> ||
-    std::is_same_v<T, CCPaletteType> ||
-    std::is_same_v<T, CloakType> ||
-    std::is_same_v<T, DiffType> ||
-    std::is_same_v<T, DirType> ||
-    std::is_same_v<T, DoorClass::DoorStateType> ||
-    std::is_same_v<T, DoType> ||
-    std::is_same_v<T, EventType> ||
-    std::is_same_v<T, FacingType> ||
-    std::is_same_v<T, FactoryType> ||
-    std::is_same_v<T, GameType> ||
-    std::is_same_v<T, HouseColorType> ||
-    std::is_same_v<T, HousesType> ||
-    std::is_same_v<T, InfantryType> ||
-    std::is_same_v<T, KeyNumType> ||
-    std::is_same_v<T, KindType> ||
-    std::is_same_v<T, LandType> ||
-    std::is_same_v<T, LayerType> ||
-    std::is_same_v<T, MissionType> ||
-    std::is_same_v<T, MouseType> ||
-    std::is_same_v<T, MPHType> ||
-    std::is_same_v<T, OverlayType> ||
-    std::is_same_v<T, PlayerColorType> ||
-    std::is_same_v<T, RadarEnum> ||
-    std::is_same_v<T, RadioMessageType> ||
-    std::is_same_v<T, RTTIType> ||
-    std::is_same_v<T, ScenarioDirType> ||
-    std::is_same_v<T, ScenarioPlayerType> ||
-    std::is_same_v<T, ScenarioVarType> ||
-    std::is_same_v<T, SpecialWeaponType> ||
-    std::is_same_v<T, SmudgeType> ||
-    std::is_same_v<T, SourceType> ||
-    std::is_same_v<T, SpeedType> ||
-    std::is_same_v<T, StateType>||
-    std::is_same_v<T, StructType> ||
-    std::is_same_v<T, TeamMissionType> ||
-    std::is_same_v<T, TemplateType> ||
-    std::is_same_v<T, TerrainType> ||
-    std::is_same_v<T, TheaterType> ||
-    std::is_same_v<T, TriggerClass::ActionType> ||
-    std::is_same_v<T, TriggerClass::PersistantType> ||
-    std::is_same_v<T, UnitType> ||
-    std::is_same_v<T, UrgencyType> ||
-    std::is_same_v<T, VocType> ||
-    std::is_same_v<T, VoxType> ||
-    std::is_same_v<T, WarheadType> ||
-    std::is_same_v<T, WeaponType> ||
-    std::is_same_v<T, ZoneType>
+    TD_ENUMS_FORMAT(std::is_same_v<T MACRO_COMMA, > ||, >)
 );
 
-// Matches the SupportedByTdTypeConverter Concept types
+// variant alternative to SupportedByTdTypeConverter
 using ConverterTypeVariant = std::variant<
-    AircraftType,
-    AnimType,
-    ArmorType,
-    BulletType,
-    BSizeType,
-    BStateType,
-    CCPaletteType,
-    CloakType,
-    DiffType,
-    DirType,
-    DoorClass::DoorStateType,
-    DoType,
-    EventType,
-    FacingType,
-    FactoryType,
-    GameType,
-    HouseColorType,
-    HousesType,
-    InfantryType,
-    KeyNumType,
-    KindType,
-    LandType,
-    LayerType,
-    MissionType,
-    MouseType,
-    MPHType,
-    OverlayType,
-    PlayerColorType,
-    RadarEnum,
-    RadioMessageType,
-    RTTIType,
-    ScenarioDirType,
-    ScenarioPlayerType,
-    ScenarioVarType,
-    SpecialWeaponType,
-    SmudgeType,
-    SourceType,
-    SpeedType,
-    StateType,
-    StructType,
-    TeamMissionType,
-    TemplateType,
-    TerrainType,
-    TheaterType,
-    TriggerClass::ActionType,
-    TriggerClass::PersistantType,
-    UnitType,
-    UrgencyType,
-    VocType,
-    VoxType,
-    WarheadType,
-    WeaponType,
-    ZoneType
+    TD_ENUMS_FORMAT(, MACRO_COMMA, )
+>;
+
+// used to enable storing string conversion maps for each enum type in a stl container
+using EnumTwoWayMapVariant = std::variant<
+    TD_ENUMS_FORMAT(TwoWayMap<, >MACRO_COMMA, >)
 >;

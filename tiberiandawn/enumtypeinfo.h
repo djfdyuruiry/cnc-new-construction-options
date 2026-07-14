@@ -2,9 +2,6 @@
 
 #include "common/twowaymap.h"
 
-#include "defines.h"
-#include "door.h"
-#include "teamtype.h"
 #include "typevariants.h"
 
 /**
@@ -19,7 +16,7 @@ public:
     const std::string Prefix;
     const T MinimumToInclude;
     const T MaximumToInclude;
-    const TwoWayMap<T, std::string> PatchTable;
+    const TwoWayMap<T> PatchTable;
     const std::vector<T> Excluded;
 
     /**
@@ -92,59 +89,7 @@ public:
     }
 };
 
-// Allows template type EnumTypeInfo to be stored in stl container (see typevariants.h)
+// used to enable storing EnumTypeInfo instances for each enum type in a stl container (see typevariants.h)
 using EnumTypeInfoVariant = std::variant<
-    EnumTypeInfo<ArmorType>,
-    EnumTypeInfo<MPHType>,
-    EnumTypeInfo<WeaponType>,
-    EnumTypeInfo<HousesType>,
-    EnumTypeInfo<StructType>,
-    EnumTypeInfo<FactoryType>,
-    EnumTypeInfo<DirType>,
-    EnumTypeInfo<BSizeType>,
-    EnumTypeInfo<AircraftType>,
-    EnumTypeInfo<MissionType>,
-    EnumTypeInfo<AnimType>,
-    EnumTypeInfo<InfantryType>,
-    EnumTypeInfo<UnitType>,
-    EnumTypeInfo<SpeedType>,
-    EnumTypeInfo<BulletType>,
-    EnumTypeInfo<WarheadType>,
-    EnumTypeInfo<VocType>,
-    EnumTypeInfo<PlayerColorType>,
-    EnumTypeInfo<HouseColorType>,
-    EnumTypeInfo<DiffType>,
-    EnumTypeInfo<ScenarioDirType>,
-    EnumTypeInfo<ScenarioVarType>,
-    EnumTypeInfo<SourceType>,
-    EnumTypeInfo<RadarEnum>,
-    EnumTypeInfo<RTTIType>,
-    EnumTypeInfo<ZoneType>,
-    EnumTypeInfo<StateType>,
-    EnumTypeInfo<VoxType>,
-    EnumTypeInfo<MouseType>,
-    EnumTypeInfo<TheaterType>,
-    EnumTypeInfo<TemplateType>,
-    EnumTypeInfo<OverlayType>,
-    EnumTypeInfo<SmudgeType>,
-    EnumTypeInfo<LandType>,
-    EnumTypeInfo<TeamMissionType>,
-    EnumTypeInfo<RadioMessageType>,
-    EnumTypeInfo<CloakType>,
-    EnumTypeInfo<FacingType>,
-    EnumTypeInfo<DoorClass::DoorStateType>,
-    EnumTypeInfo<KindType>,
-    EnumTypeInfo<DoType>,
-    EnumTypeInfo<BStateType>,
-    EnumTypeInfo<EventType>,
-    EnumTypeInfo<TriggerClass::ActionType>,
-    EnumTypeInfo<TriggerClass::PersistantType>,
-    EnumTypeInfo<TerrainType>,
-    EnumTypeInfo<ScenarioPlayerType>,
-    EnumTypeInfo<LayerType>,
-    EnumTypeInfo<UrgencyType>,
-    EnumTypeInfo<CCPaletteType>,
-    EnumTypeInfo<GameType>,
-    EnumTypeInfo<KeyNumType>,
-    EnumTypeInfo<SpecialWeaponType>
+    TD_ENUMS_FORMAT(EnumTypeInfo<, >MACRO_COMMA, >)
 >;

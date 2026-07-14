@@ -7,7 +7,7 @@
 
 /**
  * There are alot of template instantiations for TwoWayMap, and thus
- * static fields would be repeated. So this delcares one set of static
+ * static fields would be repeated. So this declares one set of static
  * fields for all TwoWayMap classes.
  */
 class TwoWayMapStatic
@@ -21,8 +21,8 @@ protected:
  * either direction. Useful for converting between enums/constants
  * and strings, for example.
  */
-template<typename A, typename B>
-class TwoWayMap : private TwoWayMapStatic
+template<typename A, typename B = std::string>
+class TwoWayMap : protected TwoWayMapStatic
 {
 private:
     std::map<A, B> ForwardMap;
