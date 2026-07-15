@@ -14,7 +14,7 @@
     },
     {
       "name": "magic-enum",
-      "version>=": "0.9.7#1"
+      "version>=": "0.9.8#0"
     },
     {
       "name" : "nlohmann-json",
@@ -22,7 +22,7 @@
     },
     {
       "name": "openal-soft",
-      "version>=": "1.25.1#0",
+      "version>=": "1.25.1#2",
       "features": [
         "pipewire"
       ],
@@ -30,12 +30,12 @@
     },
     {
       "name": "openal-soft",
-      "version>=": "1.25.1#0",
+      "version>=": "1.25.1#2",
       "platform": "!linux"
     },
     {
       "name": "sdl2",
-      "version>=": "2.32.10#0",
+      "version>=": "2.32.10#1",
       "features": [
         "vulkan",
         "wayland",
@@ -46,7 +46,7 @@
     },
     {
       "name": "sdl2",
-      "version>=": "2.32.10#0",
+      "version>=": "2.32.10#1",
       "features": [
         "vulkan"
       ],
@@ -54,7 +54,7 @@
     },
     {
       "name": "spdlog",
-      "version>=": "1.17.0#0"
+      "version>=": "1.17.0#1"
     }
   ],
   "overrides": [
@@ -68,7 +68,7 @@
     },
     {
       "name" : "magic-enum",
-      "version" : "0.9.7#1"
+      "version" : "0.9.8#0"
     },
     {
       "name" : "nlohmann-json",
@@ -76,15 +76,15 @@
     },
     { 
       "name": "openal-soft",
-      "version": "1.25.1#0"
+      "version": "1.25.1#2"
     },
     {
       "name": "sdl2",
-      "version": "2.32.10#0"
+      "version": "2.32.10#1"
     },
     { 
       "name": "spdlog",
-      "version": "1.17.0#0"
+      "version": "1.17.0#1"
     }
   ]
 }
