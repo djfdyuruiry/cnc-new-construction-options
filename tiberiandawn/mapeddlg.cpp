@@ -1887,9 +1887,10 @@ int MapEditClass::Scenario_Dialog(void)
     .......................... Fill in theater items .........................
     */
     theaterbtn.Add_Item("Desert");
-    theaterbtn.Add_Item("Jungle");
+    theaterbtn.Add_Item("(!Broken!) Jungle");
     theaterbtn.Add_Item("Temperate");
     theaterbtn.Add_Item("Winter");
+    theaterbtn.Add_Item("Snow");
 
     /*
     ............................ Init parameters .............................

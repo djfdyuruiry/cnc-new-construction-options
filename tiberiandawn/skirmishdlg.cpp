@@ -134,6 +134,12 @@ protected:
                     // (index will change if maps are added/removed by player)
                     MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
 
+                    Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
+                    GameToPlay = GAME_NORMAL;
+                    Read_Scenario(Scen.ScenarioName);
+
+                    display = REDRAW_FOREGROUND;
+
                     strcpy(MPlayerName, Text[BUTTON_NAME].get());
                 }
                 break;
@@ -366,6 +372,8 @@ protected:
 
                 if (ai_players) {
                     // at least one AI player enabled, allow user to proceed
+                    GameToPlay = GAME_SKIRMISH;
+                    Clear_Scenario();
                     return true;
                 }
 
@@ -523,6 +531,95 @@ protected:
                          CC_GREEN,
                          BLACK,
                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+        // draw minimap
+
+        auto D_BORD_X1 = 50;
+        auto D_BORD_Y1 = 50;
+        auto D_BORD_X2 = D_BORD_X1 + MAP_CELL_W + 1;
+        auto D_BORD_Y2 = D_BORD_Y1 + MAP_CELL_H + 1;
+
+        LogicPage->Lock();
+        /*
+        .................... Erase the map interior .....................
+        */
+        LogicPage->Fill_Rect(D_BORD_X1 + 1, D_BORD_Y1 + 1, D_BORD_X2 - 1, D_BORD_Y2 - 1, BLACK);
+
+        /*...............................................................
+        Draw Land map symbols (use color according to Ground[] array).
+        ...............................................................*/
+        for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
+            auto occupier = Map[cell].Cell_Occupier();
+            if (occupier == NULL) {
+                auto color = Ground[Map[cell].Land_Type()].Color;
+                LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
+            }
+        }
+
+        LogicPage->Unlock();
+
+        /*
+        ................. Draw the actual map location ..................
+        */
+        //LogicPage->Draw_Rect(map_x1, map_y1, map_x2, map_y2, WHITE);
+
+        /*...............................................................
+        Draw Unit map symbols (Use the radar map color according to
+        that specified in the house type class object.
+        DKGREEN = terrain object
+        ...............................................................*/
+        for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
+            auto occupier = Map[cell].Cell_Occupier();
+            if (occupier) {
+                HouseColorType color = static_cast<HouseColorType>(DKGREEN);
+                if (occupier && occupier->Owner() != HOUSE_NONE) {
+                    color = HouseClass::As_Pointer(occupier->Owner())->Class->Color;
+                }
+                LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
+            }
+        }
+
+        /*
+        ...................... Draw Home location .......................
+        */
+        LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
+                             D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
+                             WHITE);
+        //
+        // /*
+        // ..................... Erase old coordinates .....................
+        // */
+        // LogicPage->Fill_Rect(D_DIALOG_X + 7,
+        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22,
+        //                      D_DIALOG_X + D_DIALOG_W - 7,
+        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22 + 10,
+        //                      BLACK);
+        //
+        // /*
+        // ..................... Draw the coordinates ......................
+        // */
+        // txt_x = D_DIALOG_X + D_DIALOG_W / 8;
+        // txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22;
+        // sprintf(txt, "%d", map_x1 - D_BORD_X1 - 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        //
+        // txt_x += (D_DIALOG_W - 20) / 4;
+        // sprintf(txt, "%d", map_y1 - D_BORD_Y1 - 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        //
+        // txt_x += (D_DIALOG_W - 20) / 4;
+        // sprintf(txt, "%d", map_x2 - map_x1 + 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        //
+        // txt_x += (D_DIALOG_W - 20) / 4;
+        // sprintf(txt, "%d", map_y2 - map_y1 + 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+        Show_Mouse();
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -689,6 +786,9 @@ protected:
             if (MPlayerFilenum[i] == MPlayerScenarioNumber) {
                 ScenarioIdx = i;
                 scenario_list.Set_Selected_Index(i);
+                Set_Scenario_Name(Scen.ScenarioName, MPlayerFilenum[ScenarioIdx], SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
+                GameToPlay = GAME_NORMAL;
+                Read_Scenario(Scen.ScenarioName);
                 break;
             }
         }
