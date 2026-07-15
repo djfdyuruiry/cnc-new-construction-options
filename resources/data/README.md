@@ -20,6 +20,7 @@
 
 > Counterstrike/Aftermath game data is included here because original game CDs include these files inside an RTP patch file (not worth parsing and extracting undocumented format)
 
+- `conquer.eng`: Aftermath strings file (forces Aftermath version to be used)
 - `expand.mix`: Counterstrike expansion MIX file
 - `expand2.mix`: Aftermath expansion MIX file
 - `hires1.mix`: Aftermath resource MIX file
