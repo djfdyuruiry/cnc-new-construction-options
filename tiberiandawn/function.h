@@ -491,7 +491,7 @@ void Set_Scenario_Name(char* buf,
                        ScenarioDirType dir = SCEN_DIR_NONE,
                        ScenarioVarType var = SCEN_VAR_NONE);
 void Write_Scenario_Ini(char* root);
-bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::optional<bool> allow_superweapons = std::nullopt, bool fresh = true);
+bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, bool init_rules = true, bool init_lua = true, std::optional<bool> allow_superweapons = std::nullopt, bool fresh = true);
 bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const char* root, bool fresh);
 int Scan_Place_Object(ObjectClass* obj, CELL cell);
 
@@ -658,7 +658,7 @@ bool Read_Scenario(char* root);
 bool Start_Scenario(char* root, bool briefing = true);
 void Set_Scenario_Difficulty(int difficulty);
 HousesType Select_House(void);
-void Clear_Scenario(void);
+void Clear_Scenario(bool reset_rules = true);
 void Do_Briefing(char const* text);
 void Do_Lose(void);
 void Do_Win(void);

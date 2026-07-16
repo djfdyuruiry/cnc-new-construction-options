@@ -356,7 +356,7 @@ void Fill_In_Data(void)
  *   03/21/1992 JLB : Changed buffer allocations, so changes memset code.                      *
  *   07/13/1995 JLB : End count down moved here.                                               *
  *=============================================================================================*/
-void Clear_Scenario(void)
+void Clear_Scenario(const bool reset_rules)
 {
     EndCountDown = TICKS_PER_SECOND * 30;
     CrateCount = 0;
@@ -401,12 +401,14 @@ void Clear_Scenario(void)
     CellTriggers.Clear();
     CellTriggers.Resize(MAP_CELL_TOTAL);
 
-    /**
-     * Reset all rules to the default found in INI files, they might have been changed
-     * by a Lua script call or loaded from the scenario file.
-     */
-    CNC_LOG_DEBUG("Initialising RulesClass global instance: Rule");
-    Rule.Init();
+    if (reset_rules) {
+        /**
+         * Reset all rules to the default found in INI files, they might have been changed
+         * by a Lua script call or loaded from the scenario file.
+         */
+        CNC_LOG_DEBUG("Initialising RulesClass global instance: Rule");
+        Rule.Init();
+    }
 
     // Tear down Lua runtime
     ScenarioLua::On_Clear_Scenario();

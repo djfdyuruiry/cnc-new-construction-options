@@ -25,7 +25,6 @@ typedef enum
     BUTTON_OK,
     BUTTON_LOAD,
     BUTTON_CANCEL,
-    BUTTON_DIFFICULTY,
     BUTTON_COLOR_1,
     BUTTON_COLOR_2,
     BUTTON_COLOR_3,
@@ -64,6 +63,144 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
                 display = REDRAW_BACKGROUND;
             }
         }
+    }
+
+    void Render_Minimap()
+    {
+        constexpr auto map_width = MAP_CELL_W + 1;
+        constexpr auto map_height = MAP_CELL_H + 1;
+        auto minimap_x = X + Width - map_width - (MarginWidth / 2);
+        auto minimap_y = Dimensions[BUTTON_SCENARIO_LIST].Y + (2 * Factor);
+
+        auto D_BORD_X2 = minimap_x + map_width;
+        auto D_BORD_Y2 = minimap_y + map_height;
+
+        Hide_Mouse();
+        LogicPage->Lock();
+
+        /*
+        .................... Erase the map interior .....................
+        */
+        LogicPage->Fill_Rect(minimap_x + 1, minimap_y + 1, D_BORD_X2 - 1, D_BORD_Y2 - 1, BLACK);
+
+#ifdef MEGAMAPS
+        const auto scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
+#else
+        const auto scale_map = true;
+#endif
+
+        /*...............................................................
+        Draw Land map symbols (use color according to Ground[] array).
+        ...............................................................*/
+        for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
+            if (!Map.In_Radar(cell)) {
+                continue;
+            }
+
+            auto terrain = Map[cell].Cell_Terrain();
+            int color = BLACK;
+
+            if (terrain == nullptr) {
+                const auto ground = Map[cell].Land_Type();
+
+                // pick a ground color
+                if (ground == LAND_WATER) {
+                    color = 0x02;
+                } else if (ground == LAND_WALL || ground == LAND_ROCK) {
+                    color = 0x0E;
+                } else if (ground == LAND_TIBERIUM) {
+                    color = 0x04;
+                } else if (Map.Theater == THEATER_SNOW) {
+                    color = 0xFF;
+                } else if (Map.Theater == THEATER_DESERT) {
+                    color = 0x14;
+                } else {
+                    color = 0xA0;
+                }
+            } else {
+                // trees
+                color = 0x03;
+            }
+
+            if (scale_map) {
+                // 'zoom' a regular map in by scaling pixels
+                for (int x = 0; x < 2; ++x) {
+                    for (int y = 0; y < 2; ++y) {
+                        LogicPage->Put_Pixel(minimap_x + (Cell_X(cell) * 2) + x + 1,
+                                            minimap_y + (Cell_Y(cell) * 2) + y + 1, color);
+                    }
+                }
+            } else {
+                // we can't scale a megamap as it's too big, so just draw a pixel per cell
+                LogicPage->Put_Pixel(minimap_x + Cell_X(cell) + 1, minimap_y + Cell_Y(cell) + 1, color);
+            }
+        }
+
+        LogicPage->Unlock();
+
+        /*
+        ................. Draw the actual map location ..................
+        */
+        //LogicPage->Draw_Rect(map_x1, map_y1, map_x2, map_y2, WHITE);
+
+        /*...............................................................
+        Draw Unit map symbols (Use the radar map color according to
+        that specified in the house type class object.
+        DKGREEN = terrain object
+        ...............................................................*/
+        // for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
+        //     auto occupier = Map[cell].Cell_Occupier();
+        //     if (occupier) {
+        //         HouseColorType color = static_cast<HouseColorType>(DKGREEN);
+        //         if (occupier && occupier->Owner() != HOUSE_NONE) {
+        //             color = HouseClass::As_Pointer(occupier->Owner())->Class->Color;
+        //         }
+        //         LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
+        //     }
+        // }
+
+        /*
+        ...................... Draw Home location .......................
+        */
+        // LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
+        //                      D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
+        //                      WHITE);
+        //
+        // /*
+        // ..................... Erase old coordinates .....................
+        // */
+        // LogicPage->Fill_Rect(D_DIALOG_X + 7,
+        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22,
+        //                      D_DIALOG_X + D_DIALOG_W - 7,
+        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22 + 10,
+        //                      BLACK);
+        //
+        // /*
+        // ..................... Draw the coordinates ......................
+        // */
+        // txt_x = D_DIALOG_X + D_DIALOG_W / 8;
+        // txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22;
+        // sprintf(txt, "%d", map_x1 - D_BORD_X1 - 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        //
+        // txt_x += (D_DIALOG_W - 20) / 4;
+        // sprintf(txt, "%d", map_y1 - D_BORD_Y1 - 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        //
+        // txt_x += (D_DIALOG_W - 20) / 4;
+        // sprintf(txt, "%d", map_x2 - map_x1 + 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+        //
+        // txt_x += (D_DIALOG_W - 20) / 4;
+        // sprintf(txt, "%d", map_y2 - map_y1 + 1);
+        // Fancy_Text_Print(
+        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+        LogicPage->Draw_Rect(minimap_x, minimap_y, D_BORD_X2, D_BORD_Y2, GRAY);
+        Show_Mouse();
     }
 
 protected:
@@ -134,9 +271,13 @@ protected:
                     // (index will change if maps are added/removed by player)
                     MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
 
+                    const auto old_build_level = BuildLevel;
+
                     Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
                     GameToPlay = GAME_NORMAL;
-                    Read_Scenario(Scen.ScenarioName);
+                    Read_Scenario_Ini(Scen.ScenarioName, Special, false, false); // don't init lua/rules
+
+                    BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
 
                     display = REDRAW_FOREGROUND;
 
@@ -373,7 +514,7 @@ protected:
                 if (ai_players) {
                     // at least one AI player enabled, allow user to proceed
                     GameToPlay = GAME_SKIRMISH;
-                    Clear_Scenario();
+                    Clear_Scenario(false);
                     return true;
                 }
 
@@ -532,118 +673,7 @@ protected:
                          BLACK,
                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-        // draw minimap
-
-        auto D_BORD_X1 = 50;
-        auto D_BORD_Y1 = 50;
-        auto D_BORD_X2 = D_BORD_X1 + MAP_CELL_W + 1;
-        auto D_BORD_Y2 = D_BORD_Y1 + MAP_CELL_H + 1;
-
-        LogicPage->Lock();
-
-        /*
-        .................... Erase the map interior .....................
-        */
-        LogicPage->Fill_Rect(D_BORD_X1 + 1, D_BORD_Y1 + 1, D_BORD_X2 - 1, D_BORD_Y2 - 1, BLACK);
-
-        /*...............................................................
-        Draw Land map symbols (use color according to Ground[] array).
-        ...............................................................*/
-        for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-            int color = BLACK;
-            if (Map.In_Radar(cell)) {
-                auto terrain = Map[cell].Cell_Terrain();
-
-                if (terrain == nullptr) {
-                    auto ground = Map[cell].Land_Type();
-
-                    // pick a ground color
-                    if (ground == LAND_WATER) {
-                        color = 0x02;
-                    } else if (ground == LAND_WALL || ground == LAND_ROCK) {
-                        color = 0x0E;
-                    } else if (ground == LAND_TIBERIUM) {
-                        color = 0x04;
-                    } else if (Map.Theater == THEATER_SNOW) {
-                        color = 0xFF;
-                    } else if (Map.Theater == THEATER_DESERT) {
-                        color = 0x14;
-                    } else {
-                        color = 0xA0;
-                    }
-                } else {
-                    // trees
-                    color = 0x03;
-                }
-            }
-
-            LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
-        }
-
-        LogicPage->Unlock();
-
-        /*
-        ................. Draw the actual map location ..................
-        */
-        //LogicPage->Draw_Rect(map_x1, map_y1, map_x2, map_y2, WHITE);
-
-        /*...............................................................
-        Draw Unit map symbols (Use the radar map color according to
-        that specified in the house type class object.
-        DKGREEN = terrain object
-        ...............................................................*/
-        // for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-        //     auto occupier = Map[cell].Cell_Occupier();
-        //     if (occupier) {
-        //         HouseColorType color = static_cast<HouseColorType>(DKGREEN);
-        //         if (occupier && occupier->Owner() != HOUSE_NONE) {
-        //             color = HouseClass::As_Pointer(occupier->Owner())->Class->Color;
-        //         }
-        //         LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
-        //     }
-        // }
-
-        /*
-        ...................... Draw Home location .......................
-        */
-        // LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
-        //                      D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
-        //                      WHITE);
-        //
-        // /*
-        // ..................... Erase old coordinates .....................
-        // */
-        // LogicPage->Fill_Rect(D_DIALOG_X + 7,
-        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22,
-        //                      D_DIALOG_X + D_DIALOG_W - 7,
-        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22 + 10,
-        //                      BLACK);
-        //
-        // /*
-        // ..................... Draw the coordinates ......................
-        // */
-        // txt_x = D_DIALOG_X + D_DIALOG_W / 8;
-        // txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22;
-        // sprintf(txt, "%d", map_x1 - D_BORD_X1 - 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        //
-        // txt_x += (D_DIALOG_W - 20) / 4;
-        // sprintf(txt, "%d", map_y1 - D_BORD_Y1 - 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        //
-        // txt_x += (D_DIALOG_W - 20) / 4;
-        // sprintf(txt, "%d", map_x2 - map_x1 + 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        //
-        // txt_x += (D_DIALOG_W - 20) / 4;
-        // sprintf(txt, "%d", map_y2 - map_y1 + 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Show_Mouse();
+        Render_Minimap();
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -670,29 +700,6 @@ protected:
                          CC_GREEN,
                          TBLACK,
                          TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        auto& difficulty = Get_Control<SliderClass>(BUTTON_DIFFICULTY);
-
-        Fancy_Text_Print("Easy", // TODO: Locale file entry
-                         difficulty.X,
-                         difficulty.Y - 8 * Factor,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print("Hard", // TODO: Locale file entry
-                         difficulty.X + difficulty.Width,
-                         difficulty.Y - 8 * Factor,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-        Fancy_Text_Print("Normal", // TODO: Locale file entry
-                         difficulty.X + difficulty.Width / 2,
-                         difficulty.Y - 8 * Factor,
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
         Fancy_Text_Print(TXT_SCENARIOS,
                          Dimensions[BUTTON_SCENARIO_LIST].X + (Dimensions[BUTTON_SCENARIO_LIST].W / 2),
@@ -784,7 +791,7 @@ protected:
 
         auto& level_gauge = Get_Control<GaugeClass>(BUTTON_LEVEL);
         level_gauge.Set_Maximum(MPLAYER_BUILD_LEVEL_MAX - 1);
-        level_gauge.Set_Value(static_cast<int>(BuildLevel) - 1);
+        level_gauge.Set_Value(6);
 
         auto& count_gauge = Get_Control<GaugeClass>(BUTTON_COUNT);
         count_gauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
@@ -810,9 +817,14 @@ protected:
             if (MPlayerFilenum[i] == MPlayerScenarioNumber) {
                 ScenarioIdx = i;
                 scenario_list.Set_Selected_Index(i);
+
+                const auto old_build_level = BuildLevel;
+
                 Set_Scenario_Name(Scen.ScenarioName, MPlayerFilenum[ScenarioIdx], SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
                 GameToPlay = GAME_NORMAL;
-                Read_Scenario(Scen.ScenarioName);
+                Read_Scenario_Ini(Scen.ScenarioName, Special, false, false); // don't init lua/rules
+
+                BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
                 break;
             }
         }
@@ -906,25 +918,6 @@ protected:
             Dimensions[BUTTON_CANCEL].W,
             Dimensions[BUTTON_CANCEL].H
         );
-    }
-
-    void Init_Difficulty_Slider()
-    {
-        auto& difficulty = Add_Control<BUTTON_DIFFICULTY, SliderClass>(
-            Dimensions[BUTTON_NAME].X,
-            Dimensions[BUTTON_OK].Y - (8 * Factor) - MarginWidth,
-            Width - (Dimensions[BUTTON_NAME].X - X) * 2,
-            8 * Factor,
-            true
-        );
-
-        if (Rule.IsFineDifficulty) {
-            difficulty.Set_Maximum(5);
-            difficulty.Set_Value(2);
-        } else {
-            difficulty.Set_Maximum(3);
-            difficulty.Set_Value(1);
-        }
     }
 
     void Init_Bottom_Row()
@@ -1031,7 +1024,6 @@ protected:
         Init_Top_Row();
         Init_Middle_Row();
         Init_Bottom_Row();
-        Init_Difficulty_Slider();
         Init_Dialog_Buttons();
     }
 
@@ -1041,13 +1033,13 @@ protected:
 
         Dimensions[BUTTON_OK].W = 45 * Factor;
         Dimensions[BUTTON_OK].H = 9 * Factor;
-        Dimensions[BUTTON_OK].X = X + (Width / 6) - (Dimensions[BUTTON_OK].W / 2);
-        Dimensions[BUTTON_OK].Y = Y + Height - Dimensions[BUTTON_OK].H - MarginWidth - Factor * 6;
+        Dimensions[BUTTON_OK].X = X + (5 * Factor);
+        Dimensions[BUTTON_OK].Y = Y + Height - Dimensions[BUTTON_OK].H - (5 * Factor);
 
         Dimensions[BUTTON_CANCEL].W = 45 * Factor;
         Dimensions[BUTTON_CANCEL].H = 9 * Factor;
-        Dimensions[BUTTON_CANCEL].X = X + Width - (Width / 6) - (Dimensions[BUTTON_CANCEL].W / 2);
-        Dimensions[BUTTON_CANCEL].Y = Y + Height - Dimensions[BUTTON_CANCEL].H - MarginWidth - Factor * 6;
+        Dimensions[BUTTON_CANCEL].X = X + Width - Dimensions[BUTTON_CANCEL].W - (5 * Factor);
+        Dimensions[BUTTON_CANCEL].Y = Y + Height - Dimensions[BUTTON_CANCEL].H - (5 * Factor);
 
         Dimensions[BUTTON_NAME].W = 70 * Factor;
         Dimensions[BUTTON_NAME].H = 9 * Factor;
@@ -1072,21 +1064,17 @@ protected:
         Dimensions[BUTTON_PLAYER_LIST].W = 118 * Factor;
         Dimensions[BUTTON_PLAYER_LIST].X = X + MarginWidth + MarginWidth + 5 * Factor;
 
-        Dimensions[BUTTON_SCENARIO_LIST].W = 140 * Factor;
-        Dimensions[BUTTON_SCENARIO_LIST].H = 30 * Factor;
-        Dimensions[BUTTON_SCENARIO_LIST].X =
-            (Dimensions[BUTTON_CANCEL].X + static_cast<int>(nearbyint(Dimensions[BUTTON_CANCEL].W * 0.8)))
-            - Dimensions[BUTTON_SCENARIO_LIST].W + (20 * Factor);
-        Dimensions[BUTTON_SCENARIO_LIST].Y = Dimensions[BUTTON_COLOR_1].Y + TextHeight + 5 * Factor + TextHeight;
-
-        Dimensions[BUTTON_SCENARIO_LIST].H *= 2;
+        Dimensions[BUTTON_SCENARIO_LIST].W = 220 * Factor;
+        Dimensions[BUTTON_SCENARIO_LIST].H = (35 * Factor) * 2;
+        Dimensions[BUTTON_SCENARIO_LIST].X = Dimensions[BUTTON_OK].X;
+        Dimensions[BUTTON_SCENARIO_LIST].Y = (Y + (Height / 2)) - Dimensions[BUTTON_SCENARIO_LIST].H + (5 * Factor);
 
         // right column of AI house controls
         Dimensions[BUTTON_AI_HOUSE_1].W = static_cast<int>(nearbyint(Dimensions[BUTTON_HOUSE].W / 1.75));
         Dimensions[BUTTON_AI_HOUSE_1].H = (6 * 5 * Factor);
         Dimensions[BUTTON_AI_HOUSE_1].X = Dimensions[BUTTON_SCENARIO_LIST].X
-            - Dimensions[BUTTON_AI_HOUSE_1].W - (10 * Factor);
-        Dimensions[BUTTON_AI_HOUSE_1].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + (5 * Factor);
+             + (Dimensions[BUTTON_SCENARIO_LIST].W / 2) - (Dimensions[BUTTON_AI_HOUSE_1].W / 2);
+        Dimensions[BUTTON_AI_HOUSE_1].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + Dimensions[BUTTON_SCENARIO_LIST].H + (15 * Factor);
 
         for (auto control = BUTTON_AI_HOUSE_2; control <= BUTTON_AI_HOUSE_5; ++control) {
             const auto previous_control = static_cast<SkirmishControls>(control - 1);
@@ -1109,35 +1097,30 @@ protected:
             Dimensions[control].Y = Dimensions[previous_control].Y + 10 * Factor;
         }
 
-        Dimensions[BUTTON_OPTIONS].W = static_cast<int>(nearbyint(Dimensions[BUTTON_SCENARIO_LIST].W * 0.8));
+        Dimensions[BUTTON_OPTIONS].W = static_cast<int>(nearbyint(Dimensions[BUTTON_CANCEL].W * 2.5));
         Dimensions[BUTTON_OPTIONS].H = (5 * 6 * Factor) + 5 * Factor;
-        Dimensions[BUTTON_OPTIONS].X = (Dimensions[BUTTON_SCENARIO_LIST].X + Dimensions[BUTTON_SCENARIO_LIST].W)
-            - Dimensions[BUTTON_OPTIONS].W;
-        Dimensions[BUTTON_OPTIONS].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + Dimensions[BUTTON_SCENARIO_LIST].H
-            + MarginWidth - 2 * Factor;
+        Dimensions[BUTTON_OPTIONS].X = Dimensions[BUTTON_CANCEL].X
+            - static_cast<int>(nearbyint(Dimensions[BUTTON_OPTIONS].W * 0.8));
+        Dimensions[BUTTON_OPTIONS].Y = Dimensions[BUTTON_CANCEL].Y - 3 * Factor - Dimensions[BUTTON_OPTIONS].H;
 
         Dimensions[BUTTON_COUNT].W = 25 * Factor;
         Dimensions[BUTTON_COUNT].H = 7 * Factor;
-        Dimensions[BUTTON_COUNT].Y = Dimensions[BUTTON_OPTIONS].Y;
-        Dimensions[BUTTON_COUNT].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
-            + 20 * Factor;
+        Dimensions[BUTTON_COUNT].X = Dimensions[BUTTON_OPTIONS].X + (Dimensions[BUTTON_OPTIONS].W / 2) + 5 * Factor;
+        Dimensions[BUTTON_COUNT].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + Dimensions[BUTTON_SCENARIO_LIST].H + (5 * Factor);
 
         Dimensions[BUTTON_LEVEL].W = 25 * Factor;
         Dimensions[BUTTON_LEVEL].H = 7 * Factor;
+        Dimensions[BUTTON_LEVEL].X = Dimensions[BUTTON_COUNT].X;
         Dimensions[BUTTON_LEVEL].Y = Dimensions[BUTTON_COUNT].Y + Dimensions[BUTTON_COUNT].H;
-        Dimensions[BUTTON_LEVEL].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
-            + 20 * Factor;
 
         Dimensions[BUTTON_CREDITS].W = 25 * Factor;
         Dimensions[BUTTON_CREDITS].H = 7 * Factor;
-        Dimensions[BUTTON_CREDITS].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
-            + 20 * Factor;
+        Dimensions[BUTTON_CREDITS].X = Dimensions[BUTTON_COUNT].X;
         Dimensions[BUTTON_CREDITS].Y = Dimensions[BUTTON_LEVEL].Y + Dimensions[BUTTON_LEVEL].H;
 
         Dimensions[BUTTON_TIBERIUM_SCALE].W = 25 * Factor;
         Dimensions[BUTTON_TIBERIUM_SCALE].H = 7 * Factor;
-        Dimensions[BUTTON_TIBERIUM_SCALE].X = Dimensions[BUTTON_PLAYER_LIST].X + (Dimensions[BUTTON_PLAYER_LIST].W / 2)
-            + 20 * Factor;
+        Dimensions[BUTTON_TIBERIUM_SCALE].X = Dimensions[BUTTON_COUNT].X;
         Dimensions[BUTTON_TIBERIUM_SCALE].Y = Dimensions[BUTTON_CREDITS].Y + Dimensions[BUTTON_CREDITS].H;
     }
 
@@ -1179,37 +1162,6 @@ public:
         Get the scenario filename
         .....................................................................*/
         Scen.Scenario = MPlayerFilenum[ScenarioIdx];
-
-        switch (
-            Get_Control<SliderClass>(BUTTON_DIFFICULTY).Get_Value() * (Rule.IsFineDifficulty ? 1 : 2)
-        ) {
-            case 0:
-                Scen.CDifficulty = DIFF_HARD;
-                Scen.Difficulty = DIFF_EASY;
-                break;
-
-            case 1:
-                Scen.CDifficulty = DIFF_HARD;
-                Scen.Difficulty = DIFF_NORMAL;
-                break;
-
-            case 2:
-                Scen.CDifficulty = DIFF_NORMAL;
-                Scen.Difficulty = DIFF_NORMAL;
-                break;
-
-            case 3:
-                Scen.CDifficulty = DIFF_EASY;
-                Scen.Difficulty = DIFF_NORMAL;
-                break;
-
-            case 4:
-                Scen.CDifficulty = DIFF_EASY;
-                Scen.Difficulty = DIFF_HARD;
-                break;
-
-            default: break; // do nothing
-        }
 
         // set AI player variables from difficulty/house dropdowns
         MPlayerGhosts = 0;
