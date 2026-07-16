@@ -68,6 +68,27 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         }
     }
 
+    void Toggle_AI_Players()
+    {
+        for (auto diff_control = BUTTON_AI_DIFF_1; diff_control <= BUTTON_AI_DIFF_5; ++diff_control) {
+            auto house_control = static_cast<SkirmishControls>(diff_control + 5);
+
+            auto& diff_dropdown = Get_Control<DropListClass>(diff_control);
+            auto& house_dropdown = Get_Control<DropListClass>(house_control);
+
+            if (diff_control - BUTTON_AI_DIFF_1 < SelectedMapPlayerCount - 1) {
+                house_dropdown.DropButton.Enable();
+                diff_dropdown.DropButton.Enable();
+            } else {
+                house_dropdown.Set_Selected_Index(0);
+                diff_dropdown.Set_Selected_Index(0);
+
+                house_dropdown.DropButton.Disable();
+                diff_dropdown.DropButton.Disable();
+            }
+        }
+    }
+
     int Get_Menu_Color_For_Cell(const CELL raw_cell)
     {
         const auto& cell = Map[raw_cell];
@@ -75,6 +96,9 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         if (cell.IsWaypoint) {
             for (auto i = 0; i < 6; i++) {
                 if (raw_cell == Scen.Waypoint[i]) {
+                    // track how many player start locations are found
+                    SelectedMapPlayerCount++;
+
                     // player start location
                     return 127;
                 }
@@ -189,6 +213,8 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         const auto scale_map = true;
 #endif
 
+        SelectedMapPlayerCount = 0;
+
         /*...............................................................
         Draw Land map symbols (use color according to Ground[] array).
         ...............................................................*/
@@ -299,6 +325,8 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
     }
 
+    int SelectedMapPlayerCount;
+
 protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
@@ -369,7 +397,8 @@ protected:
 
                     strcpy(MPlayerName, Text[BUTTON_NAME].get());
 
-                    display = REDRAW_FOREGROUND;
+                    SelectedMapPlayerCount = 2;
+                    display = REDRAW_ALL;
                 }
                 break;
             }
@@ -600,9 +629,42 @@ protected:
                 }
 
                 if (ai_players) {
-                    // at least one AI player enabled, allow user to proceed
-                    GameToPlay = GAME_SKIRMISH;
-                    Clear_Scenario(false);
+                    // at least one AI player enabled, proceed to select difficulty
+                    const auto difficulty = Fetch_Difficulty();
+
+                    if (difficulty == -1) {
+                        // user canceled the difficulty popup
+                        display = REDRAW_ALL;
+                        break;
+                    }
+
+                    switch (difficulty) {
+                        case 0:
+                            Scen.CDifficulty = DIFF_HARD;
+                            Scen.Difficulty = DIFF_EASY;
+                            break;
+
+                        case 1:
+                            Scen.CDifficulty = DIFF_HARD;
+                            Scen.Difficulty = DIFF_NORMAL;
+                            break;
+
+                        case 2:
+                            Scen.CDifficulty = DIFF_NORMAL;
+                            Scen.Difficulty = DIFF_NORMAL;
+                            break;
+
+                        case 3:
+                            Scen.CDifficulty = DIFF_EASY;
+                            Scen.Difficulty = DIFF_NORMAL;
+                            break;
+
+                        case 4:
+                            Scen.CDifficulty = DIFF_EASY;
+                            Scen.Difficulty = DIFF_HARD;
+                            break;
+                    }
+
                     return true;
                 }
 
@@ -762,6 +824,15 @@ protected:
                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
         Render_Minimap();
+
+        // Render_Minimap updated SelectedMapPlayerCount, so refresh UI to match
+        Toggle_AI_Players();
+        Fancy_Text_Print(std::format("{} Players", SelectedMapPlayerCount).c_str(),
+                         Dimensions[BUTTON_MINIMAP].X + (Dimensions[BUTTON_MINIMAP].W / 2),
+                         Dimensions[BUTTON_MINIMAP].Y - TextHeight - (1 * Factor),
+                         CC_GREEN,
+                         TBLACK,
+                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -825,7 +896,7 @@ protected:
                          TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
         // AI player setting headers
-        Fancy_Text_Print("Player", // TODO: Locale file entry
+        Fancy_Text_Print("Difficulty", // TODO: Locale file entry
                          (Dimensions[BUTTON_AI_HOUSE_1].X
                             - static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W * 1.5)) - (10 * Factor))
                             + (static_cast<int>((Dimensions[BUTTON_AI_HOUSE_1].W * 1.5) / 1.25)),
@@ -834,7 +905,7 @@ protected:
                          TBLACK,
                          TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-        Fancy_Text_Print("Side", // TODO: Locale file entry
+        Fancy_Text_Print(TXT_SIDE_COLON,
                          Dimensions[BUTTON_AI_HOUSE_1].X
                             + static_cast<int>(nearbyint(Dimensions[BUTTON_AI_HOUSE_1].W / 1.25)),
                          Dimensions[BUTTON_AI_HOUSE_1].Y - TextHeight - (2 * Factor),
@@ -848,8 +919,8 @@ protected:
             - (10 * Factor)) - 3 * Factor;
 
         for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            // TODO: Locale file entry
-            Fancy_Text_Print(std::format("AI {}:", control - BUTTON_HOUSE).c_str(),
+            // TODO: Locale file entry"
+            Fancy_Text_Print(std::format("AI {}:", control - BUTTON_AI_DIFF_1 + 1).c_str(),
                              cur_ai_house_label_x,
                              Dimensions[control].Y,
                              CC_GREEN,
@@ -899,40 +970,40 @@ protected:
             scenario_list.Add_Item(strupr(MPlayerScenarios[i]));
         }
 
-        if (MPlayerFilenum.Count() == 0) {
-            // no scenarios available
-            MPlayerScenarioNumber = ScenarioIdx = -1;
-            return;
-        }
-
-        // select the last scenario chosen by the player (if present)
-        auto first_scenario_number = -1;
-        auto preferred_scenario_found = false;
-
-        for (auto i = 0; i < MPlayerFilenum.Count(); i++) {
-            if (first_scenario_number == -1) {
-                first_scenario_number = i;
-            }
-
-            if (MPlayerFilenum[i] != MPlayerScenarioNumber) {
-                continue;
-            }
-
-            ScenarioIdx = i;
-            scenario_list.Set_Selected_Index(i);
-
-            preferred_scenario_found = true;
-            break;
-        }
-
-        if (!preferred_scenario_found) {
-            // preferred scenario no longer present in game data, default to first scenario in the list
-            MPlayerScenarioNumber = ScenarioIdx = first_scenario_number;
-        }
+        scenario_list.Set_Selected_Index(ScenarioIdx);
     }
 
     void Init_Data() override
     {
+        if (MPlayerFilenum.Count() != 0) {
+            // select the last scenario chosen by the player (if present)
+            auto first_scenario_number = -1;
+            auto preferred_scenario_found = false;
+
+            for (auto i = 0; i < MPlayerFilenum.Count(); i++) {
+                if (first_scenario_number == -1) {
+                    first_scenario_number = i;
+                }
+
+                if (MPlayerFilenum[i] != MPlayerScenarioNumber) {
+                    continue;
+                }
+
+                ScenarioIdx = i;
+
+                preferred_scenario_found = true;
+                break;
+            }
+
+            if (!preferred_scenario_found) {
+                // preferred scenario no longer present in game data, default to first scenario in the list
+                MPlayerScenarioNumber = ScenarioIdx = first_scenario_number;
+            }
+        } else {
+            // no scenarios available
+            MPlayerScenarioNumber = ScenarioIdx = -1;
+        }
+
         MPlayerColorIdx = MPlayerPrefColor; // init my preferred color
 
         strcpy(Text[BUTTON_NAME].get(), MPlayerName);       // set my name
@@ -1228,7 +1299,7 @@ protected:
     }
 
 public:
-    SkirmishScenarioDialog() : Dialog(300, 195, 10, 4) {}
+    SkirmishScenarioDialog() : Dialog(300, 195, 10, 4), SelectedMapPlayerCount(2) {}
 
     ~SkirmishScenarioDialog() override
     {
