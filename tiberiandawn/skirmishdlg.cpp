@@ -760,6 +760,8 @@ protected:
                          BLACK,
                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
+        // TODO: split logic for detecting player count out and only render if not DOS (have popup for DOS with a
+        // preview button instead
         Render_Minimap();
 
         // Render_Minimap updated SelectedMapPlayerCount, so refresh UI to match
