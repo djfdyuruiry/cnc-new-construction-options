@@ -4,8 +4,19 @@
 
 typedef enum
 {
+    // player setup
     BUTTON_NAME = 100,
     BUTTON_HOUSE,
+    BUTTON_COLOR_1,
+    BUTTON_COLOR_2,
+    BUTTON_COLOR_3,
+    BUTTON_COLOR_4,
+    BUTTON_COLOR_5,
+    BUTTON_COLOR_6,
+    // scenario selection
+    BUTTON_SCENARIO_LIST,
+    BUTTON_MINIMAP,
+    // scenario setup
     BUTTON_AI_DIFF_1,
     BUTTON_AI_DIFF_2,
     BUTTON_AI_DIFF_3,
@@ -16,22 +27,14 @@ typedef enum
     BUTTON_AI_HOUSE_3,
     BUTTON_AI_HOUSE_4,
     BUTTON_AI_HOUSE_5,
-    BUTTON_OPTIONS,
-    BUTTON_SCENARIO_LIST,
     BUTTON_COUNT,
     BUTTON_LEVEL,
     BUTTON_CREDITS,
     BUTTON_TIBERIUM_SCALE,
+    BUTTON_OPTIONS,
+    // dialog buttons
     BUTTON_OK,
-    BUTTON_LOAD,
-    BUTTON_CANCEL,
-    BUTTON_COLOR_1,
-    BUTTON_COLOR_2,
-    BUTTON_COLOR_3,
-    BUTTON_COLOR_4,
-    BUTTON_COLOR_5,
-    BUTTON_COLOR_6,
-    BUTTON_PLAYER_LIST // not used
+    BUTTON_CANCEL
 } SkirmishControls;
 
 class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
@@ -65,23 +68,99 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         }
     }
 
+    int Get_Menu_Color_For_Cell(const CellClass& cell)
+    {
+        auto occupier = cell.Cell_Occupier();
+
+        if (occupier == nullptr) {
+            // pick a color based on land type
+            switch (cell.Land_Type()) {
+                case LAND_WATER:
+                    return 0x02;
+                case LAND_WALL:
+                case LAND_ROCK:
+                    return 0x0E;
+                case LAND_TIBERIUM:
+                    return 0x04;
+
+                default: {
+                    if (cell.TType >= TEMPLATE_ROAD1 && cell.TType <= TEMPLATE_ROAD43) {
+                        // road
+                        return 0x10;
+                    }
+
+                    if (cell.TType >= TEMPLATE_BRIDGE1 && cell.TType <= TEMPLATE_BRIDGE4D) {
+                        // bridge
+                        return 0;
+                    }
+
+                    if (Map.Theater == THEATER_SNOW) {
+                        return 0xFF;
+                    }
+
+                    if (Map.Theater == THEATER_DESERT) {
+                        return 0x14;
+                    }
+
+                    return 0xA0;
+                }
+            }
+        }
+
+        // pick a color based on occupier type
+        switch (occupier->What_Am_I()) {
+            case RTTI_TEMPLATE: {
+                return 0x1A;
+            }
+
+            case RTTI_TERRAIN: {
+                const auto terrain = reinterpret_cast<TerrainClass*>(occupier);
+                // trees or rocks
+                return terrain->Full_Name() == TXT_TREE ? 0x03 : 0x0E;
+            }
+
+            case RTTI_INFANTRY:
+            case RTTI_UNIT:
+            case RTTI_BUILDING: {
+                return 0x05; // default to gold (used for neutral house anyway)
+            }
+
+            default: break;
+        }
+
+        // default is no color
+        return BLACK;
+    }
+
     void Render_Minimap()
     {
-        constexpr auto map_width = MAP_CELL_W + 1;
-        constexpr auto map_height = MAP_CELL_H + 1;
-        auto minimap_x = X + Width - map_width - (MarginWidth / 2);
-        auto minimap_y = Dimensions[BUTTON_SCENARIO_LIST].Y + (2 * Factor);
-
-        auto D_BORD_X2 = minimap_x + map_width;
-        auto D_BORD_Y2 = minimap_y + map_height;
-
-        Hide_Mouse();
-        LogicPage->Lock();
+        const auto minimap_bottom_right_x = Dimensions[BUTTON_MINIMAP].X + Dimensions[BUTTON_MINIMAP].W;
+        const auto minimap_bottom_right_y = Dimensions[BUTTON_MINIMAP].Y + Dimensions[BUTTON_MINIMAP].H;
 
         /*
         .................... Erase the map interior .....................
         */
-        LogicPage->Fill_Rect(minimap_x + 1, minimap_y + 1, D_BORD_X2 - 1, D_BORD_Y2 - 1, BLACK);
+        LogicPage->Fill_Rect(Dimensions[BUTTON_MINIMAP].X + 1, Dimensions[BUTTON_MINIMAP].Y + 1, minimap_bottom_right_x - 1, minimap_bottom_right_y - 1, BLACK);
+
+        // load scenario data
+        const auto old_build_level = BuildLevel;
+
+        Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
+        GameToPlay = GAME_NORMAL;
+
+        if (!Read_Scenario_Ini(Scen.ScenarioName, Special, false, false)) { // don't init lua/rules
+            // clear scenario data
+            Clear_Scenario(false);
+
+            GameToPlay = GAME_SKIRMISH;
+            BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
+
+            return;
+        }
+
+        // iterate over map cells to render map
+        Hide_Mouse();
+        LogicPage->Lock();
 
 #ifdef MEGAMAPS
         const auto scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
@@ -92,47 +171,24 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         /*...............................................................
         Draw Land map symbols (use color according to Ground[] array).
         ...............................................................*/
-        for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-            if (!Map.In_Radar(cell)) {
+        for (CELL raw_cell = 0; raw_cell < MAP_CELL_TOTAL; raw_cell++) {
+            if (!Map.In_Radar(raw_cell)) {
                 continue;
             }
 
-            auto terrain = Map[cell].Cell_Terrain();
-            int color = BLACK;
-
-            if (terrain == nullptr) {
-                const auto ground = Map[cell].Land_Type();
-
-                // pick a ground color
-                if (ground == LAND_WATER) {
-                    color = 0x02;
-                } else if (ground == LAND_WALL || ground == LAND_ROCK) {
-                    color = 0x0E;
-                } else if (ground == LAND_TIBERIUM) {
-                    color = 0x04;
-                } else if (Map.Theater == THEATER_SNOW) {
-                    color = 0xFF;
-                } else if (Map.Theater == THEATER_DESERT) {
-                    color = 0x14;
-                } else {
-                    color = 0xA0;
-                }
-            } else {
-                // trees
-                color = 0x03;
-            }
+            const auto color = Get_Menu_Color_For_Cell(Map[raw_cell]);
 
             if (scale_map) {
                 // 'zoom' a regular map in by scaling pixels
                 for (int x = 0; x < 2; ++x) {
                     for (int y = 0; y < 2; ++y) {
-                        LogicPage->Put_Pixel(minimap_x + (Cell_X(cell) * 2) + x + 1,
-                                            minimap_y + (Cell_Y(cell) * 2) + y + 1, color);
+                        LogicPage->Put_Pixel(Dimensions[BUTTON_MINIMAP].X + (Cell_X(raw_cell) * 2) + x + 1,
+                                            Dimensions[BUTTON_MINIMAP].Y + (Cell_Y(raw_cell) * 2) + y + 1, color);
                     }
                 }
             } else {
                 // we can't scale a megamap as it's too big, so just draw a pixel per cell
-                LogicPage->Put_Pixel(minimap_x + Cell_X(cell) + 1, minimap_y + Cell_Y(cell) + 1, color);
+                LogicPage->Put_Pixel(Dimensions[BUTTON_MINIMAP].X + Cell_X(raw_cell) + 1, Dimensions[BUTTON_MINIMAP].Y + Cell_Y(raw_cell) + 1, color);
             }
         }
 
@@ -199,8 +255,14 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         // Fancy_Text_Print(
         //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-        LogicPage->Draw_Rect(minimap_x, minimap_y, D_BORD_X2, D_BORD_Y2, GRAY);
+        LogicPage->Draw_Rect(Dimensions[BUTTON_MINIMAP].X, Dimensions[BUTTON_MINIMAP].Y, minimap_bottom_right_x, minimap_bottom_right_y, GRAY);
         Show_Mouse();
+
+        // clear scenario data
+        Clear_Scenario(false);
+
+        GameToPlay = GAME_SKIRMISH;
+        BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
     }
 
 protected:
@@ -271,17 +333,9 @@ protected:
                     // (index will change if maps are added/removed by player)
                     MPlayerScenarioNumber = MPlayerFilenum[ScenarioIdx];
 
-                    const auto old_build_level = BuildLevel;
-
-                    Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
-                    GameToPlay = GAME_NORMAL;
-                    Read_Scenario_Ini(Scen.ScenarioName, Special, false, false); // don't init lua/rules
-
-                    BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
+                    strcpy(MPlayerName, Text[BUTTON_NAME].get());
 
                     display = REDRAW_FOREGROUND;
-
-                    strcpy(MPlayerName, Text[BUTTON_NAME].get());
                 }
                 break;
             }
@@ -810,23 +864,36 @@ protected:
         for (auto i = 0; i < MPlayerScenarios.Count(); i++) {
             scenario_list.Add_Item(strupr(MPlayerScenarios[i]));
         }
-        ScenarioIdx = 0; // 1st scenario is selected
+
+        if (MPlayerFilenum.Count() == 0) {
+            // no scenarios available
+            MPlayerScenarioNumber = ScenarioIdx = -1;
+            return;
+        }
 
         // select the last scenario chosen by the player (if present)
+        auto first_scenario_number = -1;
+        auto preferred_scenario_found = false;
+
         for (auto i = 0; i < MPlayerFilenum.Count(); i++) {
-            if (MPlayerFilenum[i] == MPlayerScenarioNumber) {
-                ScenarioIdx = i;
-                scenario_list.Set_Selected_Index(i);
-
-                const auto old_build_level = BuildLevel;
-
-                Set_Scenario_Name(Scen.ScenarioName, MPlayerFilenum[ScenarioIdx], SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
-                GameToPlay = GAME_NORMAL;
-                Read_Scenario_Ini(Scen.ScenarioName, Special, false, false); // don't init lua/rules
-
-                BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
-                break;
+            if (first_scenario_number == -1) {
+                first_scenario_number = i;
             }
+
+            if (MPlayerFilenum[i] != MPlayerScenarioNumber) {
+                continue;
+            }
+
+            ScenarioIdx = i;
+            scenario_list.Set_Selected_Index(i);
+
+            preferred_scenario_found = true;
+            break;
+        }
+
+        if (!preferred_scenario_found) {
+            // preferred scenario no longer present in game data, default to first scenario in the list
+            MPlayerScenarioNumber = ScenarioIdx = first_scenario_number;
         }
     }
 
@@ -1061,13 +1128,15 @@ protected:
             Dimensions[control].X = Dimensions[control].X + (Dimensions[control].W * (control - BUTTON_COLOR_1));
         }
 
-        Dimensions[BUTTON_PLAYER_LIST].W = 118 * Factor;
-        Dimensions[BUTTON_PLAYER_LIST].X = X + MarginWidth + MarginWidth + 5 * Factor;
-
         Dimensions[BUTTON_SCENARIO_LIST].W = 220 * Factor;
         Dimensions[BUTTON_SCENARIO_LIST].H = (35 * Factor) * 2;
         Dimensions[BUTTON_SCENARIO_LIST].X = Dimensions[BUTTON_OK].X;
         Dimensions[BUTTON_SCENARIO_LIST].Y = (Y + (Height / 2)) - Dimensions[BUTTON_SCENARIO_LIST].H + (5 * Factor);
+
+        Dimensions[BUTTON_MINIMAP].W = MAP_CELL_W + 1;
+        Dimensions[BUTTON_MINIMAP].H = MAP_CELL_H + 1;
+        Dimensions[BUTTON_MINIMAP].X = X + Width - Dimensions[BUTTON_MINIMAP].W - (MarginWidth / 2);
+        Dimensions[BUTTON_MINIMAP].Y = Dimensions[BUTTON_SCENARIO_LIST].Y + (2 * Factor);
 
         // right column of AI house controls
         Dimensions[BUTTON_AI_HOUSE_1].W = static_cast<int>(nearbyint(Dimensions[BUTTON_HOUSE].W / 1.75));
