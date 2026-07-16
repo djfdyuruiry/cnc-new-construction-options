@@ -1492,7 +1492,13 @@ void HouseClass::AI(void)
     */
     if (GameToPlay != GAME_NORMAL && !IsDefeated && !ActiveBScan && !ActiveAScan && !UScan && !ActiveIScan
         && Frame > 0) {
-        MPlayer_Defeated();
+        if (
+            // don't register neutral defeat if AI is disabled (game thinks the house is human)
+            Class->House != HOUSE_NEUTRAL
+            || !Rule.Get_Rule_Value<bool>(GAME_MULTIPLAYER_SECTION, DISABLE_NEUTRAL_HOUSE_AI_RULE)
+        ) {
+            MPlayer_Defeated();
+        }
     }
 
     for (int index = 0; index < HouseTriggers[Class->House].Count(); index++) {
