@@ -540,6 +540,7 @@ protected:
         auto D_BORD_Y2 = D_BORD_Y1 + MAP_CELL_H + 1;
 
         LogicPage->Lock();
+
         /*
         .................... Erase the map interior .....................
         */
@@ -549,11 +550,34 @@ protected:
         Draw Land map symbols (use color according to Ground[] array).
         ...............................................................*/
         for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-            auto occupier = Map[cell].Cell_Occupier();
-            if (occupier == NULL) {
-                auto color = Ground[Map[cell].Land_Type()].Color;
-                LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
+            int color = BLACK;
+            if (Map.In_Radar(cell)) {
+                auto terrain = Map[cell].Cell_Terrain();
+
+                if (terrain == nullptr) {
+                    auto ground = Map[cell].Land_Type();
+
+                    // pick a ground color
+                    if (ground == LAND_WATER) {
+                        color = 0x02;
+                    } else if (ground == LAND_WALL || ground == LAND_ROCK) {
+                        color = 0x0E;
+                    } else if (ground == LAND_TIBERIUM) {
+                        color = 0x04;
+                    } else if (Map.Theater == THEATER_SNOW) {
+                        color = 0xFF;
+                    } else if (Map.Theater == THEATER_DESERT) {
+                        color = 0x14;
+                    } else {
+                        color = 0xA0;
+                    }
+                } else {
+                    // trees
+                    color = 0x03;
+                }
             }
+
+            LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
         }
 
         LogicPage->Unlock();
@@ -568,23 +592,23 @@ protected:
         that specified in the house type class object.
         DKGREEN = terrain object
         ...............................................................*/
-        for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-            auto occupier = Map[cell].Cell_Occupier();
-            if (occupier) {
-                HouseColorType color = static_cast<HouseColorType>(DKGREEN);
-                if (occupier && occupier->Owner() != HOUSE_NONE) {
-                    color = HouseClass::As_Pointer(occupier->Owner())->Class->Color;
-                }
-                LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
-            }
-        }
+        // for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
+        //     auto occupier = Map[cell].Cell_Occupier();
+        //     if (occupier) {
+        //         HouseColorType color = static_cast<HouseColorType>(DKGREEN);
+        //         if (occupier && occupier->Owner() != HOUSE_NONE) {
+        //             color = HouseClass::As_Pointer(occupier->Owner())->Class->Color;
+        //         }
+        //         LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
+        //     }
+        // }
 
         /*
         ...................... Draw Home location .......................
         */
-        LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
-                             D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
-                             WHITE);
+        // LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
+        //                      D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
+        //                      WHITE);
         //
         // /*
         // ..................... Erase old coordinates .....................
