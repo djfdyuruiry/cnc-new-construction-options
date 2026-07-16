@@ -5,6 +5,12 @@
   "comment": "Change behavior specific to skirmish and network games, some options will change how the setup screen for games behaves (max units, number of AI etc.)",
   "rules": [
     {
+      "name": "DisableNeutralHouseAI",
+      "type": "bool",
+      "default": true,
+      "comment": "Make the Neutral house (civilian) brain dead? (Useful if you don't want that house to sell buildings etc.)"
+    },
+    {
       "name": "StartUnitsWithBaseMax",
       "type": "int",
       "default": 12,

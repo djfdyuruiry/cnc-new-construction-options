@@ -1339,7 +1339,6 @@ static void Assign_Houses(void)
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
-
         if (house_used[i]) {
             continue;
         }
@@ -1349,6 +1348,14 @@ static void Assign_Houses(void)
         if (housep) {
             housep->Clobber_All();
         }
+    }
+
+    if (
+        GameToPlay != GAME_NORMAL
+        && Rule.Get_Rule_Value<bool>(GAME_MULTIPLAYER_SECTION, DISABLE_NEUTRAL_HOUSE_AI_RULE)
+    ) {
+        // force neutral class to be brain-dead in multiplayer
+        HouseClass::As_Pointer(HOUSE_NEUTRAL)->IsHuman = true;
     }
 }
 
