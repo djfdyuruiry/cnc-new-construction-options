@@ -176,9 +176,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         const auto minimap_bottom_right_x = Dimensions[BUTTON_MINIMAP].X + Dimensions[BUTTON_MINIMAP].W;
         const auto minimap_bottom_right_y = Dimensions[BUTTON_MINIMAP].Y + Dimensions[BUTTON_MINIMAP].H;
 
-        /*
-        .................... Erase the map interior .....................
-        */
+        // draw minimap background
         LogicPage->Fill_Rect(
             Dimensions[BUTTON_MINIMAP].X + 1,
             Dimensions[BUTTON_MINIMAP].Y + 1,
@@ -215,9 +213,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
 
         SelectedMapPlayerCount = 0;
 
-        /*...............................................................
-        Draw Land map symbols (use color according to Ground[] array).
-        ...............................................................*/
+        // for each cell in the loaded map, draw a pixel to represent its contents
         for (CELL raw_cell = 0; raw_cell < MAP_CELL_TOTAL; raw_cell++) {
             if (!Map.In_Radar(raw_cell)) {
                 continue;
@@ -248,67 +244,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
 
         LogicPage->Unlock();
 
-        /*
-        ................. Draw the actual map location ..................
-        */
-        //LogicPage->Draw_Rect(map_x1, map_y1, map_x2, map_y2, WHITE);
-
-        /*...............................................................
-        Draw Unit map symbols (Use the radar map color according to
-        that specified in the house type class object.
-        DKGREEN = terrain object
-        ...............................................................*/
-        // for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-        //     auto occupier = Map[cell].Cell_Occupier();
-        //     if (occupier) {
-        //         HouseColorType color = static_cast<HouseColorType>(DKGREEN);
-        //         if (occupier && occupier->Owner() != HOUSE_NONE) {
-        //             color = HouseClass::As_Pointer(occupier->Owner())->Class->Color;
-        //         }
-        //         LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(cell) + 1, D_BORD_Y1 + Cell_Y(cell) + 1, color);
-        //     }
-        // }
-
-        /*
-        ...................... Draw Home location .......................
-        */
-        // LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
-        //                      D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
-        //                      WHITE);
-        //
-        // /*
-        // ..................... Erase old coordinates .....................
-        // */
-        // LogicPage->Fill_Rect(D_DIALOG_X + 7,
-        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22,
-        //                      D_DIALOG_X + D_DIALOG_W - 7,
-        //                      D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22 + 10,
-        //                      BLACK);
-        //
-        // /*
-        // ..................... Draw the coordinates ......................
-        // */
-        // txt_x = D_DIALOG_X + D_DIALOG_W / 8;
-        // txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22;
-        // sprintf(txt, "%d", map_x1 - D_BORD_X1 - 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        //
-        // txt_x += (D_DIALOG_W - 20) / 4;
-        // sprintf(txt, "%d", map_y1 - D_BORD_Y1 - 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        //
-        // txt_x += (D_DIALOG_W - 20) / 4;
-        // sprintf(txt, "%d", map_x2 - map_x1 + 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-        //
-        // txt_x += (D_DIALOG_W - 20) / 4;
-        // sprintf(txt, "%d", map_y2 - map_y1 + 1);
-        // Fancy_Text_Print(
-        //     txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
+        // draw minimap border
         LogicPage->Draw_Rect(
             Dimensions[BUTTON_MINIMAP].X,
             Dimensions[BUTTON_MINIMAP].Y,
@@ -316,6 +252,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
             minimap_bottom_right_y,
             GRAY
         );
+
         Show_Mouse();
 
         // clear scenario data
@@ -919,7 +856,7 @@ protected:
             - (10 * Factor)) - 3 * Factor;
 
         for (auto control = BUTTON_AI_DIFF_1; control <= BUTTON_AI_DIFF_5; ++control) {
-            // TODO: Locale file entry"
+            // TODO: Locale file entry
             Fancy_Text_Print(std::format("AI {}:", control - BUTTON_AI_DIFF_1 + 1).c_str(),
                              cur_ai_house_label_x,
                              Dimensions[control].Y,
