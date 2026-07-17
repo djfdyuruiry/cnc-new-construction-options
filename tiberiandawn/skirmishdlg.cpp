@@ -782,12 +782,12 @@ protected:
                          BLACK,
                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-        // TODO: split logic for detecting player count out and only render if not DOS (have popup for DOS with a
-        // preview button instead
-        Render_Minimap();
+        static const auto is_dos = Settings.Video.DOSMode || Is_DOS_Files();
 
-        // Render_Minimap updated SelectedMapPlayerCount, so refresh UI to match
-        Toggle_AI_Players();
+        // TODO: add button and show preview mini-map in a popup since DOS dialog is too small
+        if (!is_dos) {
+            Render_Minimap();
+        }
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -912,7 +912,7 @@ protected:
 
         auto& level_gauge = Get_Control<GaugeClass>(BUTTON_LEVEL);
         level_gauge.Set_Maximum(MPLAYER_BUILD_LEVEL_MAX - 1);
-        level_gauge.Set_Value(6);
+        level_gauge.Set_Value(static_cast<int>(BuildLevel) - 1);
 
         auto& count_gauge = Get_Control<GaugeClass>(BUTTON_COUNT);
         count_gauge.Set_Maximum(MPlayerCountMax[MPlayerBases] - MPlayerCountMin[MPlayerBases]);
