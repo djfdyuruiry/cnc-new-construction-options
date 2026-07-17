@@ -96,9 +96,6 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         if (cell.IsWaypoint) {
             for (auto i = 0; i < 6; i++) {
                 if (raw_cell == Scen.Waypoint[i]) {
-                    // track how many player start locations are found
-                    SelectedMapPlayerCount++;
-
                     // player start location
                     return 127;
                 }
@@ -171,6 +168,56 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         }
     }
 
+    void Iterate_Map_Cells(const std::function<void(CELL)>& callback)
+    {
+        if (MPlayerScenarioNumber == -1) {
+            return;
+        }
+
+        const auto old_build_level = BuildLevel;
+
+        Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
+        GameToPlay = GAME_NORMAL;
+
+        if (!Read_Scenario_Ini(Scen.ScenarioName, Special, false, false)) {
+            Clear_Scenario(false);
+            GameToPlay = GAME_SKIRMISH;
+            BuildLevel = old_build_level;
+            return;
+        }
+
+        for (CELL raw_cell = 0; raw_cell < MAP_CELL_TOTAL; raw_cell++) {
+            if (Map.In_Radar(raw_cell)) {
+                callback(raw_cell);
+            }
+        }
+
+        Clear_Scenario(false);
+        GameToPlay = GAME_SKIRMISH;
+        BuildLevel = old_build_level;
+    }
+
+    int Calculate_Player_Count()
+    {
+        auto player_count = 0;
+
+        Iterate_Map_Cells([&](const auto raw_cell) {
+            const auto& cell = Map[raw_cell];
+
+            if (!cell.IsWaypoint) {
+                return;
+            }
+
+            for (auto i = 0; i < 6; i++) {
+                if (raw_cell == Scen.Waypoint[i]) {
+                    player_count++;
+                }
+            }
+        });
+
+        return player_count;
+    }
+
     void Render_Minimap()
     {
         const auto minimap_bottom_right_x = Dimensions[BUTTON_MINIMAP].X + Dimensions[BUTTON_MINIMAP].W;
@@ -185,44 +232,25 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
             BLACK
         );
 
-        // load scenario data
-        const auto old_build_level = BuildLevel;
-
-        Set_Scenario_Name(Scen.ScenarioName, MPlayerScenarioNumber, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
-        GameToPlay = GAME_NORMAL;
-
-        if (!Read_Scenario_Ini(Scen.ScenarioName, Special, false, false)) { // don't init lua/rules
-            // clear scenario data
-            Clear_Scenario(false);
-
-            GameToPlay = GAME_SKIRMISH;
-            BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
-
-            return;
-        }
-
-        // iterate over map cells to render map
         Hide_Mouse();
         LogicPage->Lock();
 
-#ifdef MEGAMAPS
-        const auto scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
-#else
-        const auto scale_map = true;
-#endif
+        bool scale_map = false;
+        bool first_cell = true;
 
-        SelectedMapPlayerCount = 0;
-
-        // for each cell in the loaded map, draw a pixel to represent its contents
-        for (CELL raw_cell = 0; raw_cell < MAP_CELL_TOTAL; raw_cell++) {
-            if (!Map.In_Radar(raw_cell)) {
-                continue;
+        Iterate_Map_Cells([&](const auto raw_cell) {
+            if (first_cell) {
+                #ifdef MEGAMAPS
+                scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
+                #else
+                scale_map = true;
+                #endif
+                first_cell = false;
             }
 
             const auto color = Get_Menu_Color_For_Cell(raw_cell);
 
             if (scale_map) {
-                // 'zoom' a regular map in by scaling pixels
                 for (int x = 0; x < 2; ++x) {
                     for (int y = 0; y < 2; ++y) {
                         LogicPage->Put_Pixel(
@@ -233,14 +261,13 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
                     }
                 }
             } else {
-                // we can't scale a megamap as it's too big, so just draw a pixel per cell
                 LogicPage->Put_Pixel(
                     Dimensions[BUTTON_MINIMAP].X + Cell_X(raw_cell) + 1,
                     Dimensions[BUTTON_MINIMAP].Y + Cell_Y(raw_cell) + 1,
                     color
                 );
             }
-        }
+        });
 
         LogicPage->Unlock();
 
@@ -254,12 +281,6 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         );
 
         Show_Mouse();
-
-        // clear scenario data
-        Clear_Scenario(false);
-
-        GameToPlay = GAME_SKIRMISH;
-        BuildLevel = old_build_level; // Read_Scenario_Ini clobbers BuildLevel
     }
 
     int SelectedMapPlayerCount;
@@ -334,7 +355,8 @@ protected:
 
                     strcpy(MPlayerName, Text[BUTTON_NAME].get());
 
-                    SelectedMapPlayerCount = 2;
+                    SelectedMapPlayerCount = Calculate_Player_Count();
+                    Toggle_AI_Players();
                     display = REDRAW_ALL;
                 }
                 break;
@@ -766,12 +788,6 @@ protected:
 
         // Render_Minimap updated SelectedMapPlayerCount, so refresh UI to match
         Toggle_AI_Players();
-        Fancy_Text_Print(std::format("{} Players", SelectedMapPlayerCount).c_str(),
-                         Dimensions[BUTTON_MINIMAP].X + (Dimensions[BUTTON_MINIMAP].W / 2),
-                         Dimensions[BUTTON_MINIMAP].Y - TextHeight - (1 * Factor),
-                         CC_GREEN,
-                         TBLACK,
-                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
     }
 
     void Render_Background(DialogRedrawType& display) override
@@ -802,6 +818,13 @@ protected:
         Fancy_Text_Print(TXT_SCENARIOS,
                          Dimensions[BUTTON_SCENARIO_LIST].X + (Dimensions[BUTTON_SCENARIO_LIST].W / 2),
                          Dimensions[BUTTON_SCENARIO_LIST].Y - TextHeight - (1 * Factor),
+                         CC_GREEN,
+                         TBLACK,
+                         TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+        Fancy_Text_Print(std::format("{} Players", SelectedMapPlayerCount).c_str(),
+                         Dimensions[BUTTON_MINIMAP].X + (Dimensions[BUTTON_MINIMAP].W / 2),
+                         Dimensions[BUTTON_MINIMAP].Y - TextHeight - (1 * Factor),
                          CC_GREEN,
                          TBLACK,
                          TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -910,6 +933,8 @@ protected:
         }
 
         scenario_list.Set_Selected_Index(ScenarioIdx);
+
+        Toggle_AI_Players();
     }
 
     void Init_Data() override
@@ -942,6 +967,8 @@ protected:
             // no scenarios available
             MPlayerScenarioNumber = ScenarioIdx = -1;
         }
+
+        SelectedMapPlayerCount = Calculate_Player_Count();
 
         MPlayerColorIdx = MPlayerPrefColor; // init my preferred color
 
