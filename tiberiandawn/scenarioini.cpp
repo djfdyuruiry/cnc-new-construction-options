@@ -1636,7 +1636,7 @@ static void Create_Units(void)
         try_count = 0;
         while (true) {
             j = Random_Pick(0, MPlayerMax - 1);
-            if (sorted_waypts[j] != -1) {
+            if (sorted_waypts[j] != -1 && Map.In_Radar(sorted_waypts[j])) {
                 centroid = sorted_waypts[j];
                 sorted_waypts[j] = -1;
                 break;

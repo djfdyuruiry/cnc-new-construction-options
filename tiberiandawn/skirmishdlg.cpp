@@ -76,7 +76,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
             auto& diff_dropdown = Get_Control<DropListClass>(diff_control);
             auto& house_dropdown = Get_Control<DropListClass>(house_control);
 
-            if (diff_control - BUTTON_AI_DIFF_1 < SelectedMapPlayerCount - 1) {
+            if (diff_control - BUTTON_AI_DIFF_1 < MPlayerMax - 1) {
                 house_dropdown.DropButton.Enable();
                 diff_dropdown.DropButton.Enable();
             } else {
@@ -283,8 +283,6 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         Show_Mouse();
     }
 
-    int SelectedMapPlayerCount;
-
 protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
@@ -355,7 +353,7 @@ protected:
 
                     strcpy(MPlayerName, Text[BUTTON_NAME].get());
 
-                    SelectedMapPlayerCount = Calculate_Player_Count();
+                    MPlayerMax = Calculate_Player_Count();
                     Toggle_AI_Players();
                     display = REDRAW_ALL;
                 }
@@ -648,7 +646,10 @@ protected:
                     break;
                 }
             }
-            case (BUTTON_CANCEL | KN_BUTTON): return false;
+            case (BUTTON_CANCEL | KN_BUTTON): {
+                MPlayerMax = 6;
+                return false;
+            }
 
             default: break;
         } /* end of input processing */
@@ -822,7 +823,7 @@ protected:
                          TBLACK,
                          TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-        Fancy_Text_Print(std::format("{} Players", SelectedMapPlayerCount).c_str(),
+        Fancy_Text_Print(std::format("{} Players", MPlayerMax).c_str(),
                          Dimensions[BUTTON_MINIMAP].X + (Dimensions[BUTTON_MINIMAP].W / 2),
                          Dimensions[BUTTON_MINIMAP].Y - TextHeight - (1 * Factor),
                          CC_GREEN,
@@ -963,12 +964,13 @@ protected:
                 // preferred scenario no longer present in game data, default to first scenario in the list
                 MPlayerScenarioNumber = ScenarioIdx = first_scenario_number;
             }
+
+            MPlayerMax = Calculate_Player_Count();
         } else {
             // no scenarios available
             MPlayerScenarioNumber = ScenarioIdx = -1;
+            MPlayerMax = 1;
         }
-
-        SelectedMapPlayerCount = Calculate_Player_Count();
 
         MPlayerColorIdx = MPlayerPrefColor; // init my preferred color
 
@@ -1265,7 +1267,7 @@ protected:
     }
 
 public:
-    SkirmishScenarioDialog() : Dialog(300, 195, 10, 4), SelectedMapPlayerCount(2) {}
+    SkirmishScenarioDialog() : Dialog(300, 195, 10, 4) {}
 
     ~SkirmishScenarioDialog() override
     {
@@ -1326,6 +1328,8 @@ public:
             const auto selected_house = selected_house_idx < 2
                 ? HOUSE_NONE
                 : static_cast<HousesType>(selected_house_idx - 2);
+
+            CNC_LOG_WARN("idx: {} house: {}", MPlayerGhosts + 1, selected_house);
 
             MPlayerHouses[MPlayerGhosts + 1] = selected_house;
             MPlayerDifficulty[MPlayerGhosts + 1] = selected_diff;

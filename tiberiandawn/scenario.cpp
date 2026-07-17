@@ -412,6 +412,9 @@ void Clear_Scenario(const bool reset_rules)
 
     // Tear down Lua runtime
     ScenarioLua::On_Clear_Scenario();
+
+    // reset multiplayer max (changed by skirmish logic to ensure correct spawn points)
+    MPlayerMax = 6;
 }
 
 /***********************************************************************************************
