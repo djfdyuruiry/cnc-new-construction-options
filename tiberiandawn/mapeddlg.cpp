@@ -232,7 +232,7 @@ int MapEditClass::Load_Scenario(void)
     /*
     ------------------------------ Read the INI ------------------------------
     */
-    if (Read_Scenario_Ini(Scen.ScenarioName, Special, Rule.AllowSuperWeapons) == 0) {
+    if (Read_Scenario_Ini(Scen.ScenarioName, Special, true, true, Rule.AllowSuperWeapons) == 0) {
         WWMessageBox().Process("Unable to read scenario!");
         HiddenPage.Clear();
         Flag_To_Redraw(true);
@@ -1887,9 +1887,10 @@ int MapEditClass::Scenario_Dialog(void)
     .......................... Fill in theater items .........................
     */
     theaterbtn.Add_Item("Desert");
-    theaterbtn.Add_Item("Jungle");
+    theaterbtn.Add_Item("(!Broken!) Jungle");
     theaterbtn.Add_Item("Temperate");
     theaterbtn.Add_Item("Winter");
+    theaterbtn.Add_Item("Snow");
 
     /*
     ............................ Init parameters .............................

@@ -211,7 +211,7 @@ extern void GlyphX_Assign_Houses(void); // ST - 6/25/2019 11:08AM
  * HISTORY:                                                                                    *
  *   10/07/1992 JLB : Created.                                                                 *
  *=============================================================================================*/
-bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::optional<bool> allow_superweapons, bool fresh)
+bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bool init_rules, const bool init_lua, const std::optional<bool> allow_superweapons, const bool fresh)
 {
     char fname[_MAX_FNAME + _MAX_EXT]; // full INI filename
     char buf[128];                     // Working string staging buffer.
@@ -225,7 +225,7 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::opt
     ScenarioInit++;
 
     if (fresh) {
-        Clear_Scenario();
+        Clear_Scenario(init_rules);
     }
 
     /*
@@ -309,10 +309,12 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::opt
     ini.Get_String("Basic", "Lose", "x", LoseMovie, sizeof(LoseMovie));
     ini.Get_String("Basic", "Action", "x", ActionMovie, sizeof(ActionMovie));
 
-    /**
-     * Load any rule sections embedded in the scenario file.
-     */
-    Rule.Init_For_Scenario(Scen, GameToPlay, special_options, allow_superweapons);
+    if (init_rules) {
+        /**
+         * Load any rule sections embedded in the scenario file.
+         */
+        Rule.Init_For_Scenario(Scen, GameToPlay, special_options, allow_superweapons);
+    }
 
     /*
     **	For single-player scenarios, 'BuildLevel' is the scenario number.
@@ -667,7 +669,7 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::opt
     /**
      * Lua rabbit hole (if not in scenario editor mode)
      */
-    if (!Debug_Map) {
+    if (init_lua && !Debug_Map) {
         ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini, false);
     }
 
@@ -685,10 +687,10 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, std::opt
  *    globals with that data that is explicitly defined in the INI file.                       *
  *    The remaining necessary interpolated data is generated elsewhere.                        *
  *                                                                                             *
- * INPUT: * scenario_file_name	path to the ini for the scenario										  *
- *																															  *
- *				bin_file_name			path to the bin for the scenario										  *
- *											 																				  *
+ * INPUT: * scenario_file_name	path to the ini for the scenario							   *
+ *																							   *
+ *				bin_file_name			path to the bin for the scenario					   *
+ *											 												   *
  *          root      root filename for scenario file to read                                  *
  *                                                                                             *
  *          fresh      true = should the current scenario be cleared?                          *
@@ -1337,7 +1339,6 @@ static void Assign_Houses(void)
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++) {
-
         if (house_used[i]) {
             continue;
         }
@@ -1347,6 +1348,14 @@ static void Assign_Houses(void)
         if (housep) {
             housep->Clobber_All();
         }
+    }
+
+    if (
+        GameToPlay != GAME_NORMAL
+        && Rule.Get_Rule_Value<bool>(GAME_MULTIPLAYER_SECTION, DISABLE_NEUTRAL_HOUSE_AI_RULE)
+    ) {
+        // force neutral class to be brain-dead in multiplayer
+        HouseClass::As_Pointer(HOUSE_NEUTRAL)->IsHuman = true;
     }
 }
 
@@ -1627,7 +1636,7 @@ static void Create_Units(void)
         try_count = 0;
         while (true) {
             j = Random_Pick(0, MPlayerMax - 1);
-            if (sorted_waypts[j] != -1) {
+            if (sorted_waypts[j] != -1 && Map.In_Radar(sorted_waypts[j])) {
                 centroid = sorted_waypts[j];
                 sorted_waypts[j] = -1;
                 break;

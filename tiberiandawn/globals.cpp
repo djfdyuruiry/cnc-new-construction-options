@@ -491,7 +491,7 @@ int MPlayerTColors[MAX_MPLAYER_COLORS] = {
 ** bases (production), and those that don't.  There is a list for
 ** descriptions, and another for actual filenames.
 */
-char MPlayerDescriptions[100][40];
+char MPlayerDescriptions[500][40];
 DynamicVectorClass<char*> MPlayerScenarios;
 DynamicVectorClass<int> MPlayerFilenum;
 
