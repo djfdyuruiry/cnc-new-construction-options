@@ -1,12 +1,88 @@
-# 🛠 New Construction Options 🛠
+<div align="center">
+  <h1>🛠 New Construction Options 🛠</h1>
+  
+  <p align="center">
+    <a href="#download">
+      <img src="launcher/img/nco-launcher.png" style="width: 128px;" alt="TRX logo"/>
+    </a>
+  </p>
+  
+  
+  <a href="#download">
+      <h2>Download</h2>
+  </a>
+</div>
 
-C&C: New Construction Options (NCO) is a cross-platform, enhanced game engine for `Command & Conquer: Tiberian Dawn` & `Command & Conquer: Red Alert`. It's goals are to enhance the gameplay and modding experience.
+
+<hr/>
+
+C&C: New Construction Options (NCO) is a cross-platform, enhanced version of `Command & Conquer: Tiberian Dawn` & `Command & Conquer: Red Alert`. It's goals are to enhance the gameplay and modding experience.
 
 This project aims to provide an out-of-the-box experience that looks and feels like the original games while giving users extensive modding control and enhancements through in-game menus, with full INI file configuration and Lua scripting.
 
 NCO is also available as a mod for Command & Conquer: Remastered Collection, both for Tiberian Dawn and Red Alert.
 
 > This project is a fork of [Vanilla Conquer](https://github.com/TheAssemblyArmada/Vanilla-Conquer) 
+
+## Tiberian Dawn Showcase
+
+<table>
+    <tr>
+        <th>
+            <p>Native High Resolution Support</p>
+            <img src="wiki/img/td-hi-res-mode.png" alt="High Resolution" width="600" height="400"/>
+        </th>
+        <th>
+            <p>Modern Wall Building</p>
+            <img src="wiki/img/td-modern-walls.webp" alt="Modern Wall Building" width="400" height="400"/>
+        </th>
+    </tr>
+    <tr>
+        <th>
+            <p>Rally Points</p>
+            <img src="wiki/img/td-rally-points.webp" alt="Rally Points" width="400"/>
+        </th>
+        <th>
+            <p>Scenario Editor</p>
+            <img src="wiki/img/td-scenario-editor.webp" alt="Scenario Editor" width="640" height="400"/>
+        </th>
+    </tr>
+    <tr>
+        <th>
+            <p>Rules Editor</p>
+            <img src="wiki/img/td-rules-editor.webp" alt="Rules Editor" width="640" height="400"/>
+        </th>
+        <th>
+            <p>Mission Select Menu</p>
+            <img src="wiki/img/td-mission-select.webp" alt="Mission Select Menu" width="640" height="400"/>
+        </th>
+    </tr>
+    <tr>
+        <th>
+            <p>Improved Skirmish Setup</p>
+            <img src="wiki/img/td-skirmish-setup.webp" alt="Improved Skirmish Setup" width="640" height="400"/>
+        </th>
+        <th>
+            <p>Snow Theater</p>
+            <img src="wiki/img/td-snow-theatre-large.png" alt="Snow Theater" width="640" height="400"/>
+        </th>
+    </tr>
+</table>
+
+## Red Alert Showcase
+
+<table>
+    <tr>
+        <th>
+            <p>Native High Resolution Support</p>
+            <img src="wiki/img/ra-hi-res-mode.png" alt="High Resolution" width="600" height="400"/>
+        </th>
+        <th>
+            <p>The Lost Files (Mod Support)</p>
+            <img src="wiki/img/ra-lost-files.webp" alt="The Lost Files" width="600" height="400"/>
+        </th>
+    </tr>
+</table>
 
 ## Download
 
