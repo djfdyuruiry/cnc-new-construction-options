@@ -30,7 +30,7 @@ NCO is also available as a mod for Command & Conquer: Remastered Collection, bot
         </th>
         <th>
             <p>Modern Wall Building</p>
-            <img src="wiki/img/td-modern-walls.webp" alt="Modern Wall Building" width="400" height="400"/>
+            <img src="wiki/img/td-modern-walls.webp" alt="Modern Wall Building" width="600" height="400"/>
         </th>
     </tr>
     <tr>
