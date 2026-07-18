@@ -29,8 +29,8 @@ NCO is also available as a mod for Command & Conquer: Remastered Collection, bot
             <img src="wiki/img/td-hi-res-mode.png" alt="High Resolution" width="600" height="400"/>
         </th>
         <th>
-            <p>Modern Wall Building</p>
-            <img src="wiki/img/td-modern-walls.webp" alt="Modern Wall Building" width="600" height="400"/>
+            <p>Scenario Editor</p>
+            <img src="wiki/img/td-scenario-editor.webp" alt="Scenario Editor" width="640" height="400"/>
         </th>
     </tr>
     <tr>
@@ -39,8 +39,8 @@ NCO is also available as a mod for Command & Conquer: Remastered Collection, bot
             <img src="wiki/img/td-rally-points.webp" alt="Rally Points" width="400"/>
         </th>
         <th>
-            <p>Scenario Editor</p>
-            <img src="wiki/img/td-scenario-editor.webp" alt="Scenario Editor" width="640" height="400"/>
+            <p>Modern Wall Building</p>
+            <img src="wiki/img/td-modern-walls.webp" alt="Modern Wall Building" width="600" height="400"/>
         </th>
     </tr>
     <tr>
