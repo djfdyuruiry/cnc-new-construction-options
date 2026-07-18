@@ -6,13 +6,9 @@
       <img src="launcher/img/nco-launcher.png" style="width: 128px;" alt="TRX logo"/>
     </a>
   </p>
-  
-  
-  <a href="#download">
-      <h2>Download</h2>
-  </a>
-</div>
 
+  [<img src="wiki/img/download.png" alt="Download" width="160"/>](#download)
+</div>
 
 <hr/>
 
