@@ -21,7 +21,7 @@ SettingsClass::SettingsClass()
     ** Video settings
     */
     // TODO: Could offer presets through the launcher or a ini setting (retro, modern etc.)
-    Video.Width = 800;
+    Video.Width = 960; // == 1.5x Win95 resolution
     Video.Height = 600;
     Video.StretchWidth = 0;
     Video.StretchHeight = 0;
