@@ -381,7 +381,7 @@ void ScoreClass::Presentation(void)
     Set_Logic_Page(SysMemPage);
     BlackPalette.Set();
 
-    Enter_Zoomed_Resolution_Mode();
+    Enter_Original_Resolution_Mode();
 
     void const* country4 = MFCD::Retrieve("COUNTRY4.AUD");
     void const* sfx4 = MFCD::Retrieve("SFX4.AUD");
@@ -1699,7 +1699,7 @@ void Multi_Score_Presentation(void)
     HidPage.Clear();
     Hide_Mouse();
 
-    Enter_Zoomed_Resolution_Mode();
+    Enter_Original_Resolution_Mode();
 
     void* anim = Open_Animation(
         "MLTIPLYR.WSA", (WSAOpenType)(WSA_OPEN_FROM_MEM | WSA_OPEN_TO_PAGE), (unsigned char*)ScorePalette.Get_Data());

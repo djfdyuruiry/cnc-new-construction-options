@@ -399,7 +399,7 @@ void GameOptionsClass::Process(void)
                     Theme.Queue_Song(THEME_PICK_ANOTHER);
 
                     // player might have watched the briefing/action movie, so ensure we leave zoom mode
-                    Leave_Zoomed_Resolution_Mode();
+                    Leave_Original_Resolution_Mode();
 
                     process = false;
                 }

@@ -635,7 +635,7 @@ bool Load_Game(const char* file_name)
     */
     Clear_Scenario();
 
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     /*
     **	Load the scenario global information.

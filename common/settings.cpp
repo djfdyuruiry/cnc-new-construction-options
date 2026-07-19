@@ -25,6 +25,7 @@ SettingsClass::SettingsClass()
     Video.Height = 600;
     Video.StretchWidth = 0;
     Video.StretchHeight = 0;
+    Video.HiResStretch = true;
     Video.Windowed = false;
     Video.Display = 1;
     Video.Boxing = true;
@@ -71,6 +72,7 @@ void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
          .Load("VideoHeight").With_Binding(Video.Height)
          .Load("StretchWidth").With_Binding(Video.StretchWidth)
          .Load("StretchHeight").With_Binding(Video.StretchHeight)
+         .Load("HiResStretch").With_Binding(Video.HiResStretch).With_Comment("Stretch menus and videos to fill the screen when using high resolutions")
          .Load("Windowed").With_Binding(Video.Windowed)
          .Load("Boxing").With_Binding(Video.Boxing)
          .Load("BoxingAspectRatio").With_Comment("4:3, 16:9 etc.").With_Binding(Video.BoxingAspectRatio)
@@ -161,6 +163,7 @@ void SettingsClass::Update_Sections()
         .Set("VideoHeight", Video.Height)
         .Set("StretchWidth", Video.StretchWidth)
         .Set("StretchHeight", Video.StretchHeight)
+        .Set("HiResStretch", Video.HiResStretch)
         .Set("Windowed", Video.Windowed)
         .Set("Boxing", Video.Boxing)
         .Set("BoxingAspectRatio", Video.BoxingAspectRatio)

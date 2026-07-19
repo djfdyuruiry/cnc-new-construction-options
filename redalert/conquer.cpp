@@ -2436,7 +2436,7 @@ void Play_Movie(char const* name, ThemeType theme, bool clrscrn, bool immediate)
 
         VQAHandle* vqa = NULL;
 
-        Enter_Zoomed_Resolution_Mode();
+        Enter_Original_Resolution_Mode();
 
 #ifdef MOVIE640
         if (IsVQ640) {
