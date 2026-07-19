@@ -62,6 +62,7 @@ static SDL_Palette* palette;
 static Uint32 pixel_format;
 static SDL_Rect render_dst;
 static ResolutionMode CurrentResolutionMode = MODE_DEFAULT;
+static bool StretchOriginalResolution = true;
 
 static struct
 {
@@ -522,8 +523,11 @@ void Move_Video_Mouse(const float xrel, const float yrel)
         next_y = 0;
     }
 
-    if (Get_Current_Resolution_Mode() == MODE_ZOOM && (next_x > 639 || next_y > 399)) {
-        // prevent mouse leaving screen in zoom mode
+    if (
+        Get_Current_Resolution_Mode() == MODE_ORIGINAL_RES
+        && (next_x > (DefaultWidth - 1) || next_y > (DefaultHeight - 1))
+    ) {
+        // prevent mouse leaving the bounds of original resolution content
         return;
     }
 
@@ -933,10 +937,23 @@ public:
         SDL_UpdateTexture(texture, NULL, windowSurface->pixels, windowSurface->pitch);
         SDL_RenderClear(renderer);
 
-        if (CurrentResolutionMode == MODE_ZOOM) {
+        if (CurrentResolutionMode == MODE_ORIGINAL_RES) {
             constexpr SDL_Rect src_rect = {0, 0, DefaultWidth, DefaultHeight};
 
-            SDL_RenderCopy(renderer, texture, &src_rect, &render_dst);
+            if (StretchOriginalResolution) {
+                // 'stretch' the content to fill the screen
+                SDL_RenderCopy(renderer, texture, &src_rect, &render_dst);
+            } else {
+                const SDL_Rect center_dst = {
+                    .x = (render_dst.w / 2) - (DefaultWidth / 2),
+                    .y = (render_dst.h / 2) - (DefaultHeight / 2),
+                    .w = DefaultWidth,
+                    .h = DefaultHeight
+                };
+
+                // render the content in the center of the screen
+                SDL_RenderCopy(renderer, texture, &src_rect, &center_dst);
+            }
         } else {
             SDL_RenderCopy(renderer, texture, nullptr, &render_dst);
         }
@@ -998,6 +1015,12 @@ ResolutionMode Get_Current_Resolution_Mode()
     return CurrentResolutionMode;
 }
 
+void Set_Current_Resolution_Mode(const ResolutionMode resolution_mode, const bool enable_original_res_stretch)
+{
+    CurrentResolutionMode = resolution_mode;
+    StretchOriginalResolution = enable_original_res_stretch;
+}
+
 void Set_Current_Resolution_Mode(const ResolutionMode resolution_mode)
 {
     CurrentResolutionMode = resolution_mode;
@@ -1009,7 +1032,7 @@ std::optional<int> Try_Get_Resolution_Mode_Width()
         return std::nullopt;
     }
 
-    if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
+    if (Get_Current_Resolution_Mode() == MODE_ORIGINAL_RES) {
         return DefaultWidth;
     }
 
@@ -1022,34 +1045,38 @@ std::optional<int> Try_Get_Resolution_Mode_Height()
         return std::nullopt;
     }
 
-    if (Get_Current_Resolution_Mode() == MODE_ZOOM) {
+    if (Get_Current_Resolution_Mode() == MODE_ORIGINAL_RES) {
         return DefaultHeight;
     }
 
     return frontSurface->GetHeight();
 }
 
-void Enter_Zoomed_Resolution_Mode()
+void Enter_Original_Resolution_Mode()
 {
     const auto resolution_mode = Get_Current_Resolution_Mode();
 
     if (resolution_mode == MODE_DOS || resolution_mode == MODE_DEFAULT) {
-        // these modes never zoom in
+        // these modes never change
         return;
     }
 
-    Set_Current_Resolution_Mode(MODE_ZOOM);
+    Set_Current_Resolution_Mode(MODE_ORIGINAL_RES);
 
-    // center mouse in zoomed view
-    Move_Video_Mouse_Absolute(DefaultWidth / 2, DefaultHeight / 2);
+    // center mouse when rendering content designed for original resolution
+    if (StretchOriginalResolution) {
+        Move_Video_Mouse_Absolute(DefaultWidth / 2, DefaultHeight / 2);
+    } else if (frontSurface != nullptr) {
+        Move_Video_Mouse_Absolute(frontSurface->GetWidth() / 2, frontSurface->GetHeight() / 2);
+    }
 }
 
-void Leave_Zoomed_Resolution_Mode()
+void Leave_Original_Resolution_Mode()
 {
     const auto resolution_mode = Get_Current_Resolution_Mode();
 
     if (resolution_mode == MODE_DOS || resolution_mode == MODE_DEFAULT) {
-        // these modes never zoom out
+        // these modes never change
         return;
     }
 

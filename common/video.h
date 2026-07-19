@@ -113,12 +113,13 @@ enum ResolutionMode
     MODE_DOS,
     // custom resolution
     MODE_HIGH_RES,
-    // zoom into default resolution
-    MODE_ZOOM
+    // video is temporarily displaying content design for original game resolution
+    MODE_ORIGINAL_RES
 };
 
 ResolutionMode Get_Current_Resolution_Mode();
 
+void Set_Current_Resolution_Mode(ResolutionMode resolution_mode, bool enable_original_res_stretch);
 void Set_Current_Resolution_Mode(ResolutionMode resolution_mode);
 
 /**
@@ -148,23 +149,23 @@ std::optional<int> Try_Get_Resolution_Mode_Height();
 /**
  * Enter the standard resolution mode for the game engine, if current resolution mode supports it.
  *
- * Generally this should be called after clearing the screen to prevent zoom in artifacts.
+ * Generally this should be called after clearing the screen to prevent stretch artifacts.
  *
  * This mode is currently used for menus, videos, CPS animations and score screens.
  *
  * Supported video backends: sdl2
 */
-void Enter_Zoomed_Resolution_Mode();
+void Enter_Original_Resolution_Mode();
 
 /**
  * Enter the dynamic high resolution mode for the game engine, if current resolution mode supports it.
  *
- * Call this to reset calls to Enter_Standard_Resolution_Mode().
+ * Call this to reset calls to Enter_Original_Resolution_Mode().
  *
  * This mode is currently only used when playing a scenario.
  *
  * Supported video backends: sdl2
  */
-void Leave_Zoomed_Resolution_Mode();
+void Leave_Original_Resolution_Mode();
 
 #endif // VIDEO_H

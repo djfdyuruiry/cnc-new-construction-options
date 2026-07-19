@@ -146,13 +146,13 @@ bool Start_Scenario(char* root, bool briefing)
             }
 
             // we are about to start the scenario, so zoom out
-            Leave_Zoomed_Resolution_Mode();
+            Leave_Original_Resolution_Mode();
         } else {
             Play_Movie(BriefMovie);
             Play_Movie(ActionMovie, Scen.TransitTheme);
 
             // we are about to start the scenario, so zoom out
-            Leave_Zoomed_Resolution_Mode();
+            Leave_Original_Resolution_Mode();
 #ifdef NEWMENU
 
             char buffer[_MAX_FNAME + _MAX_EXT + 4];
@@ -713,7 +713,7 @@ void Do_Lose(void)
     Play_Movie(LoseMovie);
 
     // we are about to show a user popup, so zoom out
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     /*
     ** Start same scenario again

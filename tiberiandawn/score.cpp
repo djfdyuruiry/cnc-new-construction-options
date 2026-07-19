@@ -646,7 +646,7 @@ void ScoreClass::Presentation(void)
     Set_Palette(BlackPalette);
 
     // we are about to render the scenario score screen at 640x400, so zoom in
-    Enter_Zoomed_Resolution_Mode();
+    Enter_Original_Resolution_Mode();
 
     Set_Logic_Page(SysMemPage);
 
@@ -2041,7 +2041,7 @@ void Multi_Score_Presentation(void)
     Set_Palette(BlackPalette);
 
     // we are about to render the multiplayer scenario score screen at 640x400, so zoom in
-    Enter_Zoomed_Resolution_Mode();
+    Enter_Original_Resolution_Mode();
 
     anim = Open_Animation("MLTIPLYR.WSA", NULL, 0L, (WSAOpenType)(WSA_OPEN_FROM_MEM | WSA_OPEN_TO_PAGE), Palette);
     Hide_Mouse();

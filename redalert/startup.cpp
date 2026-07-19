@@ -805,6 +805,6 @@ void Resolve_Resolution_Mode()
         ScreenWidth = Settings.Video.Width;
         ScreenHeight = Settings.Video.Height;
 
-        Set_Current_Resolution_Mode(MODE_HIGH_RES);
+        Set_Current_Resolution_Mode(MODE_HIGH_RES, Settings.Video.HiResStretch);
     }
 }

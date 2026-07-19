@@ -399,7 +399,7 @@ bool Start_Scenario(char* name, bool briefing)
             Show_Mouse();
         }
 
-        Leave_Zoomed_Resolution_Mode();
+        Leave_Original_Resolution_Mode();
 
         Restate_Mission(Scen.ScenarioName, TXT_OK, TXT_NONE);
     }
@@ -412,7 +412,7 @@ bool Start_Scenario(char* name, bool briefing)
         Play_Movie(Scen.ActionMovie, Scen.TransitTheme);
     }
 
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     if (Scen.TransitTheme == THEME_NONE) {
         Theme.Queue_Song(THEME_FIRST);
@@ -1211,7 +1211,7 @@ void Do_Lose(void)
 #endif // CHEAT_KEYS
     Play_Movie(Scen.LoseMovie);
 
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     /*
     ** Start same scenario again

@@ -68,7 +68,7 @@ void GDI_Ending(void)
     if (CCFileClass("TRAILER.VQA").Is_Available()) {
         Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
         // we are about to show a CPS scaled to full resolution, so zoom out
-        Leave_Zoomed_Resolution_Mode();
+        Leave_Original_Resolution_Mode();
 
         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
         SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
@@ -85,7 +85,7 @@ void GDI_Ending(void)
 
     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
     // we are about to show a CPS scaled to full resolution, so zoom out
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
     SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
@@ -226,7 +226,7 @@ void Nod_Ending(void)
     if (CCFileClass("TRAILER.VQA").Is_Available()) {
         Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
         // we are about to show a CPS scaled to full resolution, so zoom out
-        Leave_Zoomed_Resolution_Mode();
+        Leave_Original_Resolution_Mode();
 
         Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
         SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
@@ -243,7 +243,7 @@ void Nod_Ending(void)
 
     Fade_Palette_To(BlackPalette, FADE_PALETTE_MEDIUM, Call_Back);
     // we are about to show a CPS scaled to full resolution, so zoom out
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     Load_Uncompress(CCFileClass("ATTRACT2.CPS"), SysMemPage, SysMemPage, Palette);
     SysMemPage.Scale(SeenBuff, 0, 0, 0, 0, 320, 199, SeenBuff.Get_Width(), SeenBuff.Get_Height());
