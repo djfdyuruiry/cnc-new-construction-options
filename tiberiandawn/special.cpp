@@ -266,6 +266,8 @@ void Special_Dialog(void)
             }
             break;
         }
+
+        Frame_Limiter();
     }
 
     Map.Revert_Mouse_Shape();
