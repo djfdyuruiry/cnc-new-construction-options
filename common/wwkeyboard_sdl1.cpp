@@ -42,10 +42,18 @@ void WWKeyboardClassSDL1::Fill_Buffer_From_System(void)
             exit(0);
             break;
         case SDL_KEYDOWN:
-            Put_Key_Message(event.key.keysym.sym, false);
+            if (event.key.keysym.sym == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT)) {
+                /* Switching to full screen is handled in the key up event */
+            } else {
+                Put_Key_Message(event.key.keysym.sym, false);
+            }
             break;
         case SDL_KEYUP:
-            Put_Key_Message(event.key.keysym.sym, true);
+            if (event.key.keysym.sym == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT)) {
+                Toggle_Video_Fullscreen();
+            } else {
+                Put_Key_Message(event.key.keysym.sym, true);
+            }
             break;
         case SDL_MOUSEMOTION:
             Move_Video_Mouse(static_cast<float>(event.motion.xrel), static_cast<float>(event.motion.yrel));
@@ -84,6 +92,16 @@ void WWKeyboardClassSDL1::Fill_Buffer_From_System(void)
 
             Put_Mouse_Message(key, x, y, event.type == SDL_MOUSEBUTTONDOWN ? false : true);
         } break;
+
+        case SDL_ACTIVEEVENT:
+            if (event.active.state & SDL_APPINPUTFOCUS) {
+                if (event.active.gain) {
+                    Focus_Restore();
+                } else {
+                    Focus_Loss();
+                }
+            }
+            break;
         }
     }
 }
