@@ -53,6 +53,7 @@
 #include "function.h"
 #include "wincomm.h"
 #include "modemreg.h"
+#include "serialport.h"
 //#include "i86.h"
 //#include "tcpip.h"
 
@@ -87,6 +88,8 @@ KeyNumType NullModemClass::Input;
 
 GadgetClass *NullModemClass::Commands;		// button list
 
+SerialPortClass* NullModemClass::SerialPort = nullptr;
+
 /*
 ** Ugly hack: this string stores the string received from the modem
 */
@@ -120,14 +123,12 @@ static enum {
  * HISTORY:                                                                *
  *   12/20/1994 BR : Created.                                              *
  *=========================================================================*/
-NullModemClass::NullModemClass (int numsend, int numreceive, int maxlen,
+	NullModemClass::NullModemClass (int numsend, int numreceive, int maxlen,
 	unsigned short magicnum) : ConnManClass()
 {
 	/*------------------------------------------------------------------------
 	Init Port to NULL; we haven't opened Greenleaf yet.
 	------------------------------------------------------------------------*/
-	// TODO: Fix
-    // PortHandle = NULL;
 	Connection = NULL;
 
 	NumSend = numsend;
@@ -283,12 +284,11 @@ int NullModemClass::Init (int port, int ,char *dev_name, int baud, char parity, 
 	int	i;
 
 	/*
-	** Create a new modem class for our com port
+	** Create a new serial port for our com port
 	*/
-    // TODO: Fix
-	// if (!SerialPort) {
-	// 	SerialPort = new WinModemClass;
-	// }
+	if (!SerialPort) {
+		SerialPort = new SerialPortClass;
+	}
 
 	/*
 	** Shift up the baud rate to sensible values
@@ -362,19 +362,31 @@ int NullModemClass::Init (int port, int ,char *dev_name, int baud, char parity, 
 	/*
 	** Open the com port
 	*/
+	SerialParity sp_parity;
+	switch (parity) {
+		case 'O': case 'o': sp_parity = SerialParity::Odd; break;
+		case 'E': case 'e': sp_parity = SerialParity::Even; break;
+		case 'M': case 'm': sp_parity = SerialParity::Mark; break;
+		case 'S': case 's': sp_parity = SerialParity::Space; break;
+		default:            sp_parity = SerialParity::None; break;
+	}
 
-    // TODO: Fix
-    // PortHandle = SerialPort->Serial_Port_Open (device, baud, parity, wordlen, stopbits, flowcontrol);
-	// if (PortHandle == INVALID_HANDLE_VALUE) {
-	// 	Shutdown();
-	// 	return(false);
-	// }
+	SerialFlowControl sp_flow;
+	switch (flowcontrol) {
+		case 1: sp_flow = SerialFlowControl::Hardware; break;
+		case 2: sp_flow = SerialFlowControl::Software; break;
+		default: sp_flow = SerialFlowControl::None; break;
+	}
+
+	if (!SerialPort->Open(device, baud, sp_parity, wordlen, stopbits, sp_flow)) {
+		Shutdown();
+		return(false);
+	}
 
 	/*------------------------------------------------------------------------
 	Init the Connection
 	------------------------------------------------------------------------*/
-    // TODO: Fix
-    // Connection->Init(PortHandle);
+	Connection->Init();
 
 	NumConnections = 1;
 
@@ -500,7 +512,7 @@ int NullModemClass::Init_Send_Queue( void )
  * HISTORY:                                                                                    *
  *    8/2/96 11:47AM ST : Documented / Win32 support                                           *
  *=============================================================================================*/
-DetectPortType NullModemClass::Detect_Port( SerialSettingsType *settings)
+	DetectPortType NullModemClass::Detect_Port( SerialSettingsType *settings)
 {
 
 	static char com_ids[9][5]={
@@ -517,16 +529,13 @@ DetectPortType NullModemClass::Detect_Port( SerialSettingsType *settings)
 
 	int	i;
 
-#ifdef _WIN32
-	/*
-	** Create a new modem class for our com port
-	*/
-	if (!SerialPort) {
-		SerialPort = new WinModemClass;
+	SerialParity sp_parity = SerialParity::None;
+	SerialFlowControl sp_flow;
+	if (settings->HardwareFlowControl){
+		sp_flow = SerialFlowControl::Hardware;
 	}else{
-		SerialPort->Serial_Port_Close();
+		sp_flow = SerialFlowControl::None;
 	}
-#endif
 
 	/*
 	** Shift up the baud rate to sensible values
@@ -594,18 +603,14 @@ DetectPortType NullModemClass::Detect_Port( SerialSettingsType *settings)
 	}
 
 	/*
-	** Open the com port
+	** Open the com port to test if it exists
 	*/
-	// TODO: Fix
-	// HANDLE porthandle = SerialPort->Serial_Port_Open (device, baud, 0, 8, 1, settings->HardwareFlowControl);
+	SerialPortClass test_port;
+	if (!test_port.Open(device, baud, sp_parity, 8, 1, sp_flow)){
+		return (PORT_INVALID);
+	}
 
-    // TODO: Fix
-	// if (porthandle == INVALID_HANDLE_VALUE){
-	// 	return (PORT_INVALID);
-	// }
-
-	// TODO: Fix
-	// SerialPort->Serial_Port_Close();
+	test_port.Close();
 	return (PORT_VALID);
 
 }
@@ -629,14 +634,12 @@ DetectPortType NullModemClass::Detect_Port( SerialSettingsType *settings)
  *=============================================================================================*/
 void NullModemClass::Shutdown ( void )
 {
-    // TODO: Fix
-	// if (PortHandle && SerialPort) {
-	// 	SerialPort->Serial_Port_Close();
-	// 	delete SerialPort;
-	// 	SerialPort = NULL;
-	// 	PortHandle = NULL;
-	// 	Delete_Connection();
-	// }
+	if (SerialPort) {
+		SerialPort->Close();
+		delete SerialPort;
+		SerialPort = nullptr;
+		Delete_Connection();
+	}
 
 #ifdef FORCE_WINSOCK
 	if (Winsock.Get_Connected()){
@@ -785,11 +788,12 @@ int NullModemClass::Service (void)
 	}
 
 	/*------------------------------------------------------------------------
-	First, copy all the bytes we can from the Greenleaf RX buffer to our
+	First, copy all the bytes we can from the serial RX buffer to our
 	own buffer.
 	------------------------------------------------------------------------*/
-	// TODO: Fix
-	// RXCount += SerialPort->Read_From_Serial_Port((unsigned char*)(RXBuf + RXCount), int(RXSize - RXCount) );
+	if (SerialPort) {
+		RXCount += SerialPort->Read((unsigned char*)(RXBuf + RXCount), int(RXSize - RXCount));
+	}
 
 //	if (RXCount){
 //char port[128];
@@ -800,12 +804,12 @@ int NullModemClass::Service (void)
 bool enabled = false;
 
 #if (0)
-if (SerialPort->FramingErrors ||
+if (SerialPort && (SerialPort->FramingErrors ||
 	SerialPort->IOErrors ||
 	SerialPort->InBufferOverflows ||
 	SerialPort->BufferOverruns ||
 	SerialPort->InBufferOverflows ||
-	SerialPort->OutBufferOverflows){
+	SerialPort->OutBufferOverflows)){
 
 
 if (!MonoClass::Is_Enabled()) {
@@ -1628,20 +1632,23 @@ DialStatusType NullModemClass::Dial_Modem( char *string, DialMethodType method, 
 	//Delay(120);
 	//HMSetDialingMethod( Port, (int)method );
 	CCDebugString ("C&C95 - About to set modem dial type.\n");
-	// TODO: Fix
-	// SerialPort->Set_Modem_Dial_Type((WinCommDialMethodType) method);
+	/* Set dial type (tone/pulse) - not applicable for direct serial */
 
 
 //Timer_Test(__LINE__, __FILE__);
 
 	//Clear out any old modem result codes
 	CCDebugString ("C&C95 - About to call 'Get_Modem_Result'.\n");
-	// TODO: Fix
-	// SerialPort->Get_Modem_Result(60, buffer, 81);
+	if (SerialPort) {
+		SerialPort->Flush();
+	}
 	//status = HMDial( Port, string );
-	CCDebugString ("C&C95 - About to call 'SerialPort->Dial_Modem'.\n");
-	// TODO: Fix
-	// SerialPort->Dial_Modem(string);
+	CCDebugString ("C&C95 - About to dial number.\n");
+	if (SerialPort) {
+		char dial_cmd[80];
+		snprintf(dial_cmd, sizeof(dial_cmd), "ATDT%s\r", string);
+		SerialPort->Write((const unsigned char*)dial_cmd, strlen(dial_cmd));
+	}
 
 
 //Timer_Test(__LINE__, __FILE__);
@@ -1692,8 +1699,15 @@ DialStatusType NullModemClass::Dial_Modem( char *string, DialMethodType method, 
 		char abuffer [128];
 		sprintf (abuffer, "C&C95 - ModemWaitCarrier delay = %d\n", delay);
 		CCDebugString (abuffer);
-		// TODO: Fix
-		// delay = SerialPort->Get_Modem_Result(delay, buffer, 81);
+
+		if (SerialPort) {
+			int bytes_read = SerialPort->Read((unsigned char*)(buffer + strlen(buffer)), 80 - strlen(buffer));
+			if (bytes_read > 0) {
+				buffer[79] = '\0';
+			}
+		}
+		/* Keep delay decreasing */
+		delay -= 100;
 
 
 		/*
@@ -1909,8 +1923,13 @@ DialStatusType NullModemClass::Answer_Modem( bool reconnect )
 		}
 
 		//delay = HMInputLine( Port, delay, buffer, 81 );
-		// TODO: Fix
-		// delay = SerialPort->Get_Modem_Result(delay, comm_buffer, 81);
+		if (SerialPort) {
+			int bytes_read = SerialPort->Read((unsigned char*)(comm_buffer + strlen(comm_buffer)), 80 - strlen(comm_buffer));
+			if (bytes_read > 0) {
+				comm_buffer[79] = '\0';
+			}
+		}
+		delay -= 100;
 
 		/*
 		............................ Process input ............................
@@ -1948,8 +1967,9 @@ DialStatusType NullModemClass::Answer_Modem( bool reconnect )
 
 				//HMWaitForOK( 0, NULL );
 				//status = HMAnswer( Port );
-				// TODO: Fix
-				// SerialPort->Write_To_Serial_Port ((unsigned char*)"ATA\r", strlen("ATA\r"));
+				if (SerialPort) {
+					SerialPort->Write((const unsigned char*)"ATA\r", strlen("ATA\r"));
+				}
 
 				ring = true;
 				delay = ModemWaitCarrier;
@@ -1982,14 +2002,13 @@ DialStatusType NullModemClass::Answer_Modem( bool reconnect )
 
 		if (delay <= 0) {
 			if (ring) {
-				// TODO: Fix
-				// if (SerialPort->Get_Modem_Status() & CD_SET){
-				// 	sprintf(ModemRXString, "%s", "Connected");
-				// 	dialstatus = DIAL_CONNECTED;
-				// }else{
-				// 	dialstatus = DIAL_ERROR;
-				// 	WWMessageBox().Process ("Error - TIme out waiting for connect.", TXT_OK);
-				// }
+				if (SerialPort && SerialPort->CD()) {
+					sprintf(ModemRXString, "%s", "Connected");
+					dialstatus = DIAL_CONNECTED;
+				} else {
+					dialstatus = DIAL_ERROR;
+					WWMessageBox().Process ("Error - Timeout waiting for connect.", TXT_OK);
+				}
 				process = false;
 			} else {
 				delay = 60000;
@@ -2039,15 +2058,13 @@ bool NullModemClass::Hangup_Modem( void )
 		return( true );
 	}
 
-	// TODO: Fix
-	// SerialPort->Set_Serial_DTR(false);
+	if (SerialPort) {
+		SerialPort->SetDTR(false);
+	}
 	Delay(3200/60);
-	// TODO: Fix
-	// SerialPort->Set_Serial_DTR(true);
-
-	//SetDtr( Port, 0 );
-	//PortKillTime( Port, 3200 );
-	//SetDtr( Port, 1 );
+	if (SerialPort) {
+		SerialPort->SetDTR(true);
+	}
 
 	status = Send_Modem_Command( "AT", '\r', buffer, 81, DEFAULT_TIMEOUT, 1 );
 
@@ -2058,9 +2075,14 @@ bool NullModemClass::Hangup_Modem( void )
 
 	delay = ModemGuardTime;
 	while ( delay > 0 ) {
-		//delay = HMInputLine( Port, delay, buffer, 81 );
-		// TODO: Fix
-		// delay = SerialPort->Get_Modem_Result(delay, buffer, 81);
+		if (SerialPort) {
+			int bytes_read = SerialPort->Read((unsigned char*)(buffer + strlen(buffer)), 80 - strlen(buffer));
+			if (bytes_read > 0) {
+				buffer[79] = '\0';
+			}
+		}
+		Delay(60);
+		delay -= 60;
 	}
 
 	escape[0] = ModemEscapeCode;
@@ -2068,15 +2090,20 @@ bool NullModemClass::Hangup_Modem( void )
 	escape[2] = ModemEscapeCode;
 	escape[3] = 0;
 
-	//status = HMSendStringNoWait( Port, escape, -1 );
-    // TODO: Fix
-    // SerialPort->Write_To_Serial_Port((unsigned char*)escape, 3);
+	if (SerialPort) {
+		SerialPort->Write((const unsigned char*)escape, 3);
+	}
 
 	delay = ModemGuardTime;
 	while ( delay > 0 ) {
-        // TODO: Fix
-        // delay = SerialPort->Get_Modem_Result(delay, buffer, 81);
-		//delay = HMInputLine( Port, delay, buffer, 81 );
+		if (SerialPort) {
+			int bytes_read = SerialPort->Read((unsigned char*)(buffer + strlen(buffer)), 80 - strlen(buffer));
+			if (bytes_read > 0) {
+				buffer[79] = '\0';
+			}
+		}
+		Delay(60);
+		delay -= 60;
 
 		if ( strncmp( buffer, "OK", 2 ) == 0 ) {
 			break;
@@ -2332,20 +2359,30 @@ int NullModemClass::Change_IRQ_Priority( int )
  *=============================================================================================*/
 int NullModemClass::Get_Modem_Status( void )
 {
-	int modemstatus;
+	int modemstatus = 0;
 	int status;
 	char buffer[81];
 
-	//modemstatus = GetModemStatus( Port );
-    // TODO: Fix
-	// modemstatus = SerialPort->Get_Modem_Status();
+	if (SerialPort) {
+		if (SerialPort->CTS()) {
+			modemstatus |= 0x10;  /* CTS_SET */
+		}
+		if (SerialPort->DSR()) {
+			modemstatus |= 0x20;  /* DSR_SET */
+		}
+		if (SerialPort->RI()) {
+			modemstatus |= 0x40;  /* RI_SET */
+		}
+		if (SerialPort->CD()) {
+			modemstatus |= 0x80;  /* CD_SET */
+		}
+	}
 
 	status = Send_Modem_Command( "AT", '\r', buffer, 81, DEFAULT_TIMEOUT, 1 );
 
-    // TODO: Fix
-	// if (status == MODEM_CMD_OK) {
-	// 	modemstatus &= (~CD_SET);
-	// }
+	if (status == MODEM_CMD_OK) {
+		modemstatus |= 0x80;  /* Set CD if we got OK response */
+	}
 
 	return( modemstatus );
 
@@ -2373,10 +2410,50 @@ int NullModemClass::Get_Modem_Status( void )
  *=============================================================================================*/
 int NullModemClass::Send_Modem_Command( char *command, char terminator, char *buffer, int buflen, int delay, int retries )
 {
-	return 0;
+	if (!SerialPort || !buffer) {
+		return MODEM_CMD_TIMEOUT;
+	}
 
-    // TODO: Fix
-    // return (SerialPort->Send_Command_To_Modem(command, terminator, buffer, buflen, delay, retries));
+	memset(buffer, 0, buflen);
+
+	for (int retry = 0; retry < retries; retry++) {
+		/* Send the command */
+		int cmd_len = strlen(command);
+		SerialPort->Write((const unsigned char*)command, cmd_len);
+		SerialPort->Write((const unsigned char*)&terminator, 1);
+
+		/* Wait for response */
+		int remaining = delay;
+		int got_response = false;
+
+		while (remaining > 0 && !got_response) {
+			int bytes_read = SerialPort->Read((unsigned char*)(buffer + strlen(buffer)), buflen - strlen(buffer) - 1);
+			if (bytes_read > 0) {
+				/* Check for response patterns */
+				if (strstr(buffer, "OK") != nullptr) {
+					return MODEM_CMD_OK;
+				}
+				if (strstr(buffer, "ERROR") != nullptr) {
+					return MODEM_CMD_ERROR;
+				}
+				if (strstr(buffer, "0") != nullptr && strstr(buffer, "OK") == nullptr) {
+					/* Some modems return "0" for certain commands */
+					if (strstr(buffer, "NO CARRIER") != nullptr) {
+						return MODEM_CMD_0;
+					}
+				}
+			}
+
+			/* Simulate delay */
+			Delay(60);
+			remaining -= 60;
+		}
+
+		/* Clear buffer for next retry */
+		memset(buffer, 0, buflen);
+	}
+
+	return MODEM_CMD_TIMEOUT;
 }
 
 

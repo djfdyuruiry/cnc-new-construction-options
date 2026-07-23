@@ -17,7 +17,17 @@
 class ModemRegistryEntryClass
 {
 public:
-    ModemRegistryEntryClass(int modem_number) {}
+    ModemRegistryEntryClass(int modem_number)
+        : ModemName("")
+        , ModemDeviceName("")
+        , ErrorCorrectionEnable("")
+        , ErrorCorrectionDisable("")
+        , CompressionEnable("")
+        , CompressionDisable("")
+        , HardwareFlowControl("")
+        , NoFlowControl("")
+    {
+    }
 
     ~ModemRegistryEntryClass(void) {}
 
@@ -62,12 +72,12 @@ public:
     }
 
 private:
-    char* ModemName;
-    char* ModemDeviceName;
-    char* ErrorCorrectionEnable;
-    char* ErrorCorrectionDisable;
-    char* CompressionEnable;
-    char* CompressionDisable;
-    char* HardwareFlowControl;
-    char* NoFlowControl;
+    char ModemName[256];
+    char ModemDeviceName[256];
+    char ErrorCorrectionEnable[256];
+    char ErrorCorrectionDisable[256];
+    char CompressionEnable[256];
+    char CompressionDisable[256];
+    char HardwareFlowControl[256];
+    char NoFlowControl[256];
 };

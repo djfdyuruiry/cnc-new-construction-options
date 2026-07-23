@@ -259,7 +259,7 @@ bool Read_Scenario(char* root)
 
     Clear_Scenario();
     ScenarioInit++;
-    if (Read_Scenario_Ini(root, special_options)) {
+    if (Read_Scenario_Ini(root, special_options, true, true, std::nullopt, true)) {
 
         Fill_In_Data();
 

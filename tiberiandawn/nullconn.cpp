@@ -43,6 +43,7 @@
 
 #include "function.h"
 #include "wincomm.h"
+#include "serialport.h"
 //#include "tcpip.h"
 
 /***************************************************************************
@@ -184,16 +185,18 @@ int NullModemConnClass::Send (char *buf, int buflen, void* extrabuf, int extrale
 	/*------------------------------------------------------------------------
 	Send the data
 	------------------------------------------------------------------------*/
-	//status =
 #ifdef FORCE_WINSOCK
 	if (Winsock.Get_Connected() || GameToPlay == GAME_INTERNET){
 		Winsock.Write(SendBuf, (int)sendlen);
 	}else{
-		SerialPort->Write_To_Serial_Port((unsigned char *)SendBuf, (int)sendlen );
+		if (NullModemClass::SerialPort) {
+			NullModemClass::SerialPort->Write((const unsigned char *)SendBuf, (int)sendlen);
+		}
 	}
 #else
-    // TODO: Fix
-    // SerialPort->Write_To_Serial_Port((unsigned char *)SendBuf, (int)sendlen );
+	if (NullModemClass::SerialPort) {
+		NullModemClass::SerialPort->Write((const unsigned char *)SendBuf, (int)sendlen);
+	}
 #endif	//WINSOCK
 
 	//if ( status == ASSUCCESS ) {

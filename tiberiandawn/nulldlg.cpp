@@ -49,8 +49,11 @@
  *   Edit_Phone_Dialog -- lets user edit a phone book entry                *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 #include "function.h"
-#include "wincomm.h"
+
+#include "framelimit.h"
 #include "modemreg.h"
+#include "serialport.h"
+#include "wincomm.h"
 //#include "tcpip.h"
 
 ModemRegistryEntryClass* ModemRegistry = NULL;		//Ptr to modem registry data
@@ -998,16 +1001,21 @@ GameType Select_Serial_Dialog( void )
 		d_cancel_x, d_cancel_y, d_cancel_w, d_cancel_h);
 //#endif
 
-	/*
-	------------------------------- Initialize -------------------------------
-	*/
-	Set_Logic_Page(SeenBuff);
-
 	/*........................................................................
 	Read the CC.INI file to extract default serial settings, scenario numbers
 	& descriptions, and the phone list.
 	........................................................................*/
 	Read_MultiPlayer_Settings ();
+
+	/*
+	------------------------------- Initialize -------------------------------
+    */
+    Load_Title_Screen(TitlePicture, &HidPage, Palette);
+    Blit_Hid_Page_To_Seen_Buff();
+    Set_Palette(Palette);
+
+    while (Get_Mouse_State() > 0)
+        Show_Mouse();
 
 	if (SerialDefaults.Port == 0 ||
 		SerialDefaults.IRQ == -1 ||
@@ -1044,7 +1052,7 @@ GameType Select_Serial_Dialog( void )
 	Fancy_Text_Print(TXT_NONE, 0, 0, CC_GREEN, TBLACK,
 		TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-Debug_Smart_Print = true;
+//Debug_Smart_Print = true;
 
 	MPlayerLocalID = 0xff;		// set to invalid value
 
@@ -1076,24 +1084,27 @@ Debug_Smart_Print = true;
 		if (display) {
 			Hide_Mouse();
 			if (display >= REDRAW_BACKGROUND) {
+                Load_Title_Screen(TitlePicture, &HidPage, Palette);
+			    Blit_Hid_Page_To_Seen_Buff();
+
 				/*
 				..................... Refresh the backdrop ......................
 				*/
-				Load_Title_Screen("HTITLE.PCX", &HidPage, Palette);
-				HidPage.Blit(SeenBuff);
+				//Load_Title_Screen("HTITLE.PCX", &HidPage, Palette);
+				//HidPage.Blit(SeenBuff);
 				/*
 				..................... Draw the background .......................
 				*/
-				Dialog_Box(d_dialog_x, d_dialog_y, d_dialog_w, d_dialog_h);
+			    Dialog_Box(d_dialog_x, d_dialog_y, d_dialog_w, d_dialog_h);
+			    /*
+                ....................... Draw the labels .........................
+                */
+			    Draw_Caption (TXT_SELECT_SERIAL_GAME, d_dialog_x, d_dialog_y, d_dialog_w);
 
 				/*
 				..................... Redraw the buttons .......................
 				*/
-				commands->Draw_All();
-				/*
-				....................... Draw the labels .........................
-				*/
-				Draw_Caption (TXT_SELECT_SERIAL_GAME, d_dialog_x, d_dialog_y, d_dialog_w);
+				commands->Flag_List_To_Redraw();
 			}
 			Show_Mouse();
 			display = REDRAW_NONE;
@@ -1357,6 +1368,8 @@ Debug_Smart_Print = true;
 
 			pressed = false;
 		}
+
+	    Frame_Limiter();
 	}	/* end of while */
 
 #if 0
@@ -1619,6 +1632,8 @@ void Advanced_Modem_Settings (SerialSettingsType *settings)
 				process = false;
 				break;
 		}
+
+	    Frame_Limiter();
 	}
 }
 
@@ -2136,36 +2151,27 @@ static int Com_Settings_Dialog( SerialSettingsType *settings )
 
 	sprintf (baudbuf, "%d", tempsettings.Baud);
 
-	/*........................................................................
+ 	/*........................................................................
 	Set up the port list box & edit box
 	........................................................................*/
-	for (i = 0; i < 4; i++) {
-		portlist.Add_Item( portname[ i ] );
-	}
+	static auto enumerated_ports = SerialPortClass::Enumerate();
 
-	/*
-	** Loop through the first 10 possible modem entries in the registry. Frankly, its just
-	** tough luck if the user has more than 10 modems attached!
-	*/
-	if (ModemRegistry) {
-		delete ModemRegistry;
-	}
-	int modems_found = 0;
-	for (i=0 ; i<10 ; i++) {
-		ModemRegistry = new ModemRegistryEntryClass (i);
-		if (ModemRegistry->Get_Modem_Name()) {
-			strncpy (modemnames[modems_found], ModemRegistry->Get_Modem_Name(), MODEM_NAME_MAX);
-			portlist.Add_Item( modemnames [modems_found++] );
-			port_custom_index ++;
+	for (auto& port_info : enumerated_ports) {
+		port_info.display_name = port_info.name;
+		if (!port_info.description.empty()) {
+			port_info.display_name += " - " + port_info.description;
 		}
-		delete ModemRegistry;
+		if (port_info.display_name.length() > 79) {
+			port_info.display_name = port_info.display_name.substr(0, 79);
+		}
+		portlist.Add_Item(port_info.display_name.c_str());
+		port_custom_index++;
 	}
-	ModemRegistry = NULL;
 
 	portlist.Add_Item ( custom_port );
 
 
-	/*
+ 	/*
 	** Work out the current port index
 	*/
 	port_index = -1;
@@ -2194,39 +2200,29 @@ static int Com_Settings_Dialog( SerialSettingsType *settings )
 		}
 	}
 
+	if (port_index == -1 && enumerated_ports.size() > 0) {
+		for (i = 0; i < (int)enumerated_ports.size() && port_index == -1; i++) {
+			if (strcmp(enumerated_ports[i].name.c_str(), tempsettings.ModemName) == 0) {
+				port_index = i;
+				strcpy (portbuf, enumerated_ports[i].name.c_str());
+			}
+		}
+	}
+
 	if (port_index == -1) {
-		switch ( tempsettings.Port ) {
-			case ( 0x3f8 ):
-				port_index = 0;
-				strcpy (portbuf, "COM1");
-				break;
-
-			case ( 0x2f8 ):
-				port_index = 1;
-				strcpy (portbuf, "COM2");
-				break;
-
-			case ( 0x3e8 ):
-				port_index = 2;
-				strcpy (portbuf, "COM3");
-				break;
-
-			case ( 0x2e8 ):
-				port_index = 3;
-				strcpy (portbuf, "COM4");
-				break;
-
-			default:
-				port_index = port_custom_index;
-				sprintf (portbuf, "%x", tempsettings.Port);
-				temp = strchr( custom_port, '-' );
-				if ( temp ) {
-					pos = (int)(temp - custom_port) + 2;
-					len = strlen( portbuf );
-					strncpy( custom_port + pos, portbuf, len );
-					*(custom_port + pos + len) = 0;
-				}
-				break;
+		if (enumerated_ports.size() > 0) {
+			port_index = 0;
+			strcpy (portbuf, enumerated_ports[0].name.c_str());
+		} else {
+			port_index = port_custom_index;
+			strcpy (portbuf, "/dev/ttyS0");
+			temp = strchr( custom_port, '-' );
+			if ( temp ) {
+				pos = (int)(temp - custom_port) + 2;
+				len = strlen( portbuf );
+				strncpy( custom_port + pos, portbuf, len );
+				*(custom_port + pos + len) = 0;
+			}
 		}
 	}
 
@@ -2268,18 +2264,18 @@ static int Com_Settings_Dialog( SerialSettingsType *settings )
 
 	cwaitstr_index = tempsettings.CallWaitStringIndex;
 	for (i = 0; i < CALL_WAIT_STRINGS_NUM; i++) {
-		if ( i == CALL_WAIT_CUSTOM ) {
-			item = CallWaitStrings[ i ];
-			temp = strchr( item, '-' );
-			if ( temp ) {
-				pos = (int)(temp - item) + 2;
-				len = strlen( tempsettings.CallWaitString );
-				strncpy( item + pos, tempsettings.CallWaitString, len );
-				*(item + pos + len) = 0;
-				if (i == cwaitstr_index) {
-					strncpy( cwaitstrbuf, item + pos, CWAITSTRBUF_MAX );
-				}
-			}
+	    if ( i == CALL_WAIT_CUSTOM ) {
+	        item = CallWaitStrings[ i ];
+	        temp = strchr( item, '-' );
+	        if ( temp ) {
+	            pos = (int)(temp - item) + 2;
+	            len = strlen( tempsettings.CallWaitString );
+	            strncpy( item + pos, tempsettings.CallWaitString, len );
+	            *(item + pos + len) = 0;
+	            if (i == cwaitstr_index) {
+	                strncpy( cwaitstrbuf, item + pos, CWAITSTRBUF_MAX );
+	            }
+	        }
 		} else {
 			if (i == cwaitstr_index) {
 				strncpy( cwaitstrbuf, CallWaitStrings[ i ], CWAITSTRBUF_MAX );
@@ -2579,56 +2575,36 @@ static int Com_Settings_Dialog( SerialSettingsType *settings )
 				if (portlist.Current_Index() != port_index) {
 					port_index = portlist.Current_Index();
 					item = (char *)portlist.Current_Item();
-					if (port_index < 4) {
+
+					if (port_index == port_custom_index) {
+						/*
+						** This is the custom entry
+						*/
+						temp = strchr( item, '-' );
+						if ( temp ) {
+							pos = (int)(temp - item) + 2;
+							if ( *(item + pos) == '?' ) {
+								portbuf[0] = 0;
+							} else {
+								strncpy( portbuf, item + pos, PORTBUF_MAX );
+							}
+						}
+						port_edt.Set_Focus();
+					} else {
+						/*
+						** This is an enumerated port or modem entry
+						*/
 						temp = strchr( item, ' ' );
-						if ( !temp ) {
-							strncpy( portbuf, item, PORTBUF_MAX );
-						} else {
+						if (temp) {
 							pos = (int)(temp - item);
 							strncpy( portbuf, item, pos );
 							portbuf[pos] = 0;
+						} else {
+							strncpy( portbuf, item, PORTBUF_MAX );
 						}
 						port_edt.Clear_Focus();
-
-						// auto select the irq for port
-
-#ifdef EDIT_IRQ
-						irq_index = _irqidx[ port_index ];
-						irqlist.Set_Selected_Index( irq_index );
-						item = (char *)irqlist.Current_Item();
-						temp = strchr( item, ' ' );
-						if ( !temp ) {
-							strncpy( irqbuf, item, 2 );
-						} else {
-							pos = (int)(temp - item);
-							strncpy( irqbuf, item, pos );
-							irqbuf[pos] = 0;
-						}
-						irq_edt.Clear_Focus();
-#endif	//EDIT_IRQ
-					} else {
-						if (port_index == port_custom_index) {
-							/*
-							** This is the custom entry
-							*/
-							temp = strchr( item, '-' );
-							if ( temp ) {
-								pos = (int)(temp - item) + 2;
-								if ( *(item + pos) == '?' ) {
-									portbuf[0] = 0;
-								} else {
-									strncpy( portbuf, item + pos, PORTBUF_MAX );
-								}
-							}
-							port_edt.Set_Focus();
-						}else{
-							/*
-							** Must be a modem name entry so just copy iy
-							*/
-							strncpy (portbuf, item, PORTBUF_MAX);
-						}
-
 					}
+
 					port_edt.Set_Text( portbuf, PORTBUF_MAX );
 					display = REDRAW_BUTTONS;
 				} else {
@@ -2851,39 +2827,20 @@ static int Com_Settings_Dialog( SerialSettingsType *settings )
 			------------------------------------------------------------------*/
 			case (KN_RETURN):
 			case (BUTTON_SAVE | KN_BUTTON):
-				switch (port_index) {
-					case ( 0 ):
-						tempsettings.Port = 0x3f8;
-						tempsettings.ModemName[0] = 0;
-						break;
-
-					case ( 1 ):
-						tempsettings.Port = 0x2f8;
-						tempsettings.ModemName[0] = 0;
-						break;
-
-					case ( 2 ):
-						tempsettings.Port = 0x3e8;
-						tempsettings.ModemName[0] = 0;
-						break;
-
-					case ( 3 ):
-						tempsettings.Port = 0x2e8;
-						tempsettings.ModemName[0] = 0;
-						break;
-
-					default:
-						if (port_index == port_custom_index) {
-							strncpy ( tempsettings.ModemName, portbuf, MODEM_NAME_MAX );
-							tempsettings.Port = 1;
-						} else {
-							/*
-							** Must be a modem name index
-							*/
-							strcpy (tempsettings.ModemName, portlist.Current_Item());
-							tempsettings.Port = 1;
-						}
-						break;
+				if (port_index < port_custom_index) {
+					/*
+					** This is an enumerated port
+					*/
+					strncpy ( tempsettings.ModemName, portbuf, MODEM_NAME_MAX );
+					tempsettings.ModemName[MODEM_NAME_MAX - 1] = 0;
+					tempsettings.Port = 1;
+				} else {
+					/*
+					** This is the custom entry
+					*/
+					strncpy ( tempsettings.ModemName, portbuf, MODEM_NAME_MAX );
+					tempsettings.ModemName[MODEM_NAME_MAX - 1] = 0;
+					tempsettings.Port = 1;
 				}
 
 #ifdef EDIT_IRQ
@@ -2954,6 +2911,7 @@ static int Com_Settings_Dialog( SerialSettingsType *settings )
 				break;
 		}
 
+	    Frame_Limiter();
 	}	/* end of while */
 
 	/*------------------------------------------------------------------------

@@ -257,7 +257,7 @@ extern DynamicVectorClass<char*> InitStrings;
 extern SerialSettingsType SerialDefaults;
 extern ModemGameType ModemGameToPlay;
 extern char* DialMethodCheck[DIAL_METHODS];
-extern char* CallWaitStrings[CALL_WAIT_STRINGS_NUM];
+extern char CallWaitStrings[CALL_WAIT_STRINGS_NUM][26];
 
 /*
 ** Network/Modem globals

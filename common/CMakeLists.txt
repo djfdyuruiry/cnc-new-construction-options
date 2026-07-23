@@ -119,9 +119,11 @@ if(BUILD_NCO_TD OR BUILD_NCO_RA OR BUILD_TESTS)
     if (WIN32)
         list(APPEND COMMON_SRC file_win.cpp paths_win.cpp)
     else()
-        list(APPEND COMMON_SRC file_posix.cpp paths_posix.cpp)
+        list(APPEND COMMON_SRC file_posix.cpp paths_posix.cpp serialport_posix.cpp)
     endif()
 endif()
+
+
 
 set(COMMONR_SRC
     framelimit.cpp
@@ -185,6 +187,13 @@ endif()
 file(GLOB_RECURSE COMMON_HEADERS "*.h")
 
 add_library(common STATIC ${COMMON_SRC} ${COMMON_HEADERS})
+
+if(UNIX AND NOT APPLE)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBSERIALPORT REQUIRED libserialport)
+    target_include_directories(common PUBLIC ${LIBSERIALPORT_INCLUDE_DIRS})
+    target_link_libraries(common PUBLIC ${LIBSERIALPORT_LIBRARIES})
+endif()
 
 target_link_libraries(common PUBLIC ${COMMON_LIBS})
 

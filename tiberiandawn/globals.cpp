@@ -441,7 +441,7 @@ SerialSettingsType SerialDefaults; // serial port default settings
 
 char* DialMethodCheck[DIAL_METHODS] = {"T", "P"};
 
-char* CallWaitStrings[CALL_WAIT_STRINGS_NUM] = {"*70,", "70#,", "1170,", "CUSTOM -                "};
+char CallWaitStrings[CALL_WAIT_STRINGS_NUM][26] = {"*70,", "70#,", "1170,", "CUSTOM -                "};
 
 ModemGameType ModemGameToPlay; // type of modem play Dialer, answerer, null
 

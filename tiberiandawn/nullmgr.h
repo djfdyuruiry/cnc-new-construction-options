@@ -46,6 +46,7 @@
 */
 #include "nullconn.h"
 #include "connmgr.h"
+#include "serialport.h"
 //#include "commlib.h"
 
 /*
@@ -174,6 +175,11 @@ class NullModemClass : public ConnManClass
 		int Verify_And_Convert_To_Int( char *buffer );
 
 	/*
+	**	Serial port handle (cross-platform).
+	*/
+	static SerialPortClass* SerialPort;
+
+	/*
 	**	Private Interface.
 	*/
 	private:
@@ -183,14 +189,6 @@ class NullModemClass : public ConnManClass
 		*/
 		NullModemConnClass *Connection;
 		int NumConnections;						// # connection objects in use
-
-		/*
-		**	This is the Greenleaf port handle.
-		*/
-		// TODO: Fix
-		// PORT *Port;
-        // TODO: Fix
-        // HANDLE	PortHandle;
 
 		int NumSend;
 		int NumReceive;
