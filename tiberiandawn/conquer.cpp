@@ -2292,7 +2292,7 @@ void Play_Movie(char const* name, ThemeType theme, bool clrscrn)
         Keyboard->Clear();
 
         // we are playing a video (which plays at 640x400) so zoom in if needed
-        Enter_Zoomed_Resolution_Mode();
+        Enter_Original_Resolution_Mode();
 
         VQAHandle* vqa = NULL;
 

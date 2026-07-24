@@ -1862,7 +1862,7 @@ void Load_Title_Page(bool visible)
 {
     const char* titlepict = RESFACTOR == 1 ? "TITLE.CPS" : "TITLE.PCX";
 
-    Enter_Zoomed_Resolution_Mode();
+    Enter_Original_Resolution_Mode();
 
     Load_Title_Screen((char*)titlepict, &HidPage, (unsigned char*)CCPalette.Get_Data());
     if (visible) {

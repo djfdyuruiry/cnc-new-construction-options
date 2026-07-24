@@ -395,7 +395,7 @@ bool Load_Game(const char* file_name)
     // TabClass::One_Time and it's associated base class methods - these depend on the excepted resolution being set to
     // calculate constants correctly, so zoom out
     const auto resolution_mode = Get_Current_Resolution_Mode();
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
     Call_Back();
 
     const auto save_header = SaveGameResolver::Load(
@@ -579,7 +579,7 @@ bool Load_Game_Binary(const char* file_name)
     // we are about to load a scenario, which means Map.Load will call TabClass::One_Time and the base class methods
     // - these depend on the excepted resolution being set to calculate constants correctly, so zoom out
     const auto resolution_mode = Get_Current_Resolution_Mode();
-    Leave_Zoomed_Resolution_Mode();
+    Leave_Original_Resolution_Mode();
 
     Call_Back();
     /*

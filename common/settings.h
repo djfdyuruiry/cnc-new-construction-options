@@ -37,6 +37,7 @@ public:
         int Height;
         int StretchWidth;
         int StretchHeight;
+        bool HiResStretch;
         bool Windowed;
         bool Boxing;
         std::string BoxingAspectRatio;
