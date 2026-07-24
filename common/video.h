@@ -42,6 +42,7 @@ public:
     virtual void FillRect(const Rect& rect, unsigned char color) = 0;
     virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path) = 0;
     virtual void Clear_Png_Image() = 0;
+    virtual void Capture_Frame(const char* output_file_path) = 0;
 };
 
 inline VideoSurface::~VideoSurface()

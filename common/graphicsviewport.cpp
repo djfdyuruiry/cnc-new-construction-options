@@ -1013,3 +1013,8 @@ void GraphicViewPortClass::Clear_Png_Image()
 {
     GraphicBuff->Get_DD_Surface()->Clear_Png_Image();
 }
+
+void GraphicViewPortClass::Take_Screenshot(const char* output_file_path)
+{
+    GraphicBuff->Get_DD_Surface()->Capture_Frame(output_file_path);
+}

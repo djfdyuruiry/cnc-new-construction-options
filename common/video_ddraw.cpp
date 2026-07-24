@@ -1184,6 +1184,7 @@ public:
     virtual void FillRect(const Rect& rect, unsigned char color);
     virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path);
     virtual void Clear_Png_Image();
+    virtual void Capture_Frame(const char* output_file_path);
 
 protected:
     LPDIRECTDRAWSURFACE VideoSurfacePtr;   // Pointer to the related direct draw surface
@@ -1339,10 +1340,17 @@ void VideoSurfaceDDraw::FillRect(const Rect& rect, unsigned char color)
 
 void VideoSurfaceDDraw::Load_Png_Image(const Rect&, const char*)
 {
+    // TODO: PNG support not implemented
 }
 
 void VideoSurfaceDDraw::Clear_Png_Image()
 {
+    // TODO: PNG support not implemented
+}
+
+void VideoSurfaceDDraw::Capture_Frame(const char* output_file_path)
+{
+    // TODO: PNG support not implemented
 }
 
 /*

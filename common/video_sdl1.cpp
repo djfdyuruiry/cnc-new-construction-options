@@ -482,10 +482,17 @@ public:
 
     virtual void Load_Png_Image(const Rect&, const char*)
     {
+        // TODO: PNG support not implemented
     }
 
     virtual void Clear_Png_Image()
     {
+        // TODO: PNG support not implemented
+    }
+
+    virtual void Capture_Frame(const char* output_file_path)
+    {
+        // TODO: PNG support not implemented
     }
 
     void RenderSurface()

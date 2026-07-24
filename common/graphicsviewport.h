@@ -304,6 +304,8 @@ public:
                         const char* png_file_path);
     void Clear_Png_Image();
 
+    void Take_Screenshot(const char* output_file_path);
+
     // This doesnt seem to exist anywhere?? - Steve T 9/26/95 6:05PM
     //      VOID Grey_Out_Region(int x, int y, int width, int height, int color);
 

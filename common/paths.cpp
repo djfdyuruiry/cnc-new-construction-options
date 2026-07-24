@@ -150,3 +150,15 @@ const char* PathsClass::User_Save_Path()
 
     return UserSavePath.c_str();
 }
+
+const char* PathsClass::User_Screenshot_Path()
+{
+    if (UserScreenshotPath.empty()) {
+        UserScreenshotPath = Concatenate_Paths(User_Path(), "screenshot");
+
+        // ensure screenshot directory exists in game directory inside user path
+        Create_Directory(UserScreenshotPath.c_str());
+    }
+
+    return UserScreenshotPath.c_str();
+}

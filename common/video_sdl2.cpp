@@ -915,6 +915,11 @@ public:
         png_texture = SDL_CreateTextureFromSurface(renderer, img_surface);
         SDL_FreeSurface(img_surface);
 
+        if (png_texture == nullptr) {
+            CNC_LOG_ERROR("SDL2 SDL_CreateTextureFromSurface error: {}", SDL_GetError());
+            return;
+        }
+
         png_rect.x = dest_rect.X;
         png_rect.y = dest_rect.Y;
         png_rect.w = dest_rect.Width + 1;
@@ -923,9 +928,22 @@ public:
 
     virtual void Clear_Png_Image()
     {
-        if (png_texture) {
-            SDL_DestroyTexture(png_texture);
-            png_texture = nullptr;
+        if (png_texture == nullptr) {
+            return;
+        }
+
+        SDL_DestroyTexture(png_texture);
+        png_texture = nullptr;
+    }
+
+    virtual void Capture_Frame(const char* output_file_path)
+    {
+        if (windowSurface == nullptr) {
+            return;
+        }
+
+        if (IMG_SavePNG(windowSurface, output_file_path) != 0) {
+            CNC_LOG_ERROR("SDL2 IMG_SavePNG error: {}", SDL_GetError());
         }
     }
 
