@@ -997,3 +997,19 @@ void GraphicViewPortClass::Texture_Fill_Rect(int xpos,
         Unlock();
     }
 }
+
+void GraphicViewPortClass::Load_Png_Image(
+    const int xpos,
+    const int ypos,
+    const int width,
+    const int height,
+    const char* png_file_path
+)
+{
+    GraphicBuff->Get_DD_Surface()->Load_Png_Image({xpos, ypos, width, height}, png_file_path);
+}
+
+void GraphicViewPortClass::Clear_Png_Image()
+{
+    GraphicBuff->Get_DD_Surface()->Clear_Png_Image();
+}

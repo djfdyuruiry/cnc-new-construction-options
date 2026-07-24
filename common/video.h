@@ -28,9 +28,7 @@ public:
 class VideoSurface
 {
 public:
-    virtual ~VideoSurface()
-    {
-    }
+    virtual ~VideoSurface() = 0;
 
     virtual void* GetData() const = 0;
     virtual int GetPitch() const = 0;
@@ -42,7 +40,13 @@ public:
     virtual bool Unlock() = 0;
     virtual void Blt(const Rect& destRect, VideoSurface* src, const Rect& srcRect, bool mask) = 0;
     virtual void FillRect(const Rect& rect, unsigned char color) = 0;
+    virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path) = 0;
+    virtual void Clear_Png_Image() = 0;
 };
+
+inline VideoSurface::~VideoSurface()
+{
+}
 
 class SurfaceMonitorClass
 {

@@ -219,6 +219,9 @@ protected:
             CommandChain->Flag_List_To_Redraw();
         }
 
+        // TODO: remove
+        LogicPage->Load_Png_Image(10, 10, 320, 200, "test.png");
+
         Show_Mouse();
         display = REDRAW_NONE;
     }
@@ -326,6 +329,8 @@ public:
             auto result = On_Input(display, input);
 
             if (result.has_value()) {
+                LogicPage->Clear_Png_Image();
+
                 return *result;
             }
 

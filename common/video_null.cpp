@@ -272,6 +272,14 @@ public:
     virtual void FillRect(const Rect& rect, unsigned char color)
     {
     }
+
+    virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
+    {
+    }
+
+    virtual void Clear_Png_Image()
+    {
+    }
 };
 
 /*

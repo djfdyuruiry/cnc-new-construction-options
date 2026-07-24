@@ -480,6 +480,14 @@ public:
         SDL_FillRect(surface, &rectSDL, color);
     }
 
+    virtual void Load_Png_Image(const Rect&, const char*)
+    {
+    }
+
+    virtual void Clear_Png_Image()
+    {
+    }
+
     void RenderSurface()
     {
         SDL_BlitSurface(surface, NULL, window, NULL);

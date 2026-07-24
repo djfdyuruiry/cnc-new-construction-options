@@ -47,6 +47,7 @@
 #include "logger.h"
 
 #include <SDL.h>
+#include <SDL2/SDL_image.h>
 
 // C&C 95 Resolution
 static constexpr auto DefaultWidth = 640;
@@ -818,6 +819,7 @@ public:
         : flags(flags)
         , windowSurface(nullptr)
         , texture(nullptr)
+        , png_texture(nullptr)
     {
         surface = SDL_CreateRGBSurface(0, w, h, 8, 0, 0, 0, 0);
         SDL_SetSurfacePalette(surface, palette);
@@ -836,6 +838,10 @@ public:
         }
 
         SDL_FreeSurface(surface);
+
+        if (png_texture) {
+            SDL_DestroyTexture(png_texture);
+        }
 
         if (texture) {
             // BUG: This crashes the process if game was not fully initialised when destructor called
@@ -889,6 +895,38 @@ public:
     {
         SDL_Rect rectSDL = {rect.X, rect.Y, rect.Width + 1, rect.Height + 1};
         SDL_FillRect(surface, &rectSDL, color);
+    }
+
+    virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
+    {
+        if (windowSurface == nullptr) {
+            return;
+        }
+
+        Clear_Png_Image();
+
+        const auto img_surface = IMG_Load(png_file_path);
+
+        if (img_surface == nullptr) {
+            return;
+        }
+
+        SDL_SetSurfaceBlendMode(img_surface, SDL_BLENDMODE_BLEND);
+        png_texture = SDL_CreateTextureFromSurface(renderer, img_surface);
+        SDL_FreeSurface(img_surface);
+
+        png_rect.x = dest_rect.X;
+        png_rect.y = dest_rect.Y;
+        png_rect.w = dest_rect.Width + 1;
+        png_rect.h = dest_rect.Height + 1;
+    }
+
+    virtual void Clear_Png_Image()
+    {
+        if (png_texture) {
+            SDL_DestroyTexture(png_texture);
+            png_texture = nullptr;
+        }
     }
 
     void RenderSurface()
@@ -958,6 +996,10 @@ public:
             SDL_RenderCopy(renderer, texture, nullptr, &render_dst);
         }
 
+        if (png_texture != nullptr) {
+            SDL_RenderCopy(renderer, png_texture, nullptr, &png_rect);
+        }
+
         SDL_RenderPresent(renderer);
     }
 
@@ -975,6 +1017,8 @@ private:
     SDL_Surface* surface;
     SDL_Surface* windowSurface;
     SDL_Texture* texture;
+    SDL_Texture* png_texture;
+    SDL_Rect png_rect;
     GBC_Enum flags;
 };
 

@@ -1182,6 +1182,8 @@ public:
     virtual bool Unlock();
     virtual void Blt(const Rect& destRect, VideoSurface* src, const Rect& srcRect, bool mask);
     virtual void FillRect(const Rect& rect, unsigned char color);
+    virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path);
+    virtual void Clear_Png_Image();
 
 protected:
     LPDIRECTDRAWSURFACE VideoSurfacePtr;   // Pointer to the related direct draw surface
@@ -1333,6 +1335,14 @@ void VideoSurfaceDDraw::FillRect(const Rect& rect, unsigned char color)
     destRect.bottom = rect.Y + rect.Height;
 
     VideoSurfacePtr->Blt(&destRect, NULL, NULL, DDBLT_WAIT | DDBLT_ASYNC | DDBLT_COLORFILL, &blit_effects);
+}
+
+void VideoSurfaceDDraw::Load_Png_Image(const Rect&, const char*)
+{
+}
+
+void VideoSurfaceDDraw::Clear_Png_Image()
+{
 }
 
 /*
