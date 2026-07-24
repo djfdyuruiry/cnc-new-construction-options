@@ -28,9 +28,9 @@ The below diagram shows how the video backend is used from Tiberian Dawn/Red Ale
 
 Internally the SDL2 backend uses an enum to set the 'mode' which drives how then window is initialized and resolution configured:
 
-- The game engine can set the mode to `MODE_HIGH_RES`, this enables hi-res and 'zooming' in and out of 640x400
-- `MODE_ZOOM` mode is used to signal that SDL2 should crop the game to this resolution when rendering frames
-- The `Enter_Zoomed_Resolution_Mode` and `Leave_Zoomed_Resolution_Mode` functions trigger the change in mode
+- The game engine can set the mode to `MODE_HIGH_RES`, this enables hi-res
+- `MODE_ORIGINAL_RES` mode is used to signal that SDL2 should crop the game to 640x400 when rendering frames
+- The `Enter_Original_Resolution_Mode` and `Leave_Original_Resolution_Mode` functions trigger the change in mode
 - For code that needs to determine the current displayed ares (Zoomed or full) the `Try_Get_Resolution_Mode_Width` and `Try_Get_Resolution_Mode_Height` return either the zoomed resolution or full resolution dependent on the current mode
 
 See: `ResolutionMode` in [video.h](../../common/video.h)

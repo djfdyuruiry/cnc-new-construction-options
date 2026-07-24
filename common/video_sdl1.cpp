@@ -550,6 +550,21 @@ void Set_Current_Resolution_Mode(const ResolutionMode)
     // TODO: Resolution mode support not implemented
 }
 
+void Set_Current_Resolution_Mode(const ResolutionMode, const bool)
+{
+    // TODO: Resolution mode support not implemented
+}
+
+void Enter_Original_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+}
+
+void Leave_Original_Resolution_Mode()
+{
+    // TODO: Resolution mode support not implemented
+}
+
 std::optional<int> Try_Get_Resolution_Mode_Width()
 {
     // TODO: Resolution mode support not implemented
@@ -562,12 +577,4 @@ std::optional<int> Try_Get_Resolution_Mode_Height()
     return std::nullopt;
 }
 
-void Enter_Zoomed_Resolution_Mode()
-{
-    // TODO: Resolution mode support not implemented
-}
 
-void Leave_Zoomed_Resolution_Mode()
-{
-    // TODO: Resolution mode support not implemented
-}
