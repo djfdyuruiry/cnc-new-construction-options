@@ -333,6 +333,23 @@ int LoadOptionsClass::Process(void)
                                      TBLACK,
                                      TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_CENTER | TPF_NOSHADOW);
                 }
+
+                if (
+                    Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+                    && listbtn.Count() > 0
+                ) {
+                    const auto screenshot_path = Get_Save_Screenshot_Path(Files[0]->Num);
+
+                    if (screenshot_path.has_value()) {
+                        LogicPage->Load_Png_Image(
+                            d_dialog_x + d_dialog_w - 320,
+                            d_dialog_y,
+                            320,
+                            200,
+                            screenshot_path->c_str()
+                        );
+                    }
+                }
             }
 
             /*
@@ -475,6 +492,25 @@ int LoadOptionsClass::Process(void)
         ** the save-game description field.
         */
         case (BUTTON_LIST | KN_BUTTON):
+            if (listbtn.Count() < 1) {
+                break;
+            }
+
+            if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+                const auto idx = listbtn.Current_Index();
+                const auto screenshot_path = Get_Save_Screenshot_Path(Files[idx]->Num);
+
+                if (screenshot_path.has_value()) {
+                    LogicPage->Load_Png_Image(
+                        d_dialog_x + d_dialog_w - 320,
+                        d_dialog_y,
+                        320,
+                        200,
+                        screenshot_path->c_str()
+                    );
+                }
+            }
+
             if (Style != SAVE) {
                 break;
             }
@@ -527,6 +563,7 @@ int LoadOptionsClass::Process(void)
         Frame_Limiter();
     }
 
+    LogicPage->Clear_Png_Image();
     Clear_List(&listbtn);
 
     if (cancel)

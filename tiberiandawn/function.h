@@ -637,6 +637,7 @@ bool Load_Misc_Values(FileClass& file);
 bool Save_Misc_Values(FileClass& file);
 bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep, GameType& game_type);
 bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* housep);
+std::optional<std::string> Get_Save_Screenshot_Path(int id);
 bool Load_Game(int id);
 bool Load_Game(const char* file_name);
 bool Load_Game_Binary(const char* file_name);

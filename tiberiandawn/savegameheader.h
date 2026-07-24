@@ -46,13 +46,16 @@ public:
     std::string PlayerHouseType;
     std::string PlayerType;
     std::string Description;
+    std::string ScreenshotBase64;
 
     static bool From_Stream(std::ifstream& stream, SaveGameHeader& output);
     static bool From_File(const std::string& path, SaveGameHeader& output);
 
     void Read_Globals();
+    void Read_Screenshot_If_Present();
     bool Validate() const;
     bool Write_Globals() const;
+    std::optional<std::string> Write_Screenshot_If_Present() const;
     void Set_SaveGameData(SaveGameData data);
     const SaveGameData& Get_SaveGameData() const;
 
@@ -69,7 +72,8 @@ public:
         ScenarioID,
         PlayerHouseType,
         PlayerType,
-        Description
+        Description,
+        ScreenshotBase64
     )
 
 private:

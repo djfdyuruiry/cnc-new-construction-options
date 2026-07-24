@@ -1,7 +1,9 @@
+#include "common/b64straw.h"
 #include "common/stringutils.h"
 
 #include "function.h"
 #include "savegameheader.h"
+
 #include "typeconverter.h"
 
 bool SaveGameData::Apply_Rules(RulesClass& rules) const
@@ -87,6 +89,46 @@ void SaveGameHeader::Read_Globals()
     PlayerType = TdTypeConverter::To_String(ScenPlayer);
 }
 
+/**
+ * Read screenshot taken before options dialog was shown into a base64 string.
+ */
+void SaveGameHeader::Read_Screenshot_If_Present()
+{
+    static const auto screenshot_path = PathsClass::Concatenate_Paths(
+        Paths.User_Screenshot_Path(),
+        PRE_DIALOG_SCREENSHOT_FILE_NAME
+    );
+
+    CCFileClass screenshot;
+
+    const auto screenshot_available = screenshot.Open(screenshot_path.c_str());
+
+    ScreenshotBase64.clear();
+
+    if (!screenshot_available) {
+        return;
+    }
+
+    FileStraw binary_in(screenshot);
+    Base64Straw base64_out(Base64Straw::ENCODE);
+
+    base64_out.Get_From(binary_in);
+
+    while (true) {
+        char buffer[512];
+
+        const auto length = base64_out.Get(buffer, sizeof(buffer) - 1);
+
+        buffer[length] = '\0';
+
+        if (length == 0) {
+            break;
+        }
+
+        ScreenshotBase64 += buffer;
+    }
+}
+
 bool SaveGameHeader::Validate() const
 {
     auto result = true;
@@ -132,6 +174,50 @@ bool SaveGameHeader::Write_Globals() const
     Whom = Parse_Player_House_Type();
 
     return true;
+}
+
+std::optional<std::string> SaveGameHeader::Write_Screenshot_If_Present() const
+{
+    static const auto screenshot_path = PathsClass::Concatenate_Paths(
+        Paths.User_Screenshot_Path(),
+        ".save-load.png"
+    );
+
+    if (ScreenshotBase64.empty()) {
+        return std::nullopt;
+    }
+
+    CCFileClass screenshot;
+
+    screenshot.Set_Name(screenshot_path.c_str());
+
+    if (screenshot.Is_Available() && !screenshot.Delete()) {
+        CNC_LOGGER_ERROR("Failed to clear previous save game screenshot: {}", screenshot_path);
+        return std::nullopt;
+    }
+
+    screenshot.Open(WRITE);
+
+    BufferStraw string_in(ScreenshotBase64.c_str(), ScreenshotBase64.size());
+
+    Base64Straw binary_out(Base64Straw::DECODE);
+    binary_out.Get_From(string_in);
+
+    while (true) {
+        char buffer[512];
+
+        const auto length = binary_out.Get(buffer, sizeof(buffer) - 1);
+
+        if (length == 0) {
+            break;
+        }
+
+        screenshot.Write(buffer, length);
+    }
+
+    screenshot.Close();
+
+    return screenshot_path;
 }
 
 void SaveGameHeader::Set_SaveGameData(SaveGameData data)

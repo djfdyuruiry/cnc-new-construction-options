@@ -1014,9 +1014,7 @@ public:
             SDL_RenderCopy(renderer, texture, nullptr, &render_dst);
         }
 
-        if (png_texture != nullptr) {
-            SDL_RenderCopy(renderer, png_texture, nullptr, &png_rect);
-        }
+        Render_Png_Texture();
 
         SDL_RenderPresent(renderer);
     }
@@ -1038,6 +1036,45 @@ private:
     SDL_Texture* png_texture;
     SDL_Rect png_rect;
     GBC_Enum flags;
+
+    void Render_Png_Texture() const
+    {
+        if (png_texture == nullptr) {
+            return;
+        }
+
+        if (CurrentResolutionMode != MODE_ORIGINAL_RES) {
+            SDL_RenderCopy(renderer, png_texture, nullptr, &png_rect);
+            return;
+        }
+
+        SDL_Rect draw_rect = png_rect;
+
+        if (StretchOriginalResolution) {
+            // translate png rectangle dimensions to the stretched content
+            const auto scale_x = static_cast<float>(render_dst.w) / DefaultWidth;
+            const auto scale_y = static_cast<float>(render_dst.h) / DefaultHeight;
+
+            draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
+            draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
+            draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
+            draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
+        } else {
+            // translate png rectangle dimensions to the centered content
+            draw_rect.x = static_cast<int>(
+                static_cast<float>(png_rect.x)
+                + (static_cast<float>(render_dst.x) - DefaultWidth / 2.0f)
+            );
+            draw_rect.y = static_cast<int>(
+                static_cast<float>(png_rect.y)
+                + (static_cast<float>(render_dst.y) - DefaultHeight / 2.0f)
+            );
+            draw_rect.w = png_rect.w;
+            draw_rect.h = png_rect.h;
+        }
+
+        SDL_RenderCopy(renderer, png_texture, nullptr, &draw_rect);
+    }
 };
 
 void Video_Render_Frame()

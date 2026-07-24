@@ -1398,6 +1398,21 @@ bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* ho
     return (false);
 }
 
+std::optional<std::string> Get_Save_Screenshot_Path(int id)
+{
+    const auto file_name = std::format("SAVEGAME.{:03d}", id);
+
+    const auto header = SaveGameResolver::Load_Header(
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name.c_str())
+    );
+
+    if (!header.has_value()) {
+        return std::nullopt;
+    }
+
+    return header->Write_Screenshot_If_Present();
+}
+
 /***************************************************************************
  * TechnoType_To_Target -- converts TechnoTypeClass to TARGET              *
  *                                                                         *
