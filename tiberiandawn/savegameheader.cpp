@@ -61,19 +61,25 @@ bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
 
 bool SaveGameHeader::From_File(const std::string& path, SaveGameHeader& output)
 {
-    // build path using CDFileClass logic
     std::string full_path;
 
     CNC_LOGGER_INFO("Attempting to read header from JSON save game file: {}", path);
 
-    if (CDFileClass file; !file.Open(path.c_str(), READ)) {
+    // build path using CDFileClass logic
+    CDFileClass file(path.c_str());
+
+    if (!file.Is_Available()) {
+        return false;
+    }
+
+    if (!file.Open(READ)) {
         CNC_LOGGER_ERROR("Failed to read full path to JSON save game");
         file.Close();
         return false;
-    } else {
-        full_path = std::string(file.File_Name());
-        file.Close();
     }
+
+    full_path = std::string(file.File_Name());
+    file.Close();
 
     // open file stream
     auto save_file_stream = std::ifstream(full_path);
