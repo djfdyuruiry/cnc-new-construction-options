@@ -213,7 +213,13 @@ void Main_Game(int argc, char* argv[])
                     );
 
                     // take a screenshot before showing the desired dialog (used for save games)
-                    LogicPage->Take_Screenshot(screenshot_path.c_str());
+                    LogicPage->Take_Clipped_Screenshot(
+                        0,
+                        Map.Get_Tab_Height(),
+                        SeenBuff.Get_Width() - (Map.SideWidth),
+                        SeenBuff.Get_Height() - (Map.Get_Tab_Height()),
+                        screenshot_path.c_str()
+                    );
 
                     switch (SpecialDialog) {
                     case SDLG_SPECIAL:

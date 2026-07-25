@@ -897,10 +897,10 @@ public:
         SDL_FillRect(surface, &rectSDL, color);
     }
 
-    virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
+    virtual bool Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
     {
         if (windowSurface == nullptr) {
-            return;
+            return false;
         }
 
         Clear_Png_Image();
@@ -908,7 +908,7 @@ public:
         const auto img_surface = IMG_Load(png_file_path);
 
         if (img_surface == nullptr) {
-            return;
+            return false;
         }
 
         SDL_SetSurfaceBlendMode(img_surface, SDL_BLENDMODE_BLEND);
@@ -917,13 +917,15 @@ public:
 
         if (png_texture == nullptr) {
             CNC_LOG_ERROR("SDL2 SDL_CreateTextureFromSurface error: {}", SDL_GetError());
-            return;
+            return false;
         }
 
         png_rect.x = dest_rect.X;
         png_rect.y = dest_rect.Y;
         png_rect.w = dest_rect.Width + 1;
         png_rect.h = dest_rect.Height + 1;
+
+        return true;
     }
 
     virtual void Clear_Png_Image()
@@ -936,15 +938,45 @@ public:
         png_texture = nullptr;
     }
 
-    virtual void Capture_Frame(const char* output_file_path)
+    virtual bool Capture_Frame(const char* output_file_path)
     {
         if (windowSurface == nullptr) {
-            return;
+            return false;
         }
 
         if (IMG_SavePNG(windowSurface, output_file_path) != 0) {
             CNC_LOG_ERROR("SDL2 IMG_SavePNG error: {}", SDL_GetError());
+            return false;
         }
+
+        return true;
+    }
+
+    virtual bool Capture_Sub_Frame(const Rect& sub_area, const char* output_file_path)
+    {
+        if (windowSurface == nullptr) {
+            return false;
+        }
+
+        const SDL_Rect sdl_sub_area = { .x = sub_area.X, .y = sub_area.Y, .w = sub_area.Width, .h = sub_area.Height };
+        auto sub_surface = SDL_CreateRGBSurfaceWithFormat(
+            0,
+            sdl_sub_area.w,
+            sdl_sub_area.h,
+            SDL_BITSPERPIXEL(pixel_format),
+            pixel_format
+        );
+        SDL_BlitSurface(windowSurface, &sdl_sub_area, sub_surface, nullptr);
+
+        const auto save_result = IMG_SavePNG(sub_surface, output_file_path) == 0;
+
+        SDL_FreeSurface(sub_surface);
+
+        if (!save_result) {
+            CNC_LOG_ERROR("SDL2 IMG_SavePNG error: {}", SDL_GetError());
+        }
+
+        return save_result;
     }
 
     void RenderSurface()

@@ -1018,3 +1018,12 @@ void GraphicViewPortClass::Take_Screenshot(const char* output_file_path)
 {
     GraphicBuff->Get_DD_Surface()->Capture_Frame(output_file_path);
 }
+
+void GraphicViewPortClass::Take_Clipped_Screenshot(const int xpos,
+                                                   const int ypos,
+                                                   const int width,
+                                                   const int height,
+                                                   const char* output_file_path)
+{
+    GraphicBuff->Get_DD_Surface()->Capture_Sub_Frame({xpos, ypos, width, height}, output_file_path);
+}

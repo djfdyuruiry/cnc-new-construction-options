@@ -273,9 +273,10 @@ public:
     {
     }
 
-    virtual void Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
+    virtual bool Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
     {
         // TODO: PNG support not implemented
+        return false;
     }
 
     virtual void Clear_Png_Image()
@@ -283,9 +284,16 @@ public:
         // TODO: PNG support not implemented
     }
 
-    virtual void Capture_Frame(const char* output_file_path)
+    virtual bool Capture_Frame(const char* output_file_path)
     {
         // TODO: PNG support not implemented
+        return false;
+    }
+
+    virtual bool Capture_Sub_Frame(const Rect& sub_area, const char* output_file_path)
+    {
+        // TODO: PNG support not implemented
+        return false;
     }
 };
 
