@@ -216,7 +216,7 @@ void Main_Game(int argc, char* argv[])
                     LogicPage->Take_Clipped_Screenshot(
                         0,
                         Map.Get_Tab_Height(),
-                        SeenBuff.Get_Width() - (Map.SideWidth),
+                        SeenBuff.Get_Width() - (Map.IsSidebarActive ? Map.SideWidth : 0),
                         SeenBuff.Get_Height() - (Map.Get_Tab_Height()),
                         screenshot_path.c_str()
                     );

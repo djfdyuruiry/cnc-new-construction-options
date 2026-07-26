@@ -837,18 +837,11 @@ public:
             frontSurface = nullptr;
         }
 
-        SDL_FreeSurface(surface);
-
-        if (png_texture) {
-            SDL_DestroyTexture(png_texture);
+        if (surface != nullptr) {
+            SDL_FreeSurface(surface);
         }
 
-        if (texture) {
-            // BUG: This crashes the process if game was not fully initialised when destructor called
-            // SDL_DestroyTexture(texture);
-        }
-
-        if (windowSurface) {
+        if (windowSurface != nullptr) {
             SDL_FreeSurface(windowSurface);
         }
     }

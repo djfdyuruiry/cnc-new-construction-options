@@ -110,7 +110,7 @@ int LoadOptionsClass::Process(void)
     ** Dialog & button dimensions
     */
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
-TXT    int d_dialog_w = 310 * factor;
+    int d_dialog_w = 310 * factor;
     int d_dialog_h = 190 * factor;
     int d_dialog_x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) >> 1;
     int d_dialog_y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) >> 1;
@@ -489,6 +489,11 @@ TXT    int d_dialog_w = 310 * factor;
         case (BUTTON_DELETE | KN_BUTTON):
             game_idx = listbtn.Current_Index();
             game_num = Files[game_idx]->Num;
+
+            if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+                LogicPage->Clear_Png_Image();
+            }
+
             if (WWMessageBox().Process(TXT_DELETE_FILE_QUERY, TXT_YES, TXT_NO) == 0) {
                 sprintf(fname, "savegame.%03d", game_num);
                 const auto save_full_path = PathsClass::Concatenate_Paths(Paths.User_Save_Path(), fname);
@@ -500,8 +505,13 @@ TXT    int d_dialog_w = 310 * factor;
 
                 Clear_List(&listbtn);
                 Fill_List(&listbtn);
-                if (listbtn.Count() == 0) {
+
+                if (listbtn.Count() < 1) {
                     process = false;
+                } else if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+                    load_savegame_screenshot(
+                        Get_Save_Screenshot_Path(Files[0]->Num)
+                    );
                 }
             }
             display = true;
@@ -578,7 +588,10 @@ TXT    int d_dialog_w = 310 * factor;
         Frame_Limiter();
     }
 
-    LogicPage->Clear_Png_Image();
+    if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+        LogicPage->Clear_Png_Image();
+    }
+
     Clear_List(&listbtn);
 
     if (cancel)
