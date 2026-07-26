@@ -1098,7 +1098,7 @@ private:
             }
         } else {
             int game_w, game_h;
-            auto res_mode = Get_Current_Resolution_Mode();
+            const auto res_mode = Get_Current_Resolution_Mode();
 
             if (res_mode == MODE_HIGH_RES) {
                 game_w = Settings.Video.Width;
@@ -1112,16 +1112,16 @@ private:
             }
 
             if (StretchOriginalResolution) {
-                float scale_x = (float)render_dst.w / game_w;
-                float scale_y = (float)render_dst.h / game_h;
+                const auto scale_x = static_cast<float>(render_dst.w) / static_cast<float>(game_w);
+                const auto scale_y = static_cast<float>(render_dst.h) / static_cast<float>(game_h);
 
                 draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
                 draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
                 draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
                 draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
             } else {
-                int offset_x = render_dst.x + (render_dst.w - game_w) / 2;
-                int offset_y = render_dst.y + (render_dst.h - game_h) / 2;
+                const auto offset_x = render_dst.x + (render_dst.w - game_w) / 2;
+                const auto offset_y = render_dst.y + (render_dst.h - game_h) / 2;
 
                 draw_rect.x = png_rect.x + offset_x;
                 draw_rect.y = png_rect.y + offset_y;
