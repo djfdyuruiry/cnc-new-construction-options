@@ -1075,34 +1075,57 @@ private:
             return;
         }
 
-        if (CurrentResolutionMode != MODE_ORIGINAL_RES) {
-            SDL_RenderCopy(renderer, png_texture, nullptr, &png_rect);
-            return;
-        }
-
         SDL_Rect draw_rect = png_rect;
 
-        if (StretchOriginalResolution) {
-            // translate png rectangle dimensions to the stretched content
-            const auto scale_x = static_cast<float>(render_dst.w) / DefaultWidth;
-            const auto scale_y = static_cast<float>(render_dst.h) / DefaultHeight;
+        if (CurrentResolutionMode == MODE_ORIGINAL_RES) {
+            if (StretchOriginalResolution) {
+                const auto scale_x = static_cast<float>(render_dst.w) / DefaultWidth;
+                const auto scale_y = static_cast<float>(render_dst.h) / DefaultHeight;
 
-            draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
-            draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
-            draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
-            draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
+                draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
+                draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
+                draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
+                draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
+            } else {
+                draw_rect.x = static_cast<int>(
+                    static_cast<float>(png_rect.x)
+                    + (static_cast<float>(render_dst.x) - DefaultWidth / 2.0f)
+                );
+                draw_rect.y = static_cast<int>(
+                    static_cast<float>(png_rect.y)
+                    + (static_cast<float>(render_dst.y) - DefaultHeight / 2.0f)
+                );
+            }
         } else {
-            // translate png rectangle dimensions to the centered content
-            draw_rect.x = static_cast<int>(
-                static_cast<float>(png_rect.x)
-                + (static_cast<float>(render_dst.x) - DefaultWidth / 2.0f)
-            );
-            draw_rect.y = static_cast<int>(
-                static_cast<float>(png_rect.y)
-                + (static_cast<float>(render_dst.y) - DefaultHeight / 2.0f)
-            );
-            draw_rect.w = png_rect.w;
-            draw_rect.h = png_rect.h;
+            int game_w, game_h;
+            auto res_mode = Get_Current_Resolution_Mode();
+
+            if (res_mode == MODE_HIGH_RES) {
+                game_w = Settings.Video.Width;
+                game_h = Settings.Video.Height;
+            } else if (res_mode == MODE_DEFAULT) {
+                game_w = DefaultWidth;
+                game_h = DefaultHeight;
+            } else {
+                game_w = DefaultDosWidth;
+                game_h = DefaultDosHeight;
+            }
+
+            if (StretchOriginalResolution) {
+                float scale_x = (float)render_dst.w / game_w;
+                float scale_y = (float)render_dst.h / game_h;
+
+                draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
+                draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
+                draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
+                draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
+            } else {
+                int offset_x = render_dst.x + (render_dst.w - game_w) / 2;
+                int offset_y = render_dst.y + (render_dst.h - game_h) / 2;
+
+                draw_rect.x = png_rect.x + offset_x;
+                draw_rect.y = png_rect.y + offset_y;
+            }
         }
 
         SDL_RenderCopy(renderer, png_texture, nullptr, &draw_rect);
