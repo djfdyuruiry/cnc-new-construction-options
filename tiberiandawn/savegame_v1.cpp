@@ -10,8 +10,6 @@ void SaveGameScenarioState_v1::Read_Globals()
 {
     ScenarioNumber = Scen.Scenario;
     ScenarioFileName = Scen.FileName;
-    ScenarioDirection = TdTypeConverter::To_String(ScenDir);
-    ScenarioVariation = TdTypeConverter::To_String(ScenVar);
     BriefText = Scen.BriefingText;
     BriefMovieName = BriefMovie;
     WinMovieName = WinMovie;
@@ -61,17 +59,6 @@ void SaveGameScenarioState_v1::Read_Globals()
 bool SaveGameScenarioState_v1::Validate() const
 {
     auto result = true;
-
-    // ini file values
-    if (!TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection)) {
-        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioDirection save game value: {}", ScenarioDirection);
-        result = false;
-    }
-
-    if (!TdTypeConverter::Try_Parse<ScenarioVarType>(ScenarioVariation)) {
-        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioVariation save game value: {}", ScenarioVariation);
-        result = false;
-    }
 
     const std::unordered_map<std::string, std::string> stringFields = {
         { NAMEOF(ScenarioFileName), ScenarioFileName },
@@ -235,22 +222,6 @@ bool SaveGameScenarioState_v1::Validate() const
     return result;
 }
 
-ScenarioDirType SaveGameScenarioState_v1::Parse_Scenario_Direction() const
-{
-    return TdTypeConverter::Assert_Parse<ScenarioDirType>(
-        ScenarioDirection,
-        "Attempted to parse invalid ScenarioState.ScenarioDirection save game value: {}"
-    );
-}
-
-ScenarioVarType SaveGameScenarioState_v1::Parse_Scenario_Variation() const
-{
-    return TdTypeConverter::Assert_Parse<ScenarioVarType>(
-        ScenarioVariation,
-        "Attempted to parse invalid ScenarioState.ScenarioVariation save game value: {}"
-    );
-}
-
 SpecialClass SaveGameScenarioState_v1::Parse_MultiPlayer_Special() const
 {
     SpecialClass multi_special;
@@ -273,8 +244,6 @@ bool SaveGameScenarioState_v1::Write_Globals() const
     Scen.Scenario = ScenarioNumber;
 
     // validate already called, so we are using known valid values
-    ScenDir = TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection).value();
-    ScenVar = TdTypeConverter::Try_Parse<ScenarioVarType>(ScenarioVariation).value();
     strcpy(Scen.FileName, ScenarioFileName.c_str());
     strcpy(Scen.BriefingText, BriefText.c_str());
     strcpy(BriefMovie, BriefMovieName.c_str());

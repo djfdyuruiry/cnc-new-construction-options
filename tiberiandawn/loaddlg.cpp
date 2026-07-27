@@ -364,10 +364,9 @@ int LoadOptionsClass::Process(void)
                 );
 
                 if (listbtn.Count() > 0) {
-                    // BUG: Doesn't update after first draw
                     Fancy_Text_Print(Files[game_idx]->Summary.c_str(),
-                                     d_screenshot_x + 10,
-                                     d_screenshot_y - 10,
+                                     d_screenshot_x + (d_screenshot_w / 2),
+                                     d_screenshot_y - (10 * factor),
                                      CC_GREEN,
                                      TBLACK,
                                      TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_CENTER | TPF_NOSHADOW);
@@ -537,12 +536,13 @@ int LoadOptionsClass::Process(void)
                 );
             }
 
-            if (Style != SAVE) {
-                break;
-            }
-
             if (listbtn.Count() && listbtn.Current_Index() != game_idx) {
                 game_idx = listbtn.Current_Index();
+                display = true;
+
+                if (Style != SAVE) {
+                    break;
+                }
 
                 /*
                 ** Copy the game's description, UNLESS it's the empty slot; if
@@ -704,24 +704,16 @@ void LoadOptionsClass::Fill_List(ListClass* list)
                 ? Get_Savefile_Info(*fdata)
                 : Get_Savefile_Info_Binary(fdata->Num, fdata->Descr, &fdata->Scenario, &fdata->House);
 
-            std::string description;
-
             if (!ok) {
-                description = Text_String(TXT_OLD_GAME);
-            } else {
-                if (fdata->Game == GAME_SKIRMISH) {
-                    description = "(Skirmish) "; // TODO: Locale file entry
-                    description += fdata->Descr;
-                } else {
-                    description = "(";
-                    description += Text_String(fdata->House == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I);
-                    description += ") ";
-                    description += fdata->Descr;
-                }
-            }
+                strncpy(fdata->Descr, Text_String(TXT_OLD_GAME), std::size(fdata->Descr));
+                fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+            } else if (fdata->Game == GAME_SKIRMISH) {
+                const auto description = std::format("(Skirmish) {}", fdata->Descr);
 
-            strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
-            fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+                strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
+                fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+
+            }
 
             fdata->Valid = ok;
             fdata->DateTime = ff->GetTime();

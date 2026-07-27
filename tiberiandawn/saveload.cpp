@@ -1344,14 +1344,15 @@ bool Get_Savefile_Info(FileEntryClass& entry)
             *header->ScenarioName
         );
     } else {
+        // campaign mission
         entry.Summary = std::format(
-            "{} Campaign - Mission {}",
+            "{} Campaign - Mission {} ({} {})",
             Text_String(entry.House == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I),
-            entry.Scenario
+            entry.Scenario,
+            header->ScenarioDirection,
+            header->ScenarioVariation
         );
     }
-
-    CNC_LOG_WARN(entry.Summary);
 
     return true;
 }

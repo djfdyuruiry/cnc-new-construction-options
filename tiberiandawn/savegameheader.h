@@ -43,6 +43,8 @@ public:
     std::string Version;
     std::string ScenarioGameType;
     int ScenarioID;
+    std::string ScenarioDirection;
+    std::string ScenarioVariation;
     std::optional<std::string> ScenarioName;
     std::string PlayerHouseType;
     std::string PlayerActsLikeType;
@@ -62,6 +64,8 @@ public:
     const SaveGameData& Get_SaveGameData() const;
 
     GameType Parse_Game_Type() const;
+    ScenarioDirType Parse_Scenario_Direction() const;
+    ScenarioVarType Parse_Scenario_Variation() const;
     HousesType Parse_Player_House_Type() const;
     HousesType Parse_Player_Acts_Like_House_Type() const;
     ScenarioPlayerType Parse_Player_Type() const;
@@ -73,6 +77,8 @@ public:
         Version,
         ScenarioGameType,
         ScenarioID,
+        ScenarioDirection,
+        ScenarioVariation,
         ScenarioName,
         PlayerHouseType,
         PlayerActsLikeType,

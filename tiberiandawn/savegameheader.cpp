@@ -91,6 +91,8 @@ void SaveGameHeader::Read_Globals()
 {
     ScenarioGameType = TdTypeConverter::To_String(GameToPlay);
     ScenarioID = Scen.Scenario;
+    ScenarioDirection = TdTypeConverter::To_String(ScenDir);
+    ScenarioVariation = TdTypeConverter::To_String(ScenVar);
 
     const auto scenario_file_name = std::string(Scen.ScenarioName) + ".INI";
 
@@ -165,6 +167,17 @@ bool SaveGameHeader::Validate() const
         result = false;
     }
 
+    // ini file values
+    if (!TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection)) {
+        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioDirection save game value: {}", ScenarioDirection);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<ScenarioVarType>(ScenarioVariation)) {
+        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioVariation save game value: {}", ScenarioVariation);
+        result = false;
+    }
+
     if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
         CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
         result = false;
@@ -195,7 +208,17 @@ bool SaveGameHeader::Validate() const
 
 bool SaveGameHeader::Write_Globals() const
 {
+    if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write globals from invalid save data");
+        return false;
+    }
+
     Scen.Scenario = ScenarioID;
+
+    // validate already called, so we are using known valid values
+    ScenDir = TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection).value();
+    ScenVar = TdTypeConverter::Try_Parse<ScenarioVarType>(ScenarioVariation).value();
+
     GameToPlay = Parse_Game_Type();
     ScenPlayer = Parse_Player_Type();
     Whom = Parse_Player_House_Type();
@@ -266,6 +289,23 @@ GameType SaveGameHeader::Parse_Game_Type() const
     return TdTypeConverter::Assert_Parse<GameType>(
         ScenarioGameType,
         "Attempted to parse invalid Header.ScenarioGameType save game value: {}"
+    );
+}
+
+
+ScenarioDirType SaveGameHeader::Parse_Scenario_Direction() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioDirType>(
+        ScenarioDirection,
+        "Attempted to parse invalid ScenarioState.ScenarioDirection save game value: {}"
+    );
+}
+
+ScenarioVarType SaveGameHeader::Parse_Scenario_Variation() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioVarType>(
+        ScenarioVariation,
+        "Attempted to parse invalid ScenarioState.ScenarioVariation save game value: {}"
     );
 }
 
