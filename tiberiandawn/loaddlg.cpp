@@ -363,13 +363,14 @@ int LoadOptionsClass::Process(void)
                     LTGRAY
                 );
 
-                if (Style == SAVE) {
-                    // Fancy_Text_Print(TXT_MISSION_DESCRIPTION,
-                    //                  d_dialog_cx,
-                    //                  d_edit_y - d_txt8_h,
-                    //                  CC_GREEN,
-                    //                  TBLACK,
-                    //                  TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_CENTER | TPF_NOSHADOW);
+                if (listbtn.Count() > 0) {
+                    // BUG: Doesn't update after first draw
+                    Fancy_Text_Print(Files[game_idx]->Summary.c_str(),
+                                     d_screenshot_x + 10,
+                                     d_screenshot_y - 10,
+                                     CC_GREEN,
+                                     TBLACK,
+                                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_CENTER | TPF_NOSHADOW);
                 }
             }
 
@@ -657,11 +658,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
     FileEntryClass* fdata; // for adding entries to 'Files'
     char descr[DESCRIP_MAX];
     char scan_path[_MAX_PATH];
-    unsigned scenario; // scenario #
-    HousesType house;  // house
     Find_File_Data* ff = nullptr;
-    int id;
-    bool found;
 
     /*
     ** Make sure the list is empty
@@ -681,43 +678,52 @@ void LoadOptionsClass::Fill_List(ListClass* list)
     /*
     ** Find all savegame files
     */
-    snprintf(scan_path, sizeof(scan_path), "%s", Paths.Concatenate_Paths(Paths.User_Save_Path(), "SAVEGAME.*").c_str());
+    snprintf(
+        scan_path,
+        sizeof(scan_path),
+        "%s",
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), "SAVEGAME.*").c_str()
+    );
 
-    found = Find_First(scan_path, 0, &ff);
+    auto found = Find_First(scan_path, 0, &ff);
+
     while (found) {
         if (stricmp(ff->GetName(), NET_SAVE_FILE_NAME) != 0) {
+            fdata = new FileEntryClass;
+
             /*
             ** Extract the game ID from the filename
             */
-            id = Num_From_Ext(ff->GetName());
+            fdata->Num = Num_From_Ext(ff->GetName());
 
             /*
             ** get the game's info; if success, add it to the list
             */
-            auto game_type = GAME_NORMAL;
-            bool ok = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
-                ? Get_Savefile_Info(id, descr, scenario, house, game_type)
-                : Get_Savefile_Info_Binary(id, descr, &scenario, &house);
+            fdata->Game = GAME_NORMAL;
+            const auto ok = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+                ? Get_Savefile_Info(*fdata)
+                : Get_Savefile_Info_Binary(fdata->Num, fdata->Descr, &fdata->Scenario, &fdata->House);
 
-            fdata = new FileEntryClass;
+            std::string description;
 
-            fdata->Descr[0] = '\0';
             if (!ok) {
-                strcpy(fdata->Descr, Text_String(TXT_OLD_GAME));
+                description = Text_String(TXT_OLD_GAME);
             } else {
-                if (game_type == GAME_SKIRMISH) {
-                    sprintf(fdata->Descr, "%s", "(Skirmish) "); // TODO: Locale file entry
-                } else if (house == HOUSE_BAD) {
-                    sprintf(fdata->Descr, "(%s) ", Text_String(TXT_N_O_D));
+                if (fdata->Game == GAME_SKIRMISH) {
+                    description = "(Skirmish) "; // TODO: Locale file entry
+                    description += fdata->Descr;
                 } else {
-                    sprintf(fdata->Descr, "(%s) ", Text_String(TXT_G_D_I));
+                    description = "(";
+                    description += Text_String(fdata->House == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I);
+                    description += ") ";
+                    description += fdata->Descr;
                 }
             }
-            strncat(fdata->Descr, descr, (sizeof(fdata->Descr) - strlen(fdata->Descr)) - 1);
+
+            strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
+            fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+
             fdata->Valid = ok;
-            fdata->Scenario = scenario;
-            fdata->House = house;
-            fdata->Num = id;
             fdata->DateTime = ff->GetTime();
             Files.Add(fdata);
         }
@@ -744,7 +750,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
         */
         int i = 0;
         for (i = 0; i < Files.Count(); i++) {         // i = the # we're searching for
-            id = -1;                                  // mark as 'not found'
+            auto id = -1;                          // mark as 'not found'
             for (int j = 0; j < Files.Count(); j++) { // loop through all game ID's
                 if (Files[j]->Num == i) {             // if found, mark as found
                     id = j;

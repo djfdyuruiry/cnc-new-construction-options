@@ -91,7 +91,23 @@ void SaveGameHeader::Read_Globals()
 {
     ScenarioGameType = TdTypeConverter::To_String(GameToPlay);
     ScenarioID = Scen.Scenario;
+
+    const auto scenario_file_name = std::string(Scen.ScenarioName) + ".INI";
+
+    if (CCFileClass scenario_file(scenario_file_name.c_str()); scenario_file.Is_Available()) {
+        INIClass ini;
+
+        ini.Load(scenario_file);
+
+        const auto scenario_name = ini.Get_String("Basic", "Name", std::string(""));
+
+        if (!scenario_name.empty()) {
+            ScenarioName = scenario_name;
+        }
+    }
+
     PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
+    PlayerActsLikeType = TdTypeConverter::To_String(PlayerPtr->ActLike);
     PlayerType = TdTypeConverter::To_String(ScenPlayer);
 }
 
@@ -156,6 +172,11 @@ bool SaveGameHeader::Validate() const
 
     if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
         CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<HousesType>(PlayerActsLikeType).has_value()) {
+        CNC_LOGGER_ERROR("Invalid Header.PlayerActsLikeType save game value: {}", PlayerActsLikeType);
         result = false;
     }
 
@@ -253,6 +274,14 @@ HousesType SaveGameHeader::Parse_Player_House_Type() const
     return TdTypeConverter::Assert_Parse<HousesType>(
         PlayerHouseType,
         "Attempted to parse invalid Header.PlayerHouse save game value: {}"
+    );
+}
+
+HousesType SaveGameHeader::Parse_Player_Acts_Like_House_Type() const
+{
+    return TdTypeConverter::Assert_Parse<HousesType>(
+        PlayerActsLikeType,
+        "Attempted to parse invalid Header.PlayerActsLikeType save game value: {}"
     );
 }
 

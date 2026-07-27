@@ -39,11 +39,13 @@ class FileEntryClass
 {
 public:
     char Descr[85];        // save-game description
+    GameType Game;
     unsigned Scenario;     // scenario #
     HousesType House;      // house
     int Num;               // save file number (from the extension)
     unsigned int DateTime; // date/time stamp of file
     bool Valid;            // Is the scenario valid?
+    std::string Summary;   // Printable summary of save game metadata
 };
 
 class LoadOptionsClass
