@@ -901,6 +901,7 @@ public:
         const auto img_surface = IMG_Load(png_file_path);
 
         if (img_surface == nullptr) {
+            CNC_LOG_ERROR("SDL2 IMG_Load error: {}", SDL_GetError());
             return false;
         }
 
