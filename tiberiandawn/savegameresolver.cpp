@@ -5,9 +5,6 @@
 #include "savegame_v1.h"
 #include "savegameresolver.h"
 
-#include "b64straw.h"
-#include "base64.h"
-
 //The implementation of the current save game version
 #define CURRENT_SAVE_CLASS SaveGame_v1
 #define CURRENT_SAVE_CLASS_NAME NAMEOF(SaveGame_v1)

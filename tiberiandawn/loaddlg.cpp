@@ -700,7 +700,8 @@ void LoadOptionsClass::Fill_List(ListClass* list)
             ** get the game's info; if success, add it to the list
             */
             fdata->Game = GAME_NORMAL;
-            const auto ok = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+            const auto json_saves_enabled = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE);
+            const auto ok = json_saves_enabled
                 ? Get_Savefile_Info(*fdata)
                 : Get_Savefile_Info_Binary(fdata->Num, fdata->Descr, &fdata->Scenario, &fdata->House);
 
@@ -709,6 +710,16 @@ void LoadOptionsClass::Fill_List(ListClass* list)
                 fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
             } else if (fdata->Game == GAME_SKIRMISH) {
                 const auto description = std::format("(Skirmish) {}", fdata->Descr);
+
+                strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
+                fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+            } else if (!json_saves_enabled) {
+                // legacy prefix logic for binary saves
+                const auto description = std::format(
+                    "({}) {}",
+                    Text_String(fdata->House == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I),
+                    fdata->Descr
+                );
 
                 strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
                 fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
