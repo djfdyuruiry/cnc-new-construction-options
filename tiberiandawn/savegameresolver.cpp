@@ -26,6 +26,7 @@ bool SaveGameResolver::Save(CDFileClass& file, const char* description)
         header.Version = Current_Save_Version;
         header.Description = description;
         header.Read_Globals();
+        header.Read_Screenshot_If_Present();
 
         // build save
         CURRENT_SAVE_CLASS save;
@@ -81,6 +82,12 @@ std::optional<SaveGameHeader> SaveGameResolver::Load(const std::string& path)
                         header.Set_SaveGameData(
                             std::move(save.Export_SaveGameData())
                         );
+
+                        const auto screenshot_path = header.Write_Screenshot_If_Present();
+
+                        if (screenshot_path.has_value()) {
+                            CNC_LOGGER_WARN("Screenshot: {}", *screenshot_path);
+                        }
 
                         return std::move(header);
                     }

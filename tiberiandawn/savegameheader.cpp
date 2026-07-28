@@ -1,7 +1,9 @@
+#include "common/b64straw.h"
 #include "common/stringutils.h"
 
 #include "function.h"
 #include "savegameheader.h"
+
 #include "typeconverter.h"
 
 bool SaveGameData::Apply_Rules(RulesClass& rules) const
@@ -59,19 +61,25 @@ bool SaveGameHeader::From_Stream(std::ifstream& stream, SaveGameHeader& output)
 
 bool SaveGameHeader::From_File(const std::string& path, SaveGameHeader& output)
 {
-    // build path using CDFileClass logic
     std::string full_path;
 
     CNC_LOGGER_INFO("Attempting to read header from JSON save game file: {}", path);
 
-    if (CDFileClass file; !file.Open(path.c_str(), READ)) {
+    // build path using CDFileClass logic
+    CDFileClass file(path.c_str());
+
+    if (!file.Is_Available()) {
+        return false;
+    }
+
+    if (!file.Open(READ)) {
         CNC_LOGGER_ERROR("Failed to read full path to JSON save game");
         file.Close();
         return false;
-    } else {
-        full_path = std::string(file.File_Name());
-        file.Close();
     }
+
+    full_path = std::string(file.File_Name());
+    file.Close();
 
     // open file stream
     auto save_file_stream = std::ifstream(full_path);
@@ -83,8 +91,66 @@ void SaveGameHeader::Read_Globals()
 {
     ScenarioGameType = TdTypeConverter::To_String(GameToPlay);
     ScenarioID = Scen.Scenario;
+    ScenarioDirection = TdTypeConverter::To_String(ScenDir);
+    ScenarioVariation = TdTypeConverter::To_String(ScenVar);
+
+    const auto scenario_file_name = std::string(Scen.ScenarioName) + ".INI";
+
+    if (CCFileClass scenario_file(scenario_file_name.c_str()); scenario_file.Is_Available()) {
+        INIClass ini;
+
+        ini.Load(scenario_file);
+
+        const auto scenario_name = ini.Get_String("Basic", "Name", std::string(""));
+
+        if (!scenario_name.empty()) {
+            ScenarioName = scenario_name;
+        }
+    }
+
     PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
+    PlayerActsLikeType = TdTypeConverter::To_String(PlayerPtr->ActLike);
     PlayerType = TdTypeConverter::To_String(ScenPlayer);
+}
+
+/**
+ * Read screenshot taken before options dialog was shown into a base64 string.
+ */
+void SaveGameHeader::Read_Screenshot_If_Present()
+{
+    static const auto screenshot_path = PathsClass::Concatenate_Paths(
+        Paths.User_Screenshot_Path(),
+        PRE_DIALOG_SCREENSHOT_FILE_NAME
+    );
+
+    CCFileClass screenshot;
+
+    const auto screenshot_available = screenshot.Open(screenshot_path.c_str());
+
+    ScreenshotBase64.clear();
+
+    if (!screenshot_available) {
+        return;
+    }
+
+    FileStraw binary_in(screenshot);
+    Base64Straw base64_out(Base64Straw::ENCODE);
+
+    base64_out.Get_From(binary_in);
+
+    while (true) {
+        char buffer[512];
+
+        const auto length = base64_out.Get(buffer, sizeof(buffer) - 1);
+
+        buffer[length] = '\0';
+
+        if (length == 0) {
+            break;
+        }
+
+        ScreenshotBase64 += buffer;
+    }
 }
 
 bool SaveGameHeader::Validate() const
@@ -101,6 +167,17 @@ bool SaveGameHeader::Validate() const
         result = false;
     }
 
+    // ini file values
+    if (!TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection)) {
+        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioDirection save game value: {}", ScenarioDirection);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<ScenarioVarType>(ScenarioVariation)) {
+        CNC_LOGGER_ERROR("Invalid ScenarioState.ScenarioVariation save game value: {}", ScenarioVariation);
+        result = false;
+    }
+
     if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
         CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
         result = false;
@@ -108,6 +185,11 @@ bool SaveGameHeader::Validate() const
 
     if (!TdTypeConverter::Try_Parse<HousesType>(PlayerHouseType).has_value()) {
         CNC_LOGGER_ERROR("Invalid Header.PlayerHouse save game value: {}", PlayerHouseType);
+        result = false;
+    }
+
+    if (!TdTypeConverter::Try_Parse<HousesType>(PlayerActsLikeType).has_value()) {
+        CNC_LOGGER_ERROR("Invalid Header.PlayerActsLikeType save game value: {}", PlayerActsLikeType);
         result = false;
     }
 
@@ -126,12 +208,66 @@ bool SaveGameHeader::Validate() const
 
 bool SaveGameHeader::Write_Globals() const
 {
+    if (!Validate()) {
+        CNC_LOGGER_ERROR("Refusing to write globals from invalid save data");
+        return false;
+    }
+
     Scen.Scenario = ScenarioID;
+
+    // validate already called, so we are using known valid values
+    ScenDir = TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection).value();
+    ScenVar = TdTypeConverter::Try_Parse<ScenarioVarType>(ScenarioVariation).value();
+
     GameToPlay = Parse_Game_Type();
     ScenPlayer = Parse_Player_Type();
     Whom = Parse_Player_House_Type();
 
     return true;
+}
+
+std::optional<std::string> SaveGameHeader::Write_Screenshot_If_Present() const
+{
+    static const auto screenshot_path = PathsClass::Concatenate_Paths(
+        Paths.User_Screenshot_Path(),
+        ".save-load.png"
+    );
+
+    if (ScreenshotBase64.empty()) {
+        return std::nullopt;
+    }
+
+    CCFileClass screenshot;
+
+    screenshot.Set_Name(screenshot_path.c_str());
+
+    if (screenshot.Is_Available() && !screenshot.Delete()) {
+        CNC_LOGGER_ERROR("Failed to clear previous save game screenshot: {}", screenshot_path);
+        return std::nullopt;
+    }
+
+    screenshot.Open(WRITE);
+
+    BufferStraw string_in(ScreenshotBase64.c_str(), ScreenshotBase64.size());
+
+    Base64Straw binary_out(Base64Straw::DECODE);
+    binary_out.Get_From(string_in);
+
+    while (true) {
+        char buffer[512];
+
+        const auto length = binary_out.Get(buffer, sizeof(buffer) - 1);
+
+        if (length == 0) {
+            break;
+        }
+
+        screenshot.Write(buffer, length);
+    }
+
+    screenshot.Close();
+
+    return screenshot_path;
 }
 
 void SaveGameHeader::Set_SaveGameData(SaveGameData data)
@@ -156,11 +292,36 @@ GameType SaveGameHeader::Parse_Game_Type() const
     );
 }
 
+
+ScenarioDirType SaveGameHeader::Parse_Scenario_Direction() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioDirType>(
+        ScenarioDirection,
+        "Attempted to parse invalid ScenarioState.ScenarioDirection save game value: {}"
+    );
+}
+
+ScenarioVarType SaveGameHeader::Parse_Scenario_Variation() const
+{
+    return TdTypeConverter::Assert_Parse<ScenarioVarType>(
+        ScenarioVariation,
+        "Attempted to parse invalid ScenarioState.ScenarioVariation save game value: {}"
+    );
+}
+
 HousesType SaveGameHeader::Parse_Player_House_Type() const
 {
     return TdTypeConverter::Assert_Parse<HousesType>(
         PlayerHouseType,
         "Attempted to parse invalid Header.PlayerHouse save game value: {}"
+    );
+}
+
+HousesType SaveGameHeader::Parse_Player_Acts_Like_House_Type() const
+{
+    return TdTypeConverter::Assert_Parse<HousesType>(
+        PlayerActsLikeType,
+        "Attempted to parse invalid Header.PlayerActsLikeType save game value: {}"
     );
 }
 

@@ -326,6 +326,8 @@ public:
             auto result = On_Input(display, input);
 
             if (result.has_value()) {
+                LogicPage->Clear_Png_Image();
+
                 return *result;
             }
 

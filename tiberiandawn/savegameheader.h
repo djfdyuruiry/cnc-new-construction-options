@@ -43,21 +43,31 @@ public:
     std::string Version;
     std::string ScenarioGameType;
     int ScenarioID;
+    std::string ScenarioDirection;
+    std::string ScenarioVariation;
+    std::optional<std::string> ScenarioName;
     std::string PlayerHouseType;
+    std::string PlayerActsLikeType;
     std::string PlayerType;
     std::string Description;
+    std::string ScreenshotBase64;
 
     static bool From_Stream(std::ifstream& stream, SaveGameHeader& output);
     static bool From_File(const std::string& path, SaveGameHeader& output);
 
     void Read_Globals();
+    void Read_Screenshot_If_Present();
     bool Validate() const;
     bool Write_Globals() const;
+    std::optional<std::string> Write_Screenshot_If_Present() const;
     void Set_SaveGameData(SaveGameData data);
     const SaveGameData& Get_SaveGameData() const;
 
     GameType Parse_Game_Type() const;
+    ScenarioDirType Parse_Scenario_Direction() const;
+    ScenarioVarType Parse_Scenario_Variation() const;
     HousesType Parse_Player_House_Type() const;
+    HousesType Parse_Player_Acts_Like_House_Type() const;
     ScenarioPlayerType Parse_Player_Type() const;
 
     void Dump_Json(std::string& output) const;
@@ -67,9 +77,14 @@ public:
         Version,
         ScenarioGameType,
         ScenarioID,
+        ScenarioDirection,
+        ScenarioVariation,
+        ScenarioName,
         PlayerHouseType,
+        PlayerActsLikeType,
         PlayerType,
-        Description
+        Description,
+        ScreenshotBase64
     )
 
 private:

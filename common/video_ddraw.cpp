@@ -1182,6 +1182,10 @@ public:
     virtual bool Unlock();
     virtual void Blt(const Rect& destRect, VideoSurface* src, const Rect& srcRect, bool mask);
     virtual void FillRect(const Rect& rect, unsigned char color);
+    virtual bool Load_Png_Image(const Rect& dest_rect, const char* png_file_path);
+    virtual void Clear_Png_Image();
+    virtual bool Capture_Frame(const char* output_file_path);
+    virtual bool Capture_Sub_Frame(const Rect& sub_area, const char* output_file_path);
 
 protected:
     LPDIRECTDRAWSURFACE VideoSurfacePtr;   // Pointer to the related direct draw surface
@@ -1333,6 +1337,29 @@ void VideoSurfaceDDraw::FillRect(const Rect& rect, unsigned char color)
     destRect.bottom = rect.Y + rect.Height;
 
     VideoSurfacePtr->Blt(&destRect, NULL, NULL, DDBLT_WAIT | DDBLT_ASYNC | DDBLT_COLORFILL, &blit_effects);
+}
+
+bool VideoSurfaceDDraw::Load_Png_Image(const Rect&, const char*)
+{
+    // TODO: PNG support not implemented
+    return false;
+}
+
+void VideoSurfaceDDraw::Clear_Png_Image()
+{
+    // TODO: PNG support not implemented
+}
+
+bool VideoSurfaceDDraw::Capture_Frame(const char* output_file_path)
+{
+    // TODO: PNG support not implemented
+    return false;
+}
+
+bool VideoSurfaceDDraw::Capture_Sub_Frame(const Rect& sub_area, const char* output_file_path)
+{
+    // TODO: PNG support not implemented
+    return false;
 }
 
 /*

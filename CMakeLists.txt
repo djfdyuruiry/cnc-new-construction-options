@@ -144,6 +144,9 @@ if(SDL2)
     find_package(SDL2 CONFIG REQUIRED)
     list(APPEND NCO_LIBS $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
 
+    find_package(SDL2_image CONFIG REQUIRED)
+    list(APPEND NCO_LIBS $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>)
+
     # winuser.h defines VK_ macros but it can be prevented
     if(WIN32)
         add_definitions(-DNOVIRTUALKEYCODES)

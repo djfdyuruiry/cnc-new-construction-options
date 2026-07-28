@@ -21,8 +21,6 @@ public:
     // ini file values
 
     int ScenarioNumber;
-    std::string ScenarioDirection;
-    std::string ScenarioVariation;
     std::string ScenarioFileName;
     std::string BriefText;
     std::string BriefMovieName;
@@ -75,16 +73,12 @@ public:
 
     void Read_Globals();
     bool Validate() const;
-    ScenarioDirType Parse_Scenario_Direction() const;
-    ScenarioVarType Parse_Scenario_Variation() const;
     SpecialClass Parse_MultiPlayer_Special() const;
     bool Write_Globals() const;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
         SaveGameScenarioState_v1,
         ScenarioNumber,
-        ScenarioDirection,
-        ScenarioVariation,
         ScenarioFileName,
         BriefText,
         BriefMovieName,

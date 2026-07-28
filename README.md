@@ -49,8 +49,8 @@ NCO is also available as a mod for Command & Conquer: Remastered Collection, bot
             <img src="wiki/img/td-rules-editor.webp" alt="Rules Editor" width="640" height="400"/>
         </th>
         <th>
-            <p>Mission Select Menu</p>
-            <img src="wiki/img/td-mission-select.webp" alt="Mission Select Menu" width="640" height="400"/>
+            <p>Save Game Screenshots</p>
+            <img src="wiki/img/td-save-game-screenshots.webp" alt="Save Game Screenshots" width="640" height="400"/>
         </th>
     </tr>
     <tr>
@@ -59,8 +59,8 @@ NCO is also available as a mod for Command & Conquer: Remastered Collection, bot
             <img src="wiki/img/td-skirmish-setup.webp" alt="Improved Skirmish Setup" width="640" height="400"/>
         </th>
         <th>
-            <p>Snow Theater</p>
-            <img src="wiki/img/td-snow-theatre-large.png" alt="Snow Theater" width="640" height="400"/>
+            <p>Mission Select Menu</p>
+            <img src="wiki/img/td-mission-select.webp" alt="Mission Select Menu" width="640" height="400"/>
         </th>
     </tr>
 </table>

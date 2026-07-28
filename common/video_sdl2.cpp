@@ -47,6 +47,7 @@
 #include "logger.h"
 
 #include <SDL.h>
+#include <SDL2/SDL_image.h>
 
 // C&C 95 Resolution
 static constexpr auto DefaultWidth = 640;
@@ -818,6 +819,7 @@ public:
         : flags(flags)
         , windowSurface(nullptr)
         , texture(nullptr)
+        , png_texture(nullptr)
     {
         surface = SDL_CreateRGBSurface(0, w, h, 8, 0, 0, 0, 0);
         SDL_SetSurfacePalette(surface, palette);
@@ -835,14 +837,11 @@ public:
             frontSurface = nullptr;
         }
 
-        SDL_FreeSurface(surface);
-
-        if (texture) {
-            // BUG: This crashes the process if game was not fully initialised when destructor called
-            // SDL_DestroyTexture(texture);
+        if (surface != nullptr) {
+            SDL_FreeSurface(surface);
         }
 
-        if (windowSurface) {
+        if (windowSurface != nullptr) {
             SDL_FreeSurface(windowSurface);
         }
     }
@@ -889,6 +888,89 @@ public:
     {
         SDL_Rect rectSDL = {rect.X, rect.Y, rect.Width + 1, rect.Height + 1};
         SDL_FillRect(surface, &rectSDL, color);
+    }
+
+    virtual bool Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
+    {
+        if (windowSurface == nullptr) {
+            return false;
+        }
+
+        Clear_Png_Image();
+
+        const auto img_surface = IMG_Load(png_file_path);
+
+        if (img_surface == nullptr) {
+            CNC_LOG_ERROR("SDL2 IMG_Load error: {}", SDL_GetError());
+            return false;
+        }
+
+        SDL_SetSurfaceBlendMode(img_surface, SDL_BLENDMODE_BLEND);
+        png_texture = SDL_CreateTextureFromSurface(renderer, img_surface);
+        SDL_FreeSurface(img_surface);
+
+        if (png_texture == nullptr) {
+            CNC_LOG_ERROR("SDL2 SDL_CreateTextureFromSurface error: {}", SDL_GetError());
+            return false;
+        }
+
+        png_rect.x = dest_rect.X;
+        png_rect.y = dest_rect.Y;
+        png_rect.w = dest_rect.Width + 1;
+        png_rect.h = dest_rect.Height + 1;
+
+        return true;
+    }
+
+    virtual void Clear_Png_Image()
+    {
+        if (png_texture == nullptr) {
+            return;
+        }
+
+        SDL_DestroyTexture(png_texture);
+        png_texture = nullptr;
+    }
+
+    virtual bool Capture_Frame(const char* output_file_path)
+    {
+        if (windowSurface == nullptr) {
+            return false;
+        }
+
+        if (IMG_SavePNG(windowSurface, output_file_path) != 0) {
+            CNC_LOG_ERROR("SDL2 IMG_SavePNG error: {}", SDL_GetError());
+            return false;
+        }
+
+        return true;
+    }
+
+    virtual bool Capture_Sub_Frame(const Rect& sub_area, const char* output_file_path)
+    {
+        if (windowSurface == nullptr) {
+            return false;
+        }
+
+        const SDL_Rect sdl_sub_area = { .x = sub_area.X, .y = sub_area.Y, .w = sub_area.Width, .h = sub_area.Height };
+        auto sub_surface = SDL_CreateRGBSurfaceWithFormat(
+            0,
+            sdl_sub_area.w,
+            sdl_sub_area.h,
+            SDL_BITSPERPIXEL(pixel_format),
+            pixel_format
+        );
+        SDL_BlitSurface(windowSurface, &sdl_sub_area, sub_surface, nullptr);
+
+        const auto save_result = IMG_SavePNG(sub_surface, output_file_path) == 0;
+
+        SDL_FreeSurface(sub_surface);
+
+        if (!save_result) {
+            CNC_LOG_ERROR("SDL2 IMG_SavePNG error: {}", SDL_GetError());
+        }
+
+        return save_result;
     }
 
     void RenderSurface()
@@ -958,6 +1040,8 @@ public:
             SDL_RenderCopy(renderer, texture, nullptr, &render_dst);
         }
 
+        Render_Png_Texture();
+
         SDL_RenderPresent(renderer);
     }
 
@@ -975,7 +1059,71 @@ private:
     SDL_Surface* surface;
     SDL_Surface* windowSurface;
     SDL_Texture* texture;
+    SDL_Texture* png_texture;
+    SDL_Rect png_rect;
     GBC_Enum flags;
+
+    void Render_Png_Texture() const
+    {
+        if (png_texture == nullptr) {
+            return;
+        }
+
+        SDL_Rect draw_rect = png_rect;
+
+        if (CurrentResolutionMode == MODE_ORIGINAL_RES) {
+            if (StretchOriginalResolution) {
+                const auto scale_x = static_cast<float>(render_dst.w) / DefaultWidth;
+                const auto scale_y = static_cast<float>(render_dst.h) / DefaultHeight;
+
+                draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
+                draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
+                draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
+                draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
+            } else {
+                draw_rect.x = static_cast<int>(
+                    static_cast<float>(png_rect.x)
+                    + (static_cast<float>(render_dst.x) - DefaultWidth / 2.0f)
+                );
+                draw_rect.y = static_cast<int>(
+                    static_cast<float>(png_rect.y)
+                    + (static_cast<float>(render_dst.y) - DefaultHeight / 2.0f)
+                );
+            }
+        } else {
+            int game_w, game_h;
+            const auto res_mode = Get_Current_Resolution_Mode();
+
+            if (res_mode == MODE_HIGH_RES) {
+                game_w = Settings.Video.Width;
+                game_h = Settings.Video.Height;
+            } else if (res_mode == MODE_DEFAULT) {
+                game_w = DefaultWidth;
+                game_h = DefaultHeight;
+            } else {
+                game_w = DefaultDosWidth;
+                game_h = DefaultDosHeight;
+            }
+
+            if (StretchOriginalResolution) {
+                const auto scale_x = static_cast<float>(render_dst.w) / static_cast<float>(game_w);
+                const auto scale_y = static_cast<float>(render_dst.h) / static_cast<float>(game_h);
+
+                draw_rect.x = static_cast<int>(static_cast<float>(png_rect.x) * scale_x);
+                draw_rect.y = static_cast<int>(static_cast<float>(png_rect.y) * scale_y);
+                draw_rect.w = static_cast<int>(static_cast<float>(png_rect.w) * scale_x);
+                draw_rect.h = static_cast<int>(static_cast<float>(png_rect.h) * scale_y);
+            } else {
+                const auto offset_x = render_dst.x + (render_dst.w - game_w) / 2;
+                const auto offset_y = render_dst.y + (render_dst.h - game_h) / 2;
+
+                draw_rect.x = png_rect.x + offset_x;
+                draw_rect.y = png_rect.y + offset_y;
+            }
+        }
+
+        SDL_RenderCopy(renderer, png_texture, nullptr, &draw_rect);
+    }
 };
 
 void Video_Render_Frame()

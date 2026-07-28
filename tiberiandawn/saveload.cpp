@@ -1314,9 +1314,9 @@ void Decode_All_Pointers_Binary()
  * HISTORY:                                                                *
  *   01/12/1995 BR : Created.                                              *
  *=========================================================================*/
-bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& housep, GameType& game_type)
+bool Get_Savefile_Info(FileEntryClass& entry)
 {
-    const auto file_name = std::format("SAVEGAME.{:03d}", id);
+    const auto file_name = std::format("SAVEGAME.{:03d}", entry.Num);
 
     const auto header = SaveGameResolver::Load_Header(
         PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name.c_str())
@@ -1326,12 +1326,33 @@ bool Get_Savefile_Info(const int& id, char* buf, unsigned& scenp, HousesType& ho
         return false;
     }
 
-    scenp = header->ScenarioID;
-    housep = header->Parse_Player_House_Type();
+    entry.Scenario = header->ScenarioID;
+    entry.House = header->Parse_Player_House_Type();
 
-    strcpy(buf, header->Description.c_str());
+    strncpy(entry.Descr, header->Description.c_str(), std::size(entry.Descr));
+    entry.Descr[std::size(entry.Descr) - 1] = '\0';
 
-    game_type = header->Parse_Game_Type();
+    entry.Game = header->Parse_Game_Type();
+
+    if (entry.Game == GAME_SKIRMISH || header->ScenarioName.has_value()) {
+        const auto house = header->Parse_Player_Acts_Like_House_Type();
+
+        // skirmish or covert-ops/bonus mission
+        entry.Summary = std::format(
+            "({}) {}",
+            Text_String(house == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I),
+            *header->ScenarioName
+        );
+    } else {
+        // campaign mission
+        entry.Summary = std::format(
+            "{} Campaign - Mission {} ({} {})",
+            Text_String(entry.House == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I),
+            entry.Scenario,
+            header->ScenarioDirection,
+            header->ScenarioVariation
+        );
+    }
 
     return true;
 }
@@ -1396,6 +1417,21 @@ bool Get_Savefile_Info_Binary(int id, char* buf, unsigned* scenp, HousesType* ho
         return (true);
     }
     return (false);
+}
+
+std::optional<std::string> Get_Save_Screenshot_Path(int id)
+{
+    const auto file_name = std::format("SAVEGAME.{:03d}", id);
+
+    const auto header = SaveGameResolver::Load_Header(
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), file_name.c_str())
+    );
+
+    if (!header.has_value()) {
+        return std::nullopt;
+    }
+
+    return header->Write_Screenshot_If_Present();
 }
 
 /***************************************************************************

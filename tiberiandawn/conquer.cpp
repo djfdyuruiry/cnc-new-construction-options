@@ -207,6 +207,20 @@ void Main_Game(int argc, char* argv[])
                 if (SpecialDialog != SDLG_NONE) {
                     Set_Video_Cursor_Clip(false);
 
+                    static const auto screenshot_path = PathsClass::Concatenate_Paths(
+                        Paths.User_Screenshot_Path(),
+                        PRE_DIALOG_SCREENSHOT_FILE_NAME
+                    );
+
+                    // take a screenshot before showing the desired dialog (used for save games)
+                    LogicPage->Take_Clipped_Screenshot(
+                        0,
+                        Map.Get_Tab_Height(),
+                        SeenBuff.Get_Width() - (Map.IsSidebarActive ? Map.SideWidth : 0),
+                        SeenBuff.Get_Height() - (Map.Get_Tab_Height()),
+                        screenshot_path.c_str()
+                    );
+
                     switch (SpecialDialog) {
                     case SDLG_SPECIAL:
                         Map.Help_Text(TXT_NONE);

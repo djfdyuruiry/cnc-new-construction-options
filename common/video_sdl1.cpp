@@ -480,6 +480,29 @@ public:
         SDL_FillRect(surface, &rectSDL, color);
     }
 
+    virtual bool Load_Png_Image(const Rect& dest_rect, const char* png_file_path)
+    {
+        // TODO: PNG support not implemented
+        return false;
+    }
+
+    virtual void Clear_Png_Image()
+    {
+        // TODO: PNG support not implemented
+    }
+
+    virtual bool Capture_Frame(const char* output_file_path)
+    {
+        // TODO: PNG support not implemented
+        return false;
+    }
+
+    virtual bool Capture_Sub_Frame(const Rect& sub_area, const char* output_file_path)
+    {
+        // TODO: PNG support not implemented
+        return false;
+    }
+
     void RenderSurface()
     {
         SDL_BlitSurface(surface, NULL, window, NULL);

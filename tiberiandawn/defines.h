@@ -3118,4 +3118,6 @@ typedef enum ProximityResult : signed char
     PR_INVALID_NOT_VISITED = 0
 } PlacementResult;
 
+#define PRE_DIALOG_SCREENSHOT_FILE_NAME ".pre-dialog.png"
+
 #endif

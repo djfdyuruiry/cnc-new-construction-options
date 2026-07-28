@@ -110,23 +110,18 @@ int LoadOptionsClass::Process(void)
     ** Dialog & button dimensions
     */
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
-    int d_dialog_w = 250 * factor;
-    int d_dialog_h = 156 * factor;
+    int d_dialog_w = 310 * factor;
+    int d_dialog_h = 190 * factor;
     int d_dialog_x = (Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()) - d_dialog_w) >> 1;
     int d_dialog_y = (Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()) - d_dialog_h) >> 1;
     int d_dialog_cx = d_dialog_x + (d_dialog_w >> 1);
     int d_txt8_h = 11 * factor;
-    int d_margin = 7 * factor;
+    int d_margin = 4 * factor;
 
-    int d_list_w = d_dialog_w - (d_margin * 2);
-    int d_list_h = 104 * factor;
+    int d_list_w = (d_dialog_w - (d_margin * 3)) / 2;
+    int d_list_h = (Style == SAVE ? 135 : 150) * factor;
     int d_list_x = d_dialog_x + d_margin;
     int d_list_y = d_dialog_y + d_margin + d_txt8_h + d_margin;
-
-    int d_edit_w = d_dialog_w - (d_margin * 2);
-    int d_edit_h = 13 * factor;
-    int d_edit_x = d_dialog_x + d_margin;
-    int d_edit_y = d_list_y + d_list_h - (30 * factor) + d_margin + d_txt8_h;
 
 #ifdef german
     int d_button_w = 50 * factor;
@@ -145,6 +140,11 @@ int LoadOptionsClass::Process(void)
     int d_cancel_h = 13 * factor;
     int d_cancel_x = d_dialog_cx + d_margin;
     int d_cancel_y = d_dialog_y + d_dialog_h - d_cancel_h - d_margin;
+
+    int d_edit_w = d_dialog_w - (d_margin * 2);
+    int d_edit_h = 13 * factor;
+    int d_edit_x = d_dialog_x + d_margin;
+    int d_edit_y = d_button_y - d_margin - d_edit_h;
 
     /*
     ** Button enumerations
@@ -174,7 +174,6 @@ int LoadOptionsClass::Process(void)
     ** Dialog variables
     */
     bool cancel = false;    // true = user cancels
-    int list_ht = d_list_h; // adjusted list box height
 
     /*
     ** Other Variables
@@ -214,7 +213,6 @@ int LoadOptionsClass::Process(void)
         btn_txt = TXT_SAVE_BUTTON;
         btn_id = BUTTON_SAVE;
         caption = TXT_SAVE_MISSION;
-        list_ht -= 30;
         break;
 
     default:
@@ -224,6 +222,26 @@ int LoadOptionsClass::Process(void)
         break;
     }
 
+    int d_screenshot_x = d_list_x + d_list_w + d_margin;
+    int d_screenshot_y = d_list_y + (8 * factor);
+    int d_screenshot_w = d_list_w - 2;
+    int d_screenshot_h = d_list_y + d_list_h - d_screenshot_y - 2;
+
+    const auto load_savegame_screenshot = [&](const std::optional<std::string>& path) {
+        if (!path.has_value()) {
+            LogicPage->Clear_Png_Image();
+            return;
+        }
+
+        LogicPage->Load_Png_Image(
+            d_screenshot_x,
+            d_screenshot_y,
+            d_screenshot_w,
+            d_screenshot_h,
+            path->c_str()
+        );
+    };
+
     TextButtonClass button(
         btn_id, btn_txt, TPF_6PT_GRAD | TPF_CENTER | TPF_NOSHADOW, d_button_x, d_button_y, d_button_w);
 
@@ -231,7 +249,7 @@ int LoadOptionsClass::Process(void)
         BUTTON_CANCEL, TXT_CANCEL, TPF_6PT_GRAD | TPF_CENTER | TPF_NOSHADOW, d_cancel_x, d_cancel_y, d_cancel_w);
 
     ListClass listbtn(
-        BUTTON_LIST, d_list_x, d_list_y, d_list_w, list_ht, TPF_6PT_GRAD | TPF_NOSHADOW, up_button, down_button);
+        BUTTON_LIST, d_list_x, d_list_y, d_list_w, d_list_h, TPF_6PT_GRAD | TPF_NOSHADOW, up_button, down_button);
 
     EditClass editbtn(BUTTON_EDIT,
                       game_descr,
@@ -268,6 +286,15 @@ int LoadOptionsClass::Process(void)
     if (Style == SAVE) {
         editbtn.Add_Tail(*commands);
         editbtn.Set_Focus();
+    }
+
+    if (
+        Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
+        && listbtn.Count() > 0
+    ) {
+        load_savegame_screenshot(
+            Get_Save_Screenshot_Path(Files[0]->Num)
+        );
     }
 
     /*
@@ -325,10 +352,21 @@ int LoadOptionsClass::Process(void)
                 Dialog_Box(d_dialog_x, d_dialog_y, d_dialog_w, d_dialog_h);
                 Draw_Caption(caption, d_dialog_x, d_dialog_y, d_dialog_w);
 
-                if (Style == SAVE) {
-                    Fancy_Text_Print(TXT_MISSION_DESCRIPTION,
-                                     d_dialog_cx,
-                                     d_edit_y - d_txt8_h,
+                // TODO: Print save game header info above screenshot
+
+                // draw border around save screenshot
+                LogicPage->Draw_Rect(
+                    d_screenshot_x - 1,
+                    d_screenshot_y - 1,
+                    d_screenshot_x + d_screenshot_w + 1,
+                    d_screenshot_y + d_screenshot_h + 1,
+                    LTGRAY
+                );
+
+                if (listbtn.Count() > 0) {
+                    Fancy_Text_Print(Files[game_idx]->Summary.c_str(),
+                                     d_screenshot_x + (d_screenshot_w / 2),
+                                     d_screenshot_y - (10 * factor),
                                      CC_GREEN,
                                      TBLACK,
                                      TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_CENTER | TPF_NOSHADOW);
@@ -451,6 +489,11 @@ int LoadOptionsClass::Process(void)
         case (BUTTON_DELETE | KN_BUTTON):
             game_idx = listbtn.Current_Index();
             game_num = Files[game_idx]->Num;
+
+            if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+                LogicPage->Clear_Png_Image();
+            }
+
             if (WWMessageBox().Process(TXT_DELETE_FILE_QUERY, TXT_YES, TXT_NO) == 0) {
                 sprintf(fname, "savegame.%03d", game_num);
                 const auto save_full_path = PathsClass::Concatenate_Paths(Paths.User_Save_Path(), fname);
@@ -462,8 +505,13 @@ int LoadOptionsClass::Process(void)
 
                 Clear_List(&listbtn);
                 Fill_List(&listbtn);
-                if (listbtn.Count() == 0) {
+
+                if (listbtn.Count() < 1) {
                     process = false;
+                } else if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+                    load_savegame_screenshot(
+                        Get_Save_Screenshot_Path(Files[0]->Num)
+                    );
                 }
             }
             display = true;
@@ -475,12 +523,26 @@ int LoadOptionsClass::Process(void)
         ** the save-game description field.
         */
         case (BUTTON_LIST | KN_BUTTON):
-            if (Style != SAVE) {
+            if (listbtn.Count() < 1) {
+                LogicPage->Clear_Png_Image();
                 break;
+            }
+
+            if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+                const auto idx = listbtn.Current_Index();
+
+                load_savegame_screenshot(
+                    Get_Save_Screenshot_Path(Files[idx]->Num)
+                );
             }
 
             if (listbtn.Count() && listbtn.Current_Index() != game_idx) {
                 game_idx = listbtn.Current_Index();
+                display = true;
+
+                if (Style != SAVE) {
+                    break;
+                }
 
                 /*
                 ** Copy the game's description, UNLESS it's the empty slot; if
@@ -525,6 +587,10 @@ int LoadOptionsClass::Process(void)
         }
 
         Frame_Limiter();
+    }
+
+    if (Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)) {
+        LogicPage->Clear_Png_Image();
     }
 
     Clear_List(&listbtn);
@@ -592,11 +658,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
     FileEntryClass* fdata; // for adding entries to 'Files'
     char descr[DESCRIP_MAX];
     char scan_path[_MAX_PATH];
-    unsigned scenario; // scenario #
-    HousesType house;  // house
     Find_File_Data* ff = nullptr;
-    int id;
-    bool found;
 
     /*
     ** Make sure the list is empty
@@ -616,43 +678,54 @@ void LoadOptionsClass::Fill_List(ListClass* list)
     /*
     ** Find all savegame files
     */
-    snprintf(scan_path, sizeof(scan_path), "%s", Paths.Concatenate_Paths(Paths.User_Save_Path(), "SAVEGAME.*").c_str());
+    snprintf(
+        scan_path,
+        sizeof(scan_path),
+        "%s",
+        PathsClass::Concatenate_Paths(Paths.User_Save_Path(), "SAVEGAME.*").c_str()
+    );
 
-    found = Find_First(scan_path, 0, &ff);
+    auto found = Find_First(scan_path, 0, &ff);
+
     while (found) {
         if (stricmp(ff->GetName(), NET_SAVE_FILE_NAME) != 0) {
+            fdata = new FileEntryClass;
+
             /*
             ** Extract the game ID from the filename
             */
-            id = Num_From_Ext(ff->GetName());
+            fdata->Num = Num_From_Ext(ff->GetName());
 
             /*
             ** get the game's info; if success, add it to the list
             */
-            auto game_type = GAME_NORMAL;
-            bool ok = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE)
-                ? Get_Savefile_Info(id, descr, scenario, house, game_type)
-                : Get_Savefile_Info_Binary(id, descr, &scenario, &house);
+            fdata->Game = GAME_NORMAL;
+            const auto json_saves_enabled = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, NEW_SAVE_GAME_FORMAT_RULE);
+            const auto ok = json_saves_enabled
+                ? Get_Savefile_Info(*fdata)
+                : Get_Savefile_Info_Binary(fdata->Num, fdata->Descr, &fdata->Scenario, &fdata->House);
 
-            fdata = new FileEntryClass;
-
-            fdata->Descr[0] = '\0';
             if (!ok) {
-                strcpy(fdata->Descr, Text_String(TXT_OLD_GAME));
-            } else {
-                if (game_type == GAME_SKIRMISH) {
-                    sprintf(fdata->Descr, "%s", "(Skirmish) "); // TODO: Locale file entry
-                } else if (house == HOUSE_BAD) {
-                    sprintf(fdata->Descr, "(%s) ", Text_String(TXT_N_O_D));
-                } else {
-                    sprintf(fdata->Descr, "(%s) ", Text_String(TXT_G_D_I));
-                }
+                strncpy(fdata->Descr, Text_String(TXT_OLD_GAME), std::size(fdata->Descr));
+                fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+            } else if (fdata->Game == GAME_SKIRMISH) {
+                const auto description = std::format("(Skirmish) {}", fdata->Descr);
+
+                strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
+                fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
+            } else if (!json_saves_enabled) {
+                // legacy prefix logic for binary saves
+                const auto description = std::format(
+                    "({}) {}",
+                    Text_String(fdata->House == HOUSE_BAD ? TXT_N_O_D : TXT_G_D_I),
+                    fdata->Descr
+                );
+
+                strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
+                fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
             }
-            strncat(fdata->Descr, descr, (sizeof(fdata->Descr) - strlen(fdata->Descr)) - 1);
+
             fdata->Valid = ok;
-            fdata->Scenario = scenario;
-            fdata->House = house;
-            fdata->Num = id;
             fdata->DateTime = ff->GetTime();
             Files.Add(fdata);
         }
@@ -679,7 +752,7 @@ void LoadOptionsClass::Fill_List(ListClass* list)
         */
         int i = 0;
         for (i = 0; i < Files.Count(); i++) {         // i = the # we're searching for
-            id = -1;                                  // mark as 'not found'
+            auto id = -1;                          // mark as 'not found'
             for (int j = 0; j < Files.Count(); j++) { // loop through all game ID's
                 if (Files[j]->Num == i) {             // if found, mark as found
                     id = j;
