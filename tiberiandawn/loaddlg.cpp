@@ -223,9 +223,9 @@ int LoadOptionsClass::Process(void)
     }
 
     int d_screenshot_x = d_list_x + d_list_w + d_margin;
-    int d_screenshot_y = d_list_y + (5 * factor);
-    int d_screenshot_w = d_list_w;
-    int d_screenshot_h = d_list_h - (10 * factor);
+    int d_screenshot_y = d_list_y + (8 * factor);
+    int d_screenshot_w = d_list_w - 2;
+    int d_screenshot_h = d_list_y + d_list_h - d_screenshot_y - 2;
 
     const auto load_savegame_screenshot = [&](const std::optional<std::string>& path) {
         if (!path.has_value()) {
@@ -712,7 +712,6 @@ void LoadOptionsClass::Fill_List(ListClass* list)
 
                 strncpy(fdata->Descr, description.c_str(), std::size(fdata->Descr));
                 fdata->Descr[std::size(fdata->Descr) - 1] = '\0';
-
             }
 
             fdata->Valid = ok;
