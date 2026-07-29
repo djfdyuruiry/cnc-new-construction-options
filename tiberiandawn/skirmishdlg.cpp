@@ -940,14 +940,14 @@ protected:
 
     void Init_Data() override
     {
-        if (MPlayerFilenum.Count() != 0) {
+        if (MPlayerFilenum.Count() > 0) {
             // select the last scenario chosen by the player (if present)
             auto first_scenario_number = -1;
             auto preferred_scenario_found = false;
 
             for (auto i = 0; i < MPlayerFilenum.Count(); i++) {
                 if (first_scenario_number == -1) {
-                    first_scenario_number = i;
+                    first_scenario_number = MPlayerFilenum[i];
                 }
 
                 if (MPlayerFilenum[i] != MPlayerScenarioNumber) {
@@ -962,7 +962,8 @@ protected:
 
             if (!preferred_scenario_found) {
                 // preferred scenario no longer present in game data, default to first scenario in the list
-                MPlayerScenarioNumber = ScenarioIdx = first_scenario_number;
+                MPlayerScenarioNumber = first_scenario_number;
+                ScenarioIdx = 0;
             }
 
             MPlayerMax = Calculate_Player_Count();
