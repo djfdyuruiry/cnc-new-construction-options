@@ -127,7 +127,6 @@ enum MapEdit1Enum
 
     POPUP_BASE_W = 100,
     POPUP_BASE_H = 16,
-    POPUP_BASE_X = 600 - POPUP_BASE_W,
     POPUP_BASE_Y = 0,
 };
 

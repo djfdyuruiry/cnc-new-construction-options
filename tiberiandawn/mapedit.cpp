@@ -258,6 +258,8 @@ void MapEditClass::One_Time(void)
     /*........................................................................
     The base percent-built slider & its label
     ........................................................................*/
+    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W;
+
     BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, POPUP_BASE_Y, POPUP_BASE_W, POPUP_BASE_H);
     BaseLabel = new TextLabelClass(
         BaseText, POPUP_BASE_X - 3, POPUP_BASE_Y, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
@@ -1382,7 +1384,7 @@ void MapEditClass::Draw_It(bool forced)
     //
     // Erase scrags at top of screen
     //
-    LogicPage->Fill_Rect(0, 0, 640, 16, BLACK);
+    LogicPage->Fill_Rect(0, 0, Try_Get_Resolution_Mode_Width().value_or(640), 16, BLACK);
 
     /*
     **	Display the total value of all Tiberium on the map.
