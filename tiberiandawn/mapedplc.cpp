@@ -102,130 +102,126 @@ int MapEditClass::Placement_Dialog(void)
     /*........................................................................
     Dialog & button dimensions
     ........................................................................*/
-    enum
-    {
-        D_DIALOG_W = 480,
-        D_DIALOG_H = 360,
-        D_DIALOG_X = ((640 - D_DIALOG_W) / 2),
-        D_DIALOG_Y = ((400 - D_DIALOG_H) / 2),
-        D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2),
+    const auto D_DIALOG_W = 480;
+    const auto D_DIALOG_H = 360;
+    const auto D_DIALOG_X = ((Try_Get_Resolution_Mode_Width().value_or(640) - D_DIALOG_W) / 2);
+    const auto D_DIALOG_Y = ((Try_Get_Resolution_Mode_Height().value_or(400) - D_DIALOG_H) / 2);
+    const auto D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);
 
-        D_TXT8_H = 22,
-        D_MARGIN = 14,
+    const auto D_TXT8_H = 22;
+    const auto D_MARGIN = 14;
 
-        D_PICTURE_W = 304, // must be divisible by 8!
-        D_PICTURE_H = 210,
-        D_PICTURE_X = D_DIALOG_X + 16, // must start on a byte boundary!
-        D_PICTURE_Y = D_DIALOG_Y + D_MARGIN + D_TXT8_H + D_MARGIN,
-        D_PICTURE_CX = D_PICTURE_X + D_PICTURE_W / 2,
+    const auto D_PICTURE_W = 304; // must be divisible by 8!
+    const auto D_PICTURE_H = 210;
+    const auto D_PICTURE_X = D_DIALOG_X + 16; // must start on a byte boundary!
+    const auto D_PICTURE_Y = D_DIALOG_Y + D_MARGIN + D_TXT8_H + D_MARGIN;
+    const auto D_PICTURE_CX = D_PICTURE_X + D_PICTURE_W / 2;
 
-        D_GDI_W = 90,
-        D_GDI_H = 18,
-        D_GDI_X = D_DIALOG_X + D_MARGIN,
-        D_GDI_Y = D_DIALOG_Y + D_MARGIN,
+    const auto D_GDI_W = 90;
+    const auto D_GDI_H = 18;
+    const auto D_GDI_X = D_DIALOG_X + D_MARGIN;
+    const auto D_GDI_Y = D_DIALOG_Y + D_MARGIN;
 
-        D_NOD_W = 90,
-        D_NOD_H = 18,
-        D_NOD_X = D_GDI_X + D_GDI_W,
-        D_NOD_Y = D_DIALOG_Y + D_MARGIN,
+    const auto D_NOD_W = 90;
+    const auto D_NOD_H = 18;
+    const auto D_NOD_X = D_GDI_X + D_GDI_W;
+    const auto D_NOD_Y = D_DIALOG_Y + D_MARGIN;
 
-        D_NEUTRAL_W = 90,
-        D_NEUTRAL_H = 18,
-        D_NEUTRAL_X = D_NOD_X + D_NOD_W,
-        D_NEUTRAL_Y = D_DIALOG_Y + D_MARGIN,
+    const auto D_NEUTRAL_W = 90;
+    const auto D_NEUTRAL_H = 18;
+    const auto D_NEUTRAL_X = D_NOD_X + D_NOD_W;
+    const auto D_NEUTRAL_Y = D_DIALOG_Y + D_MARGIN;
 
-        D_MULTI1_W = 44,
-        D_MULTI1_H = 18,
-        D_MULTI1_X = D_GDI_X,
-        D_MULTI1_Y = D_GDI_Y,
+    const auto D_MULTI1_W = 44;
+    const auto D_MULTI1_H = 18;
+    const auto D_MULTI1_X = D_GDI_X;
+    const auto D_MULTI1_Y = D_GDI_Y;
 
-        D_MULTI2_W = 44,
-        D_MULTI2_H = 18,
-        D_MULTI2_X = D_MULTI1_X + D_MULTI1_W,
-        D_MULTI2_Y = D_GDI_Y,
+    const auto D_MULTI2_W = 44;
+    const auto D_MULTI2_H = 18;
+    const auto D_MULTI2_X = D_MULTI1_X + D_MULTI1_W;
+    const auto D_MULTI2_Y = D_GDI_Y;
 
-        D_MULTI3_W = 44,
-        D_MULTI3_H = 18,
-        D_MULTI3_X = D_MULTI2_X + D_MULTI2_W,
-        D_MULTI3_Y = D_GDI_Y,
+    const auto D_MULTI3_W = 44;
+    const auto D_MULTI3_H = 18;
+    const auto D_MULTI3_X = D_MULTI2_X + D_MULTI2_W;
+    const auto D_MULTI3_Y = D_GDI_Y;
 
-        D_MULTI4_W = 44,
-        D_MULTI4_H = 18,
-        D_MULTI4_X = D_MULTI3_X + D_MULTI3_W,
-        D_MULTI4_Y = D_GDI_Y,
+    const auto D_MULTI4_W = 44;
+    const auto D_MULTI4_H = 18;
+    const auto D_MULTI4_X = D_MULTI3_X + D_MULTI3_W;
+    const auto D_MULTI4_Y = D_GDI_Y;
 
-        D_LEFT_W = 90,
-        D_LEFT_H = 18,
-        D_LEFT_X = D_PICTURE_CX - 5 - D_LEFT_W,
-        D_LEFT_Y = D_PICTURE_Y + D_PICTURE_H + D_MARGIN,
+    const auto D_LEFT_W = 90;
+    const auto D_LEFT_H = 18;
+    const auto D_LEFT_X = D_PICTURE_CX - 5 - D_LEFT_W;
+    const auto D_LEFT_Y = D_PICTURE_Y + D_PICTURE_H + D_MARGIN;
 
-        D_RIGHT_W = 90,
-        D_RIGHT_H = 18,
-        D_RIGHT_X = D_PICTURE_CX + 5,
-        D_RIGHT_Y = D_PICTURE_Y + D_PICTURE_H + D_MARGIN,
+    const auto D_RIGHT_W = 90;
+    const auto D_RIGHT_H = 18;
+    const auto D_RIGHT_X = D_PICTURE_CX + 5;
+    const auto D_RIGHT_Y = D_PICTURE_Y + D_PICTURE_H + D_MARGIN;
 
-        D_TEMPLATE_W = 140,
-        D_TEMPLATE_H = 18,
-        D_TEMPLATE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TEMPLATE_W,
-        D_TEMPLATE_Y = D_PICTURE_Y,
+    const auto D_TEMPLATE_W = 140;
+    const auto D_TEMPLATE_H = 18;
+    const auto D_TEMPLATE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TEMPLATE_W;
+    const auto D_TEMPLATE_Y = D_PICTURE_Y;
 
-        D_OVERLAY_W = 140,
-        D_OVERLAY_H = 18,
-        D_OVERLAY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_OVERLAY_W,
-        D_OVERLAY_Y = D_TEMPLATE_Y + D_TEMPLATE_H,
+    const auto D_OVERLAY_W = 140;
+    const auto D_OVERLAY_H = 18;
+    const auto D_OVERLAY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_OVERLAY_W;
+    const auto D_OVERLAY_Y = D_TEMPLATE_Y + D_TEMPLATE_H;
 
-        D_SMUDGE_W = 140,
-        D_SMUDGE_H = 18,
-        D_SMUDGE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_SMUDGE_W,
-        D_SMUDGE_Y = D_OVERLAY_Y + D_OVERLAY_H,
+    const auto D_SMUDGE_W = 140;
+    const auto D_SMUDGE_H = 18;
+    const auto D_SMUDGE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_SMUDGE_W;
+    const auto D_SMUDGE_Y = D_OVERLAY_Y + D_OVERLAY_H;
 
-        D_TERRAIN_W = 140,
-        D_TERRAIN_H = 18,
-        D_TERRAIN_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TERRAIN_W,
-        D_TERRAIN_Y = D_SMUDGE_Y + D_SMUDGE_H,
+    const auto D_TERRAIN_W = 140;
+    const auto D_TERRAIN_H = 18;
+    const auto D_TERRAIN_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TERRAIN_W;
+    const auto D_TERRAIN_Y = D_SMUDGE_Y + D_SMUDGE_H;
 
-        D_UNIT_W = 140,
-        D_UNIT_H = 18,
-        D_UNIT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_UNIT_W,
-        D_UNIT_Y = D_TERRAIN_Y + D_TERRAIN_H,
+    const auto D_UNIT_W = 140;
+    const auto D_UNIT_H = 18;
+    const auto D_UNIT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_UNIT_W;
+    const auto D_UNIT_Y = D_TERRAIN_Y + D_TERRAIN_H;
 
-        D_INFANTRY_W = 140,
-        D_INFANTRY_H = 18,
-        D_INFANTRY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_INFANTRY_W,
-        D_INFANTRY_Y = D_UNIT_Y + D_UNIT_H,
+    const auto D_INFANTRY_W = 140;
+    const auto D_INFANTRY_H = 18;
+    const auto D_INFANTRY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_INFANTRY_W;
+    const auto D_INFANTRY_Y = D_UNIT_Y + D_UNIT_H;
 
-        D_AIRCRAFT_W = 140,
-        D_AIRCRAFT_H = 18,
-        D_AIRCRAFT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_AIRCRAFT_W,
-        D_AIRCRAFT_Y = D_INFANTRY_Y + D_INFANTRY_H,
+    const auto D_AIRCRAFT_W = 140;
+    const auto D_AIRCRAFT_H = 18;
+    const auto D_AIRCRAFT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_AIRCRAFT_W;
+    const auto D_AIRCRAFT_Y = D_INFANTRY_Y + D_INFANTRY_H;
 
-        D_BUILDING_W = 140,
-        D_BUILDING_H = 18,
-        D_BUILDING_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_BUILDING_W,
-        D_BUILDING_Y = D_AIRCRAFT_Y + D_AIRCRAFT_H,
+    const auto D_BUILDING_W = 140;
+    const auto D_BUILDING_H = 18;
+    const auto D_BUILDING_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_BUILDING_W;
+    const auto D_BUILDING_Y = D_AIRCRAFT_Y + D_AIRCRAFT_H;
 
-        D_OK_W = 90,
-        D_OK_H = 18,
-        D_OK_X = D_PICTURE_CX - D_OK_W - 5,
-        D_OK_Y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - D_MARGIN,
+    const auto D_OK_W = 90;
+    const auto D_OK_H = 18;
+    const auto D_OK_X = D_PICTURE_CX - D_OK_W - 5;
+    const auto D_OK_Y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - D_MARGIN;
 
-        D_CANCEL_W = 90,
-        D_CANCEL_H = 18,
-        D_CANCEL_X = D_PICTURE_CX + 5,
-        D_CANCEL_Y = D_DIALOG_Y + D_DIALOG_H - D_CANCEL_H - D_MARGIN,
+    const auto D_CANCEL_W = 90;
+    const auto D_CANCEL_H = 18;
+    const auto D_CANCEL_X = D_PICTURE_CX + 5;
+    const auto D_CANCEL_Y = D_DIALOG_Y + D_DIALOG_H - D_CANCEL_H - D_MARGIN;
 
-    };
     /*........................................................................
     Grid Dimensions
     ........................................................................*/
-    enum
-    {
-        GRIDSIZE = 10,
-        GRIDBLOCK_W = 6,
-        GRIDBLOCK_H = 6,
-        D_GRID_X = D_DIALOG_X + D_DIALOG_W - (GRIDSIZE * GRIDBLOCK_W) - D_MARGIN,
-        D_GRID_Y = D_DIALOG_Y + D_DIALOG_H - (GRIDSIZE * GRIDBLOCK_H) - D_MARGIN,
-    };
+
+    const auto GRIDSIZE = 10;
+    const auto GRIDBLOCK_W = 6;
+    const auto GRIDBLOCK_H = 6;
+    const auto D_GRID_X = D_DIALOG_X + D_DIALOG_W - (GRIDSIZE * GRIDBLOCK_W) - D_MARGIN;
+    const auto D_GRID_Y = D_DIALOG_Y + D_DIALOG_H - (GRIDSIZE * GRIDBLOCK_H) - D_MARGIN;
+
     /*........................................................................
     Button enumerations:
     ........................................................................*/
