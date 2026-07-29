@@ -152,7 +152,15 @@ void MapEditClass::One_Time(void)
     ........................................................................*/
     // MapArea = new ControlClass(MAP_AREA,0,8,312,192, GadgetClass::LEFTPRESS |
     // GadgetClass::LEFTRELEASE, false);
-    MapArea = new ControlClass(MAP_AREA, 0, 16, 624, 384, GadgetClass::LEFTPRESS | GadgetClass::LEFTRELEASE, false);
+    MapArea = new ControlClass(
+        MAP_AREA,
+        0,
+        16,
+        SeenBuff.Get_Width(),
+        SeenBuff.Get_Height() - 16,
+        GadgetClass::LEFTPRESS | GadgetClass::LEFTRELEASE,
+        false
+    );
 
     /*........................................................................
     House buttons
