@@ -116,7 +116,7 @@ ToggleClass* SidebarClass::Upgrade = NULL;
 ToggleClass* SidebarClass::Zoom = NULL;
 ShapeButtonClass SidebarClass::StripClass::UpButton[COLUMNS];
 ShapeButtonClass SidebarClass::StripClass::DownButton[COLUMNS];
-SidebarClass::StripClass::SelectClass SidebarClass::StripClass::SelectButton[COLUMNS][MAX_VISIBLE];
+std::vector<SidebarClass::StripClass::SelectClass> SidebarClass::StripClass::SelectButton[COLUMNS];
 
 /*
 ** Shape data pointers
@@ -179,12 +179,21 @@ void SidebarClass::One_Time(const bool on_save_load)
     ** variable resolutions.
     */
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    const float icon_button_height = static_cast<float>(StripClass::OBJECT_HEIGHT) * static_cast<float>(factor);
+
     SideBarWidth = SIDEBARWIDTH * factor;
     SideX = SeenBuff.Get_Width() - SideBarWidth;
     SideY = Map.RadY + Map.RadHeight + 1;
     SideWidth = SeenBuff.Get_Width() - SideX;
     SideHeight = SeenBuff.Get_Height() - SideY;
-    MaxVisible = 4;
+
+    auto constexpr hi_res_button_height = 27;
+
+    // dynamically determine visible icon buttons for current resolution (hi-res) OR hard coded default
+    MaxVisible = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
+        ? static_cast<int>(std::floor(static_cast<float>(SideHeight - hi_res_button_height) / icon_button_height))
+        : DefaultMaxVisible;
+
     ButtonHeight = 9 * factor;
     TopHeight = ButtonHeight + (4 * factor);
 
@@ -781,13 +790,8 @@ void SidebarClass::Draw_It(bool complete)
         IsToRedraw = false;
 
         if (LogicPage->Lock()) {
-            /*
-            **	Draw the outline box around the sidebar buttons.
-            */
-            // CC_Draw_Shape(SidebarShape1, (int)complete, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
-            // CC_Draw_Shape(SidebarShape2, (int)complete, SideX, 158+118, WINDOW_MAIN, SHAPE_WIN_REL);
-
             if (Get_Resolution_Factor() == 0) {
+                // DOS rendering logic
                 if (complete) {
                     LogicPage->Fill_Rect(
                         SideX + Map.PowWidth, SideY, SideX + SideWidth - 1, SideY + SideHeight - 1, LTGREY);
@@ -812,32 +816,53 @@ void SidebarClass::Draw_It(bool complete)
                          BOXSTYLE_RAISED,
                          false);
             } else {
+                // C&C95 and hi-res rendering logic
                 LogicPage->Draw_Line(SideX, 157, SeenBuff.Get_Width() - 1, 157, 0);
                 CC_Draw_Shape(SidebarShape1, 0, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
-                CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
 
+                // if displaying the default number of strip icons, render the original frame graphics for strips
+                const auto use_default_strip_graphics = MaxVisible == DefaultMaxVisible;
+
+                if (use_default_strip_graphics) {
+                    CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
+                }
+
+                // hi-res renders sidebar controls outside original graphics area, use a texture to fill blank areas
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                     static constexpr auto power_width = 20;
+                    static constexpr auto side_shape1_height = 118;
+                    static constexpr auto side_shape2_height = 124;
 
-                    // resolution is larger than standard height, so fill in the blank bottom space with a texture
-                    InGameFillTexture.Draw_Rectangle(
-                        *LogicPage,
-                        SideX + power_width,
-                        GBUFF_INIT_HEIGHT,
-                        SideBarWidth - power_width,
-                        SeenBuff.Get_Width() - GBUFF_INIT_HEIGHT
-                    );
+                    const auto blank_space_y = use_default_strip_graphics
+                        ? SideY + side_shape1_height + side_shape2_height
+                        : SideY + side_shape1_height;
+
+                    if (complete) {
+                        // fill in space behind build strips (if we aren't using the default graphics) and below strips
+                        InGameFillTexture.Draw_Rectangle(
+                            *LogicPage,
+                            SideX + power_width,
+                            blank_space_y,
+                            SideBarWidth - power_width,
+                            SeenBuff.Get_Height() - (blank_space_y)
+                        );
+                    } else if (!use_default_strip_graphics) {
+                        // if we aren't using the default graphics, fill in the space between strips to clear any help
+                        // text (shown when user hovers over a build icon in the right column)
+                        static constexpr auto strip_gap_width = 6;
+
+                        const auto blank_space_x = SideX + power_width + (StripClass::OBJECT_WIDTH * 2);
+
+                        InGameFillTexture.Draw_Rectangle(
+                            *LogicPage,
+                            blank_space_x,
+                            blank_space_y,
+                            strip_gap_width,
+                            SeenBuff.Get_Height() - (blank_space_y)
+                        );
+                    }
                 }
             }
-
-            //  Repair.Draw_Me(true);
-            //  Upgrade.Draw_Me(true);
-            //  Zoom.Draw_Me(true);
-            //	} else {                                                                                                        \
-    //		if (IsToRedraw || complete) {                                                                                  \
-    //			LogicPage->Fill_Rect(TacPixelX + Lepton_To_Pixel(TacLeptonWidth), SIDE_Y, 319, SIDE_Y+TOP_HEIGHT,             \
-    //BLACK);                                                                                                          \
-    //		}
 
             LogicPage->Unlock();
         }
@@ -1168,10 +1193,13 @@ SidebarClass::StripClass::StripClass(InitClass const&)
  * HISTORY:                                                                                    *
  *   12/31/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::StripClass::One_Time(int, const bool on_save_load)
+void SidebarClass::StripClass::One_Time(int id, const bool on_save_load)
 {
     static const char* _file[3] = {"ION", "ATOM", "BOMB"};
     int factor = Get_Resolution_Factor();
+
+    MaxVisibleIcons = Map.MaxVisible;           // Number of object slots visible at any one time.
+    SelectButton[id] = std::vector<SelectClass>(MaxVisibleIcons);
 
     ObjectWidth = OBJECT_WIDTH << factor;
     ObjectHeight = OBJECT_HEIGHT << factor;
@@ -1180,6 +1208,17 @@ void SidebarClass::StripClass::One_Time(int, const bool on_save_load)
     ButtonSpacingOffset = (StripWidth - ((BUTTON_WIDTH << factor) << 1)) / 3;
 
     if (on_save_load) {
+        // check if rendering save data would leave a gap between last icon and the end of the strip (hi-res only)
+        if (MaxVisibleIcons > DefaultMaxVisible) {
+            const auto visible_icon_count = BuildableCount - TopIndex;
+            const auto blank_icon_count = MaxVisibleIcons - visible_icon_count;
+
+            // if blank icons would be rendered, adjust TopIndex up to fix this
+            if (blank_icon_count > 0) {
+                TopIndex = max(TopIndex - blank_icon_count, 0); // ensure TopIndex adjust result is legal
+            }
+        }
+
         return;
     }
 
@@ -1277,18 +1316,18 @@ void SidebarClass::StripClass::Init_IO(int id)
     UpButton[ID].IsSticky = true;
     UpButton[ID].ID = BUTTON_UP + id;
     UpButton[ID].X = X + ButtonSpacingOffset + 1;
-    UpButton[ID].Y = Y + MAX_VISIBLE * ObjectHeight - 1;
+    UpButton[ID].Y = Y + MaxVisibleIcons * ObjectHeight - 1;
 
     UpButton[ID].Set_Shape(Hires_Retrieve("STRIPUP.SHP"));
 
     DownButton[ID].IsSticky = true;
     DownButton[ID].ID = BUTTON_DOWN + id;
     DownButton[ID].X = UpButton[ID].X + UpButton[ID].Width + ButtonSpacingOffset - 2;
-    DownButton[ID].Y = Y + MAX_VISIBLE * ObjectHeight - 1;
+    DownButton[ID].Y = Y + MaxVisibleIcons * ObjectHeight - 1;
 
     DownButton[ID].Set_Shape(Hires_Retrieve("STRIPDN.SHP"));
 
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectClass& g = SelectButton[ID][index];
         g.ID = BUTTON_SELECT;
         g.X = X;
@@ -1380,7 +1419,7 @@ void SidebarClass::StripClass::Activate(void)
     DownButton[ID].Zap();
     Map.Add_A_Button(DownButton[ID]);
 
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectButton[ID][index].Zap();
         Map.Add_A_Button(SelectButton[ID][index]);
     }
@@ -1405,7 +1444,7 @@ void SidebarClass::StripClass::Deactivate(void)
 {
     Map.Remove_A_Button(UpButton[ID]);
     Map.Remove_A_Button(DownButton[ID]);
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         Map.Remove_A_Button(SelectButton[ID][index]);
     }
 }
@@ -1549,7 +1588,7 @@ bool SidebarClass::StripClass::Scroll(bool up)
         Scroller++;
     }
 #ifdef NEVER
-    if (BuildableCount <= MAX_VISIBLE)
+    if (BuildableCount <= MaxVisibleIcons)
         return (false);
 
     /*
@@ -1564,7 +1603,7 @@ bool SidebarClass::StripClass::Scroll(bool up)
         TopIndex--;
         Slid = 0;
     } else {
-        if (TopIndex + MAX_VISIBLE >= BuildableCount)
+        if (TopIndex + MaxVisibleIcons >= BuildableCount)
             return (false);
 
         Slid = ObjectHeight;
@@ -1640,7 +1679,7 @@ bool SidebarClass::StripClass::AI(KeyNumType& input, int, int)
     **	logic handler. This might result in up or down scrolling.
     */
     if (!IsScrolling && Scroller) {
-        if (BuildableCount <= MAX_VISIBLE) {
+        if (BuildableCount <= MaxVisibleIcons) {
             Scroller = 0;
         } else {
 
@@ -1661,7 +1700,7 @@ bool SidebarClass::StripClass::AI(KeyNumType& input, int, int)
                 }
 
             } else {
-                if (TopIndex + MAX_VISIBLE >= BuildableCount) {
+                if (TopIndex + MaxVisibleIcons >= BuildableCount) {
                     Scroller = 0;
                 } else {
                     Scroller--;
@@ -1796,14 +1835,26 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         }
 
         /*
-        **	Fills the background to the side strip. We shouldnt need to do this if the strip
+        **	Fills the background to the side strip. We shouldn't need to do this if the strip
         ** has a full complement of icons.
         */
         /*
         ** New sidebar needs to be drawn not filled
         */
-        if (factor > 0 && BuildableCount < MAX_VISIBLE) {
-            CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+        if (factor > 0 && BuildableCount < MaxVisibleIcons) {
+            if (MaxVisibleIcons == DefaultMaxVisible) {
+                // static side strip
+                CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+            } else {
+                // dynamically rendered strip background
+                auto constexpr icon_button_height = OBJECT_HEIGHT * 2;
+                auto logos_y = Y - 1;
+
+                for (auto i = 0; i < MaxVisibleIcons - 3; i++) {
+                    CC_Draw_Shape(LogoShapes, ID, X + 3, logos_y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    logos_y += icon_button_height;
+                }
+            }
         }
 
         /*
@@ -1816,7 +1867,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         **	Loop through all the buildable objects that are visible in the strip and render
         **	them. Their Y offset may be adjusted if the strip is in the process of scrolling.
         */
-        for (int i = 0; i < MAX_VISIBLE + (IsScrolling ? 1 : 0); i++) {
+        for (int i = 0; i < MaxVisibleIcons + (IsScrolling ? 1 : 0); i++) {
             bool production;
             bool completed;
             int stage;

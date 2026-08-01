@@ -48,6 +48,8 @@ class InitClass
 class SidebarClass : public PowerClass
 {
 public:
+    static auto constexpr DefaultMaxVisible = 4;
+
     /*
     **	These constants are used to control the sidebar rendering. They are instantiated
     **	as enumerations since C++ cannot use "const" in this context.
@@ -153,6 +155,8 @@ public:
     */
     class StripClass : public StageClass
     {
+        int MaxVisibleIcons;
+
         class SelectClass : public ControlClass
         {
         public:
@@ -218,13 +222,10 @@ public:
             OBJECT_HEIGHT = 24,        // Pixel height of each buildable object.
             OBJECT_WIDTH = 32,         // Pixel width of each buildable object.
             STRIP_WIDTH = 35,          // Width of strip (not counting border lines).
-            MAX_VISIBLE = 4,           // Number of object slots visible at any one time.
             SCROLL_RATE = 8,           // The pixel jump while scrolling (larger is faster).
             BUTTON_SPACING_OFFSET = 4, // spacing info for buttons
             UP_X_OFFSET = 2,           // Scroll up arrow coordinates.
-            UP_Y_OFFSET = MAX_VISIBLE * OBJECT_HEIGHT + 1,
             DOWN_X_OFFSET = 18, // Scroll down arrow coordinates.
-            DOWN_Y_OFFSET = MAX_VISIBLE * OBJECT_HEIGHT + 1,
             BUTTON_WIDTH = 16,  // Width of the mini-scroll button.
             BUTTON_HEIGHT = 12, // Height of the mini-scroll button.
             // LEFT_EDGE_OFFSET=2,		// Offset from left edge for building shapes.
@@ -361,7 +362,7 @@ public:
 
         static ShapeButtonClass UpButton[COLUMNS];
         static ShapeButtonClass DownButton[COLUMNS];
-        static SelectClass SelectButton[COLUMNS][MAX_VISIBLE];
+        static std::vector<SelectClass> SelectButton[COLUMNS];
 
         /*
         **	This points to the shapes that are used for the clock overlay. This displays
