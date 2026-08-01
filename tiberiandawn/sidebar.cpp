@@ -1216,6 +1216,17 @@ void SidebarClass::StripClass::One_Time(int id, const bool on_save_load)
     ButtonSpacingOffset = (StripWidth - ((BUTTON_WIDTH << factor) << 1)) / 3;
 
     if (on_save_load) {
+        // check if rendering save data would leave a gap between last icon and the end of the strip (hi-res only)
+        if (MAX_VISIBLE > 4) {
+            const auto visible_icon_count = BuildableCount - TopIndex;
+            const auto blank_icon_count = MAX_VISIBLE - visible_icon_count;
+
+            // if blank icons would be rendered, adjust TopIndex up to fix this
+            if (blank_icon_count > 0) {
+                TopIndex = max(TopIndex - blank_icon_count, 0); // ensure TopIndex adjust result is legal
+            }
+        }
+
         return;
     }
 
