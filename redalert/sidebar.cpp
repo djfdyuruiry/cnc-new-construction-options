@@ -108,7 +108,7 @@ ShapeButtonClass SidebarClass::Upgrade;
 ShapeButtonClass SidebarClass::Zoom;
 ShapeButtonClass SidebarClass::StripClass::UpButton[COLUMNS];
 ShapeButtonClass SidebarClass::StripClass::DownButton[COLUMNS];
-SidebarClass::StripClass::SelectClass SidebarClass::StripClass::SelectButton[COLUMNS][MAX_VISIBLE];
+std::vector<SidebarClass::StripClass::SelectClass> SidebarClass::StripClass::SelectButton[COLUMNS];
 
 /*
 ** Shape data pointers
@@ -147,7 +147,7 @@ SidebarClass::SidebarClass(void)
     WindowList[WINDOW_SIDEBAR][WINDOWX] = RESFACTOR == 1 ? (SIDE_X + 8) : SeenBuff.Get_Width() - (320 - (SIDE_X + 8));
     WindowList[WINDOW_SIDEBAR][WINDOWY] = SIDE_Y + 1 + TOP_HEIGHT;
     WindowList[WINDOW_SIDEBAR][WINDOWWIDTH] = SIDE_WIDTH;
-    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT;
+    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = DefaultMaxVisible * StripClass::OBJECT_HEIGHT;
     //	WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT-1;
 
     /*
@@ -213,6 +213,16 @@ void SidebarClass::One_Time(const bool on_save)
 
     PowerClass::One_Time(on_save);
 
+    const auto side_height = SeenBuff.Get_Height() - (SIDE_Y * RESFACTOR);
+    const auto icon_button_height = static_cast<float>(StripClass::OBJECT_HEIGHT) * static_cast<float>(RESFACTOR);
+
+    auto constexpr hi_res_button_height = 27;
+
+    // dynamically determine visible icon buttons for current resolution (hi-res) OR hard coded default
+    MaxVisible = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
+        ? static_cast<int>(std::floor(static_cast<float>(side_height - hi_res_button_height) / icon_button_height))
+        : DefaultMaxVisible;
+
     /*
     **	This sets up the clipping window. This window is used by the shape drawing
     **	code so that as the sidebar buildable buttons scroll, they get properly
@@ -221,7 +231,7 @@ void SidebarClass::One_Time(const bool on_save)
     WindowList[WINDOW_SIDEBAR][WINDOWX] = RESFACTOR == 1 ? ((SIDE_X + 8)) : SeenBuff.Get_Width() - (640 - ((SIDE_X + 8) * 2));
     WindowList[WINDOW_SIDEBAR][WINDOWY] = (SIDE_Y + 1 + TOP_HEIGHT) * RESFACTOR;
     WindowList[WINDOW_SIDEBAR][WINDOWWIDTH] = (SIDE_WIDTH)*RESFACTOR;
-    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT) * RESFACTOR;
+    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (MaxVisible * StripClass::OBJECT_HEIGHT) * RESFACTOR;
     //	WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT-1) * RESFACTOR;
 
     /*
@@ -238,12 +248,12 @@ void SidebarClass::One_Time(const bool on_save)
     Column[1].X = RESFACTOR == 1 ? COLUMN_TWO_X : SeenBuff.Get_Width() - (640 - (COLUMN_TWO_X * 2));
     Column[1].Y = COLUMN_TWO_Y * RESFACTOR;
 
+    Column[0].One_Time(0, on_save);
+    Column[1].One_Time(1, on_save);
+
     if (on_save) {
         return;
     }
-
-    Column[0].One_Time(0);
-    Column[1].One_Time(1);
 
     /*
     **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
@@ -1159,8 +1169,28 @@ SidebarClass::StripClass::StripClass(InitClass const&)
  * HISTORY:                                                                                    *
  *   12/31/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::StripClass::One_Time(int)
+void SidebarClass::StripClass::One_Time(int id, bool on_save)
 {
+    MaxVisibleIcons = Map.MaxVisible;
+    UpYOffset = MaxVisibleIcons * static_cast<int>(OBJECT_HEIGHT) + 1;
+    DownYOffset = UpYOffset;
+
+    SelectButton[id] = std::vector<SelectClass>(MaxVisibleIcons);
+
+    if (on_save) {
+        if (MaxVisibleIcons > DefaultMaxVisible) {
+            const auto visible_icon_count = BuildableCount - TopIndex;
+            const auto blank_icon_count = MaxVisibleIcons - visible_icon_count;
+
+            // if blank icons would be rendered, adjust TopIndex up to fix this
+            if (blank_icon_count > 0) {
+                TopIndex = max(TopIndex - blank_icon_count, 0); // ensure TopIndex adjust result is legal
+            }
+        }
+
+        return;
+    }
+
     /*
     ** Sidebar is player team specific in Hires
     */
@@ -1253,7 +1283,7 @@ void SidebarClass::StripClass::Init_IO(int id)
     UpButton[ID].IsSticky = true;
     UpButton[ID].ID = BUTTON_UP + id;
     UpButton[ID].X = X + (UP_X_OFFSET * RESFACTOR);
-    UpButton[ID].Y = Y + (UP_Y_OFFSET * RESFACTOR);
+    UpButton[ID].Y = Y + (UpYOffset * RESFACTOR);
 
 #if (FRENCH)
     UpButton[ID].Set_Shape(MFCD::Retrieve("STRIPUP.SHP"));
@@ -1264,7 +1294,7 @@ void SidebarClass::StripClass::Init_IO(int id)
     DownButton[ID].IsSticky = true;
     DownButton[ID].ID = BUTTON_DOWN + id;
     DownButton[ID].X = X + (DOWN_X_OFFSET * RESFACTOR);
-    DownButton[ID].Y = Y + (DOWN_Y_OFFSET * RESFACTOR);
+    DownButton[ID].Y = Y + (DownYOffset * RESFACTOR);
 
     /*
     ** Buttons are in a slightly different position in the new sidebar
@@ -1274,7 +1304,7 @@ void SidebarClass::StripClass::Init_IO(int id)
 
     DownButton[ID].Set_Shape(MFCD::Retrieve("STRIPDN.SHP"));
 
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectClass& g = SelectButton[ID][index];
         g.ID = BUTTON_SELECT;
         g.X = X;
@@ -1381,7 +1411,7 @@ void SidebarClass::StripClass::Activate(void)
     DownButton[ID].Zap();
     Map.Add_A_Button(DownButton[ID]);
 
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectButton[ID][index].Zap();
         Map.Add_A_Button(SelectButton[ID][index]);
     }
@@ -1406,7 +1436,7 @@ void SidebarClass::StripClass::Deactivate(void)
 {
     Map.Remove_A_Button(UpButton[ID]);
     Map.Remove_A_Button(DownButton[ID]);
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         Map.Remove_A_Button(SelectButton[ID][index]);
     }
 }
@@ -1475,7 +1505,7 @@ bool SidebarClass::StripClass::Scroll(bool up)
             return (false);
         Scroller--;
     } else {
-        if (TopIndex + MAX_VISIBLE >= BuildableCount)
+        if (TopIndex + MaxVisibleIcons >= BuildableCount)
             return (false);
         Scroller++;
     }
@@ -1551,7 +1581,7 @@ bool SidebarClass::StripClass::AI(KeyNumType& input, int, int)
     **	logic handler. This might result in up or down scrolling.
     */
     if (!IsScrolling && Scroller) {
-        if (BuildableCount <= MAX_VISIBLE) {
+        if (BuildableCount <= MaxVisibleIcons) {
             Scroller = 0;
         } else {
 
@@ -1572,7 +1602,7 @@ bool SidebarClass::StripClass::AI(KeyNumType& input, int, int)
                 }
 
             } else {
-                if (TopIndex + MAX_VISIBLE >= BuildableCount) {
+                if (TopIndex + MaxVisibleIcons >= BuildableCount) {
                     Scroller = 0;
                 } else {
                     Scroller--;
@@ -1716,7 +1746,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         /*
         ** New sidebar needs to be drawn not filled
         */
-        if (BuildableCount < MAX_VISIBLE) {
+        if (BuildableCount < MaxVisibleIcons) {
             CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), Y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
         }
 
@@ -1730,7 +1760,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         **	Loop through all the buildable objects that are visible in the strip and render
         **	them. Their Y offset may be adjusted if the strip is in the process of scrolling.
         */
-        for (int i = 0; i < MAX_VISIBLE + (IsScrolling ? 1 : 0); i++) {
+        for (int i = 0; i < MaxVisibleIcons + (IsScrolling ? 1 : 0); i++) {
             bool production;
             bool completed;
             int stage;
