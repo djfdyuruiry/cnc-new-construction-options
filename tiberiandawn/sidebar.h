@@ -59,7 +59,6 @@ public:
     int SideHeight;       // height of the sidebar
     int TopHeight;        // height of top of sidebar
     int MaxVisible;       // max production icons visible
-    int StripHeight;      // height of build icons (includes up/down buttons)
     int ButtonOneWidth;   // Button width.
     int ButtonTwoWidth;   // Button width.
     int ButtonThreeWidth; // Button width.

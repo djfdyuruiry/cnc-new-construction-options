@@ -194,11 +194,6 @@ void SidebarClass::One_Time(const bool on_save_load)
         ? static_cast<int>(std::floor(static_cast<float>(SideHeight - hi_res_button_height) / icon_button_height))
         : 4;
 
-    // used to determine space left after icon strip for texture fill (hi-res only)
-    StripHeight = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
-        ? (MaxVisible * static_cast<int>(icon_button_height)) + (hi_res_button_height * 2)
-        : SideHeight;
-
     ButtonHeight = 9 * factor;
     TopHeight = ButtonHeight + (4 * factor);
 
@@ -828,19 +823,40 @@ void SidebarClass::Draw_It(bool complete)
             } else {
                 LogicPage->Draw_Line(SideX, 157, SeenBuff.Get_Width() - 1, 157, 0);
                 CC_Draw_Shape(SidebarShape1, 0, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
-                CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
+
+                if (MaxVisible == 4) {
+                    CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
+                }
 
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                     static constexpr auto power_width = 20;
+                    static constexpr auto side1_shape_height = 118;
 
-                    // resolution is larger than standard height, so fill in the blank bottom space with a texture
-                    InGameFillTexture.Draw_Rectangle(
-                        *LogicPage,
-                        SideX + power_width,
-                        SideY + StripHeight,
-                        SideBarWidth - power_width,
-                        SideHeight - StripHeight
-                    );
+                    const auto blank_space_y = SideY + side1_shape_height;
+
+                    if (complete) {
+                        // resolution is larger than standard height, so texture fill blank space around strips
+                        InGameFillTexture.Draw_Rectangle(
+                            *LogicPage,
+                            SideX + power_width,
+                            blank_space_y,
+                            SideBarWidth - power_width,
+                            SeenBuff.Get_Height() - (blank_space_y)
+                        );
+                    } else {
+                        static constexpr auto strip_gap_width = 6;
+
+                        const auto blank_space_x = SideX + power_width + (StripClass::OBJECT_WIDTH * 2);
+
+                        // fill in the space between strips to clear any help text
+                        InGameFillTexture.Draw_Rectangle(
+                            *LogicPage,
+                            blank_space_x,
+                            blank_space_y,
+                            strip_gap_width,
+                            SeenBuff.Get_Height() - (blank_space_y)
+                        );
+                    }
                 }
             }
 
@@ -1823,12 +1839,19 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         ** New sidebar needs to be drawn not filled
         */
         if (factor > 0 && BuildableCount < MAX_VISIBLE) {
-            // draw logo shapes at bottom of strip to line up with buttons
+            if (MAX_VISIBLE == 4) {
+                // static side strip
+                CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+            } else {
+                // dynamically rendered strip background
+                auto constexpr icon_button_height = OBJECT_HEIGHT * 2;
+                auto logos_y = Y - 1;
 
-            // and uncomment below to render top of strip
-            // CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
-
-            // loop over each logo from 2nd to n-1, defining a clipping window and draw the logo shape using 2nd row
+                for (auto i = 0; i < MAX_VISIBLE - 3; i++) {
+                    CC_Draw_Shape(LogoShapes, ID, X + 3, logos_y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    logos_y += icon_button_height;
+                }
+            }
         }
 
         /*
