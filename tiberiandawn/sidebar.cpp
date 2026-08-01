@@ -116,7 +116,7 @@ ToggleClass* SidebarClass::Upgrade = NULL;
 ToggleClass* SidebarClass::Zoom = NULL;
 ShapeButtonClass SidebarClass::StripClass::UpButton[COLUMNS];
 ShapeButtonClass SidebarClass::StripClass::DownButton[COLUMNS];
-SidebarClass::StripClass::SelectClass SidebarClass::StripClass::SelectButton[COLUMNS][MAX_VISIBLE];
+std::vector<SidebarClass::StripClass::SelectClass> SidebarClass::StripClass::SelectButton[COLUMNS];
 
 /*
 ** Shape data pointers
@@ -179,12 +179,26 @@ void SidebarClass::One_Time(const bool on_save_load)
     ** variable resolutions.
     */
     int factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
+    const float icon_button_height = static_cast<float>(StripClass::OBJECT_HEIGHT) * static_cast<float>(factor);
+
     SideBarWidth = SIDEBARWIDTH * factor;
     SideX = SeenBuff.Get_Width() - SideBarWidth;
     SideY = Map.RadY + Map.RadHeight + 1;
     SideWidth = SeenBuff.Get_Width() - SideX;
     SideHeight = SeenBuff.Get_Height() - SideY;
-    MaxVisible = 4;
+
+    auto constexpr hi_res_button_height = 27;
+
+    // dynamically determine visible icon buttons for current resolution (hi-res) OR hard coded default
+    MaxVisible = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
+        ? static_cast<int>(std::floor(static_cast<float>(SideHeight - hi_res_button_height) / icon_button_height))
+        : 4;
+
+    // used to determine space left after icon strip for texture fill (hi-res only)
+    StripHeight = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
+        ? (MaxVisible * static_cast<int>(icon_button_height)) + (hi_res_button_height * 2)
+        : SideHeight;
+
     ButtonHeight = 9 * factor;
     TopHeight = ButtonHeight + (4 * factor);
 
@@ -823,9 +837,9 @@ void SidebarClass::Draw_It(bool complete)
                     InGameFillTexture.Draw_Rectangle(
                         *LogicPage,
                         SideX + power_width,
-                        GBUFF_INIT_HEIGHT,
+                        SideY + StripHeight,
                         SideBarWidth - power_width,
-                        SeenBuff.Get_Width() - GBUFF_INIT_HEIGHT
+                        SideHeight - StripHeight
                     );
                 }
             }
@@ -1168,10 +1182,16 @@ SidebarClass::StripClass::StripClass(InitClass const&)
  * HISTORY:                                                                                    *
  *   12/31/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::StripClass::One_Time(int, const bool on_save_load)
+void SidebarClass::StripClass::One_Time(int id, const bool on_save_load)
 {
     static const char* _file[3] = {"ION", "ATOM", "BOMB"};
     int factor = Get_Resolution_Factor();
+
+    MAX_VISIBLE = Map.MaxVisible;           // Number of object slots visible at any one time.
+    UP_Y_OFFSET = MAX_VISIBLE * OBJECT_HEIGHT + 1;
+    DOWN_Y_OFFSET = MAX_VISIBLE * OBJECT_HEIGHT + 1;
+
+    SelectButton[id] = std::vector<SelectClass>(MAX_VISIBLE);
 
     ObjectWidth = OBJECT_WIDTH << factor;
     ObjectHeight = OBJECT_HEIGHT << factor;
@@ -1796,14 +1816,19 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         }
 
         /*
-        **	Fills the background to the side strip. We shouldnt need to do this if the strip
+        **	Fills the background to the side strip. We shouldn't need to do this if the strip
         ** has a full complement of icons.
         */
         /*
         ** New sidebar needs to be drawn not filled
         */
         if (factor > 0 && BuildableCount < MAX_VISIBLE) {
-            CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+            // draw logo shapes at bottom of strip to line up with buttons
+
+            // and uncomment below to render top of strip
+            // CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+
+            // loop over each logo from 2nd to n-1, defining a clipping window and draw the logo shape using 2nd row
         }
 
         /*
