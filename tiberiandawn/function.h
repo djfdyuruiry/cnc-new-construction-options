@@ -1140,9 +1140,9 @@ void On_Achievement_Event(const HouseClass* player_ptr, const char* achievement_
 /* Holds the title filename. On 320x200, set to TITLE.CPS, else HTITLE.PCX. */
 extern char* TitlePicture;
 
-// texture to fill in dialogs when not in a scenario
+// dialog background texture (when not in a scenario)
 extern Texture MenuFillTexture;
-// texture to fill in dialogs when in a scenario
+// dialog background texture (when in a scenario)
 extern Texture InGameFillTexture;
 
 int Lookup_Country_Name(const ScenarioPlayerType& player, const int& index);

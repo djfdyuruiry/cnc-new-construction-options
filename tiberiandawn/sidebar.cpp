@@ -790,13 +790,8 @@ void SidebarClass::Draw_It(bool complete)
         IsToRedraw = false;
 
         if (LogicPage->Lock()) {
-            /*
-            **	Draw the outline box around the sidebar buttons.
-            */
-            // CC_Draw_Shape(SidebarShape1, (int)complete, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
-            // CC_Draw_Shape(SidebarShape2, (int)complete, SideX, 158+118, WINDOW_MAIN, SHAPE_WIN_REL);
-
             if (Get_Resolution_Factor() == 0) {
+                // DOS rendering logic
                 if (complete) {
                     LogicPage->Fill_Rect(
                         SideX + Map.PowWidth, SideY, SideX + SideWidth - 1, SideY + SideHeight - 1, LTGREY);
@@ -821,21 +816,29 @@ void SidebarClass::Draw_It(bool complete)
                          BOXSTYLE_RAISED,
                          false);
             } else {
+                // C&C95 and hi-res rendering logic
                 LogicPage->Draw_Line(SideX, 157, SeenBuff.Get_Width() - 1, 157, 0);
                 CC_Draw_Shape(SidebarShape1, 0, SideX, 158, WINDOW_MAIN, SHAPE_WIN_REL);
 
-                if (MaxVisible == DefaultMaxVisible) {
+                // if displaying the default number of strip icons, render the original frame graphics for strips
+                const auto use_default_strip_graphics = MaxVisible == DefaultMaxVisible;
+
+                if (use_default_strip_graphics) {
                     CC_Draw_Shape(SidebarShape2, 0, SideX, 158 + 118, WINDOW_MAIN, SHAPE_WIN_REL);
                 }
 
+                // hi-res renders sidebar controls outside original graphics area, use a texture to fill blank areas
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                     static constexpr auto power_width = 20;
-                    static constexpr auto side1_shape_height = 118;
+                    static constexpr auto side_shape1_height = 118;
+                    static constexpr auto side_shape2_height = 124;
 
-                    const auto blank_space_y = SideY + side1_shape_height;
+                    const auto blank_space_y = use_default_strip_graphics
+                        ? SideY + side_shape1_height + side_shape2_height
+                        : SideY + side_shape1_height;
 
                     if (complete) {
-                        // resolution is larger than standard height, so texture fill blank space around strips
+                        // fill in space behind build strips (if we aren't using the default graphics) and below strips
                         InGameFillTexture.Draw_Rectangle(
                             *LogicPage,
                             SideX + power_width,
@@ -843,12 +846,13 @@ void SidebarClass::Draw_It(bool complete)
                             SideBarWidth - power_width,
                             SeenBuff.Get_Height() - (blank_space_y)
                         );
-                    } else {
+                    } else if (!use_default_strip_graphics) {
+                        // if we aren't using the default graphics, fill in the space between strips to clear any help
+                        // text (shown when user hovers over a build icon in the right column)
                         static constexpr auto strip_gap_width = 6;
 
                         const auto blank_space_x = SideX + power_width + (StripClass::OBJECT_WIDTH * 2);
 
-                        // fill in the space between strips to clear any help text
                         InGameFillTexture.Draw_Rectangle(
                             *LogicPage,
                             blank_space_x,
@@ -859,15 +863,6 @@ void SidebarClass::Draw_It(bool complete)
                     }
                 }
             }
-
-            //  Repair.Draw_Me(true);
-            //  Upgrade.Draw_Me(true);
-            //  Zoom.Draw_Me(true);
-            //	} else {                                                                                                        \
-    //		if (IsToRedraw || complete) {                                                                                  \
-    //			LogicPage->Fill_Rect(TacPixelX + Lepton_To_Pixel(TacLeptonWidth), SIDE_Y, 319, SIDE_Y+TOP_HEIGHT,             \
-    //BLACK);                                                                                                          \
-    //		}
 
             LogicPage->Unlock();
         }
