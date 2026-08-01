@@ -48,6 +48,8 @@ class InitClass
 class SidebarClass : public PowerClass
 {
 public:
+    static auto constexpr DefaultMaxVisible = 4;
+
     /*
     **	These constants are used to control the sidebar rendering. They are instantiated
     **	as enumerations since C++ cannot use "const" in this context.
@@ -153,9 +155,7 @@ public:
     */
     class StripClass : public StageClass
     {
-        int MAX_VISIBLE;
-        int UP_Y_OFFSET;
-        int DOWN_Y_OFFSET;
+        int MaxVisibleIcons;
 
         class SelectClass : public ControlClass
         {
