@@ -108,7 +108,7 @@ ShapeButtonClass SidebarClass::Upgrade;
 ShapeButtonClass SidebarClass::Zoom;
 ShapeButtonClass SidebarClass::StripClass::UpButton[COLUMNS];
 ShapeButtonClass SidebarClass::StripClass::DownButton[COLUMNS];
-SidebarClass::StripClass::SelectClass SidebarClass::StripClass::SelectButton[COLUMNS][MAX_VISIBLE];
+std::vector<SidebarClass::StripClass::SelectClass> SidebarClass::StripClass::SelectButton[COLUMNS];
 
 /*
 ** Shape data pointers
@@ -147,7 +147,7 @@ SidebarClass::SidebarClass(void)
     WindowList[WINDOW_SIDEBAR][WINDOWX] = RESFACTOR == 1 ? (SIDE_X + 8) : SeenBuff.Get_Width() - (320 - (SIDE_X + 8));
     WindowList[WINDOW_SIDEBAR][WINDOWY] = SIDE_Y + 1 + TOP_HEIGHT;
     WindowList[WINDOW_SIDEBAR][WINDOWWIDTH] = SIDE_WIDTH;
-    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT;
+    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = DefaultMaxVisible * StripClass::OBJECT_HEIGHT;
     //	WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT-1;
 
     /*
@@ -213,6 +213,16 @@ void SidebarClass::One_Time(const bool on_save)
 
     PowerClass::One_Time(on_save);
 
+    const auto side_height = SeenBuff.Get_Height() - (SIDE_Y * RESFACTOR);
+    const auto icon_button_height = static_cast<float>(StripClass::OBJECT_HEIGHT) * static_cast<float>(RESFACTOR);
+
+    auto constexpr hi_res_button_height = 27;
+
+    // dynamically determine visible icon buttons for current resolution (hi-res) OR hard coded default
+    MaxVisible = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
+        ? static_cast<int>(std::floor(static_cast<float>(side_height - hi_res_button_height) / icon_button_height))
+        : DefaultMaxVisible;
+
     /*
     **	This sets up the clipping window. This window is used by the shape drawing
     **	code so that as the sidebar buildable buttons scroll, they get properly
@@ -221,7 +231,7 @@ void SidebarClass::One_Time(const bool on_save)
     WindowList[WINDOW_SIDEBAR][WINDOWX] = RESFACTOR == 1 ? ((SIDE_X + 8)) : SeenBuff.Get_Width() - (640 - ((SIDE_X + 8) * 2));
     WindowList[WINDOW_SIDEBAR][WINDOWY] = (SIDE_Y + 1 + TOP_HEIGHT) * RESFACTOR;
     WindowList[WINDOW_SIDEBAR][WINDOWWIDTH] = (SIDE_WIDTH)*RESFACTOR;
-    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT) * RESFACTOR;
+    WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (MaxVisible * StripClass::OBJECT_HEIGHT) * RESFACTOR;
     //	WindowList[WINDOW_SIDEBAR][WINDOWHEIGHT] = (StripClass::MAX_VISIBLE * StripClass::OBJECT_HEIGHT-1) * RESFACTOR;
 
     /*
@@ -238,12 +248,12 @@ void SidebarClass::One_Time(const bool on_save)
     Column[1].X = RESFACTOR == 1 ? COLUMN_TWO_X : SeenBuff.Get_Width() - (640 - (COLUMN_TWO_X * 2));
     Column[1].Y = COLUMN_TWO_Y * RESFACTOR;
 
+    Column[0].One_Time(0, on_save);
+    Column[1].One_Time(1, on_save);
+
     if (on_save) {
         return;
     }
-
-    Column[0].One_Time(0);
-    Column[1].One_Time(1);
 
     /*
     **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
@@ -766,29 +776,111 @@ void SidebarClass::Draw_It(bool complete)
             ** The sidebar shape is too big in 640x400 so it needs to be drawn in three chunks.
             */
             CC_Draw_Shape(SidebarShape, 0, side_x, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
-            CC_Draw_Shape(
-                SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+            CC_Draw_Shape(SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+
+            // cropped area of a strip background section that tiles cleanly (used in hi-res)
+            constexpr auto strip_background_section_height = 96;
 
             const auto bottom_shape_x = side_x;
-            const auto bottom_shape_y = (8 + 80 + 50) * RESFACTOR;
+            const auto bottom_shape_y = Get_Current_Resolution_Mode() == MODE_HIGH_RES
+                ? Column[0].Y + (MaxVisible * (StripClass::OBJECT_HEIGHT * RESFACTOR)) // dynamic strip icon count
+                : (8 + 80 + 50) * RESFACTOR; // static strip icon count
 
+            /*
+            ** In hi-res mode the sidebar has dynamic build strips that fill the screen height, so render the border
+            ** graphics for the strips using cropped versions of SidebarBottomShape and SidebarMiddleShape (to make them
+            ** tile correctly).
+            */
             if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                // ensure we avoid the power strip
+                const auto x = side_x + power_width;
+                // start from the end of the last shape that was rendered (middle shape)
+                auto y = Column[0].Y + ((StripClass::OBJECT_HEIGHT * RESFACTOR) * (DefaultMaxVisible / 2));
+
+                WindowList[WINDOW_CUSTOM][WINDOWX] = x;
+                WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = strip_background_section_height;
+
+                // tile bottom and middle sidebar shapes down the remaining strip height
+                while (y < bottom_shape_y) {
+                    // detect rendering outside strip dimensions
+                    if (y + strip_background_section_height > bottom_shape_y) {
+                        // trim overflow from height
+                        WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] =
+                            strip_background_section_height - ((y + strip_background_section_height) - bottom_shape_y);
+
+                        // nothing left to draw
+                        if (WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] <= 0) {
+                            break;
+                        }
+                    }
+
+                    WindowList[WINDOW_CUSTOM][WINDOWY] = y;
+                    CC_Draw_Shape(
+                        SidebarBottomShape,
+                        shape,
+                        -power_width,
+                        0,
+                        WINDOW_CUSTOM,
+                        SHAPE_WIN_REL
+                    );
+                    y += strip_background_section_height;
+
+                    // detect rendering outside strip dimensions
+                    if (y + strip_background_section_height > bottom_shape_y) {
+                        // trim overflow from height
+                        WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] =
+                            strip_background_section_height - ((y + strip_background_section_height) - bottom_shape_y);
+
+                        // nothing left to draw
+                        if (WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] <= 0) {
+                            break;
+                        }
+                    }
+
+                    WindowList[WINDOW_CUSTOM][WINDOWY] = y;
+                    CC_Draw_Shape(
+                        SidebarMiddleShape,
+                        shape,
+                        -power_width,
+                        -4, // crop graphics before strip icons so shape tiles correctly
+                        WINDOW_CUSTOM,
+                        SHAPE_WIN_REL
+                    );
+                    y += strip_background_section_height;
+                }
+            }
+
+            // render bottom graphics for sidebar strips
+            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                static auto constexpr button_border_height = 28;
+
                 /*
-                ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip.
+                ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip
+                ** and only show the up/down button borders.
                 */
                 WindowList[WINDOW_CUSTOM][WINDOWX] = bottom_shape_x + power_width;
                 WindowList[WINDOW_CUSTOM][WINDOWY] = bottom_shape_y;
                 WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
-                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = GBUFF_INIT_HEIGHT - WindowList[WINDOW_CUSTOM][WINDOWY];
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = button_border_height;
 
                 CC_Draw_Shape(
                     SidebarBottomShape,
                     shape,
                     -power_width,
-                    0,
+                    -strip_background_section_height,
                     WINDOW_CUSTOM,
                     SHAPE_WIN_REL
                 );
+
+                static constexpr auto seperator_height = 16;
+                auto seperator_y = bottom_shape_y + button_border_height;
+
+                // fill remaining blank sidebar space with seperator shapes
+                while (seperator_y < SeenBuff.Get_Height()) {
+                    CC_Draw_Shape(SidebarFillSeperatorShape, 0, bottom_shape_x + power_width, seperator_y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, nullptr);
+                    seperator_y += seperator_height;
+                }
             } else {
                 CC_Draw_Shape(
                     SidebarBottomShape,
@@ -798,33 +890,6 @@ void SidebarClass::Draw_It(bool complete)
                     WINDOW_MAIN,
                     SHAPE_WIN_REL
                 );
-            }
-
-            /*
-            ** In hi-res mode the sidebar won't fill the screen height, so fill the remaining height with a repeating
-            ** set of ::SidebarFillSeperatorShape followed by a background made from two ::SidebarFillShape shapes.
-            */
-            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                // ensure we avoid the power strip
-                const auto x = side_x + power_width;
-                const auto flags = SHAPE_WIN_REL | SHAPE_NORMAL;
-
-                auto y = GBUFF_INIT_HEIGHT + 1;
-
-                while (y < SeenBuff.Get_Height()) {
-                    constexpr auto seperator_height = 16;
-                    constexpr auto background_height = 192;
-
-                    // seperator graphic
-                    CC_Draw_Shape(SidebarFillSeperatorShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
-                    y += seperator_height;
-
-                    // tiled background
-                    CC_Draw_Shape(SidebarFillShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
-                    y += background_height;
-                    CC_Draw_Shape(SidebarFillShape, 2, x, y, WINDOW_MAIN, flags, nullptr);
-                    y += background_height;
-                }
             }
 
             Repair.Draw_Me(true);
@@ -1159,8 +1224,29 @@ SidebarClass::StripClass::StripClass(InitClass const&)
  * HISTORY:                                                                                    *
  *   12/31/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SidebarClass::StripClass::One_Time(int)
+void SidebarClass::StripClass::One_Time(int id, bool on_save)
 {
+    MaxVisibleIcons = Map.MaxVisible;
+    UpYOffset = MaxVisibleIcons * static_cast<int>(OBJECT_HEIGHT) + 1;
+    DownYOffset = UpYOffset;
+
+    SelectButton[id] = std::vector<SelectClass>(MaxVisibleIcons);
+
+    if (on_save) {
+        // check if rendering save data would leave a gap between last icon and the end of the strip (hi-res only)
+        if (MaxVisibleIcons > DefaultMaxVisible) {
+            const auto visible_icon_count = BuildableCount - TopIndex;
+            const auto blank_icon_count = MaxVisibleIcons - visible_icon_count;
+
+            // if blank icons would be rendered, adjust TopIndex up to fix this
+            if (blank_icon_count > 0) {
+                TopIndex = max(TopIndex - blank_icon_count, 0); // ensure TopIndex adjust result is legal
+            }
+        }
+
+        return;
+    }
+
     /*
     ** Sidebar is player team specific in Hires
     */
@@ -1253,7 +1339,7 @@ void SidebarClass::StripClass::Init_IO(int id)
     UpButton[ID].IsSticky = true;
     UpButton[ID].ID = BUTTON_UP + id;
     UpButton[ID].X = X + (UP_X_OFFSET * RESFACTOR);
-    UpButton[ID].Y = Y + (UP_Y_OFFSET * RESFACTOR);
+    UpButton[ID].Y = Y + (UpYOffset * RESFACTOR);
 
 #if (FRENCH)
     UpButton[ID].Set_Shape(MFCD::Retrieve("STRIPUP.SHP"));
@@ -1264,7 +1350,7 @@ void SidebarClass::StripClass::Init_IO(int id)
     DownButton[ID].IsSticky = true;
     DownButton[ID].ID = BUTTON_DOWN + id;
     DownButton[ID].X = X + (DOWN_X_OFFSET * RESFACTOR);
-    DownButton[ID].Y = Y + (DOWN_Y_OFFSET * RESFACTOR);
+    DownButton[ID].Y = Y + (DownYOffset * RESFACTOR);
 
     /*
     ** Buttons are in a slightly different position in the new sidebar
@@ -1274,7 +1360,7 @@ void SidebarClass::StripClass::Init_IO(int id)
 
     DownButton[ID].Set_Shape(MFCD::Retrieve("STRIPDN.SHP"));
 
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectClass& g = SelectButton[ID][index];
         g.ID = BUTTON_SELECT;
         g.X = X;
@@ -1381,7 +1467,7 @@ void SidebarClass::StripClass::Activate(void)
     DownButton[ID].Zap();
     Map.Add_A_Button(DownButton[ID]);
 
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectButton[ID][index].Zap();
         Map.Add_A_Button(SelectButton[ID][index]);
     }
@@ -1406,7 +1492,7 @@ void SidebarClass::StripClass::Deactivate(void)
 {
     Map.Remove_A_Button(UpButton[ID]);
     Map.Remove_A_Button(DownButton[ID]);
-    for (int index = 0; index < MAX_VISIBLE; index++) {
+    for (int index = 0; index < MaxVisibleIcons; index++) {
         Map.Remove_A_Button(SelectButton[ID][index]);
     }
 }
@@ -1475,7 +1561,7 @@ bool SidebarClass::StripClass::Scroll(bool up)
             return (false);
         Scroller--;
     } else {
-        if (TopIndex + MAX_VISIBLE >= BuildableCount)
+        if (TopIndex + MaxVisibleIcons >= BuildableCount)
             return (false);
         Scroller++;
     }
@@ -1551,7 +1637,7 @@ bool SidebarClass::StripClass::AI(KeyNumType& input, int, int)
     **	logic handler. This might result in up or down scrolling.
     */
     if (!IsScrolling && Scroller) {
-        if (BuildableCount <= MAX_VISIBLE) {
+        if (BuildableCount <= MaxVisibleIcons) {
             Scroller = 0;
         } else {
 
@@ -1572,7 +1658,7 @@ bool SidebarClass::StripClass::AI(KeyNumType& input, int, int)
                 }
 
             } else {
-                if (TopIndex + MAX_VISIBLE >= BuildableCount) {
+                if (TopIndex + MaxVisibleIcons >= BuildableCount) {
                     Scroller = 0;
                 } else {
                     Scroller--;
@@ -1710,14 +1796,34 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         SidebarRedraws++;
 
         /*
-        **	Fills the background to the side strip. We shouldnt need to do this if the strip
+        **	Fills the background to the side strip. We shouldn't need to do this if the strip
         ** has a full complement of icons.
         */
         /*
         ** New sidebar needs to be drawn not filled
         */
-        if (BuildableCount < MAX_VISIBLE) {
-            CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), Y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+        if (BuildableCount < MaxVisibleIcons) {
+            if (MaxVisibleIcons == DefaultMaxVisible) {
+                // static side strip
+                CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), Y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+            } else {
+                // dynamically rendered strip background
+                auto const strip_shape_height = (OBJECT_HEIGHT * RESFACTOR) * DefaultMaxVisible;
+
+                // clip to actual desired strip height to hide overflow when rendering bottom strip shape
+                // (fixed to DefaultMaxVisible icons tall)
+                WindowList[WINDOW_CUSTOM][WINDOWX] = X + (2 * RESFACTOR);
+                WindowList[WINDOW_CUSTOM][WINDOWY] = Y;
+                WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = OBJECT_WIDTH * RESFACTOR;
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = (OBJECT_HEIGHT * RESFACTOR) * MaxVisibleIcons;
+
+                auto logos_y = 0;
+
+                for (auto i = 0; i < MaxVisibleIcons; i += DefaultMaxVisible) {
+                    CC_Draw_Shape(LogoShapes, ID, 0, logos_y, WINDOW_CUSTOM, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    logos_y += strip_shape_height;
+                }
+            }
         }
 
         /*
@@ -1730,7 +1836,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         **	Loop through all the buildable objects that are visible in the strip and render
         **	them. Their Y offset may be adjusted if the strip is in the process of scrolling.
         */
-        for (int i = 0; i < MAX_VISIBLE + (IsScrolling ? 1 : 0); i++) {
+        for (int i = 0; i < MaxVisibleIcons + (IsScrolling ? 1 : 0); i++) {
             bool production;
             bool completed;
             int stage;
