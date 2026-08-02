@@ -778,23 +778,68 @@ void SidebarClass::Draw_It(bool complete)
             CC_Draw_Shape(SidebarShape, 0, side_x, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
             CC_Draw_Shape(SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
 
+            static auto constexpr strip_bottom_shape_height = 124;
+            static constexpr auto seperator_height = 16;
+
             const auto bottom_shape_x = side_x;
-            const auto bottom_shape_y = (8 + 80 + 50) * RESFACTOR;
+            auto bottom_shape_y = (8 + 80 + 50) * RESFACTOR;
+
+            /*
+            ** In hi-res mode the sidebar won't fill the screen height, so fill the remaining height with a repeating
+            ** set of ::SidebarFillSeperatorShape followed by a background made from two ::SidebarFillShape shapes.
+            */
+            if (complete && Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                // ensure we avoid the power strip
+                const auto x = side_x + power_width;
+                const auto flags = SHAPE_WIN_REL | SHAPE_NORMAL;
+
+                auto y = Column[0].Y + ((StripClass::OBJECT_HEIGHT * RESFACTOR) * DefaultMaxVisible);
+
+                while (y < SeenBuff.Get_Height() - 28) {
+                    constexpr auto background_height = 96;
+
+                    // seperator graphic
+                    //CC_Draw_Shape(SidebarFillSeperatorShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
+                    //y += seperator_height;
+
+                    /*
+                    ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip.
+                    */
+                    WindowList[WINDOW_CUSTOM][WINDOWX] = x;
+                    WindowList[WINDOW_CUSTOM][WINDOWY] = y;
+                    WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
+                    WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = background_height;
+
+                    // TODO: drop sidebar middle shape and then the below to keep textures lined up (with clip window to ignore header before column icons)
+                    CC_Draw_Shape(
+                        SidebarBottomShape,
+                        shape,
+                        -power_width,
+                        0,
+                        WINDOW_CUSTOM,
+                        SHAPE_WIN_REL
+                    );
+                    y += background_height;
+                }
+            }
 
             if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+                // TODO: Check alignment
+                bottom_shape_y = Column[0].Y + (MaxVisible * (StripClass::OBJECT_HEIGHT * RESFACTOR)) + 4;
+
                 /*
                 ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip.
                 */
                 WindowList[WINDOW_CUSTOM][WINDOWX] = bottom_shape_x + power_width;
                 WindowList[WINDOW_CUSTOM][WINDOWY] = bottom_shape_y;
                 WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
-                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = GBUFF_INIT_HEIGHT - WindowList[WINDOW_CUSTOM][WINDOWY];
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = 28;
 
                 CC_Draw_Shape(
                     SidebarBottomShape,
                     shape,
                     -power_width,
-                    0,
+                    -96,
                     WINDOW_CUSTOM,
                     SHAPE_WIN_REL
                 );
@@ -807,33 +852,6 @@ void SidebarClass::Draw_It(bool complete)
                     WINDOW_MAIN,
                     SHAPE_WIN_REL
                 );
-            }
-
-            /*
-            ** In hi-res mode the sidebar won't fill the screen height, so fill the remaining height with a repeating
-            ** set of ::SidebarFillSeperatorShape followed by a background made from two ::SidebarFillShape shapes.
-            */
-            if (complete && Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                // ensure we avoid the power strip
-                const auto x = side_x + power_width;
-                const auto flags = SHAPE_WIN_REL | SHAPE_NORMAL;
-
-                auto y = GBUFF_INIT_HEIGHT + 1;
-
-                while (y < SeenBuff.Get_Height()) {
-                    constexpr auto seperator_height = 16;
-                    constexpr auto background_height = 192;
-
-                    // seperator graphic
-                    CC_Draw_Shape(SidebarFillSeperatorShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
-                    y += seperator_height;
-
-                    // tiled background
-                    CC_Draw_Shape(SidebarFillShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
-                    y += background_height;
-                    CC_Draw_Shape(SidebarFillShape, 2, x, y, WINDOW_MAIN, flags, nullptr);
-                    y += background_height;
-                }
             }
 
             Repair.Draw_Me(true);
@@ -1751,12 +1769,20 @@ void SidebarClass::StripClass::Draw_It(bool complete)
                 CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), Y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
             } else {
                 // dynamically rendered strip background
-                auto const strip_height = (OBJECT_HEIGHT * RESFACTOR) * DefaultMaxVisible;
-                auto logos_y = Y;
+                auto const strip_shape_height = (OBJECT_HEIGHT * RESFACTOR) * DefaultMaxVisible;
 
-                for (auto i = 0; i < MaxVisibleIcons - (DefaultMaxVisible - 1); i += DefaultMaxVisible) {
-                    CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), logos_y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
-                    logos_y += strip_height;
+                // clip to actual desired strip height to hide overflow when rendering bottom strip shape
+                // (fixed to DefaultMaxVisible icons tall)
+                WindowList[WINDOW_CUSTOM][WINDOWX] = X + (2 * RESFACTOR);
+                WindowList[WINDOW_CUSTOM][WINDOWY] = Y;
+                WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = OBJECT_WIDTH * RESFACTOR;
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = (OBJECT_HEIGHT * RESFACTOR) * MaxVisibleIcons;
+
+                auto logos_y = 0;
+
+                for (auto i = 0; i < MaxVisibleIcons; i += DefaultMaxVisible) {
+                    CC_Draw_Shape(LogoShapes, ID, 0, logos_y, WINDOW_CUSTOM, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    logos_y += strip_shape_height;
                 }
             }
         }
