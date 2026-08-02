@@ -776,8 +776,7 @@ void SidebarClass::Draw_It(bool complete)
             ** The sidebar shape is too big in 640x400 so it needs to be drawn in three chunks.
             */
             CC_Draw_Shape(SidebarShape, 0, side_x, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
-            CC_Draw_Shape(
-                SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
+            CC_Draw_Shape(SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
 
             const auto bottom_shape_x = side_x;
             const auto bottom_shape_y = (8 + 80 + 50) * RESFACTOR;
@@ -814,7 +813,7 @@ void SidebarClass::Draw_It(bool complete)
             ** In hi-res mode the sidebar won't fill the screen height, so fill the remaining height with a repeating
             ** set of ::SidebarFillSeperatorShape followed by a background made from two ::SidebarFillShape shapes.
             */
-            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+            if (complete && Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                 // ensure we avoid the power strip
                 const auto x = side_x + power_width;
                 const auto flags = SHAPE_WIN_REL | SHAPE_NORMAL;
@@ -1740,14 +1739,26 @@ void SidebarClass::StripClass::Draw_It(bool complete)
         SidebarRedraws++;
 
         /*
-        **	Fills the background to the side strip. We shouldnt need to do this if the strip
+        **	Fills the background to the side strip. We shouldn't need to do this if the strip
         ** has a full complement of icons.
         */
         /*
         ** New sidebar needs to be drawn not filled
         */
         if (BuildableCount < MaxVisibleIcons) {
-            CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), Y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+            if (MaxVisibleIcons == DefaultMaxVisible) {
+                // static side strip
+                CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), Y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+            } else {
+                // dynamically rendered strip background
+                auto const strip_height = (OBJECT_HEIGHT * RESFACTOR) * DefaultMaxVisible;
+                auto logos_y = Y;
+
+                for (auto i = 0; i < MaxVisibleIcons - (DefaultMaxVisible - 1); i += DefaultMaxVisible) {
+                    CC_Draw_Shape(LogoShapes, ID, X + (2 * RESFACTOR), logos_y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
+                    logos_y += strip_height;
+                }
+            }
         }
 
         /*
