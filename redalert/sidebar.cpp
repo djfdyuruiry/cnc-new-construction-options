@@ -778,39 +778,44 @@ void SidebarClass::Draw_It(bool complete)
             CC_Draw_Shape(SidebarShape, 0, side_x, 8 * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
             CC_Draw_Shape(SidebarMiddleShape, shape, side_x, (8 + 80) * RESFACTOR, WINDOW_MAIN, SHAPE_WIN_REL);
 
-            static auto constexpr strip_bottom_shape_height = 124;
-            static constexpr auto seperator_height = 16;
+            // cropped area of a strip background section that tiles cleanly (used in hi-res)
+            constexpr auto strip_background_section_height = 96;
 
             const auto bottom_shape_x = side_x;
-            auto bottom_shape_y = (8 + 80 + 50) * RESFACTOR;
+            const auto bottom_shape_y = Get_Current_Resolution_Mode() == MODE_HIGH_RES
+                ? Column[0].Y + (MaxVisible * (StripClass::OBJECT_HEIGHT * RESFACTOR)) // dynamic strip icon count
+                : (8 + 80 + 50) * RESFACTOR; // static strip icon count
 
             /*
-            ** In hi-res mode the sidebar won't fill the screen height, so fill the remaining height with a repeating
-            ** set of ::SidebarFillSeperatorShape followed by a background made from two ::SidebarFillShape shapes.
+            ** In hi-res mode the sidebar has dynamic build strips that fill the screen height, so render the border
+            ** graphics for the strips using cropped versions of SidebarBottomShape and SidebarMiddleShape (to make them
+            ** tile correctly).
             */
-            if (complete && Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
+            if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
                 // ensure we avoid the power strip
                 const auto x = side_x + power_width;
-                const auto flags = SHAPE_WIN_REL | SHAPE_NORMAL;
+                // start from the end of the last shape that was rendered (middle shape)
+                auto y = Column[0].Y + ((StripClass::OBJECT_HEIGHT * RESFACTOR) * (DefaultMaxVisible / 2));
 
-                auto y = Column[0].Y + ((StripClass::OBJECT_HEIGHT * RESFACTOR) * DefaultMaxVisible);
+                WindowList[WINDOW_CUSTOM][WINDOWX] = x;
+                WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = strip_background_section_height;
 
-                while (y < SeenBuff.Get_Height() - 28) {
-                    constexpr auto background_height = 96;
+                // tile bottom and middle sidebar shapes down the remaining strip height
+                while (y < bottom_shape_y) {
+                    // detect rendering outside strip dimensions
+                    if (y + strip_background_section_height > bottom_shape_y) {
+                        // trim overflow from height
+                        WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] =
+                            strip_background_section_height - ((y + strip_background_section_height) - bottom_shape_y);
 
-                    // seperator graphic
-                    //CC_Draw_Shape(SidebarFillSeperatorShape, 0, x, y, WINDOW_MAIN, flags, nullptr);
-                    //y += seperator_height;
+                        // nothing left to draw
+                        if (WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] <= 0) {
+                            break;
+                        }
+                    }
 
-                    /*
-                    ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip.
-                    */
-                    WindowList[WINDOW_CUSTOM][WINDOWX] = x;
                     WindowList[WINDOW_CUSTOM][WINDOWY] = y;
-                    WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
-                    WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = background_height;
-
-                    // TODO: drop sidebar middle shape and then the below to keep textures lined up (with clip window to ignore header before column icons)
                     CC_Draw_Shape(
                         SidebarBottomShape,
                         shape,
@@ -819,30 +824,63 @@ void SidebarClass::Draw_It(bool complete)
                         WINDOW_CUSTOM,
                         SHAPE_WIN_REL
                     );
-                    y += background_height;
+                    y += strip_background_section_height;
+
+                    // detect rendering outside strip dimensions
+                    if (y + strip_background_section_height > bottom_shape_y) {
+                        // trim overflow from height
+                        WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] =
+                            strip_background_section_height - ((y + strip_background_section_height) - bottom_shape_y);
+
+                        // nothing left to draw
+                        if (WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] <= 0) {
+                            break;
+                        }
+                    }
+
+                    WindowList[WINDOW_CUSTOM][WINDOWY] = y;
+                    CC_Draw_Shape(
+                        SidebarMiddleShape,
+                        shape,
+                        -power_width,
+                        -4, // crop graphics before strip icons so shape tiles correctly
+                        WINDOW_CUSTOM,
+                        SHAPE_WIN_REL
+                    );
+                    y += strip_background_section_height;
                 }
             }
 
+            // render bottom graphics for sidebar strips
             if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                // TODO: Check alignment
-                bottom_shape_y = Column[0].Y + (MaxVisible * (StripClass::OBJECT_HEIGHT * RESFACTOR)) + 4;
+                static auto constexpr button_border_height = 28;
 
                 /*
-                ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip.
+                ** In hi-res, clip off the left hand side of the bottom shape so it doesn't conflict with power strip
+                ** and only show the up/down button borders.
                 */
                 WindowList[WINDOW_CUSTOM][WINDOWX] = bottom_shape_x + power_width;
                 WindowList[WINDOW_CUSTOM][WINDOWY] = bottom_shape_y;
                 WindowList[WINDOW_CUSTOM][WINDOWWIDTH] = (SeenBuff.Get_Width() - side_x) - power_width - 1;
-                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = 28;
+                WindowList[WINDOW_CUSTOM][WINDOWHEIGHT] = button_border_height;
 
                 CC_Draw_Shape(
                     SidebarBottomShape,
                     shape,
                     -power_width,
-                    -96,
+                    -strip_background_section_height,
                     WINDOW_CUSTOM,
                     SHAPE_WIN_REL
                 );
+
+                static constexpr auto seperator_height = 16;
+                auto seperator_y = bottom_shape_y + button_border_height;
+
+                // fill remaining blank sidebar space with seperator shapes
+                while (seperator_y < SeenBuff.Get_Height()) {
+                    CC_Draw_Shape(SidebarFillSeperatorShape, 0, bottom_shape_x + power_width, seperator_y, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, nullptr);
+                    seperator_y += seperator_height;
+                }
             } else {
                 CC_Draw_Shape(
                     SidebarBottomShape,
