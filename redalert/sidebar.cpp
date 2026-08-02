@@ -1233,6 +1233,7 @@ void SidebarClass::StripClass::One_Time(int id, bool on_save)
     SelectButton[id] = std::vector<SelectClass>(MaxVisibleIcons);
 
     if (on_save) {
+        // check if rendering save data would leave a gap between last icon and the end of the strip (hi-res only)
         if (MaxVisibleIcons > DefaultMaxVisible) {
             const auto visible_icon_count = BuildableCount - TopIndex;
             const auto blank_icon_count = MaxVisibleIcons - visible_icon_count;
