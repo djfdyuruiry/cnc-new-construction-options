@@ -747,7 +747,7 @@ bool SidebarClass::Scroll(bool up, int column)
         const auto mouse_x = Get_Mouse_X();
         const auto mouse_y = Get_Mouse_Y();
 
-        bool scr = false;
+        bool can_scroll = false;
 
         // determine which columns to scroll given the position of the mouse relative to the sidebar strips
         const auto mouse_outside_columns = mouse_y < SideY || mouse_x < Column[0].X;
@@ -756,19 +756,27 @@ bool SidebarClass::Scroll(bool up, int column)
             const auto mouse_over_column = mouse_x >= column.X && mouse_x <= column.X + column.ObjectWidth;
 
             if (mouse_outside_columns || mouse_over_column) {
-                scr |= column.Scroll(up);
+                // are there more icons to scroll to?
+                if (up) {
+                    can_scroll = can_scroll || column.TopIndex != 0;
+                } else {
+                    can_scroll = can_scroll || column.TopIndex + column.MaxVisibleIcons < column.BuildableCount;
+                }
+
+                if (can_scroll) {
+                    column.Scroll(up);
+                }
             }
         }
 
-        if (!scr) {
-            Sound_Effect(VOC_SCOLD);
-        }
-        if (scr) {
+        if (can_scroll) {
             IsToRedraw = true;
             Flag_To_Redraw(false);
-            return (true);
+        } else {
+            Sound_Effect(VOC_SCOLD);
         }
-        return (false);
+
+        return can_scroll;
     }
 
     if (Column[column].Scroll(up)) {
