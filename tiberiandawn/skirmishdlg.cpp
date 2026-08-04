@@ -356,10 +356,8 @@ protected:
                     MPlayerMax = Calculate_Player_Count();
                     Toggle_AI_Players();
 
-                    if (ScenarioIdx == scenario_list.Count() - 1) {
-                        // workaround other controls failing to render when we select the last scenario
-                        Flag_All_Controls_To_Redraw();
-                    }
+                    // workaround other controls failing to render sometimes
+                    Flag_All_Controls_To_Redraw();
 
                     display = REDRAW_ALL;
                 }
