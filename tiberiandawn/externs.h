@@ -268,7 +268,7 @@ extern int ColorUsed[];
 extern char MPlayerName[MPLAYER_NAME_MAX];
 extern int MPlayerGColors[];
 extern int MPlayerTColors[];
-extern char MPlayerDescriptions[500][40];
+extern std::vector<std::unique_ptr<char[]>> MPlayerDescriptions;
 extern DynamicVectorClass<char*> MPlayerScenarios;
 extern DynamicVectorClass<int> MPlayerFilenum;
 extern int MPlayerMax;
