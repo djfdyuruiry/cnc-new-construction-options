@@ -223,6 +223,20 @@ protected:
         display = REDRAW_NONE;
     }
 
+    /**
+     * Force a complete redraw of all controls the next time a display
+     * value of REDRAW_CONTROLS or higher is presented to Render(..).
+     */
+    void Flag_All_Controls_To_Redraw()
+    {
+        auto control = CommandChain;
+
+        while (control != nullptr) {
+            control->Flag_To_Redraw();
+            control = control->Get_Next();
+        }
+    }
+
     virtual void Init_UI_State() = 0;
     virtual void Init_Data() = 0;
 
