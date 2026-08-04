@@ -20,15 +20,26 @@ void TiberianDawnSettings::Load_MultiPlayer(INIClass& ini)
          .Load("BasesOn").With_Default(true).Then_Set(MPlayerBases)
          .Load("TiberiumRegrows").With_Default(true).template Then_Set_With_Type<bool>(MPlayerTiberium)
          .Load("CratesOn").With_Default(false).template Then_Set_With_Type<bool>(MPlayerGoodies)
-         .Load("CaptureTheFlag").With_Default(false)
-            .template With_Callback<bool>([] (auto ctf) { Special.IsCaptureTheFlag = ctf; })
+         .Load("CaptureTheFlag").With_Default(false).template With_Callback<bool>([] (auto ctf) {
+             Special.IsCaptureTheFlag = ctf;
+         })
          .template Load_With_Converter_Callback<PlayerColorType, TdTypeConverter>(
              "Color", REMAP_GOLD, [] (auto colour) { MPlayerPrefColor = colour; }
          )
          .template Load_With_Converter_Callback<HousesType, TdTypeConverter>(
              "Side", HOUSE_GOOD, [] (auto house) { MPlayerHouse = house; }
          )
-        .Load("MaxScenarioNumber").With_Default(500);
+        .Load("MaxScenarioNumber")
+            .With_Comment("load multiplayer scenarios up to this number, increase to load more")
+            .With_Default(500)
+            .template With_Callback<int>([] (auto max_scenario_num) {
+                // build the multiplayer map descriptions collection
+                MPlayerDescriptions.clear();
+
+                for (auto i = 0; i < max_scenario_num; i++) {
+                    MPlayerDescriptions.emplace_back(std::make_unique<char[]>(256));
+                }
+            });
     });
 
     //	Get the player's last-used Handle
@@ -42,15 +53,6 @@ void TiberianDawnSettings::Load_MultiPlayer(INIClass& ini)
             max_name_length
         );
     }
-
-    // build the multiplayer map descriptions collection
-    const auto max_scenario_num = multiplayer_section.Get<int>("MaxScenarioNumber");
-
-    MPlayerDescriptions.clear();
-
-    for (auto i = 0; i < max_scenario_num; i++) {
-        MPlayerDescriptions.emplace_back(std::make_unique<char[]>(256));
-    }
 }
 
 void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
@@ -63,7 +65,9 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
     CommonSettings->Load(IniFileName, ini);
 
     Get_Map_Section().With<IniRuleContext>(ini, [&](auto& c) {
-        c.Load("PlacementDebugging").With_Default(false);
+        c.Load("PlacementDebugging")
+         .With_Comment("dump a placement_debug.txt file every time placement is calculated")
+         .With_Default(false);
     });
     Load_MultiPlayer(ini);
 }
@@ -86,7 +90,6 @@ void TiberianDawnSettings::Update_MultiPlayer()
         .Set("CaptureTheFlag", static_cast<bool>(Special.IsCaptureTheFlag))
         .Set_With_Converter<PlayerColorType, TdTypeConverter>("Color", static_cast<PlayerColorType>(MPlayerPrefColor))
         .Set_With_Converter<HousesType, TdTypeConverter>("Side", MPlayerHouse)
-        .Set_Rule_Comment("MaxScenarioNumber", "load multiplayer scenarios up to this number, increase to load more")
         .Set("MaxScenarioNumber", static_cast<int>(MPlayerDescriptions.size()));
 }
 
