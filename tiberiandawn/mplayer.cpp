@@ -618,7 +618,7 @@ void Read_Scenario_Descriptions(void)
     Loop through all possible scenario numbers; if a file is available, add
     its number to the FileNum list.
     ------------------------------------------------------------------------*/
-    for (i = 0; i < 500; i++) {
+    for (i = 0; i < MPlayerDescriptions.size(); i++) {
         Set_Scenario_Name(Scen.ScenarioName, i, SCEN_PLAYER_MPLAYER, SCEN_DIR_EAST, SCEN_VAR_A);
         sprintf(fname, "%s.INI", Scen.ScenarioName);
         file.Set_Name(fname);
@@ -650,8 +650,8 @@ void Read_Scenario_Descriptions(void)
         /*.....................................................................
         Extract description & add it to the list.
         .....................................................................*/
-        ini.Get_String("Basic", "Name", "Nulls-Ville", MPlayerDescriptions[i], 40);
-        MPlayerScenarios.Add(MPlayerDescriptions[i]);
+        ini.Get_String("Basic", "Name", "Nulls-Ville", MPlayerDescriptions[i].get(), 40);
+        MPlayerScenarios.Add(MPlayerDescriptions[i].get());
     }
 }
 

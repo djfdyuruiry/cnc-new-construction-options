@@ -27,7 +27,8 @@ void TiberianDawnSettings::Load_MultiPlayer(INIClass& ini)
          )
          .template Load_With_Converter_Callback<HousesType, TdTypeConverter>(
              "Side", HOUSE_GOOD, [] (auto house) { MPlayerHouse = house; }
-         );
+         )
+        .Load("MaxScenarioNumber").With_Default(500);
     });
 
     //	Get the player's last-used Handle
@@ -40,6 +41,15 @@ void TiberianDawnSettings::Load_MultiPlayer(INIClass& ini)
             IniFileName,
             max_name_length
         );
+    }
+
+    // build the multiplayer map descriptions collection
+    const auto max_scenario_num = multiplayer_section.Get<int>("MaxScenarioNumber");
+
+    MPlayerDescriptions.clear();
+
+    for (auto i = 0; i < max_scenario_num; i++) {
+        MPlayerDescriptions.emplace_back(std::make_unique<char[]>(256));
     }
 }
 
@@ -75,7 +85,9 @@ void TiberianDawnSettings::Update_MultiPlayer()
         .Set("CratesOn", static_cast<bool>(MPlayerGoodies))
         .Set("CaptureTheFlag", static_cast<bool>(Special.IsCaptureTheFlag))
         .Set_With_Converter<PlayerColorType, TdTypeConverter>("Color", static_cast<PlayerColorType>(MPlayerPrefColor))
-        .Set_With_Converter<HousesType, TdTypeConverter>("Side", MPlayerHouse);
+        .Set_With_Converter<HousesType, TdTypeConverter>("Side", MPlayerHouse)
+        .Set_Rule_Comment("MaxScenarioNumber", "load multiplayer scenarios up to this number, increase to load more")
+        .Set("MaxScenarioNumber", static_cast<int>(MPlayerDescriptions.size()));
 }
 
 void TiberianDawnSettings::Update_Sections()
