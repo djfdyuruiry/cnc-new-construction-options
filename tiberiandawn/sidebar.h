@@ -155,8 +155,6 @@ public:
     */
     class StripClass : public StageClass
     {
-        int MaxVisibleIcons;
-
         class SelectClass : public ControlClass
         {
         public:
@@ -171,6 +169,7 @@ public:
         };
 
     public:
+        int MaxVisibleIcons;
         int ObjectWidth;
         int ObjectHeight;
         int StripWidth;
