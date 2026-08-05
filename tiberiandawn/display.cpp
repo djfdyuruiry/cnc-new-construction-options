@@ -1835,8 +1835,8 @@ bool DisplayClass::Scroll_Map(DirType facing, int& distance, bool really)
     /*
     **	Clip the new coordinate to the edges of the game world.
     */
-    int xx = Coord_X(coord) - Cell_To_Lepton(MapCellX);
-    int yy = Coord_Y(coord) - Cell_To_Lepton(MapCellY);
+    int xx = (int)(short)Coord_X(coord) - (short)Cell_To_Lepton(MapCellX);
+    int yy = (int)(short)Coord_Y(coord) - (short)Cell_To_Lepton(MapCellY);
     bool shifted = Confine_Rect(
         &xx, &yy, TacLeptonWidth, TacLeptonHeight, Cell_To_Lepton(MapCellWidth), Cell_To_Lepton(MapCellHeight));
     if (xx < 0) {
