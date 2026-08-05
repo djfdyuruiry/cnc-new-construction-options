@@ -267,7 +267,8 @@ void MapEditClass::One_Time(void)
     /*........................................................................
     The base percent-built slider & its label
     ........................................................................*/
-    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W;
+    const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
+    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W - (25 * factor);
 
     BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, POPUP_BASE_Y, POPUP_BASE_W, POPUP_BASE_H);
     BaseLabel = new TextLabelClass(
@@ -1390,6 +1391,8 @@ void MapEditClass::Draw_It(bool forced)
         return;
     }
 
+    const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
+
     //
     // Erase scrags at top of screen
     //
@@ -1400,6 +1403,9 @@ void MapEditClass::Draw_It(bool forced)
     */
     Fancy_Text_Print(
         "Tiberium=%ld   ", 0, 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
+
+    Fancy_Text_Print(
+        "%3d%%", SeenBuff.Get_Width() - (22 * factor), 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
 
     /*------------------------------------------------------------------------
     If there are no object controls displayed, just invoke parent's Redraw
