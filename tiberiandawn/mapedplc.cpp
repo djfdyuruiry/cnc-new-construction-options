@@ -436,6 +436,7 @@ int MapEditClass::Placement_Dialog(void)
     TerrainTypeClass::Prep_For_Add();
     UnitTypeClass::Prep_For_Add();
     InfantryTypeClass::Prep_For_Add();
+    AircraftTypeClass::Prep_For_Add();
     BuildingTypeClass::Prep_For_Add();
 
     /*........................................................................
@@ -935,7 +936,7 @@ void MapEditClass::Start_Placement(void)
     TerrainTypeClass::Prep_For_Add();
     UnitTypeClass::Prep_For_Add();
     InfantryTypeClass::Prep_For_Add();
-    // AircraftTypeClass::Prep_For_Add();
+    AircraftTypeClass::Prep_For_Add();
     BuildingTypeClass::Prep_For_Add();
     /*........................................................................
     Compute offset of each class type in the Objects array
