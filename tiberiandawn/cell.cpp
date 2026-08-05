@@ -909,7 +909,6 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
     TemplateTypeClass* tptr;
     TriggerClass* trig;
     int i;
-    char waypt[2];
 #endif
 
     // if we are not in editor mode, the cell is outside the bounds of the map...
@@ -1065,58 +1064,6 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                               Map.UnitShadow);
                 IsTheaterShape = false;
             }
-
-#ifdef SCENARIO_EDITOR
-            if (Debug_Map) {
-                /*
-                **	Draw the cell's Trigger mnemonic, if it has a trigger
-                */
-                if (IsTrigger) {
-                    trig = Get_Trigger();
-                    Fancy_Text_Print(trig->Get_Name(),
-                                     x + Map.TacPixelX,
-                                     y + Map.TacPixelY,
-                                     PINK,
-                                     TBLACK,
-                                     TPF_NOSHADOW | TPF_6POINT);
-                }
-
-                /*
-                **	Draw the cell's Waypoint designation if there is one.
-                */
-                if (IsWaypoint) {
-                    for (i = 0; i < 26; i++) {
-                        if (Scen.Waypoint[i] == Cell_Number()) {
-                            waypt[0] = 'A' + i;
-                            waypt[1] = 0;
-                            Fancy_Text_Print(waypt,
-                                             Map.TacPixelX + x + CELL_PIXEL_W / 2,
-                                             Map.TacPixelY + y + (CELL_PIXEL_H / 2) - 3,
-                                             YELLOW,
-                                             TBLACK,
-                                             TPF_NOSHADOW | TPF_6POINT | TPF_CENTER);
-                            break;
-                        }
-                    }
-                    if (Scen.Waypoint[WAYPT_HOME] == Cell_Number()) {
-                        Fancy_Text_Print("Home",
-                                         Map.TacPixelX + x,
-                                         Map.TacPixelY + y + (CELL_PIXEL_H)-7,
-                                         WHITE,
-                                         TBLACK,
-                                         TPF_NOSHADOW | TPF_6POINT);
-                    }
-                    if (Scen.Waypoint[WAYPT_REINF] == Cell_Number()) {
-                        Fancy_Text_Print("Reinf",
-                                         Map.TacPixelX + x,
-                                         Map.TacPixelY + y + (CELL_PIXEL_H)-7,
-                                         WHITE,
-                                         TBLACK,
-                                         TPF_NOSHADOW | TPF_6POINT);
-                    }
-                }
-            }
-#endif
 
             /*
             **	Draw the placement cursor:

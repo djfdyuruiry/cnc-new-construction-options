@@ -209,6 +209,11 @@ public:
     bool Scan_For_Proximity(const ProximityScanRules& scan_rules) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
 
+    void Iterate_Over_Map_Cells(
+        const std::function<void(CELL, CellClass&)>& on_cell,
+        const std::function<void(int)>& on_row = [](auto _) {}
+    );
+
     static PlacementResult* Allocate_Proximity_Tracker();
     static void Dump_Proximity_Tracker_To_File(const ProximityScanRules& scan_rules, const PlacementResult* tracker, const char* file_name = "placement_debug.txt");
 #endif

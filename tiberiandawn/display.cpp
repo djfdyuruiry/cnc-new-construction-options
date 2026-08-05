@@ -1129,13 +1129,9 @@ PlacementResult* DisplayClass::Allocate_Proximity_Tracker()
     return proximity_tracker;
 }
 
-/**
- * Dumps a text representation of the map with a placement result written in each cells to a given file.
- */
-void DisplayClass::Dump_Proximity_Tracker_To_File(
-    const ProximityScanRules& scan_rules,
-    const PlacementResult* tracker,
-    const char* file_name
+void DisplayClass::Iterate_Over_Map_Cells(
+    const std::function<void(CELL, CellClass&)>& on_cell,
+    const std::function<void(int)>& on_row
 )
 {
 #if defined TIBERIAN_DAWN && !defined MEGAMAPS
@@ -1146,11 +1142,6 @@ void DisplayClass::Dump_Proximity_Tracker_To_File(
     constexpr auto max_max_cell_height = 128;
 #endif
 
-    if (tracker == nullptr) {
-        return;
-    }
-
-    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Path(), file_name);
     int map_cell_x = Map.MapCellX;
     int map_cell_y = Map.MapCellY;
     int map_cell_width = Map.MapCellWidth;
@@ -1174,26 +1165,47 @@ void DisplayClass::Dump_Proximity_Tracker_To_File(
         map_cell_height++;
     }
 
+    for (int cell_y = 0; cell_y < map_cell_height; cell_y++) {
+        for (int cell_x = 0; cell_x < map_cell_width; cell_x++) {
+            const auto raw_cell = XY_Cell(map_cell_x + cell_x, map_cell_y + cell_y);
+
+            on_cell(raw_cell, Array[raw_cell]);
+        }
+
+        on_row(cell_y);
+    }
+}
+
+/**
+ * Dumps a text representation of the map with a placement result written in each cells to a given file.
+ */
+void DisplayClass::Dump_Proximity_Tracker_To_File(
+    const ProximityScanRules& scan_rules,
+    const PlacementResult* tracker,
+    const char* file_name
+)
+{
+    if (tracker == nullptr) {
+        return;
+    }
+
+    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Path(), file_name);
+
     if (CDFileClass out; out.Open(debug_proximity_path.c_str(), WRITE)) {
         out.Write(std::format("CELL X,Y: {},{}", Cell_X(scan_rules.OriginalCell), Cell_Y(scan_rules.OriginalCell)));
         out.Write("\n");
         out.Write(std::format("FILTER: {}", static_cast<signed char>(scan_rules.Filter)));
         out.Write("\n");
 
-        for (int y = 0; y < map_cell_height; y++) {
-            for (int x = 0; x < map_cell_width; x++) {
-#ifdef MEGAMAPS
-                constexpr auto map_width_shift_bits = 7;
-#else
-                constexpr auto map_width_shift_bits = 6;
-#endif
-
-                const CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << map_width_shift_bits);
+        Map.Iterate_Over_Map_Cells(
+            [&](auto cell, auto& _) {
                 out.Write(std::format("{}", static_cast<signed char>(tracker[cell])));
+            },
+            [&](auto _) {
+                out.Write("\n");
             }
+        );
 
-            out.Write("\n");
-        }
         out.Close();
     }
 }

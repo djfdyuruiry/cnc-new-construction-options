@@ -1432,6 +1432,83 @@ void MapEditClass::Draw_It(bool forced)
             Fancy_Text_Print(buf, 320, 0, CC_TAN, TBLACK, TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
         }
     }
+
+    /**
+     * Iterate over map cells to draw associated waypoint ID's and trigger names on top.
+     */
+    // TODO: have settings dialog menu options for font/colours in scenario editor + associated TdSettings entries to persist
+    static auto constexpr cell_text_back_color = TBLACK;
+    static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT;
+    static auto constexpr trigger_color = LTGREEN;
+    static auto constexpr waypoint_colour = YELLOW;
+
+    Iterate_Over_Map_Cells(
+        [&](auto _, auto& cell) {
+            auto cell_object = cell.Cell_Occupier();
+
+            int x, y;
+            Coord_To_Pixel(cell.Cell_Coord(), x, y);
+
+            if (cell.IsTrigger) {
+                /*
+                **	Draw the cell's Trigger mnemonic, if it has a trigger
+                */
+                auto& trig = *cell.Get_Trigger();
+
+                Fancy_Text_Print(
+                    trig.Get_Name(),
+                    x + TacPixelX,
+                    y + TacPixelY,
+                    trigger_color,
+                    cell_text_back_color,
+                    cell_text_flags
+                );
+            } else if (cell.IsWaypoint) {
+                /*
+                **	Draw the cell's Waypoint designation if there is one.
+                */
+                for (auto i = 0; i < WAYPT_HOME; i++) {
+                    if (Scen.Waypoint[i] == cell.Cell_Number()) {
+                        Fancy_Text_Print(std::format("{}", i).c_str(),
+                                         x + TacPixelX,
+                                         y + TacPixelY,
+                                         waypoint_colour,
+                                         cell_text_back_color,
+                                         cell_text_flags | TPF_CENTER);
+                        break;
+                    }
+                }
+            } else if (Scen.Waypoint[WAYPT_HOME] == cell.Cell_Number()) {
+                    Fancy_Text_Print("HOME",
+                                     x + TacPixelX,
+                                     y + TacPixelY,
+                                     waypoint_colour,
+                                     cell_text_back_color,
+                                     cell_text_flags);
+            } else if (Scen.Waypoint[WAYPT_REINF] == cell.Cell_Number()) {
+                Fancy_Text_Print("REINF",
+                                 x + TacPixelX,
+                                 y + TacPixelY,
+                                 waypoint_colour,
+                                 cell_text_back_color,
+                                 cell_text_flags);
+            } else if (cell_object != nullptr && cell_object->Trigger) {
+                const auto coord = cell_object->Render_Coord();
+                int object_x, object_y;
+
+                if (Coord_To_Pixel(coord, object_x, object_y)) {
+                    Fancy_Text_Print(
+                        cell_object->Trigger->Get_Name(),
+                        object_x + (WinX << 3),
+                        object_y,
+                        trigger_color,
+                        cell_text_back_color,
+                        cell_text_flags | TPF_CENTER
+                    );
+                }
+            }
+        }
+    );
 }
 
 /***************************************************************************
