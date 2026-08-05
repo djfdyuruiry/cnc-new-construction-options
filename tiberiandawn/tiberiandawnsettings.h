@@ -19,11 +19,17 @@ class INIClass;
 class TiberianDawnSettings
 {
 public:
+    static constexpr auto EditorSection = "Editor";
     static constexpr auto MapPlayerSection = "Map";
     static constexpr auto MultiPlayerSection = "MultiPlayer";
 
     void Init(SettingsClass& common_settings);
     void Load(std::string ini_file_name, INIClass& ini);
+
+    // editor
+    bool Enforce_OwnableBy_In_Editor();
+    ColorType Get_Editor_Trigger_Color();
+    ColorType Get_Editor_Waypoint_Color();
 
     // map
     bool Placement_Debugging_Is_Enabled();
@@ -39,6 +45,7 @@ private:
     std::string IniFileName;
 
     RuleSections& Get_Common_Sections();
+    RuleSection& Get_Editor_Section();
     RuleSection& Get_Map_Section();
     RuleSection& Get_Multiplayer_Section();
 

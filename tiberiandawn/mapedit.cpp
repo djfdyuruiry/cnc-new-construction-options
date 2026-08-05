@@ -59,6 +59,7 @@
 #include "function.h"
 #include "common/framelimit.h"
 #include "ccini.h"
+#include "tiberiandawnsettings.h"
 
 #ifdef SCENARIO_EDITOR
 
@@ -1439,8 +1440,8 @@ void MapEditClass::Draw_It(bool forced)
     // TODO: have settings dialog menu options for font/colours in scenario editor + associated TdSettings entries to persist
     static auto constexpr cell_text_back_color = TBLACK;
     static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT | TPF_CENTER;
-    static auto constexpr trigger_color = LTGREEN;
-    static auto constexpr waypoint_colour = YELLOW;
+    const auto trigger_color = TdSettings.Get_Editor_Trigger_Color();
+    const auto waypoint_colour = TdSettings.Get_Editor_Waypoint_Color();
 
     Iterate_Over_Map_Cells(
         [&](auto raw_cell, auto& cell) {
@@ -1921,6 +1922,10 @@ void MapEditClass::AI_Menu(void)
  *=========================================================================*/
 bool MapEditClass::Verify_House(HousesType house, ObjectTypeClass const* objtype)
 {
+    if (!TdSettings.Enforce_OwnableBy_In_Editor()) {
+        return true;
+    }
+
     /*
     --------------- Verify that new house can own this object ----------------
     */
