@@ -963,20 +963,22 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
 
 #ifdef SCENARIO_EDITOR
             /*
-            **	Set up the remap table for this icon.
+            **	Set up the remap table for this icon, used to shade the cell with a certain color.
             */
             if (Debug_Map) {
-                if (Debug_Passable) {
+                if (
+                    Cell_X(cell) < Map.IniMapCellX || Cell_X(cell) >= (Map.IniMapCellX + Map.IniMapCellWidth) ||
+                    Cell_Y(cell) < Map.IniMapCellY || Cell_Y(cell) >= (Map.IniMapCellY + Map.IniMapCellHeight)
+                ) {
+                    // this cell will be out of bounds during gameplay, so highlight it as such
+                    remap = Map.FadingShade;
+                } else if (Debug_Passable) {
                     if (::Ground[Land].Cost[0] == 0
-                        || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) { // impassable
-                        remap = Map.FadingRed;
-                        } else {
-                            if (::Ground[Land].Cost[0] > 0x70) { // pretty passable
-                                remap = Map.FadingGreen;
-                            } else {
-                                remap = Map.FadingYellow; // moderately passable
-                            }
-                        }
+                        || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) {
+                        remap = Map.FadingRed; // impassable
+                    } else {
+                        remap = Map.FadingGreen; // passable
+                    }
                 }
             }
 #endif

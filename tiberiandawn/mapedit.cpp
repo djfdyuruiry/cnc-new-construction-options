@@ -1727,7 +1727,7 @@ void MapEditClass::Main_Menu(void)
         .......................... Edit map size ...........................
         */
         case 3:
-            if (Size_Map(MapCellX, MapCellY, MapCellWidth, MapCellHeight) == 0) {
+            if (Size_Map(IniMapCellX, IniMapCellY, IniMapCellWidth, IniMapCellHeight) == 0) {
                 process = false;
                 Changed = 1;
             }

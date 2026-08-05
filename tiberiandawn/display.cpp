@@ -1579,7 +1579,32 @@ void DisplayClass::Read_INI(CCINIClass& ini)
     int w = ini.Get_Int(name, "Width", MAP_CELL_W - 2);
     int h = ini.Get_Int(name, "Height", MAP_CELL_H - 2);
 
-    Set_Map_Dimensions(x, y, w, h);
+    if (!Debug_Map) {
+        Set_Map_Dimensions(x, y, w, h);
+    }
+#ifdef SCENARIO_EDITOR
+    else {
+        /*
+        **	When in scenario editor mode, we want to show the entire map so user can place terrain out of bounds to
+        **  influence reinforcement positions.
+        */
+#if defined TIBERIAN_DAWN && !defined MEGAMAPS
+        constexpr auto max_max_cell_width = 64;
+        constexpr auto max_max_cell_height = 64;
+#else
+        constexpr auto max_max_cell_width = 128;
+        constexpr auto max_max_cell_height = 128;
+#endif
+
+        Set_Map_Dimensions(0, 0, max_max_cell_width, max_max_cell_height);
+
+        // store original bounds for rendering and file save logic
+        IniMapCellX = x;
+        IniMapCellY = y;
+        IniMapCellWidth = w;
+        IniMapCellHeight = h;
+    }
+#endif
 
     /*
     **	The theater is determined at this point. There is specific data that
@@ -1715,10 +1740,22 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     static char const* const NAME = "MAP";
     ini.Clear(NAME);
     ini.Put_TheaterType(NAME, "Theater", Theater);
-    ini.Put_Int(NAME, "X", MapCellX);
-    ini.Put_Int(NAME, "Y", MapCellY);
-    ini.Put_Int(NAME, "Width", MapCellWidth);
-    ini.Put_Int(NAME, "Height", MapCellHeight);
+
+    if (!Debug_Map) {
+        ini.Put_Int(NAME, "X", MapCellX);
+        ini.Put_Int(NAME, "Y", MapCellY);
+        ini.Put_Int(NAME, "Width", MapCellWidth);
+        ini.Put_Int(NAME, "Height", MapCellHeight);
+    }
+#ifdef SCENARIO_EDITOR
+    else {
+        // save actual bounds for map, not the current display bounds
+        ini.Put_Int(NAME, "X", IniMapCellX);
+        ini.Put_Int(NAME, "Y", IniMapCellY);
+        ini.Put_Int(NAME, "Width", IniMapCellWidth);
+        ini.Put_Int(NAME, "Height", IniMapCellHeight);
+    }
+#endif
 
 #ifdef MEGAMAPS
     /*

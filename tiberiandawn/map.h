@@ -125,6 +125,17 @@ public:
     int MapCellWidth;
     int MapCellHeight;
 
+#ifdef SCENARIO_EDITOR
+    /*
+    **	This is the dimensions and position of the sub section of the global map as defined in scenario INI file.
+    **	Not used during scenario editor rendering or normal gameplay.
+    */
+    int IniMapCellX;
+    int IniMapCellY;
+    int IniMapCellWidth;
+    int IniMapCellHeight;
+#endif
+
     /*
     **	This is the total value of all harvestable Tiberium on the map.
     */

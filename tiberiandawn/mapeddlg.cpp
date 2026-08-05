@@ -147,8 +147,8 @@ int MapEditClass::New_Scenario(void)
     /*
     ------ Set the Home & Reinforcement Cells to the center of the map -------
     */
-    Scen.Waypoint[WAYPT_REINF] = XY_Cell(MapCellX + MapCellWidth / 2, MapCellY + MapCellHeight / 2);
-    Scen.Waypoint[WAYPT_HOME] = XY_Cell(MapCellX + MapCellWidth / 2, MapCellY + MapCellHeight / 2);
+    Scen.Waypoint[WAYPT_REINF] = XY_Cell(IniMapCellX + IniMapCellWidth / 2, IniMapCellY + IniMapCellHeight / 2);
+    Scen.Waypoint[WAYPT_HOME] = XY_Cell(IniMapCellX + IniMapCellWidth / 2, IniMapCellY + IniMapCellHeight / 2);
     (*this)[Coord_Cell(TacticalCoord)].IsWaypoint = 1;
     Flag_Cell(Coord_Cell(TacticalCoord));
 
@@ -1523,28 +1523,28 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     /*
     ---------------------------- Save selections -----------------------------
     */
-    MapCellX = map_x1 - D_BORD_X1 - 1;
-    MapCellY = map_y1 - D_BORD_Y1 - 1;
-    MapCellWidth = map_x2 - map_x1 + 1;
-    MapCellHeight = map_y2 - map_y1 + 1;
+    IniMapCellX = map_x1 - D_BORD_X1 - 1;
+    IniMapCellY = map_y1 - D_BORD_Y1 - 1;
+    IniMapCellWidth = map_x2 - map_x1 + 1;
+    IniMapCellHeight = map_y2 - map_y1 + 1;
 
     /*
     --------------------- Clip Home Cell to new map size ---------------------
     */
-    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) < MapCellX) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(MapCellX, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
+    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) < IniMapCellX) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(IniMapCellX, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
     }
 
-    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) > MapCellX + MapCellWidth - 1) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(MapCellX + MapCellWidth - 1, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
+    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) > IniMapCellX + IniMapCellWidth - 1) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(IniMapCellX + IniMapCellWidth - 1, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
     }
 
-    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) < MapCellY) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), MapCellY);
+    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) < IniMapCellY) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), IniMapCellY);
     }
 
-    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) > MapCellY + MapCellHeight - 1) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), MapCellY + MapCellHeight - 1);
+    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) > IniMapCellY + IniMapCellHeight - 1) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), IniMapCellY + IniMapCellHeight - 1);
     }
 
     return (0);
