@@ -65,7 +65,9 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
     CommonSettings->Load(IniFileName, ini);
 
     Get_Editor_Section().With<IniRuleContext>(ini, [&](auto& c) {
-        c.Load("EnforceObjectOwnableBy").With_Comment("When adding/editing game objects, only allow setting house to valid 'OwnableBy' value").With_Default(false)
+        c.Load("EnforceObjectOwnableBy")
+            .With_Comment("only allow game objects to be assigned a house found in their 'OwnableBy' rule")
+            .With_Default(false)
          .template Load_With_Converter<ColorType, TdTypeConverter>("TriggerColor", LTGREEN)
          .template Load_With_Converter<ColorType, TdTypeConverter>("WaypointColor", YELLOW);
     });
