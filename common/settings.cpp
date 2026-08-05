@@ -105,6 +105,10 @@ void SettingsClass::Load(std::string ini_file_name, INIClass& ini)
          .Load("ButtonStyle").With_Default("Default");
     });
 
+    Sections["Intro"].With<IniRuleContext>(ini, [&](auto& c) {
+        c.Load("PlayNcoGreeting").With_Default(true);
+    });
+
     /*
     ** Enforce a fixed resolution for DOS mode.
     */
@@ -196,4 +200,9 @@ void SettingsClass::Save(INIClass& ini)
 RuleSections& SettingsClass::Get_Sections()
 {
     return Sections;
+}
+
+bool SettingsClass::Play_Nco_Greeting()
+{
+    return Sections["Intro"].Get<bool>("PlayNcoGreeting");
 }

@@ -60,6 +60,7 @@ public:
 
     RuleSections& Get_Sections();
 
+    bool Play_Nco_Greeting();
 private:
     static inline const auto& Logger = CncLogger::For(Settings);
 

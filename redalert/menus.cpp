@@ -698,6 +698,8 @@ int Main_Menu(unsigned int)
     */
     bool display = true;
     bool process = true;
+    static auto first_loop = true;
+
     while (process) {
 
         /*
@@ -764,6 +766,15 @@ int Main_Menu(unsigned int)
                 retval = -1;
                 process = false;
             }
+        }
+
+        // the first time the player sees the main menu, say our name
+        if (first_loop) {
+            if (Settings.Play_Nco_Greeting()) {
+                Speak(VOX_NEW_CONSTRUCT);
+            }
+
+            first_loop = false;
         }
 
         /*
