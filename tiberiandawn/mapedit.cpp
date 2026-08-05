@@ -467,6 +467,22 @@ bool MapEditClass::Add_To_List(ObjectTypeClass const* object)
     return (false);
 }
 
+void MapEditClass::Exit_Editor() const
+{
+    if (!Debug_Map) {
+        return;
+    }
+
+    Theme.Queue_Song(THEME_NONE);
+    Stop_Speaking();
+    Speak(VOX_CONTROL_EXIT);
+    while (Is_Speaking()) {
+        Call_Back();
+    }
+    GameActive = false;
+    Debug_Map = false;
+}
+
 /***************************************************************************
  * MapEditClass::AI -- The map editor's main logic                         *
  *                                                                         *
@@ -802,14 +818,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             }
         }
 
-        Theme.Queue_Song(THEME_NONE);
-        Stop_Speaking();
-        Speak(VOX_CONTROL_EXIT);
-        while (Is_Speaking()) {
-            Call_Back();
-        }
-        GameActive = false;
-        Debug_Map = false;
+        Exit_Editor();
         break;
 
     /*---------------------------------------------------------------------
@@ -1651,7 +1660,8 @@ void MapEditClass::Main_Menu(void)
     _menus[5] = "Scenario Options";
     _menus[6] = "AI Options";
     _menus[7] = "Play Scenario";
-    _menus[8] = NULL;
+    _menus[8] = "Exit";
+    _menus[9] = NULL;
 
     /*
     ----------------------------- Main Menu loop -----------------------------
@@ -1801,6 +1811,10 @@ void MapEditClass::Main_Menu(void)
             // reset view dimensions, prevents issues with tactical map position and shroud
             Set_View_Dimensions(0, Map.Get_Tab_Height());
 
+            return;
+
+        case 8:
+            Exit_Editor();
             return;
         }
 

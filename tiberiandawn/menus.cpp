@@ -179,14 +179,16 @@ void Setup_Menu(int menu, char const* text[], unsigned int field, int index, int
     for (lp = 0; lp < num; lp++) {
         idx = Select_To_Entry(lp, field, index);
         drawy = menuy + (lp * FontHeight) + (lp * skip);
-        Fancy_Text_Print(text[idx],
-                         menux,
-                         drawy,
-                         menuptr[((idx == item) && (MenuUpdate)) ? HILITE : NORMCOL],
-                         TBLACK,
-                         TPF_8POINT | TPF_DROPSHADOW);
-        //		if ((idx==item) && (MenuUpdate ))
-        //			Text_Print(text[idx],menux,drawy,menuptr[HILITE],TBLACK);
+        if (idx < MAX_MAIN_MENU_NUM) {
+            Fancy_Text_Print(text[idx],
+                             menux,
+                             drawy,
+                             menuptr[((idx == item) && (MenuUpdate)) ? HILITE : NORMCOL],
+                             TBLACK,
+                             TPF_8POINT | TPF_DROPSHADOW);
+            //		if ((idx==item) && (MenuUpdate ))
+            //			Text_Print(text[idx],menux,drawy,menuptr[HILITE],TBLACK);
+        }
     }
     MenuSkip = skip;
     Show_Mouse();
@@ -306,7 +308,10 @@ int Check_Menu(int menu, char const* text[], char*, int field, int index)
     */
     default:
         for (idx = 0; idx < menuptr[ITEMSHIGH]; idx++) {
-            if (toupper(*(text[Select_To_Entry(idx, field, index)]))
+            const auto entry_idx = Select_To_Entry(idx, field, index);
+            auto entry = entry_idx < MAX_MAIN_MENU_NUM ? text[entry_idx] : nullptr;
+
+            if (entry != nullptr && toupper(*entry)
                 == toupper(Keyboard->To_ASCII((KeyNumType)(key & 0x0FF)))) {
                 newitem = select = idx;
                 break;
@@ -318,21 +323,29 @@ int Check_Menu(int menu, char const* text[], char*, int field, int index)
 
     if (newitem != item) {
         Hide_Mouse();
+
         idx = Select_To_Entry(item, field, index);
-        drawy = menuy + (item * menuskip);
-        Fancy_Text_Print(text[idx], menux, drawy, normcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+        if (idx < MAX_MAIN_MENU_NUM) {
+            drawy = menuy + (item * menuskip);
+            Fancy_Text_Print(text[idx], menux, drawy, normcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+        }
+
         idx = Select_To_Entry(newitem, field, index);
-        drawy = menuy + (newitem * menuskip);
-        Fancy_Text_Print(text[idx], menux, drawy, litcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+        if (idx < MAX_MAIN_MENU_NUM) {
+            drawy = menuy + (newitem * menuskip);
+            Fancy_Text_Print(text[idx], menux, drawy, litcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+        }
         Show_Mouse(); /* resurrect the mouse	*/
     }
 
     if (select != -1) {
         idx = Select_To_Entry(select, field, index);
-        Hide_Mouse(); /* get rid of the mouse	*/
-        drawy = menuy + (newitem * menuskip);
-        Flash_Line(text[idx], menux, drawy, normcol, litcol, TBLACK);
-        Show_Mouse();
+        if (idx < MAX_MAIN_MENU_NUM) {
+            Hide_Mouse(); /* get rid of the mouse	*/
+            drawy = menuy + (newitem * menuskip);
+            Flash_Line(text[idx], menux, drawy, normcol, litcol, TBLACK);
+            Show_Mouse();
+        }
         select = idx;
     }
 
@@ -422,7 +435,7 @@ int Do_Menu(char const** strings, bool blue)
     UnknownKey = 0;
     while (selection == -1) {
         Call_Back();
-        selection = Check_Menu(0, strings, NULL, 0xFFL, 0);
+        selection = Check_Menu(0, strings, NULL, 0xFFFFFFFL, 0);
         if (UnknownKey != 0 || UnknownKey == KN_ESC || UnknownKey == KN_LMOUSE || UnknownKey == KN_RMOUSE)
             break;
 

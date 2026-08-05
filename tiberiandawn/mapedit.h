@@ -69,7 +69,7 @@ enum MapEdit1Enum
 
     NUM_EDIT_CLASSES = 8, // # different classes (templates, terrain, etc)
 
-    MAX_MAIN_MENU_NUM = 8,
+    MAX_MAIN_MENU_NUM = 9,
     MAX_MAIN_MENU_LEN = 20,
 
     MAX_AI_MENU_NUM = 6,
@@ -259,6 +259,7 @@ public:
                             char missionbuf[TeamTypeClass::MAX_TEAM_MISSIONS][20],
                             ListClass* list);
 
+    void Exit_Editor() const;
     /*
     --------------------------- Private Interface ----------------------------
     */
