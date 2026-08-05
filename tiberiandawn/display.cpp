@@ -4726,6 +4726,7 @@ bool DisplayClass::In_View(CELL cell)
         return (false);
     if ((Coord_Y(coord) - Coord_Y(tcoord)) > TacLeptonHeight + 255)
         return (false);
+
     return (true);
 
 #ifdef OBSOLETE

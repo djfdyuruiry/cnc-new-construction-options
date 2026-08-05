@@ -965,16 +965,18 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
             /*
             **	Set up the remap table for this icon.
             */
-            if (Debug_Map && Debug_Passable) {
-                if (::Ground[Land].Cost[0] == 0
-                    || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) { // impassable
-                    remap = Map.FadingRed;
-                } else {
-                    if (::Ground[Land].Cost[0] > 0x70) { // pretty passable
-                        remap = Map.FadingGreen;
-                    } else {
-                        remap = Map.FadingYellow; // moderately passable
-                    }
+            if (Debug_Map) {
+                if (Debug_Passable) {
+                    if (::Ground[Land].Cost[0] == 0
+                        || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) { // impassable
+                        remap = Map.FadingRed;
+                        } else {
+                            if (::Ground[Land].Cost[0] > 0x70) { // pretty passable
+                                remap = Map.FadingGreen;
+                            } else {
+                                remap = Map.FadingYellow; // moderately passable
+                            }
+                        }
                 }
             }
 #endif

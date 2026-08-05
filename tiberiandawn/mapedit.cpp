@@ -155,9 +155,9 @@ void MapEditClass::One_Time(void)
     MapArea = new ControlClass(
         MAP_AREA,
         0,
-        16,
+        Get_Tab_Height(),
         SeenBuff.Get_Width(),
-        SeenBuff.Get_Height() - 16,
+        SeenBuff.Get_Height() - Get_Tab_Height(),
         GadgetClass::LEFTPRESS | GadgetClass::LEFTRELEASE,
         false
     );
@@ -1392,7 +1392,7 @@ void MapEditClass::Draw_It(bool forced)
     //
     // Erase scrags at top of screen
     //
-    LogicPage->Fill_Rect(0, 0, Try_Get_Resolution_Mode_Width().value_or(640), 16, BLACK);
+    LogicPage->Fill_Rect(0, 0, Try_Get_Resolution_Mode_Width().value_or(640), Get_Tab_Height(), BLACK);
 
     /*
     **	Display the total value of all Tiberium on the map.
@@ -1434,31 +1434,42 @@ void MapEditClass::Draw_It(bool forced)
     }
 
     /**
-     * Iterate over map cells to draw associated waypoint ID's and trigger names on top.
+     * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells.
      */
     // TODO: have settings dialog menu options for font/colours in scenario editor + associated TdSettings entries to persist
     static auto constexpr cell_text_back_color = TBLACK;
-    static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT;
+    static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT | TPF_CENTER;
     static auto constexpr trigger_color = LTGREEN;
     static auto constexpr waypoint_colour = YELLOW;
 
     Iterate_Over_Map_Cells(
-        [&](auto _, auto& cell) {
+        [&](auto raw_cell, auto& cell) {
             auto cell_object = cell.Cell_Occupier();
 
             int x, y;
-            Coord_To_Pixel(cell.Cell_Coord(), x, y);
+            if (!Coord_To_Pixel(cell.Cell_Coord(), x, y)) {
+                // failed to resolve cell screen co-ords
+                return;
+            }
+
+            if (!In_View(raw_cell) || y < Get_Tab_Height()) {
+                // don't decorate a non-visible cell
+                return;
+            }
+
+            auto render_x = x + TacPixelX;
+            auto render_y = y + TacPixelY - (CELL_PIXEL_H / 4);
 
             if (cell.IsTrigger) {
                 /*
                 **	Draw the cell's Trigger mnemonic, if it has a trigger
                 */
-                auto& trig = *cell.Get_Trigger();
+                const auto& trig = *cell.Get_Trigger();
 
                 Fancy_Text_Print(
                     trig.Get_Name(),
-                    x + TacPixelX,
-                    y + TacPixelY,
+                    render_x,
+                    render_y,
                     trigger_color,
                     cell_text_back_color,
                     cell_text_flags
@@ -1470,29 +1481,34 @@ void MapEditClass::Draw_It(bool forced)
                 for (auto i = 0; i < WAYPT_HOME; i++) {
                     if (Scen.Waypoint[i] == cell.Cell_Number()) {
                         Fancy_Text_Print(std::format("{}", i).c_str(),
-                                         x + TacPixelX,
-                                         y + TacPixelY,
+                                         render_x,
+                                         render_y,
                                          waypoint_colour,
                                          cell_text_back_color,
-                                         cell_text_flags | TPF_CENTER);
+                                         cell_text_flags);
                         break;
                     }
                 }
-            } else if (Scen.Waypoint[WAYPT_HOME] == cell.Cell_Number()) {
+
+                if (Scen.Waypoint[WAYPT_HOME] == cell.Cell_Number()) {
                     Fancy_Text_Print("HOME",
-                                     x + TacPixelX,
-                                     y + TacPixelY,
+                                     render_x,
+                                     render_y,
                                      waypoint_colour,
                                      cell_text_back_color,
                                      cell_text_flags);
-            } else if (Scen.Waypoint[WAYPT_REINF] == cell.Cell_Number()) {
-                Fancy_Text_Print("REINF",
-                                 x + TacPixelX,
-                                 y + TacPixelY,
-                                 waypoint_colour,
-                                 cell_text_back_color,
-                                 cell_text_flags);
+                }
+
+                if (Scen.Waypoint[WAYPT_REINF] == cell.Cell_Number()) {
+                    Fancy_Text_Print("REINF",
+                                     render_x,
+                                     render_y,
+                                     waypoint_colour,
+                                     cell_text_back_color,
+                                     cell_text_flags);
+                }
             } else if (cell_object != nullptr && cell_object->Trigger) {
+                // draw object trigger (building/unit/infantry etc.)
                 const auto coord = cell_object->Render_Coord();
                 int object_x, object_y;
 
@@ -1500,10 +1516,10 @@ void MapEditClass::Draw_It(bool forced)
                     Fancy_Text_Print(
                         cell_object->Trigger->Get_Name(),
                         object_x + (WinX << 3),
-                        object_y,
+                        object_y + (CELL_PIXEL_H / 2),
                         trigger_color,
                         cell_text_back_color,
-                        cell_text_flags | TPF_CENTER
+                        cell_text_flags
                     );
                 }
             }

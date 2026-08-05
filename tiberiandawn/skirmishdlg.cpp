@@ -89,10 +89,8 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         }
     }
 
-    int Get_Menu_Color_For_Cell(const CELL raw_cell)
+    int Get_Menu_Color_For_Cell(const CELL raw_cell, const CellClass& cell)
     {
-        const auto& cell = Map[raw_cell];
-
         if (cell.IsWaypoint) {
             for (auto i = 0; i < 6; i++) {
                 if (raw_cell == Scen.Waypoint[i]) {
@@ -168,7 +166,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         }
     }
 
-    void Iterate_Map_Cells(const std::function<void(CELL)>& callback)
+    void Iterate_Map_Cells(const std::function<void(CELL, const CellClass&)>& callback)
     {
         if (MPlayerScenarioNumber == -1) {
             return;
@@ -186,11 +184,11 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
             return;
         }
 
-        for (CELL raw_cell = 0; raw_cell < MAP_CELL_TOTAL; raw_cell++) {
+        Map.Iterate_Over_Map_Cells([&] (CELL raw_cell, auto& cell) {
             if (Map.In_Radar(raw_cell)) {
-                callback(raw_cell);
+                callback(raw_cell, cell);
             }
-        }
+        });
 
         Clear_Scenario(false);
         GameToPlay = GAME_SKIRMISH;
@@ -201,9 +199,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
     {
         auto player_count = 0;
 
-        Iterate_Map_Cells([&](const auto raw_cell) {
-            const auto& cell = Map[raw_cell];
-
+        Iterate_Map_Cells([&](const auto raw_cell, const auto& cell) {
             if (!cell.IsWaypoint) {
                 return;
             }
@@ -238,7 +234,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         bool scale_map = false;
         bool first_cell = true;
 
-        Iterate_Map_Cells([&](const auto raw_cell) {
+        Iterate_Map_Cells([&](const auto raw_cell, const auto& cell) {
             if (first_cell) {
                 #ifdef MEGAMAPS
                 scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
@@ -248,7 +244,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
                 first_cell = false;
             }
 
-            const auto color = Get_Menu_Color_For_Cell(raw_cell);
+            const auto color = Get_Menu_Color_For_Cell(raw_cell, cell);
 
             if (scale_map) {
                 for (int x = 0; x < 2; ++x) {
