@@ -801,8 +801,15 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                 }
             }
         }
-        Prog_End();
-        exit(0);
+
+        Theme.Queue_Song(THEME_NONE);
+        Stop_Speaking();
+        Speak(VOX_CONTROL_EXIT);
+        while (Is_Speaking()) {
+            Call_Back();
+        }
+        GameActive = false;
+        Debug_Map = false;
         break;
 
     /*---------------------------------------------------------------------
