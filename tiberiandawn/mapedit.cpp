@@ -1794,7 +1794,13 @@ void MapEditClass::Main_Menu(void)
             }
             Changed = 0;
             Debug_Map = false;
+            Debug_Unshroud = false;
+
             Start_Scenario(Scen.ScenarioName);
+
+            // reset view dimensions, prevents issues with tactical map position and shroud
+            Set_View_Dimensions(0, Map.Get_Tab_Height());
+
             return;
         }
 
