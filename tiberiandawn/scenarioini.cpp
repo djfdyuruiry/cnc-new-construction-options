@@ -1186,12 +1186,13 @@ void Write_Scenario_Ini(char* root)
     /*
     **	Write the scenario data out to a file.
     */
-    CCFileClass out_file(fname);
-
-    if (out_file.Open(WRITE)) {
+    if (CCFileClass out_file(fname); out_file.Open(WRITE)) {
         ini.Save(out_file, true);
+        out_file.Close();
     } else {
-        WWMessageBox().Process("Error saving scenario");
+        WWMessageBox().Process(
+            std::format("Error saving scenario to file: {}", fname).c_str()
+        );
     }
 #endif
 }
