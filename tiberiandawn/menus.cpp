@@ -174,7 +174,7 @@ void Setup_Menu(int menu, char const* text[], unsigned int field, int index, int
     item = Select_To_Entry(menuptr[MSELECTED], field, index);
     num = menuptr[ITEMSHIGH];
 
-    Fancy_Text_Print(0, 0, 0, TBLACK, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+    Fancy_Text_Print(0, 0, 0, TBLACK, TBLACK, TPF_6POINT | TPF_DROPSHADOW);
     Hide_Mouse();
     for (lp = 0; lp < num; lp++) {
         idx = Select_To_Entry(lp, field, index);
@@ -185,7 +185,7 @@ void Setup_Menu(int menu, char const* text[], unsigned int field, int index, int
                              drawy,
                              menuptr[((idx == item) && (MenuUpdate)) ? HILITE : NORMCOL],
                              TBLACK,
-                             TPF_8POINT | TPF_DROPSHADOW);
+                             TPF_6POINT | TPF_DROPSHADOW);
             //		if ((idx==item) && (MenuUpdate ))
             //			Text_Print(text[idx],menux,drawy,menuptr[HILITE],TBLACK);
         }
@@ -327,13 +327,13 @@ int Check_Menu(int menu, char const* text[], char*, int field, int index)
         idx = Select_To_Entry(item, field, index);
         if (idx < MAX_MAIN_MENU_NUM) {
             drawy = menuy + (item * menuskip);
-            Fancy_Text_Print(text[idx], menux, drawy, normcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+            Fancy_Text_Print(text[idx], menux, drawy, normcol, TBLACK, TPF_6POINT | TPF_DROPSHADOW);
         }
 
         idx = Select_To_Entry(newitem, field, index);
         if (idx < MAX_MAIN_MENU_NUM) {
             drawy = menuy + (newitem * menuskip);
-            Fancy_Text_Print(text[idx], menux, drawy, litcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+            Fancy_Text_Print(text[idx], menux, drawy, litcol, TBLACK, TPF_6POINT | TPF_DROPSHADOW);
         }
         Show_Mouse(); /* resurrect the mouse	*/
     }
@@ -403,22 +403,22 @@ int Do_Menu(char const** strings, bool blue)
     **	Determine the width of the menu by finding the length of the
     **	longest menu entry.
     */
-    Fancy_Text_Print(TXT_NONE, 0, 0, 0, 0, TPF_8POINT | TPF_DROPSHADOW);
+    Fancy_Text_Print(TXT_NONE, 0, 0, 0, 0, TPF_6POINT | TPF_DROPSHADOW);
     length = 0;
     ptr = strings;
     while (*ptr) {
         length = MAX(length, (int)String_Pixel_Width(*ptr));
         ptr++;
     }
-    length += 7;
+    length += 45;
     MenuList[0][ITEMWIDTH] = length >> 3;
 
     /*
     **	Adjust the window values to match the size of the
     **	specified menu.
     */
-    WindowList[WINDOW_MENU][WINDOWWIDTH] = MenuList[0][ITEMWIDTH] + 2;
-    WindowList[WINDOW_MENU][WINDOWX] = 19 - (length >> 4);
+    WindowList[WINDOW_MENU][WINDOWWIDTH] = (MenuList[0][ITEMWIDTH] + 2) * 6;
+    WindowList[WINDOW_MENU][WINDOWX] = (19 - MenuList[0][ITEMWIDTH]);
     WindowList[WINDOW_MENU][WINDOWY] = 174 - (unsigned)(MenuList[0][ITEMSHIGH] * (FontHeight + FontYSpacing));
     WindowList[WINDOW_MENU][WINDOWHEIGHT] = MenuList[0][ITEMSHIGH] * FontHeight + 5 /*11*/;
 
