@@ -166,12 +166,12 @@ void MapEditClass::One_Time(void)
     const auto POPUP_GDI_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
     const auto POPUP_NOD_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 338);
     const auto POPUP_NEUTRAL_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 356);
-    const auto POPUP_MULTI1_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
-    const auto POPUP_MULTI2_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
-    const auto POPUP_MULTI3_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 330);
-    const auto POPUP_MULTI4_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 338);
+    const auto POPUP_MULTI1_Y = POPUP_GDI_Y;
+    const auto POPUP_MULTI2_Y = POPUP_MULTI1_Y;
+    const auto POPUP_MULTI3_Y = POPUP_NOD_Y;
+    const auto POPUP_MULTI4_Y = POPUP_MULTI3_Y;
     const auto POPUP_MISSION_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 300);
-    const auto POPUP_FACEBOX_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
+    const auto POPUP_FACEBOX_Y = POPUP_MISSION_Y + ((POPUP_MISSION_H - POPUP_FACEBOX_H) / 2);
     const auto POPUP_HEALTH_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 340);
 
     /*........................................................................
@@ -360,6 +360,8 @@ void MapEditClass::Read_INI(CCINIClass& ini)
 
     BasePercent = ini.Get_Int("Basic", "Percent", 0);
     BaseGauge->Set_Value(BasePercent);
+
+    CurrentCell = Coord_Cell(Pixel_To_Coord(TacPixelX, TacPixelY));
 }
 
 /***************************************************************************
@@ -1513,30 +1515,23 @@ void MapEditClass::Draw_It(bool forced)
         return;
     }
 
-    /*------------------------------------------------------------------------
-    Otherwise, if 'display' is set, invoke the parent's Redraw to refresh
-    the HIDPAGE; then, update the buttons & text labels onto HIDPAGE;
-    then invoke the parent's Redraw to blit the HIDPAGE to SEENPAGE.
-    ------------------------------------------------------------------------*/
-    if (forced) {
+    /**
+     * Render a text label in the middle of the header bar to show currently selected object/cell location.
+     */
+    const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
 
-        /*
-        ....................... Update the text labels ........................
-        */
-        if (CurrentObject.Count()) {
-            /*
-            ------------------ Display the object's name & ID ------------------
-            */
-            label = Text_String(CurrentObject[0]->Full_Name());
-            tptr = label;
-            sprintf(buf, "%s (%d)", tptr, CurrentObject[0]->As_Target());
-
-            /*
-            ......................... print the label ..........................
-            */
-            Fancy_Text_Print(buf, 320, 0, CC_TAN, TBLACK, TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
-        }
-    }
+    Fancy_Text_Print(
+        "Coord %u - Cell #%d @ %dx%d",
+        SeenBuff.Get_Width() / 2,
+        0,
+        CC_TAN,
+        TBLACK,
+        TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL,
+        Cell_Coord(target_cell),
+        Array[target_cell].Cell_Number(),
+        Cell_X(target_cell),
+        Cell_Y(target_cell)
+    );
 
     /**
      * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells.
