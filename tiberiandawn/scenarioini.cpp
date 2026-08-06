@@ -1186,8 +1186,13 @@ void Write_Scenario_Ini(char* root)
     /*
     **	Write the scenario data out to a file.
     */
-    RawFileClass rawfile(fname);
-    ini.Save(rawfile, true);
+    CCFileClass out_file(fname);
+
+    if (out_file.Open(WRITE)) {
+        ini.Save(out_file, true);
+    } else {
+        WWMessageBox().Process("Error saving scenario");
+    }
 #endif
 }
 
