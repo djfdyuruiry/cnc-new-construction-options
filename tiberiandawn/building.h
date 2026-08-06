@@ -164,6 +164,14 @@ public:
 
     TARGET RallyPoint;
 
+#ifdef SCENARIO_EDITOR
+    /*
+    ** Is this structure part of an AI base that is built after scenario start?
+    ** Used to alter the visual style in scenario editor
+    */
+    bool IsUnbuiltBase;
+#endif
+
     /*---------------------------------------------------------------------
     **	Constructors, Destructors, and overloaded operators.
     */

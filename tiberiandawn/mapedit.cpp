@@ -163,6 +163,17 @@ void MapEditClass::One_Time(void)
         false
     );
 
+    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
+    const auto POPUP_NOD_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 338);
+    const auto POPUP_NEUTRAL_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 356);
+    const auto POPUP_MULTI1_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
+    const auto POPUP_MULTI2_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
+    const auto POPUP_MULTI3_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 330);
+    const auto POPUP_MULTI4_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 338);
+    const auto POPUP_MISSION_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 300);
+    const auto POPUP_FACEBOX_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
+    const auto POPUP_HEALTH_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 340);
+
     /*........................................................................
     House buttons
     ........................................................................*/
@@ -263,6 +274,18 @@ void MapEditClass::One_Time(void)
     ........................................................................*/
     FacingDial = new Dial8Class(
         POPUP_FACINGDIAL, POPUP_FACEBOX_X, POPUP_FACEBOX_Y, POPUP_FACEBOX_W, POPUP_FACEBOX_H, (DirType)0);
+
+    /*........................................................................
+    AI Base flag for structures
+    ........................................................................*/
+    static char base_structure_text[5] = "Base";
+
+    IsBaseStructureCheckbox = new CheckBoxClass(POPUP_BASESTRUCTURE, POPUP_HEALTH_X + POPUP_HEALTH_W + 5, POPUP_HEALTH_Y + 3, HealthGauge->Height - 6);
+    IsBaseStructureText = new TextLabelClass(base_structure_text,
+                                    IsBaseStructureCheckbox->X + ((HealthGauge->Height - 6) * 2) + 5,
+                                    IsBaseStructureCheckbox->Y + ((HealthGauge->Height - 6) / 4),
+                                    CC_GREEN,
+                                    TPF_CENTER | TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
 
     /*........................................................................
     The base percent-built slider & its label
@@ -721,9 +744,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    F6 = toggle passable/impassable display
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        F6 = toggle passable/impassable display
+        ---------------------------------------------------------------------*/
     case KN_F6:
         Debug_Passable = (Debug_Passable == false);
         HiddenPage.Clear();
@@ -731,9 +754,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    INSERT = go into object-placement mode
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        INSERT = go into object-placement mode
+        ---------------------------------------------------------------------*/
     case KN_INSERT:
         if (!PendingObject) {
             /*
@@ -751,9 +774,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ESC = exit placement mode, or exit to DOS
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ESC = exit placement mode, or exit to DOS
+        ---------------------------------------------------------------------*/
     case KN_ESC:
 
         /*
@@ -821,9 +844,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         Exit_Editor();
         break;
 
-    /*---------------------------------------------------------------------
-    LEFT = go to previous placement object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        LEFT = go to previous placement object
+        ---------------------------------------------------------------------*/
     case KN_LEFT:
         if (PendingObject) {
             Place_Prev();
@@ -831,9 +854,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    RIGHT = go to next placement object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        RIGHT = go to next placement object
+        ---------------------------------------------------------------------*/
     case KN_RIGHT:
         if (PendingObject) {
             Place_Next();
@@ -841,9 +864,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    PGUP = go to previous placement category
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        PGUP = go to previous placement category
+        ---------------------------------------------------------------------*/
     case KN_PGUP:
         if (PendingObject) {
             Place_Prev_Category();
@@ -851,9 +874,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    PGDN = go to next placement category
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        PGDN = go to next placement category
+        ---------------------------------------------------------------------*/
     case KN_PGDN:
         if (PendingObject) {
             Place_Next_Category();
@@ -861,9 +884,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    HOME = jump to first placement object, or go to Home Cell
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        HOME = jump to first placement object, or go to Home Cell
+        ---------------------------------------------------------------------*/
     case KN_HOME:
         if (PendingObject) {
             Place_Home();
@@ -887,9 +910,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         break;
 
 #if (KN_HOME | KN_SHIFT_BIT) != KN_HOME
-    /*---------------------------------------------------------------------
-    SHIFT-HOME: set new Home Cell position
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        SHIFT-HOME: set new Home Cell position
+        ---------------------------------------------------------------------*/
     case ((int)KN_HOME | (int)KN_SHIFT_BIT):
 #else
     case ((int)KN_HOME | (int)KN_CTRL_BIT):
@@ -924,10 +947,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    SHIFT-R: set new Reinforcement Cell position.  Don't allow setting
-    the Reinf. Cell to the same as the Home Cell (for display purposes.)
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        SHIFT-R: set new Reinforcement Cell position.  Don't allow setting
+        the Reinf. Cell to the same as the Home Cell (for display purposes.)
+        ---------------------------------------------------------------------*/
     case ((int)KN_R | (int)KN_SHIFT_BIT):
         if (CurrentCell == 0 || CurrentCell == Scen.Waypoint[WAYPT_HOME]) {
             break;
@@ -962,9 +985,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ALT-Letter: Label a waypoint cell
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ALT-Letter: Label a waypoint cell
+        ---------------------------------------------------------------------*/
     case ((int)KN_A | (int)KN_ALT_BIT):
     case ((int)KN_B | (int)KN_ALT_BIT):
     case ((int)KN_C | (int)KN_ALT_BIT):
@@ -1010,9 +1033,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ALT-1-4: Designate a cell as a capture-the-flag cell.
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ALT-1-4: Designate a cell as a capture-the-flag cell.
+        ---------------------------------------------------------------------*/
     case ((int)KN_1 | (int)KN_ALT_BIT):
     case ((int)KN_2 | (int)KN_ALT_BIT):
     case ((int)KN_3 | (int)KN_ALT_BIT):
@@ -1042,9 +1065,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ALT-Space: Remove a waypoint designation
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ALT-Space: Remove a waypoint designation
+        ---------------------------------------------------------------------*/
     case ((int)KN_SPACE | (int)KN_ALT_BIT):
         if (CurrentCell != 0) {
             /*...............................................................
@@ -1078,9 +1101,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    'H' = toggle current placement object's house
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        'H' = toggle current placement object's house
+        ---------------------------------------------------------------------*/
     case KN_H:
     case ((int)KN_H | (int)KN_SHIFT_BIT):
         if (PendingObject) {
@@ -1089,18 +1112,18 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Left-mouse click:
-    Button DOWN:
-    - Toggle LMouseDown
-    - If we're in placement mode, try to place the current object
-      - If success, re-enter placement mode
-    - Otherwise, try to select an object, and "grab" it if there is one
-    - If no object, then select that cell as the "current" cell
-    Button UP:
-    - Toggle LMouseDown
-    - release any grabbed object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Left-mouse click:
+        Button DOWN:
+        - Toggle LMouseDown
+        - If we're in placement mode, try to place the current object
+          - If success, re-enter placement mode
+        - Otherwise, try to select an object, and "grab" it if there is one
+        - If no object, then select that cell as the "current" cell
+        Button UP:
+        - Toggle LMouseDown
+        - release any grabbed object
+        ---------------------------------------------------------------------*/
     case ((int)MAP_AREA | (int)KN_BUTTON):
         /*
         ------------------------- Left Button DOWN -------------------------
@@ -1162,9 +1185,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         }
         break;
 
-    /*---------------------------------------------------------------------
-    SHIFT-ALT-Arrow: move the current object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        SHIFT-ALT-Arrow: move the current object
+        ---------------------------------------------------------------------*/
     case (int)KN_UP | (int)KN_ALT_BIT | (int)KN_SHIFT_BIT:
     case (int)KN_DOWN | (int)KN_ALT_BIT | (int)KN_SHIFT_BIT:
     case (int)KN_LEFT | (int)KN_ALT_BIT | (int)KN_SHIFT_BIT:
@@ -1176,9 +1199,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    DELETE: delete currently-selected object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        DELETE: delete currently-selected object
+        ---------------------------------------------------------------------*/
     case KN_DELETE:
         /*..................................................................
         Delete currently-selected object's trigger, or the object
@@ -1237,17 +1260,17 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    TAB: select next object on the map
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        TAB: select next object on the map
+        ---------------------------------------------------------------------*/
     case KN_TAB:
         Select_Next();
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: House Button
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: House Button
+        ---------------------------------------------------------------------*/
     case (POPUP_GDI | KN_BUTTON):
     case (POPUP_NOD | KN_BUTTON):
     case (POPUP_NEUTRAL | KN_BUTTON):
@@ -1273,9 +1296,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: Mission
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: Mission
+        ---------------------------------------------------------------------*/
     case (POPUP_MISSIONLIST | KN_BUTTON):
         if (CurrentObject[0]->Is_Techno()) {
             /*
@@ -1291,9 +1314,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: Health
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: Health
+        ---------------------------------------------------------------------*/
     case (POPUP_HEALTHGAUGE | KN_BUTTON):
         if (CurrentObject[0]->Is_Techno()) {
             /*
@@ -1327,9 +1350,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: Facing
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: Facing
+        ---------------------------------------------------------------------*/
     case (POPUP_FACINGDIAL | KN_BUTTON):
         if (CurrentObject[0]->Is_Techno()) {
             /*
@@ -1355,6 +1378,65 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         }
         input = KN_NONE;
         break;
+
+    case (POPUP_BASESTRUCTURE | KN_BUTTON): {
+        input = KN_NONE;
+
+        // when the 'Base' checkbox is toggled, add/remove the selected building (if any) from the AI base
+        if (CurrentObject.Count() < 1 || CurrentObject[0]->What_Am_I() != RTTI_BUILDING) {
+            break;
+        }
+
+        auto selected_building = dynamic_cast<BuildingClass*>(CurrentObject[0]);
+        const auto building_strength = selected_building->Strength;
+        const auto facing = selected_building->PrimaryFacing;
+
+        auto base_changed = false;
+
+        BaseNodeClass building_node;
+
+        building_node.Type = selected_building->Class->Type;
+        building_node.Coord = selected_building->Coord;
+
+        // TODO: provide way of setting the base index in UI (influence base build order without editing INI)
+        if (!IsBaseStructureCheckbox->IsOn) {
+            if (!Base.Is_Node(selected_building)) {
+                Base.Nodes.Add(building_node);
+                base_changed = true;
+            }
+
+            IsBaseStructureCheckbox->Turn_On();
+        } else if (IsBaseStructureCheckbox->IsOn) {
+            if (Base.Is_Node(selected_building)) {
+                Base.Nodes.Delete(building_node);
+                base_changed = true;
+            }
+
+            IsBaseStructureCheckbox->Turn_Off();
+        }
+
+        if (base_changed) {
+            Changed = 1;
+
+            // rebuild AI base to reflect change
+            Build_Base_To(BasePercent);
+
+            // restore building state (adding existing structure to base causes it to be recreated)
+            auto new_building = Base.Get_Building(building_node);
+
+            if (new_building != nullptr) {
+                new_building->Strength = building_strength;
+                new_building->PrimaryFacing = facing;
+
+                new_building->Select();
+                new_building->Time_To_Redraw();
+            }
+
+            Flag_To_Redraw(true);
+        }
+
+        break;
+    }
 
     /*---------------------------------------------------------------------
     Object-Editing button: Facing
@@ -1732,6 +1814,7 @@ void MapEditClass::Main_Menu(void)
             }
             if (Load_Scenario() == 0) {
                 Scen.CarryOverMoney = 0;
+                Build_Base_To(BasePercent);
                 Changed = 0;
             }
             process = false;

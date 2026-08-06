@@ -78,52 +78,42 @@ enum MapEdit1Enum
     POPUP_GDI_W = 100,
     POPUP_GDI_H = 18,
     POPUP_GDI_X = 20,
-    POPUP_GDI_Y = 320,
 
     POPUP_NOD_W = 100,
     POPUP_NOD_H = 18,
     POPUP_NOD_X = 20,
-    POPUP_NOD_Y = 338,
 
     POPUP_NEUTRAL_W = 100,
     POPUP_NEUTRAL_H = 18,
     POPUP_NEUTRAL_X = 20,
-    POPUP_NEUTRAL_Y = 356,
 
     POPUP_MULTI1_W = 50,
     POPUP_MULTI1_H = 18,
     POPUP_MULTI1_X = 20,
-    POPUP_MULTI1_Y = 320,
 
     POPUP_MULTI2_W = 50,
     POPUP_MULTI2_H = 18,
     POPUP_MULTI2_X = 70,
-    POPUP_MULTI2_Y = 320,
 
     POPUP_MULTI3_W = 50,
     POPUP_MULTI3_H = 18,
     POPUP_MULTI3_X = 20,
-    POPUP_MULTI3_Y = 330,
 
     POPUP_MULTI4_W = 50,
     POPUP_MULTI4_H = 18,
     POPUP_MULTI4_X = 70,
-    POPUP_MULTI4_Y = 338,
 
     POPUP_MISSION_W = 160,
     POPUP_MISSION_H = 80,
     POPUP_MISSION_X = 140,
-    POPUP_MISSION_Y = 300,
 
     POPUP_FACEBOX_W = 60,
     POPUP_FACEBOX_H = 60,
     POPUP_FACEBOX_X = 320,
-    POPUP_FACEBOX_Y = 320,
 
     POPUP_HEALTH_W = 100,
     POPUP_HEALTH_H = 20,
     POPUP_HEALTH_X = 400,
-    POPUP_HEALTH_Y = 340,
 
     POPUP_BASE_W = 100,
     POPUP_BASE_H = 16,
@@ -150,6 +140,7 @@ enum MapEditButtonIDEnum
     POPUP_MISSIONLIST, // list box for missions
     POPUP_HEALTHGAUGE, // health of object
     POPUP_FACINGDIAL,  // object's facing
+    POPUP_BASESTRUCTURE, // health of object
     POPUP_BASEPERCENT, // Base's percent-built slider
     MAP_AREA,          // map as a click-able thingy
     BUTTON_FLAG = 0x8000
@@ -234,7 +225,7 @@ public:
     void Place_Trigger(void);
     void Start_Base_Building(void);
     void Cancel_Base_Building(void);
-    void Build_Base_To(int percent);
+    void Build_Base_To(int percent, bool place_virtual_buildings = true);
 
     /*
     ............................ mapedsel.cpp .............................
@@ -342,6 +333,8 @@ private:
     ListClass* MissionList;
     TriColorGaugeClass* HealthGauge;
     Dial8Class* FacingDial;
+    CheckBoxClass* IsBaseStructureCheckbox;
+    TextLabelClass* IsBaseStructureText;
     ControlClass* MapArea;
     TextLabelClass* HealthText;
     static char HealthBuf[20];

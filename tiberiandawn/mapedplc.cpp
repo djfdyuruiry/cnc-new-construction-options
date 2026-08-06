@@ -2005,7 +2005,7 @@ void MapEditClass::Cancel_Base_Building(void)
  * HISTORY:                                                                *
  *   12/01/1994 BR : Created.                                              *
  *=========================================================================*/
-void MapEditClass::Build_Base_To(int percent)
+void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings)
 {
     int i;
     int num_buildings;
@@ -2028,11 +2028,12 @@ void MapEditClass::Build_Base_To(int percent)
     ** Compute number of buildings to build
     */
     num_buildings = (Base.Nodes.Count() * percent) / 100;
+    auto limit = place_virtual_buildings ? Base.Nodes.Count() : num_buildings ;
 
     /*
     ** Build the base to the desired amount
     */
-    for (i = 0; i < num_buildings; i++) {
+    for (i = 0; i < limit; i++) {
         /*
         ** Get a ptr to the type of building to build, create one, and unlimbo it.
         */
@@ -2046,6 +2047,8 @@ void MapEditClass::Build_Base_To(int percent)
             WWMessageBox().Process("Unable to build base!");
             return;
         }
+
+        obj->IsUnbuiltBase = i >= num_buildings;
     }
 
     // ScenarioInit--;

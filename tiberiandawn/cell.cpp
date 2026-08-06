@@ -971,13 +971,13 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                     Cell_Y(cell) < Map.IniMapCellY || Cell_Y(cell) >= (Map.IniMapCellY + Map.IniMapCellHeight)
                 ) {
                     // this cell will be out of bounds during gameplay, so highlight it as such
-                    remap = Map.FadingShade;
+                    remap = DisplayClass::FadingShade;
                 } else if (Debug_Passable) {
                     if (::Ground[Land].Cost[0] == 0
                         || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) {
-                        remap = Map.FadingRed; // impassable
+                        remap = DisplayClass::FadingRed; // impassable
                     } else {
-                        remap = Map.FadingGreen; // passable
+                        remap = DisplayClass::FadingGreen; // passable
                     }
                 }
             }

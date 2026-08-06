@@ -296,6 +296,8 @@ void MapEditClass::Popup_Controls(void)
     Remove_A_Button(*HealthGauge);
     Remove_A_Button(*HealthText);
     Remove_A_Button(*FacingDial);
+    Remove_A_Button(*IsBaseStructureCheckbox);
+    Remove_A_Button(*IsBaseStructureText);
     Remove_A_Button(*BaseGauge);
     Remove_A_Button(*BaseLabel);
     Remove_A_Button(*MapArea);
@@ -395,6 +397,14 @@ void MapEditClass::Popup_Controls(void)
         sprintf(HealthBuf, "%d", CurrentObject[0]->Strength);
         Add_A_Button(*HealthGauge);
         Add_A_Button(*HealthText);
+        Add_A_Button(*IsBaseStructureCheckbox);
+        Add_A_Button(*IsBaseStructureText);
+
+        if (Base.Is_Node(dynamic_cast<BuildingClass*>(CurrentObject[0]))) {
+            IsBaseStructureCheckbox->Turn_On();
+        } else {
+            IsBaseStructureCheckbox->Turn_Off();
+        }
 
         if (objtype->IsTurretEquipped) {
             FacingDial->Set_Direction(((TechnoClass*)CurrentObject[0])->PrimaryFacing);

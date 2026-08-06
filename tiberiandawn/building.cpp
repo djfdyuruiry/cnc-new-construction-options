@@ -5232,6 +5232,15 @@ DirType BuildingClass::Fire_Direction(void) const
 void const* BuildingClass::Remap_Table(void)
 {
     Validate();
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map && Base.Get_Node(this) != nullptr && IsUnbuiltBase) {
+
+        // this building won't be present on scenario start, so render it faded
+        return DisplayClass::FadingShade;
+    }
+#endif
+
     return (House->Remap_Table(IsBlushing, false));
 }
 

@@ -328,10 +328,16 @@ int MapEditClass::Save_Scenario(void)
         LastHouse = HOUSE_GOOD;
     }
 
+    // clear virtual base buildings in prep for save
+    Build_Base_To(BasePercent, false);
+
     /*
     ----------------------------- Write the INI ------------------------------
     */
     Write_Scenario_Ini(Scen.ScenarioName);
+
+    // restore virtual base buildings
+    Build_Base_To(BasePercent);
 
     return (0);
 }
@@ -3917,6 +3923,13 @@ int MapEditClass::Import_Teams(void)
     INIClass ini;
     file.Set_Name("MASTER.INI");
     if (!file.Is_Available()) {
+        WWMessageBox().Process(
+            "Unable to find 'MASTER.INI' - create this file with a 'TeamTypes' section to import types"
+        );
+        HiddenPage.Clear();
+        Flag_To_Redraw(true);
+        Render();
+
         file.Close();
         return (-1);
     } else {
