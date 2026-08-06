@@ -100,9 +100,9 @@ PRIVATE void Flash_Line(char const* text, int xpix, int ypix, unsigned nfgc, uns
 
     for (loop = 0; loop < 3; loop++) {
         Hide_Mouse();
-        Fancy_Text_Print(text, xpix, ypix, hfgc, bgc, TPF_8POINT | TPF_DROPSHADOW);
+        Fancy_Text_Print(text, xpix, ypix, hfgc, bgc, TPF_6POINT | TPF_DROPSHADOW);
         Delay(2);
-        Fancy_Text_Print(text, xpix, ypix, nfgc, bgc, TPF_8POINT | TPF_DROPSHADOW);
+        Fancy_Text_Print(text, xpix, ypix, nfgc, bgc, TPF_6POINT | TPF_DROPSHADOW);
         Show_Mouse();
         Delay(2);
     }
@@ -386,7 +386,7 @@ int Do_Menu(char const** strings, bool blue)
 
     if (!strings)
         return (-1);
-    Set_Logic_Page(SeenBuff);
+    Set_Logic_Page(HidPage);
     Keyboard->Clear();
 
     /*
@@ -438,6 +438,14 @@ int Do_Menu(char const** strings, bool blue)
         selection = Check_Menu(0, strings, NULL, 0xFFFFFFFL, 0);
         if (UnknownKey != 0 || UnknownKey == KN_ESC || UnknownKey == KN_LMOUSE || UnknownKey == KN_RMOUSE)
             break;
+
+        HidPage.Blit(SeenBuff,
+                     (WindowList[WINDOW_MENU][WINDOWX]) << 3,
+                     WindowList[WINDOW_MENU][WINDOWY],
+                     (WindowList[WINDOW_MENU][WINDOWX]) << 3,
+                     WindowList[WINDOW_MENU][WINDOWY],
+                     (WindowList[WINDOW_MENU][WINDOWWIDTH]) << 3,
+                     WindowList[WINDOW_MENU][WINDOWHEIGHT]);
 
         Frame_Limiter();
     }
