@@ -1617,9 +1617,17 @@ void DisplayClass::Read_INI(CCINIClass& ini)
     }
 
 #ifdef MEGAMAPS
-    // detect if scenario is a megamap
+    // get megamap flag
     MapBinaryVersion = ini.Get_Int("MAP", "Version", MAP_VERSION_NORMAL);
     MapBinaryVersion = Bound(MapBinaryVersion, 0, 1); // Little hack to stop arbitrary values.
+
+    // validate megamap flag - if declared as normal but bounds exceed 64x64, force mega
+    constexpr auto original_map_size = 64;
+
+    if (MapBinaryVersion == MAP_VERSION_NORMAL
+        && (IniMapCellX + IniMapCellWidth > original_map_size || IniMapCellY + IniMapCellHeight > original_map_size)) {
+        MapBinaryVersion = MAP_VERSION_MEGA;
+    }
 #endif
 
     /*
