@@ -1520,7 +1520,7 @@ void MapEditClass::Draw_It(bool forced)
     //
     // Erase scrags at top of screen
     //
-    LogicPage->Fill_Rect(0, 0, Try_Get_Resolution_Mode_Width().value_or(640), Get_Tab_Height(), BLACK);
+    LogicPage->Fill_Rect(0, 0, SeenBuff.Get_Width(), Get_Tab_Height(), BLACK);
 
     /*
     **	Display the total value of all Tiberium on the map.
@@ -1528,6 +1528,9 @@ void MapEditClass::Draw_It(bool forced)
     Fancy_Text_Print(
         "Tiberium=%ld   ", 0, 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
 
+    /*
+    **	Display exact base percent value beside slider.
+    */
     Fancy_Text_Print(
         "%3d%%", SeenBuff.Get_Width() - (22 * factor), 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
 
@@ -1542,11 +1545,12 @@ void MapEditClass::Draw_It(bool forced)
     /**
      * Render a text label in the middle of the header bar to show currently selected object/cell location.
      */
+    static const auto left_offset = SeenBuff.Get_Width() > GBUFF_INIT_WIDTH ? 0 : 40;  // adjust original res left
     const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
 
     Fancy_Text_Print(
         "Coord %u - Cell #%d @ %dx%d",
-        SeenBuff.Get_Width() / 2,
+        (SeenBuff.Get_Width() / 2) - left_offset,
         0,
         CC_TAN,
         TBLACK,
