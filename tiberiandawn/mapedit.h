@@ -311,6 +311,8 @@ private:
     .....................................................................*/
     int BasePercent; // Percentage the base will be built
 
+    std::optional<std::string> LuaScriptPath;
+
     /*.....................................................................
     Variables for supporting the object-editing controls at screen bottom
     .....................................................................*/

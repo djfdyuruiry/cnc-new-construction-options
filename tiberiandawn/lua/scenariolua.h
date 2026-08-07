@@ -38,6 +38,9 @@ class ScenarioLua final
 public:
     static const LuaEngine& Get_Engine();
 
+    static std::optional<std::string> Read_Lua_Script_Path(const CCINIClass& ini);
+    static bool Write_Lua_Script_Path(CCINIClass& ini, const std::optional<std::string>& path);
+
     /**
      * Scenario has been fully loaded, so time to
      * initialize Lua runtime with scenario data.

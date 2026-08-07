@@ -1861,6 +1861,16 @@ int MapEditClass::Scenario_Dialog(void)
                             D_NODW_W,
                             D_NODW_H);
 
+    EditClass luascript_textbox(TEDIT_LUASCRIPT,
+                            luascript_buf,
+                            std::size(luascript_buf) - 1,
+                            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                            D_LUASCRIPT_X,
+                            D_LUASCRIPT_Y,
+                            D_LUASCRIPT_W,
+                            D_LUASCRIPT_H,
+                            EditClass::ALPHANUMERIC);
+
     TextButtonClass okbtn(
         BUTTON_OK, TXT_OK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, D_OK_X, D_OK_Y, D_OK_W, D_OK_H);
 
@@ -1920,6 +1930,7 @@ int MapEditClass::Scenario_Dialog(void)
     nodebtn.Add_Tail(*commands);
     nodsbtn.Add_Tail(*commands);
     nodwbtn.Add_Tail(*commands);
+    luascript_textbox.Add_Tail(*commands);
     okbtn.Add_Tail(*commands);
     cancelbtn.Add_Tail(*commands);
 
@@ -1963,6 +1974,12 @@ int MapEditClass::Scenario_Dialog(void)
     neutcred.Set_Text(neutcred_buf, 8);
 
     theaterbtn.Set_Selected_Index(orig_theater - THEATER_NONE - 1);
+
+    if (LuaScriptPath.has_value()) {
+        strncpy(luascript_buf, LuaScriptPath->c_str(), std::size(luascript_buf));
+        luascript_buf[std::size(luascript_buf) - 1] = '\0';
+        luascript_textbox.Set_Text(luascript_buf, std::size(luascript_buf) - 1);
+    }
 
     /*
     -------------------------- Main Processing Loop --------------------------
@@ -2008,8 +2025,8 @@ int MapEditClass::Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Build Level",
-                                 D_LEVEL_X,
+                Fancy_Text_Print("Build Level:",
+                                 D_LEVEL_X - 5,
                                  D_LEVEL_Y,
                                  CC_GREEN,
                                  TBLACK,
@@ -2022,21 +2039,21 @@ int MapEditClass::Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("GDI",
+                Fancy_Text_Print(TXT_SCORE_GDI,
                                  D_GDICRED_X - 5,
                                  D_GDICRED_Y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("NOD",
+                Fancy_Text_Print(TXT_SCORE_NOD,
                                  D_NODCRED_X - 5,
                                  D_NODCRED_Y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Neutral",
+                Fancy_Text_Print(TXT_SCORE_NEUT,
                                  D_NEUTCRED_X - 5,
                                  D_NEUTCRED_Y,
                                  CC_GREEN,
@@ -2050,19 +2067,26 @@ int MapEditClass::Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("GDI",
+                Fancy_Text_Print(TXT_G_D_I,
                                  D_GDIN_X + D_GDIN_W / 2,
                                  D_GDIN_Y - D_TXT8_H,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("NOD",
+                Fancy_Text_Print(TXT_N_O_D,
                                  D_NODN_X + D_NODN_W / 2,
                                  D_NODN_Y - D_TXT8_H,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                Fancy_Text_Print("Lua Script:",
+                                 D_LUASCRIPT_X - 5,
+                                 D_LUASCRIPT_Y,
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
             }
             Show_Mouse();
             display = REDRAW_NONE;
@@ -2217,6 +2241,15 @@ int MapEditClass::Scenario_Dialog(void)
     ........................... Sidebar build level ..........................
     */
     BuildLevel = atoi(level_buf);
+
+    /*
+    ........................... Lua Script Path ..........................
+    */
+    const std::string lua_script = luascript_buf;
+
+    if (!CncStringUtils::Is_Blank(lua_script)) {
+        LuaScriptPath = lua_script;
+    }
 
     /*........................................................................
     Change the theater:

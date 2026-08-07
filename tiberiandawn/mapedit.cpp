@@ -58,6 +58,7 @@
 
 #include "function.h"
 #include "common/framelimit.h"
+#include "lua/scenariolua.h"
 #include "ccini.h"
 #include "tiberiandawnsettings.h"
 
@@ -385,6 +386,10 @@ void MapEditClass::Read_INI(CCINIClass& ini)
     BaseGauge->Set_Value(BasePercent);
 
     CurrentCell = Coord_Cell(Pixel_To_Coord(TacPixelX, TacPixelY));
+
+    LuaScriptPath.reset();
+    LuaScriptPath = ScenarioLua::Read_Lua_Script_Path(ini);
+
     Changed = 0;
 }
 
@@ -416,6 +421,8 @@ void MapEditClass::Write_INI(CCINIClass& ini)
     ** by the Base's Write_INI routine.
     */
     ini.Put_Int("Basic", "Percent", BasePercent);
+
+    ScenarioLua::Write_Lua_Script_Path(ini, LuaScriptPath);
 }
 
 /***************************************************************************

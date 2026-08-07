@@ -37,6 +37,33 @@ const LuaEngine& ScenarioLua::Get_Engine()
     return Engine.value();
 }
 
+std::optional<std::string> ScenarioLua::Read_Lua_Script_Path(const CCINIClass& ini)
+{
+    auto ini_script_path = ini.Get_String(
+        "Basic",
+        "LuaScript",
+        NotFoundStr
+    );
+
+    if (ini_script_path == NotFoundStr) {
+        return std::nullopt;
+        CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");
+    }
+
+    return ini_script_path;
+}
+
+bool ScenarioLua::Write_Lua_Script_Path(CCINIClass& ini, const std::optional<std::string>& path)
+{
+    const auto write_path = path.has_value();
+
+    if (write_path) {
+        ini.Put_String("Basic", "LuaScript", *path);
+    }
+
+    return write_path;
+}
+
 void ScenarioLua::On_Scenario_Load(
     const GameEnum& game_type,
     const ScenarioClass& scenario,
@@ -84,13 +111,7 @@ void ScenarioLua::On_Scenario_Load(
     const bool was_loaded_from_save
 )
 {
-    const auto ini_script_path = ini.Get_String(
-        "Basic",
-        "LuaScript",
-        NotFoundStr
-    );
-
-    On_Scenario_Load(game_type, scenario, player, ini_script_path, was_loaded_from_save);
+    On_Scenario_Load(game_type, scenario, player, Read_Lua_Script_Path(ini), was_loaded_from_save);
 }
 
 void ScenarioLua::On_Scenario_Load(
@@ -263,16 +284,12 @@ void ScenarioLua::Exec_Scenario_Lua_Scripts(
     };
 
     if (ini_script_path.has_value()) {
-        if (*ini_script_path != NotFoundStr) {
-            if (!CncStringUtils::Is_Blank(*ini_script_path)) {
-                auto path = *ini_script_path;
+        if (!CncStringUtils::Is_Blank(*ini_script_path)) {
+            auto path = *ini_script_path;
 
-                CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", path);
-                CncStringUtils::To_Lower(path);
-                lua_scripts_to_load.emplace_back(path);
-            }
-        } else {
-            CNC_LOGGER_DEBUG("Scenario INI does not contain a [Basic].LuaScript key");
+            CNC_LOGGER_DEBUG("Scenario INI contains [Basic].LuaScript key: {}", path);
+            CncStringUtils::To_Lower(path);
+            lua_scripts_to_load.emplace_back(path);
         }
     }
 
