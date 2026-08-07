@@ -843,6 +843,7 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
     */
     if (fresh) {
         if (!Map.Read_Binary_File(bin_file_name, &ScenarioCRC)) {
+            CNC_LOG_WARN("Failed to read binary file '{}' - falling back to INI template values", bin_file_name);
             TemplateClass::Read_INI(ini);
         }
     }
