@@ -423,9 +423,9 @@ void GScreenClass::Render(void)
 
                     // add extra padding on the top and right to fit label text
                     start_x -= dialog_margin;
-                    start_y -= (dialog_margin * 3);
+                    start_y -= (dialog_margin * 4);
                     width += dialog_margin;
-                    height += (dialog_margin * 3);
+                    height += (dialog_margin * 4);
 
                     Dialog_Box(start_x, start_y, width, height);
 
@@ -433,13 +433,12 @@ void GScreenClass::Render(void)
                     if (CurrentObject.Count() > 0) {
                         // init font
                         Fancy_Text_Print(TXT_NONE, 0, 0, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-                        Fancy_Text_Print(
-                            CurrentObject[0]->Full_Name(),
-                            start_x + (width / 2),
-                            start_y + 5,
-                            CC_GREEN,
-                            TBLACK,
-                            TPF_CENTER | TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL
+                        Draw_Caption(
+                            Text_String(CurrentObject[0]->Full_Name()),
+                            OPTION_DIALOG,
+                            start_x,
+                            start_y,
+                            width
                         );
                     }
                 }
