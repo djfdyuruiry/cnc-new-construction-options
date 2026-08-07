@@ -75,49 +75,40 @@ enum MapEdit1Enum
     MAX_AI_MENU_NUM = 6,
     MAX_AI_MENU_LEN = 20,
 
+    CONTROL_MARGIN = 5,
+
     POPUP_GDI_W = 100,
     POPUP_GDI_H = 18,
-    POPUP_GDI_X = 20,
 
     POPUP_NOD_W = 100,
     POPUP_NOD_H = 18,
-    POPUP_NOD_X = 20,
 
     POPUP_NEUTRAL_W = 100,
     POPUP_NEUTRAL_H = 18,
-    POPUP_NEUTRAL_X = 20,
 
     POPUP_MULTI1_W = 50,
     POPUP_MULTI1_H = 18,
-    POPUP_MULTI1_X = 20,
 
     POPUP_MULTI2_W = 50,
     POPUP_MULTI2_H = 18,
-    POPUP_MULTI2_X = 70,
 
     POPUP_MULTI3_W = 50,
     POPUP_MULTI3_H = 18,
-    POPUP_MULTI3_X = 20,
 
     POPUP_MULTI4_W = 50,
     POPUP_MULTI4_H = 18,
-    POPUP_MULTI4_X = 70,
-
-    POPUP_MISSION_W = 160,
-    POPUP_MISSION_H = 80,
-    POPUP_MISSION_X = 140,
 
     POPUP_FACEBOX_W = 60,
     POPUP_FACEBOX_H = 60,
-    POPUP_FACEBOX_X = 320,
 
     POPUP_HEALTH_W = 100,
     POPUP_HEALTH_H = 20,
-    POPUP_HEALTH_X = 400,
+    POPUP_BASESTRUCTURE_SIZE = POPUP_HEALTH_H - CONTROL_MARGIN,
 
-    POPUP_BASE_W = 100,
-    POPUP_BASE_H = 16,
-    POPUP_BASE_Y = 0,
+    POPUP_MISSION_W = 95,
+    POPUP_MISSION_H = POPUP_FACEBOX_H,
+
+    POPUP_BASE_W = 100
 };
 
 /*...........................................................................

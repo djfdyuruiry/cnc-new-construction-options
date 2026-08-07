@@ -163,16 +163,40 @@ void MapEditClass::One_Time(void)
         false
     );
 
-    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 320);
-    const auto POPUP_NOD_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 338);
-    const auto POPUP_NEUTRAL_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 356);
+    // make all control positions relative to POPUP_GDI and use offset center X co-ord so the UI layout is centered
+    const auto POPUP_GDI_X = (SeenBuff.Get_Width() / 2)
+        - ((POPUP_GDI_W + POPUP_FACEBOX_W + POPUP_HEALTH_W + POPUP_MISSION_W + (CONTROL_MARGIN * 3)) / 2);
+    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - 80;
+
+    const auto POPUP_NOD_X = POPUP_GDI_X;
+    const auto POPUP_NOD_Y = POPUP_GDI_Y + POPUP_GDI_H;
+
+    const auto POPUP_NEUTRAL_X = POPUP_GDI_X;
+    const auto POPUP_NEUTRAL_Y = POPUP_NOD_Y + POPUP_NOD_H;
+
+    const auto POPUP_MULTI1_X = POPUP_GDI_X;
     const auto POPUP_MULTI1_Y = POPUP_GDI_Y;
+
+    const auto POPUP_MULTI2_X = POPUP_GDI_X + (CONTROL_MARGIN * 10);
     const auto POPUP_MULTI2_Y = POPUP_MULTI1_Y;
+
+    const auto POPUP_MULTI3_X = POPUP_MULTI1_X;
     const auto POPUP_MULTI3_Y = POPUP_NOD_Y;
+
+    const auto POPUP_MULTI4_X = POPUP_MULTI2_X;
     const auto POPUP_MULTI4_Y = POPUP_MULTI3_Y;
-    const auto POPUP_MISSION_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 300);
-    const auto POPUP_FACEBOX_Y = POPUP_MISSION_Y + ((POPUP_MISSION_H - POPUP_FACEBOX_H) / 2);
-    const auto POPUP_HEALTH_Y = SeenBuff.Get_Height() - (GBUFF_INIT_HEIGHT - 340);
+
+    const auto POPUP_FACEBOX_X = POPUP_GDI_X + POPUP_GDI_W + CONTROL_MARGIN;
+    const auto POPUP_FACEBOX_Y = POPUP_GDI_Y - CONTROL_MARGIN;
+
+    const auto POPUP_HEALTH_X = POPUP_FACEBOX_X + POPUP_FACEBOX_W + CONTROL_MARGIN;
+    const auto POPUP_HEALTH_Y = POPUP_GDI_Y + (CONTROL_MARGIN * 4);
+
+    const auto POPUP_BASESTRUCTURE_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
+    const auto POPUP_BASESTRUCTURE_Y = POPUP_HEALTH_Y + 1;
+
+    const auto POPUP_MISSION_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
+    const auto POPUP_MISSION_Y = POPUP_FACEBOX_Y;
 
     /*........................................................................
     House buttons
@@ -280,22 +304,21 @@ void MapEditClass::One_Time(void)
     ........................................................................*/
     static char base_structure_text[5] = "Base";
 
-    IsBaseStructureCheckbox = new CheckBoxClass(POPUP_BASESTRUCTURE, POPUP_HEALTH_X + POPUP_HEALTH_W + 5, POPUP_HEALTH_Y + 3, HealthGauge->Height - 6);
+    IsBaseStructureCheckbox = new CheckBoxClass(POPUP_BASESTRUCTURE, POPUP_BASESTRUCTURE_X, POPUP_BASESTRUCTURE_Y, POPUP_BASESTRUCTURE_SIZE);
     IsBaseStructureText = new TextLabelClass(base_structure_text,
-                                    IsBaseStructureCheckbox->X + ((HealthGauge->Height - 6) * 2) + 5,
-                                    IsBaseStructureCheckbox->Y + ((HealthGauge->Height - 6) / 4),
+                                    IsBaseStructureCheckbox->X + (POPUP_BASESTRUCTURE_SIZE * 2) + 5,
+                                    IsBaseStructureCheckbox->Y + ((POPUP_BASESTRUCTURE_SIZE - 6) / 6),
                                     CC_GREEN,
                                     TPF_CENTER | TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
 
     /*........................................................................
     The base percent-built slider & its label
     ........................................................................*/
-    const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
-    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W - (25 * factor);
+    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W - (CONTROL_MARGIN * 10);
 
-    BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, POPUP_BASE_Y, POPUP_BASE_W, POPUP_BASE_H);
+    BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, 0, POPUP_BASE_W, Get_Tab_Height());
     BaseLabel = new TextLabelClass(
-        BaseText, POPUP_BASE_X - 3, POPUP_BASE_Y, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
+        BaseText, POPUP_BASE_X - 3, 0, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
     BaseGauge->Set_Maximum(100);
     BaseGauge->Set_Value(BasePercent);
 }
