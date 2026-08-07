@@ -510,7 +510,7 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
     **	Perform a final overpass of the map. This handles smoothing of certain
     **	types of terrain (tiberium).
     */
-    Map.Overpass();
+    Map.TotalValue = Map.Overpass();
     Call_Back();
 
     /*
@@ -913,7 +913,7 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
     **	Perform a final overpass of the map. This handles smoothing of certain
     **	types of terrain (tiberium).
     */
-    Map.Overpass();
+    Map.TotalValue = Map.Overpass();
     Call_Back();
 
     /*
