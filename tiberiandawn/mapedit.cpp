@@ -385,6 +385,7 @@ void MapEditClass::Read_INI(CCINIClass& ini)
     BaseGauge->Set_Value(BasePercent);
 
     CurrentCell = Coord_Cell(Pixel_To_Coord(TacPixelX, TacPixelY));
+    Changed = 0;
 }
 
 /***************************************************************************
