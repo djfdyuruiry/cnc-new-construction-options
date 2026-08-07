@@ -1676,6 +1676,11 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_NODE_X = D_DIALOG_CX + 5 + D_NODN_W * 2;
     const auto D_NODE_Y = D_NODN_Y + D_NODN_H;
 
+    const auto D_LUASCRIPT_X = D_NODN_X;
+    const auto D_LUASCRIPT_Y = D_LEVEL_Y;
+    const auto D_LUASCRIPT_W = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_LUASCRIPT_X; // fill remaining dialog width
+    const auto D_LUASCRIPT_H = 18;
+
     const auto D_OK_W = 90;
     const auto D_OK_H = 18;
     const auto D_OK_X = D_DIALOG_CX - D_OK_W - 5;
@@ -1704,6 +1709,7 @@ int MapEditClass::Scenario_Dialog(void)
         BUTTON_NOD_E,
         BUTTON_NOD_S,
         BUTTON_NOD_W,
+        TEDIT_LUASCRIPT,
         BUTTON_OK,
         BUTTON_CANCEL,
     };
@@ -1738,6 +1744,7 @@ int MapEditClass::Scenario_Dialog(void)
     char gdicred_buf[10] = {0};
     char nodcred_buf[10] = {0};
     char neutcred_buf[10] = {0};
+    char luascript_buf[256] = {0};
     /*
     ....................... Theater-changing variables .......................
     */
