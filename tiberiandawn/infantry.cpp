@@ -3090,6 +3090,12 @@ void InfantryClass::Write_INI(CCINIClass& ini)
         if (!infantry->IsInLimbo) {
             char uname[12];
             char buf[128];
+            auto cell = Coord_Cell(infantry->Coord);
+#ifdef MEGAMAPS
+            if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+                cell = Unconfine_Old_Cell(cell);
+            }
+#endif
 
             sprintf(uname, "%03d", index);
             sprintf(buf,
@@ -3097,7 +3103,7 @@ void InfantryClass::Write_INI(CCINIClass& ini)
                     infantry->House->Class->IniName,
                     infantry->Class->IniName,
                     infantry->Health_Ratio(),
-                    Coord_Cell(infantry->Coord),
+                    cell,
                     CellClass::Spot_Index(infantry->Coord),
                     MissionClass::Mission_Name((infantry->Mission == MISSION_NONE) ? infantry->MissionQueue
                                                                                    : infantry->Mission),

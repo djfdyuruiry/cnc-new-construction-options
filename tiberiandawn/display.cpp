@@ -1617,6 +1617,7 @@ void DisplayClass::Read_INI(CCINIClass& ini)
     }
 
 #ifdef MEGAMAPS
+    // detect if scenario is a megamap
     MapBinaryVersion = ini.Get_Int("MAP", "Version", MAP_VERSION_NORMAL);
     MapBinaryVersion = Bound(MapBinaryVersion, 0, 1); // Little hack to stop arbitrary values.
 #endif
@@ -1759,10 +1760,15 @@ void DisplayClass::Write_INI(CCINIClass& ini)
 
 #ifdef MEGAMAPS
     /*
-    ** Unconditionally set it for now, need to conditionally write cell numbers to the ini file
-    ** to support being able to write either version.
+    ** Determine map version based on whether the map fits within the original 64x64 bounds.
+    ** Maps that fit entirely within the original bounds use the normal binary format.
+    ** Maps that exceed 64x64 use the megamap binary format.
     */
-    MapBinaryVersion = MAP_VERSION_MEGA;
+    constexpr int OriginalMapSize = 64;
+    MapBinaryVersion = (IniMapCellX + IniMapCellWidth <= OriginalMapSize
+                            && IniMapCellY + IniMapCellHeight <= OriginalMapSize)
+                       ? MAP_VERSION_NORMAL
+                       : MAP_VERSION_MEGA;
 
     if (MapBinaryVersion == MAP_VERSION_MEGA) {
         ini.Put_Int(NAME, "Version", 1);
@@ -1777,7 +1783,15 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     for (int i = 0; i < WAYPT_COUNT; i++) {
         if (Scen.Waypoint[i] != -1) {
             sprintf(entry, "%d", i);
+#ifdef MEGAMAPS
+            CELL waypoint = Scen.Waypoint[i];
+            if (MapBinaryVersion == MAP_VERSION_NORMAL) {
+                waypoint = Unconfine_Old_Cell(waypoint);
+            }
+            ini.Put_Int(WAYNAME, entry, waypoint);
+#else
             ini.Put_Int(WAYNAME, entry, Scen.Waypoint[i]);
+#endif
         }
     }
 
@@ -1787,14 +1801,22 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     static char const* const CELLTRIG = "CellTriggers";
     ini.Clear(CELLTRIG);
     for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-        if ((*this)[cell].IsTrigger) {
-            TriggerClass* tp = CellTriggers[cell];
+#ifdef MEGAMAPS
+        CELL save_cell = cell;
+        if (MapBinaryVersion == MAP_VERSION_NORMAL) {
+            save_cell = Unconfine_Old_Cell(cell);
+        }
+#else
+        CELL save_cell = cell;
+#endif
+        if ((*this)[save_cell].IsTrigger) {
+            TriggerClass* tp = CellTriggers[save_cell];
             if (tp != NULL) {
 
                 /*
                 **	Generate entry name.
                 */
-                sprintf(entry, "%d", cell);
+                sprintf(entry, "%d", save_cell);
 
                 /*
                 **	Save entry.

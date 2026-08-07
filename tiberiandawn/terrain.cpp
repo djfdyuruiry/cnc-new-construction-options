@@ -860,7 +860,14 @@ void TerrainClass::Write_INI(CCINIClass& ini)
         terrain = Terrains.Ptr(index);
         if (terrain != NULL && !terrain->IsInLimbo && terrain->IsActive) {
             char uname[10];
-            sprintf(uname, "%d", Coord_Cell(terrain->Coord));
+            auto cell = Coord_Cell(terrain->Coord);
+#ifdef MEGAMAPS
+            if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+                cell = Unconfine_Old_Cell(cell);
+            }
+#endif
+
+            sprintf(uname, "%d", cell);
             ini.Put_TerrainType(INI_Name(), uname, *terrain);
         }
     }

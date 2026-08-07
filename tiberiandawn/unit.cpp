@@ -3884,6 +3884,13 @@ void UnitClass::Write_INI(CCINIClass& ini)
         if (unit != NULL && !unit->IsInLimbo && unit->IsActive) {
             char uname[12];
             char buf[128];
+            auto cell = Coord_Cell(unit->Coord);
+
+#ifdef MEGAMAPS
+            if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+                cell = Unconfine_Old_Cell(cell);
+            }
+#endif
 
             sprintf(uname, "%d", index);
             sprintf(buf,
@@ -3891,7 +3898,7 @@ void UnitClass::Write_INI(CCINIClass& ini)
                     unit->House->Class->IniName,
                     unit->Class->IniName,
                     unit->Health_Ratio(),
-                    Coord_Cell(unit->Coord),
+                    cell,
                     unit->PrimaryFacing.Current(),
                     MissionClass::Mission_Name(unit->Mission),
                     unit->Trigger ? unit->Trigger->Get_Name() : "None");

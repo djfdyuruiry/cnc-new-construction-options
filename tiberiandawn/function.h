@@ -888,6 +888,16 @@ inline CELL Confine_Old_Cell(CELL cell)
 {
     return (cell % 64) + (cell / 64) * 128;
 }
+
+/*
+**	Takes a megamap cell value (from the top-left quadrant of the 128x128 map)
+**  and converts it back to the original 64x64 cell value. Used when saving
+**  normal maps that were loaded into megamap space.
+*/
+inline CELL Unconfine_Old_Cell(CELL cell)
+{
+    return (cell / 128) * 64 + (cell % 128);
+}
 #endif //MEGAMAPS
 
 inline COORDINATE Cell_Coord(CELL cell)

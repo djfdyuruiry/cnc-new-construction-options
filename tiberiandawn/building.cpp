@@ -3532,6 +3532,13 @@ void BuildingClass::Write_INI(CCINIClass& ini)
         if (!building->IsInLimbo) {
             char uname[12];
             char buf[127];
+            auto cell = Coord_Cell(building->Coord);
+
+#ifdef MEGAMAPS
+            if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+                cell = Unconfine_Old_Cell(cell);
+            }
+#endif
 
             sprintf(uname, "%03d", index);
             sprintf(buf,
@@ -3539,7 +3546,7 @@ void BuildingClass::Write_INI(CCINIClass& ini)
                     building->House->Class->IniName,
                     building->Class->IniName,
                     building->Health_Ratio(),
-                    Coord_Cell(building->Coord),
+                    cell,
                     building->PrimaryFacing.Current(),
                     building->Trigger ? building->Trigger->Get_Name() : "None");
             ini.Put_String(INI_Name(), uname, buf);
