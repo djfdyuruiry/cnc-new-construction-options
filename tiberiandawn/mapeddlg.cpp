@@ -216,12 +216,15 @@ int MapEditClass::Load_Scenario(void)
         MPlayerLocalID = Build_MPlayerID(2, HOUSE_GOOD);
         MPlayerCount = 1;
         LastHouse = HOUSE_MULTI1;
+        GameToPlay = GAME_SKIRMISH;
     } else if (ScenPlayer == SCEN_PLAYER_JP) {
         PlayerPtr = HouseClass::As_Pointer(HOUSE_MULTI4);
         PlayerPtr->IsHuman = true;
         Base.House = HOUSE_MULTI4;
+        GameToPlay = GAME_NORMAL;
     } else {
         LastHouse = HOUSE_GOOD;
+        GameToPlay = GAME_NORMAL;
     }
 
     /*
@@ -568,7 +571,7 @@ int MapEditClass::Pick_Scenario(char const* caption,
                             D_VARLOSE_H);
 
     TextButtonClass gdibtn(BUTTON_GDI,
-                           "GDI",
+                           TXT_G_D_I,
                            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                            D_GDI_X,
                            D_GDI_Y,
@@ -576,7 +579,7 @@ int MapEditClass::Pick_Scenario(char const* caption,
                            D_GDI_H);
 
     TextButtonClass nodbtn(BUTTON_NOD,
-                           "NOD",
+                           TXT_N_O_D,
                            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                            D_NOD_X,
                            D_NOD_Y,
@@ -584,7 +587,7 @@ int MapEditClass::Pick_Scenario(char const* caption,
                            D_NOD_H);
 
     TextButtonClass playermbtn(BUTTON_MPLAYER,
-                               "Multi Player",
+                               TXT_MULTIPLAYER_GAME,
                                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                                D_MPLAYER_X,
                                D_MPLAYER_Y,
@@ -3755,6 +3758,7 @@ int MapEditClass::Import_Triggers(void)
     } else {
         ini.Load(file);
     }
+
     file.Close();
 
     len = ini.Entry_Count(TriggerClass::INI_Name());

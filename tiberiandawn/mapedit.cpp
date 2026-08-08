@@ -1615,6 +1615,12 @@ void MapEditClass::Draw_It(bool forced)
                 */
                 for (auto i = 0; i < WAYPT_HOME; i++) {
                     if (Scen.Waypoint[i] == cell.Cell_Number()) {
+                        if (GameToPlay != GAME_NORMAL && i < MPlayerMax && !cell.IsFlagged) {
+                            // mark waypoints as multiplayer start positions using flags
+                            cell.Flag_Place(HOUSE_NONE);
+                            cell.Draw_It(x + TacPixelX, y + TacPixelY);
+                        }
+
                         Fancy_Text_Print(std::format("{}", i).c_str(),
                                          render_x,
                                          render_y,

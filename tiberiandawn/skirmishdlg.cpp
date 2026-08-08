@@ -92,7 +92,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
     int Get_Menu_Color_For_Cell(const CELL raw_cell, const CellClass& cell)
     {
         if (cell.IsWaypoint) {
-            for (auto i = 0; i < 6; i++) {
+            for (auto i = 0; i < MPlayerMax; i++) {
                 if (raw_cell == Scen.Waypoint[i]) {
                     // player start location
                     return 127;
@@ -204,9 +204,9 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
                 return;
             }
 
-            for (auto i = 0; i < 6; i++) {
+            for (auto i = 0; i < MPlayerMax; i++) {
                 if (raw_cell == Scen.Waypoint[i]) {
-                    player_count++;
+                    player_count = min(player_count + 1, MPlayerMax);
                 }
             }
         });
