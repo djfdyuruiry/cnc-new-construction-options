@@ -432,6 +432,10 @@ void MapEditClass::Write_INI(CCINIClass& ini)
     */
     ini.Put_Int("Basic", "Percent", BasePercent);
 
+    if (Scen.ScenarioBasicName.has_value()) {
+        ini.Put_String("Basic", "Name", *Scen.ScenarioBasicName);
+    }
+
     ScenarioLua::Write_Lua_Script_Path(ini, LuaScriptPath);
 }
 
@@ -1640,21 +1644,31 @@ void MapEditClass::Draw_Header(const bool forced)
 {
     const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
 
-    //
-    // Erase scrags at top of screen
-    //
     LogicPage->Fill_Rect(HeaderX, HeaderY, HeaderX + HeaderW, HeaderY + HeaderH, BLACK);
     LogicPage->Draw_Line(HeaderX, HeaderY + HeaderH  + 1, HeaderX + HeaderW, HeaderY + HeaderH + 1, GRAY);
 
-    /*
-    **	Display the total value of all Tiberium on the map.
-    */
+    // total value of all Tiberium on the map
     Fancy_Text_Print(
         "Tiberium=%ld   ", HeaderX, HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
 
-    /*
-    **	Display exact base percent value beside slider.
-    */
+    // name of the scenario being edited
+    std::string scenario_title = Scen.ScenarioName;
+
+    if (Scen.ScenarioBasicName.has_value()) {
+        scenario_title += " - ";
+        scenario_title += *Scen.ScenarioBasicName;
+    }
+
+    Fancy_Text_Print(
+        scenario_title.c_str(),
+        (HeaderX + HeaderW / 2),
+        HeaderY,
+        CC_TAN,
+        TBLACK,
+        TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL
+    );
+
+    // exact AI base percent value (beside associated slider)
     Fancy_Text_Print(
         "%3d%%", HeaderX + (HeaderW - (22 * factor)), HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
 }

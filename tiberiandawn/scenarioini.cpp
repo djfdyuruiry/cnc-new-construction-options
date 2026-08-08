@@ -350,6 +350,14 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
     */
     Scen.TransitTheme = ini.Get_ThemeType("Basic", "Theme", THEME_NONE);
 
+    static const std::string default_name = "<MISSING>";
+    auto basic_name = ini.Get_String("Basic", "Name", default_name);
+
+    Scen.ScenarioBasicName.reset();
+    if (basic_name != default_name) {
+        Scen.ScenarioBasicName = basic_name;
+    }
+
     /*
     **	Read in the team-type data. The team types must be created before any
     **	triggers can be created.

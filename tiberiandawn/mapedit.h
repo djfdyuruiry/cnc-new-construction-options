@@ -321,6 +321,7 @@ private:
     .....................................................................*/
     int BasePercent; // Percentage the base will be built
 
+    // TODO: rework ScenarioClass and ScenarioLua to store/load this in Scen on INI load and update JSON save/load to restore it
     std::optional<std::string> LuaScriptPath;
 
     /*.....................................................................
@@ -349,7 +350,8 @@ private:
     void Draw_Header(bool forced);
 
     /**
-     * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells.
+     * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells. Also handles
+     * placing multiplayer start position flags.
      */
     void Decorate_Cells(bool forced);
 

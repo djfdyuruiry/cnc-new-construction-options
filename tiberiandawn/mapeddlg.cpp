@@ -1734,7 +1734,7 @@ int MapEditClass::Scenario_Dialog(void)
     Dialog & button dimensions
     ........................................................................*/
     const auto D_DIALOG_W = 544;
-    const auto D_DIALOG_H = 320;
+    const auto D_DIALOG_H = 335;
     const auto D_DIALOG_X = ((Try_Get_Resolution_Mode_Width().value_or(640) - D_DIALOG_W) / 2);
     const auto D_DIALOG_Y = ((Try_Get_Resolution_Mode_Height().value_or(400) - D_DIALOG_H) / 2);
     const auto D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);
@@ -1751,6 +1751,16 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_LEVEL_H = 18;
     const auto D_LEVEL_X = D_THEATER_X + D_THEATER_W - D_LEVEL_W;
     const auto D_LEVEL_Y = D_THEATER_Y + D_THEATER_H + D_MARGIN;
+
+    const auto D_LUASCRIPT_X = D_DIALOG_CX + 5 + 26;
+    const auto D_LUASCRIPT_Y = D_LEVEL_Y;
+    const auto D_LUASCRIPT_W = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_LUASCRIPT_X; // fill remaining dialog width
+    const auto D_LUASCRIPT_H = 18;
+
+    const auto D_NAME_X = D_LEVEL_X;
+    const auto D_NAME_Y = D_LEVEL_Y + D_LEVEL_H + D_MARGIN;
+    const auto D_NAME_W = D_LUASCRIPT_X + D_LUASCRIPT_W - D_NAME_X;
+    const auto D_NAME_H = 18;
 
     const auto D_GDICRED_W = 120;
     const auto D_GDICRED_H = 18;
@@ -1770,7 +1780,7 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_GDIN_W = 26;
     const auto D_GDIN_H = 18;
     const auto D_GDIN_X = D_DIALOG_CX - 5 - D_GDIN_W * 2;
-    const auto D_GDIN_Y = D_LEVEL_Y + D_LEVEL_H + D_MARGIN + D_TXT8_H + D_MARGIN + D_TXT8_H;
+    const auto D_GDIN_Y = D_NAME_Y + D_NAME_H + D_MARGIN + D_TXT8_H + D_MARGIN + D_TXT8_H;
 
     const auto D_GDIS_W = 26;
     const auto D_GDIS_H = 18;
@@ -1790,7 +1800,7 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_NODN_W = 26;
     const auto D_NODN_H = 18;
     const auto D_NODN_X = D_DIALOG_CX + 5 + D_NODN_W;
-    const auto D_NODN_Y = D_LEVEL_Y + D_LEVEL_H + D_MARGIN + D_TXT8_H + D_MARGIN + D_TXT8_H;
+    const auto D_NODN_Y = D_GDIN_Y;
 
     const auto D_NODS_W = 26;
     const auto D_NODS_H = 18;
@@ -1806,11 +1816,6 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_NODE_H = 18;
     const auto D_NODE_X = D_DIALOG_CX + 5 + D_NODN_W * 2;
     const auto D_NODE_Y = D_NODN_Y + D_NODN_H;
-
-    const auto D_LUASCRIPT_X = D_NODN_X;
-    const auto D_LUASCRIPT_Y = D_LEVEL_Y;
-    const auto D_LUASCRIPT_W = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_LUASCRIPT_X; // fill remaining dialog width
-    const auto D_LUASCRIPT_H = 18;
 
     const auto D_OK_W = 90;
     const auto D_OK_H = 18;
@@ -1829,6 +1834,8 @@ int MapEditClass::Scenario_Dialog(void)
     {
         LIST_THEATER = 100,
         TEDIT_LEVEL,
+        TEDIT_LUASCRIPT,
+        TEDIT_TITLE,
         TEDIT_GDICRED,
         TEDIT_NODCRED,
         TEDIT_NEUTCRED,
@@ -1840,7 +1847,6 @@ int MapEditClass::Scenario_Dialog(void)
         BUTTON_NOD_E,
         BUTTON_NOD_S,
         BUTTON_NOD_W,
-        TEDIT_LUASCRIPT,
         BUTTON_OK,
         BUTTON_CANCEL,
     };
@@ -1871,11 +1877,12 @@ int MapEditClass::Scenario_Dialog(void)
     int neut_credits;         // HouseClass::As_Pointer(HouseType)->Credits
     SourceType gdi_edge;      // HouseClass::As_Pointer(HouseType)->Edge
     SourceType nod_edge;      // HouseClass::As_Pointer(HouseType)->Edge
-    char level_buf[10] = {0};
+    char level_buf[3] = {0};
+    char luascript_buf[256] = {0};
+    char name_buf[256] = {0};
     char gdicred_buf[10] = {0};
     char nodcred_buf[10] = {0};
     char neutcred_buf[10] = {0};
-    char luascript_buf[256] = {0};
     /*
     ....................... Theater-changing variables .......................
     */
@@ -1895,15 +1902,35 @@ int MapEditClass::Scenario_Dialog(void)
                          Hires_Retrieve("BTN-UP.SHP"),
                          Hires_Retrieve("BTN-DN.SHP"));
 
-    EditClass leveledt(TEDIT_GDICRED,
+    EditClass leveledt(TEDIT_LEVEL,
                        level_buf,
-                       4,
+                       std::size(level_buf),
                        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                        D_LEVEL_X,
                        D_LEVEL_Y,
                        D_LEVEL_W,
                        D_LEVEL_H,
                        EditClass::NUMERIC);
+
+    EditClass luascript_textbox(TEDIT_LUASCRIPT,
+                            luascript_buf,
+                            std::size(luascript_buf),
+                            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                            D_LUASCRIPT_X,
+                            D_LUASCRIPT_Y,
+                            D_LUASCRIPT_W,
+                            D_LUASCRIPT_H,
+                            EditClass::ALPHANUMERIC);
+
+    EditClass name_textbox(TEDIT_TITLE,
+                       name_buf,
+                       std::size(name_buf),
+                       TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                       D_NAME_X,
+                       D_NAME_Y,
+                       D_NAME_W,
+                       D_NAME_H,
+                       EditClass::ALPHANUMERIC);
 
     EditClass gdicred(TEDIT_GDICRED,
                       gdicred_buf,
@@ -1999,16 +2026,6 @@ int MapEditClass::Scenario_Dialog(void)
                             D_NODW_W,
                             D_NODW_H);
 
-    EditClass luascript_textbox(TEDIT_LUASCRIPT,
-                            luascript_buf,
-                            std::size(luascript_buf) - 1,
-                            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
-                            D_LUASCRIPT_X,
-                            D_LUASCRIPT_Y,
-                            D_LUASCRIPT_W,
-                            D_LUASCRIPT_H,
-                            EditClass::ALPHANUMERIC);
-
     TextButtonClass okbtn(
         BUTTON_OK, TXT_OK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, D_OK_X, D_OK_Y, D_OK_W, D_OK_H);
 
@@ -2057,6 +2074,8 @@ int MapEditClass::Scenario_Dialog(void)
     */
     commands = &theaterbtn;
     leveledt.Add_Tail(*commands);
+    luascript_textbox.Add_Tail(*commands);
+    name_textbox.Add_Tail(*commands);
     gdicred.Add_Tail(*commands);
     nodcred.Add_Tail(*commands);
     neutcred.Add_Tail(*commands);
@@ -2068,7 +2087,6 @@ int MapEditClass::Scenario_Dialog(void)
     nodebtn.Add_Tail(*commands);
     nodsbtn.Add_Tail(*commands);
     nodwbtn.Add_Tail(*commands);
-    luascript_textbox.Add_Tail(*commands);
     okbtn.Add_Tail(*commands);
     cancelbtn.Add_Tail(*commands);
 
@@ -2100,7 +2118,19 @@ int MapEditClass::Scenario_Dialog(void)
     .......................... Init credits buffers ..........................
     */
     sprintf(level_buf, "%d", BuildLevel);
-    leveledt.Set_Text(level_buf, 4);
+    leveledt.Set_Text(level_buf, std::size(level_buf));
+
+    if (LuaScriptPath.has_value()) {
+        strncpy(luascript_buf, LuaScriptPath->c_str(), std::size(luascript_buf));
+        luascript_buf[std::size(luascript_buf) - 1] = '\0';
+        luascript_textbox.Set_Text(luascript_buf, std::size(luascript_buf));
+    }
+
+    if (Scen.ScenarioBasicName.has_value()) {
+        strncpy(name_buf, Scen.ScenarioBasicName->c_str(), std::size(name_buf));
+        name_buf[std::size(name_buf) - 1] = '\0';
+        name_textbox.Set_Text(name_buf, std::size(name_buf));
+    }
 
     sprintf(gdicred_buf, "%d", gdi_credits);
     gdicred.Set_Text(gdicred_buf, 8);
@@ -2112,12 +2142,6 @@ int MapEditClass::Scenario_Dialog(void)
     neutcred.Set_Text(neutcred_buf, 8);
 
     theaterbtn.Set_Selected_Index(orig_theater - THEATER_NONE - 1);
-
-    if (LuaScriptPath.has_value()) {
-        strncpy(luascript_buf, LuaScriptPath->c_str(), std::size(luascript_buf));
-        luascript_buf[std::size(luascript_buf) - 1] = '\0';
-        luascript_textbox.Set_Text(luascript_buf, std::size(luascript_buf) - 1);
-    }
 
     /*
     -------------------------- Main Processing Loop --------------------------
@@ -2170,6 +2194,13 @@ int MapEditClass::Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
+                Fancy_Text_Print("Name:",
+                                 D_NAME_X - 5,
+                                 D_NAME_Y,
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
                 Fancy_Text_Print("Credits/1000",
                                  D_GDICRED_X + D_GDICRED_W / 2,
                                  D_GDICRED_Y - D_TXT8_H,
@@ -2200,7 +2231,7 @@ int MapEditClass::Scenario_Dialog(void)
 
                 Fancy_Text_Print("Reinforcements",
                                  D_DIALOG_CX,
-                                 D_LEVEL_Y + D_LEVEL_H + D_MARGIN,
+                                 D_NAME_Y + D_NAME_H + D_MARGIN,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -2387,6 +2418,12 @@ int MapEditClass::Scenario_Dialog(void)
 
     if (!CncStringUtils::Is_Blank(lua_script)) {
         LuaScriptPath = lua_script;
+    }
+
+    const std::string title = name_buf;
+
+    if (!CncStringUtils::Is_Blank(title)) {
+        Scen.ScenarioBasicName = title;
     }
 
     /*........................................................................

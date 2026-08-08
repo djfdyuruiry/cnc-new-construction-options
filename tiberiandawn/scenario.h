@@ -121,6 +121,12 @@ public:
     ** its name.
     */
     char FileName[_MAX_FNAME + _MAX_EXT];
+
+    /*
+    ** Human readable name for the scenario as loaded from the INI file
+    ** [Basic] section, if present.
+    */
+    std::optional<std::string> ScenarioBasicName;
 };
 
 #endif
