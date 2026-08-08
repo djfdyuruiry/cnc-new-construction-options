@@ -3752,7 +3752,15 @@ int MapEditClass::Import_Triggers(void)
     ........................................................................*/
     INIClass ini;
     file.Set_Name("MASTER.INI");
+
     if (!file.Is_Available()) {
+        WWMessageBox().Process(
+            "Unable to find 'MASTER.INI' - create this file with a 'Triggers' section to import triggers"
+        );
+        HiddenPage.Clear();
+        Flag_To_Redraw(true);
+        Render();
+
         file.Close();
         return (-1);
     } else {
