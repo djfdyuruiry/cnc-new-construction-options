@@ -146,6 +146,16 @@ void MapEditClass::One_Time(void)
 {
     MouseClass::One_Time();
 
+    HeaderX = 0;
+    HeaderY = 0;
+    HeaderW = SeenBuff.Get_Width();
+    HeaderH = Get_Tab_Height();
+
+    FooterX = 0;
+    FooterY = SeenBuff.Get_Height() - Get_Tab_Height();
+    FooterW = SeenBuff.Get_Width();
+    FooterH = Get_Tab_Height();
+
     /*------------------------------------------------------------------------
     Create the pop-up controls
     ------------------------------------------------------------------------*/
@@ -167,7 +177,7 @@ void MapEditClass::One_Time(void)
     // make all control positions relative to POPUP_GDI and use offset center X co-ord so the UI layout is centered
     const auto POPUP_GDI_X = (SeenBuff.Get_Width() / 2)
         - ((POPUP_GDI_W + POPUP_FACEBOX_W + POPUP_HEALTH_W + POPUP_MISSION_W + (CONTROL_MARGIN * 3)) / 2);
-    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - 80;
+    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - 100 - FooterH;
 
     const auto POPUP_NOD_X = POPUP_GDI_X;
     const auto POPUP_NOD_Y = POPUP_GDI_Y + POPUP_GDI_H;
@@ -315,9 +325,9 @@ void MapEditClass::One_Time(void)
     /*........................................................................
     The base percent-built slider & its label
     ........................................................................*/
-    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W - (CONTROL_MARGIN * 10);
+    const auto POPUP_BASE_X = (HeaderX + HeaderW) - POPUP_BASE_W - (CONTROL_MARGIN * 10);
 
-    BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, 0, POPUP_BASE_W, Get_Tab_Height());
+    BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, HeaderY, POPUP_BASE_W, HeaderH);
     BaseLabel = new TextLabelClass(
         BaseText, POPUP_BASE_X - 3, 0, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
     BaseGauge->Set_Maximum(100);
@@ -1498,67 +1508,20 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
     MouseClass::AI(input, x, y);
 }
 
-/***************************************************************************
- * MapEditClass::Draw_It -- overloaded Redraw routine                      *
- *                                                                         *
- * INPUT:                                                                  *
- *                                                                         *
- * OUTPUT:                                                                 *
- *                                                                         *
- * WARNINGS:                                                               *
- *                                                                         *
- * HISTORY:                                                                *
- *   11/17/1994 BR : Created.                                              *
- *=========================================================================*/
-void MapEditClass::Draw_It(bool forced)
+void MapEditClass::Draw_Footer(const bool forced)
 {
-    char const* label;
-    char buf[40];
-    char const* tptr;
-
-    MouseClass::Draw_It(forced);
-
-    if (!Debug_Map) {
-        return;
-    }
-
-    const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
-
-    //
-    // Erase scrags at top of screen
-    //
-    LogicPage->Fill_Rect(0, 0, SeenBuff.Get_Width(), Get_Tab_Height(), BLACK);
-
-    /*
-    **	Display the total value of all Tiberium on the map.
-    */
-    Fancy_Text_Print(
-        "Tiberium=%ld   ", 0, 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
-
-    /*
-    **	Display exact base percent value beside slider.
-    */
-    Fancy_Text_Print(
-        "%3d%%", SeenBuff.Get_Width() - (22 * factor), 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
-
-    /*------------------------------------------------------------------------
-    If there are no object controls displayed, just invoke parent's Redraw
-    and return.
-    ------------------------------------------------------------------------*/
-    if (!Buttons) {
-        return;
-    }
-
     /**
-     * Render a text label in the middle of the header bar to show currently selected object/cell location.
+     * Render a text label in the middle of the footer bar to show currently selected object/cell location.
      */
-    static const auto left_offset = SeenBuff.Get_Width() > GBUFF_INIT_WIDTH ? 0 : 40;  // adjust original res left
     const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
+
+    LogicPage->Fill_Rect(FooterX, FooterY, FooterX + FooterW, FooterY + FooterH, BLACK);
+    LogicPage->Draw_Line(FooterX, FooterY - 1, FooterX + FooterW, FooterY - 1, GRAY);
 
     Fancy_Text_Print(
         "Coord %u - Cell #%d @ %dx%d",
-        (SeenBuff.Get_Width() / 2) - left_offset,
-        0,
+        (FooterX + FooterW / 2),
+        FooterY,
         CC_TAN,
         TBLACK,
         TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL,
@@ -1567,10 +1530,10 @@ void MapEditClass::Draw_It(bool forced)
         Cell_X(target_cell),
         Cell_Y(target_cell)
     );
+}
 
-    /**
-     * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells.
-     */
+void MapEditClass::Decorate_Cells(const bool forced)
+{
     // TODO: have settings dialog menu options for font/colours in scenario editor + associated TdSettings entries to persist
     static auto constexpr cell_text_back_color = TBLACK;
     static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT | TPF_CENTER;
@@ -1587,13 +1550,18 @@ void MapEditClass::Draw_It(bool forced)
                 return;
             }
 
-            if (!In_View(raw_cell) || y < Get_Tab_Height()) {
+            if (!In_View(raw_cell)) {
                 // don't decorate a non-visible cell
                 return;
             }
 
             auto render_x = x + TacPixelX;
             auto render_y = y + TacPixelY - (CELL_PIXEL_H / 4);
+
+            if (render_y < HeaderY + HeaderH + 1 || render_y > FooterY - 1) {
+                // prevent rendering over header/footer areas
+                return;
+            }
 
             if (cell.IsTrigger) {
                 /*
@@ -1666,6 +1634,58 @@ void MapEditClass::Draw_It(bool forced)
             }
         }
     );
+}
+
+void MapEditClass::Draw_Header(const bool forced)
+{
+    const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
+
+    //
+    // Erase scrags at top of screen
+    //
+    LogicPage->Fill_Rect(HeaderX, HeaderY, HeaderX + HeaderW, HeaderY + HeaderH, BLACK);
+    LogicPage->Draw_Line(HeaderX, HeaderY + HeaderH  + 1, HeaderX + HeaderW, HeaderY + HeaderH + 1, GRAY);
+
+    /*
+    **	Display the total value of all Tiberium on the map.
+    */
+    Fancy_Text_Print(
+        "Tiberium=%ld   ", HeaderX, HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
+
+    /*
+    **	Display exact base percent value beside slider.
+    */
+    Fancy_Text_Print(
+        "%3d%%", HeaderX + (HeaderW - (22 * factor)), HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
+}
+
+/***************************************************************************
+ * MapEditClass::Draw_It -- overloaded Redraw routine                      *
+ *                                                                         *
+ * INPUT:                                                                  *
+ *                                                                         *
+ * OUTPUT:                                                                 *
+ *                                                                         *
+ * WARNINGS:                                                               *
+ *                                                                         *
+ * HISTORY:                                                                *
+ *   11/17/1994 BR : Created.                                              *
+ *=========================================================================*/
+void MapEditClass::Draw_It(bool forced)
+{
+    char const* label;
+    char buf[40];
+    char const* tptr;
+
+    MouseClass::Draw_It(forced);
+
+    if (!Debug_Map) {
+        return;
+    }
+
+    Draw_Header(forced);
+    Decorate_Cells(forced);
+    Draw_Footer(forced);
 }
 
 /***************************************************************************

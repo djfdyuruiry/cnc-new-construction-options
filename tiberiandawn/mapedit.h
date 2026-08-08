@@ -246,6 +246,16 @@ public:
     --------------------------- Private Interface ----------------------------
     */
 private:
+    int HeaderX;
+    int HeaderY;
+    int HeaderW;
+    int HeaderH;
+
+    int FooterX;
+    int FooterY;
+    int FooterW;
+    int FooterH;
+
     /*.....................................................................
     This is the last-requested variation of a loaded/saved/new scenario.
     .....................................................................*/
@@ -335,6 +345,15 @@ private:
     TextLabelClass* BaseLabel;
     static MissionType MapEditMissions[NUM_EDIT_MISSIONS];
     static char BaseText[6];
+
+    void Draw_Header(bool forced);
+
+    /**
+     * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells.
+     */
+    void Decorate_Cells(bool forced);
+
+    void Draw_Footer(bool forced);
 };
 
 #endif
