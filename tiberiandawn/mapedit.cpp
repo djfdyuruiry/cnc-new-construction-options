@@ -1511,21 +1511,86 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
 
 void MapEditClass::Draw_Footer(const bool forced)
 {
-    /**
-     * Render a text label in the middle of the footer bar to show currently selected object/cell location.
-     */
     const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
 
     LogicPage->Fill_Rect(FooterX, FooterY, FooterX + FooterW, FooterY + FooterH, BLACK);
     LogicPage->Draw_Line(FooterX, FooterY - 1, FooterX + FooterW, FooterY - 1, GRAY);
 
+    /*
+    **	Power output display.
+    */
+    constexpr auto fore = GREEN;
+    constexpr auto back = TBLACK;
+    static const auto text_flags = TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL;
+
+    static const auto power_to_color = [](const int power) {
+        return power == 0
+            ? GRAY
+            : power > 0
+                ? GREEN
+                : RED;
+    };
+
+    auto label_x = FooterX + 5u;
+
+    if (GameToPlay == GAME_NORMAL) {
+        // power readouts for GDI/NOD
+        const auto& gdi = *Houses.Ptr(HOUSE_GOOD);
+        const auto& nod = *Houses.Ptr(HOUSE_BAD);
+
+        const auto gdi_label = std::format("{} Power: ", Text_String(TXT_G_D_I));
+        const auto nod_label = std::format(" | {} Power: ", Text_String(TXT_N_O_D));
+
+        const auto gdi_power = gdi.Power - gdi.Drain;
+        const auto gdi_power_str = std::format("{}", gdi_power);
+
+        const auto nod_power = nod.Power - nod.Drain;
+        const auto nod_power_str = std::format("{}", nod_power);
+
+        // gdi power
+        Fancy_Text_Print(gdi_label.c_str(), label_x , FooterY, fore, back, text_flags);
+        label_x += String_Pixel_Width(gdi_label.c_str());
+
+        Fancy_Text_Print(gdi_power_str.c_str(), label_x , FooterY, power_to_color(gdi_power), back, text_flags);
+        label_x += String_Pixel_Width(gdi_power_str.c_str());
+
+        // nod power
+        Fancy_Text_Print(nod_label.c_str(), label_x , FooterY, fore, back, text_flags);
+        label_x += String_Pixel_Width(nod_label.c_str());
+
+        Fancy_Text_Print(nod_power_str.c_str(), label_x , FooterY, power_to_color(nod_power), back, text_flags);
+        label_x += String_Pixel_Width(nod_power_str.c_str());
+
+        Fancy_Text_Print(" | ", label_x , FooterY, fore, back, text_flags);
+        label_x += String_Pixel_Width(" | ");
+    } else {
+        // TODO: consider multi support?
+    }
+
+    // power readout neutral
+    const auto& neutral = *Houses.Ptr(HOUSE_NEUTRAL);
+    constexpr auto neutral_label = "Neutral Power: ";
+
+    const auto neutral_power = neutral.Power - neutral.Drain;
+    const auto neutral_power_str = std::format("{}", neutral_power);
+
+    // neutral power
+    Fancy_Text_Print(neutral_label, label_x , FooterY, fore, back, text_flags);
+    label_x += String_Pixel_Width(neutral_label);
+
+    Fancy_Text_Print(neutral_power_str.c_str(), label_x , FooterY, power_to_color(neutral_power), back, text_flags);
+
+    /*
+    **	Draw tracker for currently selected object/cell location.
+    */
+    static auto wide_location_display = SeenBuff.Get_Width() > GBUFF_INIT_WIDTH + 100;
     Fancy_Text_Print(
-        "Coord %u - Cell #%d @ %dx%d",
-        (FooterX + FooterW / 2),
+        wide_location_display ? "| Coord %u - Cell #%d @ %dx%d" : "| Coord %u - Cell #%d",
+        ((FooterX + (FooterW - (FooterW / 3))) + 5 ) - (wide_location_display ? 0 : 30),
         FooterY,
-        CC_TAN,
+        CC_GREEN,
         TBLACK,
-        TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL,
+        TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL,
         Cell_Coord(target_cell),
         Array[target_cell].Cell_Number(),
         Cell_X(target_cell),
@@ -2213,6 +2278,11 @@ void MapEditClass::Detach(ObjectClass* object)
     if (GrabbedObject == object) {
         GrabbedObject = 0;
     }
+}
+
+void MapEditClass::Init_Editor_Dimensions()
+{
+    Set_View_Dimensions(0, HeaderX + HeaderH + 2, -1, (FooterY - 2) - (HeaderH + 2));
 }
 
 #endif

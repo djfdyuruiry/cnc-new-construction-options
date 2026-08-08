@@ -178,6 +178,11 @@ public:
     //		int Trigger_Needs_Team(TriggerClass *trigger);
     void Fatal(int txt);
 
+    /**
+     * Get tactical display ready for editor UI.
+     */
+    void Init_Editor_Dimensions();
+
     /*
     ............................ mapeddlg.cpp .............................
     */

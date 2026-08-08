@@ -1478,11 +1478,21 @@ bool Select_Game(bool fade)
     if (!gameloaded) {
         if (Debug_Map) {
             Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, SCEN_VAR_A);
+#ifdef SCENARIO_EDITOR
+            Map.Init_Editor_Dimensions();
+#endif
         } else if (ScenVar != SCEN_VAR_NONE) {
             Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, ScenVar);
         } else {
             Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir);
         }
+
+#ifdef SCENARIO_EDITOR
+        if (!Debug_Map) {
+            // reset map dimensions incase we came out of scenario editor mode
+            Map.Set_View_Dimensions(0, Map.Get_Tab_Height());
+        }
+#endif
 
         /*
         ** Start_Scenario() changes the palette; so, fade out & clear the screen
