@@ -49,22 +49,6 @@ public:
         const GameEnum& game_type,
         const ScenarioClass& scenario,
         const HouseClass& player,
-        const std::optional<std::string>& ini_script_path,
-        bool was_loaded_from_save = false
-    );
-
-    static void On_Scenario_Load(
-        const GameEnum& game_type,
-        const ScenarioClass& scenario,
-        const HouseClass& player,
-        const CCINIClass& ini,
-        bool was_loaded_from_save
-    );
-
-    static void On_Scenario_Load(
-        const GameEnum& game_type,
-        const ScenarioClass& scenario,
-        const HouseClass& player,
         bool was_loaded_from_save
     );
 
@@ -131,7 +115,6 @@ private:
      *       overrides can be applied appropriately and files down the chain are executed.
      */
     static void Exec_Scenario_Lua_Scripts(
-        const std::optional<std::string>& ini_script_path,
         const ScenarioClass& scenario,
         const std::string& scenario_name,
         const std::string& faction_name,

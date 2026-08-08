@@ -358,6 +358,8 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
         Scen.ScenarioBasicName = basic_name;
     }
 
+    Scen.LuaScriptPath = ScenarioLua::Read_Lua_Script_Path(ini);
+
     /*
     **	Read in the team-type data. The team types must be created before any
     **	triggers can be created.
@@ -678,7 +680,7 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
      * Lua rabbit hole (if not in scenario editor mode)
      */
     if (init_lua && !Debug_Map) {
-        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini, false);
+        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, false);
     }
 
     /*

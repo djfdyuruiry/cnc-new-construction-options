@@ -321,9 +321,6 @@ private:
     .....................................................................*/
     int BasePercent; // Percentage the base will be built
 
-    // TODO: rework ScenarioClass and ScenarioLua to store/load this in Scen on INI load and update JSON save/load to restore it
-    std::optional<std::string> LuaScriptPath;
-
     /*.....................................................................
     Variables for supporting the object-editing controls at screen bottom
     .....................................................................*/

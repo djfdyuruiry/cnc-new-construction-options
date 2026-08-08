@@ -127,6 +127,12 @@ public:
     ** [Basic] section, if present.
     */
     std::optional<std::string> ScenarioBasicName;
+
+    /*
+    ** Custom lua script to load before starting the scenario as loaded from the INI file
+    ** [Basic] section, if present.
+    */
+    std::optional<std::string> LuaScriptPath;
 };
 
 #endif

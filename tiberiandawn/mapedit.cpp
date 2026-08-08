@@ -397,9 +397,6 @@ void MapEditClass::Read_INI(CCINIClass& ini)
 
     CurrentCell = Coord_Cell(Pixel_To_Coord(TacPixelX, TacPixelY));
 
-    LuaScriptPath.reset();
-    LuaScriptPath = ScenarioLua::Read_Lua_Script_Path(ini);
-
     Changed = 0;
 }
 
@@ -436,7 +433,7 @@ void MapEditClass::Write_INI(CCINIClass& ini)
         ini.Put_String("Basic", "Name", *Scen.ScenarioBasicName);
     }
 
-    ScenarioLua::Write_Lua_Script_Path(ini, LuaScriptPath);
+    ScenarioLua::Write_Lua_Script_Path(ini, Scen.LuaScriptPath);
 }
 
 /***************************************************************************

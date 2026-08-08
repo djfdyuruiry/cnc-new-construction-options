@@ -2120,8 +2120,8 @@ int MapEditClass::Scenario_Dialog(void)
     sprintf(level_buf, "%d", BuildLevel);
     leveledt.Set_Text(level_buf, std::size(level_buf));
 
-    if (LuaScriptPath.has_value()) {
-        strncpy(luascript_buf, LuaScriptPath->c_str(), std::size(luascript_buf));
+    if (Scen.LuaScriptPath.has_value()) {
+        strncpy(luascript_buf, Scen.LuaScriptPath->c_str(), std::size(luascript_buf));
         luascript_buf[std::size(luascript_buf) - 1] = '\0';
         luascript_textbox.Set_Text(luascript_buf, std::size(luascript_buf));
     }
@@ -2416,12 +2416,14 @@ int MapEditClass::Scenario_Dialog(void)
     */
     const std::string lua_script = luascript_buf;
 
+    Scen.LuaScriptPath.reset();
     if (!CncStringUtils::Is_Blank(lua_script)) {
-        LuaScriptPath = lua_script;
+        Scen.LuaScriptPath = lua_script;
     }
 
     const std::string title = name_buf;
 
+    Scen.ScenarioBasicName.reset();
     if (!CncStringUtils::Is_Blank(title)) {
         Scen.ScenarioBasicName = title;
     }
