@@ -1666,6 +1666,17 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     IniMapCellHeight = map_y2 - map_y1 + 1;
 
     /*
+     ** Determine map version based on whether the map fits within the original 64x64 bounds.
+     ** Maps that fit entirely within the original bounds use the normal binary format.
+     ** Maps that exceed 64x64 use the megamap binary format.
+     */
+    constexpr int original_map_size = 64;
+    MapBinaryVersion =
+        (IniMapCellX + IniMapCellWidth <= original_map_size && IniMapCellY + IniMapCellHeight <= original_map_size)
+            ? MAP_VERSION_NORMAL
+            : MAP_VERSION_MEGA;
+
+    /*
     --------------------- Clip Home Cell to new map size ---------------------
     */
     if (Cell_X(Scen.Waypoint[WAYPT_HOME]) < IniMapCellX) {

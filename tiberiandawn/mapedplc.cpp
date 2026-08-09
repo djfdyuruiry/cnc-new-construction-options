@@ -2044,7 +2044,7 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
         */
         if (!obj->Unlimbo(Base.Nodes[i].Coord)) {
             delete obj;
-            WWMessageBox().Process("Unable to build base!");
+            WWMessageBox().Process("Unable to build base! Check if any base coord overlaps a starting structure");
             return;
         }
 

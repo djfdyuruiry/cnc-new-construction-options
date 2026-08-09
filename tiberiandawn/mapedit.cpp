@@ -177,7 +177,7 @@ void MapEditClass::One_Time(void)
     // make all control positions relative to POPUP_GDI and use offset center X co-ord so the UI layout is centered
     const auto POPUP_GDI_X = (SeenBuff.Get_Width() / 2)
         - ((POPUP_GDI_W + POPUP_FACEBOX_W + POPUP_HEALTH_W + POPUP_MISSION_W + (CONTROL_MARGIN * 3)) / 2);
-    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - 100 - FooterH;
+    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - (FooterH + (CONTROL_MARGIN * 4) + POPUP_FACEBOX_H);
 
     const auto POPUP_NOD_X = POPUP_GDI_X;
     const auto POPUP_NOD_Y = POPUP_GDI_Y + POPUP_GDI_H;
@@ -313,6 +313,7 @@ void MapEditClass::One_Time(void)
     /*........................................................................
     AI Base flag for structures
     ........................................................................*/
+    // TODO: need to have another checkbox for if this is a starting structure as well
     static char base_structure_text[5] = "Base";
 
     IsBaseStructureCheckbox = new CheckBoxClass(POPUP_BASESTRUCTURE, POPUP_BASESTRUCTURE_X, POPUP_BASESTRUCTURE_Y, POPUP_BASESTRUCTURE_SIZE);
@@ -1381,6 +1382,11 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             */
             if (strength != CurrentObject[0]->Strength) {
                 CurrentObject[0]->Strength = strength;
+
+                if (CurrentObject[0]->What_Am_I() == RTTI_BUILDING) {
+                    reinterpret_cast<BuildingClass*>(CurrentObject[0])->LastStrength = strength;
+                }
+
                 HiddenPage.Clear();
                 Flag_To_Redraw(true);
                 Changed = 1;
@@ -1470,6 +1476,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
 
             if (new_building != nullptr) {
                 new_building->Strength = building_strength;
+                new_building->LastStrength = building_strength;
                 new_building->PrimaryFacing = facing;
 
                 new_building->Select();
@@ -1509,10 +1516,40 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
     MouseClass::AI(input, x, y);
 }
 
+static int Calculate_Power_For_House(const HousesType house)
+{
+    auto power = 0;
+
+    for (auto i = 0; i < Buildings.Count(); i++) {
+        const auto building = Buildings.Ptr(i);
+
+        // only count building if it belongs to the requested house and isn't a 'virtual' AI base building
+        if (building == nullptr || building->Owner() != house || building->IsUnbuiltBase) {
+            continue;
+        }
+
+        // replicates BuildingClass::Power_Output() logic without relying on LastStrength field
+        // (updated by AI loop, but that doesn't run in scenario editor mode)
+        if (building->Class->Power) {
+            power += static_cast<int>(
+                Fixed_To_Cardinal(
+                    building->Class->Power,
+                    Cardinal_To_Fixed(
+                        building->Class->MaxStrength,
+                        building->Strength
+                    )
+                )
+            );
+        }
+
+        power -= building->Class->Drain;
+    }
+
+    return power;
+}
+
 void MapEditClass::Draw_Footer(const bool forced)
 {
-    const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
-
     LogicPage->Fill_Rect(FooterX, FooterY, FooterX + FooterW, FooterY + FooterH, BLACK);
     LogicPage->Draw_Line(FooterX, FooterY - 1, FooterX + FooterW, FooterY - 1, GRAY);
 
@@ -1535,16 +1572,13 @@ void MapEditClass::Draw_Footer(const bool forced)
 
     if (GameToPlay == GAME_NORMAL) {
         // power readouts for GDI/NOD
-        const auto& gdi = *Houses.Ptr(HOUSE_GOOD);
-        const auto& nod = *Houses.Ptr(HOUSE_BAD);
-
         const auto gdi_label = std::format("{} Power: ", Text_String(TXT_G_D_I));
         const auto nod_label = std::format(" | {} Power: ", Text_String(TXT_N_O_D));
 
-        const auto gdi_power = gdi.Power - gdi.Drain;
+        const auto gdi_power = Calculate_Power_For_House(HOUSE_GOOD);
         const auto gdi_power_str = std::format("{}", gdi_power);
 
-        const auto nod_power = nod.Power - nod.Drain;
+        const auto nod_power = Calculate_Power_For_House(HOUSE_BAD);
         const auto nod_power_str = std::format("{}", nod_power);
 
         // gdi power
@@ -1568,10 +1602,9 @@ void MapEditClass::Draw_Footer(const bool forced)
     }
 
     // power readout neutral
-    const auto& neutral = *Houses.Ptr(HOUSE_NEUTRAL);
     constexpr auto neutral_label = "Neutral Power: ";
 
-    const auto neutral_power = neutral.Power - neutral.Drain;
+    const auto neutral_power = Calculate_Power_For_House(HOUSE_NEUTRAL);
     const auto neutral_power_str = std::format("{}", neutral_power);
 
     // neutral power
@@ -1583,18 +1616,37 @@ void MapEditClass::Draw_Footer(const bool forced)
     /*
     **	Draw tracker for currently selected object/cell location.
     */
-    static auto wide_location_display = SeenBuff.Get_Width() > GBUFF_INIT_WIDTH + 100;
+    static const auto wide_location_display = SeenBuff.Get_Width() > GBUFF_INIT_WIDTH + 100;
+
+    const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
+    const auto cell_x = Cell_X(target_cell);
+    const auto cell_y = Cell_Y(target_cell);
+    const auto cell_coord = XY_Coord(cell_x, cell_y) * 256; // scale coord to match INI file format
+
+    auto cell_number = Array[target_cell].Cell_Number();
+
+#ifdef MEGAMAPS
+    // if we are editing a non-megamap scenario using a megamap build, adjust the cell_number to display
+    // what will be seen in the INI file on save
+    if (MapBinaryVersion == MAP_VERSION_NORMAL && cell_x <= 64 && cell_y <= 64) {
+        const auto unconfined_cell = Unconfine_Old_Cell(target_cell);
+
+        cell_number = Array[unconfined_cell].Cell_Number();
+    }
+#endif
+
     Fancy_Text_Print(
-        wide_location_display ? "| Coord %u - Cell #%d @ %dx%d" : "| Coord %u - Cell #%d",
+        wide_location_display ? "| Coord %u - Cell #%d @ %dx%d" : "| Coord %u - Cell"
+                                                                  " #%d",
         ((FooterX + (FooterW - (FooterW / 3))) + 5 ) - (wide_location_display ? 0 : 30),
         FooterY,
         CC_GREEN,
         TBLACK,
         TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL,
-        Cell_Coord(target_cell),
-        Array[target_cell].Cell_Number(),
-        Cell_X(target_cell),
-        Cell_Y(target_cell)
+        cell_coord,
+        cell_number,
+        cell_x,
+        cell_y
     );
 }
 
@@ -2282,7 +2334,7 @@ void MapEditClass::Detach(ObjectClass* object)
 
 void MapEditClass::Init_Editor_Dimensions()
 {
-    Set_View_Dimensions(0, HeaderX + HeaderH + 2, -1, (FooterY - 2) - (HeaderH + 2));
+    Set_View_Dimensions(0, HeaderX + HeaderH + 2, -1, (FooterY - 1) - (HeaderH + 2));
 }
 
 #endif

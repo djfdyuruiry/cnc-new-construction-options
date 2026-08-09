@@ -1767,17 +1767,6 @@ void DisplayClass::Write_INI(CCINIClass& ini)
 #endif
 
 #ifdef MEGAMAPS
-    /*
-    ** Determine map version based on whether the map fits within the original 64x64 bounds.
-    ** Maps that fit entirely within the original bounds use the normal binary format.
-    ** Maps that exceed 64x64 use the megamap binary format.
-    */
-    constexpr int OriginalMapSize = 64;
-    MapBinaryVersion = (IniMapCellX + IniMapCellWidth <= OriginalMapSize
-                            && IniMapCellY + IniMapCellHeight <= OriginalMapSize)
-                       ? MAP_VERSION_NORMAL
-                       : MAP_VERSION_MEGA;
-
     if (MapBinaryVersion == MAP_VERSION_MEGA) {
         ini.Put_Int(NAME, "Version", 1);
     }
