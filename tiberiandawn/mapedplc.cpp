@@ -109,28 +109,22 @@ int MapEditClass::Placement_Dialog(void)
     const auto D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);
 
     const auto D_TXT8_H = 22;
-    const auto D_MARGIN = 14;
-
-    const auto D_PICTURE_W = 304; // must be divisible by 8!
-    const auto D_PICTURE_H = 210;
-    const auto D_PICTURE_X = D_DIALOG_X + 16; // must start on a byte boundary!
-    const auto D_PICTURE_Y = D_DIALOG_Y + D_MARGIN + D_TXT8_H + D_MARGIN;
-    const auto D_PICTURE_CX = D_PICTURE_X + D_PICTURE_W / 2;
+    const auto D_MARGIN = 18;
 
     const auto D_GDI_W = 90;
     const auto D_GDI_H = 18;
     const auto D_GDI_X = D_DIALOG_X + D_MARGIN;
-    const auto D_GDI_Y = D_DIALOG_Y + D_MARGIN;
+    const auto D_GDI_Y = D_DIALOG_Y + (D_MARGIN * 2);
 
     const auto D_NOD_W = 90;
     const auto D_NOD_H = 18;
     const auto D_NOD_X = D_GDI_X + D_GDI_W;
-    const auto D_NOD_Y = D_DIALOG_Y + D_MARGIN;
+    const auto D_NOD_Y = D_GDI_Y;
 
     const auto D_NEUTRAL_W = 90;
     const auto D_NEUTRAL_H = 18;
     const auto D_NEUTRAL_X = D_NOD_X + D_NOD_W;
-    const auto D_NEUTRAL_Y = D_DIALOG_Y + D_MARGIN;
+    const auto D_NEUTRAL_Y = D_GDI_Y;
 
     const auto D_MULTI1_W = 44;
     const auto D_MULTI1_H = 18;
@@ -152,6 +146,12 @@ int MapEditClass::Placement_Dialog(void)
     const auto D_MULTI4_X = D_MULTI3_X + D_MULTI3_W;
     const auto D_MULTI4_Y = D_GDI_Y;
 
+    const auto D_PICTURE_W = 304; // must be divisible by 8!
+    const auto D_PICTURE_H = 210;
+    const auto D_PICTURE_X = D_DIALOG_X + 16; // must start on a byte boundary!
+    const auto D_PICTURE_Y = D_GDI_Y + D_TXT8_H + D_MARGIN;
+    const auto D_PICTURE_CX = D_PICTURE_X + D_PICTURE_W / 2;
+
     const auto D_LEFT_W = 90;
     const auto D_LEFT_H = 18;
     const auto D_LEFT_X = D_PICTURE_CX - 5 - D_LEFT_W;
@@ -164,42 +164,42 @@ int MapEditClass::Placement_Dialog(void)
 
     const auto D_TEMPLATE_W = 140;
     const auto D_TEMPLATE_H = 18;
-    const auto D_TEMPLATE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TEMPLATE_W;
+    const auto D_TEMPLATE_X = D_DIALOG_X + D_DIALOG_W - (D_MARGIN / 2) - D_TEMPLATE_W;
     const auto D_TEMPLATE_Y = D_PICTURE_Y;
 
     const auto D_OVERLAY_W = 140;
     const auto D_OVERLAY_H = 18;
-    const auto D_OVERLAY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_OVERLAY_W;
+    const auto D_OVERLAY_X = D_TEMPLATE_X;
     const auto D_OVERLAY_Y = D_TEMPLATE_Y + D_TEMPLATE_H;
 
     const auto D_SMUDGE_W = 140;
     const auto D_SMUDGE_H = 18;
-    const auto D_SMUDGE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_SMUDGE_W;
+    const auto D_SMUDGE_X = D_TEMPLATE_X;
     const auto D_SMUDGE_Y = D_OVERLAY_Y + D_OVERLAY_H;
 
     const auto D_TERRAIN_W = 140;
     const auto D_TERRAIN_H = 18;
-    const auto D_TERRAIN_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TERRAIN_W;
+    const auto D_TERRAIN_X = D_TEMPLATE_X;
     const auto D_TERRAIN_Y = D_SMUDGE_Y + D_SMUDGE_H;
 
     const auto D_UNIT_W = 140;
     const auto D_UNIT_H = 18;
-    const auto D_UNIT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_UNIT_W;
+    const auto D_UNIT_X = D_TEMPLATE_X;
     const auto D_UNIT_Y = D_TERRAIN_Y + D_TERRAIN_H;
 
     const auto D_INFANTRY_W = 140;
     const auto D_INFANTRY_H = 18;
-    const auto D_INFANTRY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_INFANTRY_W;
+    const auto D_INFANTRY_X = D_TEMPLATE_X;
     const auto D_INFANTRY_Y = D_UNIT_Y + D_UNIT_H;
 
     const auto D_AIRCRAFT_W = 140;
     const auto D_AIRCRAFT_H = 18;
-    const auto D_AIRCRAFT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_AIRCRAFT_W;
+    const auto D_AIRCRAFT_X = D_TEMPLATE_X;
     const auto D_AIRCRAFT_Y = D_INFANTRY_Y + D_INFANTRY_H;
 
     const auto D_BUILDING_W = 140;
     const auto D_BUILDING_H = 18;
-    const auto D_BUILDING_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_BUILDING_W;
+    const auto D_BUILDING_X = D_TEMPLATE_X;
     const auto D_BUILDING_Y = D_AIRCRAFT_Y + D_AIRCRAFT_H;
 
     const auto D_OK_W = 90;
