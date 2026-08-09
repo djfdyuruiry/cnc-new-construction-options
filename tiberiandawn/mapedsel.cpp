@@ -298,6 +298,8 @@ void MapEditClass::Popup_Controls(void)
     Remove_A_Button(*FacingDial);
     Remove_A_Button(*IsBaseStructureCheckbox);
     Remove_A_Button(*IsBaseStructureText);
+    Remove_A_Button(*BaseStructureIdTextBox);
+    Remove_A_Button(*BaseStructureIdText);
     Remove_A_Button(*BaseGauge);
     Remove_A_Button(*BaseLabel);
     Remove_A_Button(*MapArea);
@@ -399,12 +401,29 @@ void MapEditClass::Popup_Controls(void)
         Add_A_Button(*HealthText);
         Add_A_Button(*IsBaseStructureCheckbox);
         Add_A_Button(*IsBaseStructureText);
+        Add_A_Button(*BaseStructureIdTextBox);
+        Add_A_Button(*BaseStructureIdText);
 
-        if (Base.Is_Node(dynamic_cast<BuildingClass*>(CurrentObject[0]))) {
+        auto building = dynamic_cast<BuildingClass*>(CurrentObject[0]);
+
+        if (Base.Is_Node(building)) {
             IsBaseStructureCheckbox->Turn_On();
+
+            auto node = Base.Get_Node(building);
+
+            BaseStructureIdTextBox->Enable();
+            BaseStructureIdText->Enable();
+
+            sprintf(BaseStructureIdBuffer, "%d", Base.Nodes.ID(node));
         } else {
             IsBaseStructureCheckbox->Turn_Off();
+            BaseStructureIdBuffer[0] = '\0';
+            BaseStructureIdTextBox->Disable(true);
+            BaseStructureIdText->Disable(true);
         }
+
+        BaseStructureIdTextBox->Set_Text(BaseStructureIdBuffer, std::size(BaseStructureIdBuffer));
+        BaseStructureIdContext = building;
 
         if (objtype->IsTurretEquipped) {
             FacingDial->Set_Direction(((TechnoClass*)CurrentObject[0])->PrimaryFacing);

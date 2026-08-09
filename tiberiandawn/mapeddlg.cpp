@@ -156,6 +156,9 @@ int MapEditClass::New_Scenario(void)
     Set_Tactical_Position(Cell_Coord(Scen.Waypoint[WAYPT_HOME]));
     ScenarioInit--;
 
+    BasePercent = 100;
+    BaseGauge->Set_Value(BasePercent);
+
     return (0);
 }
 

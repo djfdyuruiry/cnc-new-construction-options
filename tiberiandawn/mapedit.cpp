@@ -151,6 +151,8 @@ void MapEditClass::One_Time(void)
     HeaderW = SeenBuff.Get_Width();
     HeaderH = Get_Tab_Height();
 
+    PopupDialogVisible = false;
+
     FooterX = 0;
     FooterY = SeenBuff.Get_Height() - Get_Tab_Height();
     FooterW = SeenBuff.Get_Width();
@@ -204,7 +206,10 @@ void MapEditClass::One_Time(void)
     const auto POPUP_HEALTH_Y = POPUP_GDI_Y + (CONTROL_MARGIN * 4);
 
     const auto POPUP_BASESTRUCTURE_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
-    const auto POPUP_BASESTRUCTURE_Y = POPUP_HEALTH_Y + 1;
+    const auto POPUP_BASESTRUCTURE_Y = POPUP_HEALTH_Y - (POPUP_HEALTH_H / 2);
+
+    const auto POPUP_BASEPRIORITY_X = POPUP_BASESTRUCTURE_X;
+    const auto POPUP_BASEPRIORITY_Y = POPUP_BASESTRUCTURE_Y + POPUP_BASESTRUCTURE_SIZE + (CONTROL_MARGIN * 2);
 
     const auto POPUP_MISSION_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
     const auto POPUP_MISSION_Y = POPUP_FACEBOX_Y;
@@ -322,6 +327,46 @@ void MapEditClass::One_Time(void)
                                     IsBaseStructureCheckbox->Y + ((POPUP_BASESTRUCTURE_SIZE - 6) / 6),
                                     CC_GREEN,
                                     TPF_CENTER | TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
+
+    /*........................................................................
+    AI Base flag for structures
+    ........................................................................*/
+    static char base_id_text[8] = "Base ID";
+
+    BaseStructureIdTextBox = new EditClass(
+        POPUP_BASEID,
+        BaseStructureIdBuffer,
+        std::size(BaseStructureIdBuffer),
+        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+        POPUP_BASEPRIORITY_X,
+        POPUP_BASEPRIORITY_Y,
+        POPUP_BASESTRUCTURE_SIZE * 2,
+        18,
+        EditClass::NUMERIC
+    );
+    BaseStructureIdText = new TextLabelClass(
+        base_id_text,
+        POPUP_BASEPRIORITY_X + (POPUP_BASESTRUCTURE_SIZE * 2) + 2,
+        POPUP_BASEPRIORITY_Y + 2,
+        CC_GREEN,
+        TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL
+    );
+    BaseStructureIdContext = nullptr;
+
+    /*........................................................................
+    Calculate popup dialog dimensions
+    ........................................................................*/
+    constexpr auto dialog_margin = CONTROL_MARGIN * 4;
+
+    PopupDialogX = POPUP_GDI_X - dialog_margin;
+    PopupDialogY = POPUP_GDI_Y - (dialog_margin * 2); // make room for caption text and livery
+
+    // use bottom right controls as end points
+    const auto end_x = POPUP_MISSION_X + POPUP_MISSION_W + dialog_margin;
+    const auto end_y = POPUP_MISSION_Y + POPUP_MISSION_H + dialog_margin;
+
+    PopupDialogW = end_x - PopupDialogX;
+    PopupDialogH = end_y - PopupDialogY;
 
     /*........................................................................
     The base percent-built slider & its label
@@ -551,6 +596,38 @@ void MapEditClass::Exit_Editor() const
     Debug_Map = false;
 }
 
+static bool Change_Base_Node_Id(char* id_str, const size_t str_len, EditClass& control, BuildingClass* building)
+{
+    if (building == nullptr) {
+        return false;
+    }
+
+    if (!Base.Is_Node(building)) {
+        return false;
+    }
+
+    try {
+        const auto desired_node_idx = std::stoi(id_str);
+        const auto node_to_move_ptr = Base.Get_Node(building);
+        const auto current_node_idx = Base.Nodes.ID(node_to_move_ptr);
+
+        auto result = Base.Nodes.Move(current_node_idx, desired_node_idx);
+
+        if (!result) {
+            // invalid id, reset to current node id
+            sprintf(id_str, "%d", current_node_idx);
+            control.Set_Text(id_str, str_len);
+        }
+
+        return result;
+    } catch (const std::invalid_argument& _) {
+    } catch (const std::out_of_range& _) {
+    }
+
+    control.Set_Color(RED);
+    return false;
+}
+
 /***************************************************************************
  * MapEditClass::AI -- The map editor's main logic                         *
  *                                                                         *
@@ -749,6 +826,35 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                 }
             }
         }
+    }
+
+    /*------------------------------------------------------------------------
+    handle structure base ID textbox interactions
+    ------------------------------------------------------------------------*/
+    if (BaseStructureIdTextBox->Has_Focus()) {
+        // if user is editing the priority textbox, prevent further input processing until they move the mouse away
+        if (Get_Mouse_X() >= BaseStructureIdTextBox->X
+            && Get_Mouse_X() <= BaseStructureIdTextBox->X + BaseStructureIdTextBox->Width
+            && Get_Mouse_Y() >= BaseStructureIdTextBox->Y
+            && Get_Mouse_Y() <= BaseStructureIdTextBox->Y + BaseStructureIdTextBox->Height) {
+            input = KN_NONE;
+        }
+
+        BaseStructureIdTextBox->Draw_Me(true);
+    } else if (BaseStructureIdTextBox->Has_Changed()) {
+        // process AI base node priority change
+        if (Change_Base_Node_Id(
+            BaseStructureIdBuffer,
+            std::size(BaseStructureIdBuffer),
+            *BaseStructureIdTextBox,
+            BaseStructureIdContext
+        )) {
+            BaseStructureIdContext = nullptr;
+            Build_Base_To(BasePercent);
+        }
+
+        BaseStructureIdTextBox->Clear_Changed();
+        BaseStructureIdTextBox->Draw_Me(true);
     }
 
     /*------------------------------------------------------------------------
@@ -1170,6 +1276,15 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         - release any grabbed object
         ---------------------------------------------------------------------*/
     case ((int)MAP_AREA | (int)KN_BUTTON):
+        if (PopupDialogVisible
+            && Get_Mouse_X() >= PopupDialogX
+            && Get_Mouse_X() <= PopupDialogX + PopupDialogW
+            && Get_Mouse_Y() >= PopupDialogY
+            && Get_Mouse_Y() <= PopupDialogY + PopupDialogH) {
+            // allow absently clicking around the popup dialog area - also required to allow edit boxes to get focus
+            break;
+        }
+
         /*
         ------------------------- Left Button DOWN -------------------------
         */
@@ -1429,10 +1544,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
+    // when the 'Base' checkbox is toggled, add/remove the selected building (if any) from the AI base
     case (POPUP_BASESTRUCTURE | KN_BUTTON): {
         input = KN_NONE;
 
-        // when the 'Base' checkbox is toggled, add/remove the selected building (if any) from the AI base
         if (CurrentObject.Count() < 1 || CurrentObject[0]->What_Am_I() != RTTI_BUILDING) {
             break;
         }
@@ -1456,6 +1571,8 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             }
 
             IsBaseStructureCheckbox->Turn_On();
+            BaseStructureIdText->Enable();
+            BaseStructureIdTextBox->Enable();
         } else if (IsBaseStructureCheckbox->IsOn) {
             if (Base.Is_Node(selected_building)) {
                 Base.Nodes.Delete(building_node);
@@ -1463,6 +1580,8 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             }
 
             IsBaseStructureCheckbox->Turn_Off();
+            BaseStructureIdTextBox->Disable(true);
+            BaseStructureIdText->Disable(true);
         }
 
         if (base_changed) {
@@ -1481,6 +1600,12 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
 
                 new_building->Select();
                 new_building->Time_To_Redraw();
+
+                if (Base.Is_Node(new_building)) {
+                    sprintf(BaseStructureIdBuffer, "%d", Base.Nodes.ID(Base.Get_Node(new_building)));
+                    BaseStructureIdTextBox->Set_Text(BaseStructureIdBuffer, std::size(BaseStructureIdBuffer));
+                    BaseStructureIdContext = new_building;
+                }
             }
 
             Flag_To_Redraw(true);
@@ -1785,6 +1910,56 @@ void MapEditClass::Draw_Header(const bool forced)
     // exact AI base percent value (beside associated slider)
     Fancy_Text_Print(
         "%3d%%", HeaderX + (HeaderW - (22 * factor)), HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
+}
+
+void MapEditClass::Render_Editor_Controls()
+{
+    if (Buttons == nullptr) {
+        return;
+    }
+
+    // dynamically determine if popup dialog is visible
+    PopupDialogVisible = false;
+
+    const auto map_midpoint_y = (SeenBuff.Get_Height() - Map.Get_Tab_Height()) / 2;
+    auto control = Buttons;
+
+    while (control != nullptr) {
+        // popup buttons are only after the midpoint, so use that as a heuristic to detect a popup dialog
+        if (control->Y >= map_midpoint_y) {
+            PopupDialogVisible = true;
+            break;
+        }
+
+        control = control->Get_Next();
+    }
+
+    if (PopupDialogVisible) {
+        // draw a dialog background for the popup buttons
+        Dialog_Box(PopupDialogX, PopupDialogY, PopupDialogW, PopupDialogH);
+
+        // print the selected object name
+        if (CurrentObject.Count() > 0) {
+            // init font
+            Fancy_Text_Print(
+                TXT_NONE,
+                0,
+                0,
+                CC_GREEN,
+                TBLACK,
+                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW
+            );
+            Draw_Caption(
+                Text_String(CurrentObject[0]->Full_Name()),
+                OPTION_DIALOG,
+                PopupDialogX,
+                PopupDialogY,
+                PopupDialogW
+            );
+        }
+    }
+
+    Buttons->Draw_All();
 }
 
 /***************************************************************************

@@ -118,22 +118,23 @@ the HousesType values.
 ...........................................................................*/
 enum MapEditButtonIDEnum
 {
-    POPUP_GDI = 500,   // GDI house button
-    POPUP_NOD,         // NOD house button
-    POPUP_NEUTRAL,     // Neutral house button
-    POPUP_HOUSE_JP,    // not used
-    POPUP_MULTI1,      // Multiplayer 1 house button
-    POPUP_MULTI2,      // Multiplayer 2 house button
-    POPUP_MULTI3,      // Multiplayer 3 house button
-    POPUP_MULTI4,      // Multiplayer 4 house button
-    POPUP_MULTI5,      // Multiplayer 4 house button
-    POPUP_MULTI6,      // Multiplayer 4 house button
-    POPUP_MISSIONLIST, // list box for missions
-    POPUP_HEALTHGAUGE, // health of object
-    POPUP_FACINGDIAL,  // object's facing
-    POPUP_BASESTRUCTURE, // health of object
-    POPUP_BASEPERCENT, // Base's percent-built slider
-    MAP_AREA,          // map as a click-able thingy
+    POPUP_GDI = 500,      // GDI house button
+    POPUP_NOD,            // NOD house button
+    POPUP_NEUTRAL,        // Neutral house button
+    POPUP_HOUSE_JP,       // not used
+    POPUP_MULTI1,         // Multiplayer 1 house button
+    POPUP_MULTI2,         // Multiplayer 2 house button
+    POPUP_MULTI3,         // Multiplayer 3 house button
+    POPUP_MULTI4,         // Multiplayer 4 house button
+    POPUP_MULTI5,         // Multiplayer 4 house button
+    POPUP_MULTI6,         // Multiplayer 4 house button
+    POPUP_MISSIONLIST,    // list box for missions
+    POPUP_HEALTHGAUGE,    // health of object
+    POPUP_FACINGDIAL,     // object's facing
+    POPUP_BASESTRUCTURE,  // AI base toggle
+    POPUP_BASEID,         // AI base ID (Base.Nodes index)
+    POPUP_BASEPERCENT,    // Base's percent-built slider
+    MAP_AREA,             // map as a click-able thingy
     BUTTON_FLAG = 0x8000
 };
 
@@ -162,6 +163,7 @@ public:
     virtual void One_Time(void); // One-time init
     virtual void Init_IO(void);  // Inits button list
     virtual void AI(KeyNumType& input, int x, int y);
+    virtual void Render_Editor_Controls();
     virtual void Draw_It(bool forced = true);
     virtual bool Scroll_Map(DirType facing, int& distance, bool really = true);
     //		virtual void Flag_To_Redraw(bool complete);
@@ -256,6 +258,12 @@ private:
     int HeaderW;
     int HeaderH;
 
+    bool PopupDialogVisible;
+    int PopupDialogX;
+    int PopupDialogY;
+    int PopupDialogW;
+    int PopupDialogH;
+
     int FooterX;
     int FooterY;
     int FooterW;
@@ -341,6 +349,10 @@ private:
     Dial8Class* FacingDial;
     CheckBoxClass* IsBaseStructureCheckbox;
     TextLabelClass* IsBaseStructureText;
+    char BaseStructureIdBuffer[4];
+    EditClass* BaseStructureIdTextBox;
+    TextLabelClass* BaseStructureIdText;
+    BuildingClass* BaseStructureIdContext; // the associated building for the current base priority value
     ControlClass* MapArea;
     TextLabelClass* HealthText;
     static char HealthBuf[20];

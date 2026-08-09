@@ -382,69 +382,15 @@ void GScreenClass::Render(void)
             Render_Rally_Point_Line();
         }
 
-        if (Buttons)
+        if (!Debug_Map && Buttons)
             Buttons->Draw_All(false);
 
 #ifdef SCENARIO_EDITOR
         /*
-        ** Draw the Editor's buttons
+        ** Call editor subclass do button rendering logic.
         */
         if (Debug_Map) {
-            if (Buttons) {
-                // dynamically determine the bounds for a background box behind popup buttons
-                const auto map_midpoint_y = (SeenBuff.Get_Height() - Map.Get_Tab_Height()) / 2;
-                auto start_x = SeenBuff.Get_Width();
-                auto start_y = SeenBuff.Get_Height();
-                auto end_x = 0;
-                auto end_y = 0;
-
-                auto control = Buttons;
-                auto popup_buttons_present = false;
-
-                while (control != nullptr) {
-                    // only match popup buttons (on the bottom of the screen)
-                    if (control->Y >= map_midpoint_y) {
-                        start_x = min(start_x, control->X);
-                        start_y = min(start_y, control->Y);
-                        end_x = max(end_x, control->X + control->Width);
-                        end_y = max(end_y, control->Y + control->Height);
-
-                        popup_buttons_present = true;
-                    }
-
-                    control = control->Get_Next();
-                }
-
-                if (popup_buttons_present) {
-                    // draw a dialog background for the popup buttons
-                    static auto constexpr dialog_margin = 10;
-                    auto width = min(end_x + dialog_margin, SeenBuff.Get_Width() - dialog_margin) - (start_x - dialog_margin);
-                    auto height = min(end_y + dialog_margin, SeenBuff.Get_Height() - dialog_margin) - (start_y - dialog_margin);
-
-                    // add extra padding on the top and right to fit label text
-                    start_x -= dialog_margin;
-                    start_y -= (dialog_margin * 4);
-                    width += dialog_margin;
-                    height += (dialog_margin * 4);
-
-                    Dialog_Box(start_x, start_y, width, height);
-
-                    // print the selected object name
-                    if (CurrentObject.Count() > 0) {
-                        // init font
-                        Fancy_Text_Print(TXT_NONE, 0, 0, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-                        Draw_Caption(
-                            Text_String(CurrentObject[0]->Full_Name()),
-                            OPTION_DIALOG,
-                            start_x,
-                            start_y,
-                            width
-                        );
-                    }
-                }
-
-                Buttons->Draw_All();
-            }
+            Render_Editor_Controls();
         }
 #endif
         /*
