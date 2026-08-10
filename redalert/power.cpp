@@ -134,7 +134,12 @@ void PowerClass::One_Time(const bool on_save)
 {
     RadarClass::One_Time(on_save);
 
-    constexpr auto power_strip_height = 153;
+    if (!on_save) {
+        PowerShape = MFCD::Retrieve("POWER.SHP");
+        PowerBarShape = MFCD::Retrieve("POWERBAR.SHP");
+    }
+
+    static const auto power_strip_height = Get_Build_Frame_Height(PowerBarShape) + 41;
     bool dosmode = (RESFACTOR == 1);
 
     POWER_Y = (dosmode) ? (88 + 9) : (7 + 70 + 13);
@@ -144,13 +149,6 @@ void PowerClass::One_Time(const bool on_save)
     PowerButton.Y = POWER_Y * RESFACTOR;
     PowerButton.Width = (POWER_WIDTH * RESFACTOR) - 1;
     PowerButton.Height = POWER_HEIGHT * RESFACTOR;
-
-    if (on_save) {
-        return;
-    }
-
-    PowerShape = MFCD::Retrieve("POWER.SHP");
-    PowerBarShape = MFCD::Retrieve("POWERBAR.SHP");
 }
 
 /***********************************************************************************************
