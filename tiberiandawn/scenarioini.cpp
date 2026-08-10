@@ -1187,6 +1187,7 @@ void Write_Scenario_Ini(char* root)
     TerrainClass::Write_INI(ini);
     OverlayClass::Write_INI(ini);
     SmudgeClass::Write_INI(ini);
+    AircraftClass::Write_INI(ini);
 
     Base.Write_INI(ini);
 

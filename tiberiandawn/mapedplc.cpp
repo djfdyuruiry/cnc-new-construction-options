@@ -978,7 +978,7 @@ void MapEditClass::Start_Placement(void)
 
         // ensure any placed aircraft are in the 'landed' state
         if (PendingObject->What_Am_I() == RTTI_AIRCRAFTTYPE) {
-            reinterpret_cast<AircraftClass*>(PendingObjectPtr)->Force_To_Ground();
+            reinterpret_cast<AircraftClass*>(PendingObjectPtr)->Altitude = 0;
         }
     } else {
         if (LastChoice < TypeOffset[7])
