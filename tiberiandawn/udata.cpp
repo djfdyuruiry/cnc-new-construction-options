@@ -1451,14 +1451,15 @@ UnitType UnitTypeClass::From_Name(char const* name)
  *   05/14/1994 JLB : Created.                                                                 *
  *   11/08/1994 JLB : Handles chunky type vehicles now.                                        *
  *=============================================================================================*/
-void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
-    int shape = 0;
-    void const* ptr = Get_Cameo_Data();
-    if (!ptr) {
-        ptr = Get_Image_Data();
-        shape = IsChunkyShape ? 0 : 5;
-    }
+    //int shape = 0;
+    // TODO: TdSetting for use cameo/use shape (def to shape)
+    //void const* ptr = Get_Cameo_Data();
+    //if (!ptr) {
+        void const* ptr = Get_Image_Data();
+        int shape = IsChunkyShape ? 0 : 5;
+    //}
     CC_Draw_Shape(ptr,
                   shape,
                   x,
@@ -1466,6 +1467,9 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
                   window,
                   SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
                   HouseTypeClass::As_Reference(house).RemapTable);
+
+    end_x = x + Get_Build_Frame_Width(ptr);
+    end_y = y + Get_Build_Frame_Height(ptr);
 }
 
 /***********************************************************************************************

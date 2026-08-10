@@ -546,8 +546,21 @@ int MapEditClass::Placement_Dialog(void)
                 WindowList[WINDOW_EDITOR][WINDOWHEIGHT] = D_PICTURE_H;
                 Change_Window((int)WINDOW_EDITOR);
                 Draw_Box(D_PICTURE_X, D_PICTURE_Y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
-                curobj->Display(WinW >> 1, WinH >> 1, WINDOW_EDITOR, LastHouse);
 
+                int obj_end_x = 0;
+                int obj_end_y = 0;
+
+                curobj->Display(WinW >> 1, WinH >> 1, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
+
+                if (obj_end_x < WindowList[WINDOW_EDITOR][WINDOWX]) {
+                    obj_end_x += WindowList[WINDOW_EDITOR][WINDOWX];
+                }
+
+                if (obj_end_y < WindowList[WINDOW_EDITOR][WINDOWY]) {
+                    obj_end_y += WindowList[WINDOW_EDITOR][WINDOWY];
+                }
+
+                CNC_LOG_WARN("{}x{} -> {}x{}", WindowList[WINDOW_EDITOR][WINDOWX] + (WinW >> 1), WindowList[WINDOW_EDITOR][WINDOWY] + (WinH >> 1), obj_end_x, obj_end_y);
                 /*
                 ........................ Erase the grid .........................
                 */

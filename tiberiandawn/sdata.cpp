@@ -349,7 +349,7 @@ void SmudgeTypeClass::Init(TheaterType theater)
  * HISTORY:                                                                                    *
  *   08/12/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SmudgeTypeClass::Display(int x, int y, WindowNumberType window, HousesType) const
+void SmudgeTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
 {
     void const* ptr = Get_Image_Data();
 
@@ -365,6 +365,9 @@ void SmudgeTypeClass::Display(int x, int y, WindowNumberType window, HousesType)
                 // WINDOW_TACTICAL);
             }
         }
+
+        end_x = x + Get_Build_Frame_Width(ptr);
+        end_y = y + Get_Build_Frame_Height(ptr);
     }
     IsTheaterShape = false;
 }

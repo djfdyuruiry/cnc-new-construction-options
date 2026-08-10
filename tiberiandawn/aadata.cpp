@@ -501,14 +501,15 @@ void AircraftTypeClass::Prep_For_Add(void)
  * HISTORY:                                                                                    *
  *   07/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
-    int shape = 0;
-    void const* ptr = Get_Cameo_Data();
-    if (!ptr) {
-        ptr = Get_Image_Data();
-        shape = 5;
-    }
+    //int shape = 0;
+    // TODO: TdSetting for use cameo/use shape (def to shape)
+    //void const* ptr = Get_Cameo_Data();
+    //if (!ptr) {
+        void const* ptr = Get_Image_Data();
+        int shape = 5;
+    //}
     CC_Draw_Shape(ptr,
                   shape,
                   x,
@@ -516,6 +517,9 @@ void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
                   window,
                   SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_FADING,
                   HouseClass::As_Pointer(house)->Remap_Table(false, true));
+
+    end_x = x + Get_Build_Frame_Width(ptr);
+    end_y = y + Get_Build_Frame_Height(ptr);
 }
 #endif
 

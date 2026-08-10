@@ -901,11 +901,14 @@ TerrainType TerrainTypeClass::From_Name(char const* name)
  * HISTORY:                                                                                    *
  *   05/16/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void TerrainTypeClass::Display(int x, int y, WindowNumberType window, HousesType) const
+void TerrainTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
 {
     IsTheaterShape = true;
     CC_Draw_Shape(Get_Image_Data(), 0, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
     IsTheaterShape = false;
+
+    end_x = x + Get_Build_Frame_Width(Get_Image_Data());
+    end_y = y + Get_Build_Frame_Height(Get_Image_Data());
 }
 
 /***********************************************************************************************

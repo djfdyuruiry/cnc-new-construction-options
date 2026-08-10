@@ -3944,13 +3944,14 @@ StructType BuildingTypeClass::From_Name(char const* name)
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
-    void const* ptr = Get_Cameo_Data();
-    if (!ptr) {
+    //void const* ptr = Get_Cameo_Data();
+    // TODO: TdSetting for use cameo/use shape (def to shape)
+    //if (!ptr) {
         IsTheaterShape = IsTheater;
-        ptr = Get_Image_Data();
-    }
+        void const* ptr = Get_Image_Data();
+    //}
     CC_Draw_Shape(ptr,
                   0,
                   x,
@@ -3959,6 +3960,9 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
                   SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
                   HouseTypeClass::As_Reference(house).RemapTable);
     IsTheaterShape = false;
+
+    end_x = x + Get_Build_Frame_Width(ptr);
+    end_y = y + Get_Build_Frame_Height(ptr);
 }
 
 /***********************************************************************************************
@@ -4356,7 +4360,7 @@ short const* BuildingTypeClass::Occupy_List(bool placement) const
         return (OccupyList);
     }
 
-    static constexpr short _templap[] = {REFRESH_EOL};
+    constexpr short _templap[] = {REFRESH_EOL};
     return (&_templap[0]);
 }
 

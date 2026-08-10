@@ -1659,18 +1659,21 @@ short const* InfantryTypeClass::Occupy_List(bool) const
  * HISTORY:                                                                                    *
  *   09/24/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
     if (house != HOUSE_NONE) {
-
-        int shape = 0;
-        void const* ptr = Get_Cameo_Data();
-        if (!ptr) {
-            ptr = Get_Image_Data();
-            shape = 2;
-        }
+        //int shape = 0;
+        // TODO: TdSetting for use cameo/use shape (def to shape)
+        //void const* ptr = Get_Cameo_Data();
+        //if (!ptr) {
+            void const* ptr = Get_Image_Data();
+            int shape = 2;
+        //}
 
         CC_Draw_Shape(ptr, shape, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
+
+        end_x = x + Get_Build_Frame_Width(ptr);
+        end_y = y + Get_Build_Frame_Height(ptr);
     }
 }
 

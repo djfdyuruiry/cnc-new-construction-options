@@ -2172,7 +2172,23 @@ void MapEditClass::Draw_Member(TechnoTypeClass const* ptr, int index, int quant,
     Hide_Mouse();
     Draw_Box(x, y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
 
-    ptr->Display(x + D_PICTURE_W / 2, y + D_PICTURE_H / 2, WINDOW_EDITOR, house);
+    int obj_end_x = 0;
+    int obj_end_y = 0;
+
+    ptr->Display(x + D_PICTURE_W / 2, y + D_PICTURE_H / 2, WINDOW_EDITOR, house, obj_end_x, obj_end_y);
+
+    if (obj_end_x < WindowList[WINDOW_EDITOR][WINDOWX]) {
+        obj_end_x += WindowList[WINDOW_EDITOR][WINDOWX];
+    }
+
+    if (obj_end_y < WindowList[WINDOW_EDITOR][WINDOWY]) {
+        obj_end_y += WindowList[WINDOW_EDITOR][WINDOWY];
+    }
+
+    // TODO: Having the ability to determine shape size after rendering means that we could tile them, draw in a list etc. - so we can have a scrollable list or a grid to select from instead of one at a time
+    //       We could even have a popup list that is activatable by a button to make it easy to place stuff without menu digging
+    // TODO: Rework any shape dimension calcs in menus/UI (for high res) that has hardcoded pixel info for shapes - use Get_Build_Frame_Width + Get_Build_Frame_Height instead!
+    CNC_LOG_WARN("{}x{} -> {}x{}", WindowList[WINDOW_EDITOR][WINDOWX] + (WinW >> 1), WindowList[WINDOW_EDITOR][WINDOWY] + (WinH >> 1), obj_end_x, obj_end_y);
 
     if (quant > 0) {
         Fancy_Text_Print("%d",
