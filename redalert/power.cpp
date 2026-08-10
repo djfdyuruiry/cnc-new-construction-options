@@ -203,7 +203,7 @@ void PowerClass::Draw_It(bool complete)
                     /*
                     ** Dynamic power strip that scales to most sensible resolutions.
                     */
-                    constexpr auto hi_res_piece_height = 112;
+                    static const auto hi_res_piece_height = Get_Build_Frame_Height(PowerBarShape);
 
                     const auto power_x = RESFACTOR == 1 ? 240 : SeenBuff.Get_Width() - 160;
                     const auto end_piece_y = SeenBuff.Get_Height() - hi_res_piece_height;

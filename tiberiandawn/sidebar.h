@@ -410,6 +410,8 @@ public:
     */
     static void const* SidebarShape1;
     static void const* SidebarShape2;
+    static void const* SidebarUpBtnShape;
+    static void const* SidebarDownBtnShape;
 
     JSON_FUNCTIONS(SidebarClass)
 

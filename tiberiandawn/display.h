@@ -69,7 +69,7 @@ public:
     int MaxBuildingDistance = 1;
     int MaxWallPlacementDistance = 1;
 
-    ProximityScanRules(bool debug_placement = false);
+    ProximityScanRules();
     ~ProximityScanRules();
 
     void Update_Tracker_Cell(CELL cell, ProximityResult result) const;
@@ -399,11 +399,7 @@ private:
     */
 };
 
-ProximityScanRules Resolve_Placement_Rules(
-    const BuildingTypeClass* placement_type,
-    HousesType house,
-    bool debug_placement = false
-);
-ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance, bool debug_placement = false);
+ProximityScanRules Resolve_Placement_Rules(const BuildingTypeClass* placement_type, HousesType house);
+ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance);
 
 #endif

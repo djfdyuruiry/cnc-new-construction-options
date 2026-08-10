@@ -1563,7 +1563,6 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         building_node.Type = selected_building->Class->Type;
         building_node.Coord = selected_building->Coord;
 
-        // TODO: provide way of setting the base index in UI (influence base build order without editing INI)
         if (!IsBaseStructureCheckbox->IsOn) {
             if (!Base.Is_Node(selected_building)) {
                 Base.Nodes.Add(building_node);
@@ -1777,7 +1776,7 @@ void MapEditClass::Draw_Footer(const bool forced)
 
 void MapEditClass::Decorate_Cells(const bool forced)
 {
-    // TODO: have settings dialog menu options for font/colours in scenario editor + associated TdSettings entries to persist
+    // TODO: have settings dialog menu options for font/colours in scenario editor
     static auto constexpr cell_text_back_color = TBLACK;
     static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT | TPF_CENTER;
     const auto trigger_color = TdSettings.Get_Editor_Trigger_Color();

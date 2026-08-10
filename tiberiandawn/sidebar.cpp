@@ -127,6 +127,8 @@ void const* SidebarClass::StripClass::SpecialShapes[3];
 
 void const* SidebarClass::SidebarShape1;
 void const* SidebarClass::SidebarShape2;
+void const* SidebarClass::SidebarUpBtnShape;
+void const* SidebarClass::SidebarDownBtnShape;
 
 /***********************************************************************************************
  * SidebarClass::SidebarClass -- Default constructor for the sidebar.                          *
@@ -187,7 +189,28 @@ void SidebarClass::One_Time(const bool on_save_load)
     SideWidth = SeenBuff.Get_Width() - SideX;
     SideHeight = SeenBuff.Get_Height() - SideY;
 
-    auto constexpr hi_res_button_height = 27;
+    if (!on_save_load) {
+        /*
+        **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
+        */
+        if (SidebarShape1 == nullptr) {
+            SidebarShape1 = Hires_Retrieve("SIDE1.SHP");
+        }
+
+        if (SidebarShape2 == nullptr) {
+            SidebarShape2 = Hires_Retrieve("SIDE2.SHP");
+        }
+
+        if (SidebarUpBtnShape == nullptr) {
+            SidebarUpBtnShape = Hires_Retrieve("STRIPUP.SHP");
+        }
+
+        if (SidebarDownBtnShape == nullptr) {
+            SidebarDownBtnShape = Hires_Retrieve("STRIPDN.SHP");
+        }
+    }
+
+    static const auto hi_res_button_height = Get_Build_Frame_Height(SidebarUpBtnShape);
 
     // dynamically determine visible icon buttons for current resolution (hi-res) OR hard coded default
     MaxVisible = SeenBuff.Get_Height() > GBUFF_INIT_HEIGHT
@@ -229,20 +252,6 @@ void SidebarClass::One_Time(const bool on_save_load)
 
     Column[0].One_Time(0, on_save_load);
     Column[1].One_Time(1, on_save_load);
-
-    if (on_save_load) {
-        return;
-    }
-
-    /*
-    **	Load the sidebar shape in at this time. (Hi-Res sidebar is theater dependant)
-    */
-    if (SidebarShape1 == NULL) {
-        SidebarShape1 = Hires_Retrieve("SIDE1.SHP");
-    }
-    if (SidebarShape2 == NULL) {
-        SidebarShape2 = Hires_Retrieve("SIDE2.SHP");
-    }
 }
 
 /***********************************************************************************************
@@ -850,9 +859,9 @@ void SidebarClass::Draw_It(bool complete)
 
                 // hi-res renders sidebar controls outside original graphics area, use a texture to fill blank areas
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                    static constexpr auto power_width = 20;
-                    static constexpr auto side_shape1_height = 118;
-                    static constexpr auto side_shape2_height = 124;
+                    constexpr auto power_width = 20;
+                    static const auto side_shape1_height = Get_Build_Frame_Height(SidebarShape1);
+                    static const auto side_shape2_height = Get_Build_Frame_Height(SidebarShape2);
 
                     const auto blank_space_y = use_default_strip_graphics
                         ? SideY + side_shape1_height + side_shape2_height
@@ -870,7 +879,7 @@ void SidebarClass::Draw_It(bool complete)
                     } else if (!use_default_strip_graphics) {
                         // if we aren't using the default graphics, fill in the space between strips to clear any help
                         // text (shown when user hovers over a build icon in the right column)
-                        static constexpr auto strip_gap_width = 6;
+                        constexpr auto strip_gap_width = 6;
 
                         const auto blank_space_x = SideX + power_width + (StripClass::OBJECT_WIDTH * 2);
 
@@ -1339,14 +1348,14 @@ void SidebarClass::StripClass::Init_IO(int id)
     UpButton[ID].X = X + ButtonSpacingOffset + 1;
     UpButton[ID].Y = Y + MaxVisibleIcons * ObjectHeight - 1;
 
-    UpButton[ID].Set_Shape(Hires_Retrieve("STRIPUP.SHP"));
+    UpButton[ID].Set_Shape(SidebarUpBtnShape);
 
     DownButton[ID].IsSticky = true;
     DownButton[ID].ID = BUTTON_DOWN + id;
     DownButton[ID].X = UpButton[ID].X + UpButton[ID].Width + ButtonSpacingOffset - 2;
     DownButton[ID].Y = Y + MaxVisibleIcons * ObjectHeight - 1;
 
-    DownButton[ID].Set_Shape(Hires_Retrieve("STRIPDN.SHP"));
+    DownButton[ID].Set_Shape(SidebarDownBtnShape);
 
     for (int index = 0; index < MaxVisibleIcons; index++) {
         SelectClass& g = SelectButton[ID][index];
@@ -1868,7 +1877,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
                 CC_Draw_Shape(LogoShapes, ID, X + 3, Y - 1, WINDOW_MAIN, SHAPE_WIN_REL | SHAPE_NORMAL, 0);
             } else {
                 // dynamically rendered strip background
-                auto constexpr icon_button_height = OBJECT_HEIGHT * 2;
+                constexpr auto icon_button_height = OBJECT_HEIGHT * 2;
                 auto logos_y = Y - 1;
 
                 for (auto i = 0; i < MaxVisibleIcons - 3; i++) {

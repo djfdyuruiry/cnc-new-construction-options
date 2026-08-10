@@ -80,11 +80,9 @@
 #include "ccini.h"
 #include "tiberiandawnsettings.h"
 
-ProximityScanRules::ProximityScanRules(const bool debug_placement)
+ProximityScanRules::ProximityScanRules()
 {
-    if (debug_placement) {
-        ProximityTracker = DisplayClass::Allocate_Proximity_Tracker();
-    }
+    ProximityTracker = DisplayClass::Allocate_Proximity_Tracker();
 }
 
 ProximityScanRules::~ProximityScanRules()
@@ -1081,8 +1079,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	}
 
     const auto building_type = dynamic_cast<const BuildingTypeClass*>(object);
-    constexpr auto debug_placement = true;
-    auto scan_rules = Resolve_Placement_Rules(building_type, house, debug_placement);
+    auto scan_rules = Resolve_Placement_Rules(building_type, house);
 
 	/*
 	**	Scan through all cells that the building foundation would cover. If any adjacent
@@ -5059,13 +5056,9 @@ FROM_JSON(DisplayClass)
     p.One_Time(true);
 }
 
-ProximityScanRules Resolve_Placement_Rules(
-    const BuildingTypeClass* placement_type,
-    const HousesType house,
-    const bool debug_placement
-)
+ProximityScanRules Resolve_Placement_Rules(const BuildingTypeClass* placement_type, const HousesType house)
 {
-    ProximityScanRules scan_rules(debug_placement);
+    ProximityScanRules scan_rules;
 
     const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_RULE);
     const auto max_wall_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALLS_MAX_LENGTH_RULE);
@@ -5120,7 +5113,7 @@ ProximityScanRules Resolve_Placement_Rules(
     return scan_rules;
 }
 
-ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance, const bool debug_placement)
+ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance)
 {
     const BuildingTypeClass* placement_type = nullptr;
     HousesType house = HOUSE_NONE;
@@ -5130,5 +5123,5 @@ ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instan
         house = placement_instance->House->Class->House;
     };
 
-    return Resolve_Placement_Rules(placement_type, house, debug_placement);
+    return Resolve_Placement_Rules(placement_type, house);
 }
