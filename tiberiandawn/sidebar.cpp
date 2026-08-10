@@ -859,7 +859,7 @@ void SidebarClass::Draw_It(bool complete)
 
                 // hi-res renders sidebar controls outside original graphics area, use a texture to fill blank areas
                 if (Get_Current_Resolution_Mode() == MODE_HIGH_RES) {
-                    constexpr auto power_width = 20;
+                    static const auto power_width = Get_Build_Frame_Width(Hires_Retrieve("PWRBAR.SHP"));
                     static const auto side_shape1_height = Get_Build_Frame_Height(SidebarShape1);
                     static const auto side_shape2_height = Get_Build_Frame_Height(SidebarShape2);
 
