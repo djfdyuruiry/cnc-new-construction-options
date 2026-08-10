@@ -1470,7 +1470,7 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
             // visceroid's have no facing, they just pulse
             shape_num = 0;
         } else if (IsChunkyShape) {
-            // chunky shapes have less frames, so to face east
+            // chunky shapes have a different frame count, so correct to face east
             shape_num = Type == UNIT_GUNBOAT ? 96 : 3;
         } else if (OwnableBy.size() == 1 && OwnableBy[0] == HOUSE_JP) {
             // dinos graphics are infantry based, so correct to face east
@@ -1487,10 +1487,24 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
                   HouseTypeClass::As_Reference(house).RemapTable);
 
     if (!display_icon && IsTurretEquipped) {
+        auto turret_x = x;
+        auto turret_y = y;
+
+        // these units have a lookup table for turret offset - below is for east facing
+        if (Type == UNIT_MSAM || Type == UNIT_MLRS) {
+            turret_x += 6;
+            turret_y -= 3;
+        }
+
+        // these units have a fixed upward offset for their turrets
+        if (Type == UNIT_JEEP || Type == UNIT_BUGGY) {
+            turret_y -= 4;
+        }
+
         CC_Draw_Shape(shape,
                       shape_num + 32,
-                      x,
-                      y,
+                      turret_x,
+                      turret_y,
                       window,
                       SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
                       HouseTypeClass::As_Reference(house).RemapTable);
