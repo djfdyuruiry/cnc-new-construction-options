@@ -1177,8 +1177,11 @@ void TriggerClass::Write_INI_String(char* buffer)
     **	Generate INI entry.
     */
     auto hname = House == HOUSE_NONE ? "None" : HouseClass::As_Pointer(House)->Class->IniName;
-
     auto tname = Team == NULL ? "None" : Team->IniName;
+
+    if (Action == ACTION_LUA_EVENT || Action == ACTION_LUA_SCRIPT) {
+        tname = StringData->c_str();
+    }
 
     sprintf(buffer,
             "%s,%s,%d,%s,%s,%d",
