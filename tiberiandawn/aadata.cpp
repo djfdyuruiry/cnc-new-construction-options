@@ -47,6 +47,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 
 void const* AircraftTypeClass::LRotorData = NULL;
@@ -503,23 +504,25 @@ void AircraftTypeClass::Prep_For_Add(void)
  *=============================================================================================*/
 void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
-    //int shape = 0;
-    // TODO: TdSetting for use cameo/use shape (def to shape)
-    //void const* ptr = Get_Cameo_Data();
-    //if (!ptr) {
-        void const* ptr = Get_Image_Data();
-        int shape = 5;
-    //}
-    CC_Draw_Shape(ptr,
-                  shape,
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+    const auto shape_num = display_icon && shape != nullptr ? 0 : 24;
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+    }
+
+    CC_Draw_Shape(shape,
+                  shape_num,
                   x,
                   y,
                   window,
                   SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_FADING,
                   HouseClass::As_Pointer(house)->Remap_Table(false, true));
 
-    end_x = x + Get_Build_Frame_Width(ptr);
-    end_y = y + Get_Build_Frame_Height(ptr);
+    end_x = x + Get_Build_Frame_Width(shape);
+    end_y = y + Get_Build_Frame_Height(shape);
 }
 #endif
 

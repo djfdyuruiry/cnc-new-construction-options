@@ -45,6 +45,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 
 void const* UnitTypeClass::WakeShapes = 0;
 
@@ -1453,23 +1454,50 @@ UnitType UnitTypeClass::From_Name(char const* name)
  *=============================================================================================*/
 void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
-    //int shape = 0;
-    // TODO: TdSetting for use cameo/use shape (def to shape)
-    //void const* ptr = Get_Cameo_Data();
-    //if (!ptr) {
-        void const* ptr = Get_Image_Data();
-        int shape = IsChunkyShape ? 0 : 5;
-    //}
-    CC_Draw_Shape(ptr,
-                  shape,
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+    auto shape_num = display_icon && shape != nullptr ? 0 : 24; // facing east
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    // display patches
+    if (!display_icon) {
+        if (Type == UNIT_VICE) {
+            // visceroid's have no facing, they just pulse
+            shape_num = 0;
+        } else if (IsChunkyShape) {
+            // chunky shapes have less frames, so to face east
+            shape_num = Type == UNIT_GUNBOAT ? 96 : 3;
+        } else if (OwnableBy.size() == 1 && OwnableBy[0] == HOUSE_JP) {
+            // dinos graphics are infantry based, so correct to face east
+            shape_num = 6;
+        }
+    }
+
+    CC_Draw_Shape(shape,
+                  shape_num,
                   x,
                   y,
                   window,
                   SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
                   HouseTypeClass::As_Reference(house).RemapTable);
 
-    end_x = x + Get_Build_Frame_Width(ptr);
-    end_y = y + Get_Build_Frame_Height(ptr);
+    if (!display_icon && IsTurretEquipped) {
+        CC_Draw_Shape(shape,
+                      shape_num + 32,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable);
+    }
+
+    end_x = x + Get_Build_Frame_Width(shape);
+    end_y = y + Get_Build_Frame_Height(shape);
 }
 
 /***********************************************************************************************

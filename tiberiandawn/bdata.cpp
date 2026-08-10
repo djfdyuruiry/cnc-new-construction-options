@@ -55,6 +55,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 
 #define MCW MAP_CELL_W
@@ -3946,23 +3947,44 @@ StructType BuildingTypeClass::From_Name(char const* name)
  *=============================================================================================*/
 void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
 {
-    //void const* ptr = Get_Cameo_Data();
-    // TODO: TdSetting for use cameo/use shape (def to shape)
-    //if (!ptr) {
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (!display_icon) {
         IsTheaterShape = IsTheater;
-        void const* ptr = Get_Image_Data();
-    //}
-    CC_Draw_Shape(ptr,
+    }
+
+    CC_Draw_Shape(shape,
                   0,
                   x,
                   y,
                   window,
                   SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
                   HouseTypeClass::As_Reference(house).RemapTable);
-    IsTheaterShape = false;
 
-    end_x = x + Get_Build_Frame_Width(ptr);
-    end_y = y + Get_Build_Frame_Height(ptr);
+    // special overlay for weapons factory
+    if (!display_icon && *this == STRUCT_WEAP) {
+        CC_Draw_Shape(WarFactoryOverlay,
+            0,
+            x,
+            y,
+            window,
+            SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
+            HouseTypeClass::As_Reference(house).RemapTable);
+    }
+
+    if (!display_icon) {
+        IsTheaterShape = IsTheater;
+    }
+
+    end_x = x + Get_Build_Frame_Width(shape);
+    end_y = y + Get_Build_Frame_Height(shape);
 }
 
 /***********************************************************************************************

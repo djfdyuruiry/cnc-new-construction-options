@@ -69,7 +69,10 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
             .With_Comment("only allow game objects to be assigned a house found in their 'OwnableBy' rule")
             .With_Default(false)
          .template Load_With_Converter<ColorType, TdTypeConverter>("TriggerColor", LTGREEN)
-         .template Load_With_Converter<ColorType, TdTypeConverter>("WaypointColor", YELLOW);
+         .template Load_With_Converter<ColorType, TdTypeConverter>("WaypointColor", YELLOW)
+         .Load("DisplayObjectSidebarIcons")
+            .With_Comment("if an object has a sidebar icon, show that in menus instead of map graphics")
+            .With_Default(false);
     });
 
     Get_Map_Section().With<IniRuleContext>(ini, [&](auto& c) {
@@ -93,6 +96,11 @@ ColorType TiberianDawnSettings::Get_Editor_Trigger_Color()
 ColorType TiberianDawnSettings::Get_Editor_Waypoint_Color()
 {
     return Get_Editor_Section().Get_With_Converter<ColorType, TdTypeConverter>("WaypointColor");
+}
+
+bool TiberianDawnSettings::Display_Object_Icons()
+{
+    return Get_Editor_Section().Get<bool>("DisplayObjectSidebarIcons");
 }
 
 bool TiberianDawnSettings::Placement_Debugging_Is_Enabled()

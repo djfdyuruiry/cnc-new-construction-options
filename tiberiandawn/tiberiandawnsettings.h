@@ -30,6 +30,7 @@ public:
     bool Enforce_OwnableBy_In_Editor();
     ColorType Get_Editor_Trigger_Color();
     ColorType Get_Editor_Waypoint_Color();
+    bool Display_Object_Icons();
 
     // map
     bool Placement_Debugging_Is_Enabled();

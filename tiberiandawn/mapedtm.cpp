@@ -2190,13 +2190,20 @@ void MapEditClass::Draw_Member(TechnoTypeClass const* ptr, int index, int quant,
     // TODO: Rework any shape dimension calcs in menus/UI (for high res) that has hardcoded pixel info for shapes - use Get_Build_Frame_Width + Get_Build_Frame_Height instead!
 
     if (quant > 0) {
+        // print quantity text with black background
+        LogicPage->Fill_Rect(x + D_PICTURE_W - 11,  y + 1, x + D_PICTURE_W - 3,  y + 15, TBLACK);
         Fancy_Text_Print("%d",
-                         x + 1,
-                         y + D_PICTURE_H - 16,
-                         CC_GREEN,
+                         x + D_PICTURE_W - 10,
+                         y + 1,
+                         YELLOW,
                          TBLACK,
                          TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_DROPSHADOW,
                          quant);
+
+        // highlight cell with thick red border
+        for (auto i = 0; i < 3; i++) {
+            LogicPage->Draw_Rect(x + i, y + i, x + D_PICTURE_W - (i + 1), y + D_PICTURE_H - (i + 1), RED);
+        }
     }
 
     Show_Mouse();
