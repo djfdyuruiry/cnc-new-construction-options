@@ -2651,6 +2651,11 @@ bool CellClass::Is_Visible(HousesType house) const
  *=============================================================================================*/
 bool CellClass::Is_Visible(HouseClass* player) const
 {
+    if (Debug_Map) {
+        // no shroud in scenario editor mode
+        return true;
+    }
+
     if (player && player->Class) {
         return Is_Visible(player->Class->House);
     }

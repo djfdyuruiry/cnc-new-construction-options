@@ -975,6 +975,11 @@ void MapEditClass::Start_Placement(void)
         PendingObject = Objects[LastChoice];
         PendingHouse = LastHouse;
         PendingObjectPtr = PendingObject->Create_One_Of(HouseClass::As_Pointer(LastHouse));
+
+        // ensure any placed aircraft are in the 'landed' state
+        if (PendingObject->What_Am_I() == RTTI_AIRCRAFTTYPE) {
+            reinterpret_cast<AircraftClass*>(PendingObjectPtr)->Force_To_Ground();
+        }
     } else {
         if (LastChoice < TypeOffset[7])
             LastChoice = TypeOffset[7];

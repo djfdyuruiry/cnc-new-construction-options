@@ -521,6 +521,27 @@ void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
                   SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_FADING,
                   HouseClass::As_Pointer(house)->Remap_Table(false, true));
 
+    if (!display_icon && IsRotorEquipped) {
+        static const auto rotor_flags = SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST;
+
+        // Use idling rotor frames (slower animation) for static display
+        auto rotor_x = x;
+        const auto rotor_y = y - 2;
+        const auto rotor_frame = (Frame % 8) + 4;
+
+        if (Type == AIRCRAFT_TRANSPORT) {
+            // Dual rotors offset along flight axis.
+            rotor_x += 10;
+            CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+
+            rotor_x -= 20;
+            CC_Draw_Shape(LRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+        } else {
+            // Single rotor centered above body
+            CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+        }
+    }
+
     end_x = x + Get_Build_Frame_Width(shape);
     end_y = y + Get_Build_Frame_Height(shape);
 }

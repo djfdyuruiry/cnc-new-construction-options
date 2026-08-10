@@ -179,6 +179,8 @@ public:
     virtual void Scatter(COORDINATE threat, bool forced = false, bool nokidding = false);
     void Set_Reinforcement_Delay(int delay);
 
+    void Force_To_Ground();
+
 /*
 **	Scenario and debug support.
 */

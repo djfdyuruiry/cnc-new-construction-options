@@ -3576,6 +3576,19 @@ void AircraftClass::Set_Reinforcement_Delay(int delay)
     ReinforcementStart = Frame + delay;
 }
 
+/**
+ * Utility method to reset all object data to the idle 'landed' state.
+ */
+void AircraftClass::Force_To_Ground()
+{
+    Altitude = 0;
+    IsRotating = 0;
+    Jitter = 0;
+    IsHoming = IsHovering = IsLanding = IsTakingOff = false;
+
+    Time_To_Redraw();
+}
+
 TO_JSON(AircraftClass)
 {
     FIELD_VALUE_TO_JSON(TARGET, p.As_Target());
