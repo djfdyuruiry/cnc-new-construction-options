@@ -1968,7 +1968,7 @@ void TemplateTypeClass::Init(TheaterType theater)
 
         ((void const*&)tplate.ImageData) = NULL;
         if (tplate.Theater & (1 << theater)) {
-            _makepath(fullname, NULL, NULL, tplate.IniName, Theaters[theater].Suffix);
+            _makepath(fullname, NULL, NULL, tplate.ImageName.c_str(), Theaters[theater].Suffix);
             ptr = MFCD::Retrieve(fullname);
             ((void const*&)tplate.ImageData) = ptr;
             // No need for icon caching now. ST - 12/19/2018 11:48AM
