@@ -213,6 +213,7 @@ void Main_Game(int argc, char* argv[])
                     );
 
                     // take a screenshot before showing the desired dialog (used for save games)
+                    Set_Logic_Page(SeenBuff);
                     LogicPage->Take_Clipped_Screenshot(
                         0,
                         Map.Get_Tab_Height(),
