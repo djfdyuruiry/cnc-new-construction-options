@@ -20,7 +20,7 @@ Texture::Texture(std::string shape_filename, const unsigned short shape_number)
 {
 }
 
-bool Texture::Load()
+bool Texture::Load(std::optional<int> source_shape_width, std::optional<int> source_shape_height)
 {
     if (Loaded) {
         return true;
@@ -47,8 +47,8 @@ bool Texture::Load()
     }
 
     ShapeHeader = static_cast<unsigned char*>(Get_Shape_Header_Data(reinterpret_cast<void*>(shape_size)));
-    ShapeWidth = Get_Build_Frame_Width(shape_file);
-    ShapeHeight = Get_Build_Frame_Height(shape_file);
+    ShapeWidth = source_shape_width.value_or(Get_Build_Frame_Width(shape_file));
+    ShapeHeight = source_shape_height.value_or(Get_Build_Frame_Height(shape_file));
 
     Loaded = true;
 

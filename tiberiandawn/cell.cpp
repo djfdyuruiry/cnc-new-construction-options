@@ -1058,6 +1058,7 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
             if (Overlay != OVERLAY_NONE) {
                 OverlayTypeClass const& otype = OverlayTypeClass::As_Reference(Overlay);
                 IsTheaterShape = (bool)otype.IsTheater;
+
                 CC_Draw_Shape(otype.Get_Image_Data(),
                               OverlayData,
                               (x + (CELL_PIXEL_W >> 1)),
@@ -1112,10 +1113,14 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                     **	Draw an overlay; just use the existing 'OverlayData' even though
                     **	it means nothing.
                     */
-                    case RTTI_OVERLAYTYPE:
-                        OverlayTypeClass::As_Reference(((OverlayTypeClass*)Map.PendingObject)->Type)
-                            .Draw_It(x, y, OverlayData);
+                    case RTTI_OVERLAYTYPE: {
+                        const auto instance_type_id = reinterpret_cast<const OverlayTypeClass*>(Map.PendingObject)->Type;
+                        const auto& instance_type = OverlayTypeClass::As_Reference(instance_type_id);
+
+                        // display tiberium density for placement cursor relative to id
+                        instance_type.Draw_It(x, y, instance_type.IsTiberium ? instance_type_id - OVERLAY_TIBERIUM1 : OverlayData);
                         break;
+                    }
 
                     /*
                     **	Draw a smudge
@@ -1872,9 +1877,9 @@ int CellClass::Tiberium_Adjust(bool pregame)
             int count = 0;
 
             /*
-            **	Mixup the Tiberium overlays so that they don't look the same.
+            **	Mixup the Tiberium overlays so that they don't look the same, except when in editor mode.
             */
-            if (pregame) {
+            if (pregame && !Debug_Map) {
                 Overlay = Random_Pick(OVERLAY_TIBERIUM1, OVERLAY_TIBERIUM12);
             }
 
@@ -1895,7 +1900,10 @@ int CellClass::Tiberium_Adjust(bool pregame)
                 }
             }
 
-            OverlayData = _adj[count];
+            if (!Debug_Map) {
+                OverlayData = _adj[count];
+            }
+
             return((OverlayData+1) * Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE));
         }
     }

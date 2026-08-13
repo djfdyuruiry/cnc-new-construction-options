@@ -140,6 +140,7 @@ public:
     */
     virtual void Disable(bool disable_drawing = false);
     virtual void Enable(void);
+    virtual bool IsEnabled(void) const;
     virtual unsigned Get_ID(void) const
     {
         return 0;

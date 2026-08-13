@@ -153,10 +153,15 @@ void MapEditClass::One_Time(void)
 
     PopupDialogVisible = false;
 
+    FooterW = HeaderW;
+    FooterH = HeaderH;
     FooterX = 0;
-    FooterY = SeenBuff.Get_Height() - Get_Tab_Height();
-    FooterW = SeenBuff.Get_Width();
-    FooterH = Get_Tab_Height();
+    FooterY = SeenBuff.Get_Height() - FooterH;
+
+    EditorSidebar.W = SeenBuff.Get_Width() / 4;
+    EditorSidebar.H = SeenBuff.Get_Height() - HeaderH - FooterH - 3;
+    EditorSidebar.X = SeenBuff.Get_Width() - EditorSidebar.W;
+    EditorSidebar.Y = HeaderY + HeaderH + 2;
 
     /*------------------------------------------------------------------------
     Create the pop-up controls
@@ -169,9 +174,9 @@ void MapEditClass::One_Time(void)
     MapArea = new ControlClass(
         MAP_AREA,
         0,
-        Get_Tab_Height(),
-        SeenBuff.Get_Width(),
-        SeenBuff.Get_Height() - Get_Tab_Height(),
+        HeaderX + HeaderH + 2,
+        EditorSidebar.X - 1,
+        (FooterY - 1) - (HeaderH + 2),
         GadgetClass::LEFTPRESS | GadgetClass::LEFTRELEASE,
         false
     );
@@ -213,6 +218,8 @@ void MapEditClass::One_Time(void)
 
     const auto POPUP_MISSION_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
     const auto POPUP_MISSION_Y = POPUP_FACEBOX_Y;
+
+    EditorSidebar.Init(this);
 
     /*........................................................................
     House buttons
@@ -369,6 +376,11 @@ void MapEditClass::One_Time(void)
     PopupDialogH = end_y - PopupDialogY;
 
     /*........................................................................
+    Calculate editor sidebar dimensions
+    ........................................................................*/
+    const auto sidebar_width_limit = SeenBuff.Get_Width() - (PopupDialogX + PopupDialogW + dialog_margin);
+
+    /*........................................................................
     The base percent-built slider & its label
     ........................................................................*/
     const auto POPUP_BASE_X = (HeaderX + HeaderW) - POPUP_BASE_W - (CONTROL_MARGIN * 10);
@@ -406,7 +418,9 @@ void MapEditClass::Init_IO(void)
         /*------------------------------------------------------------------------
         For editor mode, add the map area to the button input list
         ------------------------------------------------------------------------*/
-        Buttons = 0;
+        Buttons = nullptr;
+
+        EditorSidebar.Add_This();
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
         Add_A_Button(*MapArea);
@@ -857,6 +871,13 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         BaseStructureIdTextBox->Draw_Me(true);
     }
 
+    // give editor sidebar a change to steal input
+    if (EditorSidebar.On_Input(input)) {
+        // editor sidebar processed input, so finish early
+        MouseClass::AI(input, x, y);
+        return;
+    }
+
     /*------------------------------------------------------------------------
     Trap special editing keys; if one is detected, set 'input' to 0 to
     prevent a conflict with parent's AI().
@@ -875,6 +896,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             } else {
                 Cancel_Placement();
             }
+            break;
         }
 
         /*
@@ -882,6 +904,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         */
         if (CurTrigger) {
             Stop_Trigger_Placement();
+            break;
         }
 
         /*
@@ -890,6 +913,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         if (CurrentObject.Count()) {
             CurrentObject[0]->Unselect();
             Popup_Controls();
+            break;
         }
         Main_Menu();
         input = KN_NONE;
@@ -1924,8 +1948,9 @@ void MapEditClass::Render_Editor_Controls()
     auto control = Buttons;
 
     while (control != nullptr) {
-        // popup buttons are only after the midpoint, so use that as a heuristic to detect a popup dialog
-        if (control->Y >= map_midpoint_y) {
+        // popup buttons are only after the midpoint and don't overlap the sidebar, so use that as a heuristic to
+        // detect a popup dialog
+        if (control->Y >= map_midpoint_y && control->X < EditorSidebar.X - 1) {
             PopupDialogVisible = true;
             break;
         }
@@ -1987,6 +2012,7 @@ void MapEditClass::Draw_It(bool forced)
 
     Draw_Header(forced);
     Decorate_Cells(forced);
+    EditorSidebar.Render();
     Draw_Footer(forced);
 }
 
@@ -2508,7 +2534,12 @@ void MapEditClass::Detach(ObjectClass* object)
 
 void MapEditClass::Init_Editor_Dimensions()
 {
-    Set_View_Dimensions(0, HeaderX + HeaderH + 2, -1, (FooterY - 1) - (HeaderH + 2));
+    Set_View_Dimensions(
+        0,
+        HeaderX + HeaderH + 2,
+        SeenBuff.Get_Width() - EditorSidebar.W - 1,
+        SeenBuff.Get_Height() - HeaderH + 2 - FooterH - 1
+    );
 }
 
 #endif

@@ -1998,62 +1998,26 @@ void TemplateTypeClass::Init(TheaterType theater)
  *=============================================================================================*/
 void TemplateTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
 {
-    int w, h;
-    int index;
+    const auto w = Bound(Width, 1, 13);
+    const auto h = Bound(Height, 1, 8);
+
     unsigned char map[13 * 8];
-    bool scale; // Should the template be half sized?
 
-    w = Bound(Width, 1, 13);
-    h = Bound(Height, 1, 8);
-    scale = (w > 3 || h > 3);
-    if (scale) {
-        x -= (w / 2) * (ICON_PIXEL_W / 2);
-        y -= (h / 2) * (ICON_PIXEL_H / 2);
-    } else {
-        x -= (w / 2) * ICON_PIXEL_W;
-        y -= (h / 2) * ICON_PIXEL_H;
-    }
-    x += WindowList[window][WINDOWX];
-    y += WindowList[window][WINDOWY];
-
+    // get icon set metadata
     Mem_Copy(Get_Icon_Set_Map(Get_Image_Data()), map, Width * Height);
 
-    for (index = 0; index < w * h; index++) {
+    // iterate over each icon in the set and render relative to x,y
+    for (auto index = 0; index < w * h; index++) {
+        const auto dest_x = x + ((index % w) * (ICON_PIXEL_W));
+        const auto dest_y = y + ((index / w) * (ICON_PIXEL_H));
+
+        // non-blank icon in set
         if (map[index] != 0xFF) {
-            HidPage.Draw_Stamp(Get_Image_Data(), index, 0, 0, NULL, WINDOW_MAIN);
-            if (scale) {
-                end_x = x + ((index % w) * (ICON_PIXEL_W / 2));
-                end_y = y + ((index / w) * (ICON_PIXEL_H / 2));
-
-                HidPage.Scale((*LogicPage),
-                              0,
-                              0,
-                              end_x,
-                              end_y,
-                              ICON_PIXEL_W,
-                              ICON_PIXEL_H,
-                              ICON_PIXEL_W / 2,
-                              ICON_PIXEL_H / 2,
-                              (char*)NULL);
-
-                end_x += ICON_PIXEL_W / 2;
-                end_y += ICON_PIXEL_H / 2;
-            } else {
-                end_x = x + ((index % w) * (ICON_PIXEL_W));
-                end_y = y + ((index / w) * (ICON_PIXEL_H));
-
-                HidPage.Blit((*LogicPage),
-                             0,
-                             0,
-                             end_x,
-                             end_y,
-                             ICON_PIXEL_W,
-                             ICON_PIXEL_H);
-
-                end_x += ICON_PIXEL_W;
-                end_y += ICON_PIXEL_H;
-            }
+            LogicPage->Draw_Stamp(Get_Image_Data(), index, dest_x, dest_y, nullptr, window);
         }
+
+        end_x = max(end_x, dest_x + ICON_PIXEL_W);
+        end_y = max(end_y, dest_y + ICON_PIXEL_H);
     }
 }
 

@@ -1,0 +1,794 @@
+#include <ranges>
+
+#include "function.h"
+#include "mapeditsidebar.h"
+
+typedef enum
+{
+    MINIMAP = MAP_AREA + 1, // extend scenario editor button IDs
+    OVERLAY_BUTTON,
+    TERRAIN_BUTTON,
+    UNITS_BUTTON,
+    BUILDINGS_BUTTON,
+    WAYPOINTS_BUTTON,
+    TRIGGERS_BUTTON,
+    OVERLAY_GRID,
+    TERRAIN_OBJECT_LIST,
+    UNITS_GRID,
+    BUILDING_OBJECT_LIST,
+    WAYPOINTS_LIST,
+    TRIGGERS_LIST,
+    PREVIOUS_BUTTON,
+    NEXT_BUTTON
+} SidebarControls;
+
+void MapEditorSidebar::Init_Controls()
+{
+    // virtual control for minimap to support input events
+    Controls[MINIMAP] = std::make_unique<ControlClass>(
+        MINIMAP,
+        Dimensions[MINIMAP].X,
+        Dimensions[MINIMAP].Y,
+        Dimensions[MINIMAP].W,
+        Dimensions[MINIMAP].H,
+        GadgetClass::LEFTRELEASE,
+        false
+    );
+
+    // selection buttons
+    static const auto button_text_flags = TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW;
+
+    static const std::map<SidebarControls, const char*> buttons = {
+        {OVERLAY_BUTTON, "Overlay"},
+        {TERRAIN_BUTTON, "Terrain"},
+        {UNITS_BUTTON, "Units"},
+        {BUILDINGS_BUTTON, "Buildings"},
+        {WAYPOINTS_BUTTON, "Waypoints"},
+        {TRIGGERS_BUTTON, "Triggers"},
+        {PREVIOUS_BUTTON, "Previous"},
+        {NEXT_BUTTON, "Next"}
+    };
+
+    for (const auto& [id, text] : buttons) {
+        Controls[id] = std::make_unique<TextButtonClass>(
+            id,
+            text,
+            button_text_flags,
+            Dimensions[id].X,
+            Dimensions[id].Y,
+            Dimensions[id].W,
+            Dimensions[id].H
+        );
+    }
+
+    // virtual controls for grids and lists to support input events
+    for (auto i = OVERLAY_GRID; i <= BUILDING_OBJECT_LIST; ++i) {
+        Controls[i] = std::make_unique<ControlClass>(
+            i,
+            Dimensions[i].X,
+            Dimensions[i].Y,
+            Dimensions[i].W,
+            Dimensions[i].H,
+            GadgetClass::LEFTRELEASE,
+            false
+        );
+        Controls[i]->Disable();
+    }
+
+    // list controls
+    static const auto up_btn = Hires_Retrieve("BTN-UP.SHP");
+    static const auto down_btn = Hires_Retrieve("BTN-DN.SHP");
+
+    for (const auto& id : { WAYPOINTS_LIST, TRIGGERS_LIST }) {
+        Controls[id] = std::make_unique<ListClass>(
+            id,
+            Dimensions[id].X,
+            Dimensions[id].Y,
+            Dimensions[id].W,
+            Dimensions[id].H,
+            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+            up_btn,
+            down_btn
+        );
+        Controls[id]->Disable(true);
+    }
+}
+
+void MapEditorSidebar::Init_Dimensions()
+{
+    /**
+     * Minimap
+     */
+#ifdef MEGAMAPS
+    Dimensions[MINIMAP] = {
+        .X = X + ((W - 130) / 2),
+        .Y = Y + ControlMargin,
+        .W = 130,
+        .H = 130
+    };
+#else
+    Dimensions[MINIMAP] = {
+        X + ((W - 64) / 2),
+        Y + ControlMargin,
+        64,
+        64
+    };
+#endif
+
+    /**
+     * Map object selection buttons
+     */
+    const auto button_width = (W - ControlMargin * 3) / 2;
+
+    // first row
+    Dimensions[OVERLAY_BUTTON] = {
+        .X = X + ControlMargin,
+        .Y = (Dimensions[MINIMAP].Y + Dimensions[MINIMAP].H) + (ControlMargin * 2),
+        .W = button_width,
+        .H = ButtonHeight
+    };
+
+    Dimensions[TERRAIN_BUTTON] = Dimensions[OVERLAY_BUTTON];
+    Dimensions[TERRAIN_BUTTON].X += button_width + ControlMargin; // adjust right
+
+    // second row
+    Dimensions[UNITS_BUTTON] = Dimensions[OVERLAY_BUTTON];
+    Dimensions[UNITS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+    Dimensions[BUILDINGS_BUTTON] = Dimensions[TERRAIN_BUTTON];
+    Dimensions[BUILDINGS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+    // third row
+    Dimensions[WAYPOINTS_BUTTON] = Dimensions[UNITS_BUTTON];
+    Dimensions[WAYPOINTS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+    Dimensions[TRIGGERS_BUTTON] = Dimensions[BUILDINGS_BUTTON];
+    Dimensions[TRIGGERS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+    Dimensions[PREVIOUS_BUTTON] = {
+        .X = X + ControlMargin,
+        .Y = (Y + H - FooterHeight) + ControlMargin,
+        .W = button_width,
+        .H = ButtonHeight
+    };
+
+    Dimensions[NEXT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
+    Dimensions[NEXT_BUTTON].X += ControlMargin + button_width;
+
+    /**
+     * Sidebar content panels
+     */
+    for (auto i = OVERLAY_GRID; i <= TRIGGERS_LIST; ++i) {
+        Dimensions[i] = Dimensions[WAYPOINTS_BUTTON];
+        Dimensions[i].Y += Dimensions[WAYPOINTS_BUTTON].H + ControlMargin;
+        Dimensions[i].W = W - (ControlMargin * 2);
+        Dimensions[i].H = H - (Dimensions[i].Y - Y) - FooterHeight;
+    }
+
+    Dimensions[WAYPOINTS_LIST].H += (FooterHeight - ControlMargin);
+    Dimensions[TRIGGERS_LIST].H += (FooterHeight - ControlMargin);
+}
+
+void MapEditorSidebar::Init(MapEditClass* parent)
+{
+    if (parent == nullptr) {
+        return;
+    }
+
+    // init state
+    Parent = parent;
+    Controls.clear();
+
+    Init_Dimensions();
+    Init_Controls();
+}
+
+void MapEditorSidebar::Add_This()
+{
+    if (Parent == nullptr) {
+        return;
+    }
+
+    // reset pagination
+    OverlayGridPager = {};;
+    TerrainPager = {};;
+    UnitsGridPager = {};;
+    BuildingListPager = {};;
+
+    // reset current object context
+    CurrentObject = nullptr;
+    HelpText.reset();
+    HelpTextX = 0;
+    HelpTextY = 0;
+
+    // reset to show first panel
+    constexpr auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
+    On_Input(fake_input, true);
+
+    for (auto i = MINIMAP; i <= NEXT_BUTTON; ++i) {
+        Parent->Add_A_Button(*Controls[i]);
+    }
+}
+
+void MapEditorSidebar::Remove_This()
+{
+    if (Parent == nullptr) {
+        return;
+    }
+
+    for (auto i = MINIMAP; i <= TRIGGERS_LIST; ++i) {
+        Parent->Remove_A_Button(*Controls[i]);
+    }
+}
+
+/**
+ * Add info for type instances that have valid image data to the given catalog.
+ *
+ * @tparam T Enum type that holds instances (UnitType etc.)
+ * @tparam U ObjectTypeClass subclass
+ * @param catalog Vector to store type instance pointers in
+ */
+template <SupportedByTdTypeConverter T, typename U>
+static void Populate_Object_Catalog(std::vector<MapEditorSidebar::ObjectCatalogItem>& catalog)
+{
+    for (const auto& instance : TdTypeConverter::Get_Valid_Instances<T>()) {
+        if constexpr (std::is_same_v<T, TemplateType>) {
+            if (instance >= TEMPLATE_NONE) {
+                continue;
+            }
+        } else {
+            if (instance < 0) {
+                continue;
+            }
+        }
+
+        const auto& instance_obj = U::As_Reference(instance);
+
+        if (instance_obj.Get_Image_Data() != nullptr) {
+            if constexpr (std::is_same_v<T, StructType>) {
+                if (reinterpret_cast<const BuildingTypeClass*>(&instance_obj)->IsWall) {
+                    // ignore wall buildings, these are shown in the overlay grid instead
+                    continue;
+                }
+            }
+
+            MapEditorSidebar::ObjectCatalogItem entry;
+            entry.ObjectType = &instance_obj;
+
+            catalog.emplace_back(entry);
+        } else {
+            CNC_LOG_WARN("Rejecting {}", instance_obj.IniName);
+        }
+    }
+}
+
+/**
+ * Dumps out object graphics/icons to fill the object area, using start_idx and end_idx for pagination.
+ */
+void MapEditorSidebar::Render_Object_List(
+    const int control, std::vector<ObjectCatalogItem>& objects, ObjectListPager& pager
+)
+{
+    /**
+     * Draw background and border
+     */
+    InGameFillTexture.Draw_Rectangle(
+        *LogicPage,
+        Dimensions[control].X,
+        Dimensions[control].Y,
+        Dimensions[control].W,
+        Dimensions[control].H
+    );
+
+    LogicPage->Draw_Rect(
+        Dimensions[control].X,
+        Dimensions[control].Y,
+        Dimensions[control].X + Dimensions[control].W,
+        Dimensions[control].Y + Dimensions[control].H,
+        GRAY
+    );
+
+    if (pager.CurrentIndex == -1) {
+        pager.CurrentIndex = 0;
+        pager.CurrentDepth = 0;
+        pager.PageStartIndexes.emplace_back(0);
+    }
+
+    // reset dimensions for not rendered items
+    for (auto i = 0; i < pager.CurrentIndex; ++i) {
+        objects[i].Dimensions.Reset();
+    }
+
+    /**
+     * Draw objects
+     */
+    auto x = ControlMargin;
+    auto y = ControlMargin;
+    auto idx = pager.CurrentIndex;
+
+    // clipping window for list
+    WindowList[WINDOW_EDITOR][WINDOWX] = Dimensions[control].X;
+    WindowList[WINDOW_EDITOR][WINDOWY] = Dimensions[control].Y;
+    WindowList[WINDOW_EDITOR][WINDOWWIDTH] = Dimensions[control].W;
+    WindowList[WINDOW_EDITOR][WINDOWHEIGHT] = Dimensions[control].H;
+
+    // walk down the list height
+    while (y < Dimensions[control].H && idx < objects.size()) {
+        auto next_y = y; // track the deepest y value of a rendered object
+
+        // walk across the list width
+        while (x < Dimensions[control].W && idx < objects.size()) {
+            int end_x = x;
+            int end_y = y;
+
+            // render the object, with end vars to determine width
+            objects[idx].ObjectType->Display(x, y, WINDOW_EDITOR, PlayerPtr->ActLike, end_x, end_y);
+
+            if (end_x <= Dimensions[control].W && end_y <= Dimensions[control].H) {
+                // OK - object fits
+                auto& catalog_dimensions = objects[idx].Dimensions;
+
+                catalog_dimensions.X = Dimensions[control].X + x;
+                catalog_dimensions.Y = Dimensions[control].Y + y;
+                catalog_dimensions.W = end_x - x;
+                catalog_dimensions.H = end_y - y;
+
+                idx++;
+
+                x = end_x + ControlMargin;
+                next_y = max(next_y, end_y);
+            } else {
+                // KO - object too big, erase partial drawing and go to next y line
+                InGameFillTexture.Draw_Rectangle(
+                    *LogicPage,
+                    Bound(Dimensions[control].X + x, Dimensions[control].X, Dimensions[control].X + Dimensions[control].W),
+                    Bound(Dimensions[control].Y + y, Dimensions[control].Y, Dimensions[control].Y + Dimensions[control].H),
+                    Bound(end_x, 0, Dimensions[control].W - x),
+                    Bound(end_y, 0, Dimensions[control].H - y)
+                );
+                break;
+            }
+        }
+
+        x = ControlMargin * 2;
+        y = next_y + ControlMargin * 2;
+    }
+
+    if (pager.PageStartIndexes.size() <= pager.CurrentDepth + 1 && idx < objects.size()) {
+        pager.PageStartIndexes.emplace_back(idx);
+    }
+
+    // reset dimensions for not rendered items
+    for (auto i = idx; i < objects.size(); ++i) {
+        objects[i].Dimensions.Reset();
+    }
+}
+
+/**
+ * Draws a 'page' worth of object graphics/icons in a table of uniform size cells. page_number is used
+ * for pagination.
+ */
+void MapEditorSidebar::Render_Object_Grid(const int control, std::vector<ObjectCatalogItem>& objects, GridPager& pager)
+{
+    constexpr auto cell_width = 64;
+    constexpr auto cell_height = 48;
+
+    const int row_count = floor(static_cast<float>(Dimensions[control].H) / cell_height);
+    const int cell_count = floor(static_cast<float>(Dimensions[control].W) / cell_width);
+
+    if (pager.CurrentPage == -1) {
+        pager.ItemsPerPage = row_count * cell_count;
+        pager.PageCount = ceil(static_cast<float>(objects.size()) / pager.ItemsPerPage);
+        pager.CurrentPage = 0;
+    }
+
+    const auto x_offset = (Dimensions[control].W - (cell_width * cell_count)) / 2;
+    const auto y_offset = (Dimensions[control].H - (cell_height * row_count)) / 2;
+
+    auto idx = min(objects.size(), pager.CurrentPage * pager.ItemsPerPage);
+    const auto end_idx = min(objects.size(), idx + pager.ItemsPerPage);
+
+    // reset dimensions for not rendered items
+    for (auto i = 0; i < idx; ++i) {
+        objects[i].Dimensions.Reset();
+    }
+
+    for (auto row = 0 ; row < row_count; row++)
+    {
+        for (auto cell = 0 ; cell < cell_count; cell++)
+        {
+            if (idx >= end_idx) {
+                return;
+            }
+
+            objects[idx].Dimensions.X = Dimensions[control].X + x_offset + (cell * cell_width);
+            objects[idx].Dimensions.Y = Dimensions[control].Y + y_offset + (row * cell_height);
+            objects[idx].Dimensions.W = cell_width;
+            objects[idx].Dimensions.H = cell_height;
+
+            Parent->Draw_Member(
+                objects[idx].ObjectType,
+                0,
+                0,
+                PlayerPtr->ActLike,
+                objects[idx].Dimensions.X,
+                objects[idx].Dimensions.Y
+            );
+            idx++;
+        }
+    }
+
+    // reset dimensions for not rendered items
+    for (auto i = idx; i < objects.size(); ++i) {
+        objects[i].Dimensions.Reset();
+    }
+}
+
+static int Get_Menu_Color_For_Cell(const CELL raw_cell, const CellClass& cell)
+{
+    if (cell.IsWaypoint && ScenPlayer == SCEN_PLAYER_MPLAYER) {
+        for (auto i = 0; i < MPlayerMax; i++) {
+            if (raw_cell == Scen.Waypoint[i]) {
+                // multiplayer start location
+                return 127;
+            }
+        }
+    }
+
+    auto occupier = cell.Cell_Occupier();
+
+    if (occupier != nullptr) {
+        // pick a color based on occupier type
+        switch (occupier->What_Am_I()) {
+            case RTTI_TEMPLATE: {
+                return PINK;
+            }
+
+            case RTTI_TERRAIN: {
+                const auto terrain = reinterpret_cast<TerrainClass*>(occupier);
+                // trees or rocks
+                return terrain->Full_Name() == TXT_TREE ? DKGREEN : DKGRAY;
+            }
+
+            case RTTI_AIRCRAFT:
+            case RTTI_INFANTRY:
+            case RTTI_UNIT:
+            case RTTI_BUILDING: {
+                return HouseClass::As_Pointer(cell.Cell_Occupier()->Owner())->Class->Color;
+            }
+
+            default: break;
+        }
+    }
+
+    // pick a color based on land type
+    if (cell.TType >= TEMPLATE_ROAD1 && cell.TType <= TEMPLATE_ROAD43) {
+        // road
+        return CC_TAN;
+    }
+
+    if (cell.TType >= TEMPLATE_BRIDGE1 && cell.TType <= TEMPLATE_BRIDGE4D) {
+        // bridge
+        return CC_TAN;
+    }
+
+    return Ground[cell.Land_Type()].Color;
+}
+
+/**
+ * TODO: Align colors better with skirmish minimap which looks easier to visually process
+ */
+void MapEditorSidebar::Render_Minimap()
+{
+    const auto minimap_bottom_right_x = Dimensions[MINIMAP].X + Dimensions[MINIMAP].W;
+    const auto minimap_bottom_right_y = Dimensions[MINIMAP].Y + Dimensions[MINIMAP].H;
+
+    // draw minimap background
+    LogicPage->Fill_Rect(
+        Dimensions[MINIMAP].X + 1,
+        Dimensions[MINIMAP].Y + 1,
+        minimap_bottom_right_x - 1,
+        minimap_bottom_right_y - 1,
+        Ground[LAND_CLEAR].Color
+    );
+
+    Hide_Mouse();
+    LogicPage->Lock();
+
+#ifdef MEGAMAPS
+    const auto scale_map = Parent->IniMapCellX + Parent->IniMapCellWidth <= 64
+        && Parent->IniMapCellY + Parent->IniMapCellHeight <= 64; // are the map bounds within normal map size?
+#else
+    const auto scale_map = true;
+#endif
+
+    Parent->Iterate_Over_Map_Cells([&](const auto raw_cell, const auto& cell) {
+        const auto cell_x = Cell_X(raw_cell);
+        const auto cell_y = Cell_Y(raw_cell);
+
+        if (scale_map && (cell_x > 64 || cell_y > 64)) {
+            // if scaling the map, only render original map cells
+            return;
+        }
+
+        auto color = Get_Menu_Color_For_Cell(raw_cell, cell);
+
+        if (scale_map) {
+            for (int x = 0; x < 2; ++x) {
+                for (int y = 0; y < 2; ++y) {
+                    LogicPage->Put_Pixel(
+                        Dimensions[MINIMAP].X + (cell_x * 2) + x + 1,
+                        Dimensions[MINIMAP].Y + (cell_y * 2) + y + 1,
+                        color
+                    );
+                }
+            }
+        } else {
+            LogicPage->Put_Pixel(
+                Dimensions[MINIMAP].X + cell_x + 1,
+                Dimensions[MINIMAP].Y + cell_y + 1,
+                color
+            );
+        }
+    });
+
+    // draw scenario bounds for map
+    if (scale_map) {
+        LogicPage->Draw_Rect(
+            Dimensions[MINIMAP].X + (Parent->IniMapCellX * 2) + 1,
+            Dimensions[MINIMAP].Y + (Parent->IniMapCellY * 2) + 1,
+            Dimensions[MINIMAP].X + (Parent->IniMapCellX * 2 + Parent->IniMapCellWidth * 2) + 1,
+            Dimensions[MINIMAP].Y + (Parent->IniMapCellY * 2 + Parent->IniMapCellHeight * 2) + 1,
+            WHITE
+        );
+    } else {
+        LogicPage->Draw_Rect(
+            Dimensions[MINIMAP].X + Parent->IniMapCellX + 1,
+            Dimensions[MINIMAP].Y + Parent->IniMapCellY + 1,
+            Dimensions[MINIMAP].X + (Parent->IniMapCellX + Parent->IniMapCellWidth) + 1,
+            Dimensions[MINIMAP].Y + (Parent->IniMapCellY + Parent->IniMapCellHeight) + 1,
+            WHITE
+        );
+    }
+
+    LogicPage->Unlock();
+
+    // draw minimap border
+    LogicPage->Draw_Rect(
+        Dimensions[MINIMAP].X,
+        Dimensions[MINIMAP].Y,
+        minimap_bottom_right_x,
+        minimap_bottom_right_y,
+        GRAY
+    );
+
+    Show_Mouse();
+}
+
+void MapEditorSidebar::Render()
+{
+    if (Parent == nullptr) {
+        return;
+    }
+
+    // background
+    Dialog_Box(X, Y, W, H);
+
+    // left margin
+    LogicPage->Draw_Line(X - 1, Y, X - 1, Y + H, GRAY);
+
+    Render_Minimap();
+
+    // active content panel
+    if (Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()) {
+        if (OverlayCatalog.empty()) {
+            Populate_Object_Catalog<OverlayType, OverlayTypeClass>(OverlayCatalog);
+
+            OverlayGridPager.ItemCount = OverlayCatalog.size();
+        }
+
+        Render_Object_Grid(OVERLAY_GRID, OverlayCatalog, OverlayGridPager);
+    } else if (Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()) {
+        if (TerrainCatalog.empty()) {
+            Populate_Object_Catalog<TemplateType, TemplateTypeClass>(TerrainCatalog);
+            Populate_Object_Catalog<TerrainType, TerrainTypeClass>(TerrainCatalog);
+
+            TerrainPager.ItemCount = TerrainCatalog.size();
+        }
+
+        Render_Object_List(TERRAIN_OBJECT_LIST, TerrainCatalog, TerrainPager);
+    } else if (Get_Control<UNITS_GRID, ControlClass>().IsEnabled()) {
+        if (UnitsCatalog.empty()) {
+            Populate_Object_Catalog<InfantryType, InfantryTypeClass>(UnitsCatalog);
+            Populate_Object_Catalog<UnitType, UnitTypeClass>(UnitsCatalog);
+            Populate_Object_Catalog<AircraftType, AircraftTypeClass>(UnitsCatalog);
+
+            UnitsGridPager.ItemCount = UnitsCatalog.size();
+        }
+
+        Render_Object_Grid(UNITS_GRID, UnitsCatalog, UnitsGridPager);
+    } else if (Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()) {
+        if (BuildingsCatalog.empty()) {
+            Populate_Object_Catalog<StructType, BuildingTypeClass>(BuildingsCatalog);
+
+            BuildingListPager.ItemCount = BuildingsCatalog.size();
+        }
+
+        Render_Object_List(BUILDING_OBJECT_LIST, BuildingsCatalog, BuildingListPager);
+    }
+
+    if (!HelpText.has_value()) {
+        return;
+    }
+
+    // help text for current object
+    Fancy_Text_Print(TXT_NONE, 0, 0, BLACK, BLACK, TPF_MAP | TPF_NOSHADOW);
+    const auto text_width = String_Pixel_Width(*HelpText);
+
+    // shift help text location so the text doesn't hit the screen edge (and wrap)
+    if (HelpTextX + text_width + 1 >= (X + W) - ControlMargin) {
+        HelpTextX = (X + W) - text_width - ControlMargin;
+    }
+
+    Fancy_Text_Print(*HelpText, HelpTextX, HelpTextY, CC_GREEN, BLACK, TPF_MAP | TPF_NOSHADOW);
+    LogicPage->Draw_Rect(HelpTextX - 1, HelpTextY - 1, HelpTextX + text_width + 1, HelpTextY + FontHeight, CC_GREEN);
+}
+
+bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
+{
+    if (Parent == nullptr) {
+        return false;
+    }
+
+    if (!forced) {
+        if (Get_Mouse_X() < X || Get_Mouse_X() > X + W || Get_Mouse_Y() < Y || Get_Mouse_Y() > Y + H) {
+            // input happened outside sidebar bounds, so ignore it
+            return false;
+        }
+    }
+
+    static const std::map<SidebarControls, int> button_to_content = {
+        {OVERLAY_BUTTON, OVERLAY_GRID},
+        {TERRAIN_BUTTON, TERRAIN_OBJECT_LIST},
+        {UNITS_BUTTON, UNITS_GRID},
+        {BUILDINGS_BUTTON, BUILDING_OBJECT_LIST},
+        {TRIGGERS_BUTTON, TRIGGERS_LIST},
+        {WAYPOINTS_BUTTON, WAYPOINTS_LIST}
+    };
+
+    const auto set_current_object_for_mouse = [&](const std::vector<ObjectCatalogItem>& catalog) {
+        const auto mouse_x = Get_Mouse_X();
+        const auto mouse_y = Get_Mouse_Y();
+
+        for (const auto& [dimensions, object_type] : catalog) {
+            if (!dimensions.Point_Is_Inside_Dimensions(mouse_x, mouse_y)) {
+                continue;
+            }
+
+            if (CurrentObject == object_type) {
+                // still hovering over the same object
+                return;
+            }
+
+            CurrentObject = object_type;
+
+            HelpText = object_type->Full_Name() != TXT_NONE
+                ? Text_String(object_type->Full_Name())
+                : object_type->IniName;
+            HelpTextX = dimensions.X;
+            HelpTextY = dimensions.Y;
+
+            Parent->Flag_To_Redraw(true);
+            return;
+        }
+
+        CurrentObject = nullptr;
+        HelpText.reset();
+    };
+
+    switch (input) {
+        // toggle buttons to switch content panels
+
+        case (OVERLAY_BUTTON | KN_BUTTON):
+        case (TERRAIN_BUTTON | KN_BUTTON):
+        case (UNITS_BUTTON | KN_BUTTON):
+        case (BUILDINGS_BUTTON | KN_BUTTON):
+        case (WAYPOINTS_BUTTON | KN_BUTTON):
+        case (TRIGGERS_BUTTON | KN_BUTTON): {
+            for (auto i = OVERLAY_BUTTON; i <= TRIGGERS_BUTTON; ++i) {
+                auto& control = Get_Control<TextButtonClass>(i);
+
+                control.IsPressed = input == (i | KN_BUTTON);
+
+                if (control.IsPressed) {
+                    // show
+                    Controls[button_to_content.at(i)]->Enable();
+
+                    if (i == WAYPOINTS_BUTTON || i == TRIGGERS_BUTTON) {
+                        Controls[PREVIOUS_BUTTON]->Disable(true);
+                        Controls[NEXT_BUTTON]->Disable(true);
+                    } else {
+                        Controls[PREVIOUS_BUTTON]->Enable();
+                        Controls[NEXT_BUTTON]->Enable();
+                    }
+                } else {
+                    // hide and prevent drawing
+                    Controls[button_to_content.at(i)]->Disable(true);
+                }
+            }
+
+            Parent->Flag_To_Redraw();
+            break;
+        }
+
+        // start placement when content panel clicked
+
+        case (OVERLAY_GRID | KN_BUTTON):
+        case (TERRAIN_OBJECT_LIST | KN_BUTTON):
+        case (UNITS_GRID | KN_BUTTON):
+        case (BUILDING_OBJECT_LIST | KN_BUTTON):
+            if (Parent->PendingObject == nullptr && CurrentObject != nullptr) {
+                Parent->Manual_Start_Placement(CurrentObject);
+            }
+            break;
+
+        // content panel navigation
+
+        case (PREVIOUS_BUTTON | KN_BUTTON):
+            if (Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()) {
+                OverlayGridPager.CurrentPage = max(0, OverlayGridPager.CurrentPage - 1);
+            } else if (Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()) {
+                if (TerrainPager.CurrentDepth > 0) {
+                    TerrainPager.CurrentDepth--;
+                    TerrainPager.CurrentIndex = TerrainPager.PageStartIndexes[TerrainPager.CurrentDepth];
+                }
+            } else if (Get_Control<UNITS_GRID, ControlClass>().IsEnabled()) {
+                UnitsGridPager.CurrentPage = max(0, UnitsGridPager.CurrentPage - 1);
+            } else if (Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()) {
+                if (BuildingListPager.CurrentDepth > 0) {
+                    BuildingListPager.CurrentDepth--;
+                    BuildingListPager.CurrentIndex = BuildingListPager.PageStartIndexes[BuildingListPager.CurrentDepth];
+                }
+            }
+
+            Parent->Flag_To_Redraw();
+            break;
+
+        case (NEXT_BUTTON | KN_BUTTON):
+            if (Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()) {
+                OverlayGridPager.CurrentPage = min(OverlayGridPager.PageCount - 1, OverlayGridPager.CurrentPage + 1);
+            } else if (Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()) {
+                if (TerrainPager.CurrentDepth + 1 < TerrainPager.PageStartIndexes.size()) {
+                    TerrainPager.CurrentDepth++;
+                    TerrainPager.CurrentIndex = TerrainPager.PageStartIndexes[TerrainPager.CurrentDepth];
+                }
+            } else if (Get_Control<UNITS_GRID, ControlClass>().IsEnabled()) {
+                UnitsGridPager.CurrentPage = min(UnitsGridPager.PageCount - 1 , UnitsGridPager.CurrentPage + 1);
+            } else if (Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()) {
+                if (BuildingListPager.CurrentDepth + 1 < BuildingListPager.PageStartIndexes.size()) {
+                    BuildingListPager.CurrentDepth++;
+                    BuildingListPager.CurrentIndex = BuildingListPager.PageStartIndexes[BuildingListPager.CurrentDepth];
+                }
+            }
+
+            Parent->Flag_To_Redraw();
+            break;
+
+        default: {
+            // automatically track current object based on mouse over event
+            if (Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()) {
+                set_current_object_for_mouse(OverlayCatalog);
+            } else if (Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()) {
+                set_current_object_for_mouse(TerrainCatalog);
+            } else if (Get_Control<UNITS_GRID, ControlClass>().IsEnabled()) {
+                set_current_object_for_mouse(UnitsCatalog);
+            } else if (Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()) {
+                set_current_object_for_mouse(BuildingsCatalog);
+            }
+
+            return false;
+        }
+    }
+
+    return true;
+}

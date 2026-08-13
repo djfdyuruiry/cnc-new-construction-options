@@ -1225,6 +1225,8 @@ int MapEditClass::Place_Object(void)
         ** Update the Tiberium computation if we're placing an overlay
         */
         if (PendingObject->What_Am_I() == RTTI_OVERLAYTYPE && ((OverlayTypeClass*)PendingObject)->IsTiberium) {
+            // set tiberium density relative to tiberium type
+            (*this)[ZoneCell + ZoneOffset].OverlayData = (((OverlayTypeClass*)PendingObject)->Type - OVERLAY_TIBERIUM1);
 
             TotalValue = Overpass();
             Flag_To_Redraw(false);
@@ -2070,6 +2072,29 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
     }
 
     // ScenarioInit--;
+}
+
+void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type)
+{
+    Cancel_Placement();
+
+    for (auto i = 0; i < std::size(Objects); i++) {
+        if (Objects[i] == object_type) {
+            LastChoice = i;
+        }
+    }
+
+    PendingObject = object_type;
+    PendingHouse = PlayerPtr->ActLike;
+    PendingObjectPtr = object_type->Create_One_Of(PlayerPtr);
+
+    if (PendingObjectPtr == nullptr) {
+        WWMessageBox().Process("Failed to create new object for placement");
+        Cancel_Placement();
+    }
+
+    Set_Cursor_Pos();
+    Set_Cursor_Shape(PendingObject->Occupy_List());
 }
 
 #endif

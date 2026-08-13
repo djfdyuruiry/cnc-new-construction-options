@@ -1596,7 +1596,7 @@ int MapEditClass::Team_Members(HousesType house)
     const auto D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);
 
     const auto D_TXT6_H = 14;
-    const auto D_MARGIN = 14;
+    const auto D_MARGIN = 7;
 
 #ifdef TEENSY_WEENSY
     // const auto D_PICTURE_W = 32;
@@ -2121,7 +2121,7 @@ int MapEditClass::Team_Members(HousesType house)
  * HISTORY:                                                                                    *
  *   07/02/1995 JLB : Created.                                                                 *
  *=============================================================================================*/
-void MapEditClass::Draw_Member(TechnoTypeClass const* ptr, int index, int quant, HousesType house, int pic_x, int pic_y)
+void MapEditClass::Draw_Member(ObjectTypeClass const* ptr, int index, int quant, HousesType house, int pic_x, int pic_y)
 {
 #define TEENSY_WEENSY
     /*
@@ -2163,6 +2163,8 @@ void MapEditClass::Draw_Member(TechnoTypeClass const* ptr, int index, int quant,
     int x = pic_x + col * D_PICTURE_W;
     int y = pic_y + row * D_ROW_H;
 
+    x += col;
+
     WindowList[WINDOW_EDITOR][WINDOWX] = 0;
     WindowList[WINDOW_EDITOR][WINDOWY] = 0;
     WindowList[WINDOW_EDITOR][WINDOWWIDTH] = Try_Get_Resolution_Mode_Width().value_or(640);
@@ -2170,7 +2172,7 @@ void MapEditClass::Draw_Member(TechnoTypeClass const* ptr, int index, int quant,
     Change_Window((int)WINDOW_EDITOR);
 
     Hide_Mouse();
-    Draw_Box(x, y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
+    Draw_Box(x, y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_RAISED, true);
 
     int obj_end_x = 0;
     int obj_end_y = 0;

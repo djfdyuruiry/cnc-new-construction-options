@@ -3965,7 +3965,7 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
                   x,
                   y,
                   window,
-                  SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
+                  SHAPE_FADING | SHAPE_WIN_REL,
                   HouseTypeClass::As_Reference(house).RemapTable);
 
     // special overlay for weapons factory
@@ -3975,7 +3975,7 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
             x,
             y,
             window,
-            SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
+            SHAPE_FADING | SHAPE_WIN_REL,
             HouseTypeClass::As_Reference(house).RemapTable);
     }
 
@@ -4006,7 +4006,7 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
 void BuildingTypeClass::Prep_For_Add(void)
 {
     for (StructType index = STRUCT_FIRST; index < STRUCT_COUNT; index++) {
-        if (As_Reference(index).Get_Image_Data()) {
+        if (As_Reference(index).Get_Image_Data() && !As_Reference(index).IsWall) { // walls handled by overlay types
             Map.Add_To_List(&As_Reference(index));
         }
     }

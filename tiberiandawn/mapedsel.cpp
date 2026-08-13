@@ -285,6 +285,7 @@ void MapEditClass::Popup_Controls(void)
     always must add MapArea LAST in the list, so it doesn't intercept the
     other buttons' input.
     ------------------------------------------------------------------------*/
+    EditorSidebar.Remove_This();
     Remove_A_Button(*GDIButton);
     Remove_A_Button(*NODButton);
     Remove_A_Button(*NeutralButton);
@@ -308,6 +309,8 @@ void MapEditClass::Popup_Controls(void)
     ------------------ If no current object, hide the list -------------------
     */
     if (!CurrentObject.Count()) {
+        EditorSidebar.Add_This();
+
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
         Add_A_Button(*MapArea);
@@ -318,6 +321,7 @@ void MapEditClass::Popup_Controls(void)
     --------------- If not Techno, no need for editing buttons ---------------
     */
     if (!CurrentObject[0]->Is_Techno()) {
+        EditorSidebar.Add_This();
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
         Add_A_Button(*MapArea);
@@ -436,6 +440,7 @@ void MapEditClass::Popup_Controls(void)
     Add the map area last, so it's "underneath" the other buttons, and won't
     intercept input for those buttons.
     ------------------------------------------------------------------------*/
+    EditorSidebar.Add_This();
     Add_A_Button(*BaseGauge);
     Add_A_Button(*BaseLabel);
     Add_A_Button(*MapArea);

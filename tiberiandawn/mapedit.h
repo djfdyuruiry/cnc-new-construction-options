@@ -49,6 +49,7 @@
 ********************************* Includes **********************************
 */
 #include "function.h"
+#include "mapeditsidebar.h"
 
 /*
 ********************************** Defines **********************************
@@ -204,6 +205,7 @@ public:
     int Edit_Trigger(void);
     int Import_Triggers(void);
     int Import_Teams(void);
+
     /*
     ............................ mapedplc.cpp .............................
     */
@@ -224,6 +226,7 @@ public:
     void Start_Base_Building(void);
     void Cancel_Base_Building(void);
     void Build_Base_To(int percent, bool place_virtual_buildings = true);
+    void Manual_Start_Placement(const ObjectTypeClass* object_type);
 
     /*
     ............................ mapedsel.cpp .............................
@@ -238,7 +241,7 @@ public:
     /*
     ............................. mapedtm.cpp .............................
     */
-    void Draw_Member(TechnoTypeClass const* ptr, int index, int quant, HousesType house, int pic_x, int pic_y);
+    void Draw_Member(ObjectTypeClass const* ptr, int index, int quant, HousesType house, int pic_x, int pic_y);
     void Handle_Teams(char const* caption);
     int Select_Team(char const* caption);
     int Edit_Team(void);
@@ -333,6 +336,8 @@ private:
     Variables for pre-building a base
     .....................................................................*/
     int BasePercent; // Percentage the base will be built
+
+    MapEditorSidebar EditorSidebar;
 
     /*.....................................................................
     Variables for supporting the object-editing controls at screen bottom

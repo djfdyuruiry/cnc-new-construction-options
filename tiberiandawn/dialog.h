@@ -10,15 +10,8 @@
 #include "common/logger.h"
 
 #include "function.h"
+#include "dialogcontroldimension.h"
 #include "drop.h"
-
-struct DialogControlDimension
-{
-    int X = 0;
-    int Y = 0;
-    int W = 0;
-    int H = 0;
-};
 
 template<typename T> concept EnumerationType = std::is_enum_v<T>;
 
@@ -79,16 +72,16 @@ protected:
 
     bool Is_Mouse_Over_Rectangle(const int start_x, const int start_y, const int end_x, const int end_y)
     {
-        return Keyboard->MouseQX >= start_x
-            && Keyboard->MouseQX <= end_x
-            && Keyboard->MouseQY >= start_y
-            && Keyboard->MouseQY <= end_y;
+        return Get_Mouse_X() >= start_x
+            && Get_Mouse_X() <= end_x
+            && Get_Mouse_Y() >= start_y
+            && Get_Mouse_Y() <= end_y;
     }
 
     bool Is_Mouse_Outside_Control_Dimensions(const ControlClass& control)
     {
-        return (Keyboard->MouseQX < control.X || Keyboard->MouseQX > control.X + control.Width)
-            && (Keyboard->MouseQY < control.Y || Keyboard->MouseQY > control.Y + control.Height);
+        return (Get_Mouse_X() < control.X || Get_Mouse_X() > control.X + control.Width)
+            && (Get_Mouse_Y() < control.Y || Get_Mouse_Y() > control.Y + control.Height);
     }
 
     bool Is_Mouse_Outside_Dropdown_Dimensions(const DropListClass& control)

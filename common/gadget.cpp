@@ -274,6 +274,11 @@ void GadgetClass::Disable(const bool disable_drawing)
     Clear_Focus();
 }
 
+bool GadgetClass::IsEnabled() const
+{
+    return !IsDisabled;
+}
+
 /***********************************************************************************************
  * GadgetClass::Remove -- Removes the specified gadget from the list.                          *
  *                                                                                             *
