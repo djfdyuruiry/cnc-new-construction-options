@@ -2,6 +2,7 @@
 
 #include "function.h"
 #include "mapeditsidebar.h"
+#include "tiberiandawnsettings.h"
 
 typedef enum
 {
@@ -713,6 +714,11 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             }
 
             CurrentObject = object_type;
+
+            if (TdSettings.Display_Object_Icons() && object_type->Get_Cameo_Data()) {
+                // we want icons and this object type has one, so help text is unnecessary
+                return;
+            }
 
             HelpText = object_type->Full_Name() != TXT_NONE
                 ? Text_String(object_type->Full_Name())
