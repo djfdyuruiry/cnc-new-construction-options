@@ -896,6 +896,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             } else {
                 Cancel_Placement();
             }
+            Flag_To_Redraw(true);
             break;
         }
 
@@ -904,6 +905,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         */
         if (CurTrigger) {
             Stop_Trigger_Placement();
+            Flag_To_Redraw(true);
             break;
         }
 
@@ -913,6 +915,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         if (CurrentObject.Count()) {
             CurrentObject[0]->Unselect();
             Popup_Controls();
+            Flag_To_Redraw(true);
             break;
         }
         Main_Menu();
@@ -1579,6 +1582,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         auto selected_building = dynamic_cast<BuildingClass*>(CurrentObject[0]);
         const auto building_strength = selected_building->Strength;
         const auto facing = selected_building->PrimaryFacing;
+        const auto trigger = selected_building->Trigger;
 
         auto base_changed = false;
 
@@ -1620,6 +1624,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                 new_building->Strength = building_strength;
                 new_building->LastStrength = building_strength;
                 new_building->PrimaryFacing = facing;
+
+                // note: triggers are blown away if base percent causes the building to not be a starting structure
+                new_building->Trigger = trigger;
 
                 new_building->Select();
                 new_building->Time_To_Redraw();
@@ -1883,6 +1890,12 @@ void MapEditClass::Decorate_Cells(const bool forced)
                                      cell_text_flags);
                 }
             } else if (cell_object != nullptr && cell_object->Trigger) {
+                if (cell_object->What_Am_I() == RTTI_BUILDING && cell.Cell_Building()->IsUnbuiltBase) {
+                    // hide triggers stored in unbuilt buildings
+                    // (they are only cached in-case the building becomes a starting structure again)
+                    return;
+                }
+
                 // draw object trigger (building/unit/infantry etc.)
                 const auto coord = cell_object->Render_Coord();
                 int object_x, object_y;
@@ -1940,6 +1953,8 @@ void MapEditClass::Render_Editor_Controls()
     if (Buttons == nullptr) {
         return;
     }
+
+    EditorSidebar.Render();
 
     // dynamically determine if popup dialog is visible
     PopupDialogVisible = false;
@@ -2012,7 +2027,6 @@ void MapEditClass::Draw_It(bool forced)
 
     Draw_Header(forced);
     Decorate_Cells(forced);
-    EditorSidebar.Render();
     Draw_Footer(forced);
 }
 

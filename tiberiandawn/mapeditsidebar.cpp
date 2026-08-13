@@ -44,7 +44,7 @@ void MapEditorSidebar::Init_Controls()
         {UNITS_BUTTON, "Units"},
         {BUILDINGS_BUTTON, "Buildings"},
         {WAYPOINTS_BUTTON, "Waypoints"},
-        {TRIGGERS_BUTTON, "Triggers"},
+        {TRIGGERS_BUTTON, "Cell Triggers"},
         {PREVIOUS_BUTTON, "Previous"},
         {NEXT_BUTTON, "Next"}
     };
@@ -179,6 +179,18 @@ void MapEditorSidebar::Init(MapEditClass* parent)
     Parent = parent;
     Controls.clear();
 
+    // reset pagination
+    OverlayGridPager = {};
+    TerrainPager = {};
+    UnitsGridPager = {};
+    BuildingListPager = {};
+
+    // reset current object context
+    CurrentObject = nullptr;
+    HelpText.reset();
+    HelpTextX = 0;
+    HelpTextY = 0;
+
     Init_Dimensions();
     Init_Controls();
 }
@@ -189,24 +201,21 @@ void MapEditorSidebar::Add_This()
         return;
     }
 
-    // reset pagination
-    OverlayGridPager = {};;
-    TerrainPager = {};;
-    UnitsGridPager = {};;
-    BuildingListPager = {};;
-
-    // reset current object context
-    CurrentObject = nullptr;
-    HelpText.reset();
-    HelpTextX = 0;
-    HelpTextY = 0;
-
-    // reset to show first panel
-    constexpr auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
-    On_Input(fake_input, true);
-
     for (auto i = MINIMAP; i <= NEXT_BUTTON; ++i) {
         Parent->Add_A_Button(*Controls[i]);
+    }
+
+    if (
+        !Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()
+        && !Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()
+        && !Get_Control<UNITS_GRID, ControlClass>().IsEnabled()
+        && !Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()
+        && !Get_Control<WAYPOINTS_LIST, ListClass>().IsEnabled()
+        && !Get_Control<TRIGGERS_LIST, ControlClass>().IsEnabled()
+    ) {
+        // nothing selected, so show first panel
+        constexpr auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
+        On_Input(fake_input, true);
     }
 }
 
@@ -218,6 +227,31 @@ void MapEditorSidebar::Remove_This()
 
     for (auto i = MINIMAP; i <= TRIGGERS_LIST; ++i) {
         Parent->Remove_A_Button(*Controls[i]);
+    }
+}
+
+void MapEditorSidebar::Refresh_Triggers()
+{
+    auto& trigger_list = Get_Control<TRIGGERS_LIST, ListClass>();
+
+    // clear down trigger list and UI
+    CellTriggerList.clear();
+
+    while (trigger_list.Count() > 0) {
+        trigger_list.Remove_Item(0);
+    }
+
+    // populate with current cell triggers
+    for (auto i = 0; i < Triggers.Count(); i++) {
+        auto trigger = Triggers.Ptr(i);
+
+        if (trigger == nullptr || (trigger->Event != EVENT_PLAYER_ENTERED && trigger->Event != EVENT_CELLFIRST)) {
+            // filter for cell triggers
+            continue;
+        }
+
+        CellTriggerList.emplace_back(trigger);
+        trigger_list.Add_Item(trigger->Get_Name());
     }
 }
 
@@ -250,21 +284,21 @@ static void Populate_Object_Catalog(std::vector<MapEditorSidebar::ObjectCatalogI
 
         const auto& instance_obj = U::As_Reference(instance);
 
-        if (instance_obj.Get_Image_Data() != nullptr) {
-            if constexpr (std::is_same_v<T, StructType>) {
-                if (reinterpret_cast<const BuildingTypeClass*>(&instance_obj)->IsWall) {
-                    // ignore wall buildings, these are shown in the overlay grid instead
-                    continue;
-                }
-            }
-
-            MapEditorSidebar::ObjectCatalogItem entry;
-            entry.ObjectType = &instance_obj;
-
-            catalog.emplace_back(entry);
-        } else {
-            CNC_LOG_WARN("Rejecting {}", instance_obj.IniName);
+        if (instance_obj.Get_Image_Data() == nullptr) {
+            continue;
         }
+
+        if constexpr (std::is_same_v<T, StructType>) {
+            if (reinterpret_cast<const BuildingTypeClass*>(&instance_obj)->IsWall) {
+                // ignore wall buildings, these are shown in the overlay grid instead
+                continue;
+            }
+        }
+
+        MapEditorSidebar::ObjectCatalogItem entry;
+        entry.ObjectType = &instance_obj;
+
+        catalog.emplace_back(entry);
     }
 }
 
@@ -275,6 +309,7 @@ void MapEditorSidebar::Render_Object_List(
     const int control, std::vector<ObjectCatalogItem>& objects, ObjectListPager& pager
 )
 {
+    // TODO: Consider alternatives, maybe draw stamp with clear template - very hard to see smudges
     /**
      * Draw background and border
      */
@@ -598,6 +633,7 @@ void MapEditorSidebar::Render()
         if (TerrainCatalog.empty()) {
             Populate_Object_Catalog<TemplateType, TemplateTypeClass>(TerrainCatalog);
             Populate_Object_Catalog<TerrainType, TerrainTypeClass>(TerrainCatalog);
+            Populate_Object_Catalog<SmudgeType, SmudgeTypeClass>(TerrainCatalog);
 
             TerrainPager.ItemCount = TerrainCatalog.size();
         }
@@ -733,7 +769,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         case (TERRAIN_OBJECT_LIST | KN_BUTTON):
         case (UNITS_GRID | KN_BUTTON):
         case (BUILDING_OBJECT_LIST | KN_BUTTON):
-            if (Parent->PendingObject == nullptr && CurrentObject != nullptr) {
+            if (CurrentObject != nullptr) {
                 Parent->Manual_Start_Placement(CurrentObject);
             }
             break;
@@ -778,6 +814,12 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             }
 
             Parent->Flag_To_Redraw();
+            break;
+
+        case (TRIGGERS_LIST | KN_BUTTON):
+            Parent->Manual_Start_Trigger_Placement(
+                CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()]
+            );
             break;
 
         default: {

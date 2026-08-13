@@ -1086,6 +1086,12 @@ void TriggerClass::Read_INI(CCINIClass& ini)
             trigger->AttachCount++;
         }
     }
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map) {
+        Map.Refresh_Sidebar_Triggers();
+    }
+#endif
 }
 
 /***********************************************************************************************

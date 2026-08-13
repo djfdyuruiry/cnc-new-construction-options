@@ -353,16 +353,11 @@ void SmudgeTypeClass::Display(int x, int y, WindowNumberType window, HousesType,
 {
     void const* ptr = Get_Image_Data();
 
-    x += WindowList[window][WINDOWX];
-    y += WindowList[window][WINDOWY];
-
     IsTheaterShape = true; // Smudges are theater specific
     if (ptr) {
         for (int w = 0; w < Width; w++) {
             for (int h = 0; h < Height; h++) {
-                CC_Draw_Shape(ptr, 0, x + w * ICON_PIXEL_W, y + h * ICON_PIXEL_H, WINDOW_TACTICAL, SHAPE_WIN_REL);
-                // LogicPage->Draw_Stamp(ptr, w + (h*Width), x + w*ICON_PIXEL_W, y + h*ICON_PIXEL_H, NULL,
-                // WINDOW_TACTICAL);
+                CC_Draw_Shape(ptr, 0, x + w * ICON_PIXEL_W, y + h * ICON_PIXEL_H, window, SHAPE_WIN_REL);
             }
         }
 

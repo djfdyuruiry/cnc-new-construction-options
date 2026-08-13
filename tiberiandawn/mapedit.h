@@ -227,6 +227,8 @@ public:
     void Cancel_Base_Building(void);
     void Build_Base_To(int percent, bool place_virtual_buildings = true);
     void Manual_Start_Placement(const ObjectTypeClass* object_type);
+    void Manual_Start_Trigger_Placement(TriggerClass* trigger);
+    void Refresh_Sidebar_Triggers();
 
     /*
     ............................ mapedsel.cpp .............................

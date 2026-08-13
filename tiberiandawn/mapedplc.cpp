@@ -550,6 +550,7 @@ int MapEditClass::Placement_Dialog(void)
                 int obj_end_x = 0;
                 int obj_end_y = 0;
 
+                // TODO: restore ability to center graphics conditionally
                 curobj->Display(WinW >> 1, WinH >> 1, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
 
                 if (obj_end_x < WindowList[WINDOW_EDITOR][WINDOWX]) {
@@ -560,7 +561,6 @@ int MapEditClass::Placement_Dialog(void)
                     obj_end_y += WindowList[WINDOW_EDITOR][WINDOWY];
                 }
 
-                CNC_LOG_WARN("{}x{} -> {}x{}", WindowList[WINDOW_EDITOR][WINDOWX] + (WinW >> 1), WindowList[WINDOW_EDITOR][WINDOWY] + (WinH >> 1), obj_end_x, obj_end_y);
                 /*
                 ........................ Erase the grid .........................
                 */
@@ -2071,14 +2071,19 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
     // ScenarioInit--;
 }
 
+/**
+ * Start placement of an given object type immediately. Cancels any in-progress
+ * placement.
+ */
 void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type)
 {
     Cancel_Placement();
 
+    // setup tracker field used by placement dialog
     for (auto i = 0; i < std::size(Objects); i++) {
         if (Objects[i] == object_type) {
             LastChoice = i;
-        }
+            break;        }
     }
 
     PendingObject = object_type;
@@ -2090,8 +2095,23 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type)
         Cancel_Placement();
     }
 
+    // ensure any placed aircraft are in the 'landed' state
+    if (PendingObject->What_Am_I() == RTTI_AIRCRAFTTYPE) {
+        reinterpret_cast<AircraftClass*>(PendingObjectPtr)->Altitude = 0;
+    }
+
     Set_Cursor_Pos();
     Set_Cursor_Shape(PendingObject->Occupy_List());
+}
+
+void MapEditClass::Manual_Start_Trigger_Placement(TriggerClass* trigger)
+{
+    CurTrigger = trigger;
+}
+
+void MapEditClass::Refresh_Sidebar_Triggers()
+{
+    EditorSidebar.Refresh_Triggers();
 }
 
 #endif

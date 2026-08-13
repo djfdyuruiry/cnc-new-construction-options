@@ -53,8 +53,12 @@ private:
     ObjectListPager TerrainPager;
     GridPager UnitsGridPager;
     ObjectListPager BuildingListPager;
+    std::vector<TriggerClass*> CellTriggerList;
 
     const ObjectTypeClass* CurrentObject = nullptr;
+    int CurrentWaypoint = -1;
+    TriggerClass* CurrentTrigger = nullptr;
+
     std::optional<const char*> HelpText;
     int HelpTextX = 0;
     int HelpTextY = 0;
@@ -80,8 +84,11 @@ private:
 public:
 
     void Init(MapEditClass* parent);
+
     void Add_This();
     void Remove_This();
+
+    void Refresh_Triggers();
 
     void Render();
     bool On_Input(const KeyNumType& input, bool forced = false);
