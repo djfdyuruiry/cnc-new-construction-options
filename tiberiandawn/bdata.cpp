@@ -3980,7 +3980,7 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
     }
 
     if (!display_icon) {
-        IsTheaterShape = IsTheater;
+        IsTheaterShape = false;
     }
 
     end_x = x + Get_Build_Frame_Width(shape);
