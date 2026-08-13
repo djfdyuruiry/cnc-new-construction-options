@@ -1877,9 +1877,9 @@ int CellClass::Tiberium_Adjust(bool pregame)
             int count = 0;
 
             /*
-            **	Mixup the Tiberium overlays so that they don't look the same, except when in editor mode.
+            **	Mixup the Tiberium overlays so that they don't look the same
             */
-            if (pregame && !Debug_Map) {
+            if (pregame) {
                 Overlay = Random_Pick(OVERLAY_TIBERIUM1, OVERLAY_TIBERIUM12);
             }
 
@@ -1900,9 +1900,7 @@ int CellClass::Tiberium_Adjust(bool pregame)
                 }
             }
 
-            if (!Debug_Map) {
-                OverlayData = _adj[count];
-            }
+            OverlayData = _adj[count];
 
             return((OverlayData+1) * Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE));
         }

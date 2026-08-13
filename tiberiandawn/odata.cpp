@@ -759,8 +759,8 @@ void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType
         int frame = 0;
 
         if (IsTiberium) {
-            // pick tiberium density graphic relative to tiberium type
-            frame = Type - OVERLAY_TIBERIUM1;
+            // display tiberium in it's most mature state
+            frame = 11;
         }
 
         IsTheaterShape = IsTheater;
@@ -791,9 +791,21 @@ void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType
  *=============================================================================================*/
 void OverlayTypeClass::Prep_For_Add(void)
 {
+    auto tiberium_added = false;
+
     for (OverlayType index = OVERLAY_FIRST; index < OVERLAY_COUNT; index++) {
+        if (As_Reference(index).IsTiberium && tiberium_added) {
+            // we only want the first tiberium overlay
+            continue;
+        }
+
         if (As_Reference(index).Get_Image_Data()) {
             Map.Add_To_List(&As_Reference(index));
+
+            if (As_Reference(index).IsTiberium)
+            {
+                tiberium_added = true;
+            }
         }
     }
 }

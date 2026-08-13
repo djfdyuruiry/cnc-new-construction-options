@@ -234,6 +234,12 @@ static void Populate_Object_Catalog(std::vector<MapEditorSidebar::ObjectCatalogI
     for (const auto& instance : TdTypeConverter::Get_Valid_Instances<T>()) {
         if constexpr (std::is_same_v<T, TemplateType>) {
             if (instance >= TEMPLATE_NONE) {
+                // ordering is different to other types
+                continue;
+            }
+        } else if constexpr (std::is_same_v<T, OverlayType>) {
+            if (instance < 0 || instance > OVERLAY_TIBERIUM1 && instance <= OVERLAY_TIBERIUM12) {
+                // we only want the first tiberium instance
                 continue;
             }
         } else {

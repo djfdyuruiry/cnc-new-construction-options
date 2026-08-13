@@ -1222,12 +1222,9 @@ int MapEditClass::Place_Object(void)
     if (PendingObjectPtr->Unlimbo(Cell_Coord(ZoneCell + ZoneOffset))) {
 
         /*
-        ** Update the Tiberium computation if we're placing an overlay
+        ** Update the Tiberium computation if we're adding more to the map
         */
         if (PendingObject->What_Am_I() == RTTI_OVERLAYTYPE && ((OverlayTypeClass*)PendingObject)->IsTiberium) {
-            // set tiberium density relative to tiberium type
-            (*this)[ZoneCell + ZoneOffset].OverlayData = (((OverlayTypeClass*)PendingObject)->Type - OVERLAY_TIBERIUM1);
-
             TotalValue = Overpass();
             Flag_To_Redraw(false);
         }
