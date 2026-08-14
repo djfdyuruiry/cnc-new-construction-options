@@ -45,7 +45,7 @@ void MapEditorSidebar::Init_Controls()
         {UNITS_BUTTON, "Units"},
         {BUILDINGS_BUTTON, "Buildings"},
         {WAYPOINTS_BUTTON, "Waypoints"},
-        {TRIGGERS_BUTTON, "Cell Triggers"},
+        {TRIGGERS_BUTTON, SeenBuff.Get_Width() <= GBUFF_INIT_WIDTH ? "Triggers" : "Cell Triggers"},
         {PREVIOUS_BUTTON, "Previous"},
         {NEXT_BUTTON, "Next"}
     };
