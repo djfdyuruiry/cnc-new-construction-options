@@ -1677,7 +1677,20 @@ void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
         shape = Get_Image_Data();
     }
 
-    CC_Draw_Shape(shape, shape_num, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
+    if (display_icon) {
+        CC_Draw_Shape(shape, shape_num, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
+    } else {
+        CC_Draw_Shape(
+            shape,
+            shape_num,
+            x,
+            y,
+            window,
+            SHAPE_FADING | SHAPE_CENTER | SHAPE_GHOST | SHAPE_WIN_REL,
+            HouseTypeClass::As_Reference(house).RemapTable,
+            DisplayClass::UnitShadow
+        );
+    }
 
     end_x = x + Get_Build_Frame_Width(shape);
     end_y = y + Get_Build_Frame_Height(shape);

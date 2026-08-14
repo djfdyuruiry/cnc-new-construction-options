@@ -547,18 +547,23 @@ int MapEditClass::Placement_Dialog(void)
                 Change_Window((int)WINDOW_EDITOR);
                 Draw_Box(D_PICTURE_X, D_PICTURE_Y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
 
+                int display_x = WinW >> 1;
+                int display_y = WinH >> 1;
                 int obj_end_x = 0;
                 int obj_end_y = 0;
 
-                // TODO: restore ability to center graphics conditionally
-                curobj->Display(WinW >> 1, WinH >> 1, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
+                curobj->Display(display_x, display_y, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
 
-                if (obj_end_x < WindowList[WINDOW_EDITOR][WINDOWX]) {
-                    obj_end_x += WindowList[WINDOW_EDITOR][WINDOWX];
-                }
+                if (curobj->What_Am_I() != RTTI_INFANTRYTYPE
+                    && curobj->What_Am_I() != RTTI_UNITTYPE
+                    && curobj->What_Am_I() != RTTI_AIRCRAFTTYPE
+                    && curobj->What_Am_I() != RTTI_OVERLAYTYPE) {
+                    // these object types are not centered automatically, so re-draw to center shape dimensions
+                    display_x = display_x - ((obj_end_x - display_x) / 2);
+                    display_y = display_y - ((obj_end_y - display_y) / 2);
 
-                if (obj_end_y < WindowList[WINDOW_EDITOR][WINDOWY]) {
-                    obj_end_y += WindowList[WINDOW_EDITOR][WINDOWY];
+                    Draw_Box(D_PICTURE_X, D_PICTURE_Y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
+                    curobj->Display(display_x, display_y, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
                 }
 
                 /*

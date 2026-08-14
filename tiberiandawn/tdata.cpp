@@ -904,7 +904,16 @@ TerrainType TerrainTypeClass::From_Name(char const* name)
 void TerrainTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
 {
     IsTheaterShape = true;
-    CC_Draw_Shape(Get_Image_Data(), 0, x, y, window, SHAPE_NORMAL | SHAPE_WIN_REL);
+    CC_Draw_Shape(
+        Get_Image_Data(),
+        0,
+        x,
+        y,
+        window,
+      SHAPE_GHOST | SHAPE_WIN_REL,
+      nullptr,
+      DisplayClass::UnitShadow
+    );
     IsTheaterShape = false;
 
     end_x = x + Get_Build_Frame_Width(Get_Image_Data());

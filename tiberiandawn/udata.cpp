@@ -1478,13 +1478,24 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
         }
     }
 
-    CC_Draw_Shape(shape,
-                  shape_num,
-                  x,
-                  y,
-                  window,
-                  SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
-                  HouseTypeClass::As_Reference(house).RemapTable);
+    if (display_icon) {
+        CC_Draw_Shape(shape,
+                 shape_num,
+                 x,
+                 y,
+                 window,
+                 SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
+                 HouseTypeClass::As_Reference(house).RemapTable);
+    } else {
+        CC_Draw_Shape(shape,
+                      shape_num,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_CENTER | SHAPE_GHOST | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable,
+                      DisplayClass::UnitShadow);
+    }
 
     if (!display_icon && IsTurretEquipped) {
         auto turret_x = x;
@@ -1506,8 +1517,9 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
                       turret_x,
                       turret_y,
                       window,
-                      SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
-                      HouseTypeClass::As_Reference(house).RemapTable);
+                      SHAPE_FADING | SHAPE_CENTER | SHAPE_GHOST | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable,
+                      DisplayClass::UnitShadow);
     }
 
     end_x = x + Get_Build_Frame_Width(shape);

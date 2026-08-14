@@ -3960,13 +3960,24 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
         IsTheaterShape = IsTheater;
     }
 
-    CC_Draw_Shape(shape,
-                  0,
-                  x,
-                  y,
-                  window,
-                  SHAPE_FADING | SHAPE_WIN_REL,
-                  HouseTypeClass::As_Reference(house).RemapTable);
+    if (display_icon) {
+        CC_Draw_Shape(shape,
+                      0,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable);
+    } else {
+        CC_Draw_Shape(shape,
+                      0,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_GHOST | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable,
+                      DisplayClass::UnitShadow);
+    }
 
     // special overlay for weapons factory
     if (!display_icon && *this == STRUCT_WEAP) {
@@ -3975,8 +3986,9 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
             x,
             y,
             window,
-            SHAPE_FADING | SHAPE_WIN_REL,
-            HouseTypeClass::As_Reference(house).RemapTable);
+            SHAPE_FADING | SHAPE_GHOST | SHAPE_WIN_REL,
+            HouseTypeClass::As_Reference(house).RemapTable,
+            DisplayClass::UnitShadow);
     }
 
     if (!display_icon) {
