@@ -183,7 +183,7 @@ void MapEditClass::One_Time(void)
     );
 
     // make all control positions relative to POPUP_GDI and use offset center X co-ord so the UI layout is centered
-    const auto POPUP_GDI_X = (SeenBuff.Get_Width() / 2)
+    const auto POPUP_GDI_X = (MapArea->Width / 2)
         - ((POPUP_GDI_W + POPUP_FACEBOX_W + POPUP_HEALTH_W + POPUP_MISSION_W + (CONTROL_MARGIN * 3)) / 2);
     const auto POPUP_GDI_Y = SeenBuff.Get_Height() - (FooterH + (CONTROL_MARGIN * 4) + POPUP_FACEBOX_H);
 
