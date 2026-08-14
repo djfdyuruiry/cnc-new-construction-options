@@ -230,6 +230,10 @@ public:
     void Manual_Start_Trigger_Placement(TriggerClass* trigger);
     void Refresh_Sidebar_Triggers();
 
+    void Start_Waypoint_Placement(WaypointType waypt);
+    void Stop_Waypoint_Placement(void);
+    void Place_Waypoint(void);
+
     /*
     ............................ mapedsel.cpp .............................
     */
@@ -326,6 +330,11 @@ private:
     The "current" team type for editing & associating with a trigger
     .....................................................................*/
     TeamTypeClass* CurTeam; // current team
+
+    /*.....................................................................
+    The "current" waypoint for placement
+    .....................................................................*/
+    WaypointType CurWaypoint; // current waypoint being placed
 
     /*.....................................................................
     Bitfields for flags & such

@@ -2109,6 +2109,49 @@ void MapEditClass::Manual_Start_Trigger_Placement(TriggerClass* trigger)
     CurTrigger = trigger;
 }
 
+void MapEditClass::Start_Waypoint_Placement(WaypointType waypt)
+{
+    CurWaypoint = waypt;
+    Set_Default_Mouse(MOUSE_CAN_MOVE);
+    Override_Mouse_Shape(MOUSE_CAN_MOVE);
+}
+
+void MapEditClass::Stop_Waypoint_Placement(void)
+{
+    CurWaypoint = static_cast<WaypointType>(-1);
+    Set_Default_Mouse(MOUSE_NORMAL);
+    Override_Mouse_Shape(MOUSE_NORMAL);
+}
+
+void MapEditClass::Place_Waypoint(void)
+{
+    int x, y;
+    CELL cell;
+
+    x = Keyboard->MouseQX;
+    y = Keyboard->MouseQY;
+
+    cell = Click_Cell_Calc(x, y);
+    if (cell == 0) {
+        return;
+    }
+
+    /*
+    ------------------ Clear any existing waypoint from the target cell ------------------
+    */
+    for (int i = 0; i < WAYPT_COUNT; i++) {
+        if (Scen.Waypoint[i] == cell) {
+            Scen.Waypoint[i] = -1;
+        }
+    }
+
+    /*
+    --------------------- Assign the waypoint to the target cell ---------------------
+    */
+    Scen.Waypoint[CurWaypoint] = cell;
+    (*this)[cell].IsWaypoint = 1;
+}
+
 void MapEditClass::Refresh_Sidebar_Triggers()
 {
     EditorSidebar.Refresh_Triggers();

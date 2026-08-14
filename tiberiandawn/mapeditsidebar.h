@@ -42,6 +42,8 @@ private:
     static inline std::vector<ObjectCatalogItem> TerrainCatalog;
     static inline std::vector<ObjectCatalogItem> UnitsCatalog;
     static inline std::vector<ObjectCatalogItem> BuildingsCatalog;
+    static inline std::vector<WaypointType> WaypointLookup;
+    static inline std::vector<std::unique_ptr<char[]>> WaypointText;
 
     MapEditClass* Parent = nullptr;
     std::map<int, DialogControlDimension> Dimensions;

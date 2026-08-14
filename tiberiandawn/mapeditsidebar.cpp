@@ -93,6 +93,43 @@ void MapEditorSidebar::Init_Controls()
         );
         Controls[id]->Disable(true);
     }
+
+    // waypoint list (text labels, tracker list and populate UI list)
+
+    if (WaypointText.empty()) {
+        // initialise static waypoint text strings
+        for (int i = 0; i < WAYPT_HOME; i++) {
+            auto text_ptr = std::make_unique<char[]>(3);
+            sprintf(text_ptr.get(), "%d", i);
+
+            WaypointText.emplace_back(std::move(text_ptr));
+        }
+    }
+
+    if (WaypointLookup.empty()) {
+        // initialise static tracker list for mapping selected index to waypoint
+        WaypointLookup.push_back(WAYPT_HOME);
+        WaypointLookup.push_back(WAYPT_REINF);
+
+        for (auto i = static_cast<WaypointType>(0); i < WAYPT_HOME; ++i) {
+            WaypointLookup.push_back(i);
+        }
+    }
+
+    auto& waypoint_list = Get_Control<WAYPOINTS_LIST, ListClass>();
+
+    while (waypoint_list.Count() > 0) {
+        waypoint_list.Remove_Item(0);
+    }
+
+    // add const char strings
+    waypoint_list.Add_Item("HOME");
+    waypoint_list.Add_Item("REINF");
+
+    // add dynamic char strings
+    for (const auto& text_ptr : WaypointText) {
+        waypoint_list.Add_Item(text_ptr.get());
+    }
 }
 
 void MapEditorSidebar::Init_Dimensions()
@@ -827,6 +864,14 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                 CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()]
             );
             break;
+
+        case (WAYPOINTS_LIST | KN_BUTTON): {
+            const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();
+            const auto waypoint = WaypointLookup[list_idx];
+
+            Parent->Start_Waypoint_Placement(waypoint);
+            break;
+        }
 
         default: {
             // automatically track current object based on mouse over event

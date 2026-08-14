@@ -113,14 +113,15 @@ MapEditClass::MapEditClass(void)
     ObjCount = 0;
     LastChoice = 0;
     LastHouse = HOUSE_GOOD;
-    GrabbedObject = 0;
+    GrabbedObject = nullptr;
     for (int i = 0; i < NUM_EDIT_CLASSES; i++) {
         NumType[i] = 0;
         TypeOffset[i] = 0;
     }
     Scen.Waypoint[WAYPT_HOME] = 0;
     CurrentCell = 0;
-    CurTrigger = NULL;
+    CurTrigger = nullptr;
+    CurWaypoint = static_cast<WaypointType>(-1);
     Changed = 0;
     LMouseDown = 0;
     BaseBuilding = 0;
@@ -792,7 +793,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         back to normal (or whatever the shape is set to by Set_Default_Mouse())
         when it re-enters the map area.
         .....................................................................*/
-        if (CurTrigger) {
+        if (CurTrigger || CurWaypoint != static_cast<WaypointType>(-1)) {
             Override_Mouse_Shape(MOUSE_CAN_MOVE);
         } else {
             Override_Mouse_Shape(MOUSE_NORMAL);
@@ -910,6 +911,15 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         }
 
         /*
+        ................. Turn off waypoint placement mode .................
+        */
+        if (CurWaypoint != static_cast<WaypointType>(-1)) {
+            Stop_Waypoint_Placement();
+            Flag_To_Redraw(true);
+            break;
+        }
+
+        /*
         .............. Unselect object & hide popup controls ...............
         */
         if (CurrentObject.Count()) {
@@ -955,8 +965,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         /*---------------------------------------------------------------------
         ESC = exit placement mode, or exit to DOS
         ---------------------------------------------------------------------*/
-    case KN_ESC:
-
+    case KN_ESC: {
         /*
         .................... Exit object placement mode ....................
         */
@@ -977,43 +986,52 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                 Stop_Trigger_Placement();
                 input = KN_NONE;
                 break;
-            } else {
-                rc = WWMessageBox().Process("Exit Scenario Editor?", TXT_YES, TXT_NO);
+            }
+
+            /*
+            ................... Exit waypoint placement mode ...................
+            */
+            if (CurWaypoint != static_cast<WaypointType>(-1)) {
+                Stop_Waypoint_Placement();
+                input = KN_NONE;
+                break;
+            }
+
+            rc = WWMessageBox().Process("Exit Scenario Editor?", TXT_YES, TXT_NO);
+            HiddenPage.Clear();
+            Flag_To_Redraw(true);
+            Render();
+
+            /*
+            .......... User doesn't want to exit; return to editor ..........
+            */
+            if (rc == 1) {
+                input = KN_NONE;
+                break;
+            }
+
+            /*
+            ................. If changed, prompt for saving .................
+            */
+            if (Changed) {
+                rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
                 HiddenPage.Clear();
                 Flag_To_Redraw(true);
                 Render();
 
                 /*
-                .......... User doesn't want to exit; return to editor ..........
+                ..................... User wants to save .....................
                 */
-                if (rc == 1) {
-                    input = KN_NONE;
-                    break;
-                }
-
-                /*
-                ................. If changed, prompt for saving .................
-                */
-                if (Changed) {
-                    rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
-                    HiddenPage.Clear();
-                    Flag_To_Redraw(true);
-                    Render();
+                if (rc == 0) {
 
                     /*
-                    ..................... User wants to save .....................
+                    .............. If save cancelled, abort exit ..............
                     */
-                    if (rc == 0) {
-
-                        /*
-                        .............. If save cancelled, abort exit ..............
-                        */
-                        if (Save_Scenario() != 0) {
-                            input = KN_NONE;
-                            break;
-                        } else {
-                            Changed = 0;
-                        }
+                    if (Save_Scenario() != 0) {
+                        input = KN_NONE;
+                        break;
+                    } else {
+                        Changed = 0;
                     }
                 }
             }
@@ -1021,6 +1039,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
 
         Exit_Editor();
         break;
+    }
 
         /*---------------------------------------------------------------------
         LEFT = go to previous placement object
@@ -1325,6 +1344,11 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                     Changed = 1;
                     Start_Placement();
                 }
+            } else if (CurWaypoint != static_cast<WaypointType>(-1)) {
+                Place_Waypoint();
+                Stop_Waypoint_Placement();
+                Flag_To_Redraw(true);
+                Changed = 1;
             } else {
                 /*
                 ....................... Place a trigger .........................
