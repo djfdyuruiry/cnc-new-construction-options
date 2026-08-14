@@ -47,6 +47,7 @@
 #include <utility>
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "type.h"
 
 static OverlayTypeClass const Road(OVERLAY_ROAD, // Overlay type number.
@@ -752,6 +753,35 @@ unsigned char* OverlayTypeClass::Radar_Icon(int data) const
  *=============================================================================================*/
 void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
 {
+    auto display_icon = TdSettings.Display_Object_Icons();
+
+    if (display_icon && IsWall) {
+        // look for associated strip icon for this wall
+        for (auto struct_type = STRUCT_FIRST; struct_type <= STRUCT_LAST; ++struct_type) {
+            const auto& building_type = BuildingTypeClass::As_Reference(struct_type);
+
+            if (building_type.OverlayToPlace != Type) {
+                // overlay type doesn't match
+                continue;
+            }
+
+            if (!building_type.Get_Cameo_Data()) {
+                // no cameo data to draw
+                continue;
+            }
+
+            CC_Draw_Shape(
+                building_type.Get_Cameo_Data(),
+                0,
+                x,
+                y,
+                window,
+                SHAPE_CENTER | SHAPE_WIN_REL
+            );
+            return;
+        }
+    }
+
     /*
     ---------------------------- Draw the shape ------------------------------
     */
@@ -773,8 +803,7 @@ void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType
             SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST,
             nullptr,
             DisplayClass::UnitShadow
-        )
-        ;
+        );
         IsTheaterShape = false;
 
         end_x = x + Get_Build_Frame_Width(Get_Image_Data());

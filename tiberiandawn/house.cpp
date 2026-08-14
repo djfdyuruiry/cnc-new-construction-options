@@ -4780,30 +4780,16 @@ void HouseClass::Sell_Wall(CELL cell)
 
             if (optr.IsWall) {
                 BuildingTypeClass const* btype = NULL;
-                switch (overlay) {
-                case OVERLAY_SANDBAG_WALL:
-                    btype = &BuildingTypeClass::As_Reference(STRUCT_SANDBAG_WALL);
-                    break;
 
-                case OVERLAY_CYCLONE_WALL:
-                    btype = &BuildingTypeClass::As_Reference(STRUCT_CYCLONE_WALL);
-                    break;
+                for (auto struct_type = STRUCT_FIRST; struct_type <= STRUCT_LAST; ++struct_type) {
+                    const auto& building_type = BuildingTypeClass::As_Reference(struct_type);
 
-                case OVERLAY_BRICK_WALL:
-                    btype = &BuildingTypeClass::As_Reference(STRUCT_BRICK_WALL);
-                    break;
-
-                case OVERLAY_BARBWIRE_WALL:
-                    btype = &BuildingTypeClass::As_Reference(STRUCT_BARBWIRE_WALL);
-                    break;
-
-                case OVERLAY_WOOD_WALL:
-                    btype = &BuildingTypeClass::As_Reference(STRUCT_WOOD_WALL);
-                    break;
-
-                default:
-                    break;
+                    if (building_type.OverlayToPlace == optr.Type) {
+                        btype = &building_type;
+                        break;
+                    }
                 }
+
                 if (btype != NULL && !btype->IsUnsellable) {
 
                     if (PlayerPtr == this) {

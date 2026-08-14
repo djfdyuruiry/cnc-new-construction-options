@@ -796,28 +796,8 @@ bool BuildingClass::Mark(MarkType mark)
             **	gets converted into an overlay wall type when it is placed down. The
             **	actual building object itself is destroyed.
             */
-            if (Class->IsWall) {
-                switch (Class->Type) {
-                case STRUCT_BRICK_WALL:
-                    new OverlayClass(OVERLAY_BRICK_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_BARBWIRE_WALL:
-                    new OverlayClass(OVERLAY_BARBWIRE_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_SANDBAG_WALL:
-                    new OverlayClass(OVERLAY_SANDBAG_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_WOOD_WALL:
-                    new OverlayClass(OVERLAY_WOOD_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_CYCLONE_WALL:
-                    new OverlayClass(OVERLAY_CYCLONE_WALL, cell, House->Class->House);
-                    break;
-                }
+            if (Class->IsWall && Class->OverlayToPlace != OVERLAY_NONE) {
+                new OverlayClass(Class->OverlayToPlace, cell, House->Class->House);
                 Transmit_Message(RADIO_OVER_OUT);
                 Delete_This();
 

@@ -4018,7 +4018,8 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
 void BuildingTypeClass::Prep_For_Add(void)
 {
     for (StructType index = STRUCT_FIRST; index < STRUCT_COUNT; index++) {
-        if (As_Reference(index).Get_Image_Data() && !As_Reference(index).IsWall) { // walls handled by overlay types
+        // walls handled by overlay types in scenario editor
+        if (As_Reference(index).Get_Image_Data() && (!Debug_Map || !As_Reference(index).IsWall)) {
             Map.Add_To_List(&As_Reference(index));
         }
     }
