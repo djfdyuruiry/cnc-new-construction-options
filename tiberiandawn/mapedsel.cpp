@@ -88,6 +88,22 @@ int MapEditClass::Select_Object(void)
     */
     if ((unsigned)cell < MAP_CELL_TOTAL) {
         object = Cell_Object(cell, x, y);
+
+        auto& cell_obj = Array[cell];
+
+        // if no object found, and overlay is present, simulate 'grabbing' it by starting placement of an equivalent
+        // object and remove the overlay from the cell
+        if (object == nullptr && cell_obj.Overlay != OVERLAY_NONE) {
+            auto owner = cell_obj.Owner != HOUSE_NONE
+                ? HouseClass::As_Pointer(cell_obj.Owner)
+                : nullptr;
+
+            Manual_Start_Placement(&OverlayTypeClass::As_Reference(cell_obj.Overlay), owner);
+            cell_obj.Delete_Wall();
+
+            GrabbedOverlay = true;
+            GrabbedOverlayOrigin = cell;
+        }
     }
 
     /*

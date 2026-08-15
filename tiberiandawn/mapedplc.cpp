@@ -1278,6 +1278,34 @@ void MapEditClass::Cancel_Placement(void)
     PendingObject = 0;
     PendingObjectPtr = 0;
     PendingHouse = HOUSE_NONE;
+    if (GrabbedOverlay) {
+        // make grabbed overlay 'snap' back to original cell by placing it down again
+        Set_Cursor_Pos(GrabbedOverlayOrigin);
+        Place_Object();
+
+        GrabbedOverlay = false;
+        GrabbedOverlayOrigin = 0;
+    } else if (CurTrigger) {
+        /*
+        ------------------------ Clear placement trigger -------------------------
+        */
+        CurTrigger = nullptr;
+        return;
+    } else if (CurWaypoint) {
+        /*
+        ------------------------ Clear placement waypoint ------------------------
+        */
+        CurWaypoint = static_cast<WaypointType>(-1);
+        return;
+    } else {
+        /*
+        ---------------------- Delete the placement object -----------------------
+        */
+        delete PendingObjectPtr;
+        PendingObject = 0;
+        PendingObjectPtr = 0;
+        PendingHouse = HOUSE_NONE;
+    }
 
     /*
     -------------------------- Restore cursor shape --------------------------
@@ -2107,7 +2135,7 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
  * Start placement of an given object type immediately. Cancels any in-progress
  * placement.
  */
-void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type)
+void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner)
 {
     Cancel_Placement();
 
@@ -2115,12 +2143,13 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type)
     for (auto i = 0; i < std::size(Objects); i++) {
         if (Objects[i] == object_type) {
             LastChoice = i;
-            break;        }
+            break;
+        }
     }
 
     PendingObject = object_type;
-    PendingHouse = PlayerPtr->ActLike;
-    PendingObjectPtr = object_type->Create_One_Of(PlayerPtr);
+    PendingHouse = owner != nullptr ? owner->Class->House : PlayerPtr->Class->House;
+    PendingObjectPtr = object_type->Create_One_Of(owner != nullptr ? owner : PlayerPtr);
 
     if (PendingObjectPtr == nullptr) {
         WWMessageBox().Process("Failed to create new object for placement");

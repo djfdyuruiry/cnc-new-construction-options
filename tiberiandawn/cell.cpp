@@ -2783,6 +2783,35 @@ bool CellClass::Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const
 
 #endif // USE_RA_AI
 
+/**
+ * Immediately delete any wall present on this cell and update adjacent cells accordingly. No money
+ * is refunded to the house that owns this cell.
+ */
+bool CellClass::Delete_Wall()
+{
+    if (Overlay == OVERLAY_NONE || !OverlayTypeClass::As_Reference(Overlay).IsWall) {
+        return false;
+    }
+
+    Overlay = OVERLAY_NONE;
+    OverlayData = 0;
+    Owner = HOUSE_NONE;
+
+    for (const auto& facing : { FACING_N, FACING_E, FACING_S, FACING_W }) {
+        auto adj_cell = Adjacent_Cell(facing);
+
+        if (adj_cell != nullptr) {
+            adj_cell->Wall_Update();
+        }
+    }
+
+    Recalc_Attributes();
+    Redraw_Objects();
+    ObjectClass::Detach_This_From_All(::As_Target(Cell_Number()), true);
+
+    return true;
+}
+
 TO_JSON(CellClass)
 {
     BITFIELD_TO_JSON(IsPlot);

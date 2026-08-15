@@ -122,6 +122,8 @@ MapEditClass::MapEditClass(void)
     CurrentCell = 0;
     CurTrigger = nullptr;
     CurWaypoint = static_cast<WaypointType>(-1);
+    GrabbedOverlay = false;
+    GrabbedOverlayOrigin = 0;
     Changed = 0;
     LMouseDown = 0;
     BaseBuilding = 0;
@@ -828,7 +830,12 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             Flag_To_Redraw(true);
             if (Place_Object() == 0) {
                 Changed = 1;
-                Start_Placement();
+
+                if (!GrabbedOverlay) {
+                    Start_Placement();
+                } else {
+                    GrabbedOverlay = false;
+                }
             }
         } else {
             /*.....................................................................
@@ -1342,7 +1349,12 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             if (PendingObject) {
                 if (Place_Object() == 0) {
                     Changed = 1;
-                    Start_Placement();
+
+                    if (!GrabbedOverlay) {
+                        Start_Placement();
+                    } else {
+                        GrabbedOverlay = false;
+                    }
                 }
             } else if (CurWaypoint != static_cast<WaypointType>(-1)) {
                 Place_Waypoint();
