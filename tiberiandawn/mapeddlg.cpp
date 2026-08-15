@@ -2542,7 +2542,7 @@ void MapEditClass::Handle_Triggers(void)
         ............................... 'Edit' ................................
         */
         if (rc == 1 && CurTrigger) {
-            if (Edit_Trigger() == 0) {
+            if (Edit_Trigger(CurTrigger) == 0) {
                 Changed = 1;
             }
         }
@@ -2559,7 +2559,7 @@ void MapEditClass::Handle_Triggers(void)
                 /*
                 ................... delete it if user cancels ...................
                 */
-                if (Edit_Trigger() == -1) {
+                if (Edit_Trigger(CurTrigger) == -1) {
                     delete CurTrigger;
                     CurTrigger = NULL;
                 } else {
@@ -2998,7 +2998,7 @@ int MapEditClass::Select_Trigger(void)
  * HISTORY:                                                                *
  *   11/29/1994 BR : Created.                                              *
  *=========================================================================*/
-int MapEditClass::Edit_Trigger(void)
+int MapEditClass::Edit_Trigger(TriggerClass* trigger)
 {
     /*........................................................................
     Dialog & button dimensions
@@ -3309,30 +3309,30 @@ int MapEditClass::Edit_Trigger(void)
     /*
     ....................... Set default button states ........................
     */
-    event_idx = CurTrigger->Event; // event list
+    event_idx = trigger->Event; // event list
     if (event_idx == EVENT_NONE)
         event_idx = EVENT_FIRST;
 
-    action_idx = CurTrigger->Action; // action list
+    action_idx = trigger->Action; // action list
     if (action_idx == TriggerClass::ACTION_NONE)
         action_idx = TriggerClass::ACTION_FIRST;
 
-    strcpy(namebuf, CurTrigger->Get_Name()); // Name
+    strcpy(namebuf, trigger->Get_Name()); // Name
     name_edt.Set_Text(namebuf, 5);
 
     if (TriggerClass::Event_Need_Data(event_idx)) {
-        sprintf(databuf, "%d", CurTrigger->Data); // Credits/Time
+        sprintf(databuf, "%d", trigger->Data); // Credits/Time
         data_edt.Set_Text(databuf, 8);
     }
 
-    house = CurTrigger->House; // House
+    house = trigger->House; // House
 
-    persistant = CurTrigger->IsPersistant;
+    persistant = trigger->IsPersistant;
 
     volatilebtn.Turn_Off();
     persistbtn.Turn_Off();
     semipersistbtn.Turn_Off();
-    switch (CurTrigger->IsPersistant) {
+    switch (trigger->IsPersistant) {
     case TriggerClass::VOLATILE:
         volatilebtn.Turn_On();
         break;
@@ -3446,8 +3446,8 @@ int MapEditClass::Edit_Trigger(void)
                 }
 
                 if (TriggerClass::Action_Need_Team(action_idx)) {
-                    if (CurTrigger->Team) {
-                        Fancy_Text_Print(CurTrigger->Team->IniName,
+                    if (trigger->Team) {
+                        Fancy_Text_Print(trigger->Team->IniName,
                                          D_TEAM_X + D_TEAM_W + 5,
                                          D_TEAM_Y,
                                          CC_GREEN,
@@ -3491,7 +3491,7 @@ int MapEditClass::Edit_Trigger(void)
             semipersistbtn.Add_Tail(*commands);
             if (TriggerClass::Event_Need_Data(event_idx)) {
                 data_edt.Add_Tail(*commands);
-                sprintf(databuf, "%d", CurTrigger->Data);
+                sprintf(databuf, "%d", trigger->Data);
                 data_edt.Set_Text(databuf, 8);
             }
             if (TriggerClass::Event_Need_House(event_idx)) {
@@ -3526,9 +3526,9 @@ int MapEditClass::Edit_Trigger(void)
             if (eventlist.Current_Index() != event_idx) {
                 event_idx = EventType(eventlist.Current_Index());
                 databuf[0] = 0;
-                CurTrigger->Data = 0;
+                trigger->Data = 0;
                 if (!TriggerClass::Event_Need_House(event_idx)) {
-                    CurTrigger->House = HOUSE_NONE;
+                    trigger->House = HOUSE_NONE;
                 }
                 display = REDRAW_ALL;
             }
@@ -3563,7 +3563,7 @@ int MapEditClass::Edit_Trigger(void)
         case (BUTTON_TEAM | KN_BUTTON):
             Handle_Teams("Select a Team");
             if (CurTeam) {
-                CurTrigger->Team = CurTeam;
+                trigger->Team = CurTeam;
             }
             HiddenPage.Clear();
             Flag_To_Redraw(true);
@@ -3624,38 +3624,38 @@ int MapEditClass::Edit_Trigger(void)
         /*
         ......................... Set Event & Action ..........................
         */
-        CurTrigger->Event = EventType(event_idx);
-        CurTrigger->Action = TriggerClass::ActionType(action_idx);
+        trigger->Event = EventType(event_idx);
+        trigger->Action = TriggerClass::ActionType(action_idx);
 
         /*
         .............................. Set name ...............................
         */
         if (strlen(namebuf) == 0) {
-            CurTrigger->Set_Name("____");
+            trigger->Set_Name("____");
         } else {
-            CurTrigger->Set_Name(namebuf);
+            trigger->Set_Name(namebuf);
         }
 
         /*
         .............................. Set Data ...............................
         */
         if (TriggerClass::Event_Need_Data(event_idx)) {
-            CurTrigger->Data = atol(databuf);
+            trigger->Data = atol(databuf);
         }
 
         /*
         .............................. Set House ..............................
         */
         if (TriggerClass::Event_Need_House(event_idx)) {
-            CurTrigger->House = house;
+            trigger->House = house;
         } else {
-            CurTrigger->House = HOUSE_NONE;
+            trigger->House = HOUSE_NONE;
         }
 
         /*
         ........................... Set Persistence  ..........................
         */
-        CurTrigger->IsPersistant = persistant;
+        trigger->IsPersistant = persistant;
     }
 
     /*

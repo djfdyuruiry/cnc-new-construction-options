@@ -121,7 +121,7 @@ MapEditClass::MapEditClass(void)
     Scen.Waypoint[WAYPT_HOME] = 0;
     CurrentCell = 0;
     CurTrigger = nullptr;
-    CurWaypoint = static_cast<WaypointType>(-1);
+    CurWaypoint = WAYPT_COUNT;
     GrabbedOverlay = false;
     GrabbedOverlayOrigin = 0;
     Changed = 0;
@@ -795,7 +795,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         back to normal (or whatever the shape is set to by Set_Default_Mouse())
         when it re-enters the map area.
         .....................................................................*/
-        if (CurTrigger || CurWaypoint != static_cast<WaypointType>(-1)) {
+        if (CurTrigger || CurWaypoint != WAYPT_COUNT) {
             Override_Mouse_Shape(MOUSE_CAN_MOVE);
         } else {
             Override_Mouse_Shape(MOUSE_NORMAL);
@@ -920,8 +920,8 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         /*
         ................. Turn off waypoint placement mode .................
         */
-        if (CurWaypoint != static_cast<WaypointType>(-1)) {
-            Stop_Waypoint_Placement();
+        if (CurWaypoint != WAYPT_COUNT) {
+            Cancel_Placement();
             Flag_To_Redraw(true);
             break;
         }
@@ -998,8 +998,8 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             /*
             ................... Exit waypoint placement mode ...................
             */
-            if (CurWaypoint != static_cast<WaypointType>(-1)) {
-                Stop_Waypoint_Placement();
+            if (CurWaypoint != WAYPT_COUNT) {
+                Cancel_Placement();
                 input = KN_NONE;
                 break;
             }
@@ -1356,9 +1356,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                         GrabbedOverlay = false;
                     }
                 }
-            } else if (CurWaypoint != static_cast<WaypointType>(-1)) {
+            } else if (CurWaypoint != WAYPT_COUNT) {
                 Place_Waypoint();
-                Stop_Waypoint_Placement();
+                Cancel_Placement();
                 Flag_To_Redraw(true);
                 Changed = 1;
             } else {

@@ -202,7 +202,7 @@ public:
     int Scenario_Dialog(void);
     void Handle_Triggers(void);
     int Select_Trigger(void);
-    int Edit_Trigger(void);
+    int Edit_Trigger(TriggerClass* trigger);
     int Import_Triggers(void);
     int Import_Teams(void);
 
@@ -231,7 +231,6 @@ public:
     void Init_Sidebar_For_Scenario();
 
     void Start_Waypoint_Placement(WaypointType waypt);
-    void Stop_Waypoint_Placement(void);
     void Place_Waypoint(void);
 
     /*

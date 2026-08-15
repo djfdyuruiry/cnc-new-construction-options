@@ -356,15 +356,8 @@ void MapEditorSidebar::Purge_Theater_Objects()
     BuildingsCatalog.clear();
 }
 
-void MapEditorSidebar::Refresh_For_Scenario()
+void MapEditorSidebar::Refresh_Trigger_List()
 {
-    /**
-     * Reset pagination for object types that are theater dependant (page count may change).
-     */
-    OverlayGridPager = {};
-    TerrainPager = {};
-    BuildingListPager = {};
-
     /**
      * Refresh cell trigger info.
      */
@@ -389,6 +382,18 @@ void MapEditorSidebar::Refresh_For_Scenario()
         CellTriggerList.emplace_back(trigger);
         trigger_list.Add_Item(trigger->Get_Name());
     }
+}
+
+void MapEditorSidebar::Refresh_For_Scenario()
+{
+    /**
+     * Reset pagination for object types that are theater dependant (page count may change).
+     */
+    OverlayGridPager = {};
+    TerrainPager = {};
+    BuildingListPager = {};
+
+    Refresh_Trigger_List();
 }
 
 /**
@@ -988,14 +993,36 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             );
             break;
 
-        case (ADD_TRIGGER_BUTTON | KN_BUTTON):
-            break;
+        case (ADD_TRIGGER_BUTTON | KN_BUTTON): {
+            auto new_trigger = new TriggerClass();
 
-        case (EDIT_TRIGGER_BUTTON | KN_BUTTON):
-            break;
+            new_trigger->Event = EVENT_PLAYER_ENTERED;
 
-        case (DELETE_TRIGGER_BUTTON | KN_BUTTON):
+            if (Parent->Edit_Trigger(new_trigger) == 0) {
+                Refresh_Trigger_List();
+            } else {
+                delete new_trigger;
+            }
             break;
+        }
+
+        case (EDIT_TRIGGER_BUTTON | KN_BUTTON): {
+            auto selected_trigger = CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()];
+
+            if (Parent->Edit_Trigger(selected_trigger) == 0) {
+                Refresh_Trigger_List();
+            }
+            break;
+        }
+
+        case (DELETE_TRIGGER_BUTTON | KN_BUTTON): {
+            auto selected_trigger = CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()];
+
+            delete selected_trigger;
+
+            Refresh_Trigger_List();
+            break;
+        }
 
         case (WAYPOINTS_LIST | KN_BUTTON): {
             const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();

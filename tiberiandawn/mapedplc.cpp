@@ -1284,11 +1284,11 @@ void MapEditClass::Cancel_Placement(void)
         */
         CurTrigger = nullptr;
         return;
-    } else if (CurWaypoint) {
+    } else if (CurWaypoint != WAYPT_COUNT) {
         /*
         ------------------------ Clear placement waypoint ------------------------
         */
-        CurWaypoint = static_cast<WaypointType>(-1);
+        CurWaypoint = WAYPT_COUNT;
         return;
     } else {
         /*
@@ -2168,13 +2168,6 @@ void MapEditClass::Start_Waypoint_Placement(WaypointType waypt)
     CurWaypoint = waypt;
     Set_Default_Mouse(MOUSE_CAN_MOVE);
     Override_Mouse_Shape(MOUSE_CAN_MOVE);
-}
-
-void MapEditClass::Stop_Waypoint_Placement(void)
-{
-    CurWaypoint = static_cast<WaypointType>(-1);
-    Set_Default_Mouse(MOUSE_NORMAL);
-    Override_Mouse_Shape(MOUSE_NORMAL);
 }
 
 void MapEditClass::Place_Waypoint(void)

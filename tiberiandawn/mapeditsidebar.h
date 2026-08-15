@@ -58,8 +58,6 @@ private:
     std::vector<TriggerClass*> CellTriggerList;
 
     const ObjectTypeClass* CurrentObject = nullptr;
-    int CurrentWaypoint = -1;
-    TriggerClass* CurrentTrigger = nullptr;
 
     std::optional<const char*> HelpText;
     int HelpTextX = 0;
@@ -92,6 +90,7 @@ public:
     void Add_This();
     void Remove_This();
 
+    void Refresh_Trigger_List();
     void Refresh_For_Scenario();
 
     void Render();
