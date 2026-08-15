@@ -878,8 +878,10 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
     }
 
     if (!forced) {
+        // if input happens outside sidebar bounds, ignore it
         if (Get_Mouse_X() < X || Get_Mouse_X() > X + W || Get_Mouse_Y() < Y || Get_Mouse_Y() > Y + H) {
-            // input happened outside sidebar bounds, so ignore it
+            HelpText.reset(); // clear any active help text
+            CurrentObject = nullptr; // clear mouse hover over object
             return false;
         }
     }
