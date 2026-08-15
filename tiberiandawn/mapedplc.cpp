@@ -2144,6 +2144,8 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, Ho
     PendingHouse = owner != nullptr ? owner->Class->House : PlayerPtr->Class->House;
     PendingObjectPtr = object_type->Create_One_Of(owner != nullptr ? owner : PlayerPtr);
 
+    LastHouse = PendingHouse;
+
     if (PendingObjectPtr == nullptr) {
         WWMessageBox().Process("Failed to create new object for placement");
         Cancel_Placement();
