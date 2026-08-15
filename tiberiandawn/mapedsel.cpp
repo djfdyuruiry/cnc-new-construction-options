@@ -102,6 +102,7 @@ int MapEditClass::Select_Object(void)
             cell_obj.Delete_Wall();
 
             GrabbedOverlay = true;
+            GrabbedObject = PendingObjectPtr;
             GrabbedOverlayOrigin = cell;
         }
     }

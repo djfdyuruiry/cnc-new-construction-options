@@ -826,26 +826,20 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         /*.....................................................................
         "Paint" mode: place current object, and restart placement
         .....................................................................*/
-        if (PendingObject) {
+        if (PendingObject && !GrabbedOverlay) {
             Flag_To_Redraw(true);
             if (Place_Object() == 0) {
                 Changed = 1;
 
-                if (!GrabbedOverlay) {
-                    Start_Placement();
-                } else {
-                    GrabbedOverlay = false;
-                }
+                Start_Placement();
             }
-        } else {
+        } else if (GrabbedObject) {
             /*.....................................................................
             Move the currently-grabbed object
             .....................................................................*/
-            if (GrabbedObject) {
-                GrabbedObject->Mark(MARK_CHANGE);
-                if (Move_Grabbed_Object() == 0) {
-                    Changed = 1;
-                }
+            GrabbedObject->Mark(MARK_CHANGE);
+            if (Move_Grabbed_Object() == 0) {
+                Changed = 1;
             }
         }
     }
@@ -1398,10 +1392,15 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             LastClickTime = WinTickCount.Time();
             input = KN_NONE;
         } else {
-
             /*
             -------------------------- Left Button UP --------------------------
             */
+            if (GrabbedOverlay) {
+                Place_Object();
+                GrabbedOverlay = false;
+                Changed = 1;
+            }
+
             LMouseDown = 0;
             GrabbedObject = 0;
             input = KN_NONE;
@@ -1464,14 +1463,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             Flag_To_Redraw(true);
             Changed = 1;
         } else {
-            if (GrabbedOverlay) {
-                /*
-                ............. Remove grabbed overlay from origin cell .............
-                */
-                Cancel_Placement();
-                Array[CurrentCell].Delete_Wall();
-                Flag_To_Redraw(true);
-            } else if (CurrentCell) {
+            if (CurrentCell) {
                 /*
                 ................. Remove trigger from current cell .................
                 */
@@ -1484,6 +1476,19 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                     HiddenPage.Clear();
                     Flag_To_Redraw(true);
                     Changed = 1;
+                } else {
+                    auto& current_cell = Array[CurrentCell];
+
+                    // first try to delete a wall (if any)
+                    if (!current_cell.Delete_Wall()) {
+                        // purge any object in this cell, most objects are grabbable so this is an edge case
+                        if (current_cell.Cell_Occupier() != nullptr) {
+                            current_cell.Cell_Occupier()->Delete_This();
+                            Flag_To_Redraw(true);
+                        }
+                    } else {
+                        Flag_To_Redraw(true);
+                    }
                 }
             }
         }
