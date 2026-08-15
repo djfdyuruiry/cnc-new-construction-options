@@ -2160,11 +2160,15 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, Ho
 
 void MapEditClass::Manual_Start_Trigger_Placement(TriggerClass* trigger)
 {
+    Cancel_Placement();
+
     CurTrigger = trigger;
 }
 
 void MapEditClass::Start_Waypoint_Placement(WaypointType waypt)
 {
+    Cancel_Placement();
+
     CurWaypoint = waypt;
     Set_Default_Mouse(MOUSE_CAN_MOVE);
     Override_Mouse_Shape(MOUSE_CAN_MOVE);

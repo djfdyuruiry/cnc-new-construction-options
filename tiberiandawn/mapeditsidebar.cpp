@@ -1000,7 +1000,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
 
             if (Parent->Edit_Trigger(new_trigger) == 0) {
                 Parent->Mark_Changed();
-                Parent->Cancel_Placement();
+                Parent->Manual_Start_Trigger_Placement(new_trigger);
 
                 Refresh_Trigger_List();
             } else {
