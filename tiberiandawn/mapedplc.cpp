@@ -1073,10 +1073,10 @@ int MapEditClass::Place_Object(void)
         while ((*occupy) != REFRESH_EOL) {
 
             /*
-            ................. Check this cell for an occupier ..................
+            .............. Check this cell for an occupier/overlay ..............
             */
             template_cell = (ZoneCell + ZoneOffset) + (*occupy);
-            if ((*this)[template_cell].Cell_Occupier()) {
+            if (okflag && (*this)[template_cell].Cell_Occupier()) {
                 occupier = (*this)[template_cell].Cell_Occupier();
 
                 /*
@@ -1116,6 +1116,54 @@ int MapEditClass::Place_Object(void)
                 .......... Major error if can't replace the object now ..........
                 */
                 occupier->Mark(MARK_DOWN);
+            } else if (okflag && Array[template_cell].Overlay != OVERLAY_NONE) {
+                auto& cell_obj = (*this)[template_cell];
+
+                /*
+                ..................... Save overlay data .........................
+                */
+                const auto cell_overlay = cell_obj.Overlay;
+                const auto cell_overlay_data = cell_obj.OverlayData;
+                const auto cell_overlay_smudge = cell_obj.Smudge;
+
+                /*
+                ................ Set the cell's template values .................
+                */
+                save_ttype = cell_obj.TType;
+                save_ticon = cell_obj.TIcon;
+                cell_obj.TType = ((TemplateTypeClass*)PendingObject)->Type;
+                cell_obj.TIcon =
+                    Cell_X(*occupy) + Cell_Y(*occupy) * ((TemplateTypeClass*)PendingObject)->Width;
+
+                /*
+                ................ Purge overlay .................
+                */
+                cell_obj.Overlay = OVERLAY_NONE;
+                cell_obj.OverlayData = 0;
+                cell_obj.Smudge = SMUDGE_NONE;
+
+                cell_obj.Recalc_Attributes();
+                cell_obj.Wall_Update();
+                cell_obj.Concrete_Calc();
+
+                /*
+                ................ Check if overlay could be placed ................
+                */
+                okflag = cell_obj.Is_Generally_Clear();
+
+                /*
+                .............. Put everything back the way it was ...............
+                */
+                cell_obj.TType = save_ttype;
+                cell_obj.TIcon = save_ticon;
+
+                cell_obj.Overlay = cell_overlay;
+                cell_obj.OverlayData = cell_overlay_data;
+                cell_obj.Smudge = cell_overlay_smudge;
+
+                cell_obj.Recalc_Attributes();
+                cell_obj.Wall_Update();
+                cell_obj.Concrete_Calc();
             }
             occupy++;
         }
@@ -1125,34 +1173,6 @@ int MapEditClass::Place_Object(void)
         */
         if (okflag) {
             if (PendingObjectPtr->Unlimbo(Cell_Coord(ZoneCell + ZoneOffset))) {
-                /*...............................................................
-                Loop through all cells occupied by this template, and clear the
-                smudge & overlay.
-                ...............................................................*/
-                occupy = PendingObject->Occupy_List();
-                while ((*occupy) != REFRESH_EOL) {
-                    /*
-                    ............... Get cell for this occupy item ................
-                    */
-                    template_cell = (ZoneCell + ZoneOffset) + (*occupy);
-
-                    /*
-                    ................... Clear smudge & overlay ...................
-                    */
-                    (*this)[template_cell].Overlay = OVERLAY_NONE;
-                    (*this)[template_cell].OverlayData = 0;
-                    (*this)[template_cell].Smudge = SMUDGE_NONE;
-
-                    /*
-                    ............ make adjacent cells recalc attrib's .............
-                    */
-                    (*this)[template_cell].Recalc_Attributes();
-                    (*this)[template_cell].Wall_Update();
-                    (*this)[template_cell].Concrete_Calc();
-
-                    occupy++;
-                }
-
                 /*
                 ......................... Set flags etc .........................
                 */
@@ -1161,7 +1181,6 @@ int MapEditClass::Place_Object(void)
                 PendingHouse = HOUSE_NONE;
                 Set_Cursor_Shape(0);
                 // ScenarioInit--;
-                TotalValue = Overpass();
                 Flag_To_Redraw(false);
                 return (0);
             }
