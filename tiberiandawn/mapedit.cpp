@@ -2586,9 +2586,9 @@ void MapEditClass::Init_Editor_Dimensions()
 {
     Set_View_Dimensions(
         0,
-        HeaderX + HeaderH + 2,
+        HeaderY + HeaderH + 2,
         SeenBuff.Get_Width() - EditorSidebar.W - 1,
-        SeenBuff.Get_Height() - HeaderH + 2 - FooterH - 1
+        EditorSidebar.H
     );
 }
 
