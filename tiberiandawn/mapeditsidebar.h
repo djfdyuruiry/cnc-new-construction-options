@@ -9,6 +9,18 @@
 
 class MapEditClass;
 
+/**
+ * Sidebar shown on the right of the Scenario Editor screen that shows a minimap and allows
+ * selecting various types of game objects for placement on the map. Shows the below groups:
+ *
+ *   - Overlay
+ *   - Terrain (templates, terrain and smudges)
+ *   - Units (infantry, units and aircraft)
+ *   - Buildings
+ *   - Waypoints (controls: goto/clear)
+ *   - Cell Triggers (controls: add/edit/delete)
+ *
+ */
 class MapEditorSidebar : public DialogControlDimension
 {
 public:
@@ -33,6 +45,7 @@ public:
         int CurrentDepth = -1;
         std::vector<int> PageStartIndexes;
     };
+
 private:
     static constexpr auto ControlMargin = 5;
     static constexpr auto ButtonHeight = 20;
@@ -57,6 +70,7 @@ private:
     ObjectListPager BuildingListPager;
     std::vector<TriggerClass*> CellTriggerList;
 
+    // current sidebar object the mouse is hovering over
     const ObjectTypeClass* CurrentObject = nullptr;
 
     std::optional<const char*> HelpText;
@@ -78,6 +92,8 @@ private:
     void Render_Object_Grid(int control, std::vector<ObjectCatalogItem>& objects, GridPager& pager);
     void Render_Object_List(int control, std::vector<ObjectCatalogItem>& objects, ObjectListPager& pager);
     void Render_Minimap();
+
+    void Set_Current_Object_On_Mouse_Over(const std::vector<ObjectCatalogItem>& catalog);
 
     void Init_Controls();
     void Init_Dimensions();

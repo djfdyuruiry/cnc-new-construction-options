@@ -160,10 +160,10 @@ void MapEditorSidebar::Init_Dimensions()
     };
 #else
     Dimensions[MINIMAP] = {
-        X + ((W - 64) / 2),
-        Y + ControlMargin,
-        64,
-        64
+        .X = X + ((W - 66) / 2),
+        .Y = Y + ControlMargin,
+        .W = 66,
+        .H = 66
     };
 #endif
 
@@ -274,18 +274,16 @@ void MapEditorSidebar::Add_This()
         Parent->Add_A_Button(*Controls[i]);
     }
 
-    if (
-        !Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()
-        && !Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()
-        && !Get_Control<UNITS_GRID, ControlClass>().IsEnabled()
-        && !Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()
-        && !Get_Control<WAYPOINTS_LIST, ListClass>().IsEnabled()
-        && !Get_Control<TRIGGERS_LIST, ControlClass>().IsEnabled()
-    ) {
-        // nothing selected, so show first panel
-        constexpr auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
-        On_Input(fake_input, true);
+    for (auto i = OVERLAY_GRID; i <= TRIGGERS_LIST; ++i) {
+        if (Get_Control<ControlClass>(i).IsEnabled()) {
+            // a content panel is being displayed, good to go
+            return;
+        }
     }
+
+    // no content panel being displayed, so show first panel
+    constexpr auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
+    On_Input(fake_input, true);
 }
 
 void MapEditorSidebar::Remove_This()
@@ -315,13 +313,16 @@ static void Populate_Object_Catalog(std::vector<MapEditorSidebar::ObjectCatalogI
                 // ordering is different to other types
                 continue;
             }
-        } else if constexpr (std::is_same_v<T, OverlayType>) {
-            if (instance < 0 || instance > OVERLAY_TIBERIUM1 && instance <= OVERLAY_TIBERIUM12) {
-                // we only want the first tiberium instance
-                continue;
-            }
         } else {
+            if constexpr (std::is_same_v<T, OverlayType>) {
+                if (instance > OVERLAY_TIBERIUM1 && instance <= OVERLAY_TIBERIUM12) {
+                    // we only want the first tiberium instance
+                    continue;
+                }
+            }
+
             if (instance < 0) {
+                // signed char enum NONE values
                 continue;
             }
         }
@@ -329,6 +330,7 @@ static void Populate_Object_Catalog(std::vector<MapEditorSidebar::ObjectCatalogI
         const auto& instance_obj = U::As_Reference(instance);
 
         if (instance_obj.Get_Image_Data() == nullptr) {
+            // no image data present, ignore instance
             continue;
         }
 
@@ -833,6 +835,42 @@ void MapEditorSidebar::Render()
     LogicPage->Draw_Rect(HelpTextX - 1, HelpTextY - 1, HelpTextX + text_width + 1, HelpTextY + FontHeight, CC_GREEN);
 }
 
+void MapEditorSidebar::Set_Current_Object_On_Mouse_Over(const std::vector<ObjectCatalogItem>& catalog)
+{
+    const auto mouse_x = Get_Mouse_X();
+    const auto mouse_y = Get_Mouse_Y();
+
+    for (const auto& [dimensions, object_type] : catalog) {
+        if (!dimensions.Point_Is_Inside_Dimensions(mouse_x, mouse_y)) {
+            continue;
+        }
+
+        if (CurrentObject == object_type) {
+            // still hovering over the same object
+            return;
+        }
+
+        CurrentObject = object_type;
+
+        if (TdSettings.Display_Object_Icons() && object_type->Get_Cameo_Data()) {
+            // we want icons and this object type has one, so help text is unnecessary
+            return;
+        }
+
+        HelpText = object_type->Full_Name() != TXT_NONE
+            ? Text_String(object_type->Full_Name())
+            : object_type->IniName;
+        HelpTextX = dimensions.X;
+        HelpTextY = dimensions.Y;
+
+        Parent->Flag_To_Redraw(true);
+        return;
+    }
+
+    CurrentObject = nullptr;
+    HelpText.reset();
+}
+
 bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
 {
     if (Parent == nullptr) {
@@ -846,48 +884,13 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         }
     }
 
-    static const std::map<SidebarControls, int> button_to_content = {
+    static const std::map<SidebarControls, int> ButtonToContent = {
         {OVERLAY_BUTTON, OVERLAY_GRID},
         {TERRAIN_BUTTON, TERRAIN_OBJECT_LIST},
         {UNITS_BUTTON, UNITS_GRID},
         {BUILDINGS_BUTTON, BUILDING_OBJECT_LIST},
         {TRIGGERS_BUTTON, TRIGGERS_LIST},
         {WAYPOINTS_BUTTON, WAYPOINTS_LIST}
-    };
-
-    const auto set_current_object_for_mouse = [&](const std::vector<ObjectCatalogItem>& catalog) {
-        const auto mouse_x = Get_Mouse_X();
-        const auto mouse_y = Get_Mouse_Y();
-
-        for (const auto& [dimensions, object_type] : catalog) {
-            if (!dimensions.Point_Is_Inside_Dimensions(mouse_x, mouse_y)) {
-                continue;
-            }
-
-            if (CurrentObject == object_type) {
-                // still hovering over the same object
-                return;
-            }
-
-            CurrentObject = object_type;
-
-            if (TdSettings.Display_Object_Icons() && object_type->Get_Cameo_Data()) {
-                // we want icons and this object type has one, so help text is unnecessary
-                return;
-            }
-
-            HelpText = object_type->Full_Name() != TXT_NONE
-                ? Text_String(object_type->Full_Name())
-                : object_type->IniName;
-            HelpTextX = dimensions.X;
-            HelpTextY = dimensions.Y;
-
-            Parent->Flag_To_Redraw(true);
-            return;
-        }
-
-        CurrentObject = nullptr;
-        HelpText.reset();
     };
 
     switch (input) {
@@ -905,14 +908,15 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                 control.IsPressed = input == (i | KN_BUTTON);
 
                 if (control.IsPressed) {
-                    // show
-                    Controls[button_to_content.at(i)]->Enable();
+                    // show associated content panel
+                    Controls[ButtonToContent.at(i)]->Enable();
 
-                    // disable all optional buttons
+                    // hide all content panel buttons
                     for (auto j = PREVIOUS_BUTTON; j <= DELETE_TRIGGER_BUTTON; ++j) {
                         Controls[j]->Disable(true);
                     }
 
+                    // show relevant content panel buttons
                     if (i == WAYPOINTS_BUTTON ) {
                         Controls[CLEAR_WAYPT_BUTTON]->Enable();
                         Controls[GOTO_WAYPT_BUTTON]->Enable();
@@ -925,8 +929,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                         Controls[NEXT_BUTTON]->Enable();
                     }
                 } else {
-                    // hide and prevent drawing
-                    Controls[button_to_content.at(i)]->Disable(true);
+                    // hide other content panels
+                    Controls[ButtonToContent.at(i)]->Disable(true);
                 }
             }
 
@@ -934,7 +938,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             break;
         }
 
-        // start placement when content panel clicked
+        // start placement when active content panel clicked
 
         case (OVERLAY_GRID | KN_BUTTON):
         case (TERRAIN_OBJECT_LIST | KN_BUTTON):
@@ -987,11 +991,16 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             Parent->Flag_To_Redraw();
             break;
 
-        case (TRIGGERS_LIST | KN_BUTTON):
-            Parent->Manual_Start_Trigger_Placement(
-                CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()]
-            );
+        case (TRIGGERS_LIST | KN_BUTTON): {
+            const auto trigger_idx = Get_Control<TRIGGERS_LIST, ListClass>().Current_Index();
+
+            if (trigger_idx >= CellTriggerList.size() || CellTriggerList[trigger_idx] == nullptr) {
+                break;
+            }
+
+            Parent->Manual_Start_Trigger_Placement(CellTriggerList[trigger_idx]);
             break;
+        }
 
         case (ADD_TRIGGER_BUTTON | KN_BUTTON): {
             auto new_trigger = new TriggerClass();
@@ -1010,9 +1019,13 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         }
 
         case (EDIT_TRIGGER_BUTTON | KN_BUTTON): {
-            auto selected_trigger = CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()];
+            const auto trigger_idx = Get_Control<TRIGGERS_LIST, ListClass>().Current_Index();
 
-            if (Parent->Edit_Trigger(selected_trigger) == 0) {
+            if (trigger_idx >= CellTriggerList.size() || CellTriggerList[trigger_idx] == nullptr) {
+                break;
+            }
+
+            if (Parent->Edit_Trigger(CellTriggerList[trigger_idx]) == 0) {
                 Parent->Mark_Changed();
                 Parent->Cancel_Placement();
 
@@ -1022,9 +1035,13 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         }
 
         case (DELETE_TRIGGER_BUTTON | KN_BUTTON): {
-            auto selected_trigger = CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()];
+            const auto trigger_idx = Get_Control<TRIGGERS_LIST, ListClass>().Current_Index();
 
-            selected_trigger->Remove();
+            if (trigger_idx >= CellTriggerList.size() || CellTriggerList[trigger_idx] == nullptr) {
+                break;
+            }
+
+            CellTriggerList[trigger_idx]->Remove();
 
             Parent->Mark_Changed();
             Parent->Cancel_Placement();
@@ -1049,7 +1066,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                 auto cell_x = Cell_X(waypoint_cell);
                 auto cell_y = Cell_Y(waypoint_cell);
 
-                // try to shift waypoint cell up and left so it is centered on screen when map snaps over to it
+                // try to shift waypoint cell up and left so it is (best-effort) centered on screen when map snaps to it
                 const auto map_cell_width = Parent->TacLeptonWidth / CELL_LEPTON_W;
                 const auto map_cell_height = Parent->TacLeptonHeight / CELL_LEPTON_H;
 
@@ -1082,13 +1099,13 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         default: {
             // automatically track current object based on mouse over event
             if (Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()) {
-                set_current_object_for_mouse(OverlayCatalog);
+                Set_Current_Object_On_Mouse_Over(OverlayCatalog);
             } else if (Get_Control<TERRAIN_OBJECT_LIST, ControlClass>().IsEnabled()) {
-                set_current_object_for_mouse(TerrainCatalog);
+                Set_Current_Object_On_Mouse_Over(TerrainCatalog);
             } else if (Get_Control<UNITS_GRID, ControlClass>().IsEnabled()) {
-                set_current_object_for_mouse(UnitsCatalog);
+                Set_Current_Object_On_Mouse_Over(UnitsCatalog);
             } else if (Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()) {
-                set_current_object_for_mouse(BuildingsCatalog);
+                Set_Current_Object_On_Mouse_Over(BuildingsCatalog);
             }
 
             return false;
