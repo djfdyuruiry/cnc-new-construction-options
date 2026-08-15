@@ -268,31 +268,6 @@ void MapEditorSidebar::Remove_This()
     }
 }
 
-void MapEditorSidebar::Refresh_Triggers()
-{
-    auto& trigger_list = Get_Control<TRIGGERS_LIST, ListClass>();
-
-    // clear down trigger list and UI
-    CellTriggerList.clear();
-
-    while (trigger_list.Count() > 0) {
-        trigger_list.Remove_Item(0);
-    }
-
-    // populate with current cell triggers
-    for (auto i = 0; i < Triggers.Count(); i++) {
-        auto trigger = Triggers.Ptr(i);
-
-        if (trigger == nullptr || (trigger->Event != EVENT_PLAYER_ENTERED && trigger->Event != EVENT_CELLFIRST)) {
-            // filter for cell triggers
-            continue;
-        }
-
-        CellTriggerList.emplace_back(trigger);
-        trigger_list.Add_Item(trigger->Get_Name());
-    }
-}
-
 /**
  * Add info for type instances that have valid image data to the given catalog.
  *
@@ -337,6 +312,51 @@ static void Populate_Object_Catalog(std::vector<MapEditorSidebar::ObjectCatalogI
         entry.ObjectType = &instance_obj;
 
         catalog.emplace_back(entry);
+    }
+}
+
+void MapEditorSidebar::Purge_Theater_Objects()
+{
+    /**
+     * Purge catalogs for object types that are theater dependant (object count may change).
+     */
+    OverlayCatalog.clear();
+    TerrainCatalog.clear();
+    BuildingsCatalog.clear();
+}
+
+void MapEditorSidebar::Refresh_For_Scenario()
+{
+    /**
+     * Reset pagination for object types that are theater dependant (page count may change).
+     */
+    OverlayGridPager = {};
+    TerrainPager = {};
+    BuildingListPager = {};
+
+    /**
+     * Refresh cell trigger info.
+     */
+    auto& trigger_list = Get_Control<TRIGGERS_LIST, ListClass>();
+
+    // clear down trigger list and UI
+    CellTriggerList.clear();
+
+    while (trigger_list.Count() > 0) {
+        trigger_list.Remove_Item(0);
+    }
+
+    // populate with current cell triggers
+    for (auto i = 0; i < Triggers.Count(); i++) {
+        auto trigger = Triggers.Ptr(i);
+
+        if (trigger == nullptr || (trigger->Event != EVENT_PLAYER_ENTERED && trigger->Event != EVENT_CELLFIRST)) {
+            // filter for cell triggers
+            continue;
+        }
+
+        CellTriggerList.emplace_back(trigger);
+        trigger_list.Add_Item(trigger->Get_Name());
     }
 }
 

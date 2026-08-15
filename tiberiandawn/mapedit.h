@@ -228,7 +228,7 @@ public:
     void Build_Base_To(int percent, bool place_virtual_buildings = true);
     void Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner = nullptr);
     void Manual_Start_Trigger_Placement(TriggerClass* trigger);
-    void Refresh_Sidebar_Triggers();
+    void Init_Sidebar_For_Scenario();
 
     void Start_Waypoint_Placement(WaypointType waypt);
     void Stop_Waypoint_Placement(void);

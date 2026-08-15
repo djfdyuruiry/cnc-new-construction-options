@@ -683,6 +683,12 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
         ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, false);
     }
 
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map) {
+        Map.Init_Sidebar_For_Scenario();
+    }
+#endif
+
     /*
     **	Return with flag saying that the scenario file was read.
     */
@@ -1003,6 +1009,12 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
     }
 
     Call_Back();
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map) {
+        Map.Init_Sidebar_For_Scenario();
+    }
+#endif
 
     /*
     **	Return with flag saying that the scenario file was read.

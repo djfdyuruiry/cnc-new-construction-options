@@ -85,12 +85,14 @@ private:
     void Init_Dimensions();
 public:
 
+    static void Purge_Theater_Objects();
+
     void Init(MapEditClass* parent);
 
     void Add_This();
     void Remove_This();
 
-    void Refresh_Triggers();
+    void Refresh_For_Scenario();
 
     void Render();
     bool On_Input(const KeyNumType& input, bool forced = false);

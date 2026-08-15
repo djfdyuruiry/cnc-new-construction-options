@@ -1271,13 +1271,6 @@ int MapEditClass::Place_Object(void)
  *=========================================================================*/
 void MapEditClass::Cancel_Placement(void)
 {
-    /*
-    ---------------------- Delete the placement object -----------------------
-    */
-    delete PendingObjectPtr;
-    PendingObject = 0;
-    PendingObjectPtr = 0;
-    PendingHouse = HOUSE_NONE;
     if (GrabbedOverlay) {
         // make grabbed overlay 'snap' back to original cell by placing it down again
         Set_Cursor_Pos(GrabbedOverlayOrigin);
@@ -2213,9 +2206,13 @@ void MapEditClass::Place_Waypoint(void)
     (*this)[cell].IsWaypoint = 1;
 }
 
-void MapEditClass::Refresh_Sidebar_Triggers()
+/**
+ * Refresh elements of the editor sidebar that are scenario/theater dependent.
+ */
+void MapEditClass::Init_Sidebar_For_Scenario()
 {
-    EditorSidebar.Refresh_Triggers();
+    EditorSidebar.Refresh_For_Scenario();
+    MapEditorSidebar::Purge_Theater_Objects();
 }
 
 #endif
