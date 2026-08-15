@@ -2208,4 +2208,9 @@ void MapEditClass::Init_Sidebar_For_Scenario()
     MapEditorSidebar::Purge_Theater_Objects();
 }
 
+void MapEditClass::Mark_Changed()
+{
+    Changed = 1;
+}
+
 #endif

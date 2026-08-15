@@ -226,12 +226,16 @@ public:
     void Start_Base_Building(void);
     void Cancel_Base_Building(void);
     void Build_Base_To(int percent, bool place_virtual_buildings = true);
+
     void Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner = nullptr);
     void Manual_Start_Trigger_Placement(TriggerClass* trigger);
+
     void Init_Sidebar_For_Scenario();
 
     void Start_Waypoint_Placement(WaypointType waypt);
     void Place_Waypoint(void);
+
+    void Mark_Changed(void);
 
     /*
     ............................ mapedsel.cpp .............................

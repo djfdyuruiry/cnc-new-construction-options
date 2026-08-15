@@ -999,6 +999,9 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             new_trigger->Event = EVENT_PLAYER_ENTERED;
 
             if (Parent->Edit_Trigger(new_trigger) == 0) {
+                Parent->Mark_Changed();
+                Parent->Cancel_Placement();
+
                 Refresh_Trigger_List();
             } else {
                 delete new_trigger;
@@ -1010,6 +1013,9 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             auto selected_trigger = CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()];
 
             if (Parent->Edit_Trigger(selected_trigger) == 0) {
+                Parent->Mark_Changed();
+                Parent->Cancel_Placement();
+
                 Refresh_Trigger_List();
             }
             break;
@@ -1018,7 +1024,10 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         case (DELETE_TRIGGER_BUTTON | KN_BUTTON): {
             auto selected_trigger = CellTriggerList[Get_Control<TRIGGERS_LIST, ListClass>().Current_Index()];
 
-            delete selected_trigger;
+            selected_trigger->Remove();
+
+            Parent->Mark_Changed();
+            Parent->Cancel_Placement();
 
             Refresh_Trigger_List();
             break;
@@ -1062,6 +1071,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             const auto waypoint_idx = WaypointLookup[list_idx];
 
             Scen.Waypoint[waypoint_idx] = -1;
+
+            Parent->Mark_Changed();
             Parent->Flag_To_Redraw(true);
 
             Parent->Cancel_Placement();
