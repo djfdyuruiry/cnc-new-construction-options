@@ -1777,15 +1777,16 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     for (int i = 0; i < WAYPT_COUNT; i++) {
         if (Scen.Waypoint[i] != -1) {
             sprintf(entry, "%d", i);
+
+            auto waypoint = Scen.Waypoint[i];
+
 #ifdef MEGAMAPS
-            CELL waypoint = Scen.Waypoint[i];
             if (MapBinaryVersion == MAP_VERSION_NORMAL) {
                 waypoint = Unconfine_Old_Cell(waypoint);
             }
-            ini.Put_Int(WAYNAME, entry, waypoint);
-#else
-            ini.Put_Int(WAYNAME, entry, Scen.Waypoint[i]);
 #endif
+
+            ini.Put_Int(WAYNAME, entry, waypoint);
         }
     }
 
@@ -1795,17 +1796,19 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     static char const* const CELLTRIG = "CellTriggers";
     ini.Clear(CELLTRIG);
     for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-#ifdef MEGAMAPS
-        CELL save_cell = cell;
-        if (MapBinaryVersion == MAP_VERSION_NORMAL) {
-            save_cell = Unconfine_Old_Cell(cell);
-        }
-#else
-        CELL save_cell = cell;
-#endif
-        if ((*this)[save_cell].IsTrigger) {
-            TriggerClass* tp = CellTriggers[save_cell];
+        if (Array[cell].IsTrigger) {
+            TriggerClass* tp = CellTriggers[cell];
             if (tp != NULL) {
+                auto save_cell = cell;
+
+#ifdef MEGAMAPS
+                /*
+                **	Adjust cell number if we are saving a non-megamap.
+                */
+                if (MapBinaryVersion == MAP_VERSION_NORMAL) {
+                    save_cell = Unconfine_Old_Cell(cell);
+                }
+#endif
 
                 /*
                 **	Generate entry name.

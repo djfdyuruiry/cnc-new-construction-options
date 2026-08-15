@@ -399,6 +399,7 @@ void OverlayClass::Write_INI(CCINIClass& ini)
     */
     for (int index = 0; index < MAP_CELL_TOTAL; index++) {
         auto save_index = index;
+
 #ifdef MEGAMAPS
         if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
             save_index = Unconfine_Old_Cell(index);

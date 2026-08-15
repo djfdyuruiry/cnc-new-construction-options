@@ -3091,6 +3091,7 @@ void InfantryClass::Write_INI(CCINIClass& ini)
             char uname[12];
             char buf[128];
             auto cell = Coord_Cell(infantry->Coord);
+
 #ifdef MEGAMAPS
             if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
                 cell = Unconfine_Old_Cell(cell);

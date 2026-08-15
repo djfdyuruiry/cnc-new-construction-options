@@ -861,6 +861,7 @@ void TerrainClass::Write_INI(CCINIClass& ini)
         if (terrain != NULL && !terrain->IsInLimbo && terrain->IsActive) {
             char uname[10];
             auto cell = Coord_Cell(terrain->Coord);
+
 #ifdef MEGAMAPS
             if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
                 cell = Unconfine_Old_Cell(cell);
