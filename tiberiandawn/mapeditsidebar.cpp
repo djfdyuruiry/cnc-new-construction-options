@@ -20,7 +20,12 @@ typedef enum
     WAYPOINTS_LIST,
     TRIGGERS_LIST,
     PREVIOUS_BUTTON,
-    NEXT_BUTTON
+    NEXT_BUTTON,
+    GOTO_WAYPT_BUTTON,
+    CLEAR_WAYPT_BUTTON,
+    ADD_TRIGGER_BUTTON,
+    EDIT_TRIGGER_BUTTON,
+    DELETE_TRIGGER_BUTTON
 } SidebarControls;
 
 void MapEditorSidebar::Init_Controls()
@@ -47,7 +52,12 @@ void MapEditorSidebar::Init_Controls()
         {WAYPOINTS_BUTTON, "Waypoints"},
         {TRIGGERS_BUTTON, SeenBuff.Get_Width() <= GBUFF_INIT_WIDTH ? "Triggers" : "Cell Triggers"},
         {PREVIOUS_BUTTON, "Previous"},
-        {NEXT_BUTTON, "Next"}
+        {NEXT_BUTTON, "Next"},
+        {GOTO_WAYPT_BUTTON, "Go To"},
+        {CLEAR_WAYPT_BUTTON, "Clear"},
+        {ADD_TRIGGER_BUTTON, "Add"},
+        {EDIT_TRIGGER_BUTTON, "Edit"},
+        {DELETE_TRIGGER_BUTTON, "Delete"}
     };
 
     for (const auto& [id, text] : buttons) {
@@ -60,6 +70,10 @@ void MapEditorSidebar::Init_Controls()
             Dimensions[id].W,
             Dimensions[id].H
         );
+
+        if (id > TRIGGERS_BUTTON) {
+            Controls[id].get()->Disable(true);
+        }
     }
 
     // virtual controls for grids and lists to support input events
@@ -158,7 +172,7 @@ void MapEditorSidebar::Init_Dimensions()
      */
     const auto button_width = (W - ControlMargin * 3) / 2;
 
-    // first row
+    // object select first row
     Dimensions[OVERLAY_BUTTON] = {
         .X = X + ControlMargin,
         .Y = (Dimensions[MINIMAP].Y + Dimensions[MINIMAP].H) + (ControlMargin * 2),
@@ -169,29 +183,19 @@ void MapEditorSidebar::Init_Dimensions()
     Dimensions[TERRAIN_BUTTON] = Dimensions[OVERLAY_BUTTON];
     Dimensions[TERRAIN_BUTTON].X += button_width + ControlMargin; // adjust right
 
-    // second row
+    // object select second row
     Dimensions[UNITS_BUTTON] = Dimensions[OVERLAY_BUTTON];
     Dimensions[UNITS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
 
     Dimensions[BUILDINGS_BUTTON] = Dimensions[TERRAIN_BUTTON];
     Dimensions[BUILDINGS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
 
-    // third row
+    // object select third row
     Dimensions[WAYPOINTS_BUTTON] = Dimensions[UNITS_BUTTON];
     Dimensions[WAYPOINTS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
 
     Dimensions[TRIGGERS_BUTTON] = Dimensions[BUILDINGS_BUTTON];
     Dimensions[TRIGGERS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
-
-    Dimensions[PREVIOUS_BUTTON] = {
-        .X = X + ControlMargin,
-        .Y = (Y + H - FooterHeight) + ControlMargin,
-        .W = button_width,
-        .H = ButtonHeight
-    };
-
-    Dimensions[NEXT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
-    Dimensions[NEXT_BUTTON].X += ControlMargin + button_width;
 
     /**
      * Sidebar content panels
@@ -203,8 +207,35 @@ void MapEditorSidebar::Init_Dimensions()
         Dimensions[i].H = H - (Dimensions[i].Y - Y) - FooterHeight;
     }
 
-    Dimensions[WAYPOINTS_LIST].H += (FooterHeight - ControlMargin);
-    Dimensions[TRIGGERS_LIST].H += (FooterHeight - ControlMargin);
+    // grid and list navigation
+    Dimensions[PREVIOUS_BUTTON] = {
+        .X = X + ControlMargin,
+        .Y = (Y + H - FooterHeight) + ControlMargin,
+        .W = button_width,
+        .H = ButtonHeight
+    };
+
+    Dimensions[NEXT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
+    Dimensions[NEXT_BUTTON].X += ControlMargin + button_width;
+
+    // waypoint buttons
+    Dimensions[GOTO_WAYPT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
+    Dimensions[CLEAR_WAYPT_BUTTON] = Dimensions[NEXT_BUTTON];
+
+    // trigger buttons
+    const auto footer_width = W - (ControlMargin - 2);
+    Dimensions[GOTO_WAYPT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
+    const auto trigger_button_width = ((footer_width - (ControlMargin * 2)) / 3);
+
+    Dimensions[ADD_TRIGGER_BUTTON] = Dimensions[PREVIOUS_BUTTON];
+    Dimensions[ADD_TRIGGER_BUTTON].W = trigger_button_width;
+
+    Dimensions[EDIT_TRIGGER_BUTTON] = Dimensions[ADD_TRIGGER_BUTTON];
+    Dimensions[EDIT_TRIGGER_BUTTON].X += Dimensions[ADD_TRIGGER_BUTTON].W + ControlMargin;
+
+    Dimensions[DELETE_TRIGGER_BUTTON] = Dimensions[EDIT_TRIGGER_BUTTON];
+    Dimensions[DELETE_TRIGGER_BUTTON].X += Dimensions[EDIT_TRIGGER_BUTTON].W  + ControlMargin;
+    Dimensions[DELETE_TRIGGER_BUTTON].W -= ControlMargin;
 }
 
 void MapEditorSidebar::Init(MapEditClass* parent)
@@ -239,7 +270,7 @@ void MapEditorSidebar::Add_This()
         return;
     }
 
-    for (auto i = MINIMAP; i <= NEXT_BUTTON; ++i) {
+    for (auto i = MINIMAP; i <= DELETE_TRIGGER_BUTTON; ++i) {
         Parent->Add_A_Button(*Controls[i]);
     }
 
@@ -421,7 +452,7 @@ void MapEditorSidebar::Render_Object_List(
             int end_y = y;
 
             // render the object, with end vars to determine width
-            objects[idx].ObjectType->Display(x, y, WINDOW_EDITOR, PlayerPtr->ActLike, end_x, end_y);
+            objects[idx].ObjectType->Display(x, y, WINDOW_EDITOR, PlayerPtr->Class->House, end_x, end_y);
 
             if (end_x <= Dimensions[control].W && end_y <= Dimensions[control].H) {
                 // OK - object fits
@@ -453,13 +484,42 @@ void MapEditorSidebar::Render_Object_List(
         y = next_y + ControlMargin * 2;
     }
 
-    if (pager.PageStartIndexes.size() <= pager.CurrentDepth + 1 && idx < objects.size()) {
+    const auto has_next_page = idx < objects.size();
+
+    if (pager.PageStartIndexes.size() <= pager.CurrentDepth + 1 && has_next_page) {
         pager.PageStartIndexes.emplace_back(idx);
     }
 
     // reset dimensions for not rendered items
     for (auto i = idx; i < objects.size(); ++i) {
         objects[i].Dimensions.Reset();
+    }
+
+    // disable pagination buttons if only one page available
+    if (pager.CurrentIndex == 0 && !has_next_page) {
+        if (Controls[PREVIOUS_BUTTON]->IsEnabled()) {
+            Controls[PREVIOUS_BUTTON]->Disable();
+        }
+
+        if (Controls[NEXT_BUTTON]->IsEnabled()) {
+            Controls[NEXT_BUTTON]->Disable();
+        }
+
+        return;
+    }
+
+    // previous button toggle
+    if (pager.CurrentIndex != 0 && !Controls[PREVIOUS_BUTTON]->IsEnabled()) {
+        Controls[PREVIOUS_BUTTON]->Enable();
+    } else if (pager.CurrentIndex == 0 && Controls[PREVIOUS_BUTTON]->IsEnabled()) {
+        Controls[PREVIOUS_BUTTON]->Disable();
+    }
+
+    // next button toggle
+    if (has_next_page && !Controls[NEXT_BUTTON]->IsEnabled()) {
+        Controls[NEXT_BUTTON]->Enable();
+    } else if (!has_next_page && Controls[NEXT_BUTTON]->IsEnabled()) {
+        Controls[NEXT_BUTTON]->Disable();
     }
 }
 
@@ -494,10 +554,13 @@ void MapEditorSidebar::Render_Object_Grid(const int control, std::vector<ObjectC
 
     for (auto row = 0 ; row < row_count; row++)
     {
+        auto at_end = false;
+
         for (auto cell = 0 ; cell < cell_count; cell++)
         {
             if (idx >= end_idx) {
-                return;
+                at_end = true;
+                break;
             }
 
             objects[idx].Dimensions.X = Dimensions[control].X + x_offset + (cell * cell_width);
@@ -509,17 +572,48 @@ void MapEditorSidebar::Render_Object_Grid(const int control, std::vector<ObjectC
                 objects[idx].ObjectType,
                 0,
                 0,
-                PlayerPtr->ActLike,
+                PlayerPtr->Class->House,
                 objects[idx].Dimensions.X,
                 objects[idx].Dimensions.Y
             );
             idx++;
+        }
+
+        if (at_end) {
+            break;
         }
     }
 
     // reset dimensions for not rendered items
     for (auto i = idx; i < objects.size(); ++i) {
         objects[i].Dimensions.Reset();
+    }
+
+    // disable pagination buttons if only one page available
+    if (pager.PageCount == 1) {
+        if (Controls[PREVIOUS_BUTTON]->IsEnabled()) {
+            Controls[PREVIOUS_BUTTON]->Disable();
+        }
+
+        if (Controls[NEXT_BUTTON]->IsEnabled()) {
+            Controls[NEXT_BUTTON]->Disable();
+        }
+
+        return;
+    }
+
+    // previous button toggle
+    if (pager.CurrentPage > 0 && !Controls[PREVIOUS_BUTTON]->IsEnabled()) {
+        Controls[PREVIOUS_BUTTON]->Enable();
+    } else if (pager.CurrentPage == 0 && Controls[PREVIOUS_BUTTON]->IsEnabled()) {
+        Controls[PREVIOUS_BUTTON]->Disable();
+    }
+
+    // next button toggle
+    if (pager.CurrentPage < pager.PageCount - 1 && !Controls[NEXT_BUTTON]->IsEnabled()) {
+        Controls[NEXT_BUTTON]->Enable();
+    } else if (pager.CurrentPage >= pager.PageCount - 1 && Controls[NEXT_BUTTON]->IsEnabled()) {
+        Controls[NEXT_BUTTON]->Disable();
     }
 }
 
@@ -809,9 +903,18 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                     // show
                     Controls[button_to_content.at(i)]->Enable();
 
-                    if (i == WAYPOINTS_BUTTON || i == TRIGGERS_BUTTON) {
-                        Controls[PREVIOUS_BUTTON]->Disable(true);
-                        Controls[NEXT_BUTTON]->Disable(true);
+                    // disable all optional buttons
+                    for (auto j = PREVIOUS_BUTTON; j <= DELETE_TRIGGER_BUTTON; ++j) {
+                        Controls[j]->Disable(true);
+                    }
+
+                    if (i == WAYPOINTS_BUTTON ) {
+                        Controls[CLEAR_WAYPT_BUTTON]->Enable();
+                        Controls[GOTO_WAYPT_BUTTON]->Enable();
+                    } else if (i == TRIGGERS_BUTTON) {
+                        Controls[ADD_TRIGGER_BUTTON]->Enable();
+                        Controls[EDIT_TRIGGER_BUTTON]->Enable();
+                        Controls[DELETE_TRIGGER_BUTTON]->Enable();
                     } else {
                         Controls[PREVIOUS_BUTTON]->Enable();
                         Controls[NEXT_BUTTON]->Enable();
@@ -885,11 +988,56 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             );
             break;
 
+        case (ADD_TRIGGER_BUTTON | KN_BUTTON):
+            break;
+
+        case (EDIT_TRIGGER_BUTTON | KN_BUTTON):
+            break;
+
+        case (DELETE_TRIGGER_BUTTON | KN_BUTTON):
+            break;
+
         case (WAYPOINTS_LIST | KN_BUTTON): {
             const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();
-            const auto waypoint = WaypointLookup[list_idx];
 
-            Parent->Start_Waypoint_Placement(waypoint);
+            Parent->Start_Waypoint_Placement(WaypointLookup[list_idx]);
+            break;
+        }
+
+        case (GOTO_WAYPT_BUTTON | KN_BUTTON): {
+            const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();
+            const auto waypoint_idx = WaypointLookup[list_idx];
+            const auto& waypoint_cell = Scen.Waypoint[waypoint_idx];
+
+            if (waypoint_cell != -1) {
+                auto cell_x = Cell_X(waypoint_cell);
+                auto cell_y = Cell_Y(waypoint_cell);
+
+                // try to shift waypoint cell up and left so it is centered on screen when map snaps over to it
+                const auto map_cell_width = Parent->TacLeptonWidth / CELL_LEPTON_W;
+                const auto map_cell_height = Parent->TacLeptonHeight / CELL_LEPTON_H;
+
+                cell_x = max(0, cell_x - (map_cell_width / 2));
+                cell_y = max(0, cell_y - (map_cell_height / 2));
+
+                Parent->DesiredTacticalCoord = Cell_Coord(XY_Cell(cell_x, cell_y));
+                CurrentCell = waypoint_cell;
+
+                Parent->Flag_To_Redraw(true);
+            }
+
+            Parent->Cancel_Placement();
+            break;
+        }
+
+        case (CLEAR_WAYPT_BUTTON | KN_BUTTON): {
+            const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();
+            const auto waypoint_idx = WaypointLookup[list_idx];
+
+            Scen.Waypoint[waypoint_idx] = -1;
+            Parent->Flag_To_Redraw(true);
+
+            Parent->Cancel_Placement();
             break;
         }
 
