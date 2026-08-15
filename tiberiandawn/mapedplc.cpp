@@ -2061,16 +2061,43 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
         */
         objtype = &BuildingTypeClass::As_Reference(Base.Nodes[i].Type);
         obj = (BuildingClass*)objtype->Create_One_Of(HouseClass::As_Pointer(Base.House));
+
         /*
-        ** If unlimbo fails, error out
+        ** If unlimbo fails, notify player
         */
         if (!obj->Unlimbo(Base.Nodes[i].Coord)) {
             delete obj;
-            WWMessageBox().Process("Unable to build base! Check if any base coord overlaps a starting structure");
-            return;
-        }
 
-        obj->IsUnbuiltBase = i >= num_buildings;
+            // scan for the conflicting object that caused unlimbo to fail
+            ObjectClass* conflicting_object = nullptr;
+
+            auto occupy = objtype->Occupy_List();
+            while (conflicting_object == nullptr && *occupy != REFRESH_EOL) {
+                const auto occupy_cell = Coord_Cell(Base.Nodes[i].Coord) + *occupy++;
+                conflicting_object = Array[occupy_cell].Cell_Occupier();
+            }
+
+            std::string error_message = "Another object overlaps this position at scenario start";
+
+            if (conflicting_object != nullptr) {
+                error_message = std::format(
+                    "Object {} owned by {} overlaps this position at scenario start",
+                    conflicting_object->Class_Of().IniName,
+                    conflicting_object->Owner()
+                );
+            }
+
+            WWMessageBox().Process(
+                std::format(
+                    "Unable to place base object {} @ coord {}! {}",
+                    Base.Nodes[i].Type,
+                    Base.Nodes[i].Coord,
+                    error_message
+                ).c_str()
+            );
+        } else {
+            obj->IsUnbuiltBase = i >= num_buildings;
+        }
     }
 
     // ScenarioInit--;

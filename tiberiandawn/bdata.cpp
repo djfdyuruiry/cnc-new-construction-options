@@ -4160,6 +4160,18 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
     }
 #endif
 
+    std::vector<CELL> illegal_movement_cells;
+
+    if (Debug_Map) {
+        // collect cells that are not legal to move objects into (non-bibs and non-empty cells)
+        auto offset_no_bibs = Occupy_List(false);
+
+        while (*offset_no_bibs != REFRESH_EOL) {
+            illegal_movement_cells.emplace_back(pos + *offset_no_bibs);
+            offset_no_bibs++;
+        }
+    }
+
     /*
     **	Normal buildings must check to see that every foundation square is free of
     **	obstacles. If this check passes for all foundation squares, only then does the
@@ -4171,7 +4183,35 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
         if (!Map.In_Radar(cell))
             return (false);
         if (!Map[cell].Is_Generally_Clear()) {
-            return (false);
+            if (!Debug_Map) {
+                return (false);
+            }
+
+            /*
+            **	In scenario editor mode, allow infantry and units to exist in cells of buildings they could legally
+            **	move to anyway.
+            */
+            auto legal_movement_cell = true;
+
+            for (const auto& illegal_cell : illegal_movement_cells) {
+                if (cell == illegal_cell) {
+                    legal_movement_cell = false;
+                    break;
+                }
+            }
+
+            if (!legal_movement_cell) {
+                // can't move into this anyway, so abort
+                return false;
+            }
+
+            if (
+                Map[cell].Cell_Occupier() != nullptr
+                && Map[cell].Cell_Occupier()->What_Am_I() != RTTI_INFANTRY
+                && Map[cell].Cell_Occupier()->What_Am_I() != RTTI_UNIT
+            ) {
+                return false;
+            }
         }
     }
     return (true);
