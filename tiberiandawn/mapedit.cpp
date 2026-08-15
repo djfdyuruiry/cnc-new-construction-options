@@ -1464,10 +1464,17 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             Flag_To_Redraw(true);
             Changed = 1;
         } else {
-            /*
-            ................. Remove trigger from current cell .................
-            */
-            if (CurrentCell) {
+            if (GrabbedOverlay) {
+                /*
+                ............. Remove grabbed overlay from origin cell .............
+                */
+                Cancel_Placement();
+                Array[CurrentCell].Delete_Wall();
+                Flag_To_Redraw(true);
+            } else if (CurrentCell) {
+                /*
+                ................. Remove trigger from current cell .................
+                */
                 if ((*this)[CurrentCell].IsTrigger) {
                     (*this)[CurrentCell].IsTrigger = 0;
                     CellTriggers[CurrentCell] = NULL;
