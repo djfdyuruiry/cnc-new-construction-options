@@ -5222,8 +5222,7 @@ void const* BuildingClass::Remap_Table(void)
 
 #ifdef SCENARIO_EDITOR
     if (Debug_Map && Base.Get_Node(this) != nullptr && IsUnbuiltBase) {
-
-        // this building won't be present on scenario start, so render it faded
+        // this building won't actually be present on scenario start, so indicate this by rendering it faded out
         return DisplayClass::FadingShade;
     }
 #endif

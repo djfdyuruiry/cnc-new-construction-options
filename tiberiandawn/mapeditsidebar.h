@@ -51,6 +51,8 @@ private:
     static constexpr auto ButtonHeight = 20;
     static constexpr auto FooterHeight = ControlMargin + ButtonHeight + ControlMargin;
 
+    static inline const auto& Logger = CncLogger::For(MapEditorSidebar);
+
     static inline std::vector<ObjectCatalogItem> OverlayCatalog;
     static inline std::vector<ObjectCatalogItem> TerrainCatalog;
     static inline std::vector<ObjectCatalogItem> UnitsCatalog;

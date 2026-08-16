@@ -97,13 +97,22 @@ int MapEditClass::Select_Object(void)
             auto owner = cell_obj.Owner != HOUSE_NONE
                 ? HouseClass::As_Pointer(cell_obj.Owner)
                 : nullptr;
+            auto overlay_type = &OverlayTypeClass::As_Reference(cell_obj.Overlay);
 
-            Manual_Start_Placement(&OverlayTypeClass::As_Reference(cell_obj.Overlay), owner);
-            cell_obj.Delete_Wall();
+            if (overlay_type->IsTiberium) {
+                // we only want to place first tiberium type
+                overlay_type = &OverlayTypeClass::As_Reference(OVERLAY_TIBERIUM1);
+            }
 
-            GrabbedOverlay = true;
-            GrabbedObject = PendingObjectPtr;
-            GrabbedOverlayOrigin = cell;
+            if (Manual_Start_Placement(overlay_type, owner)) {
+                cell_obj.Purge_Overlay();
+
+                GrabbedOverlay = true;
+                GrabbedObject = PendingObjectPtr;
+                GrabbedOverlayOrigin = cell;
+            } else {
+                rc = -1;
+            }
         }
     }
 

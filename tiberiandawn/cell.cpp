@@ -1113,14 +1113,10 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                     **	Draw an overlay; just use the existing 'OverlayData' even though
                     **	it means nothing.
                     */
-                    case RTTI_OVERLAYTYPE: {
-                        const auto instance_type_id = reinterpret_cast<const OverlayTypeClass*>(Map.PendingObject)->Type;
-                        const auto& instance_type = OverlayTypeClass::As_Reference(instance_type_id);
-
-                        // display tiberium density for placement cursor relative to id
-                        instance_type.Draw_It(x, y, instance_type.IsTiberium ? instance_type_id - OVERLAY_TIBERIUM1 : OverlayData);
+                    case RTTI_OVERLAYTYPE:
+                        OverlayTypeClass::As_Reference(((OverlayTypeClass*)Map.PendingObject)->Type)
+                            .Draw_It(x, y, OverlayData);
                         break;
-                    }
 
                     /*
                     **	Draw a smudge
@@ -2784,30 +2780,42 @@ bool CellClass::Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const
 #endif // USE_RA_AI
 
 /**
- * Immediately delete any wall present on this cell and update adjacent cells accordingly. No money
- * is refunded to the house that owns this cell.
+ * Immediately delete any overlay present on this cell and update adjacent cells accordingly. No money
+ * is refunded to the house that owns this cell (if it was a wall).
  */
-bool CellClass::Delete_Wall()
+bool CellClass::Purge_Overlay()
 {
-    if (Overlay == OVERLAY_NONE || !OverlayTypeClass::As_Reference(Overlay).IsWall) {
+    if (Overlay == OVERLAY_NONE) {
         return false;
     }
+
+    const auto was_wall = OverlayTypeClass::As_Reference(Overlay).IsWall;
+    const auto was_tiberium = OverlayTypeClass::As_Reference(Overlay).IsTiberium;
 
     Overlay = OVERLAY_NONE;
     OverlayData = 0;
     Owner = HOUSE_NONE;
 
-    for (const auto& facing : { FACING_N, FACING_E, FACING_S, FACING_W }) {
-        auto adj_cell = Adjacent_Cell(facing);
-
-        if (adj_cell != nullptr) {
-            adj_cell->Wall_Update();
-        }
-    }
-
     Recalc_Attributes();
     Redraw_Objects();
     ObjectClass::Detach_This_From_All(::As_Target(Cell_Number()), true);
+
+    if (was_wall) {
+        for (const auto& facing : { FACING_N, FACING_E, FACING_S, FACING_W }) {
+            auto adj_cell = Adjacent_Cell(facing);
+
+            if (adj_cell != nullptr) {
+                adj_cell->Wall_Update();
+            }
+        }
+    }
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map && was_tiberium) {
+        // recalc tiberium for Scenario Editor since we lifted a piece off the map
+        Map.TotalValue = Map.Overpass();
+    }
+#endif
 
     return true;
 }

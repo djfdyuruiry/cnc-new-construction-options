@@ -947,7 +947,9 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         case (UNITS_GRID | KN_BUTTON):
         case (BUILDING_OBJECT_LIST | KN_BUTTON):
             if (CurrentObject != nullptr) {
-                Parent->Manual_Start_Placement(CurrentObject);
+                if (!Parent->Manual_Start_Placement(CurrentObject)) {
+                    CNC_LOGGER_ERROR("Failed to start placement for object: {}", CurrentObject->IniName);
+                }
             }
             break;
 
@@ -1000,7 +1002,11 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                 break;
             }
 
-            Parent->Manual_Start_Trigger_Placement(CellTriggerList[trigger_idx]);
+            auto trigger = CellTriggerList[trigger_idx];
+
+            if (!Parent->Manual_Start_Trigger_Placement(trigger)) {
+                CNC_LOGGER_ERROR("Failed to start placement for trigger: {}", trigger->Get_Name());
+            }
             break;
         }
 
@@ -1055,7 +1061,9 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         case (WAYPOINTS_LIST | KN_BUTTON): {
             const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();
 
-            Parent->Start_Waypoint_Placement(WaypointLookup[list_idx]);
+            if (!Parent->Start_Waypoint_Placement(WaypointLookup[list_idx])) {
+                CNC_LOGGER_ERROR("Failed to start placment of waypoint: #{}", list_idx);
+            }
             break;
         }
 

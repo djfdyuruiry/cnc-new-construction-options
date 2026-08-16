@@ -1017,6 +1017,10 @@ int MapEditClass::Place_Object(void)
     unsigned char save_ticon; // for saving cell's TIcon
     BaseNodeClass node;       // for adding to an AI Base
 
+    if (PendingObject == nullptr) {
+        return -1;
+    }
+
     /*------------------------------------------------------------------------
     Placing a template:
     - first lift up any objects in the cell
@@ -1892,8 +1896,12 @@ void MapEditClass::Stop_Trigger_Placement(void)
  * HISTORY:                                                                *
  *   12/01/1994 BR : Created.                                              *
  *=========================================================================*/
-void MapEditClass::Place_Trigger(void)
+bool MapEditClass::Place_Trigger(void)
 {
+    if (CurTrigger == nullptr) {
+        return false;
+    }
+
     ObjectClass* object = NULL; // Generic object clicked on.
     int x, y;
     CELL cell; // Cell that was selected.
@@ -1941,6 +1949,7 @@ void MapEditClass::Place_Trigger(void)
     */
     HiddenPage.Clear();
     Flag_To_Redraw(true);
+    return true;
 }
 
 /***************************************************************************
@@ -2108,10 +2117,10 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
  * Start placement of an given object type immediately. Cancels any in-progress
  * placement.
  */
-void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner)
+bool MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner)
 {
     if (object_type == nullptr) {
-        return;
+        return false;
     }
 
     Cancel_Placement();
@@ -2129,7 +2138,7 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, Ho
 
     if (!type_found) {
         CNC_LOG_WARN("Failed to match object ID for manual placement: {}", object_type->IniName);
-        return;
+        return false;
     }
 
     PendingObject = object_type;
@@ -2141,6 +2150,7 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, Ho
     if (PendingObjectPtr == nullptr) {
         WWMessageBox().Process("Failed to create new object for placement");
         Cancel_Placement();
+        return false;
     }
 
     // ensure any placed aircraft are in the 'landed' state
@@ -2150,43 +2160,58 @@ void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, Ho
 
     Set_Cursor_Pos();
     Set_Cursor_Shape(PendingObject->Occupy_List());
+    return true;
 }
 
-void MapEditClass::Manual_Start_Trigger_Placement(TriggerClass* trigger)
+bool MapEditClass::Manual_Start_Trigger_Placement(TriggerClass* trigger)
 {
+    if (trigger == nullptr) {
+        return false;
+    }
+
     Cancel_Placement();
 
     CurTrigger = trigger;
+    return true;
 }
 
-void MapEditClass::Start_Waypoint_Placement(WaypointType waypt)
+bool MapEditClass::Start_Waypoint_Placement(WaypointType waypt)
 {
+    if (waypt >= WAYPT_COUNT) {
+        return false;
+    }
+
     Cancel_Placement();
 
     CurWaypoint = waypt;
+
     Set_Default_Mouse(MOUSE_CAN_MOVE);
     Override_Mouse_Shape(MOUSE_CAN_MOVE);
+
+    return true;
 }
 
-void MapEditClass::Place_Waypoint(void)
+bool MapEditClass::Place_Waypoint(void)
 {
-    int x, y;
-    CELL cell;
+    if (CurWaypoint >= WAYPT_COUNT) {
+        return false;
+    }
 
-    x = Keyboard->MouseQX;
-    y = Keyboard->MouseQY;
+    const auto x = Keyboard->MouseQX;
+    const auto y = Keyboard->MouseQY;
 
-    cell = Click_Cell_Calc(x, y);
-    if (cell == 0) {
-        return;
+    const auto cell = Click_Cell_Calc(x, y);
+
+    if (cell < 0) {
+        return false;
     }
 
     /*
     ------------------ Clear any existing waypoint from the target cell ------------------
     */
-    for (int i = 0; i < WAYPT_COUNT; i++) {
-        if (Scen.Waypoint[i] == cell) {
-            Scen.Waypoint[i] = -1;
+    for (short& waypoint_cell : Scen.Waypoint) {
+        if (waypoint_cell == cell) {
+            waypoint_cell = -1;
         }
     }
 
@@ -2194,7 +2219,9 @@ void MapEditClass::Place_Waypoint(void)
     --------------------- Assign the waypoint to the target cell ---------------------
     */
     Scen.Waypoint[CurWaypoint] = cell;
-    (*this)[cell].IsWaypoint = 1;
+    Array[cell].IsWaypoint = 1;
+
+    return true;
 }
 
 /**

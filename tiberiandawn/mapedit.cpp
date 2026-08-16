@@ -1373,17 +1373,19 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                     }
                 }
             } else if (CurWaypoint != WAYPT_COUNT) {
-                Place_Waypoint();
-                Cancel_Placement();
-                Flag_To_Redraw(true);
-                Changed = 1;
+                if (Place_Waypoint()) {
+                    Cancel_Placement();
+                    Flag_To_Redraw(true);
+                    Changed = 1;
+                }
             } else {
                 /*
                 ....................... Place a trigger .........................
                 */
                 if (CurTrigger) {
-                    Place_Trigger();
-                    Changed = 1;
+                    if (Place_Trigger()) {
+                        Changed = 1;
+                    }
                 } else {
                     /*
                     ................. Select an object or a cell .................
@@ -1501,8 +1503,8 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                 } else {
                     auto& current_cell = Array[CurrentCell];
 
-                    // first try to delete a wall (if any)
-                    if (!current_cell.Delete_Wall()) {
+                    // first try to delete overlay (if any)
+                    if (!current_cell.Purge_Overlay()) {
                         // purge any object in this cell, most objects are grabbable so this is an edge case
                         if (current_cell.Cell_Occupier() != nullptr) {
                             current_cell.Cell_Occupier()->Delete_This();

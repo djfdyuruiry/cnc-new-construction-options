@@ -315,7 +315,7 @@ public:
     bool Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const;
 #endif
 
-    bool Delete_Wall();
+    bool Purge_Overlay();
 
     JSON_FUNCTIONS(CellClass)
 

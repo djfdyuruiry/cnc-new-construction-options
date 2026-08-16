@@ -222,18 +222,18 @@ public:
     void Set_House_Buttons(HousesType house, GadgetClass* btnlist, int base_id);
     void Start_Trigger_Placement(void);
     void Stop_Trigger_Placement(void);
-    void Place_Trigger(void);
+    bool Place_Trigger(void);
     void Start_Base_Building(void);
     void Cancel_Base_Building(void);
     void Build_Base_To(int percent, bool place_virtual_buildings = true);
 
-    void Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner = nullptr);
-    void Manual_Start_Trigger_Placement(TriggerClass* trigger);
+    bool Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner = nullptr);
+    bool Manual_Start_Trigger_Placement(TriggerClass* trigger);
 
     void Init_Sidebar_For_Scenario();
 
-    void Start_Waypoint_Placement(WaypointType waypt);
-    void Place_Waypoint(void);
+    bool Start_Waypoint_Placement(WaypointType waypt);
+    bool Place_Waypoint(void);
 
     void Mark_Changed(void);
 
