@@ -494,6 +494,15 @@ std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_v
     return std::nullopt;
 }
 
+std::optional<std::string> RuleSection::Try_Get_Rule_Ini_Source(const std::string_view name) const
+{
+    if (!RuleIniSource.contains(name.data())) {
+        return std::nullopt;
+    }
+
+    return RuleIniSource.at(name.data());
+}
+
 RuleValueVariant RuleSection::operator[](const std::string_view name) const
 {
     return Get_Variant(name);
@@ -567,6 +576,17 @@ void RuleSections::Save_All_To_Ini(INIClass& ini) const
 {
     for (const auto& section : Sections | std::views::values) {
         section.Save_All_To_Ini(ini);
+    }
+}
+
+void RuleSections::Save_Rules_From_Source_To_Ini(const std::string& source, INIClass& ini) const
+{
+    for (const auto& section : Sections | std::views::values) {
+        for (const auto& rule_name : section.Rule_Names()) {
+            if (section.Try_Get_Rule_Ini_Source(rule_name) == source) {
+                section.Save_To_Ini(ini, rule_name);
+            }
+        }
     }
 }
 

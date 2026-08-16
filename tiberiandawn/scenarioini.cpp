@@ -1208,6 +1208,15 @@ void Write_Scenario_Ini(char* root)
     }
 
     /*
+    **	Write rules that that belong to this scenario.
+    */
+    Rule.Get_Rule_Sections().Save_Rules_From_Source_To_Ini(fname, ini);
+
+    for (const auto& sections : Rule.Get_Type_Rules() | std::views::values) {
+        sections.Save_Rules_From_Source_To_Ini(fname, ini);
+    }
+
+    /*
     **	Write the scenario data out to a file.
     */
     if (CCFileClass out_file(fname); out_file.Open(WRITE)) {

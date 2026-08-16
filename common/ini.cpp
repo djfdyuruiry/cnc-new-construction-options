@@ -170,6 +170,9 @@ bool INIClass::Clear(char const* section, char const* entry)
 bool INIClass::Load(FileClass& file)
 {
     FileStraw fs(file);
+
+    FileName = file.File_Name();
+
     return (Load(fs));
 }
 
@@ -1364,4 +1367,9 @@ int32_t INIClass::CRC(const char* string)
     strcpy(buffer, string);
     strupr(buffer);
     return CRCEngine()(buffer, strlen(buffer));
+}
+
+const std::optional<std::string>& INIClass::Get_FileName()
+{
+    return FileName;
 }
