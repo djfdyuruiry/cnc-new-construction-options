@@ -2258,7 +2258,15 @@ void MapEditClass::Main_Menu(void)
                     }
                 }
             }
-            if (Load_Scenario() == 0) {
+
+            if (Mission_Select_Dialog()) {
+                Flag_To_Redraw(true);
+                Render();
+
+                if (ScenPlayer != SCEN_PLAYER_MPLAYER && ScenPlayer != SCEN_PLAYER_JP) {
+                    LastHouse = HOUSE_GOOD;
+                }
+
                 Scen.CarryOverMoney = 0;
                 Build_Base_To(BasePercent);
                 Changed = 0;

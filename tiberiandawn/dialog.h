@@ -315,6 +315,8 @@ public:
     {
         auto display = REDRAW_ALL; // redraw level
 
+        Set_Logic_Page(SeenBuff);
+
         while (true) {
             /*
             ** If we have just received input focus again after running in the background then
