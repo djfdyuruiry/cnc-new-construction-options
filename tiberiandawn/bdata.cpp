@@ -4160,6 +4160,7 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
     }
 #endif
 
+#ifdef SCENARIO_EDITOR
     std::vector<CELL> illegal_movement_cells;
 
     if (Debug_Map) {
@@ -4171,6 +4172,7 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
             offset_no_bibs++;
         }
     }
+#endif
 
     /*
     **	Normal buildings must check to see that every foundation square is free of
@@ -4187,6 +4189,7 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
                 return (false);
             }
 
+#ifdef SCENARIO_EDITOR
             /*
             **	In scenario editor mode, allow infantry and units to exist in cells of buildings they could legally
             **	move to anyway.
@@ -4212,6 +4215,7 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
             ) {
                 return false;
             }
+#endif
         }
     }
     return (true);
