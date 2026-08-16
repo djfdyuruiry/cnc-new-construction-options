@@ -424,21 +424,6 @@ int MapEditClass::Placement_Dialog(void)
                                 D_BUILDING_W,
                                 D_BUILDING_H);
 
-    /*------------------------------------------------------------------------
-    Initialize addable objects list; we must do this every time in case one
-    of the object pools has become exhausted; that object won't be available
-    for adding.  (Skip aircraft, since they won't be used in the editor.)
-    ------------------------------------------------------------------------*/
-    Clear_List();
-    TemplateTypeClass::Prep_For_Add();
-    OverlayTypeClass::Prep_For_Add();
-    SmudgeTypeClass::Prep_For_Add();
-    TerrainTypeClass::Prep_For_Add();
-    UnitTypeClass::Prep_For_Add();
-    InfantryTypeClass::Prep_For_Add();
-    AircraftTypeClass::Prep_For_Add();
-    BuildingTypeClass::Prep_For_Add();
-
     /*........................................................................
     Compute offset of each class type in the Objects array
     ........................................................................*/
@@ -940,30 +925,6 @@ int MapEditClass::Placement_Dialog(void)
  *=========================================================================*/
 void MapEditClass::Start_Placement(void)
 {
-    int i;
-
-    /*------------------------------------------------------------------------
-    Initialize addable objects list; we must do this every time in case one
-    of the object pools has become exhausted; that object won't be available
-    for adding.
-    ------------------------------------------------------------------------*/
-    Clear_List();
-    TemplateTypeClass::Prep_For_Add();
-    OverlayTypeClass::Prep_For_Add();
-    SmudgeTypeClass::Prep_For_Add();
-    TerrainTypeClass::Prep_For_Add();
-    UnitTypeClass::Prep_For_Add();
-    InfantryTypeClass::Prep_For_Add();
-    AircraftTypeClass::Prep_For_Add();
-    BuildingTypeClass::Prep_For_Add();
-    /*........................................................................
-    Compute offset of each class type in the Objects array
-    ........................................................................*/
-    TypeOffset[0] = 0;
-    for (i = 1; i < NUM_EDIT_CLASSES; i++) {
-        TypeOffset[i] = TypeOffset[i - 1] + NumType[i - 1];
-    }
-
     /*
     ---------------------- Create the placement object -----------------------
     */
@@ -2149,14 +2110,26 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
  */
 void MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner)
 {
+    if (object_type == nullptr) {
+        return;
+    }
+
     Cancel_Placement();
+
+    auto type_found = false;
 
     // setup tracker field used by placement dialog
     for (auto i = 0; i < std::size(Objects); i++) {
         if (Objects[i] == object_type) {
             LastChoice = i;
+            type_found = true;
             break;
         }
+    }
+
+    if (!type_found) {
+        CNC_LOG_WARN("Failed to match object ID for manual placement: {}", object_type->IniName);
+        return;
     }
 
     PendingObject = object_type;

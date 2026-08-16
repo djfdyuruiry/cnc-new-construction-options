@@ -461,6 +461,28 @@ void MapEditClass::Read_INI(CCINIClass& ini)
     CurrentCell = Coord_Cell(Pixel_To_Coord(TacPixelX, TacPixelY));
 
     Changed = 0;
+
+    /*------------------------------------------------------------------------
+    Initialize addable objects list, if required
+    ------------------------------------------------------------------------*/
+    if (Objects[0] == nullptr) {
+        Clear_List();
+        TemplateTypeClass::Prep_For_Add();
+        OverlayTypeClass::Prep_For_Add();
+        SmudgeTypeClass::Prep_For_Add();
+        TerrainTypeClass::Prep_For_Add();
+        UnitTypeClass::Prep_For_Add();
+        InfantryTypeClass::Prep_For_Add();
+        AircraftTypeClass::Prep_For_Add();
+        BuildingTypeClass::Prep_For_Add();
+
+        /*........................................................................
+        Compute offset of each class type in the Objects array
+        ........................................................................*/
+        for (auto i = 0; i < NUM_EDIT_CLASSES; i++) {
+            TypeOffset[i] = i == 0 ? 0 : TypeOffset[i - 1] + NumType[i - 1];
+        }
+    }
 }
 
 /***************************************************************************
