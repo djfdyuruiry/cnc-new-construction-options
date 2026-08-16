@@ -1189,6 +1189,12 @@ bool ObjectClass::Unlimbo(COORDINATE coord, DirType)
 {
     if (GameActive && IsInLimbo && !IsDown) {
         if (ScenarioInit || Can_Enter_Cell(Coord_Cell(coord), FACING_NONE) == MOVE_OK) {
+            // backup state before attempting to mark object as down
+            const auto old_limbo = IsInLimbo;
+            const auto old_display = IsToDisplay;
+            const auto old_coord = Coord;
+            const auto old_active = IsActive;
+
             IsInLimbo = false;
             IsToDisplay = false;
             Coord = Class_Of().Coord_Fixup(coord);
@@ -1210,6 +1216,12 @@ bool ObjectClass::Unlimbo(COORDINATE coord, DirType)
                 }
                 return (true);
             }
+
+            // restore state on mark object rejection
+            IsInLimbo = old_limbo;
+            IsToDisplay = old_display;
+            Coord = old_coord;
+            IsActive = old_active;
         }
     }
     return (false);
