@@ -3975,7 +3975,7 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
                       y,
                       window,
                       SHAPE_FADING | SHAPE_GHOST | SHAPE_WIN_REL,
-                      HouseTypeClass::As_Reference(house).RemapTable,
+                      Houses.Ptr(house)->Remap_Table(false, false),
                       DisplayClass::UnitShadow);
     }
 
@@ -3987,7 +3987,7 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
             y,
             window,
             SHAPE_FADING | SHAPE_GHOST | SHAPE_WIN_REL,
-            HouseTypeClass::As_Reference(house).RemapTable,
+            Houses.Ptr(house)->Remap_Table(false, false),
             DisplayClass::UnitShadow);
     }
 
