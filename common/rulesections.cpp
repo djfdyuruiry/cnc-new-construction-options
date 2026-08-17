@@ -386,7 +386,12 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
         value_variant
     );
 
-    const auto comment = Try_Get_Rule_Comment(name);
+    auto comment = Try_Get_Rule_Comment(name);
+
+    if (comment.has_value() && (*comment == "-" || CncStringUtils::Is_Blank(*comment))) {
+        // don't write placeholder/blank comments
+        comment = std::nullopt;
+    }
 
     if (const auto value = std::get_if<int>(&value_variant)) {
         ini.Put_Int(SectionName.data(), name.data(), *value, 0, comment);
@@ -492,6 +497,13 @@ std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_v
     }
 
     return std::nullopt;
+}
+
+RuleSection& RuleSection::Set_Rule_Ini_Source(const std::string_view name, const std::string& source)
+{
+    RuleIniSource[name.data()] = source;;
+
+    return *this;
 }
 
 std::optional<std::string> RuleSection::Try_Get_Rule_Ini_Source(const std::string_view name) const

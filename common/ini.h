@@ -157,7 +157,7 @@ protected:
             return CRC(Entry);
         };
 
-        std::optional<std::string> comment;
+        std::optional<std::string> Comment;
         char* Entry;
         char* Value;
     };
