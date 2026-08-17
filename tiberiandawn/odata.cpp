@@ -833,8 +833,8 @@ void OverlayTypeClass::Prep_For_Add(void)
     auto tiberium_added = false;
 
     for (OverlayType index = OVERLAY_FIRST; index < OVERLAY_COUNT; index++) {
-        if (As_Reference(index).IsTiberium && tiberium_added) {
-            // we only want the first tiberium overlay
+        if (Debug_Map && As_Reference(index).IsTiberium && tiberium_added) {
+            // we only want the first tiberium overlay for Scenario Editor
             continue;
         }
 

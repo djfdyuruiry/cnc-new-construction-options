@@ -328,7 +328,6 @@ void MapEditClass::One_Time(void)
     /*........................................................................
     AI Base flag for structures
     ........................................................................*/
-    // TODO: need to have another checkbox for if this is a starting structure as well
     static char base_structure_text[5] = "Base";
 
     IsBaseStructureCheckbox = new CheckBoxClass(POPUP_BASESTRUCTURE, POPUP_BASESTRUCTURE_X, POPUP_BASESTRUCTURE_Y, POPUP_BASESTRUCTURE_SIZE);
@@ -339,7 +338,7 @@ void MapEditClass::One_Time(void)
                                     TPF_CENTER | TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
 
     /*........................................................................
-    AI Base flag for structures
+    AI Base ID textbox for structures
     ........................................................................*/
     static char base_id_text[8] = "Base ID";
 
@@ -463,25 +462,23 @@ void MapEditClass::Read_INI(CCINIClass& ini)
     Changed = 0;
 
     /*------------------------------------------------------------------------
-    Initialize addable objects list, if required
+    Initialize addable objects list, required due to possible theater change
     ------------------------------------------------------------------------*/
-    if (Objects[0] == nullptr) {
-        Clear_List();
-        TemplateTypeClass::Prep_For_Add();
-        OverlayTypeClass::Prep_For_Add();
-        SmudgeTypeClass::Prep_For_Add();
-        TerrainTypeClass::Prep_For_Add();
-        UnitTypeClass::Prep_For_Add();
-        InfantryTypeClass::Prep_For_Add();
-        AircraftTypeClass::Prep_For_Add();
-        BuildingTypeClass::Prep_For_Add();
+    Clear_List();
+    TemplateTypeClass::Prep_For_Add();
+    OverlayTypeClass::Prep_For_Add();
+    SmudgeTypeClass::Prep_For_Add();
+    TerrainTypeClass::Prep_For_Add();
+    UnitTypeClass::Prep_For_Add();
+    InfantryTypeClass::Prep_For_Add();
+    AircraftTypeClass::Prep_For_Add();
+    BuildingTypeClass::Prep_For_Add();
 
-        /*........................................................................
-        Compute offset of each class type in the Objects array
-        ........................................................................*/
-        for (auto i = 0; i < NUM_EDIT_CLASSES; i++) {
-            TypeOffset[i] = i == 0 ? 0 : TypeOffset[i - 1] + NumType[i - 1];
-        }
+    /*........................................................................
+    Compute offset of each class type in the Objects array
+    ........................................................................*/
+    for (auto i = 0; i < NUM_EDIT_CLASSES; i++) {
+        TypeOffset[i] = i == 0 ? 0 : TypeOffset[i - 1] + NumType[i - 1];
     }
 }
 

@@ -2783,7 +2783,7 @@ bool CellClass::Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const
  * Immediately delete any overlay present on this cell and update adjacent cells accordingly. No money
  * is refunded to the house that owns this cell (if it was a wall).
  */
-bool CellClass::Purge_Overlay()
+bool CellClass::Purge_Overlay(const bool update_adjacent_cell_walls, const bool recalc_tiberium)
 {
     if (Overlay == OVERLAY_NONE) {
         return false;
@@ -2800,7 +2800,7 @@ bool CellClass::Purge_Overlay()
     Redraw_Objects();
     ObjectClass::Detach_This_From_All(::As_Target(Cell_Number()), true);
 
-    if (was_wall) {
+    if (was_wall && update_adjacent_cell_walls) {
         for (const auto& facing : { FACING_N, FACING_E, FACING_S, FACING_W }) {
             auto adj_cell = Adjacent_Cell(facing);
 
@@ -2811,7 +2811,7 @@ bool CellClass::Purge_Overlay()
     }
 
 #ifdef SCENARIO_EDITOR
-    if (Debug_Map && was_tiberium) {
+    if (Debug_Map && was_tiberium && recalc_tiberium) {
         // recalc tiberium for Scenario Editor since we lifted a piece off the map
         Map.TotalValue = Map.Overpass();
     }

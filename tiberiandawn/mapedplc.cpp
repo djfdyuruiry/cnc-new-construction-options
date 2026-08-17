@@ -1101,23 +1101,17 @@ int MapEditClass::Place_Object(void)
                     Cell_X(*occupy) + Cell_Y(*occupy) * ((TemplateTypeClass*)PendingObject)->Width;
 
                 /*
-                ................ Purge overlay .................
+                .................... Purge single overlay ......................
                 */
-                cell_obj.Overlay = OVERLAY_NONE;
-                cell_obj.OverlayData = 0;
-                cell_obj.Smudge = SMUDGE_NONE;
-
-                cell_obj.Recalc_Attributes();
-                cell_obj.Wall_Update();
-                cell_obj.Concrete_Calc();
+                cell_obj.Purge_Overlay(false, false);
 
                 /*
-                ................ Check if overlay could be placed ................
+                ................ Check if overlay could be placed ..............
                 */
                 okflag = cell_obj.Is_Generally_Clear();
 
                 /*
-                .............. Put everything back the way it was ...............
+                .............. Put everything back the way it was ..............
                 */
                 cell_obj.TType = save_ttype;
                 cell_obj.TIcon = save_ticon;
@@ -2060,7 +2054,7 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
     ** Compute number of buildings to build
     */
     num_buildings = (Base.Nodes.Count() * percent) / 100;
-    auto limit = place_virtual_buildings ? Base.Nodes.Count() : num_buildings ;
+    const auto limit = place_virtual_buildings ? Base.Nodes.Count() : num_buildings;
 
     /*
     ** Build the base to the desired amount
@@ -2079,7 +2073,7 @@ void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings
             delete obj;
 
             // scan for the conflicting object that caused unlimbo to fail
-            ObjectClass* conflicting_object = nullptr;
+            ObjectClass const* conflicting_object = nullptr;
 
             auto occupy = objtype->Occupy_List();
             while (conflicting_object == nullptr && *occupy != REFRESH_EOL) {
