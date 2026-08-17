@@ -534,21 +534,20 @@ int MapEditClass::Placement_Dialog(void)
 
                 int display_x = WinW >> 1;
                 int display_y = WinH >> 1;
-                int obj_end_x = 0;
-                int obj_end_y = 0;
 
-                curobj->Display(display_x, display_y, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
+                if (
+                    curobj->What_Am_I() != RTTI_INFANTRYTYPE && curobj->What_Am_I() != RTTI_UNITTYPE
+                    && curobj->What_Am_I() != RTTI_AIRCRAFTTYPE && curobj->What_Am_I() != RTTI_OVERLAYTYPE
+                ) {
+                    // these object types are not centered automatically, so center shape dimensions
+                    auto width = 0;
+                    auto height = 0;
 
-                if (curobj->What_Am_I() != RTTI_INFANTRYTYPE
-                    && curobj->What_Am_I() != RTTI_UNITTYPE
-                    && curobj->What_Am_I() != RTTI_AIRCRAFTTYPE
-                    && curobj->What_Am_I() != RTTI_OVERLAYTYPE) {
-                    // these object types are not centered automatically, so re-draw to center shape dimensions
-                    display_x = display_x - ((obj_end_x - display_x) / 2);
-                    display_y = display_y - ((obj_end_y - display_y) / 2);
-
-                    Draw_Box(D_PICTURE_X, D_PICTURE_Y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
-                    curobj->Display(display_x, display_y, WINDOW_EDITOR, LastHouse, obj_end_x, obj_end_y);
+                    if (curobj->Get_Display_Size(width, height)) {
+                        curobj->Display(display_x - (width / 2), display_y - (height / 2), WINDOW_EDITOR, LastHouse);
+                    }
+                } else {
+                    curobj->Display(display_x, display_y, WINDOW_EDITOR, LastHouse);
                 }
 
                 /*

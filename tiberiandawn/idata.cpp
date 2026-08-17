@@ -1660,14 +1660,8 @@ short const* InfantryTypeClass::Occupy_List(bool) const
  * HISTORY:                                                                                    *
  *   09/24/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
+void InfantryTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType house) const
 {
-    if (house == HOUSE_NONE) {
-        end_x = x;
-        end_y = y;
-        return;
-    }
-
     const auto display_icon = TdSettings.Display_Object_Icons();
     auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
     const auto shape_num = display_icon && shape != nullptr ? 0 : 6;
@@ -1675,6 +1669,10 @@ void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
     if (display_icon && shape == nullptr) {
         // fall back to map graphics if icon is not present
         shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr || house == HOUSE_NONE) {
+        return;
     }
 
     if (display_icon) {
@@ -1691,9 +1689,26 @@ void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
             DisplayClass::UnitShadow
         );
     }
+}
 
-    end_x = x + Get_Build_Frame_Width(shape);
-    end_y = y + Get_Build_Frame_Height(shape);
+bool InfantryTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

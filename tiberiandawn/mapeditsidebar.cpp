@@ -458,36 +458,37 @@ void MapEditorSidebar::Render_Object_List(
 
         // walk across the list width
         while (x < Dimensions[control].W && idx < objects.size()) {
-            int end_x = x;
-            int end_y = y;
+            auto width = 0;
+            auto height = 0;
 
-            // render the object, with end vars to determine width
-            objects[idx].ObjectType->Display(x, y, WINDOW_EDITOR, PlayerPtr->Class->House, end_x, end_y);
-
-            if (end_x <= Dimensions[control].W && end_y <= Dimensions[control].H) {
-                // OK - object fits
-                auto& catalog_dimensions = objects[idx].Dimensions;
-
-                catalog_dimensions.X = Dimensions[control].X + x;
-                catalog_dimensions.Y = Dimensions[control].Y + y;
-                catalog_dimensions.W = end_x - x;
-                catalog_dimensions.H = end_y - y;
-
-                idx++;
-
-                x = end_x + ControlMargin;
-                next_y = max(next_y, end_y);
-            } else {
-                // KO - object too big, erase partial drawing and go to next y line
-                InGameFillTexture.Draw_Rectangle(
-                    *LogicPage,
-                    Bound(Dimensions[control].X + x, Dimensions[control].X, Dimensions[control].X + Dimensions[control].W),
-                    Bound(Dimensions[control].Y + y, Dimensions[control].Y, Dimensions[control].Y + Dimensions[control].H),
-                    Bound(end_x, 0, Dimensions[control].W - x),
-                    Bound(end_y, 0, Dimensions[control].H - y)
+            if (!objects[idx].ObjectType->Get_Display_Size(width, height)) {
+                // failed to get size, move on to next item
+                CNC_LOGGER_ERROR(
+                    "Failed to render object in list, no size available: {}",
+                    objects[idx].ObjectType->IniName
                 );
+                idx++;
                 break;
             }
+
+            if (x + width > Dimensions[control].W || y + height > Dimensions[control].H) {
+                // object to big for remaining width, move to next potential render spot
+                break;
+            }
+
+            objects[idx].ObjectType->Display(x, y, WINDOW_EDITOR, PlayerPtr->Class->House);
+
+            objects[idx].Dimensions = {
+                .X = Dimensions[control].X + x,
+                .Y = Dimensions[control].Y + y,
+                .W = width,
+                .H = height
+            };
+
+            idx++;
+
+            x += width + ControlMargin;
+            next_y = max(next_y, y + height);
         }
 
         x = ControlMargin * 2;

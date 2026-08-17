@@ -2174,9 +2174,7 @@ void MapEditClass::Draw_Member(ObjectTypeClass const* ptr, int index, int quant,
     Hide_Mouse();
     Draw_Box(x, y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_RAISED, true);
 
-    int obj_end_x, obj_end_y = 0;
-
-    ptr->Display(x + D_PICTURE_W / 2, y + D_PICTURE_H / 2, WINDOW_EDITOR, house, obj_end_x, obj_end_y);
+    ptr->Display(x + D_PICTURE_W / 2, y + D_PICTURE_H / 2, WINDOW_EDITOR, house);
 
     if (quant > 0) {
         // print quantity text with black background

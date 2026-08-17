@@ -1452,7 +1452,7 @@ UnitType UnitTypeClass::From_Name(char const* name)
  *   05/14/1994 JLB : Created.                                                                 *
  *   11/08/1994 JLB : Handles chunky type vehicles now.                                        *
  *=============================================================================================*/
-void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
+void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
 {
     auto display_icon = TdSettings.Display_Object_Icons();
     auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
@@ -1462,6 +1462,10 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
         // fall back to map graphics if icon is not present
         shape = Get_Image_Data();
         display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return;
     }
 
     // display patches
@@ -1521,9 +1525,27 @@ void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType ho
                       HouseTypeClass::As_Reference(house).RemapTable,
                       DisplayClass::UnitShadow);
     }
+}
 
-    end_x = x + Get_Build_Frame_Width(shape);
-    end_y = y + Get_Build_Frame_Height(shape);
+bool UnitTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

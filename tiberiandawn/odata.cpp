@@ -751,64 +751,93 @@ unsigned char* OverlayTypeClass::Radar_Icon(int data) const
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
+void OverlayTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType) const
 {
     auto display_icon = TdSettings.Display_Object_Icons();
+    void const* shape = nullptr;
 
     if (display_icon && IsWall) {
         // look for associated strip icon for this wall
         for (auto struct_type = STRUCT_FIRST; struct_type <= STRUCT_LAST; ++struct_type) {
             const auto& building_type = BuildingTypeClass::As_Reference(struct_type);
 
-            if (building_type.OverlayToPlace != Type) {
-                // overlay type doesn't match
-                continue;
+            if (building_type.OverlayToPlace == Type) {
+                shape = building_type.Get_Cameo_Data();
+                break;
             }
-
-            if (!building_type.Get_Cameo_Data()) {
-                // no cameo data to draw
-                continue;
-            }
-
-            CC_Draw_Shape(
-                building_type.Get_Cameo_Data(),
-                0,
-                x,
-                y,
-                window,
-                SHAPE_CENTER | SHAPE_WIN_REL
-            );
-            return;
         }
+    }
+
+    if (!display_icon || shape == nullptr) {
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return;
     }
 
     /*
     ---------------------------- Draw the shape ------------------------------
     */
-    if (Get_Image_Data()) {
-        int frame = 0;
-
-        if (IsTiberium) {
-            // display tiberium in it's most mature state
-            frame = 11;
-        }
-
-        IsTheaterShape = IsTheater;
+    if (display_icon) {
         CC_Draw_Shape(
-            Get_Image_Data(),
-            frame,
+            shape,
+            0,
             x,
             y,
             window,
-            SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST,
-            nullptr,
-            DisplayClass::UnitShadow
+            SHAPE_CENTER | SHAPE_WIN_REL
         );
-        IsTheaterShape = false;
-
-        end_x = x + Get_Build_Frame_Width(Get_Image_Data());
-        end_y = y + Get_Build_Frame_Height(Get_Image_Data());
+        return;
     }
+
+    // display tiberium in it's most mature state
+    const auto frame = IsTiberium ? 11 : 0;
+
+    IsTheaterShape = IsTheater;
+    CC_Draw_Shape(
+        shape,
+        frame,
+        x,
+        y,
+        window,
+        SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST,
+        nullptr,
+        DisplayClass::UnitShadow
+    );
+    IsTheaterShape = false;
+}
+
+bool OverlayTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    void const* shape = nullptr;
+
+    if (display_icon && IsWall) {
+        // look for associated strip icon for this wall
+        for (auto struct_type = STRUCT_FIRST; struct_type <= STRUCT_LAST; ++struct_type) {
+            const auto& building_type = BuildingTypeClass::As_Reference(struct_type);
+
+            if (building_type.OverlayToPlace == Type) {
+                shape = building_type.Get_Cameo_Data();
+                break;
+            }
+        }
+    }
+
+    if (shape == nullptr) {
+        shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

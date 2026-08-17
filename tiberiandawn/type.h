@@ -478,7 +478,8 @@ public:
     };
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int, int, WindowNumberType, HousesType, int&, int&) const {};
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const {};
+    virtual bool Get_Display_Size(int& width, int& height) const { return false; };
 #endif
 
     // see: types-nco.cpp.in
@@ -967,7 +968,8 @@ public:
     bool Bib_And_Offset(SmudgeType& bib, CELL& cell) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
     // see: types-nco.cpp.in
@@ -1219,7 +1221,8 @@ public:
     virtual int Repair_Step(void) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
     // see: types-nco.cpp.in
@@ -1378,7 +1381,8 @@ public:
     virtual int Full_Name(void) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
     // see: types-nco.cpp.in
@@ -1670,7 +1674,8 @@ public:
     virtual short const* Overlap_List(void) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
 private:
@@ -1753,7 +1758,8 @@ public:
     virtual short const* Occupy_List(bool placement = false) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
 private:
@@ -2088,7 +2094,8 @@ public:
     virtual int Max_Pips(void) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
     // see: types-nco.cpp.in
@@ -2225,7 +2232,8 @@ public:
     virtual unsigned char* Radar_Icon(int data) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
 private:
@@ -2308,7 +2316,8 @@ public:
     virtual void Draw_It(int x, int y, int data) const;
 
 #ifdef SCENARIO_EDITOR
-    virtual void Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const;
+    virtual void Display(int x, int y, WindowNumberType window, HousesType house) const;
+    virtual bool Get_Display_Size(int& width, int& height) const;
 #endif
 
 private:

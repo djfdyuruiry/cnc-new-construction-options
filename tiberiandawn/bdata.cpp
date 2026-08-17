@@ -3945,7 +3945,7 @@ StructType BuildingTypeClass::From_Name(char const* name)
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
+void BuildingTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType house) const
 {
     auto display_icon = TdSettings.Display_Object_Icons();
     auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
@@ -3954,6 +3954,10 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
         // fall back to map graphics if icon is not present
         shape = Get_Image_Data();
         display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return;
     }
 
     if (!display_icon) {
@@ -3994,9 +3998,27 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
     if (!display_icon) {
         IsTheaterShape = false;
     }
+}
 
-    end_x = x + Get_Build_Frame_Width(shape);
-    end_y = y + Get_Build_Frame_Height(shape);
+bool BuildingTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

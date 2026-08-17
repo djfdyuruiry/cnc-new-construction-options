@@ -502,7 +502,7 @@ void AircraftTypeClass::Prep_For_Add(void)
  * HISTORY:                                                                                    *
  *   07/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesType house, int& end_x, int& end_y) const
+void AircraftTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType house) const
 {
     const auto display_icon = TdSettings.Display_Object_Icons();
     auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
@@ -513,6 +513,10 @@ void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
         shape = Get_Image_Data();
     }
 
+    if (shape == nullptr) {
+        return;
+    }
+
     CC_Draw_Shape(shape,
                   shape_num,
                   x,
@@ -521,29 +525,48 @@ void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
                   SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_FADING,
                   HouseClass::As_Pointer(house)->Remap_Table(false, true));
 
-    if (!display_icon && IsRotorEquipped) {
-        static const auto rotor_flags = SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST;
-
-        // Use idling rotor frames (slower animation) for static display
-        auto rotor_x = x;
-        const auto rotor_y = y - 2;
-        const auto rotor_frame = (Frame % 8) + 4;
-
-        if (Type == AIRCRAFT_TRANSPORT) {
-            // Dual rotors offset along flight axis.
-            rotor_x += 10;
-            CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
-
-            rotor_x -= 20;
-            CC_Draw_Shape(LRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
-        } else {
-            // Single rotor centered above body
-            CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
-        }
+    if (!display_icon && !IsRotorEquipped) {
+        return;
     }
 
-    end_x = x + Get_Build_Frame_Width(shape);
-    end_y = y + Get_Build_Frame_Height(shape);
+    static const auto rotor_flags = SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST;
+
+    // Use idling rotor frames (slower animation) for static display
+    auto rotor_x = x;
+    const auto rotor_y = y - 2;
+    const auto rotor_frame = (Frame % 8) + 4;
+
+    if (Type == AIRCRAFT_TRANSPORT) {
+        // Dual rotors offset along flight axis.
+        rotor_x += 10;
+        CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+
+        rotor_x -= 20;
+        CC_Draw_Shape(LRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+    } else {
+        // Single rotor centered above body
+        CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+    }
+}
+
+bool AircraftTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 #endif
 

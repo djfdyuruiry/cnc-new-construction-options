@@ -1996,15 +1996,21 @@ void TemplateTypeClass::Init(TheaterType theater)
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void TemplateTypeClass::Display(int x, int y, WindowNumberType window, HousesType, int& end_x, int& end_y) const
+void TemplateTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType) const
 {
+    const auto shape = Get_Image_Data();
+
+    if (shape == nullptr) {
+        return;
+    }
+
     const auto w = Bound(Width, 1, 13);
     const auto h = Bound(Height, 1, 8);
 
     unsigned char map[13 * 8];
 
     // get icon set metadata
-    Mem_Copy(Get_Icon_Set_Map(Get_Image_Data()), map, Width * Height);
+    Mem_Copy(Get_Icon_Set_Map(shape), map, Width * Height);
 
     // iterate over each icon in the set and render relative to x,y
     for (auto index = 0; index < w * h; index++) {
@@ -2013,12 +2019,25 @@ void TemplateTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
 
         // non-blank icon in set
         if (map[index] != 0xFF) {
-            LogicPage->Draw_Stamp(Get_Image_Data(), index, dest_x, dest_y, nullptr, window);
+            LogicPage->Draw_Stamp(shape, index, dest_x, dest_y, nullptr, window);
         }
-
-        end_x = max(end_x, dest_x + ICON_PIXEL_W);
-        end_y = max(end_y, dest_y + ICON_PIXEL_H);
     }
+}
+
+bool TemplateTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto w = Bound(Width, 1, 13);
+    const auto h = Bound(Height, 1, 8);
+
+    for (auto index = 0; index < w * h; index++) {
+        const auto dest_x = ((index % w) * (ICON_PIXEL_W));
+        const auto dest_y = ((index / w) * (ICON_PIXEL_H));
+
+        width = max(width, dest_x + ICON_PIXEL_W);
+        height = max(height, dest_y + ICON_PIXEL_H);
+    }
+
+    return true;
 }
 
 /***********************************************************************************************
