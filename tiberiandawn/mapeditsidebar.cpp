@@ -1,6 +1,9 @@
+#include "function.h"
+
+#ifdef SCENARIO_EDITOR
+
 #include <ranges>
 
-#include "function.h"
 #include "mapeditsidebar.h"
 #include "tiberiandawnsettings.h"
 
@@ -1124,3 +1127,5 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
 
     return true;
 }
+
+#endif
