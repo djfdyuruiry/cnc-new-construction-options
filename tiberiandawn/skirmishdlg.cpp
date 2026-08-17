@@ -237,7 +237,7 @@ class SkirmishScenarioDialog final : public Dialog<SkirmishControls>
         Iterate_Map_Cells([&](const auto raw_cell, const auto& cell) {
             if (first_cell) {
                 #ifdef MEGAMAPS
-                scale_map = Map.MapCellWidth <= 64 && Map.MapCellHeight <= 64;
+                scale_map = Map.MapCellWidth <= ORIGINAL_MAP_CELL_W && Map.MapCellHeight <= ORIGINAL_MAP_CELL_H;
                 #else
                 scale_map = true;
                 #endif

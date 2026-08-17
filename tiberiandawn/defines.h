@@ -281,6 +281,12 @@ typedef enum DiffType : signed char
 #define MAP_CELL_H     (1 << MAP_CELL_MAX_Y_BITS)
 #define MAP_CELL_TOTAL (MAP_CELL_W * MAP_CELL_H)
 
+#ifdef MEGAMAPS
+#define ORIGINAL_MAP_CELL_W     ((MAP_CELL_W) / 2)
+#define ORIGINAL_MAP_CELL_H     ((MAP_CELL_H) / 2)
+#define ORIGINAL_MAP_CELL_TOTAL (ORIGINAL_MAP_CELL_W * ORIGINAL_MAP_CELL_H)
+#endif
+
 #define REFRESH_EOL     32767 // This number ends a refresh/occupy offset list.
 #define REFRESH_SIDEBAR 32766 // This number flags that sidebar needs refreshing.
 

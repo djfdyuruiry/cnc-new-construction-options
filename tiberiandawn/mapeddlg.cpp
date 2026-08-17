@@ -1668,16 +1668,19 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     IniMapCellWidth = map_x2 - map_x1 + 1;
     IniMapCellHeight = map_y2 - map_y1 + 1;
 
+#ifdef MEGAMAPS
     /*
-     ** Determine map version based on whether the map fits within the original 64x64 bounds.
+     ** Determine map version based on whether the map fits within the original bounds.
+     **
      ** Maps that fit entirely within the original bounds use the normal binary format.
-     ** Maps that exceed 64x64 use the megamap binary format.
+     **
+     ** Maps that exceed original size need to use the megamap binary format.
      */
-    constexpr int original_map_size = 64;
     MapBinaryVersion =
-        (IniMapCellX + IniMapCellWidth <= original_map_size && IniMapCellY + IniMapCellHeight <= original_map_size)
+        (IniMapCellX + IniMapCellWidth <= ORIGINAL_MAP_CELL_W && IniMapCellY + IniMapCellHeight <= ORIGINAL_MAP_CELL_H)
             ? MAP_VERSION_NORMAL
             : MAP_VERSION_MEGA;
+#endif
 
     /*
     --------------------- Clip Home Cell to new map size ---------------------

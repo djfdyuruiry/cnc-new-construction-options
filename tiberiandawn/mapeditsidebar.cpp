@@ -699,8 +699,8 @@ void MapEditorSidebar::Render_Minimap()
     LogicPage->Lock();
 
 #ifdef MEGAMAPS
-    const auto scale_map = Parent->IniMapCellX + Parent->IniMapCellWidth <= 64
-        && Parent->IniMapCellY + Parent->IniMapCellHeight <= 64; // are the map bounds within normal map size?
+    const auto scale_map = Parent->IniMapCellX + Parent->IniMapCellWidth <= ORIGINAL_MAP_CELL_W
+        && Parent->IniMapCellY + Parent->IniMapCellHeight <= ORIGINAL_MAP_CELL_H; // are the map bounds within normal map size?
 #else
     const auto scale_map = true;
 #endif

@@ -1131,14 +1131,6 @@ void DisplayClass::Iterate_Over_Map_Cells(
     const std::function<void(int)>& on_row
 )
 {
-#if defined TIBERIAN_DAWN && !defined MEGAMAPS
-    constexpr auto max_max_cell_width = 64;
-    constexpr auto max_max_cell_height = 64;
-#else
-    constexpr auto max_max_cell_width = 128;
-    constexpr auto max_max_cell_height = 128;
-#endif
-
     int map_cell_x = Map.MapCellX;
     int map_cell_y = Map.MapCellY;
     int map_cell_width = Map.MapCellWidth;
@@ -1149,7 +1141,7 @@ void DisplayClass::Iterate_Over_Map_Cells(
         map_cell_width++;
     }
 
-    if (map_cell_width < max_max_cell_width) {
+    if (map_cell_width < MAP_CELL_W) {
         map_cell_width++;
     }
 
@@ -1158,7 +1150,7 @@ void DisplayClass::Iterate_Over_Map_Cells(
         map_cell_height++;
     }
 
-    if (map_cell_height < max_max_cell_height) {
+    if (map_cell_height < MAP_CELL_H) {
         map_cell_height++;
     }
 
@@ -1585,15 +1577,7 @@ void DisplayClass::Read_INI(CCINIClass& ini)
         **	When in scenario editor mode, we want to show the entire map so user can place terrain out of bounds to
         **  influence reinforcement positions.
         */
-#if defined TIBERIAN_DAWN && !defined MEGAMAPS
-        constexpr auto max_max_cell_width = 64;
-        constexpr auto max_max_cell_height = 64;
-#else
-        constexpr auto max_max_cell_width = 128;
-        constexpr auto max_max_cell_height = 128;
-#endif
-
-        Set_Map_Dimensions(0, 0, max_max_cell_width, max_max_cell_height);
+        Set_Map_Dimensions(0, 0, MAP_CELL_W, MAP_CELL_H);
 
         // store original bounds for rendering and file save logic
         IniMapCellX = x;
@@ -1618,11 +1602,12 @@ void DisplayClass::Read_INI(CCINIClass& ini)
     MapBinaryVersion = ini.Get_Int("MAP", "Version", MAP_VERSION_NORMAL);
     MapBinaryVersion = Bound(MapBinaryVersion, 0, 1); // Little hack to stop arbitrary values.
 
-    // validate megamap flag - if declared as normal but bounds exceed 64x64, force mega
-    constexpr auto original_map_size = 64;
-
+    // validate megamap flag - if declared as normal but bounds exceed original, force mega
     if (MapBinaryVersion == MAP_VERSION_NORMAL
-        && (IniMapCellX + IniMapCellWidth > original_map_size || IniMapCellY + IniMapCellHeight > original_map_size)) {
+        && (
+            IniMapCellX + IniMapCellWidth > ORIGINAL_MAP_CELL_W || IniMapCellY + IniMapCellHeight > ORIGINAL_MAP_CELL_H
+        )
+    ) {
         MapBinaryVersion = MAP_VERSION_MEGA;
     }
 #endif
