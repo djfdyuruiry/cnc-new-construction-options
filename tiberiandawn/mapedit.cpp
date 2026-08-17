@@ -2205,12 +2205,13 @@ void MapEditClass::Main_Menu(void)
     _menus[1] = "Load Scenario";
     _menus[2] = "Save Scenario";
     _menus[3] = "Size Map";
-    _menus[4] = "Add Game Object";
-    _menus[5] = "Scenario Options";
+    _menus[4] = "Scenario Options";
+    _menus[5] = "Add Game Object";
     _menus[6] = "AI Options";
-    _menus[7] = "Play Scenario";
-    _menus[8] = "Exit";
-    _menus[9] = NULL;
+    _menus[7] = "Edit Scenario Rules";
+    _menus[8] = "Play Scenario";
+    _menus[9] = "Exit";
+    _menus[10] = nullptr;
 
     /*
     ----------------------------- Main Menu loop -----------------------------
@@ -2316,19 +2317,9 @@ void MapEditClass::Main_Menu(void)
             break;
 
         /*
-        .......................... Add an object ...........................
-        */
-        case 4:
-            if (Placement_Dialog() == 0) {
-                Start_Placement();
-                process = false;
-            }
-            break;
-
-        /*
         ......................... Scenario options .........................
         */
-        case 5:
+        case 4:
             if (Scenario_Dialog() == 0) {
                 Changed = 1;
                 process = false;
@@ -2336,7 +2327,17 @@ void MapEditClass::Main_Menu(void)
             break;
 
         /*
-        .......................... Other options ...........................
+        .......................... Add an object ...........................
+        */
+        case 5:
+            if (Placement_Dialog() == 0) {
+                Start_Placement();
+                process = false;
+            }
+            break;
+
+        /*
+        ............................ AI config .............................
         */
         case 6:
             AI_Menu();
@@ -2344,9 +2345,18 @@ void MapEditClass::Main_Menu(void)
             break;
 
         /*
-        ...................... Test-drive this scenario ....................
+        ........................... Rules Editor ...........................
         */
         case 7:
+            Rules_Editor_Dialog();
+            Changed = 1;
+            process = false;
+            break;
+
+        /*
+        ...................... Test-drive this scenario ....................
+        */
+        case 8:
             if (Changed) {
                 rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
                 HiddenPage.Clear();
@@ -2371,7 +2381,7 @@ void MapEditClass::Main_Menu(void)
 
             return;
 
-        case 8:
+        case 9:
             Exit_Editor();
             return;
         }

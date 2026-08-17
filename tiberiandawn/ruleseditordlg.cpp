@@ -19,6 +19,7 @@ class ConverterRuleEditorDialog : public Dialog<ConverterRuleEditorControls>
     RuleSection& Section;
     const std::string& RuleName;
     std::vector<std::string> ValidValues;
+    std::optional<std::string> RuleSourceToApply;
 
 protected:
     void Init_UI_State() override
@@ -115,6 +116,11 @@ protected:
                 );
 
                 TdTypeConverter::Set_Rule_With_Variant(Section, RuleName, selected_value, variant);
+
+                // record source if present
+                if (RuleSourceToApply.has_value()) {
+                    Section.Set_Rule_Ini_Source(RuleName, *RuleSourceToApply);
+                }
                 return true;
             }
 
@@ -176,10 +182,15 @@ protected:
     }
 
 public:
-    ConverterRuleEditorDialog(RuleSection& section, const std::string& rule_name)
+    ConverterRuleEditorDialog(
+        RuleSection& section,
+        const std::string& rule_name,
+        const std::optional<std::string>& rule_source
+    )
         : Dialog(120, 120, 5, 5),
           Section(section),
-          RuleName(rule_name)
+          RuleName(rule_name),
+          RuleSourceToApply(rule_source)
     {
         CaptionText = std::format("{}: {}", section.Get_Section_Name(), RuleName);
     }
@@ -198,6 +209,7 @@ class ConverterCsvRuleEditorDialog : public Dialog<ConverterCsvRuleEditorControl
     RuleSection& Section;
     const std::string& RuleName;
     std::vector<std::string> ValidValues;
+    std::optional<std::string> RuleSourceToApply;
 
 protected:
 
@@ -331,10 +343,15 @@ protected:
     }
 
 public:
-    ConverterCsvRuleEditorDialog(RuleSection& section, const std::string& rule_name)
+    ConverterCsvRuleEditorDialog(
+        RuleSection& section,
+        const std::string& rule_name,
+        const std::optional<std::string>& rule_source
+    )
         : Dialog(150, 150, 5, 5),
           Section(section),
-          RuleName(rule_name)
+          RuleName(rule_name),
+          RuleSourceToApply(rule_source)
     {
         CaptionText = std::format("{}: {}", section.Get_Section_Name(), RuleName);
     }
@@ -639,7 +656,13 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             section.Parse_String(name, new_value, current_value);
         }
 
-        Update_Ini_File();
+        if (RuleSourceToApply.has_value()) {
+            // record rule source
+            section.Set_Rule_Ini_Source(name, *RuleSourceToApply);
+        } else {
+            // if not editing a rule for a scenario, write updated value back to rules INI file
+            Update_Ini_File();
+        }
 
         // wait for player to edit again
         Get_Control<EditClass>(control).Clear_Changed();
@@ -749,8 +772,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
     void On_Help_Click(const RulesEditorControls& control) const
     {
-        auto rule_index = control < LEFT_RULE_EDIT_BUTTON
-            ? control - LEFT_RULE_HELP_CONTROL
+        auto rule_index = control < LEFT_RULE_EDIT_BUTTON ? control - LEFT_RULE_HELP_CONTROL
             : 7 + (control - RIGHT_RULE_HELP_CONTROL);
 
         rule_index += RulePageIndex * RulesPerPage;
@@ -779,7 +801,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         const auto factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
 
         if (TdTypeConverter::Rule_Requires_Csv_Converter(section, rule_name)) {
-            ConverterCsvRuleEditorDialog csv_dialog(section, rule_name);
+            ConverterCsvRuleEditorDialog csv_dialog(section, rule_name, RuleSourceToApply);
             csv_dialog.Init(
                 Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()),
                 Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()),
@@ -787,7 +809,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
             );
             update_to_save = csv_dialog.Present();
         } else {
-            ConverterRuleEditorDialog rule_dialog(section, rule_name);
+            ConverterRuleEditorDialog rule_dialog(section, rule_name, RuleSourceToApply);
             rule_dialog.Init(
                 Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()),
                 Try_Get_Resolution_Mode_Height().value_or(SeenBuff.Get_Height()),
@@ -797,7 +819,10 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         }
 
         if (update_to_save) {
-            Update_Ini_File();
+            if (!RuleSourceToApply.has_value()) {
+                Update_Ini_File();
+            }
+
             Load_Current_Rules_Page();
         }
     }
@@ -1038,6 +1063,8 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
     int MiddleRowY;
     int BottomRowY;
 
+    std::optional<std::string> RuleSourceToApply;
+
 protected:
     std::optional<bool> On_Input(DialogRedrawType& display, KeyNumType& input) override
     {
@@ -1121,6 +1148,12 @@ protected:
                 Save_Updated_Rules();
 
                 Collapse_Visible_Dropdowns(display);
+
+                // just close the dialog if editing scenario rules
+                if (RuleSourceToApply.has_value()) {
+                    return false;
+                }
+
                 display = REDRAW_ALL;
                 break;
             }
@@ -1488,9 +1521,11 @@ protected:
     }
 
 public:
-    RulesEditorDialog() : Dialog(300, 195, 5, 5),
+    RulesEditorDialog(const std::optional<std::string>& rule_source = std::nullopt)
+        : Dialog(300, 195, 5, 5),
         RulePageIndex(0),
-        RulePageCount(0)
+        RulePageCount(0),
+        RuleSourceToApply(rule_source)
     {
         CaptionText = "Rules Editor";
     }
@@ -1500,7 +1535,18 @@ bool Rules_Editor_Dialog()
 {
     const auto factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
 
-    RulesEditorDialog dialog;
+    std::optional<std::string> rule_source;
+
+    if (Debug_Map) {
+        // set source for changed rules so they can be written to INI on Scenario Editor save
+        auto scenario_filename = std::format("{}.INI", Scen.ScenarioName);
+
+        CncStringUtils::To_Upper(scenario_filename);
+
+        rule_source = scenario_filename;
+    }
+
+    RulesEditorDialog dialog(rule_source);
 
     dialog.Init(
         Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()),
@@ -1508,22 +1554,26 @@ bool Rules_Editor_Dialog()
         factor
     );
 
-    Load_Title_Screen(TitlePicture, &HidPage, Palette);
-    Blit_Hid_Page_To_Seen_Buff();
-    Set_Palette(Palette);
+    if (!Debug_Map) {
+        Load_Title_Screen(TitlePicture, &HidPage, Palette);
+        Blit_Hid_Page_To_Seen_Buff();
+        Set_Palette(Palette);
+    }
 
     while (Get_Mouse_State() > 0)
         Show_Mouse();
 
     const auto result = dialog.Present();
 
-    /*------------------------------------------------------------------------
-    Restore screen
-    ------------------------------------------------------------------------*/
-    Hide_Mouse();
-    Load_Title_Screen(TitlePicture, &HidPage, Palette);
-    Blit_Hid_Page_To_Seen_Buff();
-    Show_Mouse();
+    if (!Debug_Map) {
+        /*------------------------------------------------------------------------
+        Restore screen
+        ------------------------------------------------------------------------*/
+        Hide_Mouse();
+        Load_Title_Screen(TitlePicture, &HidPage, Palette);
+        Blit_Hid_Page_To_Seen_Buff();
+        Show_Mouse();
+    }
 
     return result;
 }

@@ -70,7 +70,7 @@ enum MapEdit1Enum
 
     NUM_EDIT_CLASSES = 8, // # different classes (templates, terrain, etc)
 
-    MAX_MAIN_MENU_NUM = 9,
+    MAX_MAIN_MENU_NUM = 10,
     MAX_MAIN_MENU_LEN = 20,
 
     MAX_AI_MENU_NUM = 6,

@@ -429,7 +429,7 @@ protected:
 public:
     MissionSelectDialog() : Dialog(236, 162)
     {
-        CaptionText = "Campaign Selection";
+        CaptionText = Debug_Map ? "Load Scenario": "Campaign Selection";
     }
 
     ~MissionSelectDialog() override
