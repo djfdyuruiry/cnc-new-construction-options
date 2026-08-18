@@ -378,9 +378,11 @@ void MapEditClass::One_Time(void)
     PopupDialogH = end_y - PopupDialogY;
 
     /*........................................................................
-    Calculate editor sidebar dimensions
+    Ensure popup controls don't overlap editor sidebar
     ........................................................................*/
     const auto sidebar_width_limit = SeenBuff.Get_Width() - (PopupDialogX + PopupDialogW + dialog_margin);
+
+    EditorSidebar.W = min(sidebar_width_limit, EditorSidebar.W);
 
     /*........................................................................
     The base percent-built slider & its label
@@ -392,6 +394,19 @@ void MapEditClass::One_Time(void)
         BaseText, POPUP_BASE_X - 3, 0, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
     BaseGauge->Set_Maximum(100);
     BaseGauge->Set_Value(BasePercent);
+
+    /*........................................................................
+    Editor menu button
+    ........................................................................*/
+    EditorMenuButton = new TextButtonClass(
+        POPUP_EDITORMENU,
+        "Menu",
+        TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+        0,
+        0,
+        75,
+        Get_Tab_Height()
+    );
 }
 
 /***********************************************************************************************
@@ -425,6 +440,7 @@ void MapEditClass::Init_IO(void)
         EditorSidebar.Add_This();
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
+        Add_A_Button(*EditorMenuButton);
         Add_A_Button(*MapArea);
     }
 }
@@ -893,11 +909,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
     }
 
     // give editor sidebar a change to steal input
-    if (EditorSidebar.On_Input(input)) {
-        // editor sidebar processed input, so finish early
-        MouseClass::AI(input, x, y);
-        return;
-    }
+    EditorSidebar.On_Input(input);
 
     /*------------------------------------------------------------------------
     Trap special editing keys; if one is detected, set 'input' to 0 to
@@ -1726,6 +1738,11 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
+    case (POPUP_EDITORMENU | KN_BUTTON):
+        Main_Menu();
+        input = KN_NONE;
+        break;
+
     case (KN_LMOUSE):
         input = KN_NONE;
         break;
@@ -1993,7 +2010,13 @@ void MapEditClass::Draw_Header(const bool forced)
 
     // total value of all Tiberium on the map
     Fancy_Text_Print(
-        "Tiberium=%ld   ", HeaderX, HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
+        "Tiberium=%ld   ",
+        EditorMenuButton->X + EditorMenuButton->Width + 5,
+        HeaderY, CC_GREEN,
+        BLACK,
+        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+        TotalValue
+    );
 
     // name of the scenario being edited
     std::string scenario_title = Scen.ScenarioName;

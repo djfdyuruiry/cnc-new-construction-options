@@ -156,7 +156,7 @@ void MapEditorSidebar::Init_Dimensions()
      */
 #ifdef MEGAMAPS
     Dimensions[MINIMAP] = {
-        .X = X + ((W - 130) / 2),
+        .X = X + ControlMargin,
         .Y = Y + ControlMargin,
         .W = 130,
         .H = 130
@@ -170,66 +170,94 @@ void MapEditorSidebar::Init_Dimensions()
     };
 #endif
 
-    if (SeenBuff.Get_Height() <= GBUFF_INIT_HEIGHT) {
-        // original res is too short to have minimap visible at all times
-        Dimensions[MINIMAP].Reset();
-    }
+    const auto use_lo_res_layout = SeenBuff.Get_Height() <= GBUFF_INIT_HEIGHT;
+
+    /**
+     * Show editor menu button
+     */
+    Dimensions[OVERLAY_BUTTON] = Dimensions[MINIMAP];
+
+    Dimensions[OVERLAY_BUTTON].X += Dimensions[MINIMAP].W + ControlMargin;
+    Dimensions[OVERLAY_BUTTON].Y = Y + ControlMargin;
+    Dimensions[OVERLAY_BUTTON].W = use_lo_res_layout
+        ? (W - (ControlMargin * 3)) / 2 // button rows instead of minimap
+        : (SeenBuff.Get_Width() - Dimensions[OVERLAY_BUTTON].X) - ControlMargin;
+    Dimensions[OVERLAY_BUTTON].H = ButtonHeight;
 
     /**
      * Map object selection buttons
      */
-    const auto button_width = (W - ControlMargin * 3) / 2;
+    if (use_lo_res_layout) {
+        /**
+         * In original res, hide the minimap and menu buttons, object select buttons are in three rows of two wide
+         */
+        Dimensions[MINIMAP].Reset();
 
-    // object select first row
-    Dimensions[OVERLAY_BUTTON] = {
-        .X = X + ControlMargin,
-        .Y = (Dimensions[MINIMAP].Y + Dimensions[MINIMAP].H) + (ControlMargin * 2),
-        .W = button_width,
-        .H = ButtonHeight
-    };
+        Dimensions[OVERLAY_BUTTON].X = X + ControlMargin;
 
-    if (SeenBuff.Get_Height() <= GBUFF_INIT_HEIGHT) {
-        // adjust buttons in original res, no minimap to anchor to
-        Dimensions[OVERLAY_BUTTON].Y = Y + ControlMargin;
+        Dimensions[TERRAIN_BUTTON] = Dimensions[OVERLAY_BUTTON];
+        Dimensions[TERRAIN_BUTTON].X += Dimensions[OVERLAY_BUTTON].W + ControlMargin; // adjust right
+
+        // object select second row
+        Dimensions[UNITS_BUTTON] = Dimensions[OVERLAY_BUTTON];
+        Dimensions[UNITS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+        Dimensions[BUILDINGS_BUTTON] = Dimensions[TERRAIN_BUTTON];
+        Dimensions[BUILDINGS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+        // object select third row
+        Dimensions[WAYPOINTS_BUTTON] = Dimensions[UNITS_BUTTON];
+        Dimensions[WAYPOINTS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+
+        Dimensions[TRIGGERS_BUTTON] = Dimensions[BUILDINGS_BUTTON];
+        Dimensions[TRIGGERS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
+    } else {
+        /**
+         * In hi-res, render buttons stacked to the right of the minimap
+         */
+
+        Dimensions[TERRAIN_BUTTON] = Dimensions[OVERLAY_BUTTON];
+        Dimensions[TERRAIN_BUTTON].Y += Dimensions[TERRAIN_BUTTON].H + ControlMargin; // adjust down
+
+        Dimensions[UNITS_BUTTON] = Dimensions[TERRAIN_BUTTON];
+        Dimensions[UNITS_BUTTON].Y += Dimensions[UNITS_BUTTON].H + ControlMargin; // adjust down
+
+        Dimensions[BUILDINGS_BUTTON] = Dimensions[UNITS_BUTTON];
+        Dimensions[BUILDINGS_BUTTON].Y += Dimensions[BUILDINGS_BUTTON].H + ControlMargin; // adjust down
+
+        Dimensions[WAYPOINTS_BUTTON] = Dimensions[BUILDINGS_BUTTON];
+        Dimensions[WAYPOINTS_BUTTON].Y += Dimensions[WAYPOINTS_BUTTON].H + ControlMargin; // adjust down
+
+        Dimensions[TRIGGERS_BUTTON] = Dimensions[WAYPOINTS_BUTTON];
+        Dimensions[TRIGGERS_BUTTON].Y += Dimensions[TRIGGERS_BUTTON].H + ControlMargin; // adjust down
+
+        const auto buttons_height = (Dimensions[TRIGGERS_BUTTON].Y + Dimensions[TRIGGERS_BUTTON].H) - Dimensions[OVERLAY_BUTTON].Y;
+
+        Dimensions[MINIMAP].Y += (buttons_height - Dimensions[MINIMAP].H) / 2;
     }
-
-    Dimensions[TERRAIN_BUTTON] = Dimensions[OVERLAY_BUTTON];
-    Dimensions[TERRAIN_BUTTON].X += button_width + ControlMargin; // adjust right
-
-    // object select second row
-    Dimensions[UNITS_BUTTON] = Dimensions[OVERLAY_BUTTON];
-    Dimensions[UNITS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
-
-    Dimensions[BUILDINGS_BUTTON] = Dimensions[TERRAIN_BUTTON];
-    Dimensions[BUILDINGS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
-
-    // object select third row
-    Dimensions[WAYPOINTS_BUTTON] = Dimensions[UNITS_BUTTON];
-    Dimensions[WAYPOINTS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
-
-    Dimensions[TRIGGERS_BUTTON] = Dimensions[BUILDINGS_BUTTON];
-    Dimensions[TRIGGERS_BUTTON].Y += ButtonHeight + ControlMargin;  // adjust down
 
     /**
      * Sidebar content panels
      */
     for (auto i = OVERLAY_GRID; i <= TRIGGERS_LIST; ++i) {
-        Dimensions[i] = Dimensions[WAYPOINTS_BUTTON];
-        Dimensions[i].Y += Dimensions[WAYPOINTS_BUTTON].H + ControlMargin;
-        Dimensions[i].W = W - (ControlMargin * 2);
-        Dimensions[i].H = H - (Dimensions[i].Y - Y) - FooterHeight;
+        Dimensions[i] = Dimensions[TRIGGERS_BUTTON];
+
+        Dimensions[i].X = use_lo_res_layout ? X + ControlMargin : Dimensions[MINIMAP].X + 1;
+        Dimensions[i].Y += Dimensions[TRIGGERS_BUTTON].H + ControlMargin + 1;
+        Dimensions[i].W = W - (ControlMargin * 2) - 2;
+        Dimensions[i].H = H - (Dimensions[i].Y - Y) - FooterHeight - 2;
     }
 
     // grid and list navigation
     Dimensions[PREVIOUS_BUTTON] = {
         .X = X + ControlMargin,
         .Y = (Y + H - FooterHeight) + ControlMargin,
-        .W = button_width,
+        .W = (W - (ControlMargin * 3)) / 2,
         .H = ButtonHeight
     };
 
     Dimensions[NEXT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
-    Dimensions[NEXT_BUTTON].X += ControlMargin + button_width;
+    Dimensions[NEXT_BUTTON].X += Dimensions[PREVIOUS_BUTTON].W + ControlMargin;
 
     // waypoint buttons
     Dimensions[GOTO_WAYPT_BUTTON] = Dimensions[PREVIOUS_BUTTON];
@@ -295,7 +323,7 @@ void MapEditorSidebar::Add_This()
     }
 
     // no content panel being displayed, so show first panel
-    constexpr auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
+    auto fake_input = static_cast<KeyNumType>(OVERLAY_BUTTON | KN_BUTTON);
     On_Input(fake_input, true);
 }
 
@@ -415,7 +443,8 @@ void MapEditorSidebar::Refresh_For_Scenario()
  * Dumps out object graphics/icons to fill the object area, using start_idx and end_idx for pagination.
  */
 void MapEditorSidebar::Render_Object_List(
-    const int control, std::vector<ObjectCatalogItem>& objects, ObjectListPager& pager
+    const int control,
+    std::vector<ObjectCatalogItem>& objects, ObjectListPager& pager
 )
 {
     // TODO: Consider alternatives, maybe draw stamp with clear template - very hard to see smudges
@@ -431,11 +460,11 @@ void MapEditorSidebar::Render_Object_List(
     );
 
     LogicPage->Draw_Rect(
-        Dimensions[control].X,
-        Dimensions[control].Y,
+        Dimensions[control].X - 1,
+        Dimensions[control].Y - 1,
         Dimensions[control].X + Dimensions[control].W,
         Dimensions[control].Y + Dimensions[control].H,
-        GRAY
+        LTGREY
     );
 
     if (pager.CurrentIndex == -1) {
@@ -572,6 +601,15 @@ void MapEditorSidebar::Render_Object_Grid(const int control, std::vector<ObjectC
     for (auto i = 0; i < idx; ++i) {
         objects[i].Dimensions.Reset();
     }
+
+    // draw border
+    LogicPage->Draw_Rect(
+        Dimensions[control].X - 1,
+        Dimensions[control].Y - 1,
+        Dimensions[control].X + Dimensions[control].W,
+        Dimensions[control].Y + Dimensions[control].H,
+        LTGREY
+    );
 
     for (auto row = 0 ; row < row_count; row++)
     {
@@ -887,10 +925,10 @@ void MapEditorSidebar::Set_Current_Object_On_Mouse_Over(const std::vector<Object
     HelpText.reset();
 }
 
-bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
+void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
 {
     if (Parent == nullptr) {
-        return false;
+        return;
     }
 
     if (!forced) {
@@ -898,7 +936,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
         if (Get_Mouse_X() < X || Get_Mouse_X() > X + W || Get_Mouse_Y() < Y || Get_Mouse_Y() > Y + H) {
             HelpText.reset(); // clear any active help text
             CurrentObject = nullptr; // clear mouse hover over object
-            return false;
+            return;
         }
     }
 
@@ -938,6 +976,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                 )
             );
             Parent->Flag_To_Redraw(true);
+            input = KN_NONE;
             break;
         }
 
@@ -982,6 +1021,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             }
 
             Parent->Flag_To_Redraw();
+            input = KN_NONE;
             break;
         }
 
@@ -996,6 +1036,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                     CNC_LOGGER_ERROR("Failed to start placement for object: {}", CurrentObject->IniName);
                 }
             }
+            input = KN_NONE;
             break;
 
         // content panel navigation
@@ -1018,6 +1059,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             }
 
             Parent->Flag_To_Redraw();
+            input = KN_NONE;
             break;
 
         case (NEXT_BUTTON | KN_BUTTON):
@@ -1038,6 +1080,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             }
 
             Parent->Flag_To_Redraw();
+            input = KN_NONE;
             break;
 
         case (TRIGGERS_LIST | KN_BUTTON): {
@@ -1052,6 +1095,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             if (!Parent->Manual_Start_Trigger_Placement(trigger)) {
                 CNC_LOGGER_ERROR("Failed to start placement for trigger: {}", trigger->Get_Name());
             }
+
+            input = KN_NONE;
             break;
         }
 
@@ -1068,6 +1113,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             } else {
                 delete new_trigger;
             }
+
+            input = KN_NONE;
             break;
         }
 
@@ -1084,6 +1131,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
 
                 Refresh_Trigger_List();
             }
+
+            input = KN_NONE;
             break;
         }
 
@@ -1100,6 +1149,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             Parent->Cancel_Placement();
 
             Refresh_Trigger_List();
+
+            input = KN_NONE;
             break;
         }
 
@@ -1109,6 +1160,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             if (!Parent->Start_Waypoint_Placement(WaypointLookup[list_idx])) {
                 CNC_LOGGER_ERROR("Failed to start placment of waypoint: #{}", list_idx);
             }
+
+            input = KN_NONE;
             break;
         }
 
@@ -1124,6 +1177,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             }
 
             Parent->Cancel_Placement();
+
+            input = KN_NONE;
             break;
         }
 
@@ -1137,6 +1192,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             Parent->Flag_To_Redraw(true);
 
             Parent->Cancel_Placement();
+
+            input = KN_NONE;
             break;
         }
 
@@ -1151,12 +1208,8 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             } else if (Get_Control<BUILDING_OBJECT_LIST, ControlClass>().IsEnabled()) {
                 Set_Current_Object_On_Mouse_Over(BuildingsCatalog);
             }
-
-            return false;
         }
     }
-
-    return true;
 }
 
 #endif

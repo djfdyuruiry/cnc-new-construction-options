@@ -112,5 +112,5 @@ public:
     void Refresh_For_Scenario();
 
     void Render();
-    bool On_Input(const KeyNumType& input, bool forced = false);
+    void On_Input(KeyNumType& input, bool forced = false);
 };

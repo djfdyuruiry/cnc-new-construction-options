@@ -329,6 +329,7 @@ void MapEditClass::Popup_Controls(void)
     Remove_A_Button(*BaseStructureIdText);
     Remove_A_Button(*BaseGauge);
     Remove_A_Button(*BaseLabel);
+    Remove_A_Button(*EditorMenuButton);
     Remove_A_Button(*MapArea);
 
     /*
@@ -339,6 +340,7 @@ void MapEditClass::Popup_Controls(void)
 
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
+        Add_A_Button(*EditorMenuButton);
         Add_A_Button(*MapArea);
         return;
     }
@@ -350,6 +352,7 @@ void MapEditClass::Popup_Controls(void)
         EditorSidebar.Add_This();
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
+        Add_A_Button(*EditorMenuButton);
         Add_A_Button(*MapArea);
         return;
     }
@@ -469,6 +472,7 @@ void MapEditClass::Popup_Controls(void)
     EditorSidebar.Add_This();
     Add_A_Button(*BaseGauge);
     Add_A_Button(*BaseLabel);
+    Add_A_Button(*EditorMenuButton);
     Add_A_Button(*MapArea);
 }
 

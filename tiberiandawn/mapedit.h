@@ -134,6 +134,7 @@ enum MapEditButtonIDEnum
     POPUP_FACINGDIAL,     // object's facing
     POPUP_BASESTRUCTURE,  // AI base toggle
     POPUP_BASEID,         // AI base ID (Base.Nodes index)
+    POPUP_EDITORMENU,     // Scenario Editor menu button
     POPUP_BASEPERCENT,    // Base's percent-built slider
     MAP_AREA,             // map as a click-able thingy
     BUTTON_FLAG = 0x8000
@@ -385,6 +386,7 @@ private:
     static char HealthBuf[20];
     GaugeClass* BaseGauge;
     TextLabelClass* BaseLabel;
+    TextButtonClass* EditorMenuButton;
     static MissionType MapEditMissions[NUM_EDIT_MISSIONS];
     static char BaseText[6];
 
