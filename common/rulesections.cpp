@@ -155,12 +155,17 @@ std::string RuleSection::Variant_To_String(const RuleValueVariant& value_variant
 {
     return std::visit([&](const auto& t) {
         using T = std::decay_t<decltype(t)>;
+        const T value = std::get<T>(value_variant);
 
         if constexpr (std::is_same_v<T, float>) {
-            return std::format("{:.2f}", std::get<T>(value_variant));
+            // render all floats with 2 decimal places
+            return std::format("{:.2f}", value);
+        } else if constexpr (std::is_same_v<T, char>) {
+            // prevent char value being interpreted as a character
+            return std::format("{}", static_cast<int>(value));
         }
 
-        return std::format("{}", std::get<T>(value_variant));
+        return std::format("{}", value);
     }, value_variant);
 }
 
