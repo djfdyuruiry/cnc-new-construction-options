@@ -237,6 +237,11 @@ public:
 
     void Mark_Changed(void);
 
+#ifdef MEGAMAPS
+    bool Is_Normal_Size(void) const;
+    bool Is_Mega_Size(void) const;
+#endif
+
     /*
     ............................ mapedsel.cpp .............................
     */

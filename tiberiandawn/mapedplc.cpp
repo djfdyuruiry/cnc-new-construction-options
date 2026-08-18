@@ -2231,4 +2231,18 @@ void MapEditClass::Mark_Changed()
     Changed = 1;
 }
 
+/**
+ * Are the map bounds within normal map size?
+ */
+bool MapEditClass::Is_Normal_Size() const
+{
+    return IniMapCellX + IniMapCellWidth <= ORIGINAL_MAP_CELL_W
+        && IniMapCellY + IniMapCellHeight <= ORIGINAL_MAP_CELL_H;
+}
+
+bool MapEditClass::Is_Mega_Size() const
+{
+    return !Is_Normal_Size();
+}
+
 #endif

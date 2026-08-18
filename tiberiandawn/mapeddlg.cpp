@@ -1676,10 +1676,7 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
      **
      ** Maps that exceed original size need to use the megamap binary format.
      */
-    MapBinaryVersion =
-        (IniMapCellX + IniMapCellWidth <= ORIGINAL_MAP_CELL_W && IniMapCellY + IniMapCellHeight <= ORIGINAL_MAP_CELL_H)
-            ? MAP_VERSION_NORMAL
-            : MAP_VERSION_MEGA;
+    MapBinaryVersion = Is_Normal_Size() ? MAP_VERSION_NORMAL : MAP_VERSION_MEGA;
 #endif
 
     /*
