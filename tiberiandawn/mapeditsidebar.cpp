@@ -937,6 +937,7 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
                     XY_Cell(map_x, map_y)
                 )
             );
+            Parent->Flag_To_Redraw(true);
             break;
         }
 
