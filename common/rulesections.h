@@ -451,6 +451,7 @@ public:
     std::optional<std::string> Try_Get_Rule_Comment(std::string_view name) const;
 
     RuleSection& Set_Rule_Ini_Source(std::string_view name, const std::string& source);
+    bool Clear_Rule_Ini_Source(std::string_view name);
     std::optional<std::string> Try_Get_Rule_Ini_Source(std::string_view name) const;
 
     RuleValueVariant operator[](std::string_view name) const;

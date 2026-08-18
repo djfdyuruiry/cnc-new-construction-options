@@ -472,6 +472,7 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
     }
 
     Rules[name.data()] = value;
+    Clear_Rule_Ini_Source(name.data()); // value no longer sourced from INI file (if any)
 
     OnRulesChanged(*this, name, value);
 
@@ -506,9 +507,14 @@ std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_v
 
 RuleSection& RuleSection::Set_Rule_Ini_Source(const std::string_view name, const std::string& source)
 {
-    RuleIniSource[name.data()] = source;;
+    RuleIniSource[name.data()] = source;
 
     return *this;
+}
+
+bool RuleSection::Clear_Rule_Ini_Source(const std::string_view name)
+{
+    return RuleIniSource.erase(name.data()) == 1;
 }
 
 std::optional<std::string> RuleSection::Try_Get_Rule_Ini_Source(const std::string_view name) const
