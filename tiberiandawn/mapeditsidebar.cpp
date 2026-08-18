@@ -170,6 +170,11 @@ void MapEditorSidebar::Init_Dimensions()
     };
 #endif
 
+    if (SeenBuff.Get_Height() <= GBUFF_INIT_HEIGHT) {
+        // original res is too short to have minimap visible at all times
+        Dimensions[MINIMAP].Reset();
+    }
+
     /**
      * Map object selection buttons
      */
@@ -182,6 +187,11 @@ void MapEditorSidebar::Init_Dimensions()
         .W = button_width,
         .H = ButtonHeight
     };
+
+    if (SeenBuff.Get_Height() <= GBUFF_INIT_HEIGHT) {
+        // adjust buttons in original res, no minimap to anchor to
+        Dimensions[OVERLAY_BUTTON].Y = Y + ControlMargin;
+    }
 
     Dimensions[TERRAIN_BUTTON] = Dimensions[OVERLAY_BUTTON];
     Dimensions[TERRAIN_BUTTON].X += button_width + ControlMargin; // adjust right
@@ -700,8 +710,7 @@ void MapEditorSidebar::Render_Minimap()
     LogicPage->Lock();
 
 #ifdef MEGAMAPS
-    const auto scale_map = Parent->IniMapCellX + Parent->IniMapCellWidth <= ORIGINAL_MAP_CELL_W
-        && Parent->IniMapCellY + Parent->IniMapCellHeight <= ORIGINAL_MAP_CELL_H; // are the map bounds within normal map size?
+    const auto scale_map = Parent->Is_Normal_Size();
 #else
     const auto scale_map = true;
 #endif
@@ -781,7 +790,10 @@ void MapEditorSidebar::Render()
     // left margin
     LogicPage->Draw_Line(X - 1, Y, X - 1, Y + H, GRAY);
 
-    Render_Minimap();
+    if (Dimensions[MINIMAP].H > 0) {
+        // only render minimap if dimensions defined
+        Render_Minimap();
+    }
 
     // active content panel
     if (Get_Control<OVERLAY_GRID, ControlClass>().IsEnabled()) {
@@ -900,6 +912,34 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
     };
 
     switch (input) {
+        case (MINIMAP | KN_BUTTON): {
+            if (!Point_Is_Inside_Dimensions(Get_Mouse_X(), Get_Mouse_Y())) {
+                break;
+            }
+
+            auto map_x = Get_Mouse_X() - Dimensions[MINIMAP].X;
+            auto map_y = Get_Mouse_Y() - Dimensions[MINIMAP].Y;
+
+#ifdef MEGAMAPS
+            const auto scale_map = Parent->Is_Normal_Size();
+#else
+            const auto scale_map = true;
+#endif
+
+            if (scale_map) {
+                // need to adjust as the map will be scaled up x4
+                map_x /= 2;
+                map_y /= 2;
+            }
+
+            Parent->Center_Map(
+                Cell_Coord(
+                    XY_Cell(map_x, map_y)
+                )
+            );
+            break;
+        }
+
         // toggle buttons to switch content panels
 
         case (OVERLAY_BUTTON | KN_BUTTON):
@@ -1077,20 +1117,9 @@ bool MapEditorSidebar::On_Input(const KeyNumType& input, const bool forced)
             const auto& waypoint_cell = Scen.Waypoint[waypoint_idx];
 
             if (waypoint_cell != -1) {
-                auto cell_x = Cell_X(waypoint_cell);
-                auto cell_y = Cell_Y(waypoint_cell);
-
-                // try to shift waypoint cell up and left so it is (best-effort) centered on screen when map snaps to it
-                const auto map_cell_width = Parent->TacLeptonWidth / CELL_LEPTON_W;
-                const auto map_cell_height = Parent->TacLeptonHeight / CELL_LEPTON_H;
-
-                cell_x = max(0, cell_x - (map_cell_width / 2));
-                cell_y = max(0, cell_y - (map_cell_height / 2));
-
-                Parent->DesiredTacticalCoord = Cell_Coord(XY_Cell(cell_x, cell_y));
-                CurrentCell = waypoint_cell;
-
-                Parent->Flag_To_Redraw(true);
+                Parent->Center_Map(
+                    Cell_Coord(waypoint_cell)
+                );
             }
 
             Parent->Cancel_Placement();

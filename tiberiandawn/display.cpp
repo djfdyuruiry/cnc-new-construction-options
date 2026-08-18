@@ -4860,6 +4860,10 @@ COORDINATE DisplayClass::Center_Map(COORDINATE center)
 
         Set_Tactical_Position(XY_Coord(x, y));
 
+#ifdef SCENARIO_EDITOR
+        CurrentCell = Coord_Cell(center);
+#endif
+
         return center;
     }
 
