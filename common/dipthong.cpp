@@ -38,6 +38,7 @@
  *   Dip_Text -- Compresses text by using dipthonging.                     *
  *   Fixup_Text -- Converts dipthonged foreign text into normal text.      *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+#include <iterator>
 
 #include "wwkeyboard.h"
 #include "dipthong.h"
@@ -310,7 +311,7 @@ char* Extract_String(void const* data, int string)
 {
     unsigned short ptr_0, ptr_string;
 
-    if (!data || string < 0)
+    if (!data || string < 0 || string - 4567 == std::size(InternetTxt))
         return nullptr;
 
     if (string >= 4567)
