@@ -4230,6 +4230,11 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
                 return false;
             }
 
+            if (Map[cell].Overlay != OVERLAY_NONE) {
+                // prevent bibs under overlay
+                return false;
+            }
+
             if (
                 Map[cell].Cell_Occupier() != nullptr
                 && Map[cell].Cell_Occupier()->What_Am_I() != RTTI_INFANTRY
