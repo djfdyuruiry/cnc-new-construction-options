@@ -1902,8 +1902,8 @@ bool MapEditClass::Place_Trigger(void)
     /*
     -------------------- See if an object was clicked on ---------------------
     */
-    x = Keyboard->MouseQX;
-    y = Keyboard->MouseQY;
+    x = Get_Mouse_X();
+    y = Get_Mouse_Y();
 
     /*
     ............................ Get cell for x,y ............................

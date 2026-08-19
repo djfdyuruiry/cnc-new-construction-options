@@ -868,6 +868,11 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
 
                 Start_Placement();
             }
+        } else if (CurTrigger != nullptr) {
+            Flag_To_Redraw(true);
+            if (Place_Trigger()) {
+                Changed = 1;
+            }
         } else if (GrabbedObject) {
             /*.....................................................................
             Move the currently-grabbed object
@@ -2166,7 +2171,7 @@ bool MapEditClass::Mouse_Moved(void)
     } else {
         if (GrabbedObject) {
             objtype = &GrabbedObject->Class_Of();
-        } else {
+        } else if (CurTrigger == nullptr) {
             old_mx = Get_Mouse_X();
             old_my = Get_Mouse_Y();
             old_zonecell = ZoneCell;
@@ -2180,7 +2185,7 @@ bool MapEditClass::Mouse_Moved(void)
     /*
     ............... Infantry: mouse moved if any motion at all ...............
     */
-    if (objtype->What_Am_I() == RTTI_INFANTRYTYPE) {
+    if (objtype != nullptr && objtype->What_Am_I() == RTTI_INFANTRYTYPE) {
         retcode = true;
     } else {
         /*
