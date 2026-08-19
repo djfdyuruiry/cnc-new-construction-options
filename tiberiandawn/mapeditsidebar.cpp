@@ -53,7 +53,7 @@ void MapEditorSidebar::Init_Controls()
         {UNITS_BUTTON, "Units"},
         {BUILDINGS_BUTTON, "Buildings"},
         {WAYPOINTS_BUTTON, "Waypoints"},
-        {TRIGGERS_BUTTON, SeenBuff.Get_Width() <= GBUFF_INIT_WIDTH ? "Triggers" : "Cell Triggers"},
+        {TRIGGERS_BUTTON, "Triggers"},
         {PREVIOUS_BUTTON, "Previous"},
         {NEXT_BUTTON, "Next"},
         {GOTO_WAYPT_BUTTON, "Go To"},
@@ -402,28 +402,36 @@ void MapEditorSidebar::Purge_Theater_Objects()
 void MapEditorSidebar::Refresh_Trigger_List()
 {
     /**
-     * Refresh cell trigger info.
+     * Refresh cell info.
      */
     auto& trigger_list = Get_Control<TRIGGERS_LIST, ListClass>();
 
     // clear down trigger list and UI
-    CellTriggerList.clear();
+    CurrentTriggerList.clear();
+    TriggerText.clear();
 
     while (trigger_list.Count() > 0) {
         trigger_list.Remove_Item(0);
     }
 
-    // populate with current cell triggers
+    // populate with current triggers
     for (auto i = 0; i < Triggers.Count(); i++) {
         auto trigger = Triggers.Ptr(i);
 
-        if (trigger == nullptr || (trigger->Event != EVENT_PLAYER_ENTERED && trigger->Event != EVENT_CELLFIRST)) {
-            // filter for cell triggers
+        if (trigger == nullptr) {
             continue;
         }
 
-        CellTriggerList.emplace_back(trigger);
-        trigger_list.Add_Item(trigger->Get_Name());
+        const auto trigger_txt = trigger->Event <= EVENT_OBJECTFIRST
+                ? std::format("{} (Cell Trigger)", trigger->Get_Name()) // denote this trigger is cell based
+                : std::string(trigger->Get_Name());
+        auto text_ptr = std::make_unique<char[]>(trigger_txt.size() + 1);
+
+        strcpy(text_ptr.get(), trigger_txt.c_str());
+
+        trigger_list.Add_Item(text_ptr.get());
+        CurrentTriggerList.emplace_back(trigger);
+        TriggerText.emplace_back(std::move(text_ptr));
     }
 }
 
@@ -1086,11 +1094,11 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
         case (TRIGGERS_LIST | KN_BUTTON): {
             const auto trigger_idx = Get_Control<TRIGGERS_LIST, ListClass>().Current_Index();
 
-            if (trigger_idx >= CellTriggerList.size() || CellTriggerList[trigger_idx] == nullptr) {
+            if (trigger_idx >= CurrentTriggerList.size() || CurrentTriggerList[trigger_idx] == nullptr) {
                 break;
             }
 
-            auto trigger = CellTriggerList[trigger_idx];
+            auto trigger = CurrentTriggerList[trigger_idx];
 
             if (!Parent->Manual_Start_Trigger_Placement(trigger)) {
                 CNC_LOGGER_ERROR("Failed to start placement for trigger: {}", trigger->Get_Name());
@@ -1121,11 +1129,11 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
         case (EDIT_TRIGGER_BUTTON | KN_BUTTON): {
             const auto trigger_idx = Get_Control<TRIGGERS_LIST, ListClass>().Current_Index();
 
-            if (trigger_idx >= CellTriggerList.size() || CellTriggerList[trigger_idx] == nullptr) {
+            if (trigger_idx >= CurrentTriggerList.size() || CurrentTriggerList[trigger_idx] == nullptr) {
                 break;
             }
 
-            if (Parent->Edit_Trigger(CellTriggerList[trigger_idx]) == 0) {
+            if (Parent->Edit_Trigger(CurrentTriggerList[trigger_idx]) == 0) {
                 Parent->Mark_Changed();
                 Parent->Cancel_Placement();
 
@@ -1139,11 +1147,11 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
         case (DELETE_TRIGGER_BUTTON | KN_BUTTON): {
             const auto trigger_idx = Get_Control<TRIGGERS_LIST, ListClass>().Current_Index();
 
-            if (trigger_idx >= CellTriggerList.size() || CellTriggerList[trigger_idx] == nullptr) {
+            if (trigger_idx >= CurrentTriggerList.size() || CurrentTriggerList[trigger_idx] == nullptr) {
                 break;
             }
 
-            CellTriggerList[trigger_idx]->Remove();
+            CurrentTriggerList[trigger_idx]->Remove();
 
             Parent->Mark_Changed();
             Parent->Cancel_Placement();

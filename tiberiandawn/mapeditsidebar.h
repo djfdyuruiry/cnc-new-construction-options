@@ -70,7 +70,8 @@ private:
     ObjectListPager TerrainPager;
     GridPager UnitsGridPager;
     ObjectListPager BuildingListPager;
-    std::vector<TriggerClass*> CellTriggerList;
+    std::vector<TriggerClass*> CurrentTriggerList;
+    std::vector<std::unique_ptr<char[]>> TriggerText;
 
     // current sidebar object the mouse is hovering over
     const ObjectTypeClass* CurrentObject = nullptr;
