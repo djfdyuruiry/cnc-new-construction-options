@@ -1504,34 +1504,62 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             HiddenPage.Clear();
             Flag_To_Redraw(true);
             Changed = 1;
-        } else {
-            if (CurrentCell) {
-                /*
-                ................. Remove trigger from current cell .................
-                */
-                if ((*this)[CurrentCell].IsTrigger) {
-                    (*this)[CurrentCell].IsTrigger = 0;
-                    CellTriggers[CurrentCell] = NULL;
-                    /*
-                    ...................... Force a redraw ........................
-                    */
-                    HiddenPage.Clear();
-                    Flag_To_Redraw(true);
-                    Changed = 1;
-                } else {
-                    auto& current_cell = Array[CurrentCell];
+        } else if (CurrentCell) {
+            /*
+            ........... Remove cell contents (in priority order) ............
+            */
+            auto& current_cell = Array[CurrentCell];
+            auto cell_waypoint_number = - 1;
+            auto content_changed = false;
 
-                    // first try to delete overlay (if any)
-                    if (!current_cell.Purge_Overlay()) {
-                        // purge any object in this cell, most objects are grabbable so this is an edge case
-                        if (current_cell.Cell_Occupier() != nullptr) {
-                            current_cell.Cell_Occupier()->Delete_This();
-                            Flag_To_Redraw(true);
-                        }
-                    } else {
-                        Flag_To_Redraw(true);
-                    }
+            for (auto idx = 0; idx < std::size(Scen.Waypoint); idx++) {
+                if (Scen.Waypoint[idx] == current_cell.Cell_Number()) {
+                    cell_waypoint_number = idx;
+                    break;
                 }
+            }
+
+            if (Array[CurrentCell].IsTrigger) {
+                // priority 1: trigger
+                Array[CurrentCell].IsTrigger = false;
+                CellTriggers[CurrentCell] = nullptr;
+
+                EditorSidebar.Refresh_Trigger_List();
+                content_changed = true;
+            } else if (cell_waypoint_number != -1) {
+                // priority 2: waypoint
+                Scen.Waypoint[cell_waypoint_number] = -1;
+
+                EditorSidebar.Refresh_Waypoint_List();
+                content_changed = true;
+            } else if (current_cell.Purge_Overlay()) {
+                // priority 3: overlay
+                content_changed = true;
+            } else if (current_cell.Cell_Occupier() != nullptr) {
+                // priority 4: cell occupier (most objects are grabbable so this is an edge case)
+                current_cell.Cell_Occupier()->Delete_This();
+
+                content_changed = true;
+            } else if (current_cell.Smudge != SMUDGE_NONE) {
+                // priority 5: smudge
+                current_cell.Smudge = SMUDGE_NONE;
+                current_cell.SmudgeData = 0;
+                current_cell.Recalc_Attributes();
+
+                content_changed = true;
+            } else {
+                // priority 6: template icon
+                current_cell.TIcon = current_cell.Clear_Icon();
+                current_cell.TType = TEMPLATE_CLEAR1;
+
+                content_changed = true;
+            }
+
+            if (content_changed) {
+                // redraw and flag change
+                HiddenPage.Clear();
+                Flag_To_Redraw(true);
+                Changed = 1;
             }
         }
         input = KN_NONE;
