@@ -1263,6 +1263,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             (*this)[CurrentCell].IsWaypoint = 1;
             Changed = 1;
             Flag_Cell(CurrentCell);
+            EditorSidebar.Refresh_Waypoint_List();
         }
         input = KN_NONE;
         break;
@@ -1309,8 +1310,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             clear that waypoint.
             ...............................................................*/
             for (i = 0; i < 26; i++) {
-                if (Scen.Waypoint[i] == CurrentCell)
+                if (Scen.Waypoint[i] == CurrentCell) {
                     Scen.Waypoint[i] = -1;
+                    EditorSidebar.Refresh_Waypoint_List();
+                }
             }
 
             /*...............................................................
@@ -1389,6 +1392,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             } else if (CurWaypoint != WAYPT_COUNT) {
                 if (Place_Waypoint()) {
                     Cancel_Placement();
+                    EditorSidebar.Refresh_Waypoint_List();
                     Flag_To_Redraw(true);
                     Changed = 1;
                 }
@@ -1869,15 +1873,13 @@ void MapEditClass::Draw_Footer(const bool forced)
     const auto cell_y = Cell_Y(target_cell);
     const auto cell_coord = XY_Coord(cell_x, cell_y) * 256; // scale coord to match INI file format
 
-    auto cell_number = Array[target_cell].Cell_Number();
+    auto cell_number = target_cell;
 
 #ifdef MEGAMAPS
     // if we are editing a non-megamap scenario using a megamap build, adjust the cell_number to display
     // what will be seen in the INI file on save
-    if (MapBinaryVersion == MAP_VERSION_NORMAL && cell_x <= 64 && cell_y <= 64) {
-        const auto unconfined_cell = Unconfine_Old_Cell(target_cell);
-
-        cell_number = Array[unconfined_cell].Cell_Number();
+    if (Is_Normal_Size() && cell_x <= 64 && cell_y <= 64) {
+        cell_number = Unconfine_Old_Cell(target_cell);
     }
 #endif
 

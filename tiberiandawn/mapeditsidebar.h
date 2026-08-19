@@ -57,8 +57,6 @@ private:
     static inline std::vector<ObjectCatalogItem> TerrainCatalog;
     static inline std::vector<ObjectCatalogItem> UnitsCatalog;
     static inline std::vector<ObjectCatalogItem> BuildingsCatalog;
-    static inline std::vector<WaypointType> WaypointLookup;
-    static inline std::vector<std::unique_ptr<char[]>> WaypointText;
 
     MapEditClass* Parent = nullptr;
     std::map<int, DialogControlDimension> Dimensions;
@@ -70,8 +68,12 @@ private:
     ObjectListPager TerrainPager;
     GridPager UnitsGridPager;
     ObjectListPager BuildingListPager;
+
     std::vector<TriggerClass*> CurrentTriggerList;
     std::vector<std::unique_ptr<char[]>> TriggerText;
+
+    std::vector<WaypointType> WaypointLookup;
+    std::vector<std::unique_ptr<char[]>> WaypointText;
 
     // current sidebar object the mouse is hovering over
     const ObjectTypeClass* CurrentObject = nullptr;
@@ -109,6 +111,7 @@ public:
     void Add_This();
     void Remove_This();
 
+    void Refresh_Waypoint_List();
     void Refresh_Trigger_List();
     void Refresh_For_Scenario();
 

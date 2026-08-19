@@ -110,43 +110,6 @@ void MapEditorSidebar::Init_Controls()
         );
         Controls[id]->Disable(true);
     }
-
-    // waypoint list (text labels, tracker list and populate UI list)
-
-    if (WaypointText.empty()) {
-        // initialise static waypoint text strings
-        for (int i = 0; i < WAYPT_HOME; i++) {
-            auto text_ptr = std::make_unique<char[]>(3);
-            sprintf(text_ptr.get(), "%d", i);
-
-            WaypointText.emplace_back(std::move(text_ptr));
-        }
-    }
-
-    if (WaypointLookup.empty()) {
-        // initialise static tracker list for mapping selected index to waypoint
-        WaypointLookup.push_back(WAYPT_HOME);
-        WaypointLookup.push_back(WAYPT_REINF);
-
-        for (auto i = static_cast<WaypointType>(0); i < WAYPT_HOME; ++i) {
-            WaypointLookup.push_back(i);
-        }
-    }
-
-    auto& waypoint_list = Get_Control<WAYPOINTS_LIST, ListClass>();
-
-    while (waypoint_list.Count() > 0) {
-        waypoint_list.Remove_Item(0);
-    }
-
-    // add const char strings
-    waypoint_list.Add_Item("HOME");
-    waypoint_list.Add_Item("REINF");
-
-    // add dynamic char strings
-    for (const auto& text_ptr : WaypointText) {
-        waypoint_list.Add_Item(text_ptr.get());
-    }
 }
 
 void MapEditorSidebar::Init_Dimensions()
@@ -399,14 +362,63 @@ void MapEditorSidebar::Purge_Theater_Objects()
     BuildingsCatalog.clear();
 }
 
+void MapEditorSidebar::Refresh_Waypoint_List()
+{
+    // setup UI index to waypoint index
+    WaypointLookup.clear();
+    WaypointLookup.push_back(WAYPT_HOME);
+    WaypointLookup.push_back(WAYPT_REINF);
+
+    for (auto i = static_cast<WaypointType>(0); i < WAYPT_HOME; ++i) {
+        WaypointLookup.push_back(i);
+    }
+
+    // load waypoints into UI list
+    auto& waypoint_list = Get_Control<WAYPOINTS_LIST, ListClass>();
+    const auto current_index = waypoint_list.Current_Index();
+
+    while (waypoint_list.Count() > 0) {
+        waypoint_list.Remove_Item(0);
+    }
+
+    waypoint_list.Add_Item("HOME");
+    waypoint_list.Add_Item("REINF");
+
+    WaypointText.clear();
+
+    for (int i = 0; i < WAYPT_HOME; i++) {
+        CELL waypoint_cell = Scen.Waypoint[i];
+
+#ifdef MEGAMAPS
+        const auto cell_x = waypoint_cell == -1 ? -1 : Cell_X(waypoint_cell);
+        const auto cell_y = waypoint_cell == -1 ? -1 : Cell_Y(waypoint_cell);
+
+        // if we are editing a non-megamap scenario using a megamap build, adjust the cell_number to display
+        // what will be seen in the INI file on save
+        if (waypoint_cell != -1 && Parent->Is_Normal_Size() && cell_x <= 64 && cell_y <= 64) {
+            waypoint_cell = Unconfine_Old_Cell(waypoint_cell);
+        }
+#endif
+
+        auto waypoint_text = waypoint_cell == -1
+            ? std::format("{}", i)
+            : std::format("{} (Cell #{})", i, waypoint_cell);
+        auto text_ptr = std::make_unique<char[]>(waypoint_text.size() + 1);
+
+        strcpy(text_ptr.get(), waypoint_text.c_str());
+
+        waypoint_list.Add_Item(text_ptr.get());
+        WaypointText.emplace_back(std::move(text_ptr));
+    }
+
+    waypoint_list.Set_Selected_Index(current_index);
+}
+
 void MapEditorSidebar::Refresh_Trigger_List()
 {
-    /**
-     * Refresh cell info.
-     */
+    // clear down trigger list and UI
     auto& trigger_list = Get_Control<TRIGGERS_LIST, ListClass>();
 
-    // clear down trigger list and UI
     CurrentTriggerList.clear();
     TriggerText.clear();
 
@@ -414,7 +426,7 @@ void MapEditorSidebar::Refresh_Trigger_List()
         trigger_list.Remove_Item(0);
     }
 
-    // populate with current triggers
+    // populate UI with current triggers
     for (auto i = 0; i < Triggers.Count(); i++) {
         auto trigger = Triggers.Ptr(i);
 
@@ -444,6 +456,7 @@ void MapEditorSidebar::Refresh_For_Scenario()
     TerrainPager = {};
     BuildingListPager = {};
 
+    Refresh_Waypoint_List();
     Refresh_Trigger_List();
 }
 
@@ -1182,6 +1195,7 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
                 Parent->Center_Map(
                     Cell_Coord(waypoint_cell)
                 );
+                Parent->Flag_To_Redraw(true);
             }
 
             Parent->Cancel_Placement();
@@ -1195,6 +1209,7 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
             const auto waypoint_idx = WaypointLookup[list_idx];
 
             Scen.Waypoint[waypoint_idx] = -1;
+            Refresh_Waypoint_List();
 
             Parent->Mark_Changed();
             Parent->Flag_To_Redraw(true);
