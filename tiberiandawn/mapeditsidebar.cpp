@@ -387,7 +387,7 @@ void MapEditorSidebar::Refresh_Waypoint_List()
     WaypointText.clear();
 
     for (int i = 0; i < WAYPT_HOME; i++) {
-        CELL waypoint_cell = Scen.Waypoint[i];
+        auto waypoint_cell = Scen.Waypoint[i];
 
 #ifdef MEGAMAPS
         const auto cell_x = waypoint_cell == -1 ? -1 : Cell_X(waypoint_cell);
@@ -411,6 +411,7 @@ void MapEditorSidebar::Refresh_Waypoint_List()
         WaypointText.emplace_back(std::move(text_ptr));
     }
 
+    // ensure UI index is preserved
     waypoint_list.Set_Selected_Index(current_index);
 }
 
