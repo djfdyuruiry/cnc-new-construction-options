@@ -261,6 +261,11 @@ bool TriggerClass::Action_Need_Team(TriggerClass::ActionType action)
     return (false);
 }
 
+bool TriggerClass::Action_Need_StringData(const ActionType action)
+{
+    return action == ACTION_LUA_EVENT || action == ACTION_LUA_SCRIPT;
+}
+
 /***********************************************************************************************
  * TriggerClass::TriggerClass -- constructor                                                   *
  *                                                                                             *

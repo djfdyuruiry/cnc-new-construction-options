@@ -1127,6 +1127,8 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
 
             new_trigger->Event = EVENT_PLAYER_ENTERED;
 
+            Parent->Cancel_Placement();
+
             if (Parent->Edit_Trigger(new_trigger) == 0) {
                 Parent->Mark_Changed();
                 Parent->Manual_Start_Trigger_Placement(new_trigger);
@@ -1147,10 +1149,9 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
                 break;
             }
 
-            if (Parent->Edit_Trigger(CurrentTriggerList[trigger_idx]) == 0) {
-                Parent->Mark_Changed();
-                Parent->Cancel_Placement();
+            Parent->Cancel_Placement();
 
+            if (Parent->Edit_Trigger(CurrentTriggerList[trigger_idx]) == 0) {
                 Refresh_Trigger_List();
             }
 

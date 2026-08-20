@@ -3106,6 +3106,7 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
         ACTION_LIST,
         NAME_EDIT,
         DATA_EDIT,
+        STRING_DATA_EDIT,
         BUTTON_TEAM,
         BUTTON_GDI,
         BUTTON_NOD,
@@ -3147,6 +3148,7 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
     TriggerClass::ActionType action_idx;                     // index for action list
     char namebuf[5];                                         // name of this trigger
     char databuf[10];                                        // for credit/time-based triggers
+    char strdatabuf[256];                                        // for credit/time-based triggers
     HousesType house;                                        // house for this trigger
     const char* eventnames[EVENT_COUNT + 1];                 // names of events
     const char* actionnames[TriggerClass::ACTION_COUNT + 1]; // names of actions
@@ -3199,6 +3201,16 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
                        D_DATA_X,
                        D_DATA_Y,
                        D_DATA_W,
+                       D_DATA_H,
+                       EditClass::ALPHANUMERIC);
+
+    EditClass string_data_edt(STRING_DATA_EDIT,
+                       strdatabuf,
+                       255,
+                       TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                       D_DATA_X,
+                       D_DATA_Y + D_DATA_H + D_MARGIN,
+                       D_VOLATILE_X + D_VOLATILE_W - D_DATA_X,
                        D_DATA_H,
                        EditClass::ALPHANUMERIC);
 
@@ -3325,6 +3337,17 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
         data_edt.Set_Text(databuf, 8);
     }
 
+    if (TriggerClass::Action_Need_StringData(action_idx)) {
+        if (trigger->StringData.has_value()) {
+            strncpy(strdatabuf, trigger->StringData->c_str(), std::size(strdatabuf));
+            strdatabuf[std::size(strdatabuf) - 1] = '\0';
+        } else {
+            strdatabuf[0] = '\0';
+        }
+
+        string_data_edt.Set_Text(strdatabuf, std::size(strdatabuf));
+    }
+
     house = trigger->House; // House
 
     persistant = trigger->IsPersistant;
@@ -3445,6 +3468,15 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
                     }
                 }
 
+                if (TriggerClass::Action_Need_StringData(action_idx)) {
+                    Fancy_Text_Print(action_idx == TriggerClass::ACTION_LUA_EVENT ? "Handler Name" : "Script File",
+                                     D_DATA_X - 5,
+                                     D_DATA_Y + D_DATA_H + D_MARGIN,
+                                     CC_GREEN,
+                                     TBLACK,
+                                     TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+                }
+
                 if (TriggerClass::Action_Need_Team(action_idx)) {
                     if (trigger->Team) {
                         Fancy_Text_Print(trigger->Team->IniName,
@@ -3471,6 +3503,7 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
             actionlist.Zap();
             name_edt.Zap();
             data_edt.Zap();
+            string_data_edt.Zap();
             teambtn.Zap();
             gdibtn.Zap();
             nodbtn.Zap();
@@ -3494,6 +3527,19 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
                 sprintf(databuf, "%d", trigger->Data);
                 data_edt.Set_Text(databuf, 8);
             }
+
+            if (TriggerClass::Action_Need_StringData(action_idx)) {
+                string_data_edt.Add_Tail(*commands);
+                if (trigger->StringData.has_value()) {
+                    strncpy(strdatabuf, trigger->StringData->c_str(), std::size(strdatabuf));
+                    strdatabuf[std::size(strdatabuf) - 1] = '\0';
+                } else {
+                    strdatabuf[0] = '\0';
+                }
+
+                string_data_edt.Set_Text(strdatabuf, std::size(strdatabuf));
+            }
+
             if (TriggerClass::Event_Need_House(event_idx)) {
                 gdibtn.Add_Tail(*commands);
                 nodbtn.Add_Tail(*commands);
@@ -3537,6 +3583,7 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
         case (ACTION_LIST | KN_BUTTON):
             if (actionlist.Current_Index() != action_idx) {
                 action_idx = TriggerClass::ActionType(actionlist.Current_Index());
+                strdatabuf[0] = 0;
                 display = REDRAW_ALL;
             }
             break;
@@ -3545,6 +3592,9 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
             break;
 
         case (DATA_EDIT | KN_BUTTON):
+            break;
+
+        case (STRING_DATA_EDIT | KN_BUTTON):
             break;
 
         case (BUTTON_GDI | KN_BUTTON):
@@ -3641,6 +3691,10 @@ int MapEditClass::Edit_Trigger(TriggerClass* trigger)
         */
         if (TriggerClass::Event_Need_Data(event_idx)) {
             trigger->Data = atol(databuf);
+        }
+
+        if (TriggerClass::Action_Need_StringData(action_idx)) {
+            trigger->StringData = strdatabuf;
         }
 
         /*
