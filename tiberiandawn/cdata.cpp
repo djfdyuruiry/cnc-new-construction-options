@@ -1968,7 +1968,7 @@ void TemplateTypeClass::Init(TheaterType theater)
 
         ((void const*&)tplate.ImageData) = NULL;
         if (tplate.Theater & (1 << theater)) {
-            _makepath(fullname, NULL, NULL, tplate.IniName, Theaters[theater].Suffix);
+            _makepath(fullname, NULL, NULL, tplate.ImageName.c_str(), Theaters[theater].Suffix);
             ptr = MFCD::Retrieve(fullname);
             ((void const*&)tplate.ImageData) = ptr;
             // No need for icon caching now. ST - 12/19/2018 11:48AM
@@ -1996,55 +1996,48 @@ void TemplateTypeClass::Init(TheaterType theater)
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void TemplateTypeClass::Display(int x, int y, WindowNumberType window, HousesType) const
+void TemplateTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType) const
 {
-    int w, h;
-    int index;
-    unsigned char map[13 * 8];
-    bool scale; // Should the template be half sized?
+    const auto shape = Get_Image_Data();
 
-    w = Bound(Width, 1, 13);
-    h = Bound(Height, 1, 8);
-    scale = (w > 3 || h > 3);
-    if (scale) {
-        x -= (w / 2) * (ICON_PIXEL_W / 2);
-        y -= (h / 2) * (ICON_PIXEL_H / 2);
-    } else {
-        x -= (w / 2) * ICON_PIXEL_W;
-        y -= (h / 2) * ICON_PIXEL_H;
+    if (shape == nullptr) {
+        return;
     }
-    x += WindowList[window][WINDOWX];
-    y += WindowList[window][WINDOWY];
 
-    Mem_Copy(Get_Icon_Set_Map(Get_Image_Data()), map, Width * Height);
+    const auto w = Bound(Width, 1, 13);
+    const auto h = Bound(Height, 1, 8);
 
-    for (index = 0; index < w * h; index++) {
+    unsigned char map[13 * 8];
+
+    // get icon set metadata
+    Mem_Copy(Get_Icon_Set_Map(shape), map, Width * Height);
+
+    // iterate over each icon in the set and render relative to x,y
+    for (auto index = 0; index < w * h; index++) {
+        const auto dest_x = x + ((index % w) * (ICON_PIXEL_W));
+        const auto dest_y = y + ((index / w) * (ICON_PIXEL_H));
+
+        // non-blank icon in set
         if (map[index] != 0xFF) {
-            HidPage.Draw_Stamp(Get_Image_Data(), index, 0, 0, NULL, WINDOW_MAIN);
-            if (scale) {
-
-                HidPage.Scale((*LogicPage),
-                              0,
-                              0,
-                              x + ((index % w) * (ICON_PIXEL_W / 2)),
-                              y + ((index / w) * (ICON_PIXEL_H / 2)),
-                              ICON_PIXEL_W,
-                              ICON_PIXEL_H,
-                              ICON_PIXEL_W / 2,
-                              ICON_PIXEL_H / 2,
-                              (char*)NULL);
-
-            } else {
-                HidPage.Blit((*LogicPage),
-                             0,
-                             0,
-                             x + ((index % w) * (ICON_PIXEL_W)),
-                             y + ((index / w) * (ICON_PIXEL_H)),
-                             ICON_PIXEL_W,
-                             ICON_PIXEL_H);
-            }
+            LogicPage->Draw_Stamp(shape, index, dest_x, dest_y, nullptr, window);
         }
     }
+}
+
+bool TemplateTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto w = Bound(Width, 1, 13);
+    const auto h = Bound(Height, 1, 8);
+
+    for (auto index = 0; index < w * h; index++) {
+        const auto dest_x = ((index % w) * (ICON_PIXEL_W));
+        const auto dest_y = ((index / w) * (ICON_PIXEL_H));
+
+        width = max(width, dest_x + ICON_PIXEL_W);
+        height = max(height, dest_y + ICON_PIXEL_H);
+    }
+
+    return true;
 }
 
 /***********************************************************************************************

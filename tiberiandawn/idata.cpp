@@ -44,6 +44,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "type.h"
 #include "typeconverter.h"
 
@@ -1659,19 +1660,55 @@ short const* InfantryTypeClass::Occupy_List(bool) const
  * HISTORY:                                                                                    *
  *   09/24/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void InfantryTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void InfantryTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType house) const
 {
-    if (house != HOUSE_NONE) {
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+    const auto shape_num = display_icon && shape != nullptr ? 0 : 6;
 
-        int shape = 0;
-        void const* ptr = Get_Cameo_Data();
-        if (!ptr) {
-            ptr = Get_Image_Data();
-            shape = 2;
-        }
-
-        CC_Draw_Shape(ptr, shape, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
     }
+
+    if (shape == nullptr || house == HOUSE_NONE) {
+        return;
+    }
+
+    if (display_icon) {
+        CC_Draw_Shape(shape, shape_num, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
+    } else {
+        CC_Draw_Shape(
+            shape,
+            shape_num,
+            x,
+            y,
+            window,
+            SHAPE_FADING | SHAPE_CENTER | SHAPE_GHOST | SHAPE_WIN_REL,
+            HouseTypeClass::As_Reference(house).RemapTable,
+            DisplayClass::UnitShadow
+        );
+    }
+}
+
+bool InfantryTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

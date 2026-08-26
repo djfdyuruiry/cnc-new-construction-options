@@ -55,6 +55,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 
 #define MCW MAP_CELL_W
@@ -3944,21 +3945,80 @@ StructType BuildingTypeClass::From_Name(char const* name)
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void BuildingTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType house) const
 {
-    void const* ptr = Get_Cameo_Data();
-    if (!ptr) {
-        IsTheaterShape = IsTheater;
-        ptr = Get_Image_Data();
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
     }
-    CC_Draw_Shape(ptr,
-                  0,
-                  x,
-                  y,
-                  window,
-                  SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
-                  HouseTypeClass::As_Reference(house).RemapTable);
-    IsTheaterShape = false;
+
+    if (shape == nullptr) {
+        return;
+    }
+
+    if (!display_icon) {
+        IsTheaterShape = IsTheater;
+    }
+
+    if (display_icon) {
+        CC_Draw_Shape(shape,
+                      0,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable);
+    } else {
+        CC_Draw_Shape(shape,
+                      0,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_GHOST | SHAPE_WIN_REL,
+                      Houses.Ptr(house)->Remap_Table(false, false),
+                      DisplayClass::UnitShadow);
+    }
+
+    // special overlay for weapons factory
+    if (!display_icon && *this == STRUCT_WEAP) {
+        CC_Draw_Shape(WarFactoryOverlay,
+            0,
+            x,
+            y,
+            window,
+            SHAPE_FADING | SHAPE_GHOST | SHAPE_WIN_REL,
+            Houses.Ptr(house)->Remap_Table(false, false),
+            DisplayClass::UnitShadow);
+    }
+
+    if (!display_icon) {
+        IsTheaterShape = false;
+    }
+}
+
+bool BuildingTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************
@@ -3980,7 +4040,8 @@ void BuildingTypeClass::Display(int x, int y, WindowNumberType window, HousesTyp
 void BuildingTypeClass::Prep_For_Add(void)
 {
     for (StructType index = STRUCT_FIRST; index < STRUCT_COUNT; index++) {
-        if (As_Reference(index).Get_Image_Data()) {
+        // walls handled by overlay types in scenario editor
+        if (As_Reference(index).Get_Image_Data() && (!Debug_Map || !As_Reference(index).IsWall)) {
             Map.Add_To_List(&As_Reference(index));
         }
     }
@@ -4121,6 +4182,20 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
     }
 #endif
 
+#ifdef SCENARIO_EDITOR
+    std::vector<CELL> illegal_movement_cells;
+
+    if (Debug_Map) {
+        // collect cells that are not legal to move objects into (non-bibs and non-empty cells)
+        auto offset_no_bibs = Occupy_List(false);
+
+        while (*offset_no_bibs != REFRESH_EOL) {
+            illegal_movement_cells.emplace_back(pos + *offset_no_bibs);
+            offset_no_bibs++;
+        }
+    }
+#endif
+
     /*
     **	Normal buildings must check to see that every foundation square is free of
     **	obstacles. If this check passes for all foundation squares, only then does the
@@ -4132,7 +4207,42 @@ int BuildingTypeClass::Legal_Placement(CELL pos) const
         if (!Map.In_Radar(cell))
             return (false);
         if (!Map[cell].Is_Generally_Clear()) {
-            return (false);
+            if (!Debug_Map) {
+                return (false);
+            }
+
+#ifdef SCENARIO_EDITOR
+            /*
+            **	In scenario editor mode, allow infantry and units to exist in cells of buildings they could legally
+            **	move to anyway.
+            */
+            auto legal_movement_cell = true;
+
+            for (const auto& illegal_cell : illegal_movement_cells) {
+                if (cell == illegal_cell) {
+                    legal_movement_cell = false;
+                    break;
+                }
+            }
+
+            if (!legal_movement_cell) {
+                // can't move into this anyway, so abort
+                return false;
+            }
+
+            if (Map[cell].Overlay != OVERLAY_NONE) {
+                // prevent bibs under overlay
+                return false;
+            }
+
+            if (
+                Map[cell].Cell_Occupier() != nullptr
+                && Map[cell].Cell_Occupier()->What_Am_I() != RTTI_INFANTRY
+                && Map[cell].Cell_Occupier()->What_Am_I() != RTTI_UNIT
+            ) {
+                return false;
+            }
+#endif
         }
     }
     return (true);
@@ -4356,7 +4466,7 @@ short const* BuildingTypeClass::Occupy_List(bool placement) const
         return (OccupyList);
     }
 
-    static constexpr short _templap[] = {REFRESH_EOL};
+    constexpr short _templap[] = {REFRESH_EOL};
     return (&_templap[0]);
 }
 

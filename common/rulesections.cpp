@@ -155,12 +155,17 @@ std::string RuleSection::Variant_To_String(const RuleValueVariant& value_variant
 {
     return std::visit([&](const auto& t) {
         using T = std::decay_t<decltype(t)>;
+        const T value = std::get<T>(value_variant);
 
         if constexpr (std::is_same_v<T, float>) {
-            return std::format("{:.2f}", std::get<T>(value_variant));
+            // render all floats with 2 decimal places
+            return std::format("{:.2f}", value);
+        } else if constexpr (std::is_same_v<T, char>) {
+            // prevent char value being interpreted as a character
+            return std::format("{}", static_cast<int>(value));
         }
 
-        return std::format("{}", std::get<T>(value_variant));
+        return std::format("{}", value);
     }, value_variant);
 }
 
@@ -386,7 +391,12 @@ const RuleSection& RuleSection::Save_To_Ini(INIClass& ini, std::string_view name
         value_variant
     );
 
-    const auto comment = Try_Get_Rule_Comment(name);
+    auto comment = Try_Get_Rule_Comment(name);
+
+    if (comment.has_value() && (*comment == "-" || CncStringUtils::Is_Blank(*comment))) {
+        // don't write placeholder/blank comments
+        comment = std::nullopt;
+    }
 
     if (const auto value = std::get_if<int>(&value_variant)) {
         ini.Put_Int(SectionName.data(), name.data(), *value, 0, comment);
@@ -462,6 +472,7 @@ RuleSection& RuleSection::Set(std::string_view name, RuleValueVariant value)
     }
 
     Rules[name.data()] = value;
+    Clear_Rule_Ini_Source(name.data()); // value no longer sourced from INI file (if any)
 
     OnRulesChanged(*this, name, value);
 
@@ -492,6 +503,27 @@ std::optional<std::string> RuleSection::Try_Get_Rule_Comment(const std::string_v
     }
 
     return std::nullopt;
+}
+
+RuleSection& RuleSection::Set_Rule_Ini_Source(const std::string_view name, const std::string& source)
+{
+    RuleIniSource[name.data()] = source;
+
+    return *this;
+}
+
+bool RuleSection::Clear_Rule_Ini_Source(const std::string_view name)
+{
+    return RuleIniSource.erase(name.data()) == 1;
+}
+
+std::optional<std::string> RuleSection::Try_Get_Rule_Ini_Source(const std::string_view name) const
+{
+    if (!RuleIniSource.contains(name.data())) {
+        return std::nullopt;
+    }
+
+    return RuleIniSource.at(name.data());
 }
 
 RuleValueVariant RuleSection::operator[](const std::string_view name) const
@@ -567,6 +599,17 @@ void RuleSections::Save_All_To_Ini(INIClass& ini) const
 {
     for (const auto& section : Sections | std::views::values) {
         section.Save_All_To_Ini(ini);
+    }
+}
+
+void RuleSections::Save_Rules_From_Source_To_Ini(const std::string& source, INIClass& ini) const
+{
+    for (const auto& section : Sections | std::views::values) {
+        for (const auto& rule_name : section.Rule_Names()) {
+            if (section.Try_Get_Rule_Ini_Source(rule_name) == source) {
+                section.Save_To_Ini(ini, rule_name);
+            }
+        }
     }
 }
 

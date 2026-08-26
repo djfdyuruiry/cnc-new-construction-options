@@ -315,6 +315,8 @@ public:
     bool Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const;
 #endif
 
+    bool Purge_Overlay(bool update_adjacent_cell_walls = true, bool recalc_tiberium = true);
+
     JSON_FUNCTIONS(CellClass)
 
 private:

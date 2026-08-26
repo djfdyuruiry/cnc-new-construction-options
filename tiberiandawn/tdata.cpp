@@ -903,9 +903,38 @@ TerrainType TerrainTypeClass::From_Name(char const* name)
  *=============================================================================================*/
 void TerrainTypeClass::Display(int x, int y, WindowNumberType window, HousesType) const
 {
+    const auto shape = Get_Image_Data();
+
+    if (shape == nullptr) {
+        return;
+    }
+
     IsTheaterShape = true;
-    CC_Draw_Shape(Get_Image_Data(), 0, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
+    CC_Draw_Shape(
+        shape,
+        0,
+        x,
+        y,
+        window,
+      SHAPE_GHOST | SHAPE_WIN_REL,
+      nullptr,
+      DisplayClass::UnitShadow
+    );
     IsTheaterShape = false;
+}
+
+bool TerrainTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto shape = Get_Image_Data();
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(Get_Image_Data());
+    height = Get_Build_Frame_Height(Get_Image_Data());
+
+    return true;
 }
 
 /***********************************************************************************************

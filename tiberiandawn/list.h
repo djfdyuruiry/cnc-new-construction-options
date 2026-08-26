@@ -96,6 +96,9 @@ public:
     virtual LinkClass& Add_Head(LinkClass& object);
     virtual GadgetClass* Remove(void);
 
+    virtual void Disable(bool disable_drawing);
+    virtual void Enable();
+
     void Redraw_Scroll_Bar(bool forced = false);
 
 protected:

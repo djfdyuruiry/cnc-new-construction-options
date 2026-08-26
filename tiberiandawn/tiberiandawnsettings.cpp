@@ -64,12 +64,43 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
 
     CommonSettings->Load(IniFileName, ini);
 
+    Get_Editor_Section().With<IniRuleContext>(ini, [&](auto& c) {
+        c.Load("EnforceObjectOwnableBy")
+            .With_Comment("only allow game objects to be assigned a house found in their 'OwnableBy' rule")
+            .With_Default(false)
+         .template Load_With_Converter<ColorType, TdTypeConverter>("TriggerColor", LTGREEN)
+         .template Load_With_Converter<ColorType, TdTypeConverter>("WaypointColor", YELLOW)
+         .Load("DisplayObjectSidebarIcons")
+            .With_Comment("if an object has a sidebar icon, show that in menus instead of map graphics")
+            .With_Default(false);
+    });
+
     Get_Map_Section().With<IniRuleContext>(ini, [&](auto& c) {
         c.Load("PlacementDebugging")
          .With_Comment("dump a placement_debug.txt file every time placement is calculated")
          .With_Default(false);
     });
     Load_MultiPlayer(ini);
+}
+
+bool TiberianDawnSettings::Enforce_OwnableBy_In_Editor()
+{
+    return Get_Editor_Section().Get<bool>("EnforceObjectOwnableBy");
+}
+
+ColorType TiberianDawnSettings::Get_Editor_Trigger_Color()
+{
+    return Get_Editor_Section().Get_With_Converter<ColorType, TdTypeConverter>("TriggerColor");
+}
+
+ColorType TiberianDawnSettings::Get_Editor_Waypoint_Color()
+{
+    return Get_Editor_Section().Get_With_Converter<ColorType, TdTypeConverter>("WaypointColor");
+}
+
+bool TiberianDawnSettings::Display_Object_Icons()
+{
+    return Get_Editor_Section().Get<bool>("DisplayObjectSidebarIcons");
 }
 
 bool TiberianDawnSettings::Placement_Debugging_Is_Enabled()
@@ -114,6 +145,11 @@ RuleSections& TiberianDawnSettings::Get_Common_Sections()
     }
 
     return CommonSettings->Get_Sections();
+}
+
+RuleSection& TiberianDawnSettings::Get_Editor_Section()
+{
+    return Get_Common_Sections()[EditorSection];
 }
 
 RuleSection& TiberianDawnSettings::Get_Map_Section()

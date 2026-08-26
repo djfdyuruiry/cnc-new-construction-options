@@ -195,6 +195,7 @@ public:
     static bool Event_Need_House(EventType event);
     static bool Event_Need_Data(EventType event);
     static bool Action_Need_Team(ActionType action);
+    static bool Action_Need_StringData(ActionType action);
     static EventType Event_From_Name(char const* name);
     static char const* Name_From_Event(EventType event);
     static ActionType Action_From_Name(char const* name);

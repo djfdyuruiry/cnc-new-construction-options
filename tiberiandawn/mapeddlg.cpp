@@ -147,14 +147,17 @@ int MapEditClass::New_Scenario(void)
     /*
     ------ Set the Home & Reinforcement Cells to the center of the map -------
     */
-    Scen.Waypoint[WAYPT_REINF] = XY_Cell(MapCellX + MapCellWidth / 2, MapCellY + MapCellHeight / 2);
-    Scen.Waypoint[WAYPT_HOME] = XY_Cell(MapCellX + MapCellWidth / 2, MapCellY + MapCellHeight / 2);
+    Scen.Waypoint[WAYPT_REINF] = XY_Cell(IniMapCellX + IniMapCellWidth / 2, IniMapCellY + IniMapCellHeight / 2);
+    Scen.Waypoint[WAYPT_HOME] = XY_Cell(IniMapCellX + IniMapCellWidth / 2, IniMapCellY + IniMapCellHeight / 2);
     (*this)[Coord_Cell(TacticalCoord)].IsWaypoint = 1;
     Flag_Cell(Coord_Cell(TacticalCoord));
 
     ScenarioInit++;
     Set_Tactical_Position(Cell_Coord(Scen.Waypoint[WAYPT_HOME]));
     ScenarioInit--;
+
+    BasePercent = 100;
+    BaseGauge->Set_Value(BasePercent);
 
     return (0);
 }
@@ -216,12 +219,15 @@ int MapEditClass::Load_Scenario(void)
         MPlayerLocalID = Build_MPlayerID(2, HOUSE_GOOD);
         MPlayerCount = 1;
         LastHouse = HOUSE_MULTI1;
+        GameToPlay = GAME_SKIRMISH;
     } else if (ScenPlayer == SCEN_PLAYER_JP) {
         PlayerPtr = HouseClass::As_Pointer(HOUSE_MULTI4);
         PlayerPtr->IsHuman = true;
         Base.House = HOUSE_MULTI4;
+        GameToPlay = GAME_NORMAL;
     } else {
         LastHouse = HOUSE_GOOD;
+        GameToPlay = GAME_NORMAL;
     }
 
     /*
@@ -328,10 +334,16 @@ int MapEditClass::Save_Scenario(void)
         LastHouse = HOUSE_GOOD;
     }
 
+    // clear virtual base buildings in prep for save
+    Build_Base_To(BasePercent, false);
+
     /*
     ----------------------------- Write the INI ------------------------------
     */
     Write_Scenario_Ini(Scen.ScenarioName);
+
+    // restore virtual base buildings
+    Build_Base_To(BasePercent);
 
     return (0);
 }
@@ -562,7 +574,7 @@ int MapEditClass::Pick_Scenario(char const* caption,
                             D_VARLOSE_H);
 
     TextButtonClass gdibtn(BUTTON_GDI,
-                           "GDI",
+                           TXT_G_D_I,
                            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                            D_GDI_X,
                            D_GDI_Y,
@@ -570,7 +582,7 @@ int MapEditClass::Pick_Scenario(char const* caption,
                            D_GDI_H);
 
     TextButtonClass nodbtn(BUTTON_NOD,
-                           "NOD",
+                           TXT_N_O_D,
                            TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                            D_NOD_X,
                            D_NOD_Y,
@@ -578,7 +590,7 @@ int MapEditClass::Pick_Scenario(char const* caption,
                            D_NOD_H);
 
     TextButtonClass playermbtn(BUTTON_MPLAYER,
-                               "Multi Player",
+                               TXT_MULTIPLAYER_GAME,
                                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                                D_MPLAYER_X,
                                D_MPLAYER_Y,
@@ -966,6 +978,11 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     {
         BUTTON_OK = 100,
         BUTTON_CANCEL,
+        BUTTON_EDIT_X,
+        BUTTON_EDIT_Y,
+        BUTTON_EDIT_W,
+        BUTTON_EDIT_H,
+        BUTTON_MEGAMAP,
     };
     /*........................................................................
     Redraw values: in order from "top" to "bottom" layer of the dialog
@@ -997,6 +1014,42 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     CELL cell;             // for drawing map symbology
     int color;             // for drawing map symbology
     ObjectClass* occupier; // cell's occupier
+    /*........................................................................
+    Edit boxes for X, Y, Width, Height
+    ........................................................................*/
+    constexpr auto edit_w_pixel = (D_DIALOG_W - 20) / 5;
+
+    auto edit_x_pixel = (D_DIALOG_X + D_DIALOG_W / 8) - (edit_w_pixel / 2) + 25;
+    const auto edit_y_pixel = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 38;
+
+    char edit_x_str[4], edit_y_str[4], edit_w_str[4], edit_h_str[4];
+
+    sprintf(edit_x_str, "%d", IniMapCellX);
+    sprintf(edit_y_str, "%d", IniMapCellY);
+    sprintf(edit_w_str, "%d", IniMapCellWidth);
+    sprintf(edit_h_str, "%d", IniMapCellHeight);
+
+    EditClass edit_x(BUTTON_EDIT_X, edit_x_str, std::size(edit_x_str),
+                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, edit_x_pixel, edit_y_pixel, edit_w_pixel, 16, EditClass::NUMERIC);
+    edit_x_pixel += edit_w_pixel + 5;
+    EditClass edit_y(BUTTON_EDIT_Y, edit_y_str, std::size(edit_y_str),
+                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, edit_x_pixel, edit_y_pixel, edit_w_pixel, 16, EditClass::NUMERIC);
+    edit_x_pixel += edit_w_pixel + 5 + (edit_w_pixel / 3);
+    EditClass edit_w(BUTTON_EDIT_W, edit_w_str, std::size(edit_w_str),
+                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, edit_x_pixel, edit_y_pixel, edit_w_pixel, 16, EditClass::NUMERIC);
+    edit_x_pixel += edit_w_pixel + 5;
+    EditClass edit_h(BUTTON_EDIT_H, edit_h_str, std::size(edit_h_str),
+                     TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, edit_x_pixel, edit_y_pixel, edit_w_pixel, 16, EditClass::NUMERIC);
+    /*........................................................................
+    Megamap checkbox
+    ........................................................................*/
+    CheckBoxClass megamap_check(BUTTON_MEGAMAP, D_DIALOG_X + D_DIALOG_W / 8, edit_y_pixel - 60, 17);
+    megamap_check.Disable();
+
+    char megamap_label[16] = "Megamap";
+    TextLabelClass megamap_text(megamap_label, (D_DIALOG_X + D_DIALOG_W / 8) + 27, edit_y_pixel - 58,
+                                    CC_GREEN,
+                                    TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
     /*........................................................................
     Buttons
     ........................................................................*/
@@ -1039,7 +1092,14 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     /*
     ------------------------- Build the button list --------------------------
     */
-    commands = &okbtn;
+
+    commands = &edit_x;
+    edit_y.Add_Tail(*commands);
+    edit_w.Add_Tail(*commands);
+    edit_h.Add_Tail(*commands);
+    megamap_check.Add_Tail(*commands);
+    megamap_text.Add_Tail(*commands);
+    okbtn.Add_Tail(*commands);
     cancelbtn.Add_Tail(*commands);
 
     /*------------------------------------------------------------------------
@@ -1095,7 +1155,7 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
                 /*...............................................................
                 Draw the map "key"
                 ...............................................................*/
-                txt_x = D_DIALOG_CX;
+                txt_x = D_DIALOG_X + D_DIALOG_W - 150;
                 txt_y = D_DIALOG_Y + 8;
                 Fancy_Text_Print("Clear Terrain", txt_x, txt_y, LTGREY, TBLACK, TPF_DROPSHADOW | TPF_6POINT);
                 txt_y += 16;
@@ -1118,9 +1178,9 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
                 .................. Draw the coordinate labels ...................
                 */
                 txt_x = D_DIALOG_X + D_DIALOG_W / 8;
-                txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 33;
+                txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 55;
                 Fancy_Text_Print(
-                    "X", txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+                    "X", txt_x + 25, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
                 txt_x += (D_DIALOG_W - 20) / 4;
                 Fancy_Text_Print(
@@ -1128,7 +1188,7 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
 
                 txt_x += (D_DIALOG_W - 20) / 4;
                 Fancy_Text_Print("Width",
-                                 txt_x,
+                                 txt_x + 25,
                                  txt_y,
                                  CC_GREEN,
                                  TBLACK,
@@ -1230,44 +1290,72 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
                 LogicPage->Put_Pixel(D_BORD_X1 + Cell_X(Scen.Waypoint[WAYPT_HOME]) + 1,
                                      D_BORD_Y1 + Cell_Y(Scen.Waypoint[WAYPT_HOME]) + 1,
                                      WHITE);
-
-                /*
-                ..................... Erase old coordinates .....................
-                */
-                LogicPage->Fill_Rect(D_DIALOG_X + 7,
-                                     D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22,
-                                     D_DIALOG_X + D_DIALOG_W - 7,
-                                     D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22 + 10,
-                                     BLACK);
-
-                /*
-                ..................... Draw the coordinates ......................
-                */
-                txt_x = D_DIALOG_X + D_DIALOG_W / 8;
-                txt_y = D_DIALOG_Y + D_DIALOG_H - D_OK_H - 10 - 22;
-                sprintf(txt, "%d", map_x1 - D_BORD_X1 - 1);
-                Fancy_Text_Print(
-                    txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-                txt_x += (D_DIALOG_W - 20) / 4;
-                sprintf(txt, "%d", map_y1 - D_BORD_Y1 - 1);
-                Fancy_Text_Print(
-                    txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-                txt_x += (D_DIALOG_W - 20) / 4;
-                sprintf(txt, "%d", map_x2 - map_x1 + 1);
-                Fancy_Text_Print(
-                    txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
-
-                txt_x += (D_DIALOG_W - 20) / 4;
-                sprintf(txt, "%d", map_y2 - map_y1 + 1);
-                Fancy_Text_Print(
-                    txt, txt_x, txt_y, CC_GREEN, TBLACK, TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
             }
 
             Show_Mouse();
             display = REDRAW_NONE;
         }
+
+        static const auto on_edit_change = [&](
+            char* buffer,
+            const int buffer_size,
+            EditClass& control,
+            const int current_value,
+            int& target,
+            const int min,
+            const int max
+        ) {
+            control.Clear_Changed();
+
+            try {
+                const auto new_value = std::stoi(buffer);
+                auto value_offset = 0;
+
+                if (new_value >= min && new_value <= max) {
+                    // change value if valid
+
+                    if (new_value < current_value) {
+                        // value decreasing
+                        value_offset = current_value - new_value;
+                        value_offset = -value_offset;
+                    } else if (new_value > current_value) {
+                        // value increasing
+                        value_offset = new_value - current_value;
+                    }
+                } else if (new_value < min) {
+                    // bound offset to reach minimum value
+                    if (current_value > min) {
+                        value_offset = current_value - min;
+                        value_offset = -value_offset;
+                    }
+                } else if (new_value > max) {
+                    // bound offset to reach maximum value
+                    // bound value to max
+                    if (current_value < max) {
+                        value_offset = max - current_value;
+                    }
+                }
+
+                target += value_offset;
+
+                sprintf(buffer, "%d", current_value + value_offset);
+
+                control.Set_Text(buffer, buffer_size);
+                control.Set_Color(CC_GREEN);
+                display = REDRAW_ALL;
+
+                return value_offset;
+            } catch (const std::invalid_argument& _) {
+                control.Set_Color(RED);
+                display = REDRAW_ALL;
+            }
+            catch (const std::out_of_range& _) {
+                control.Set_Color(RED);
+                display = REDRAW_ALL;
+            }
+
+            return 0;
+        };
 
         /*
         ------------------------- Process user input --------------------------
@@ -1279,82 +1367,101 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
         .....................................................................*/
         if (grabbed == 0) {
             switch (input) {
-            case (KN_RETURN):
-            case (BUTTON_OK | KN_BUTTON):
-                cancel = false;
-                process = false;
-                break;
+                case (KN_RETURN):
+                case (BUTTON_OK | KN_BUTTON):
+                    cancel = false;
+                    process = false;
+                    break;
 
-            case (KN_ESC):
-            case (BUTTON_CANCEL | KN_BUTTON):
-                cancel = true;
-                process = false;
-                break;
+                case (KN_ESC):
+                case (BUTTON_CANCEL | KN_BUTTON):
+                    cancel = true;
+                    process = false;
+                    break;
 
-            case KN_LMOUSE:
-                /*
-                ....................... Grab top left ........................
-                */
-                delta1 = abs(Keyboard->MouseQX - map_x1);
-                delta2 = abs(Keyboard->MouseQY - map_y1);
-                if (delta1 < 3 && delta2 < 3) {
-                    grabbed = 1;
-                    mx = Keyboard->MouseQX;
-                    my = Keyboard->MouseQY;
-                    display = REDRAW_MAP;
+                case KN_LMOUSE:
+                    /*
+                    ....................... Grab top left ........................
+                    */
+                    delta1 = abs(Keyboard->MouseQX - map_x1);
+                    delta2 = abs(Keyboard->MouseQY - map_y1);
+                    if (delta1 < 3 && delta2 < 3) {
+                        grabbed = 1;
+                        mx = Keyboard->MouseQX;
+                        my = Keyboard->MouseQY;
+                        display = REDRAW_MAP;
+                        break;
+                    }
+                    /*
+                    ...................... Grab top right ........................
+                    */
+                    delta1 = abs(Keyboard->MouseQX - map_x2);
+                    delta2 = abs(Keyboard->MouseQY - map_y1);
+                    if (delta1 < 3 && delta2 < 3) {
+                        grabbed = 2;
+                        mx = Keyboard->MouseQX;
+                        my = Keyboard->MouseQY;
+                        display = REDRAW_MAP;
+                        break;
+                    }
+                    /*
+                    ..................... Grab bottom right ......................
+                    */
+                    delta1 = abs(Keyboard->MouseQX - map_x2);
+                    delta2 = abs(Keyboard->MouseQY - map_y2);
+                    if (delta1 < 3 && delta2 < 3) {
+                        grabbed = 3;
+                        mx = Keyboard->MouseQX;
+                        my = Keyboard->MouseQY;
+                        display = REDRAW_MAP;
+                        break;
+                    }
+                    /*
+                    ..................... Grab bottom left .......................
+                    */
+                    delta1 = abs(Keyboard->MouseQX - map_x1);
+                    delta2 = abs(Keyboard->MouseQY - map_y2);
+                    if (delta1 < 3 && delta2 < 3) {
+                        grabbed = 4;
+                        mx = Keyboard->MouseQX;
+                        my = Keyboard->MouseQY;
+                        display = REDRAW_MAP;
+                        break;
+                    }
+                    /*
+                    ..................... Grab the whole map .....................
+                    */
+                    delta1 = abs(Keyboard->MouseQX - ((map_x1 + map_x2) / 2));
+                    delta2 = abs(Keyboard->MouseQY - ((map_y1 + map_y2) / 2));
+                    if (delta1 < (map_x2 - map_x1) / 4 && delta2 < (map_y2 - map_y1) / 4) {
+                        grabbed = 5;
+                        mx = Keyboard->MouseQX;
+                        my = Keyboard->MouseQY;
+                        display = REDRAW_MAP;
+                    }
                     break;
-                }
-                /*
-                ...................... Grab top right ........................
-                */
-                delta1 = abs(Keyboard->MouseQX - map_x2);
-                delta2 = abs(Keyboard->MouseQY - map_y1);
-                if (delta1 < 3 && delta2 < 3) {
-                    grabbed = 2;
-                    mx = Keyboard->MouseQX;
-                    my = Keyboard->MouseQY;
-                    display = REDRAW_MAP;
-                    break;
-                }
-                /*
-                ..................... Grab bottom right ......................
-                */
-                delta1 = abs(Keyboard->MouseQX - map_x2);
-                delta2 = abs(Keyboard->MouseQY - map_y2);
-                if (delta1 < 3 && delta2 < 3) {
-                    grabbed = 3;
-                    mx = Keyboard->MouseQX;
-                    my = Keyboard->MouseQY;
-                    display = REDRAW_MAP;
-                    break;
-                }
-                /*
-                ..................... Grab bottom left .......................
-                */
-                delta1 = abs(Keyboard->MouseQX - map_x1);
-                delta2 = abs(Keyboard->MouseQY - map_y2);
-                if (delta1 < 3 && delta2 < 3) {
-                    grabbed = 4;
-                    mx = Keyboard->MouseQX;
-                    my = Keyboard->MouseQY;
-                    display = REDRAW_MAP;
-                    break;
-                }
-                /*
-                ..................... Grab the whole map .....................
-                */
-                delta1 = abs(Keyboard->MouseQX - ((map_x1 + map_x2) / 2));
-                delta2 = abs(Keyboard->MouseQY - ((map_y1 + map_y2) / 2));
-                if (delta1 < (map_x2 - map_x1) / 4 && delta2 < (map_y2 - map_y1) / 4) {
-                    grabbed = 5;
-                    mx = Keyboard->MouseQX;
-                    my = Keyboard->MouseQY;
-                    display = REDRAW_MAP;
-                }
-                break;
 
-            default:
-                break;
+                default: {
+                    if (input != 0) {
+                        break;
+                    }
+
+                    // check if user has changed any of the dimension textbox values
+                    const auto current_x = map_x1 - D_BORD_X1 - 1;
+                    const auto current_y = map_y1 - D_BORD_Y1 - 1;
+                    const auto current_w = map_x2 - map_x1 + 1;
+                    const auto current_h = map_y2 - map_y1 + 1;
+
+                    if (edit_x.Has_Changed() && !edit_x.Has_Focus()) {
+                        map_x2 += on_edit_change(edit_x_str, std::size(edit_x_str), edit_x, current_x, map_x1, 1, current_x + (MAP_CELL_W - (current_x + current_w) - 1));
+                    } else if (edit_y.Has_Changed() && !edit_y.Has_Focus()) {
+                        map_y2 += on_edit_change(edit_y_str, std::size(edit_y_str), edit_y, current_y, map_y1, 1, current_x + (MAP_CELL_H - (current_y + current_h) - 1));
+                    } else if (edit_w.Has_Changed() && !edit_w.Has_Focus()) {
+                        on_edit_change(edit_w_str, std::size(edit_w_str), edit_w, current_w, map_x2, 3, (MAP_CELL_W - 1) - current_x);
+                    } else if (edit_h.Has_Changed() && !edit_h.Has_Focus()) {
+                        on_edit_change(edit_h_str, std::size(edit_h_str), edit_h, current_h, map_y2, 3, (MAP_CELL_H - 1) - current_y);
+                    }
+                }
             }
         } else {
             /*.....................................................................
@@ -1499,6 +1606,39 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
                     mx = Get_Mouse_X();
                     my = Get_Mouse_Y();
                 }
+
+                if (display == REDRAW_MAP) {
+                    /*
+                    ..................... Update the coordinate edit boxes ......................
+                    */
+                    sprintf(edit_x_str, "%d", map_x1 - D_BORD_X1 - 1);
+                    edit_x.Set_Text(edit_x_str, std::size(edit_x_str));
+                    edit_x.Set_Color(CC_GREEN);
+
+                    sprintf(edit_y_str, "%d", map_y1 - D_BORD_Y1 - 1);
+                    edit_y.Set_Text(edit_y_str, std::size(edit_y_str));
+                    edit_y.Set_Color(CC_GREEN);
+
+                    sprintf(edit_w_str, "%d", map_x2 - map_x1 + 1);
+                    edit_w.Set_Text(edit_w_str, std::size(edit_w_str));
+                    edit_w.Set_Color(CC_GREEN);
+
+                    sprintf(edit_h_str, "%d", map_y2 - map_y1 + 1);
+                    edit_h.Set_Text(edit_h_str, std::size(edit_h_str));
+                    edit_h.Set_Color(CC_GREEN);
+
+                    /*
+                    ..................... Update megamap checkbox .....................
+                    */
+                    const auto is_megamap = ((map_x1 - D_BORD_X1 - 1) + (map_x2 - map_x1 + 1)) > 64 || ((map_x2 - map_x1 + 1) + (map_y2 - map_y1 + 1)) > 64;
+
+                    if (is_megamap) {
+                        megamap_check.Turn_On();
+                    } else {
+                        megamap_check.Turn_Off();
+                    }
+                }
+
                 break;
             }
         }
@@ -1523,28 +1663,39 @@ int MapEditClass::Size_Map(int x, int y, int w, int h)
     /*
     ---------------------------- Save selections -----------------------------
     */
-    MapCellX = map_x1 - D_BORD_X1 - 1;
-    MapCellY = map_y1 - D_BORD_Y1 - 1;
-    MapCellWidth = map_x2 - map_x1 + 1;
-    MapCellHeight = map_y2 - map_y1 + 1;
+    IniMapCellX = map_x1 - D_BORD_X1 - 1;
+    IniMapCellY = map_y1 - D_BORD_Y1 - 1;
+    IniMapCellWidth = map_x2 - map_x1 + 1;
+    IniMapCellHeight = map_y2 - map_y1 + 1;
+
+#ifdef MEGAMAPS
+    /*
+     ** Determine map version based on whether the map fits within the original bounds.
+     **
+     ** Maps that fit entirely within the original bounds use the normal binary format.
+     **
+     ** Maps that exceed original size need to use the megamap binary format.
+     */
+    MapBinaryVersion = Is_Normal_Size() ? MAP_VERSION_NORMAL : MAP_VERSION_MEGA;
+#endif
 
     /*
     --------------------- Clip Home Cell to new map size ---------------------
     */
-    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) < MapCellX) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(MapCellX, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
+    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) < IniMapCellX) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(IniMapCellX, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
     }
 
-    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) > MapCellX + MapCellWidth - 1) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(MapCellX + MapCellWidth - 1, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
+    if (Cell_X(Scen.Waypoint[WAYPT_HOME]) > IniMapCellX + IniMapCellWidth - 1) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(IniMapCellX + IniMapCellWidth - 1, Cell_Y(Scen.Waypoint[WAYPT_HOME]));
     }
 
-    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) < MapCellY) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), MapCellY);
+    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) < IniMapCellY) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), IniMapCellY);
     }
 
-    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) > MapCellY + MapCellHeight - 1) {
-        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), MapCellY + MapCellHeight - 1);
+    if (Cell_Y(Scen.Waypoint[WAYPT_HOME]) > IniMapCellY + IniMapCellHeight - 1) {
+        Scen.Waypoint[WAYPT_HOME] = XY_Cell(Cell_X(Scen.Waypoint[WAYPT_HOME]), IniMapCellY + IniMapCellHeight - 1);
     }
 
     return (0);
@@ -1597,7 +1748,7 @@ int MapEditClass::Scenario_Dialog(void)
     Dialog & button dimensions
     ........................................................................*/
     const auto D_DIALOG_W = 544;
-    const auto D_DIALOG_H = 320;
+    const auto D_DIALOG_H = 335;
     const auto D_DIALOG_X = ((Try_Get_Resolution_Mode_Width().value_or(640) - D_DIALOG_W) / 2);
     const auto D_DIALOG_Y = ((Try_Get_Resolution_Mode_Height().value_or(400) - D_DIALOG_H) / 2);
     const auto D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);
@@ -1614,6 +1765,16 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_LEVEL_H = 18;
     const auto D_LEVEL_X = D_THEATER_X + D_THEATER_W - D_LEVEL_W;
     const auto D_LEVEL_Y = D_THEATER_Y + D_THEATER_H + D_MARGIN;
+
+    const auto D_LUASCRIPT_X = D_DIALOG_CX + 5 + 26;
+    const auto D_LUASCRIPT_Y = D_LEVEL_Y;
+    const auto D_LUASCRIPT_W = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_LUASCRIPT_X; // fill remaining dialog width
+    const auto D_LUASCRIPT_H = 18;
+
+    const auto D_NAME_X = D_LEVEL_X;
+    const auto D_NAME_Y = D_LEVEL_Y + D_LEVEL_H + D_MARGIN;
+    const auto D_NAME_W = D_LUASCRIPT_X + D_LUASCRIPT_W - D_NAME_X;
+    const auto D_NAME_H = 18;
 
     const auto D_GDICRED_W = 120;
     const auto D_GDICRED_H = 18;
@@ -1633,7 +1794,7 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_GDIN_W = 26;
     const auto D_GDIN_H = 18;
     const auto D_GDIN_X = D_DIALOG_CX - 5 - D_GDIN_W * 2;
-    const auto D_GDIN_Y = D_LEVEL_Y + D_LEVEL_H + D_MARGIN + D_TXT8_H + D_MARGIN + D_TXT8_H;
+    const auto D_GDIN_Y = D_NAME_Y + D_NAME_H + D_MARGIN + D_TXT8_H + D_MARGIN + D_TXT8_H;
 
     const auto D_GDIS_W = 26;
     const auto D_GDIS_H = 18;
@@ -1653,7 +1814,7 @@ int MapEditClass::Scenario_Dialog(void)
     const auto D_NODN_W = 26;
     const auto D_NODN_H = 18;
     const auto D_NODN_X = D_DIALOG_CX + 5 + D_NODN_W;
-    const auto D_NODN_Y = D_LEVEL_Y + D_LEVEL_H + D_MARGIN + D_TXT8_H + D_MARGIN + D_TXT8_H;
+    const auto D_NODN_Y = D_GDIN_Y;
 
     const auto D_NODS_W = 26;
     const auto D_NODS_H = 18;
@@ -1687,6 +1848,8 @@ int MapEditClass::Scenario_Dialog(void)
     {
         LIST_THEATER = 100,
         TEDIT_LEVEL,
+        TEDIT_LUASCRIPT,
+        TEDIT_TITLE,
         TEDIT_GDICRED,
         TEDIT_NODCRED,
         TEDIT_NEUTCRED,
@@ -1728,7 +1891,9 @@ int MapEditClass::Scenario_Dialog(void)
     int neut_credits;         // HouseClass::As_Pointer(HouseType)->Credits
     SourceType gdi_edge;      // HouseClass::As_Pointer(HouseType)->Edge
     SourceType nod_edge;      // HouseClass::As_Pointer(HouseType)->Edge
-    char level_buf[10] = {0};
+    char level_buf[3] = {0};
+    char luascript_buf[256] = {0};
+    char name_buf[256] = {0};
     char gdicred_buf[10] = {0};
     char nodcred_buf[10] = {0};
     char neutcred_buf[10] = {0};
@@ -1751,15 +1916,35 @@ int MapEditClass::Scenario_Dialog(void)
                          Hires_Retrieve("BTN-UP.SHP"),
                          Hires_Retrieve("BTN-DN.SHP"));
 
-    EditClass leveledt(TEDIT_GDICRED,
+    EditClass leveledt(TEDIT_LEVEL,
                        level_buf,
-                       4,
+                       std::size(level_buf),
                        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
                        D_LEVEL_X,
                        D_LEVEL_Y,
                        D_LEVEL_W,
                        D_LEVEL_H,
                        EditClass::NUMERIC);
+
+    EditClass luascript_textbox(TEDIT_LUASCRIPT,
+                            luascript_buf,
+                            std::size(luascript_buf),
+                            TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                            D_LUASCRIPT_X,
+                            D_LUASCRIPT_Y,
+                            D_LUASCRIPT_W,
+                            D_LUASCRIPT_H,
+                            EditClass::ALPHANUMERIC);
+
+    EditClass name_textbox(TEDIT_TITLE,
+                       name_buf,
+                       std::size(name_buf),
+                       TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                       D_NAME_X,
+                       D_NAME_Y,
+                       D_NAME_W,
+                       D_NAME_H,
+                       EditClass::ALPHANUMERIC);
 
     EditClass gdicred(TEDIT_GDICRED,
                       gdicred_buf,
@@ -1903,6 +2088,8 @@ int MapEditClass::Scenario_Dialog(void)
     */
     commands = &theaterbtn;
     leveledt.Add_Tail(*commands);
+    luascript_textbox.Add_Tail(*commands);
+    name_textbox.Add_Tail(*commands);
     gdicred.Add_Tail(*commands);
     nodcred.Add_Tail(*commands);
     neutcred.Add_Tail(*commands);
@@ -1945,7 +2132,19 @@ int MapEditClass::Scenario_Dialog(void)
     .......................... Init credits buffers ..........................
     */
     sprintf(level_buf, "%d", BuildLevel);
-    leveledt.Set_Text(level_buf, 4);
+    leveledt.Set_Text(level_buf, std::size(level_buf));
+
+    if (Scen.LuaScriptPath.has_value()) {
+        strncpy(luascript_buf, Scen.LuaScriptPath->c_str(), std::size(luascript_buf));
+        luascript_buf[std::size(luascript_buf) - 1] = '\0';
+        luascript_textbox.Set_Text(luascript_buf, std::size(luascript_buf));
+    }
+
+    if (Scen.ScenarioBasicName.has_value()) {
+        strncpy(name_buf, Scen.ScenarioBasicName->c_str(), std::size(name_buf));
+        name_buf[std::size(name_buf) - 1] = '\0';
+        name_textbox.Set_Text(name_buf, std::size(name_buf));
+    }
 
     sprintf(gdicred_buf, "%d", gdi_credits);
     gdicred.Set_Text(gdicred_buf, 8);
@@ -2002,9 +2201,16 @@ int MapEditClass::Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Build Level",
-                                 D_LEVEL_X,
+                Fancy_Text_Print("Build Level:",
+                                 D_LEVEL_X - 5,
                                  D_LEVEL_Y,
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                Fancy_Text_Print("Name:",
+                                 D_NAME_X - 5,
+                                 D_NAME_Y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
@@ -2016,21 +2222,21 @@ int MapEditClass::Scenario_Dialog(void)
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("GDI",
+                Fancy_Text_Print(TXT_SCORE_GDI,
                                  D_GDICRED_X - 5,
                                  D_GDICRED_Y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("NOD",
+                Fancy_Text_Print(TXT_SCORE_NOD,
                                  D_NODCRED_X - 5,
                                  D_NODCRED_Y,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("Neutral",
+                Fancy_Text_Print(TXT_SCORE_NEUT,
                                  D_NEUTCRED_X - 5,
                                  D_NEUTCRED_Y,
                                  CC_GREEN,
@@ -2039,24 +2245,31 @@ int MapEditClass::Scenario_Dialog(void)
 
                 Fancy_Text_Print("Reinforcements",
                                  D_DIALOG_CX,
-                                 D_LEVEL_Y + D_LEVEL_H + D_MARGIN,
+                                 D_NAME_Y + D_NAME_H + D_MARGIN,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("GDI",
+                Fancy_Text_Print(TXT_G_D_I,
                                  D_GDIN_X + D_GDIN_W / 2,
                                  D_GDIN_Y - D_TXT8_H,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
 
-                Fancy_Text_Print("NOD",
+                Fancy_Text_Print(TXT_N_O_D,
                                  D_NODN_X + D_NODN_W / 2,
                                  D_NODN_Y - D_TXT8_H,
                                  CC_GREEN,
                                  TBLACK,
                                  TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+
+                Fancy_Text_Print("Lua Script:",
+                                 D_LUASCRIPT_X - 5,
+                                 D_LUASCRIPT_Y,
+                                 CC_GREEN,
+                                 TBLACK,
+                                 TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
             }
             Show_Mouse();
             display = REDRAW_NONE;
@@ -2212,6 +2425,23 @@ int MapEditClass::Scenario_Dialog(void)
     */
     BuildLevel = atoi(level_buf);
 
+    /*
+    ........................... Lua Script Path ..........................
+    */
+    const std::string lua_script = luascript_buf;
+
+    Scen.LuaScriptPath.reset();
+    if (!CncStringUtils::Is_Blank(lua_script)) {
+        Scen.LuaScriptPath = lua_script;
+    }
+
+    const std::string title = name_buf;
+
+    Scen.ScenarioBasicName.reset();
+    if (!CncStringUtils::Is_Blank(title)) {
+        Scen.ScenarioBasicName = title;
+    }
+
     /*........................................................................
     Change the theater:
     - 1st set the Theater global
@@ -2312,7 +2542,7 @@ void MapEditClass::Handle_Triggers(void)
         ............................... 'Edit' ................................
         */
         if (rc == 1 && CurTrigger) {
-            if (Edit_Trigger() == 0) {
+            if (Edit_Trigger(CurTrigger) == 0) {
                 Changed = 1;
             }
         }
@@ -2329,7 +2559,7 @@ void MapEditClass::Handle_Triggers(void)
                 /*
                 ................... delete it if user cancels ...................
                 */
-                if (Edit_Trigger() == -1) {
+                if (Edit_Trigger(CurTrigger) == -1) {
                     delete CurTrigger;
                     CurTrigger = NULL;
                 } else {
@@ -2768,7 +2998,7 @@ int MapEditClass::Select_Trigger(void)
  * HISTORY:                                                                *
  *   11/29/1994 BR : Created.                                              *
  *=========================================================================*/
-int MapEditClass::Edit_Trigger(void)
+int MapEditClass::Edit_Trigger(TriggerClass* trigger)
 {
     /*........................................................................
     Dialog & button dimensions
@@ -2876,6 +3106,7 @@ int MapEditClass::Edit_Trigger(void)
         ACTION_LIST,
         NAME_EDIT,
         DATA_EDIT,
+        STRING_DATA_EDIT,
         BUTTON_TEAM,
         BUTTON_GDI,
         BUTTON_NOD,
@@ -2917,6 +3148,7 @@ int MapEditClass::Edit_Trigger(void)
     TriggerClass::ActionType action_idx;                     // index for action list
     char namebuf[5];                                         // name of this trigger
     char databuf[10];                                        // for credit/time-based triggers
+    char strdatabuf[256];                                        // for credit/time-based triggers
     HousesType house;                                        // house for this trigger
     const char* eventnames[EVENT_COUNT + 1];                 // names of events
     const char* actionnames[TriggerClass::ACTION_COUNT + 1]; // names of actions
@@ -2969,6 +3201,16 @@ int MapEditClass::Edit_Trigger(void)
                        D_DATA_X,
                        D_DATA_Y,
                        D_DATA_W,
+                       D_DATA_H,
+                       EditClass::ALPHANUMERIC);
+
+    EditClass string_data_edt(STRING_DATA_EDIT,
+                       strdatabuf,
+                       255,
+                       TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+                       D_DATA_X,
+                       D_DATA_Y + D_DATA_H + D_MARGIN,
+                       D_VOLATILE_X + D_VOLATILE_W - D_DATA_X,
                        D_DATA_H,
                        EditClass::ALPHANUMERIC);
 
@@ -3079,30 +3321,41 @@ int MapEditClass::Edit_Trigger(void)
     /*
     ....................... Set default button states ........................
     */
-    event_idx = CurTrigger->Event; // event list
+    event_idx = trigger->Event; // event list
     if (event_idx == EVENT_NONE)
         event_idx = EVENT_FIRST;
 
-    action_idx = CurTrigger->Action; // action list
+    action_idx = trigger->Action; // action list
     if (action_idx == TriggerClass::ACTION_NONE)
         action_idx = TriggerClass::ACTION_FIRST;
 
-    strcpy(namebuf, CurTrigger->Get_Name()); // Name
+    strcpy(namebuf, trigger->Get_Name()); // Name
     name_edt.Set_Text(namebuf, 5);
 
     if (TriggerClass::Event_Need_Data(event_idx)) {
-        sprintf(databuf, "%d", CurTrigger->Data); // Credits/Time
+        sprintf(databuf, "%d", trigger->Data); // Credits/Time
         data_edt.Set_Text(databuf, 8);
     }
 
-    house = CurTrigger->House; // House
+    if (TriggerClass::Action_Need_StringData(action_idx)) {
+        if (trigger->StringData.has_value()) {
+            strncpy(strdatabuf, trigger->StringData->c_str(), std::size(strdatabuf));
+            strdatabuf[std::size(strdatabuf) - 1] = '\0';
+        } else {
+            strdatabuf[0] = '\0';
+        }
 
-    persistant = CurTrigger->IsPersistant;
+        string_data_edt.Set_Text(strdatabuf, std::size(strdatabuf));
+    }
+
+    house = trigger->House; // House
+
+    persistant = trigger->IsPersistant;
 
     volatilebtn.Turn_Off();
     persistbtn.Turn_Off();
     semipersistbtn.Turn_Off();
-    switch (CurTrigger->IsPersistant) {
+    switch (trigger->IsPersistant) {
     case TriggerClass::VOLATILE:
         volatilebtn.Turn_On();
         break;
@@ -3215,9 +3468,18 @@ int MapEditClass::Edit_Trigger(void)
                     }
                 }
 
+                if (TriggerClass::Action_Need_StringData(action_idx)) {
+                    Fancy_Text_Print(action_idx == TriggerClass::ACTION_LUA_EVENT ? "Handler Name" : "Script File",
+                                     D_DATA_X - 5,
+                                     D_DATA_Y + D_DATA_H + D_MARGIN,
+                                     CC_GREEN,
+                                     TBLACK,
+                                     TPF_RIGHT | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW);
+                }
+
                 if (TriggerClass::Action_Need_Team(action_idx)) {
-                    if (CurTrigger->Team) {
-                        Fancy_Text_Print(CurTrigger->Team->IniName,
+                    if (trigger->Team) {
+                        Fancy_Text_Print(trigger->Team->IniName,
                                          D_TEAM_X + D_TEAM_W + 5,
                                          D_TEAM_Y,
                                          CC_GREEN,
@@ -3241,6 +3503,7 @@ int MapEditClass::Edit_Trigger(void)
             actionlist.Zap();
             name_edt.Zap();
             data_edt.Zap();
+            string_data_edt.Zap();
             teambtn.Zap();
             gdibtn.Zap();
             nodbtn.Zap();
@@ -3261,9 +3524,22 @@ int MapEditClass::Edit_Trigger(void)
             semipersistbtn.Add_Tail(*commands);
             if (TriggerClass::Event_Need_Data(event_idx)) {
                 data_edt.Add_Tail(*commands);
-                sprintf(databuf, "%d", CurTrigger->Data);
+                sprintf(databuf, "%d", trigger->Data);
                 data_edt.Set_Text(databuf, 8);
             }
+
+            if (TriggerClass::Action_Need_StringData(action_idx)) {
+                string_data_edt.Add_Tail(*commands);
+                if (trigger->StringData.has_value()) {
+                    strncpy(strdatabuf, trigger->StringData->c_str(), std::size(strdatabuf));
+                    strdatabuf[std::size(strdatabuf) - 1] = '\0';
+                } else {
+                    strdatabuf[0] = '\0';
+                }
+
+                string_data_edt.Set_Text(strdatabuf, std::size(strdatabuf));
+            }
+
             if (TriggerClass::Event_Need_House(event_idx)) {
                 gdibtn.Add_Tail(*commands);
                 nodbtn.Add_Tail(*commands);
@@ -3296,9 +3572,9 @@ int MapEditClass::Edit_Trigger(void)
             if (eventlist.Current_Index() != event_idx) {
                 event_idx = EventType(eventlist.Current_Index());
                 databuf[0] = 0;
-                CurTrigger->Data = 0;
+                trigger->Data = 0;
                 if (!TriggerClass::Event_Need_House(event_idx)) {
-                    CurTrigger->House = HOUSE_NONE;
+                    trigger->House = HOUSE_NONE;
                 }
                 display = REDRAW_ALL;
             }
@@ -3307,6 +3583,7 @@ int MapEditClass::Edit_Trigger(void)
         case (ACTION_LIST | KN_BUTTON):
             if (actionlist.Current_Index() != action_idx) {
                 action_idx = TriggerClass::ActionType(actionlist.Current_Index());
+                strdatabuf[0] = 0;
                 display = REDRAW_ALL;
             }
             break;
@@ -3315,6 +3592,9 @@ int MapEditClass::Edit_Trigger(void)
             break;
 
         case (DATA_EDIT | KN_BUTTON):
+            break;
+
+        case (STRING_DATA_EDIT | KN_BUTTON):
             break;
 
         case (BUTTON_GDI | KN_BUTTON):
@@ -3333,7 +3613,7 @@ int MapEditClass::Edit_Trigger(void)
         case (BUTTON_TEAM | KN_BUTTON):
             Handle_Teams("Select a Team");
             if (CurTeam) {
-                CurTrigger->Team = CurTeam;
+                trigger->Team = CurTeam;
             }
             HiddenPage.Clear();
             Flag_To_Redraw(true);
@@ -3394,38 +3674,42 @@ int MapEditClass::Edit_Trigger(void)
         /*
         ......................... Set Event & Action ..........................
         */
-        CurTrigger->Event = EventType(event_idx);
-        CurTrigger->Action = TriggerClass::ActionType(action_idx);
+        trigger->Event = EventType(event_idx);
+        trigger->Action = TriggerClass::ActionType(action_idx);
 
         /*
         .............................. Set name ...............................
         */
         if (strlen(namebuf) == 0) {
-            CurTrigger->Set_Name("____");
+            trigger->Set_Name("____");
         } else {
-            CurTrigger->Set_Name(namebuf);
+            trigger->Set_Name(namebuf);
         }
 
         /*
         .............................. Set Data ...............................
         */
         if (TriggerClass::Event_Need_Data(event_idx)) {
-            CurTrigger->Data = atol(databuf);
+            trigger->Data = atol(databuf);
+        }
+
+        if (TriggerClass::Action_Need_StringData(action_idx)) {
+            trigger->StringData = strdatabuf;
         }
 
         /*
         .............................. Set House ..............................
         */
         if (TriggerClass::Event_Need_House(event_idx)) {
-            CurTrigger->House = house;
+            trigger->House = house;
         } else {
-            CurTrigger->House = HOUSE_NONE;
+            trigger->House = HOUSE_NONE;
         }
 
         /*
         ........................... Set Persistence  ..........................
         */
-        CurTrigger->IsPersistant = persistant;
+        trigger->IsPersistant = persistant;
     }
 
     /*
@@ -3575,12 +3859,21 @@ int MapEditClass::Import_Triggers(void)
     ........................................................................*/
     INIClass ini;
     file.Set_Name("MASTER.INI");
+
     if (!file.Is_Available()) {
+        WWMessageBox().Process(
+            "Unable to find 'MASTER.INI' - create this file with a 'Triggers' section to import triggers"
+        );
+        HiddenPage.Clear();
+        Flag_To_Redraw(true);
+        Render();
+
         file.Close();
         return (-1);
     } else {
         ini.Load(file);
     }
+
     file.Close();
 
     len = ini.Entry_Count(TriggerClass::INI_Name());
@@ -3917,6 +4210,13 @@ int MapEditClass::Import_Teams(void)
     INIClass ini;
     file.Set_Name("MASTER.INI");
     if (!file.Is_Available()) {
+        WWMessageBox().Process(
+            "Unable to find 'MASTER.INI' - create this file with a 'TeamTypes' section to import types"
+        );
+        HiddenPage.Clear();
+        Flag_To_Redraw(true);
+        Render();
+
         file.Close();
         return (-1);
     } else {

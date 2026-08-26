@@ -796,28 +796,8 @@ bool BuildingClass::Mark(MarkType mark)
             **	gets converted into an overlay wall type when it is placed down. The
             **	actual building object itself is destroyed.
             */
-            if (Class->IsWall) {
-                switch (Class->Type) {
-                case STRUCT_BRICK_WALL:
-                    new OverlayClass(OVERLAY_BRICK_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_BARBWIRE_WALL:
-                    new OverlayClass(OVERLAY_BARBWIRE_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_SANDBAG_WALL:
-                    new OverlayClass(OVERLAY_SANDBAG_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_WOOD_WALL:
-                    new OverlayClass(OVERLAY_WOOD_WALL, cell, House->Class->House);
-                    break;
-
-                case STRUCT_CYCLONE_WALL:
-                    new OverlayClass(OVERLAY_CYCLONE_WALL, cell, House->Class->House);
-                    break;
-                }
+            if (Class->IsWall && Class->OverlayToPlace != OVERLAY_NONE) {
+                new OverlayClass(Class->OverlayToPlace, cell, House->Class->House);
                 Transmit_Message(RADIO_OVER_OUT);
                 Delete_This();
 
@@ -3532,6 +3512,13 @@ void BuildingClass::Write_INI(CCINIClass& ini)
         if (!building->IsInLimbo) {
             char uname[12];
             char buf[127];
+            auto cell = Coord_Cell(building->Coord);
+
+#ifdef MEGAMAPS
+            if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+                cell = Unconfine_Old_Cell(cell);
+            }
+#endif
 
             sprintf(uname, "%03d", index);
             sprintf(buf,
@@ -3539,7 +3526,7 @@ void BuildingClass::Write_INI(CCINIClass& ini)
                     building->House->Class->IniName,
                     building->Class->IniName,
                     building->Health_Ratio(),
-                    Coord_Cell(building->Coord),
+                    cell,
                     building->PrimaryFacing.Current(),
                     building->Trigger ? building->Trigger->Get_Name() : "None");
             ini.Put_String(INI_Name(), uname, buf);
@@ -5232,6 +5219,14 @@ DirType BuildingClass::Fire_Direction(void) const
 void const* BuildingClass::Remap_Table(void)
 {
     Validate();
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map && Base.Get_Node(this) != nullptr && IsUnbuiltBase) {
+        // this building won't actually be present on scenario start, so indicate this by rendering it faded out
+        return DisplayClass::FadingShade;
+    }
+#endif
+
     return (House->Remap_Table(IsBlushing, false));
 }
 

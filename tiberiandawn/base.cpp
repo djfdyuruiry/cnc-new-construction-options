@@ -375,7 +375,7 @@ bool BaseClass::Is_Built(int index)
  * HISTORY:                                                                                    *
  *   03/24/1995 BRR : Created.                                                                 *
  *=============================================================================================*/
-BuildingClass* BaseClass::Get_Building(int index)
+BuildingClass* BaseClass::Get_Building(const BaseNodeClass& node)
 {
     ObjectClass* obj[1 + ARRAY_SIZE(Map[(CELL)0].Overlapper)];
 
@@ -383,7 +383,7 @@ BuildingClass* BaseClass::Get_Building(int index)
     ** Check the location on the map where this building should be; if it's
     ** there, return a pointer to it.
     */
-    CELL cell = Coord_Cell(Nodes[index].Coord);
+    CELL cell = Coord_Cell(node.Coord);
 
     obj[0] = Map[cell].Cell_Building();
     int count = 1;
@@ -395,8 +395,8 @@ BuildingClass* BaseClass::Get_Building(int index)
 
     BuildingClass* bldg = NULL;
     for (int i = 0; i < count; i++) {
-        if (obj[i] && obj[i]->Coord == Nodes[index].Coord && obj[i]->What_Am_I() == RTTI_BUILDING
-            && ((BuildingClass*)obj[i])->Class->Type == Nodes[index].Type) {
+        if (obj[i] && obj[i]->Coord == node.Coord && obj[i]->What_Am_I() == RTTI_BUILDING
+            && ((BuildingClass*)obj[i])->Class->Type == node.Type) {
 
             bldg = (BuildingClass*)obj[i];
             break;
@@ -404,6 +404,11 @@ BuildingClass* BaseClass::Get_Building(int index)
     }
 
     return (bldg);
+}
+
+BuildingClass* BaseClass::Get_Building(int index)
+{
+    return Get_Building(Nodes[index]);
 }
 
 /***********************************************************************************************

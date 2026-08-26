@@ -909,7 +909,6 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
     TemplateTypeClass* tptr;
     TriggerClass* trig;
     int i;
-    char waypt[2];
 #endif
 
     // if we are not in editor mode, the cell is outside the bounds of the map...
@@ -964,17 +963,21 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
 
 #ifdef SCENARIO_EDITOR
             /*
-            **	Set up the remap table for this icon.
+            **	Set up the remap table for this icon, used to shade the cell with a certain color.
             */
-            if (Debug_Map && Debug_Passable) {
-                if (::Ground[Land].Cost[0] == 0
-                    || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) { // impassable
-                    remap = Map.FadingRed;
-                } else {
-                    if (::Ground[Land].Cost[0] > 0x70) { // pretty passable
-                        remap = Map.FadingGreen;
+            if (Debug_Map) {
+                if (
+                    Cell_X(cell) < Map.IniMapCellX || Cell_X(cell) >= (Map.IniMapCellX + Map.IniMapCellWidth) ||
+                    Cell_Y(cell) < Map.IniMapCellY || Cell_Y(cell) >= (Map.IniMapCellY + Map.IniMapCellHeight)
+                ) {
+                    // this cell will be out of bounds during gameplay, so highlight it as such
+                    remap = DisplayClass::FadingShade;
+                } else if (Debug_Passable) {
+                    if (::Ground[Land].Cost[0] == 0
+                        || (Cell_Occupier() != NULL && Cell_Occupier()->What_Am_I() != RTTI_INFANTRY)) {
+                        remap = DisplayClass::FadingRed; // impassable
                     } else {
-                        remap = Map.FadingYellow; // moderately passable
+                        remap = DisplayClass::FadingGreen; // passable
                     }
                 }
             }
@@ -1055,6 +1058,7 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
             if (Overlay != OVERLAY_NONE) {
                 OverlayTypeClass const& otype = OverlayTypeClass::As_Reference(Overlay);
                 IsTheaterShape = (bool)otype.IsTheater;
+
                 CC_Draw_Shape(otype.Get_Image_Data(),
                               OverlayData,
                               (x + (CELL_PIXEL_W >> 1)),
@@ -1065,58 +1069,6 @@ void CellClass::Draw_It(int x, int y, int draw_type) const
                               Map.UnitShadow);
                 IsTheaterShape = false;
             }
-
-#ifdef SCENARIO_EDITOR
-            if (Debug_Map) {
-                /*
-                **	Draw the cell's Trigger mnemonic, if it has a trigger
-                */
-                if (IsTrigger) {
-                    trig = Get_Trigger();
-                    Fancy_Text_Print(trig->Get_Name(),
-                                     x + Map.TacPixelX,
-                                     y + Map.TacPixelY,
-                                     PINK,
-                                     TBLACK,
-                                     TPF_NOSHADOW | TPF_6POINT);
-                }
-
-                /*
-                **	Draw the cell's Waypoint designation if there is one.
-                */
-                if (IsWaypoint) {
-                    for (i = 0; i < 26; i++) {
-                        if (Scen.Waypoint[i] == Cell_Number()) {
-                            waypt[0] = 'A' + i;
-                            waypt[1] = 0;
-                            Fancy_Text_Print(waypt,
-                                             Map.TacPixelX + x + CELL_PIXEL_W / 2,
-                                             Map.TacPixelY + y + (CELL_PIXEL_H / 2) - 3,
-                                             YELLOW,
-                                             TBLACK,
-                                             TPF_NOSHADOW | TPF_6POINT | TPF_CENTER);
-                            break;
-                        }
-                    }
-                    if (Scen.Waypoint[WAYPT_HOME] == Cell_Number()) {
-                        Fancy_Text_Print("Home",
-                                         Map.TacPixelX + x,
-                                         Map.TacPixelY + y + (CELL_PIXEL_H)-7,
-                                         WHITE,
-                                         TBLACK,
-                                         TPF_NOSHADOW | TPF_6POINT);
-                    }
-                    if (Scen.Waypoint[WAYPT_REINF] == Cell_Number()) {
-                        Fancy_Text_Print("Reinf",
-                                         Map.TacPixelX + x,
-                                         Map.TacPixelY + y + (CELL_PIXEL_H)-7,
-                                         WHITE,
-                                         TBLACK,
-                                         TPF_NOSHADOW | TPF_6POINT);
-                    }
-                }
-            }
-#endif
 
             /*
             **	Draw the placement cursor:
@@ -1921,7 +1873,7 @@ int CellClass::Tiberium_Adjust(bool pregame)
             int count = 0;
 
             /*
-            **	Mixup the Tiberium overlays so that they don't look the same.
+            **	Mixup the Tiberium overlays so that they don't look the same
             */
             if (pregame) {
                 Overlay = Random_Pick(OVERLAY_TIBERIUM1, OVERLAY_TIBERIUM12);
@@ -1945,6 +1897,7 @@ int CellClass::Tiberium_Adjust(bool pregame)
             }
 
             OverlayData = _adj[count];
+
             return((OverlayData+1) * Rule.Get_Rule_Value<int>(GAME_HARVESTING_SECTION, CREDITS_PER_TIBERIUM_SCOOP_RULE));
         }
     }
@@ -2700,6 +2653,11 @@ bool CellClass::Is_Visible(HousesType house) const
  *=============================================================================================*/
 bool CellClass::Is_Visible(HouseClass* player) const
 {
+    if (Debug_Map) {
+        // no shroud in scenario editor mode
+        return true;
+    }
+
     if (player && player->Class) {
         return Is_Visible(player->Class->House);
     }
@@ -2820,6 +2778,47 @@ bool CellClass::Is_Clear_To_Move(bool ignoreinfantry, bool ignorevehicles) const
 }
 
 #endif // USE_RA_AI
+
+/**
+ * Immediately delete any overlay present on this cell and update adjacent cells accordingly. No money
+ * is refunded to the house that owns this cell (if it was a wall).
+ */
+bool CellClass::Purge_Overlay(const bool update_adjacent_cell_walls, const bool recalc_tiberium)
+{
+    if (Overlay == OVERLAY_NONE) {
+        return false;
+    }
+
+    const auto was_wall = OverlayTypeClass::As_Reference(Overlay).IsWall;
+    const auto was_tiberium = OverlayTypeClass::As_Reference(Overlay).IsTiberium;
+
+    Overlay = OVERLAY_NONE;
+    OverlayData = 0;
+    Owner = HOUSE_NONE;
+
+    Recalc_Attributes();
+    Redraw_Objects();
+    ObjectClass::Detach_This_From_All(::As_Target(Cell_Number()), true);
+
+    if (was_wall && update_adjacent_cell_walls) {
+        for (const auto& facing : { FACING_N, FACING_E, FACING_S, FACING_W }) {
+            auto adj_cell = Adjacent_Cell(facing);
+
+            if (adj_cell != nullptr) {
+                adj_cell->Wall_Update();
+            }
+        }
+    }
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map && was_tiberium && recalc_tiberium) {
+        // recalc tiberium for Scenario Editor since we lifted a piece off the map
+        Map.TotalValue = Map.Overpass();
+    }
+#endif
+
+    return true;
+}
 
 TO_JSON(CellClass)
 {

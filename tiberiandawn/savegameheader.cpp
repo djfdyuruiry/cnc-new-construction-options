@@ -93,20 +93,7 @@ void SaveGameHeader::Read_Globals()
     ScenarioID = Scen.Scenario;
     ScenarioDirection = TdTypeConverter::To_String(ScenDir);
     ScenarioVariation = TdTypeConverter::To_String(ScenVar);
-
-    const auto scenario_file_name = std::string(Scen.ScenarioName) + ".INI";
-
-    if (CCFileClass scenario_file(scenario_file_name.c_str()); scenario_file.Is_Available()) {
-        INIClass ini;
-
-        ini.Load(scenario_file);
-
-        const auto scenario_name = ini.Get_String("Basic", "Name", std::string(""));
-
-        if (!scenario_name.empty()) {
-            ScenarioName = scenario_name;
-        }
-    }
+    ScenarioName = Scen.ScenarioBasicName;
 
     PlayerHouseType = TdTypeConverter::To_String(PlayerPtr->Class->House);
     PlayerActsLikeType = TdTypeConverter::To_String(PlayerPtr->ActLike);
@@ -214,6 +201,7 @@ bool SaveGameHeader::Write_Globals() const
     }
 
     Scen.Scenario = ScenarioID;
+    Scen.ScenarioBasicName = ScenarioName;
 
     // validate already called, so we are using known valid values
     ScenDir = TdTypeConverter::Try_Parse<ScenarioDirType>(ScenarioDirection).value();

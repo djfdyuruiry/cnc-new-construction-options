@@ -151,6 +151,7 @@ set(TIBDAWN_SRC
     lua/td_luaapi.cpp
     lua/tdtypes_luaapi.cpp
     lua/ui_luaapi.cpp
+    mapeditsidebar.cpp
     missionselect.cpp
     ruleseditordlg.cpp
     savegame_v1.cpp

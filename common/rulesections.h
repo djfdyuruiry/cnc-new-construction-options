@@ -32,6 +32,7 @@
 #include "ini.h"
 #include "json.h"
 #include "logger.h"
+#include "paths.h"
 #include "stringutils.h"
 
 typedef unsigned short ushort;
@@ -80,7 +81,6 @@ class RuleSection
 {
 public:
     static bool Variants_Have_Same_Type(const RuleValueVariant& value_variant_a, const RuleValueVariant& value_variant_b);
-
 
     static std::string_view Get_Variant_Type(const RuleValueVariant& value_variant);
 
@@ -220,6 +220,20 @@ public:
 
             if (!str_validator.has_value() || str_validator.value()(str_value)) {
                 value = str_value;
+            }
+        }
+
+        // record where the value came from if we are setting an initial value or changing value
+        if (
+            (entry_has_existing_value && value != resolved_default_value) || (!entry_has_existing_value)
+        ) {
+            auto& filename = ini.Get_FileName();
+
+            if (filename.has_value()) {
+                auto filename_str = PathsClass::Get_Filename(filename->data());
+                CncStringUtils::To_Upper(filename_str);
+
+                RuleIniSource[name.data()] = filename_str;
             }
         }
 
@@ -436,6 +450,10 @@ public:
     RuleSection& Set_Rule_Comment(std::string_view name, std::string comment);
     std::optional<std::string> Try_Get_Rule_Comment(std::string_view name) const;
 
+    RuleSection& Set_Rule_Ini_Source(std::string_view name, const std::string& source);
+    bool Clear_Rule_Ini_Source(std::string_view name);
+    std::optional<std::string> Try_Get_Rule_Ini_Source(std::string_view name) const;
+
     RuleValueVariant operator[](std::string_view name) const;
 
     // TODO: Handle OnRulesChanged, if needed
@@ -482,6 +500,7 @@ private:
     std::optional<std::string> Comment;
     std::map<std::string, RuleValueVariant> Rules;
     std::map<std::string, std::string> RuleComments;
+    std::map<std::string, std::string> RuleIniSource;
     std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> OnRulesChanged;
     std::optional<std::string> ConverterSectionTypeName;
 
@@ -910,6 +929,8 @@ public:
     bool Has_Section(std::string_view name) const;
 
     void Save_All_To_Ini(INIClass& ini) const;
+
+    void Save_Rules_From_Source_To_Ini(const std::string& source, INIClass& ini) const;
 
     RuleSection& Add_Section(std::string_view name, std::function<void(RuleSection&, std::string_view, const RuleValueVariant&)> on_rules_changed);
 

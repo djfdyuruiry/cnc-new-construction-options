@@ -47,6 +47,7 @@ const std::unordered_map<size_t, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(BStateType,                   "BSTATE_",      BSTATE_NONE,                            BSTATE_AUX2,                              {},                  {},                  false),
     ENUM_TYPE_PAIR(CCPaletteType,                "CC_",          static_cast<CCPaletteType>(TBLACK),     static_cast<CCPaletteType>(WHITE),        CCPalettePatchTable, {},                  false),
     ENUM_TYPE_PAIR(CloakType,                    "",             UNCLOAKED,                              UNCLOAKING,                               {},                  {},                  false),
+    ENUM_TYPE_PAIR(ColorType,                    "",             TBLACK,                                 WHITE,                                    {},                  {},                  false),
     ENUM_TYPE_PAIR(DiffType,                     "DIFF_",        DIFF_NONE,                              DIFF_LAST,                                {},                  {},                  false),
     ENUM_TYPE_PAIR(DirType,                      "DIR_",         DIR_MIN,                                DIR_MAX,                                  {},                  {},                  true),
     ENUM_TYPE_PAIR(DoorClass::DoorStateType,     "IS_",          DoorClass::IS_CLOSED,                   DoorClass::IS_CLOSING,                    {},                  {},                  false),

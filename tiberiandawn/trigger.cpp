@@ -261,6 +261,11 @@ bool TriggerClass::Action_Need_Team(TriggerClass::ActionType action)
     return (false);
 }
 
+bool TriggerClass::Action_Need_StringData(const ActionType action)
+{
+    return action == ACTION_LUA_EVENT || action == ACTION_LUA_SCRIPT;
+}
+
 /***********************************************************************************************
  * TriggerClass::TriggerClass -- constructor                                                   *
  *                                                                                             *
@@ -1177,8 +1182,11 @@ void TriggerClass::Write_INI_String(char* buffer)
     **	Generate INI entry.
     */
     auto hname = House == HOUSE_NONE ? "None" : HouseClass::As_Pointer(House)->Class->IniName;
-
     auto tname = Team == NULL ? "None" : Team->IniName;
+
+    if (Action == ACTION_LUA_EVENT || Action == ACTION_LUA_SCRIPT) {
+        tname = StringData->c_str();
+    }
 
     sprintf(buffer,
             "%s,%s,%d,%s,%s,%d",

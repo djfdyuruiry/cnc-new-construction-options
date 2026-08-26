@@ -58,7 +58,9 @@
 
 #include "function.h"
 #include "common/framelimit.h"
+#include "lua/scenariolua.h"
 #include "ccini.h"
+#include "tiberiandawnsettings.h"
 
 #ifdef SCENARIO_EDITOR
 
@@ -111,14 +113,17 @@ MapEditClass::MapEditClass(void)
     ObjCount = 0;
     LastChoice = 0;
     LastHouse = HOUSE_GOOD;
-    GrabbedObject = 0;
+    GrabbedObject = nullptr;
     for (int i = 0; i < NUM_EDIT_CLASSES; i++) {
         NumType[i] = 0;
         TypeOffset[i] = 0;
     }
     Scen.Waypoint[WAYPT_HOME] = 0;
     CurrentCell = 0;
-    CurTrigger = NULL;
+    CurTrigger = nullptr;
+    CurWaypoint = WAYPT_COUNT;
+    GrabbedOverlay = false;
+    GrabbedOverlayOrigin = 0;
     Changed = 0;
     LMouseDown = 0;
     BaseBuilding = 0;
@@ -144,6 +149,23 @@ void MapEditClass::One_Time(void)
 {
     MouseClass::One_Time();
 
+    HeaderX = 0;
+    HeaderY = 0;
+    HeaderW = SeenBuff.Get_Width();
+    HeaderH = Get_Tab_Height();
+
+    PopupDialogVisible = false;
+
+    FooterW = HeaderW;
+    FooterH = HeaderH;
+    FooterX = 0;
+    FooterY = SeenBuff.Get_Height() - FooterH;
+
+    EditorSidebar.W = SeenBuff.Get_Width() / 4;
+    EditorSidebar.H = SeenBuff.Get_Height() - HeaderH - FooterH - 3;
+    EditorSidebar.X = SeenBuff.Get_Width() - EditorSidebar.W;
+    EditorSidebar.Y = HeaderY + HeaderH + 2;
+
     /*------------------------------------------------------------------------
     Create the pop-up controls
     ------------------------------------------------------------------------*/
@@ -155,12 +177,52 @@ void MapEditClass::One_Time(void)
     MapArea = new ControlClass(
         MAP_AREA,
         0,
-        16,
-        SeenBuff.Get_Width(),
-        SeenBuff.Get_Height() - 16,
+        HeaderX + HeaderH + 2,
+        EditorSidebar.X - 1,
+        (FooterY - 1) - (HeaderH + 2),
         GadgetClass::LEFTPRESS | GadgetClass::LEFTRELEASE,
         false
     );
+
+    // make all control positions relative to POPUP_GDI and use offset center X co-ord so the UI layout is centered
+    const auto POPUP_GDI_X = (MapArea->Width / 2)
+        - ((POPUP_GDI_W + POPUP_FACEBOX_W + POPUP_HEALTH_W + POPUP_MISSION_W + (CONTROL_MARGIN * 3)) / 2);
+    const auto POPUP_GDI_Y = SeenBuff.Get_Height() - (FooterH + (CONTROL_MARGIN * 4) + POPUP_FACEBOX_H);
+
+    const auto POPUP_NOD_X = POPUP_GDI_X;
+    const auto POPUP_NOD_Y = POPUP_GDI_Y + POPUP_GDI_H;
+
+    const auto POPUP_NEUTRAL_X = POPUP_GDI_X;
+    const auto POPUP_NEUTRAL_Y = POPUP_NOD_Y + POPUP_NOD_H;
+
+    const auto POPUP_MULTI1_X = POPUP_GDI_X;
+    const auto POPUP_MULTI1_Y = POPUP_GDI_Y;
+
+    const auto POPUP_MULTI2_X = POPUP_GDI_X + (CONTROL_MARGIN * 10);
+    const auto POPUP_MULTI2_Y = POPUP_MULTI1_Y;
+
+    const auto POPUP_MULTI3_X = POPUP_MULTI1_X;
+    const auto POPUP_MULTI3_Y = POPUP_NOD_Y;
+
+    const auto POPUP_MULTI4_X = POPUP_MULTI2_X;
+    const auto POPUP_MULTI4_Y = POPUP_MULTI3_Y;
+
+    const auto POPUP_FACEBOX_X = POPUP_GDI_X + POPUP_GDI_W + CONTROL_MARGIN;
+    const auto POPUP_FACEBOX_Y = POPUP_GDI_Y - CONTROL_MARGIN;
+
+    const auto POPUP_HEALTH_X = POPUP_FACEBOX_X + POPUP_FACEBOX_W + CONTROL_MARGIN;
+    const auto POPUP_HEALTH_Y = POPUP_GDI_Y + (CONTROL_MARGIN * 4);
+
+    const auto POPUP_BASESTRUCTURE_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
+    const auto POPUP_BASESTRUCTURE_Y = POPUP_HEALTH_Y - (POPUP_HEALTH_H / 2);
+
+    const auto POPUP_BASEPRIORITY_X = POPUP_BASESTRUCTURE_X;
+    const auto POPUP_BASEPRIORITY_Y = POPUP_BASESTRUCTURE_Y + POPUP_BASESTRUCTURE_SIZE + (CONTROL_MARGIN * 2);
+
+    const auto POPUP_MISSION_X = POPUP_HEALTH_X + POPUP_HEALTH_W + CONTROL_MARGIN;
+    const auto POPUP_MISSION_Y = POPUP_FACEBOX_Y;
+
+    EditorSidebar.Init(this);
 
     /*........................................................................
     House buttons
@@ -264,15 +326,87 @@ void MapEditClass::One_Time(void)
         POPUP_FACINGDIAL, POPUP_FACEBOX_X, POPUP_FACEBOX_Y, POPUP_FACEBOX_W, POPUP_FACEBOX_H, (DirType)0);
 
     /*........................................................................
+    AI Base flag for structures
+    ........................................................................*/
+    static char base_structure_text[5] = "Base";
+
+    IsBaseStructureCheckbox = new CheckBoxClass(POPUP_BASESTRUCTURE, POPUP_BASESTRUCTURE_X, POPUP_BASESTRUCTURE_Y, POPUP_BASESTRUCTURE_SIZE);
+    IsBaseStructureText = new TextLabelClass(base_structure_text,
+                                    IsBaseStructureCheckbox->X + (POPUP_BASESTRUCTURE_SIZE * 2) + 5,
+                                    IsBaseStructureCheckbox->Y + ((POPUP_BASESTRUCTURE_SIZE - 6) / 6),
+                                    CC_GREEN,
+                                    TPF_CENTER | TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
+
+    /*........................................................................
+    AI Base ID textbox for structures
+    ........................................................................*/
+    static char base_id_text[8] = "Base ID";
+
+    BaseStructureIdTextBox = new EditClass(
+        POPUP_BASEID,
+        BaseStructureIdBuffer,
+        std::size(BaseStructureIdBuffer),
+        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+        POPUP_BASEPRIORITY_X,
+        POPUP_BASEPRIORITY_Y,
+        POPUP_BASESTRUCTURE_SIZE * 2,
+        18,
+        EditClass::NUMERIC
+    );
+    BaseStructureIdText = new TextLabelClass(
+        base_id_text,
+        POPUP_BASEPRIORITY_X + (POPUP_BASESTRUCTURE_SIZE * 2) + 2,
+        POPUP_BASEPRIORITY_Y + 2,
+        CC_GREEN,
+        TPF_FULLSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL
+    );
+    BaseStructureIdContext = nullptr;
+
+    /*........................................................................
+    Calculate popup dialog dimensions
+    ........................................................................*/
+    constexpr auto dialog_margin = CONTROL_MARGIN * 4;
+
+    PopupDialogX = POPUP_GDI_X - dialog_margin;
+    PopupDialogY = POPUP_GDI_Y - (dialog_margin * 2); // make room for caption text and livery
+
+    // use bottom right controls as end points
+    const auto end_x = POPUP_MISSION_X + POPUP_MISSION_W + dialog_margin;
+    const auto end_y = POPUP_MISSION_Y + POPUP_MISSION_H + dialog_margin;
+
+    PopupDialogW = end_x - PopupDialogX;
+    PopupDialogH = end_y - PopupDialogY;
+
+    /*........................................................................
+    Ensure popup controls don't overlap editor sidebar
+    ........................................................................*/
+    const auto sidebar_width_limit = SeenBuff.Get_Width() - (PopupDialogX + PopupDialogW + dialog_margin);
+
+    EditorSidebar.W = min(sidebar_width_limit, EditorSidebar.W);
+
+    /*........................................................................
     The base percent-built slider & its label
     ........................................................................*/
-    const auto POPUP_BASE_X = SeenBuff.Get_Width() - POPUP_BASE_W;
+    const auto POPUP_BASE_X = (HeaderX + HeaderW) - POPUP_BASE_W - (CONTROL_MARGIN * 10);
 
-    BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, POPUP_BASE_Y, POPUP_BASE_W, POPUP_BASE_H);
+    BaseGauge = new GaugeClass(POPUP_BASEPERCENT, POPUP_BASE_X, HeaderY, POPUP_BASE_W, HeaderH);
     BaseLabel = new TextLabelClass(
-        BaseText, POPUP_BASE_X - 3, POPUP_BASE_Y, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
+        BaseText, POPUP_BASE_X - 3, 0, CC_GREEN, TPF_RIGHT | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
     BaseGauge->Set_Maximum(100);
     BaseGauge->Set_Value(BasePercent);
+
+    /*........................................................................
+    Editor menu button
+    ........................................................................*/
+    EditorMenuButton = new TextButtonClass(
+        POPUP_EDITORMENU,
+        "Menu",
+        TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+        0,
+        0,
+        75,
+        Get_Tab_Height()
+    );
 }
 
 /***********************************************************************************************
@@ -301,9 +435,12 @@ void MapEditClass::Init_IO(void)
         /*------------------------------------------------------------------------
         For editor mode, add the map area to the button input list
         ------------------------------------------------------------------------*/
-        Buttons = 0;
+        Buttons = nullptr;
+
+        EditorSidebar.Add_This();
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
+        Add_A_Button(*EditorMenuButton);
         Add_A_Button(*MapArea);
     }
 }
@@ -335,6 +472,30 @@ void MapEditClass::Read_INI(CCINIClass& ini)
 
     BasePercent = ini.Get_Int("Basic", "Percent", 0);
     BaseGauge->Set_Value(BasePercent);
+
+    CurrentCell = Coord_Cell(Pixel_To_Coord(TacPixelX, TacPixelY));
+
+    Changed = 0;
+
+    /*------------------------------------------------------------------------
+    Initialize addable objects list, required due to possible theater change
+    ------------------------------------------------------------------------*/
+    Clear_List();
+    TemplateTypeClass::Prep_For_Add();
+    OverlayTypeClass::Prep_For_Add();
+    SmudgeTypeClass::Prep_For_Add();
+    TerrainTypeClass::Prep_For_Add();
+    UnitTypeClass::Prep_For_Add();
+    InfantryTypeClass::Prep_For_Add();
+    AircraftTypeClass::Prep_For_Add();
+    BuildingTypeClass::Prep_For_Add();
+
+    /*........................................................................
+    Compute offset of each class type in the Objects array
+    ........................................................................*/
+    for (auto i = 0; i < NUM_EDIT_CLASSES; i++) {
+        TypeOffset[i] = i == 0 ? 0 : TypeOffset[i - 1] + NumType[i - 1];
+    }
 }
 
 /***************************************************************************
@@ -365,6 +526,12 @@ void MapEditClass::Write_INI(CCINIClass& ini)
     ** by the Base's Write_INI routine.
     */
     ini.Put_Int("Basic", "Percent", BasePercent);
+
+    if (Scen.ScenarioBasicName.has_value()) {
+        ini.Put_String("Basic", "Name", *Scen.ScenarioBasicName);
+    }
+
+    ScenarioLua::Write_Lua_Script_Path(ini, Scen.LuaScriptPath);
 }
 
 /***************************************************************************
@@ -463,6 +630,54 @@ bool MapEditClass::Add_To_List(ObjectTypeClass const* object)
     }
 
     return (false);
+}
+
+void MapEditClass::Exit_Editor() const
+{
+    if (!Debug_Map) {
+        return;
+    }
+
+    Theme.Queue_Song(THEME_NONE);
+    Stop_Speaking();
+    Speak(VOX_CONTROL_EXIT);
+    while (Is_Speaking()) {
+        Call_Back();
+    }
+    GameActive = false;
+    Debug_Map = false;
+}
+
+static bool Change_Base_Node_Id(char* id_str, const size_t str_len, EditClass& control, BuildingClass* building)
+{
+    if (building == nullptr) {
+        return false;
+    }
+
+    if (!Base.Is_Node(building)) {
+        return false;
+    }
+
+    try {
+        const auto desired_node_idx = std::stoi(id_str);
+        const auto node_to_move_ptr = Base.Get_Node(building);
+        const auto current_node_idx = Base.Nodes.ID(node_to_move_ptr);
+
+        auto result = Base.Nodes.Move(current_node_idx, desired_node_idx);
+
+        if (!result) {
+            // invalid id, reset to current node id
+            sprintf(id_str, "%d", current_node_idx);
+            control.Set_Text(id_str, str_len);
+        }
+
+        return result;
+    } catch (const std::invalid_argument& _) {
+    } catch (const std::out_of_range& _) {
+    }
+
+    control.Set_Color(RED);
+    return false;
 }
 
 /***************************************************************************
@@ -615,7 +830,7 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         back to normal (or whatever the shape is set to by Set_Default_Mouse())
         when it re-enters the map area.
         .....................................................................*/
-        if (CurTrigger) {
+        if (CurTrigger || CurWaypoint != WAYPT_COUNT) {
             Override_Mouse_Shape(MOUSE_CAN_MOVE);
         } else {
             Override_Mouse_Shape(MOUSE_NORMAL);
@@ -646,24 +861,60 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         /*.....................................................................
         "Paint" mode: place current object, and restart placement
         .....................................................................*/
-        if (PendingObject) {
+        if (PendingObject && !GrabbedOverlay) {
             Flag_To_Redraw(true);
             if (Place_Object() == 0) {
                 Changed = 1;
+
                 Start_Placement();
             }
-        } else {
+        } else if (CurTrigger != nullptr) {
+            Flag_To_Redraw(true);
+            if (Place_Trigger()) {
+                Changed = 1;
+            }
+        } else if (GrabbedObject) {
             /*.....................................................................
             Move the currently-grabbed object
             .....................................................................*/
-            if (GrabbedObject) {
-                GrabbedObject->Mark(MARK_CHANGE);
-                if (Move_Grabbed_Object() == 0) {
-                    Changed = 1;
-                }
+            GrabbedObject->Mark(MARK_CHANGE);
+            if (Move_Grabbed_Object() == 0) {
+                Changed = 1;
             }
         }
     }
+
+    /*------------------------------------------------------------------------
+    handle structure base ID textbox interactions
+    ------------------------------------------------------------------------*/
+    if (BaseStructureIdTextBox->Has_Focus()) {
+        // if user is editing the priority textbox, prevent further input processing until they move the mouse away
+        if (Get_Mouse_X() >= BaseStructureIdTextBox->X
+            && Get_Mouse_X() <= BaseStructureIdTextBox->X + BaseStructureIdTextBox->Width
+            && Get_Mouse_Y() >= BaseStructureIdTextBox->Y
+            && Get_Mouse_Y() <= BaseStructureIdTextBox->Y + BaseStructureIdTextBox->Height) {
+            input = KN_NONE;
+        }
+
+        BaseStructureIdTextBox->Draw_Me(true);
+    } else if (BaseStructureIdTextBox->Has_Changed()) {
+        // process AI base node priority change
+        if (Change_Base_Node_Id(
+            BaseStructureIdBuffer,
+            std::size(BaseStructureIdBuffer),
+            *BaseStructureIdTextBox,
+            BaseStructureIdContext
+        )) {
+            BaseStructureIdContext = nullptr;
+            Build_Base_To(BasePercent);
+        }
+
+        BaseStructureIdTextBox->Clear_Changed();
+        BaseStructureIdTextBox->Draw_Me(true);
+    }
+
+    // give editor sidebar a change to steal input
+    EditorSidebar.On_Input(input);
 
     /*------------------------------------------------------------------------
     Trap special editing keys; if one is detected, set 'input' to 0 to
@@ -683,6 +934,8 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             } else {
                 Cancel_Placement();
             }
+            Flag_To_Redraw(true);
+            break;
         }
 
         /*
@@ -690,6 +943,17 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         */
         if (CurTrigger) {
             Stop_Trigger_Placement();
+            Flag_To_Redraw(true);
+            break;
+        }
+
+        /*
+        ................. Turn off waypoint placement mode .................
+        */
+        if (CurWaypoint != WAYPT_COUNT) {
+            Cancel_Placement();
+            Flag_To_Redraw(true);
+            break;
         }
 
         /*
@@ -698,14 +962,16 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         if (CurrentObject.Count()) {
             CurrentObject[0]->Unselect();
             Popup_Controls();
+            Flag_To_Redraw(true);
+            break;
         }
         Main_Menu();
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    F6 = toggle passable/impassable display
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        F6 = toggle passable/impassable display
+        ---------------------------------------------------------------------*/
     case KN_F6:
         Debug_Passable = (Debug_Passable == false);
         HiddenPage.Clear();
@@ -713,9 +979,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    INSERT = go into object-placement mode
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        INSERT = go into object-placement mode
+        ---------------------------------------------------------------------*/
     case KN_INSERT:
         if (!PendingObject) {
             /*
@@ -733,11 +999,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ESC = exit placement mode, or exit to DOS
-    ---------------------------------------------------------------------*/
-    case KN_ESC:
-
+        /*---------------------------------------------------------------------
+        ESC = exit placement mode, or exit to DOS
+        ---------------------------------------------------------------------*/
+    case KN_ESC: {
         /*
         .................... Exit object placement mode ....................
         */
@@ -758,54 +1023,64 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
                 Stop_Trigger_Placement();
                 input = KN_NONE;
                 break;
-            } else {
-                rc = WWMessageBox().Process("Exit Scenario Editor?", TXT_YES, TXT_NO);
+            }
+
+            /*
+            ................... Exit waypoint placement mode ...................
+            */
+            if (CurWaypoint != WAYPT_COUNT) {
+                Cancel_Placement();
+                input = KN_NONE;
+                break;
+            }
+
+            rc = WWMessageBox().Process("Exit Scenario Editor?", TXT_YES, TXT_NO);
+            HiddenPage.Clear();
+            Flag_To_Redraw(true);
+            Render();
+
+            /*
+            .......... User doesn't want to exit; return to editor ..........
+            */
+            if (rc == 1) {
+                input = KN_NONE;
+                break;
+            }
+
+            /*
+            ................. If changed, prompt for saving .................
+            */
+            if (Changed) {
+                rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
                 HiddenPage.Clear();
                 Flag_To_Redraw(true);
                 Render();
 
                 /*
-                .......... User doesn't want to exit; return to editor ..........
+                ..................... User wants to save .....................
                 */
-                if (rc == 1) {
-                    input = KN_NONE;
-                    break;
-                }
-
-                /*
-                ................. If changed, prompt for saving .................
-                */
-                if (Changed) {
-                    rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
-                    HiddenPage.Clear();
-                    Flag_To_Redraw(true);
-                    Render();
+                if (rc == 0) {
 
                     /*
-                    ..................... User wants to save .....................
+                    .............. If save cancelled, abort exit ..............
                     */
-                    if (rc == 0) {
-
-                        /*
-                        .............. If save cancelled, abort exit ..............
-                        */
-                        if (Save_Scenario() != 0) {
-                            input = KN_NONE;
-                            break;
-                        } else {
-                            Changed = 0;
-                        }
+                    if (Save_Scenario() != 0) {
+                        input = KN_NONE;
+                        break;
+                    } else {
+                        Changed = 0;
                     }
                 }
             }
         }
-        Prog_End();
-        exit(0);
-        break;
 
-    /*---------------------------------------------------------------------
-    LEFT = go to previous placement object
-    ---------------------------------------------------------------------*/
+        Exit_Editor();
+        break;
+    }
+
+        /*---------------------------------------------------------------------
+        LEFT = go to previous placement object
+        ---------------------------------------------------------------------*/
     case KN_LEFT:
         if (PendingObject) {
             Place_Prev();
@@ -813,9 +1088,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    RIGHT = go to next placement object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        RIGHT = go to next placement object
+        ---------------------------------------------------------------------*/
     case KN_RIGHT:
         if (PendingObject) {
             Place_Next();
@@ -823,9 +1098,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    PGUP = go to previous placement category
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        PGUP = go to previous placement category
+        ---------------------------------------------------------------------*/
     case KN_PGUP:
         if (PendingObject) {
             Place_Prev_Category();
@@ -833,9 +1108,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    PGDN = go to next placement category
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        PGDN = go to next placement category
+        ---------------------------------------------------------------------*/
     case KN_PGDN:
         if (PendingObject) {
             Place_Next_Category();
@@ -843,9 +1118,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    HOME = jump to first placement object, or go to Home Cell
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        HOME = jump to first placement object, or go to Home Cell
+        ---------------------------------------------------------------------*/
     case KN_HOME:
         if (PendingObject) {
             Place_Home();
@@ -869,9 +1144,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         break;
 
 #if (KN_HOME | KN_SHIFT_BIT) != KN_HOME
-    /*---------------------------------------------------------------------
-    SHIFT-HOME: set new Home Cell position
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        SHIFT-HOME: set new Home Cell position
+        ---------------------------------------------------------------------*/
     case ((int)KN_HOME | (int)KN_SHIFT_BIT):
 #else
     case ((int)KN_HOME | (int)KN_CTRL_BIT):
@@ -906,10 +1181,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    SHIFT-R: set new Reinforcement Cell position.  Don't allow setting
-    the Reinf. Cell to the same as the Home Cell (for display purposes.)
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        SHIFT-R: set new Reinforcement Cell position.  Don't allow setting
+        the Reinf. Cell to the same as the Home Cell (for display purposes.)
+        ---------------------------------------------------------------------*/
     case ((int)KN_R | (int)KN_SHIFT_BIT):
         if (CurrentCell == 0 || CurrentCell == Scen.Waypoint[WAYPT_HOME]) {
             break;
@@ -944,9 +1219,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ALT-Letter: Label a waypoint cell
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ALT-Letter: Label a waypoint cell
+        ---------------------------------------------------------------------*/
     case ((int)KN_A | (int)KN_ALT_BIT):
     case ((int)KN_B | (int)KN_ALT_BIT):
     case ((int)KN_C | (int)KN_ALT_BIT):
@@ -988,13 +1263,14 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             (*this)[CurrentCell].IsWaypoint = 1;
             Changed = 1;
             Flag_Cell(CurrentCell);
+            EditorSidebar.Refresh_Waypoint_List();
         }
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ALT-1-4: Designate a cell as a capture-the-flag cell.
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ALT-1-4: Designate a cell as a capture-the-flag cell.
+        ---------------------------------------------------------------------*/
     case ((int)KN_1 | (int)KN_ALT_BIT):
     case ((int)KN_2 | (int)KN_ALT_BIT):
     case ((int)KN_3 | (int)KN_ALT_BIT):
@@ -1024,9 +1300,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    ALT-Space: Remove a waypoint designation
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        ALT-Space: Remove a waypoint designation
+        ---------------------------------------------------------------------*/
     case ((int)KN_SPACE | (int)KN_ALT_BIT):
         if (CurrentCell != 0) {
             /*...............................................................
@@ -1034,8 +1310,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             clear that waypoint.
             ...............................................................*/
             for (i = 0; i < 26; i++) {
-                if (Scen.Waypoint[i] == CurrentCell)
+                if (Scen.Waypoint[i] == CurrentCell) {
                     Scen.Waypoint[i] = -1;
+                    EditorSidebar.Refresh_Waypoint_List();
+                }
             }
 
             /*...............................................................
@@ -1060,9 +1338,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    'H' = toggle current placement object's house
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        'H' = toggle current placement object's house
+        ---------------------------------------------------------------------*/
     case KN_H:
     case ((int)KN_H | (int)KN_SHIFT_BIT):
         if (PendingObject) {
@@ -1071,19 +1349,28 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Left-mouse click:
-    Button DOWN:
-    - Toggle LMouseDown
-    - If we're in placement mode, try to place the current object
-      - If success, re-enter placement mode
-    - Otherwise, try to select an object, and "grab" it if there is one
-    - If no object, then select that cell as the "current" cell
-    Button UP:
-    - Toggle LMouseDown
-    - release any grabbed object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Left-mouse click:
+        Button DOWN:
+        - Toggle LMouseDown
+        - If we're in placement mode, try to place the current object
+          - If success, re-enter placement mode
+        - Otherwise, try to select an object, and "grab" it if there is one
+        - If no object, then select that cell as the "current" cell
+        Button UP:
+        - Toggle LMouseDown
+        - release any grabbed object
+        ---------------------------------------------------------------------*/
     case ((int)MAP_AREA | (int)KN_BUTTON):
+        if (PopupDialogVisible
+            && Get_Mouse_X() >= PopupDialogX
+            && Get_Mouse_X() <= PopupDialogX + PopupDialogW
+            && Get_Mouse_Y() >= PopupDialogY
+            && Get_Mouse_Y() <= PopupDialogY + PopupDialogH) {
+            // allow absently clicking around the popup dialog area - also required to allow edit boxes to get focus
+            break;
+        }
+
         /*
         ------------------------- Left Button DOWN -------------------------
         */
@@ -1095,15 +1382,28 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             if (PendingObject) {
                 if (Place_Object() == 0) {
                     Changed = 1;
-                    Start_Placement();
+
+                    if (!GrabbedOverlay) {
+                        Start_Placement();
+                    } else {
+                        GrabbedOverlay = false;
+                    }
+                }
+            } else if (CurWaypoint != WAYPT_COUNT) {
+                if (Place_Waypoint()) {
+                    Cancel_Placement();
+                    EditorSidebar.Refresh_Waypoint_List();
+                    Flag_To_Redraw(true);
+                    Changed = 1;
                 }
             } else {
                 /*
                 ....................... Place a trigger .........................
                 */
                 if (CurTrigger) {
-                    Place_Trigger();
-                    Changed = 1;
+                    if (Place_Trigger()) {
+                        Changed = 1;
+                    }
                 } else {
                     /*
                     ................. Select an object or a cell .................
@@ -1134,19 +1434,24 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             LastClickTime = WinTickCount.Time();
             input = KN_NONE;
         } else {
-
             /*
             -------------------------- Left Button UP --------------------------
             */
+            if (GrabbedOverlay) {
+                Place_Object();
+                GrabbedOverlay = false;
+                Changed = 1;
+            }
+
             LMouseDown = 0;
             GrabbedObject = 0;
             input = KN_NONE;
         }
         break;
 
-    /*---------------------------------------------------------------------
-    SHIFT-ALT-Arrow: move the current object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        SHIFT-ALT-Arrow: move the current object
+        ---------------------------------------------------------------------*/
     case (int)KN_UP | (int)KN_ALT_BIT | (int)KN_SHIFT_BIT:
     case (int)KN_DOWN | (int)KN_ALT_BIT | (int)KN_SHIFT_BIT:
     case (int)KN_LEFT | (int)KN_ALT_BIT | (int)KN_SHIFT_BIT:
@@ -1158,9 +1463,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    DELETE: delete currently-selected object
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        DELETE: delete currently-selected object
+        ---------------------------------------------------------------------*/
     case KN_DELETE:
         /*..................................................................
         Delete currently-selected object's trigger, or the object
@@ -1199,37 +1504,78 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             HiddenPage.Clear();
             Flag_To_Redraw(true);
             Changed = 1;
-        } else {
+        } else if (CurrentCell) {
             /*
-            ................. Remove trigger from current cell .................
+            ........... Remove cell contents (in priority order) ............
             */
-            if (CurrentCell) {
-                if ((*this)[CurrentCell].IsTrigger) {
-                    (*this)[CurrentCell].IsTrigger = 0;
-                    CellTriggers[CurrentCell] = NULL;
-                    /*
-                    ...................... Force a redraw ........................
-                    */
-                    HiddenPage.Clear();
-                    Flag_To_Redraw(true);
-                    Changed = 1;
+            auto& current_cell = Array[CurrentCell];
+            auto cell_waypoint_number = - 1;
+            auto content_changed = false;
+
+            for (auto idx = 0; idx < std::size(Scen.Waypoint); idx++) {
+                if (Scen.Waypoint[idx] == current_cell.Cell_Number()) {
+                    cell_waypoint_number = idx;
+                    break;
                 }
+            }
+
+            if (Array[CurrentCell].IsTrigger) {
+                // priority 1: trigger
+                Array[CurrentCell].IsTrigger = false;
+                CellTriggers[CurrentCell] = nullptr;
+
+                EditorSidebar.Refresh_Trigger_List();
+                content_changed = true;
+            } else if (cell_waypoint_number != -1) {
+                // priority 2: waypoint
+                Scen.Waypoint[cell_waypoint_number] = -1;
+
+                EditorSidebar.Refresh_Waypoint_List();
+                content_changed = true;
+            } else if (current_cell.Purge_Overlay()) {
+                // priority 3: overlay
+                content_changed = true;
+            } else if (current_cell.Cell_Occupier() != nullptr) {
+                // priority 4: cell occupier (most objects are grabbable so this is an edge case)
+                current_cell.Cell_Occupier()->Delete_This();
+
+                content_changed = true;
+            } else if (current_cell.Smudge != SMUDGE_NONE) {
+                // priority 5: smudge
+                current_cell.Smudge = SMUDGE_NONE;
+                current_cell.SmudgeData = 0;
+                current_cell.Recalc_Attributes();
+
+                content_changed = true;
+            } else {
+                // priority 6: template icon
+                current_cell.TIcon = current_cell.Clear_Icon();
+                current_cell.TType = TEMPLATE_CLEAR1;
+
+                content_changed = true;
+            }
+
+            if (content_changed) {
+                // redraw and flag change
+                HiddenPage.Clear();
+                Flag_To_Redraw(true);
+                Changed = 1;
             }
         }
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    TAB: select next object on the map
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        TAB: select next object on the map
+        ---------------------------------------------------------------------*/
     case KN_TAB:
         Select_Next();
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: House Button
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: House Button
+        ---------------------------------------------------------------------*/
     case (POPUP_GDI | KN_BUTTON):
     case (POPUP_NOD | KN_BUTTON):
     case (POPUP_NEUTRAL | KN_BUTTON):
@@ -1255,9 +1601,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: Mission
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: Mission
+        ---------------------------------------------------------------------*/
     case (POPUP_MISSIONLIST | KN_BUTTON):
         if (CurrentObject[0]->Is_Techno()) {
             /*
@@ -1273,9 +1619,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: Health
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: Health
+        ---------------------------------------------------------------------*/
     case (POPUP_HEALTHGAUGE | KN_BUTTON):
         if (CurrentObject[0]->Is_Techno()) {
             /*
@@ -1296,6 +1642,11 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             */
             if (strength != CurrentObject[0]->Strength) {
                 CurrentObject[0]->Strength = strength;
+
+                if (CurrentObject[0]->What_Am_I() == RTTI_BUILDING) {
+                    reinterpret_cast<BuildingClass*>(CurrentObject[0])->LastStrength = strength;
+                }
+
                 HiddenPage.Clear();
                 Flag_To_Redraw(true);
                 Changed = 1;
@@ -1309,9 +1660,9 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
-    /*---------------------------------------------------------------------
-    Object-Editing button: Facing
-    ---------------------------------------------------------------------*/
+        /*---------------------------------------------------------------------
+        Object-Editing button: Facing
+        ---------------------------------------------------------------------*/
     case (POPUP_FACINGDIAL | KN_BUTTON):
         if (CurrentObject[0]->Is_Techno()) {
             /*
@@ -1338,6 +1689,79 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
         input = KN_NONE;
         break;
 
+    // when the 'Base' checkbox is toggled, add/remove the selected building (if any) from the AI base
+    case (POPUP_BASESTRUCTURE | KN_BUTTON): {
+        input = KN_NONE;
+
+        if (CurrentObject.Count() < 1 || CurrentObject[0]->What_Am_I() != RTTI_BUILDING) {
+            break;
+        }
+
+        auto selected_building = dynamic_cast<BuildingClass*>(CurrentObject[0]);
+        const auto building_strength = selected_building->Strength;
+        const auto facing = selected_building->PrimaryFacing;
+        const auto trigger = selected_building->Trigger;
+
+        auto base_changed = false;
+
+        BaseNodeClass building_node;
+
+        building_node.Type = selected_building->Class->Type;
+        building_node.Coord = selected_building->Coord;
+
+        if (!IsBaseStructureCheckbox->IsOn) {
+            if (!Base.Is_Node(selected_building)) {
+                Base.Nodes.Add(building_node);
+                base_changed = true;
+            }
+
+            IsBaseStructureCheckbox->Turn_On();
+            BaseStructureIdText->Enable();
+            BaseStructureIdTextBox->Enable();
+        } else if (IsBaseStructureCheckbox->IsOn) {
+            if (Base.Is_Node(selected_building)) {
+                Base.Nodes.Delete(building_node);
+                base_changed = true;
+            }
+
+            IsBaseStructureCheckbox->Turn_Off();
+            BaseStructureIdTextBox->Disable(true);
+            BaseStructureIdText->Disable(true);
+        }
+
+        if (base_changed) {
+            Changed = 1;
+
+            // rebuild AI base to reflect change
+            Build_Base_To(BasePercent);
+
+            // restore building state (adding existing structure to base causes it to be recreated)
+            auto new_building = Base.Get_Building(building_node);
+
+            if (new_building != nullptr) {
+                new_building->Strength = building_strength;
+                new_building->LastStrength = building_strength;
+                new_building->PrimaryFacing = facing;
+
+                // note: triggers are blown away if base percent causes the building to not be a starting structure
+                new_building->Trigger = trigger;
+
+                new_building->Select();
+                new_building->Time_To_Redraw();
+
+                if (Base.Is_Node(new_building)) {
+                    sprintf(BaseStructureIdBuffer, "%d", Base.Nodes.ID(Base.Get_Node(new_building)));
+                    BaseStructureIdTextBox->Set_Text(BaseStructureIdBuffer, std::size(BaseStructureIdBuffer));
+                    BaseStructureIdContext = new_building;
+                }
+            }
+
+            Flag_To_Redraw(true);
+        }
+
+        break;
+    }
+
     /*---------------------------------------------------------------------
     Object-Editing button: Facing
     ---------------------------------------------------------------------*/
@@ -1348,6 +1772,11 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             HiddenPage.Clear();
             Flag_To_Redraw(true);
         }
+        input = KN_NONE;
+        break;
+
+    case (POPUP_EDITORMENU | KN_BUTTON):
+        Main_Menu();
         input = KN_NONE;
         break;
 
@@ -1363,6 +1792,340 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
     ------------------------ Call parent's AI routine ------------------------
     */
     MouseClass::AI(input, x, y);
+}
+
+static int Calculate_Power_For_House(const HousesType house)
+{
+    auto power = 0;
+
+    for (auto i = 0; i < Buildings.Count(); i++) {
+        const auto building = Buildings.Ptr(i);
+
+        // only count building if it belongs to the requested house and isn't a 'virtual' AI base building
+        if (building == nullptr || building->Owner() != house || building->IsUnbuiltBase) {
+            continue;
+        }
+
+        // replicates BuildingClass::Power_Output() logic without relying on LastStrength field
+        // (updated by AI loop, but that doesn't run in scenario editor mode)
+        if (building->Class->Power) {
+            power += static_cast<int>(
+                Fixed_To_Cardinal(
+                    building->Class->Power,
+                    Cardinal_To_Fixed(
+                        building->Class->MaxStrength,
+                        building->Strength
+                    )
+                )
+            );
+        }
+
+        power -= building->Class->Drain;
+    }
+
+    return power;
+}
+
+void MapEditClass::Draw_Footer(const bool forced)
+{
+    LogicPage->Fill_Rect(FooterX, FooterY, FooterX + FooterW, FooterY + FooterH, BLACK);
+    LogicPage->Draw_Line(FooterX, FooterY - 1, FooterX + FooterW, FooterY - 1, GRAY);
+
+    /*
+    **	Power output display.
+    */
+    constexpr auto fore = GREEN;
+    constexpr auto back = TBLACK;
+    static const auto text_flags = TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL;
+
+    static const auto power_to_color = [](const int power) {
+        return power == 0
+            ? GRAY
+            : power > 0
+                ? GREEN
+                : RED;
+    };
+
+    auto label_x = FooterX + 5u;
+
+    if (GameToPlay == GAME_NORMAL) {
+        // power readouts for GDI/NOD
+        const auto gdi_label = std::format("{} Power: ", Text_String(TXT_G_D_I));
+        const auto nod_label = std::format(" | {} Power: ", Text_String(TXT_N_O_D));
+
+        const auto gdi_power = Calculate_Power_For_House(HOUSE_GOOD);
+        const auto gdi_power_str = std::format("{}", gdi_power);
+
+        const auto nod_power = Calculate_Power_For_House(HOUSE_BAD);
+        const auto nod_power_str = std::format("{}", nod_power);
+
+        // gdi power
+        Fancy_Text_Print(gdi_label.c_str(), label_x , FooterY, fore, back, text_flags);
+        label_x += String_Pixel_Width(gdi_label.c_str());
+
+        Fancy_Text_Print(gdi_power_str.c_str(), label_x , FooterY, power_to_color(gdi_power), back, text_flags);
+        label_x += String_Pixel_Width(gdi_power_str.c_str());
+
+        // nod power
+        Fancy_Text_Print(nod_label.c_str(), label_x , FooterY, fore, back, text_flags);
+        label_x += String_Pixel_Width(nod_label.c_str());
+
+        Fancy_Text_Print(nod_power_str.c_str(), label_x , FooterY, power_to_color(nod_power), back, text_flags);
+        label_x += String_Pixel_Width(nod_power_str.c_str());
+
+        Fancy_Text_Print(" | ", label_x , FooterY, fore, back, text_flags);
+        label_x += String_Pixel_Width(" | ");
+    } else {
+        // TODO: consider multi support?
+    }
+
+    // power readout neutral
+    constexpr auto neutral_label = "Neutral Power: ";
+
+    const auto neutral_power = Calculate_Power_For_House(HOUSE_NEUTRAL);
+    const auto neutral_power_str = std::format("{}", neutral_power);
+
+    // neutral power
+    Fancy_Text_Print(neutral_label, label_x , FooterY, fore, back, text_flags);
+    label_x += String_Pixel_Width(neutral_label);
+
+    Fancy_Text_Print(neutral_power_str.c_str(), label_x , FooterY, power_to_color(neutral_power), back, text_flags);
+
+    /*
+    **	Draw tracker for currently selected object/cell location.
+    */
+    static const auto wide_location_display = SeenBuff.Get_Width() > GBUFF_INIT_WIDTH + 100;
+
+    const auto target_cell = CurrentObject.Count() > 0 ? Coord_Cell(CurrentObject[0]->Coord) : CurrentCell;
+    const auto cell_x = Cell_X(target_cell);
+    const auto cell_y = Cell_Y(target_cell);
+    const auto cell_coord = XY_Coord(cell_x, cell_y) * 256; // scale coord to match INI file format
+
+    auto cell_number = target_cell;
+
+#ifdef MEGAMAPS
+    // if we are editing a non-megamap scenario using a megamap build, adjust the cell_number to display
+    // what will be seen in the INI file on save
+    if (Is_Normal_Size() && cell_x <= 64 && cell_y <= 64) {
+        cell_number = Unconfine_Old_Cell(target_cell);
+    }
+#endif
+
+    Fancy_Text_Print(
+        wide_location_display ? "| Coord %u - Cell #%d @ %dx%d" : "| Coord %u - Cell"
+                                                                  " #%d",
+        ((FooterX + (FooterW - (FooterW / 3))) + 5 ) - (wide_location_display ? 0 : 30),
+        FooterY,
+        CC_GREEN,
+        TBLACK,
+        TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL,
+        cell_coord,
+        cell_number,
+        cell_x,
+        cell_y
+    );
+}
+
+void MapEditClass::Decorate_Cells(const bool forced)
+{
+    // TODO: have settings dialog menu options for font/colours in scenario editor
+    static auto constexpr cell_text_back_color = TBLACK;
+    static const auto cell_text_flags = TPF_FULLSHADOW | TPF_8POINT | TPF_CENTER;
+    const auto trigger_color = TdSettings.Get_Editor_Trigger_Color();
+    const auto waypoint_colour = TdSettings.Get_Editor_Waypoint_Color();
+
+    Iterate_Over_Map_Cells(
+        [&](auto raw_cell, auto& cell) {
+            auto cell_object = cell.Cell_Occupier();
+
+            int x, y;
+            if (!Coord_To_Pixel(cell.Cell_Coord(), x, y)) {
+                // failed to resolve cell screen co-ords
+                return;
+            }
+
+            if (!In_View(raw_cell)) {
+                // don't decorate a non-visible cell
+                return;
+            }
+
+            auto render_x = x + TacPixelX;
+            auto render_y = y + TacPixelY - (CELL_PIXEL_H / 4);
+
+            if (render_y < HeaderY + HeaderH + 1 || render_y > FooterY - 1) {
+                // prevent rendering over header/footer areas
+                return;
+            }
+
+            if (cell.IsTrigger) {
+                /*
+                **	Draw the cell's Trigger mnemonic, if it has a trigger
+                */
+                const auto& trig = *cell.Get_Trigger();
+
+                Fancy_Text_Print(
+                    trig.Get_Name(),
+                    render_x,
+                    render_y,
+                    trigger_color,
+                    cell_text_back_color,
+                    cell_text_flags
+                );
+            } else if (cell.IsWaypoint) {
+                /*
+                **	Draw the cell's Waypoint designation if there is one.
+                */
+                for (auto i = 0; i < WAYPT_HOME; i++) {
+                    if (Scen.Waypoint[i] == cell.Cell_Number()) {
+                        if (GameToPlay != GAME_NORMAL && i < MPlayerMax && !cell.IsFlagged) {
+                            // mark waypoints as multiplayer start positions using flags
+                            cell.Flag_Place(HOUSE_NONE);
+                            cell.Draw_It(x + TacPixelX, y + TacPixelY);
+                        }
+
+                        Fancy_Text_Print(std::format("{}", i).c_str(),
+                                         render_x,
+                                         render_y,
+                                         waypoint_colour,
+                                         cell_text_back_color,
+                                         cell_text_flags);
+                        break;
+                    }
+                }
+
+                if (Scen.Waypoint[WAYPT_HOME] == cell.Cell_Number()) {
+                    Fancy_Text_Print("HOME",
+                                     render_x,
+                                     render_y,
+                                     waypoint_colour,
+                                     cell_text_back_color,
+                                     cell_text_flags);
+                }
+
+                if (Scen.Waypoint[WAYPT_REINF] == cell.Cell_Number()) {
+                    Fancy_Text_Print("REINF",
+                                     render_x,
+                                     render_y,
+                                     waypoint_colour,
+                                     cell_text_back_color,
+                                     cell_text_flags);
+                }
+            } else if (cell_object != nullptr && cell_object->Trigger) {
+                if (cell_object->What_Am_I() == RTTI_BUILDING && cell.Cell_Building()->IsUnbuiltBase) {
+                    // hide triggers stored in unbuilt buildings
+                    // (they are only cached in-case the building becomes a starting structure again)
+                    return;
+                }
+
+                // draw object trigger (building/unit/infantry etc.)
+                const auto coord = cell_object->Render_Coord();
+                int object_x, object_y;
+
+                if (Coord_To_Pixel(coord, object_x, object_y)) {
+                    Fancy_Text_Print(
+                        cell_object->Trigger->Get_Name(),
+                        object_x + (WinX << 3),
+                        object_y + (CELL_PIXEL_H / 2),
+                        trigger_color,
+                        cell_text_back_color,
+                        cell_text_flags
+                    );
+                }
+            }
+        }
+    );
+}
+
+void MapEditClass::Draw_Header(const bool forced)
+{
+    const auto factor = SeenBuff.Get_Width() == GBUFF_INIT_WIDTH / 2 ? 1 : 2;
+
+    LogicPage->Fill_Rect(HeaderX, HeaderY, HeaderX + HeaderW, HeaderY + HeaderH, BLACK);
+    LogicPage->Draw_Line(HeaderX, HeaderY + HeaderH  + 1, HeaderX + HeaderW, HeaderY + HeaderH + 1, GRAY);
+
+    // total value of all Tiberium on the map
+    Fancy_Text_Print(
+        "Tiberium=%ld   ",
+        EditorMenuButton->X + EditorMenuButton->Width + 5,
+        HeaderY, CC_GREEN,
+        BLACK,
+        TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW,
+        TotalValue
+    );
+
+    // name of the scenario being edited
+    std::string scenario_title = Scen.ScenarioName;
+
+    if (Scen.ScenarioBasicName.has_value()) {
+        scenario_title += " - ";
+        scenario_title += *Scen.ScenarioBasicName;
+    }
+
+    Fancy_Text_Print(
+        scenario_title.c_str(),
+        (HeaderX + HeaderW / 2),
+        HeaderY,
+        CC_TAN,
+        TBLACK,
+        TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL
+    );
+
+    // exact AI base percent value (beside associated slider)
+    Fancy_Text_Print(
+        "%3d%%", HeaderX + (HeaderW - (22 * factor)), HeaderY, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, BasePercent);
+}
+
+void MapEditClass::Render_Editor_Controls()
+{
+    if (Buttons == nullptr) {
+        return;
+    }
+
+    EditorSidebar.Render();
+
+    // dynamically determine if popup dialog is visible
+    PopupDialogVisible = false;
+
+    const auto map_midpoint_y = (SeenBuff.Get_Height() - Map.Get_Tab_Height()) / 2;
+    auto control = Buttons;
+
+    while (control != nullptr) {
+        // popup buttons are only after the midpoint and don't overlap the sidebar, so use that as a heuristic to
+        // detect a popup dialog
+        if (control->Y >= map_midpoint_y && control->X < EditorSidebar.X - 1) {
+            PopupDialogVisible = true;
+            break;
+        }
+
+        control = control->Get_Next();
+    }
+
+    if (PopupDialogVisible) {
+        // draw a dialog background for the popup buttons
+        Dialog_Box(PopupDialogX, PopupDialogY, PopupDialogW, PopupDialogH);
+
+        // print the selected object name
+        if (CurrentObject.Count() > 0) {
+            // init font
+            Fancy_Text_Print(
+                TXT_NONE,
+                0,
+                0,
+                CC_GREEN,
+                TBLACK,
+                TPF_CENTER | TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW
+            );
+            Draw_Caption(
+                Text_String(CurrentObject[0]->Full_Name()),
+                OPTION_DIALOG,
+                PopupDialogX,
+                PopupDialogY,
+                PopupDialogW
+            );
+        }
+    }
+
+    Buttons->Draw_All();
 }
 
 /***************************************************************************
@@ -1389,49 +2152,9 @@ void MapEditClass::Draw_It(bool forced)
         return;
     }
 
-    //
-    // Erase scrags at top of screen
-    //
-    LogicPage->Fill_Rect(0, 0, Try_Get_Resolution_Mode_Width().value_or(640), 16, BLACK);
-
-    /*
-    **	Display the total value of all Tiberium on the map.
-    */
-    Fancy_Text_Print(
-        "Tiberium=%ld   ", 0, 0, CC_GREEN, BLACK, TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_NOSHADOW, TotalValue);
-
-    /*------------------------------------------------------------------------
-    If there are no object controls displayed, just invoke parent's Redraw
-    and return.
-    ------------------------------------------------------------------------*/
-    if (!Buttons) {
-        return;
-    }
-
-    /*------------------------------------------------------------------------
-    Otherwise, if 'display' is set, invoke the parent's Redraw to refresh
-    the HIDPAGE; then, update the buttons & text labels onto HIDPAGE;
-    then invoke the parent's Redraw to blit the HIDPAGE to SEENPAGE.
-    ------------------------------------------------------------------------*/
-    if (forced) {
-
-        /*
-        ....................... Update the text labels ........................
-        */
-        if (CurrentObject.Count()) {
-            /*
-            ------------------ Display the object's name & ID ------------------
-            */
-            label = Text_String(CurrentObject[0]->Full_Name());
-            tptr = label;
-            sprintf(buf, "%s (%d)", tptr, CurrentObject[0]->As_Target());
-
-            /*
-            ......................... print the label ..........................
-            */
-            Fancy_Text_Print(buf, 320, 0, CC_TAN, TBLACK, TPF_CENTER | TPF_NOSHADOW | TPF_6PT_GRAD | TPF_USE_GRAD_PAL);
-        }
-    }
+    Draw_Header(forced);
+    Decorate_Cells(forced);
+    Draw_Footer(forced);
 }
 
 /***************************************************************************
@@ -1478,7 +2201,7 @@ bool MapEditClass::Mouse_Moved(void)
     } else {
         if (GrabbedObject) {
             objtype = &GrabbedObject->Class_Of();
-        } else {
+        } else if (CurTrigger == nullptr) {
             old_mx = Get_Mouse_X();
             old_my = Get_Mouse_Y();
             old_zonecell = ZoneCell;
@@ -1492,7 +2215,7 @@ bool MapEditClass::Mouse_Moved(void)
     /*
     ............... Infantry: mouse moved if any motion at all ...............
     */
-    if (objtype->What_Am_I() == RTTI_INFANTRYTYPE) {
+    if (objtype != nullptr && objtype->What_Am_I() == RTTI_INFANTRYTYPE) {
         retcode = true;
     } else {
         /*
@@ -1540,11 +2263,13 @@ void MapEditClass::Main_Menu(void)
     _menus[1] = "Load Scenario";
     _menus[2] = "Save Scenario";
     _menus[3] = "Size Map";
-    _menus[4] = "Add Game Object";
-    _menus[5] = "Scenario Options";
+    _menus[4] = "Scenario Options";
+    _menus[5] = "Add Game Object";
     _menus[6] = "AI Options";
-    _menus[7] = "Play Scenario";
-    _menus[8] = NULL;
+    _menus[7] = "Edit Scenario Rules";
+    _menus[8] = "Play Scenario";
+    _menus[9] = "Exit";
+    _menus[10] = nullptr;
 
     /*
     ----------------------------- Main Menu loop -----------------------------
@@ -1613,8 +2338,17 @@ void MapEditClass::Main_Menu(void)
                     }
                 }
             }
-            if (Load_Scenario() == 0) {
+
+            if (Mission_Select_Dialog()) {
+                Flag_To_Redraw(true);
+                Render();
+
+                if (ScenPlayer != SCEN_PLAYER_MPLAYER && ScenPlayer != SCEN_PLAYER_JP) {
+                    LastHouse = HOUSE_GOOD;
+                }
+
                 Scen.CarryOverMoney = 0;
+                Build_Base_To(BasePercent);
                 Changed = 0;
             }
             process = false;
@@ -1634,26 +2368,16 @@ void MapEditClass::Main_Menu(void)
         .......................... Edit map size ...........................
         */
         case 3:
-            if (Size_Map(MapCellX, MapCellY, MapCellWidth, MapCellHeight) == 0) {
+            if (Size_Map(IniMapCellX, IniMapCellY, IniMapCellWidth, IniMapCellHeight) == 0) {
                 process = false;
                 Changed = 1;
             }
             break;
 
         /*
-        .......................... Add an object ...........................
-        */
-        case 4:
-            if (Placement_Dialog() == 0) {
-                Start_Placement();
-                process = false;
-            }
-            break;
-
-        /*
         ......................... Scenario options .........................
         */
-        case 5:
+        case 4:
             if (Scenario_Dialog() == 0) {
                 Changed = 1;
                 process = false;
@@ -1661,7 +2385,17 @@ void MapEditClass::Main_Menu(void)
             break;
 
         /*
-        .......................... Other options ...........................
+        .......................... Add an object ...........................
+        */
+        case 5:
+            if (Placement_Dialog() == 0) {
+                Start_Placement();
+                process = false;
+            }
+            break;
+
+        /*
+        ............................ AI config .............................
         */
         case 6:
             AI_Menu();
@@ -1669,9 +2403,18 @@ void MapEditClass::Main_Menu(void)
             break;
 
         /*
-        ...................... Test-drive this scenario ....................
+        ........................... Rules Editor ...........................
         */
         case 7:
+            Rules_Editor_Dialog();
+            Changed = 1;
+            process = false;
+            break;
+
+        /*
+        ...................... Test-drive this scenario ....................
+        */
+        case 8:
             if (Changed) {
                 rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
                 HiddenPage.Clear();
@@ -1687,7 +2430,17 @@ void MapEditClass::Main_Menu(void)
             }
             Changed = 0;
             Debug_Map = false;
+            Debug_Unshroud = false;
+
             Start_Scenario(Scen.ScenarioName);
+
+            // reset view dimensions, prevents issues with tactical map position and shroud
+            Set_View_Dimensions(0, Map.Get_Tab_Height());
+
+            return;
+
+        case 9:
+            Exit_Editor();
             return;
         }
 
@@ -1828,6 +2581,10 @@ void MapEditClass::AI_Menu(void)
  *=========================================================================*/
 bool MapEditClass::Verify_House(HousesType house, ObjectTypeClass const* objtype)
 {
+    if (!TdSettings.Enforce_OwnableBy_In_Editor()) {
+        return true;
+    }
+
     /*
     --------------- Verify that new house can own this object ----------------
     */
@@ -1932,6 +2689,16 @@ void MapEditClass::Detach(ObjectClass* object)
     if (GrabbedObject == object) {
         GrabbedObject = 0;
     }
+}
+
+void MapEditClass::Init_Editor_Dimensions()
+{
+    Set_View_Dimensions(
+        0,
+        HeaderY + HeaderH + 2,
+        SeenBuff.Get_Width() - EditorSidebar.W - 1,
+        EditorSidebar.H
+    );
 }
 
 #endif

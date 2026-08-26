@@ -107,6 +107,9 @@
 bool CCINIClass::Load(FileClass& file, bool withdigest)
 {
     FileStraw fs(file);
+
+    FileName = file.File_Name();
+
     return (Load(fs, withdigest));
 }
 

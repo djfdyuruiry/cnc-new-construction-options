@@ -50,10 +50,10 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <new>
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <utility>
 
 #include "miscasm.h"
 
@@ -207,6 +207,9 @@ public:
     // Add object to vector (growing as necessary).
     int Add(T const& object);
     int Add_Head(T const& object);
+
+    bool Swap(unsigned int index_lhs, unsigned int index_rhs);
+    bool Move(unsigned int from_index, unsigned int to_index);
 
     // Delete object just like this from vector.
     int Delete(T const& object);
@@ -755,6 +758,50 @@ template <class T> int DynamicVectorClass<T>::Add_Head(T const& object)
     ActiveCount++;
     //	(*this)[ActiveCount++] = object;
     return (true);
+}
+
+/**
+ * Swap two elements around, validates given indices provided before swapping.
+ *
+ * @return True if swap was made, false otherwise.
+ */
+template <class T> bool DynamicVectorClass<T>::Swap(const unsigned int index_lhs, const unsigned int index_rhs)
+{
+    if (index_lhs >= Count() || index_rhs >= Count() || index_lhs == index_rhs) {
+        return false;
+    }
+
+    std::swap(VectorClass<T>::Vector[index_lhs], VectorClass<T>::Vector[index_rhs]);
+    return true;
+}
+
+/**
+ * Move a given item to another index in the vector. Validates indices provided before moving items.
+ *
+ * @return True if move was made, false otherwise.
+ */
+template <class T> bool DynamicVectorClass<T>::Move(const unsigned int from_index, const unsigned int to_index)
+{
+    if (from_index >= Count() || to_index >= Count() || from_index == to_index) {
+        return false;
+    }
+
+    auto item = std::move(VectorClass<T>::Vector[from_index]);
+
+    if (to_index < from_index) {
+        // move elements down
+        for (auto i = from_index; i > to_index; --i) {
+            Swap(i, i - 1);
+        }
+    } else {
+        // move elements up
+        for (auto i = from_index; i < to_index; ++i) {
+            Swap(i, i + 1);
+        }
+    }
+
+    VectorClass<T>::Vector[to_index] = std::move(item);
+    return true;
 }
 
 /***********************************************************************************************

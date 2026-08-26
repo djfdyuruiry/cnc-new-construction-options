@@ -47,6 +47,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 
 void const* AircraftTypeClass::LRotorData = NULL;
@@ -501,21 +502,71 @@ void AircraftTypeClass::Prep_For_Add(void)
  * HISTORY:                                                                                    *
  *   07/26/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void AircraftTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
+void AircraftTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType house) const
 {
-    int shape = 0;
-    void const* ptr = Get_Cameo_Data();
-    if (!ptr) {
-        ptr = Get_Image_Data();
-        shape = 5;
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+    const auto shape_num = display_icon && shape != nullptr ? 0 : 24;
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
     }
-    CC_Draw_Shape(ptr,
-                  shape,
+
+    if (shape == nullptr) {
+        return;
+    }
+
+    CC_Draw_Shape(shape,
+                  shape_num,
                   x,
                   y,
                   window,
                   SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_FADING,
                   HouseClass::As_Pointer(house)->Remap_Table(false, true));
+
+    if (!display_icon && !IsRotorEquipped) {
+        return;
+    }
+
+    static const auto rotor_flags = SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST;
+
+    // Use idling rotor frames (slower animation) for static display
+    auto rotor_x = x;
+    const auto rotor_y = y - 2;
+    const auto rotor_frame = (Frame % 8) + 4;
+
+    if (Type == AIRCRAFT_TRANSPORT) {
+        // Dual rotors offset along flight axis.
+        rotor_x += 10;
+        CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+
+        rotor_x -= 20;
+        CC_Draw_Shape(LRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+    } else {
+        // Single rotor centered above body
+        CC_Draw_Shape(RRotorData, rotor_frame, rotor_x, rotor_y, window, rotor_flags, nullptr, DisplayClass::UnitShadow);
+    }
+}
+
+bool AircraftTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 #endif
 

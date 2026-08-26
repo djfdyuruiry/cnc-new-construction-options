@@ -382,17 +382,15 @@ void GScreenClass::Render(void)
             Render_Rally_Point_Line();
         }
 
-        if (Buttons)
+        if (!Debug_Map && Buttons)
             Buttons->Draw_All(false);
 
 #ifdef SCENARIO_EDITOR
         /*
-        ** Draw the Editor's buttons
+        ** Call editor subclass do button rendering logic.
         */
         if (Debug_Map) {
-            if (Buttons) {
-                Buttons->Draw_All();
-            }
+            Render_Editor_Controls();
         }
 #endif
         /*

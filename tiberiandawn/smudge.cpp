@@ -334,6 +334,14 @@ void SmudgeClass::Write_INI(CCINIClass& ini)
     **	Find all templates and write them to the file.
     */
     for (CELL index = 0; index < MAP_CELL_TOTAL; index++) {
+        auto save_index = index;
+
+#ifdef MEGAMAPS
+        if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+            save_index = Unconfine_Old_Cell(index);
+        }
+#endif
+
         CellClass* ptr;
 
         ptr = &Map[index];
@@ -343,8 +351,8 @@ void SmudgeClass::Write_INI(CCINIClass& ini)
                 char uname[10];
                 char buf[127];
 
-                sprintf(uname, "%03d", index);
-                sprintf(buf, "%s,%d,%d", stype->IniName, index, ptr->SmudgeData);
+                sprintf(uname, "%03d", save_index);
+                sprintf(buf, "%s,%d,%d", stype->IniName, save_index, ptr->SmudgeData);
                 ini.Put_String(INI_Name(), uname, buf);
             }
         }

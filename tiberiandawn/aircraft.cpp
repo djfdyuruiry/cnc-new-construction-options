@@ -541,8 +541,13 @@ void AircraftClass::Read_INI(CCINIClass& ini)
                         if (!Map.In_Radar(Coord_Cell(coord))) {
                             delete air;
                         } else {
-
                             air->Strength = Fixed_To_Cardinal(air->Class->MaxStrength, strength);
+
+                            // aircraft can only be spawned in landed
+                            // (typically aircraft are spawned by helipad placement or fly in as reinforcements using
+                            //  team types and triggers)
+                            air->Altitude = 0;
+
                             if (air->Unlimbo(coord, dir)) {
                                 air->Assign_Mission(AircraftClass::Mission_From_Name(strtok(NULL, ",\n\r")));
                             } else {

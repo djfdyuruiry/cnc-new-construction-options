@@ -109,28 +109,22 @@ int MapEditClass::Placement_Dialog(void)
     const auto D_DIALOG_CX = D_DIALOG_X + (D_DIALOG_W / 2);
 
     const auto D_TXT8_H = 22;
-    const auto D_MARGIN = 14;
-
-    const auto D_PICTURE_W = 304; // must be divisible by 8!
-    const auto D_PICTURE_H = 210;
-    const auto D_PICTURE_X = D_DIALOG_X + 16; // must start on a byte boundary!
-    const auto D_PICTURE_Y = D_DIALOG_Y + D_MARGIN + D_TXT8_H + D_MARGIN;
-    const auto D_PICTURE_CX = D_PICTURE_X + D_PICTURE_W / 2;
+    const auto D_MARGIN = 18;
 
     const auto D_GDI_W = 90;
     const auto D_GDI_H = 18;
     const auto D_GDI_X = D_DIALOG_X + D_MARGIN;
-    const auto D_GDI_Y = D_DIALOG_Y + D_MARGIN;
+    const auto D_GDI_Y = D_DIALOG_Y + (D_MARGIN * 2);
 
     const auto D_NOD_W = 90;
     const auto D_NOD_H = 18;
     const auto D_NOD_X = D_GDI_X + D_GDI_W;
-    const auto D_NOD_Y = D_DIALOG_Y + D_MARGIN;
+    const auto D_NOD_Y = D_GDI_Y;
 
     const auto D_NEUTRAL_W = 90;
     const auto D_NEUTRAL_H = 18;
     const auto D_NEUTRAL_X = D_NOD_X + D_NOD_W;
-    const auto D_NEUTRAL_Y = D_DIALOG_Y + D_MARGIN;
+    const auto D_NEUTRAL_Y = D_GDI_Y;
 
     const auto D_MULTI1_W = 44;
     const auto D_MULTI1_H = 18;
@@ -152,6 +146,12 @@ int MapEditClass::Placement_Dialog(void)
     const auto D_MULTI4_X = D_MULTI3_X + D_MULTI3_W;
     const auto D_MULTI4_Y = D_GDI_Y;
 
+    const auto D_PICTURE_W = 304; // must be divisible by 8!
+    const auto D_PICTURE_H = 210;
+    const auto D_PICTURE_X = D_DIALOG_X + 16; // must start on a byte boundary!
+    const auto D_PICTURE_Y = D_GDI_Y + D_TXT8_H + D_MARGIN;
+    const auto D_PICTURE_CX = D_PICTURE_X + D_PICTURE_W / 2;
+
     const auto D_LEFT_W = 90;
     const auto D_LEFT_H = 18;
     const auto D_LEFT_X = D_PICTURE_CX - 5 - D_LEFT_W;
@@ -164,42 +164,42 @@ int MapEditClass::Placement_Dialog(void)
 
     const auto D_TEMPLATE_W = 140;
     const auto D_TEMPLATE_H = 18;
-    const auto D_TEMPLATE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TEMPLATE_W;
+    const auto D_TEMPLATE_X = D_DIALOG_X + D_DIALOG_W - (D_MARGIN / 2) - D_TEMPLATE_W;
     const auto D_TEMPLATE_Y = D_PICTURE_Y;
 
     const auto D_OVERLAY_W = 140;
     const auto D_OVERLAY_H = 18;
-    const auto D_OVERLAY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_OVERLAY_W;
+    const auto D_OVERLAY_X = D_TEMPLATE_X;
     const auto D_OVERLAY_Y = D_TEMPLATE_Y + D_TEMPLATE_H;
 
     const auto D_SMUDGE_W = 140;
     const auto D_SMUDGE_H = 18;
-    const auto D_SMUDGE_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_SMUDGE_W;
+    const auto D_SMUDGE_X = D_TEMPLATE_X;
     const auto D_SMUDGE_Y = D_OVERLAY_Y + D_OVERLAY_H;
 
     const auto D_TERRAIN_W = 140;
     const auto D_TERRAIN_H = 18;
-    const auto D_TERRAIN_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_TERRAIN_W;
+    const auto D_TERRAIN_X = D_TEMPLATE_X;
     const auto D_TERRAIN_Y = D_SMUDGE_Y + D_SMUDGE_H;
 
     const auto D_UNIT_W = 140;
     const auto D_UNIT_H = 18;
-    const auto D_UNIT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_UNIT_W;
+    const auto D_UNIT_X = D_TEMPLATE_X;
     const auto D_UNIT_Y = D_TERRAIN_Y + D_TERRAIN_H;
 
     const auto D_INFANTRY_W = 140;
     const auto D_INFANTRY_H = 18;
-    const auto D_INFANTRY_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_INFANTRY_W;
+    const auto D_INFANTRY_X = D_TEMPLATE_X;
     const auto D_INFANTRY_Y = D_UNIT_Y + D_UNIT_H;
 
     const auto D_AIRCRAFT_W = 140;
     const auto D_AIRCRAFT_H = 18;
-    const auto D_AIRCRAFT_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_AIRCRAFT_W;
+    const auto D_AIRCRAFT_X = D_TEMPLATE_X;
     const auto D_AIRCRAFT_Y = D_INFANTRY_Y + D_INFANTRY_H;
 
     const auto D_BUILDING_W = 140;
     const auto D_BUILDING_H = 18;
-    const auto D_BUILDING_X = D_DIALOG_X + D_DIALOG_W - D_MARGIN - D_BUILDING_W;
+    const auto D_BUILDING_X = D_TEMPLATE_X;
     const auto D_BUILDING_Y = D_AIRCRAFT_Y + D_AIRCRAFT_H;
 
     const auto D_OK_W = 90;
@@ -424,20 +424,6 @@ int MapEditClass::Placement_Dialog(void)
                                 D_BUILDING_W,
                                 D_BUILDING_H);
 
-    /*------------------------------------------------------------------------
-    Initialize addable objects list; we must do this every time in case one
-    of the object pools has become exhausted; that object won't be available
-    for adding.  (Skip aircraft, since they won't be used in the editor.)
-    ------------------------------------------------------------------------*/
-    Clear_List();
-    TemplateTypeClass::Prep_For_Add();
-    OverlayTypeClass::Prep_For_Add();
-    SmudgeTypeClass::Prep_For_Add();
-    TerrainTypeClass::Prep_For_Add();
-    UnitTypeClass::Prep_For_Add();
-    InfantryTypeClass::Prep_For_Add();
-    BuildingTypeClass::Prep_For_Add();
-
     /*........................................................................
     Compute offset of each class type in the Objects array
     ........................................................................*/
@@ -545,7 +531,24 @@ int MapEditClass::Placement_Dialog(void)
                 WindowList[WINDOW_EDITOR][WINDOWHEIGHT] = D_PICTURE_H;
                 Change_Window((int)WINDOW_EDITOR);
                 Draw_Box(D_PICTURE_X, D_PICTURE_Y, D_PICTURE_W, D_PICTURE_H, BOXSTYLE_GREEN_DOWN, true);
-                curobj->Display(WinW >> 1, WinH >> 1, WINDOW_EDITOR, LastHouse);
+
+                int display_x = WinW >> 1;
+                int display_y = WinH >> 1;
+
+                if (
+                    curobj->What_Am_I() != RTTI_INFANTRYTYPE && curobj->What_Am_I() != RTTI_UNITTYPE
+                    && curobj->What_Am_I() != RTTI_AIRCRAFTTYPE && curobj->What_Am_I() != RTTI_OVERLAYTYPE
+                ) {
+                    // these object types are not centered automatically, so center shape dimensions
+                    auto width = 0;
+                    auto height = 0;
+
+                    if (curobj->Get_Display_Size(width, height)) {
+                        curobj->Display(display_x - (width / 2), display_y - (height / 2), WINDOW_EDITOR, LastHouse);
+                    }
+                } else {
+                    curobj->Display(display_x, display_y, WINDOW_EDITOR, LastHouse);
+                }
 
                 /*
                 ........................ Erase the grid .........................
@@ -921,30 +924,6 @@ int MapEditClass::Placement_Dialog(void)
  *=========================================================================*/
 void MapEditClass::Start_Placement(void)
 {
-    int i;
-
-    /*------------------------------------------------------------------------
-    Initialize addable objects list; we must do this every time in case one
-    of the object pools has become exhausted; that object won't be available
-    for adding.
-    ------------------------------------------------------------------------*/
-    Clear_List();
-    TemplateTypeClass::Prep_For_Add();
-    OverlayTypeClass::Prep_For_Add();
-    SmudgeTypeClass::Prep_For_Add();
-    TerrainTypeClass::Prep_For_Add();
-    UnitTypeClass::Prep_For_Add();
-    InfantryTypeClass::Prep_For_Add();
-    // AircraftTypeClass::Prep_For_Add();
-    BuildingTypeClass::Prep_For_Add();
-    /*........................................................................
-    Compute offset of each class type in the Objects array
-    ........................................................................*/
-    TypeOffset[0] = 0;
-    for (i = 1; i < NUM_EDIT_CLASSES; i++) {
-        TypeOffset[i] = TypeOffset[i - 1] + NumType[i - 1];
-    }
-
     /*
     ---------------------- Create the placement object -----------------------
     */
@@ -961,6 +940,11 @@ void MapEditClass::Start_Placement(void)
         PendingObject = Objects[LastChoice];
         PendingHouse = LastHouse;
         PendingObjectPtr = PendingObject->Create_One_Of(HouseClass::As_Pointer(LastHouse));
+
+        // ensure any placed aircraft are in the 'landed' state
+        if (PendingObject->What_Am_I() == RTTI_AIRCRAFTTYPE) {
+            reinterpret_cast<AircraftClass*>(PendingObjectPtr)->Altitude = 0;
+        }
     } else {
         if (LastChoice < TypeOffset[7])
             LastChoice = TypeOffset[7];
@@ -1032,6 +1016,10 @@ int MapEditClass::Place_Object(void)
     unsigned char save_ticon; // for saving cell's TIcon
     BaseNodeClass node;       // for adding to an AI Base
 
+    if (PendingObject == nullptr) {
+        return -1;
+    }
+
     /*------------------------------------------------------------------------
     Placing a template:
     - first lift up any objects in the cell
@@ -1049,10 +1037,10 @@ int MapEditClass::Place_Object(void)
         while ((*occupy) != REFRESH_EOL) {
 
             /*
-            ................. Check this cell for an occupier ..................
+            .............. Check this cell for an occupier/overlay ..............
             */
             template_cell = (ZoneCell + ZoneOffset) + (*occupy);
-            if ((*this)[template_cell].Cell_Occupier()) {
+            if (okflag && (*this)[template_cell].Cell_Occupier()) {
                 occupier = (*this)[template_cell].Cell_Occupier();
 
                 /*
@@ -1092,6 +1080,48 @@ int MapEditClass::Place_Object(void)
                 .......... Major error if can't replace the object now ..........
                 */
                 occupier->Mark(MARK_DOWN);
+            } else if (okflag && Array[template_cell].Overlay != OVERLAY_NONE) {
+                auto& cell_obj = (*this)[template_cell];
+
+                /*
+                ..................... Save overlay data .........................
+                */
+                const auto cell_overlay = cell_obj.Overlay;
+                const auto cell_overlay_data = cell_obj.OverlayData;
+                const auto cell_overlay_smudge = cell_obj.Smudge;
+
+                /*
+                ................ Set the cell's template values .................
+                */
+                save_ttype = cell_obj.TType;
+                save_ticon = cell_obj.TIcon;
+                cell_obj.TType = ((TemplateTypeClass*)PendingObject)->Type;
+                cell_obj.TIcon =
+                    Cell_X(*occupy) + Cell_Y(*occupy) * ((TemplateTypeClass*)PendingObject)->Width;
+
+                /*
+                .................... Purge single overlay ......................
+                */
+                cell_obj.Purge_Overlay(false, false);
+
+                /*
+                ................ Check if overlay could be placed ..............
+                */
+                okflag = cell_obj.Is_Generally_Clear();
+
+                /*
+                .............. Put everything back the way it was ..............
+                */
+                cell_obj.TType = save_ttype;
+                cell_obj.TIcon = save_ticon;
+
+                cell_obj.Overlay = cell_overlay;
+                cell_obj.OverlayData = cell_overlay_data;
+                cell_obj.Smudge = cell_overlay_smudge;
+
+                cell_obj.Recalc_Attributes();
+                cell_obj.Wall_Update();
+                cell_obj.Concrete_Calc();
             }
             occupy++;
         }
@@ -1101,34 +1131,6 @@ int MapEditClass::Place_Object(void)
         */
         if (okflag) {
             if (PendingObjectPtr->Unlimbo(Cell_Coord(ZoneCell + ZoneOffset))) {
-                /*...............................................................
-                Loop through all cells occupied by this template, and clear the
-                smudge & overlay.
-                ...............................................................*/
-                occupy = PendingObject->Occupy_List();
-                while ((*occupy) != REFRESH_EOL) {
-                    /*
-                    ............... Get cell for this occupy item ................
-                    */
-                    template_cell = (ZoneCell + ZoneOffset) + (*occupy);
-
-                    /*
-                    ................... Clear smudge & overlay ...................
-                    */
-                    (*this)[template_cell].Overlay = OVERLAY_NONE;
-                    (*this)[template_cell].OverlayData = 0;
-                    (*this)[template_cell].Smudge = SMUDGE_NONE;
-
-                    /*
-                    ............ make adjacent cells recalc attrib's .............
-                    */
-                    (*this)[template_cell].Recalc_Attributes();
-                    (*this)[template_cell].Wall_Update();
-                    (*this)[template_cell].Concrete_Calc();
-
-                    occupy++;
-                }
-
                 /*
                 ......................... Set flags etc .........................
                 */
@@ -1137,7 +1139,6 @@ int MapEditClass::Place_Object(void)
                 PendingHouse = HOUSE_NONE;
                 Set_Cursor_Shape(0);
                 // ScenarioInit--;
-                TotalValue = Overpass();
                 Flag_To_Redraw(false);
                 return (0);
             }
@@ -1203,10 +1204,9 @@ int MapEditClass::Place_Object(void)
     if (PendingObjectPtr->Unlimbo(Cell_Coord(ZoneCell + ZoneOffset))) {
 
         /*
-        ** Update the Tiberium computation if we're placing an overlay
+        ** Update the Tiberium computation if we're adding more to the map
         */
         if (PendingObject->What_Am_I() == RTTI_OVERLAYTYPE && ((OverlayTypeClass*)PendingObject)->IsTiberium) {
-
             TotalValue = Overpass();
             Flag_To_Redraw(false);
         }
@@ -1248,13 +1248,34 @@ int MapEditClass::Place_Object(void)
  *=========================================================================*/
 void MapEditClass::Cancel_Placement(void)
 {
-    /*
-    ---------------------- Delete the placement object -----------------------
-    */
-    delete PendingObjectPtr;
-    PendingObject = 0;
-    PendingObjectPtr = 0;
-    PendingHouse = HOUSE_NONE;
+    if (GrabbedOverlay) {
+        // make grabbed overlay 'snap' back to original cell by placing it down again
+        Set_Cursor_Pos(GrabbedOverlayOrigin);
+        Place_Object();
+
+        GrabbedOverlay = false;
+        GrabbedOverlayOrigin = 0;
+    } else if (CurTrigger) {
+        /*
+        ------------------------ Clear placement trigger -------------------------
+        */
+        CurTrigger = nullptr;
+        return;
+    } else if (CurWaypoint != WAYPT_COUNT) {
+        /*
+        ------------------------ Clear placement waypoint ------------------------
+        */
+        CurWaypoint = WAYPT_COUNT;
+        return;
+    } else {
+        /*
+        ---------------------- Delete the placement object -----------------------
+        */
+        delete PendingObjectPtr;
+        PendingObject = 0;
+        PendingObjectPtr = 0;
+        PendingHouse = HOUSE_NONE;
+    }
 
     /*
     -------------------------- Restore cursor shape --------------------------
@@ -1868,8 +1889,12 @@ void MapEditClass::Stop_Trigger_Placement(void)
  * HISTORY:                                                                *
  *   12/01/1994 BR : Created.                                              *
  *=========================================================================*/
-void MapEditClass::Place_Trigger(void)
+bool MapEditClass::Place_Trigger(void)
 {
+    if (CurTrigger == nullptr) {
+        return false;
+    }
+
     ObjectClass* object = NULL; // Generic object clicked on.
     int x, y;
     CELL cell; // Cell that was selected.
@@ -1877,8 +1902,8 @@ void MapEditClass::Place_Trigger(void)
     /*
     -------------------- See if an object was clicked on ---------------------
     */
-    x = Keyboard->MouseQX;
-    y = Keyboard->MouseQY;
+    x = Get_Mouse_X();
+    y = Get_Mouse_Y();
 
     /*
     ............................ Get cell for x,y ............................
@@ -1917,6 +1942,7 @@ void MapEditClass::Place_Trigger(void)
     */
     HiddenPage.Clear();
     Flag_To_Redraw(true);
+    return true;
 }
 
 /***************************************************************************
@@ -2004,7 +2030,7 @@ void MapEditClass::Cancel_Base_Building(void)
  * HISTORY:                                                                *
  *   12/01/1994 BR : Created.                                              *
  *=========================================================================*/
-void MapEditClass::Build_Base_To(int percent)
+void MapEditClass::Build_Base_To(int percent, const bool place_virtual_buildings)
 {
     int i;
     int num_buildings;
@@ -2027,27 +2053,196 @@ void MapEditClass::Build_Base_To(int percent)
     ** Compute number of buildings to build
     */
     num_buildings = (Base.Nodes.Count() * percent) / 100;
+    const auto limit = place_virtual_buildings ? Base.Nodes.Count() : num_buildings;
 
     /*
     ** Build the base to the desired amount
     */
-    for (i = 0; i < num_buildings; i++) {
+    for (i = 0; i < limit; i++) {
         /*
         ** Get a ptr to the type of building to build, create one, and unlimbo it.
         */
         objtype = &BuildingTypeClass::As_Reference(Base.Nodes[i].Type);
         obj = (BuildingClass*)objtype->Create_One_Of(HouseClass::As_Pointer(Base.House));
+
         /*
-        ** If unlimbo fails, error out
+        ** If unlimbo fails, notify player
         */
         if (!obj->Unlimbo(Base.Nodes[i].Coord)) {
             delete obj;
-            WWMessageBox().Process("Unable to build base!");
-            return;
+
+            // scan for the conflicting object that caused unlimbo to fail
+            ObjectClass const* conflicting_object = nullptr;
+
+            auto occupy = objtype->Occupy_List();
+            while (conflicting_object == nullptr && *occupy != REFRESH_EOL) {
+                const auto occupy_cell = Coord_Cell(Base.Nodes[i].Coord) + *occupy++;
+                conflicting_object = Array[occupy_cell].Cell_Occupier();
+            }
+
+            std::string error_message = "Another object overlaps this position at scenario start";
+
+            if (conflicting_object != nullptr) {
+                error_message = std::format(
+                    "Object {} owned by {} overlaps this position at scenario start",
+                    conflicting_object->Class_Of().IniName,
+                    conflicting_object->Owner()
+                );
+            }
+
+            WWMessageBox().Process(
+                std::format(
+                    "Unable to place base object {} @ coord {}! {}",
+                    Base.Nodes[i].Type,
+                    Base.Nodes[i].Coord,
+                    error_message
+                ).c_str()
+            );
+        } else {
+            obj->IsUnbuiltBase = i >= num_buildings;
         }
     }
 
     // ScenarioInit--;
+}
+
+/**
+ * Start placement of an given object type immediately. Cancels any in-progress
+ * placement.
+ */
+bool MapEditClass::Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner)
+{
+    if (object_type == nullptr) {
+        return false;
+    }
+
+    Cancel_Placement();
+
+    auto type_found = false;
+
+    // setup tracker field used by placement dialog
+    for (auto i = 0; i < std::size(Objects); i++) {
+        if (Objects[i] == object_type) {
+            LastChoice = i;
+            type_found = true;
+            break;
+        }
+    }
+
+    if (!type_found) {
+        CNC_LOG_WARN("Failed to match object ID for manual placement: {}", object_type->IniName);
+        return false;
+    }
+
+    PendingObject = object_type;
+    PendingHouse = owner != nullptr ? owner->Class->House : PlayerPtr->Class->House;
+    PendingObjectPtr = object_type->Create_One_Of(owner != nullptr ? owner : PlayerPtr);
+
+    LastHouse = PendingHouse;
+
+    if (PendingObjectPtr == nullptr) {
+        WWMessageBox().Process("Failed to create new object for placement");
+        Cancel_Placement();
+        return false;
+    }
+
+    // ensure any placed aircraft are in the 'landed' state
+    if (PendingObject->What_Am_I() == RTTI_AIRCRAFTTYPE) {
+        reinterpret_cast<AircraftClass*>(PendingObjectPtr)->Altitude = 0;
+    }
+
+    Set_Cursor_Pos();
+    Set_Cursor_Shape(PendingObject->Occupy_List());
+    return true;
+}
+
+bool MapEditClass::Manual_Start_Trigger_Placement(TriggerClass* trigger)
+{
+    if (trigger == nullptr) {
+        return false;
+    }
+
+    Cancel_Placement();
+
+    CurTrigger = trigger;
+    return true;
+}
+
+bool MapEditClass::Start_Waypoint_Placement(WaypointType waypt)
+{
+    if (waypt >= WAYPT_COUNT) {
+        return false;
+    }
+
+    Cancel_Placement();
+
+    CurWaypoint = waypt;
+
+    Set_Default_Mouse(MOUSE_CAN_MOVE);
+    Override_Mouse_Shape(MOUSE_CAN_MOVE);
+
+    return true;
+}
+
+bool MapEditClass::Place_Waypoint(void)
+{
+    if (CurWaypoint >= WAYPT_COUNT) {
+        return false;
+    }
+
+    const auto x = Keyboard->MouseQX;
+    const auto y = Keyboard->MouseQY;
+
+    const auto cell = Click_Cell_Calc(x, y);
+
+    if (cell < 0) {
+        return false;
+    }
+
+    /*
+    ------------------ Clear any existing waypoint from the target cell ------------------
+    */
+    for (short& waypoint_cell : Scen.Waypoint) {
+        if (waypoint_cell == cell) {
+            waypoint_cell = -1;
+        }
+    }
+
+    /*
+    --------------------- Assign the waypoint to the target cell ---------------------
+    */
+    Scen.Waypoint[CurWaypoint] = cell;
+    Array[cell].IsWaypoint = 1;
+
+    return true;
+}
+
+/**
+ * Refresh elements of the editor sidebar that are scenario/theater dependent.
+ */
+void MapEditClass::Init_Sidebar_For_Scenario()
+{
+    EditorSidebar.Refresh_For_Scenario();
+    MapEditorSidebar::Purge_Theater_Objects();
+}
+
+void MapEditClass::Mark_Changed()
+{
+    Changed = 1;
+}
+
+/**
+ * Are the map bounds within normal map size?
+ */
+bool MapEditClass::Is_Normal_Size() const
+{
+    return IniMapCellX + IniMapCellWidth <= ORIGINAL_MAP_CELL_W
+        && IniMapCellY + IniMapCellHeight <= ORIGINAL_MAP_CELL_H;
+}
+
+bool MapEditClass::Is_Mega_Size() const
+{
+    return !Is_Normal_Size();
 }
 
 #endif

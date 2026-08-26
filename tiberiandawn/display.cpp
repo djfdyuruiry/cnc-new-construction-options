@@ -80,11 +80,9 @@
 #include "ccini.h"
 #include "tiberiandawnsettings.h"
 
-ProximityScanRules::ProximityScanRules(const bool debug_placement)
+ProximityScanRules::ProximityScanRules()
 {
-    if (debug_placement) {
-        ProximityTracker = DisplayClass::Allocate_Proximity_Tracker();
-    }
+    ProximityTracker = DisplayClass::Allocate_Proximity_Tracker();
 }
 
 ProximityScanRules::~ProximityScanRules()
@@ -1081,8 +1079,7 @@ bool DisplayClass::Passes_Proximity_Check(ObjectTypeClass const * object, Houses
 	}
 
     const auto building_type = dynamic_cast<const BuildingTypeClass*>(object);
-    constexpr auto debug_placement = true;
-    auto scan_rules = Resolve_Placement_Rules(building_type, house, debug_placement);
+    auto scan_rules = Resolve_Placement_Rules(building_type, house);
 
 	/*
 	**	Scan through all cells that the building foundation would cover. If any adjacent
@@ -1129,28 +1126,11 @@ PlacementResult* DisplayClass::Allocate_Proximity_Tracker()
     return proximity_tracker;
 }
 
-/**
- * Dumps a text representation of the map with a placement result written in each cells to a given file.
- */
-void DisplayClass::Dump_Proximity_Tracker_To_File(
-    const ProximityScanRules& scan_rules,
-    const PlacementResult* tracker,
-    const char* file_name
+void DisplayClass::Iterate_Over_Map_Cells(
+    const std::function<void(CELL, CellClass&)>& on_cell,
+    const std::function<void(int)>& on_row
 )
 {
-#if defined TIBERIAN_DAWN && !defined MEGAMAPS
-    constexpr auto max_max_cell_width = 64;
-    constexpr auto max_max_cell_height = 64;
-#else
-    constexpr auto max_max_cell_width = 128;
-    constexpr auto max_max_cell_height = 128;
-#endif
-
-    if (tracker == nullptr) {
-        return;
-    }
-
-    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Path(), file_name);
     int map_cell_x = Map.MapCellX;
     int map_cell_y = Map.MapCellY;
     int map_cell_width = Map.MapCellWidth;
@@ -1161,7 +1141,7 @@ void DisplayClass::Dump_Proximity_Tracker_To_File(
         map_cell_width++;
     }
 
-    if (map_cell_width < max_max_cell_width) {
+    if (map_cell_width < MAP_CELL_W) {
         map_cell_width++;
     }
 
@@ -1170,9 +1150,35 @@ void DisplayClass::Dump_Proximity_Tracker_To_File(
         map_cell_height++;
     }
 
-    if (map_cell_height < max_max_cell_height) {
+    if (map_cell_height < MAP_CELL_H) {
         map_cell_height++;
     }
+
+    for (int cell_y = 0; cell_y < map_cell_height; cell_y++) {
+        for (int cell_x = 0; cell_x < map_cell_width; cell_x++) {
+            const auto raw_cell = XY_Cell(map_cell_x + cell_x, map_cell_y + cell_y);
+
+            on_cell(raw_cell, Array[raw_cell]);
+        }
+
+        on_row(cell_y);
+    }
+}
+
+/**
+ * Dumps a text representation of the map with a placement result written in each cells to a given file.
+ */
+void DisplayClass::Dump_Proximity_Tracker_To_File(
+    const ProximityScanRules& scan_rules,
+    const PlacementResult* tracker,
+    const char* file_name
+)
+{
+    if (tracker == nullptr) {
+        return;
+    }
+
+    const auto debug_proximity_path = PathsClass::Concatenate_Paths(Paths.User_Path(), file_name);
 
     if (CDFileClass out; out.Open(debug_proximity_path.c_str(), WRITE)) {
         out.Write(std::format("CELL X,Y: {},{}", Cell_X(scan_rules.OriginalCell), Cell_Y(scan_rules.OriginalCell)));
@@ -1180,20 +1186,15 @@ void DisplayClass::Dump_Proximity_Tracker_To_File(
         out.Write(std::format("FILTER: {}", static_cast<signed char>(scan_rules.Filter)));
         out.Write("\n");
 
-        for (int y = 0; y < map_cell_height; y++) {
-            for (int x = 0; x < map_cell_width; x++) {
-#ifdef MEGAMAPS
-                constexpr auto map_width_shift_bits = 7;
-#else
-                constexpr auto map_width_shift_bits = 6;
-#endif
-
-                const CELL cell = static_cast<CELL>(map_cell_x) + x + ((map_cell_y + y) << map_width_shift_bits);
+        Map.Iterate_Over_Map_Cells(
+            [&](auto cell, auto& _) {
                 out.Write(std::format("{}", static_cast<signed char>(tracker[cell])));
+            },
+            [&](auto _) {
+                out.Write("\n");
             }
+        );
 
-            out.Write("\n");
-        }
         out.Close();
     }
 }
@@ -1567,7 +1568,24 @@ void DisplayClass::Read_INI(CCINIClass& ini)
     int w = ini.Get_Int(name, "Width", MAP_CELL_W - 2);
     int h = ini.Get_Int(name, "Height", MAP_CELL_H - 2);
 
-    Set_Map_Dimensions(x, y, w, h);
+    if (!Debug_Map) {
+        Set_Map_Dimensions(x, y, w, h);
+    }
+#ifdef SCENARIO_EDITOR
+    else {
+        /*
+        **	When in scenario editor mode, we want to show the entire map so user can place terrain out of bounds to
+        **  influence reinforcement positions.
+        */
+        Set_Map_Dimensions(0, 0, MAP_CELL_W, MAP_CELL_H);
+
+        // store original bounds for rendering and file save logic
+        IniMapCellX = x;
+        IniMapCellY = y;
+        IniMapCellWidth = w;
+        IniMapCellHeight = h;
+    }
+#endif
 
     /*
     **	The theater is determined at this point. There is specific data that
@@ -1580,8 +1598,14 @@ void DisplayClass::Read_INI(CCINIClass& ini)
     }
 
 #ifdef MEGAMAPS
-    MapBinaryVersion = ini.Get_Int("MAP", "Version", MAP_VERSION_NORMAL);
+    // get megamap flag
+    MapBinaryVersion = ini.Get_Int(name, "Version", MAP_VERSION_NORMAL);
     MapBinaryVersion = Bound(MapBinaryVersion, 0, 1); // Little hack to stop arbitrary values.
+
+    // validate megamap flag - if declared as normal but bounds exceed original, force mega
+    if (MapBinaryVersion == MAP_VERSION_NORMAL && Map.Is_Mega_Size()) {
+        MapBinaryVersion = MAP_VERSION_MEGA;
+    }
 #endif
 
     /*
@@ -1703,18 +1727,24 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     static char const* const NAME = "MAP";
     ini.Clear(NAME);
     ini.Put_TheaterType(NAME, "Theater", Theater);
-    ini.Put_Int(NAME, "X", MapCellX);
-    ini.Put_Int(NAME, "Y", MapCellY);
-    ini.Put_Int(NAME, "Width", MapCellWidth);
-    ini.Put_Int(NAME, "Height", MapCellHeight);
+
+    if (!Debug_Map) {
+        ini.Put_Int(NAME, "X", MapCellX);
+        ini.Put_Int(NAME, "Y", MapCellY);
+        ini.Put_Int(NAME, "Width", MapCellWidth);
+        ini.Put_Int(NAME, "Height", MapCellHeight);
+    }
+#ifdef SCENARIO_EDITOR
+    else {
+        // save actual bounds for map, not the current display bounds
+        ini.Put_Int(NAME, "X", IniMapCellX);
+        ini.Put_Int(NAME, "Y", IniMapCellY);
+        ini.Put_Int(NAME, "Width", IniMapCellWidth);
+        ini.Put_Int(NAME, "Height", IniMapCellHeight);
+    }
+#endif
 
 #ifdef MEGAMAPS
-    /*
-    ** Unconditionally set it for now, need to conditionally write cell numbers to the ini file
-    ** to support being able to write either version.
-    */
-    MapBinaryVersion = MAP_VERSION_MEGA;
-
     if (MapBinaryVersion == MAP_VERSION_MEGA) {
         ini.Put_Int(NAME, "Version", 1);
     }
@@ -1728,7 +1758,16 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     for (int i = 0; i < WAYPT_COUNT; i++) {
         if (Scen.Waypoint[i] != -1) {
             sprintf(entry, "%d", i);
-            ini.Put_Int(WAYNAME, entry, Scen.Waypoint[i]);
+
+            auto waypoint = Scen.Waypoint[i];
+
+#ifdef MEGAMAPS
+            if (MapBinaryVersion == MAP_VERSION_NORMAL) {
+                waypoint = Unconfine_Old_Cell(waypoint);
+            }
+#endif
+
+            ini.Put_Int(WAYNAME, entry, waypoint);
         }
     }
 
@@ -1738,14 +1777,24 @@ void DisplayClass::Write_INI(CCINIClass& ini)
     static char const* const CELLTRIG = "CellTriggers";
     ini.Clear(CELLTRIG);
     for (CELL cell = 0; cell < MAP_CELL_TOTAL; cell++) {
-        if ((*this)[cell].IsTrigger) {
+        if (Array[cell].IsTrigger) {
             TriggerClass* tp = CellTriggers[cell];
             if (tp != NULL) {
+                auto save_cell = cell;
+
+#ifdef MEGAMAPS
+                /*
+                **	Adjust cell number if we are saving a non-megamap.
+                */
+                if (MapBinaryVersion == MAP_VERSION_NORMAL) {
+                    save_cell = Unconfine_Old_Cell(cell);
+                }
+#endif
 
                 /*
                 **	Generate entry name.
                 */
-                sprintf(entry, "%d", cell);
+                sprintf(entry, "%d", save_cell);
 
                 /*
                 **	Save entry.
@@ -1823,8 +1872,8 @@ bool DisplayClass::Scroll_Map(DirType facing, int& distance, bool really)
     /*
     **	Clip the new coordinate to the edges of the game world.
     */
-    int xx = Coord_X(coord) - Cell_To_Lepton(MapCellX);
-    int yy = Coord_Y(coord) - Cell_To_Lepton(MapCellY);
+    int xx = (int)(short)Coord_X(coord) - (short)Cell_To_Lepton(MapCellX);
+    int yy = (int)(short)Coord_Y(coord) - (short)Cell_To_Lepton(MapCellY);
     bool shifted = Confine_Rect(
         &xx, &yy, TacLeptonWidth, TacLeptonHeight, Cell_To_Lepton(MapCellWidth), Cell_To_Lepton(MapCellHeight));
     if (xx < 0) {
@@ -4714,6 +4763,7 @@ bool DisplayClass::In_View(CELL cell)
         return (false);
     if ((Coord_Y(coord) - Coord_Y(tcoord)) > TacLeptonHeight + 255)
         return (false);
+
     return (true);
 
 #ifdef OBSOLETE
@@ -4809,6 +4859,10 @@ COORDINATE DisplayClass::Center_Map(COORDINATE center)
             y = Cell_To_Lepton(MapCellY);
 
         Set_Tactical_Position(XY_Coord(x, y));
+
+#ifdef SCENARIO_EDITOR
+        CurrentCell = Coord_Cell(center);
+#endif
 
         return center;
     }
@@ -4990,13 +5044,9 @@ FROM_JSON(DisplayClass)
     p.One_Time(true);
 }
 
-ProximityScanRules Resolve_Placement_Rules(
-    const BuildingTypeClass* placement_type,
-    const HousesType house,
-    const bool debug_placement
-)
+ProximityScanRules Resolve_Placement_Rules(const BuildingTypeClass* placement_type, const HousesType house)
 {
-    ProximityScanRules scan_rules(debug_placement);
+    ProximityScanRules scan_rules;
 
     const auto modern_walls = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, MODERN_WALLS_RULE);
     const auto max_wall_distance = Rule.Get_Rule_Value<int>(ENHANCEMENTS_SECTION, MODERN_WALLS_MAX_LENGTH_RULE);
@@ -5051,7 +5101,7 @@ ProximityScanRules Resolve_Placement_Rules(
     return scan_rules;
 }
 
-ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance, const bool debug_placement)
+ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance)
 {
     const BuildingTypeClass* placement_type = nullptr;
     HousesType house = HOUSE_NONE;
@@ -5061,5 +5111,5 @@ ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instan
         house = placement_instance->House->Class->House;
     };
 
-    return Resolve_Placement_Rules(placement_type, house, debug_placement);
+    return Resolve_Placement_Rules(placement_type, house);
 }

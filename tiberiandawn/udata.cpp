@@ -45,6 +45,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 
 void const* UnitTypeClass::WakeShapes = 0;
 
@@ -1453,19 +1454,98 @@ UnitType UnitTypeClass::From_Name(char const* name)
  *=============================================================================================*/
 void UnitTypeClass::Display(int x, int y, WindowNumberType window, HousesType house) const
 {
-    int shape = 0;
-    void const* ptr = Get_Cameo_Data();
-    if (!ptr) {
-        ptr = Get_Image_Data();
-        shape = IsChunkyShape ? 0 : 5;
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+    auto shape_num = display_icon && shape != nullptr ? 0 : 24; // facing east
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
     }
-    CC_Draw_Shape(ptr,
-                  shape,
-                  x,
-                  y,
-                  window,
-                  SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
-                  HouseTypeClass::As_Reference(house).RemapTable);
+
+    if (shape == nullptr) {
+        return;
+    }
+
+    // display patches
+    if (!display_icon) {
+        if (Type == UNIT_VICE) {
+            // visceroid's have no facing, they just pulse
+            shape_num = 0;
+        } else if (IsChunkyShape) {
+            // chunky shapes have a different frame count, so correct to face east
+            shape_num = Type == UNIT_GUNBOAT ? 96 : 3;
+        } else if (OwnableBy.size() == 1 && OwnableBy[0] == HOUSE_JP) {
+            // dinos graphics are infantry based, so correct to face east
+            shape_num = 6;
+        }
+    }
+
+    if (display_icon) {
+        CC_Draw_Shape(shape,
+                 shape_num,
+                 x,
+                 y,
+                 window,
+                 SHAPE_FADING | SHAPE_CENTER | SHAPE_WIN_REL,
+                 HouseTypeClass::As_Reference(house).RemapTable);
+    } else {
+        CC_Draw_Shape(shape,
+                      shape_num,
+                      x,
+                      y,
+                      window,
+                      SHAPE_FADING | SHAPE_CENTER | SHAPE_GHOST | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable,
+                      DisplayClass::UnitShadow);
+    }
+
+    if (!display_icon && IsTurretEquipped) {
+        auto turret_x = x;
+        auto turret_y = y;
+
+        // these units have a lookup table for turret offset - below is for east facing
+        if (Type == UNIT_MSAM || Type == UNIT_MLRS) {
+            turret_x += 6;
+            turret_y -= 3;
+        }
+
+        // these units have a fixed upward offset for their turrets
+        if (Type == UNIT_JEEP || Type == UNIT_BUGGY) {
+            turret_y -= 4;
+        }
+
+        CC_Draw_Shape(shape,
+                      shape_num + 32,
+                      turret_x,
+                      turret_y,
+                      window,
+                      SHAPE_FADING | SHAPE_CENTER | SHAPE_GHOST | SHAPE_WIN_REL,
+                      HouseTypeClass::As_Reference(house).RemapTable,
+                      DisplayClass::UnitShadow);
+    }
+}
+
+bool UnitTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    auto display_icon = TdSettings.Display_Object_Icons();
+    auto shape = display_icon ? Get_Cameo_Data() : Get_Image_Data();
+
+    if (display_icon && shape == nullptr) {
+        // fall back to map graphics if icon is not present
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

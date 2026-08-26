@@ -873,7 +873,7 @@ void SidebarClass::Draw_It(bool complete)
                     SHAPE_WIN_REL
                 );
 
-                static constexpr auto seperator_height = 16;
+                static const auto seperator_height = Get_Build_Frame_Height(SidebarFillSeperatorShape);
                 auto seperator_y = bottom_shape_y + button_border_height;
 
                 // fill remaining blank sidebar space with seperator shapes

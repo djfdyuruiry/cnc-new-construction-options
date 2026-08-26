@@ -49,6 +49,7 @@
 ********************************* Includes **********************************
 */
 #include "function.h"
+#include "mapeditsidebar.h"
 
 /*
 ********************************** Defines **********************************
@@ -69,65 +70,46 @@ enum MapEdit1Enum
 
     NUM_EDIT_CLASSES = 8, // # different classes (templates, terrain, etc)
 
-    MAX_MAIN_MENU_NUM = 8,
+    MAX_MAIN_MENU_NUM = 10,
     MAX_MAIN_MENU_LEN = 20,
 
     MAX_AI_MENU_NUM = 6,
     MAX_AI_MENU_LEN = 20,
 
+    CONTROL_MARGIN = 5,
+
     POPUP_GDI_W = 100,
     POPUP_GDI_H = 18,
-    POPUP_GDI_X = 20,
-    POPUP_GDI_Y = 320,
 
     POPUP_NOD_W = 100,
     POPUP_NOD_H = 18,
-    POPUP_NOD_X = 20,
-    POPUP_NOD_Y = 338,
 
     POPUP_NEUTRAL_W = 100,
     POPUP_NEUTRAL_H = 18,
-    POPUP_NEUTRAL_X = 20,
-    POPUP_NEUTRAL_Y = 356,
 
     POPUP_MULTI1_W = 50,
     POPUP_MULTI1_H = 18,
-    POPUP_MULTI1_X = 20,
-    POPUP_MULTI1_Y = 320,
 
     POPUP_MULTI2_W = 50,
     POPUP_MULTI2_H = 18,
-    POPUP_MULTI2_X = 70,
-    POPUP_MULTI2_Y = 320,
 
     POPUP_MULTI3_W = 50,
     POPUP_MULTI3_H = 18,
-    POPUP_MULTI3_X = 20,
-    POPUP_MULTI3_Y = 330,
 
     POPUP_MULTI4_W = 50,
     POPUP_MULTI4_H = 18,
-    POPUP_MULTI4_X = 70,
-    POPUP_MULTI4_Y = 338,
-
-    POPUP_MISSION_W = 160,
-    POPUP_MISSION_H = 80,
-    POPUP_MISSION_X = 140,
-    POPUP_MISSION_Y = 300,
 
     POPUP_FACEBOX_W = 60,
     POPUP_FACEBOX_H = 60,
-    POPUP_FACEBOX_X = 320,
-    POPUP_FACEBOX_Y = 320,
 
     POPUP_HEALTH_W = 100,
     POPUP_HEALTH_H = 20,
-    POPUP_HEALTH_X = 400,
-    POPUP_HEALTH_Y = 340,
+    POPUP_BASESTRUCTURE_SIZE = POPUP_HEALTH_H - CONTROL_MARGIN,
 
-    POPUP_BASE_W = 100,
-    POPUP_BASE_H = 16,
-    POPUP_BASE_Y = 0,
+    POPUP_MISSION_W = 95,
+    POPUP_MISSION_H = POPUP_FACEBOX_H,
+
+    POPUP_BASE_W = 100
 };
 
 /*...........................................................................
@@ -137,21 +119,24 @@ the HousesType values.
 ...........................................................................*/
 enum MapEditButtonIDEnum
 {
-    POPUP_GDI = 500,   // GDI house button
-    POPUP_NOD,         // NOD house button
-    POPUP_NEUTRAL,     // Neutral house button
-    POPUP_HOUSE_JP,    // not used
-    POPUP_MULTI1,      // Multiplayer 1 house button
-    POPUP_MULTI2,      // Multiplayer 2 house button
-    POPUP_MULTI3,      // Multiplayer 3 house button
-    POPUP_MULTI4,      // Multiplayer 4 house button
-    POPUP_MULTI5,      // Multiplayer 4 house button
-    POPUP_MULTI6,      // Multiplayer 4 house button
-    POPUP_MISSIONLIST, // list box for missions
-    POPUP_HEALTHGAUGE, // health of object
-    POPUP_FACINGDIAL,  // object's facing
-    POPUP_BASEPERCENT, // Base's percent-built slider
-    MAP_AREA,          // map as a click-able thingy
+    POPUP_GDI = 500,      // GDI house button
+    POPUP_NOD,            // NOD house button
+    POPUP_NEUTRAL,        // Neutral house button
+    POPUP_HOUSE_JP,       // not used
+    POPUP_MULTI1,         // Multiplayer 1 house button
+    POPUP_MULTI2,         // Multiplayer 2 house button
+    POPUP_MULTI3,         // Multiplayer 3 house button
+    POPUP_MULTI4,         // Multiplayer 4 house button
+    POPUP_MULTI5,         // Multiplayer 4 house button
+    POPUP_MULTI6,         // Multiplayer 4 house button
+    POPUP_MISSIONLIST,    // list box for missions
+    POPUP_HEALTHGAUGE,    // health of object
+    POPUP_FACINGDIAL,     // object's facing
+    POPUP_BASESTRUCTURE,  // AI base toggle
+    POPUP_BASEID,         // AI base ID (Base.Nodes index)
+    POPUP_EDITORMENU,     // Scenario Editor menu button
+    POPUP_BASEPERCENT,    // Base's percent-built slider
+    MAP_AREA,             // map as a click-able thingy
     BUTTON_FLAG = 0x8000
 };
 
@@ -180,6 +165,7 @@ public:
     virtual void One_Time(void); // One-time init
     virtual void Init_IO(void);  // Inits button list
     virtual void AI(KeyNumType& input, int x, int y);
+    virtual void Render_Editor_Controls();
     virtual void Draw_It(bool forced = true);
     virtual bool Scroll_Map(DirType facing, int& distance, bool really = true);
     //		virtual void Flag_To_Redraw(bool complete);
@@ -195,6 +181,11 @@ public:
     HousesType Cycle_House(HousesType curhouse, ObjectTypeClass const* objtype);
     //		int Trigger_Needs_Team(TriggerClass *trigger);
     void Fatal(int txt);
+
+    /**
+     * Get tactical display ready for editor UI.
+     */
+    void Init_Editor_Dimensions();
 
     /*
     ............................ mapeddlg.cpp .............................
@@ -212,9 +203,10 @@ public:
     int Scenario_Dialog(void);
     void Handle_Triggers(void);
     int Select_Trigger(void);
-    int Edit_Trigger(void);
+    int Edit_Trigger(TriggerClass* trigger);
     int Import_Triggers(void);
     int Import_Teams(void);
+
     /*
     ............................ mapedplc.cpp .............................
     */
@@ -231,10 +223,25 @@ public:
     void Set_House_Buttons(HousesType house, GadgetClass* btnlist, int base_id);
     void Start_Trigger_Placement(void);
     void Stop_Trigger_Placement(void);
-    void Place_Trigger(void);
+    bool Place_Trigger(void);
     void Start_Base_Building(void);
     void Cancel_Base_Building(void);
-    void Build_Base_To(int percent);
+    void Build_Base_To(int percent, bool place_virtual_buildings = true);
+
+    bool Manual_Start_Placement(const ObjectTypeClass* object_type, HouseClass* owner = nullptr);
+    bool Manual_Start_Trigger_Placement(TriggerClass* trigger);
+
+    void Init_Sidebar_For_Scenario();
+
+    bool Start_Waypoint_Placement(WaypointType waypt);
+    bool Place_Waypoint(void);
+
+    void Mark_Changed(void);
+
+#ifdef MEGAMAPS
+    bool Is_Normal_Size(void) const;
+    bool Is_Mega_Size(void) const;
+#endif
 
     /*
     ............................ mapedsel.cpp .............................
@@ -249,7 +256,7 @@ public:
     /*
     ............................. mapedtm.cpp .............................
     */
-    void Draw_Member(TechnoTypeClass const* ptr, int index, int quant, HousesType house, int pic_x, int pic_y);
+    void Draw_Member(ObjectTypeClass const* ptr, int index, int quant, HousesType house, int pic_x, int pic_y);
     void Handle_Teams(char const* caption);
     int Select_Team(char const* caption);
     int Edit_Team(void);
@@ -259,10 +266,27 @@ public:
                             char missionbuf[TeamTypeClass::MAX_TEAM_MISSIONS][20],
                             ListClass* list);
 
+    void Exit_Editor() const;
     /*
     --------------------------- Private Interface ----------------------------
     */
 private:
+    int HeaderX;
+    int HeaderY;
+    int HeaderW;
+    int HeaderH;
+
+    bool PopupDialogVisible;
+    int PopupDialogX;
+    int PopupDialogY;
+    int PopupDialogW;
+    int PopupDialogH;
+
+    int FooterX;
+    int FooterY;
+    int FooterW;
+    int FooterH;
+
     /*.....................................................................
     This is the last-requested variation of a loaded/saved/new scenario.
     .....................................................................*/
@@ -317,6 +341,14 @@ private:
     TeamTypeClass* CurTeam; // current team
 
     /*.....................................................................
+    The "current" waypoint for placement
+    .....................................................................*/
+    WaypointType CurWaypoint; // current waypoint being placed
+
+    bool GrabbedOverlay;
+    CELL GrabbedOverlayOrigin;
+
+    /*.....................................................................
     Bitfields for flags & such
     .....................................................................*/
     int Changed : 1;      // 1 = changes are unsaved
@@ -327,6 +359,8 @@ private:
     Variables for pre-building a base
     .....................................................................*/
     int BasePercent; // Percentage the base will be built
+
+    MapEditorSidebar EditorSidebar;
 
     /*.....................................................................
     Variables for supporting the object-editing controls at screen bottom
@@ -341,13 +375,30 @@ private:
     ListClass* MissionList;
     TriColorGaugeClass* HealthGauge;
     Dial8Class* FacingDial;
+    CheckBoxClass* IsBaseStructureCheckbox;
+    TextLabelClass* IsBaseStructureText;
+    char BaseStructureIdBuffer[4];
+    EditClass* BaseStructureIdTextBox;
+    TextLabelClass* BaseStructureIdText;
+    BuildingClass* BaseStructureIdContext; // the associated building for the current base priority value
     ControlClass* MapArea;
     TextLabelClass* HealthText;
     static char HealthBuf[20];
     GaugeClass* BaseGauge;
     TextLabelClass* BaseLabel;
+    TextButtonClass* EditorMenuButton;
     static MissionType MapEditMissions[NUM_EDIT_MISSIONS];
     static char BaseText[6];
+
+    void Draw_Header(bool forced);
+
+    /**
+     * Iterate over map cells to draw associated waypoint ID's and trigger names on top of map cells. Also handles
+     * placing multiplayer start position flags.
+     */
+    void Decorate_Cells(bool forced);
+
+    void Draw_Footer(bool forced);
 };
 
 #endif

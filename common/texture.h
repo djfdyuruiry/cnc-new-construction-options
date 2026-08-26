@@ -3,6 +3,7 @@
 #include "graphicsviewport.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 
 /**
@@ -22,9 +23,11 @@ public:
      *
      * This method is idempotent.
      *
-     * @return Is the texture loaded?
+     * @param source_shape_width Pass this to override the width of the source shape
+     * @param source_shape_height Pass this to override the height of the source shape
+     * @return Is the texture Loaded?
      */
-    bool Load();
+    bool Load(std::optional<int> source_shape_width = std::nullopt, std::optional<int> source_shape_height = std::nullopt);
 
     /**
      * Draw this texture to a rectangle on the given viewport, with the target dimensions.

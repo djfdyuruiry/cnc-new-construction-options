@@ -29,6 +29,15 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
         std::string Description;
     };
 
+    static inline std::vector<MissionVariables> MissionCache;
+    static inline std::vector<MissionVariables> ScenarioEditorMissionCache;
+
+    static std::vector<MissionVariables>& Resolve_Mission_Cache()
+    {
+        // scenario editor wants to see all scenarios, so cache needs to be different
+        return Debug_Map ? ScenarioEditorMissionCache : MissionCache;
+    }
+
     // TODO: lookup point of conflict (see mapsel.cpp)
     // TODO: Add rule for disabling country lookups, so custom campaigns can hide default names
     static std::optional<std::string> Lookup_Country(const ScenarioPlayerType& player, const std::string& ini_name)
@@ -187,7 +196,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
             player, mission, direction, variation, ini_filename, name
         );
 
-        MissionCache.push_back({
+        Resolve_Mission_Cache().push_back({
             mission,
             player,
             player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD,
@@ -203,7 +212,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
      */
     static void Fill_Mission_Cache()
     {
-        MissionCache.clear();
+        Resolve_Mission_Cache().clear();
 
         for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP }) {
             /*
@@ -218,8 +227,10 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
                 RequiredCD = old_cd;
             }
 
+            const auto mission_limit = Debug_Map ? 200 : 20; // show all missions in scenario editor
+
             // TODO: Add rules for constraining mission number scan, so custom campaigns can hide default scenarios
-            for (auto mission = 1; mission < 20; mission++) {
+            for (auto mission = 1; mission < mission_limit; mission++) {
                 for (const auto& direction : { SCEN_DIR_EAST, SCEN_DIR_WEST }) {
                     for (auto variation = SCEN_VAR_A; variation < SCEN_VAR_COUNT; ++variation) {
                         Add_Mission_To_Cache_If_Present(player, mission, direction, variation);
@@ -241,7 +252,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
 
         // add all missions matching filter values
         for (const auto& player : MissionFilter) {
-            for (const auto& mission : MissionCache) {
+            for (const auto& mission : Resolve_Mission_Cache()) {
                 if (mission.Player == player) {
                     mission_list.Add_Item(mission.Description);
                     MissionsToDisplay.push_back(mission);
@@ -266,8 +277,6 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
 
         Get_Control<TextButtonClass>(control).IsPressed = false;
     }
-
-    static inline std::vector<MissionVariables> MissionCache;
 
     std::vector<ScenarioPlayerType> MissionFilter;
     std::vector<MissionVariables> MissionsToDisplay;
@@ -354,7 +363,7 @@ protected:
 
     void Init_Data() override
     {
-        if (MissionCache.empty()) {
+        if (Resolve_Mission_Cache().empty()) {
             Fill_Mission_Cache();
         }
 
@@ -420,7 +429,7 @@ protected:
 public:
     MissionSelectDialog() : Dialog(236, 162)
     {
-        CaptionText = "Campaign Selection";
+        CaptionText = Debug_Map ? "Load Scenario": "Campaign Selection";
     }
 
     ~MissionSelectDialog() override
@@ -439,6 +448,33 @@ public:
         }
     }
 };
+
+static bool Load_Selected_Mission_For_Editor()
+{
+    Set_Scenario_Name(Scen.ScenarioName, Scen.Scenario, ScenPlayer, ScenDir, ScenVar);
+
+    if (ScenPlayer == SCEN_PLAYER_JP) {
+        PlayerPtr = HouseClass::As_Pointer(HOUSE_MULTI4);
+        PlayerPtr->IsHuman = true;
+        Base.House = HOUSE_MULTI4;
+        GameToPlay = GAME_NORMAL;
+    } else {
+        GameToPlay = GAME_NORMAL;
+    }
+
+    Clear_Scenario();
+
+    if (Read_Scenario_Ini(Scen.ScenarioName, Special, true, true, Rule.AllowSuperWeapons) == 0) {
+        WWMessageBox().Process("Unable to read scenario!");
+        HiddenPage.Clear();
+
+        return false;
+    }
+
+    Fill_In_Data();
+    Set_Palette(GamePalette);
+    return true;
+}
 
 bool Mission_Select_Dialog()
 {
@@ -461,6 +497,11 @@ bool Mission_Select_Dialog()
         if (!Force_CD_Available(ScenPlayer)) {
             Raise_Fatal_CD_Error(NAMEOF(Read_Scenario_Ini), ScenPlayer);
         }
+    }
+
+    if (result && Debug_Map) {
+        // scenario editor wants the scenario loaded on it's behalf
+        return Load_Selected_Mission_For_Editor();
     }
 
     return result;

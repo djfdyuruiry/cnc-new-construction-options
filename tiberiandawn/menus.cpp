@@ -100,9 +100,9 @@ PRIVATE void Flash_Line(char const* text, int xpix, int ypix, unsigned nfgc, uns
 
     for (loop = 0; loop < 3; loop++) {
         Hide_Mouse();
-        Fancy_Text_Print(text, xpix, ypix, hfgc, bgc, TPF_8POINT | TPF_DROPSHADOW);
+        Fancy_Text_Print(text, xpix, ypix, hfgc, bgc, TPF_6POINT | TPF_DROPSHADOW);
         Delay(2);
-        Fancy_Text_Print(text, xpix, ypix, nfgc, bgc, TPF_8POINT | TPF_DROPSHADOW);
+        Fancy_Text_Print(text, xpix, ypix, nfgc, bgc, TPF_6POINT | TPF_DROPSHADOW);
         Show_Mouse();
         Delay(2);
     }
@@ -174,19 +174,21 @@ void Setup_Menu(int menu, char const* text[], unsigned int field, int index, int
     item = Select_To_Entry(menuptr[MSELECTED], field, index);
     num = menuptr[ITEMSHIGH];
 
-    Fancy_Text_Print(0, 0, 0, TBLACK, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+    Fancy_Text_Print(0, 0, 0, TBLACK, TBLACK, TPF_6POINT | TPF_DROPSHADOW);
     Hide_Mouse();
     for (lp = 0; lp < num; lp++) {
         idx = Select_To_Entry(lp, field, index);
         drawy = menuy + (lp * FontHeight) + (lp * skip);
-        Fancy_Text_Print(text[idx],
-                         menux,
-                         drawy,
-                         menuptr[((idx == item) && (MenuUpdate)) ? HILITE : NORMCOL],
-                         TBLACK,
-                         TPF_8POINT | TPF_DROPSHADOW);
-        //		if ((idx==item) && (MenuUpdate ))
-        //			Text_Print(text[idx],menux,drawy,menuptr[HILITE],TBLACK);
+        if (idx < MAX_MAIN_MENU_NUM) {
+            Fancy_Text_Print(text[idx],
+                             menux,
+                             drawy,
+                             menuptr[((idx == item) && (MenuUpdate)) ? HILITE : NORMCOL],
+                             TBLACK,
+                             TPF_6POINT | TPF_DROPSHADOW);
+            //		if ((idx==item) && (MenuUpdate ))
+            //			Text_Print(text[idx],menux,drawy,menuptr[HILITE],TBLACK);
+        }
     }
     MenuSkip = skip;
     Show_Mouse();
@@ -306,7 +308,10 @@ int Check_Menu(int menu, char const* text[], char*, int field, int index)
     */
     default:
         for (idx = 0; idx < menuptr[ITEMSHIGH]; idx++) {
-            if (toupper(*(text[Select_To_Entry(idx, field, index)]))
+            const auto entry_idx = Select_To_Entry(idx, field, index);
+            auto entry = entry_idx < MAX_MAIN_MENU_NUM ? text[entry_idx] : nullptr;
+
+            if (entry != nullptr && toupper(*entry)
                 == toupper(Keyboard->To_ASCII((KeyNumType)(key & 0x0FF)))) {
                 newitem = select = idx;
                 break;
@@ -318,21 +323,29 @@ int Check_Menu(int menu, char const* text[], char*, int field, int index)
 
     if (newitem != item) {
         Hide_Mouse();
+
         idx = Select_To_Entry(item, field, index);
-        drawy = menuy + (item * menuskip);
-        Fancy_Text_Print(text[idx], menux, drawy, normcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+        if (idx < MAX_MAIN_MENU_NUM) {
+            drawy = menuy + (item * menuskip);
+            Fancy_Text_Print(text[idx], menux, drawy, normcol, TBLACK, TPF_6POINT | TPF_DROPSHADOW);
+        }
+
         idx = Select_To_Entry(newitem, field, index);
-        drawy = menuy + (newitem * menuskip);
-        Fancy_Text_Print(text[idx], menux, drawy, litcol, TBLACK, TPF_8POINT | TPF_DROPSHADOW);
+        if (idx < MAX_MAIN_MENU_NUM) {
+            drawy = menuy + (newitem * menuskip);
+            Fancy_Text_Print(text[idx], menux, drawy, litcol, TBLACK, TPF_6POINT | TPF_DROPSHADOW);
+        }
         Show_Mouse(); /* resurrect the mouse	*/
     }
 
     if (select != -1) {
         idx = Select_To_Entry(select, field, index);
-        Hide_Mouse(); /* get rid of the mouse	*/
-        drawy = menuy + (newitem * menuskip);
-        Flash_Line(text[idx], menux, drawy, normcol, litcol, TBLACK);
-        Show_Mouse();
+        if (idx < MAX_MAIN_MENU_NUM) {
+            Hide_Mouse(); /* get rid of the mouse	*/
+            drawy = menuy + (newitem * menuskip);
+            Flash_Line(text[idx], menux, drawy, normcol, litcol, TBLACK);
+            Show_Mouse();
+        }
         select = idx;
     }
 
@@ -373,7 +386,7 @@ int Do_Menu(char const** strings, bool blue)
 
     if (!strings)
         return (-1);
-    Set_Logic_Page(SeenBuff);
+    Set_Logic_Page(HidPage);
     Keyboard->Clear();
 
     /*
@@ -390,23 +403,23 @@ int Do_Menu(char const** strings, bool blue)
     **	Determine the width of the menu by finding the length of the
     **	longest menu entry.
     */
-    Fancy_Text_Print(TXT_NONE, 0, 0, 0, 0, TPF_8POINT | TPF_DROPSHADOW);
+    Fancy_Text_Print(TXT_NONE, 0, 0, 0, 0, TPF_6POINT | TPF_DROPSHADOW);
     length = 0;
     ptr = strings;
     while (*ptr) {
         length = MAX(length, (int)String_Pixel_Width(*ptr));
         ptr++;
     }
-    length += 7;
+    length += 45;
     MenuList[0][ITEMWIDTH] = length >> 3;
 
     /*
     **	Adjust the window values to match the size of the
     **	specified menu.
     */
-    WindowList[WINDOW_MENU][WINDOWWIDTH] = MenuList[0][ITEMWIDTH] + 2;
-    WindowList[WINDOW_MENU][WINDOWX] = 19 - (length >> 4);
-    WindowList[WINDOW_MENU][WINDOWY] = 174 - (unsigned)(MenuList[0][ITEMSHIGH] * (FontHeight + FontYSpacing));
+    WindowList[WINDOW_MENU][WINDOWWIDTH] = (MenuList[0][ITEMWIDTH] + 2) * 6;
+    WindowList[WINDOW_MENU][WINDOWX] = (19 - MenuList[0][ITEMWIDTH]) + 1;
+    WindowList[WINDOW_MENU][WINDOWY] = (174 - (unsigned)(MenuList[0][ITEMSHIGH] * (FontHeight + FontYSpacing))) + 15;
     WindowList[WINDOW_MENU][WINDOWHEIGHT] = MenuList[0][ITEMSHIGH] * FontHeight + 5 /*11*/;
 
     /*
@@ -422,9 +435,17 @@ int Do_Menu(char const** strings, bool blue)
     UnknownKey = 0;
     while (selection == -1) {
         Call_Back();
-        selection = Check_Menu(0, strings, NULL, 0xFFL, 0);
+        selection = Check_Menu(0, strings, NULL, 0xFFFFFFFL, 0);
         if (UnknownKey != 0 || UnknownKey == KN_ESC || UnknownKey == KN_LMOUSE || UnknownKey == KN_RMOUSE)
             break;
+
+        HidPage.Blit(SeenBuff,
+                     (WindowList[WINDOW_MENU][WINDOWX]) << 3,
+                     WindowList[WINDOW_MENU][WINDOWY],
+                     (WindowList[WINDOW_MENU][WINDOWX]) << 3,
+                     WindowList[WINDOW_MENU][WINDOWY],
+                     (WindowList[WINDOW_MENU][WINDOWWIDTH]) << 3,
+                     WindowList[WINDOW_MENU][WINDOWHEIGHT]);
 
         Frame_Limiter();
     }
@@ -803,8 +824,9 @@ int Main_Menu(unsigned int timeout)
 
     bool display = true;
     bool process = true;
-    while (process) {
+    static auto first_loop = true;
 
+    while (process) {
         /*
         ** If we have just received input focus again after running in the background then
         ** we need to redraw.
@@ -876,6 +898,15 @@ int Main_Menu(unsigned int timeout)
                 retval = -1;
                 process = false;
             }
+        }
+
+        // the first time the player sees the main menu, say our name
+        if (first_loop) {
+            if (Settings.Play_Nco_Greeting()) {
+                Speak(VOX_NEW_CONSTRUCT);
+            }
+
+            first_loop = false;
         }
 
         /*

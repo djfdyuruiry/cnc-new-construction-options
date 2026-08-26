@@ -47,6 +47,7 @@
 #include <utility>
 
 #include "function.h"
+#include "tiberiandawnsettings.h"
 #include "type.h"
 
 static OverlayTypeClass const Road(OVERLAY_ROAD, // Overlay type number.
@@ -750,22 +751,93 @@ unsigned char* OverlayTypeClass::Radar_Icon(int data) const
  * HISTORY:                                                                                    *
  *   05/23/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType) const
+void OverlayTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType) const
 {
+    auto display_icon = TdSettings.Display_Object_Icons();
+    void const* shape = nullptr;
+
+    if (display_icon && IsWall) {
+        // look for associated strip icon for this wall
+        for (auto struct_type = STRUCT_FIRST; struct_type <= STRUCT_LAST; ++struct_type) {
+            const auto& building_type = BuildingTypeClass::As_Reference(struct_type);
+
+            if (building_type.OverlayToPlace == Type) {
+                shape = building_type.Get_Cameo_Data();
+                break;
+            }
+        }
+    }
+
+    if (!display_icon || shape == nullptr) {
+        shape = Get_Image_Data();
+        display_icon = false;
+    }
+
+    if (shape == nullptr) {
+        return;
+    }
+
     /*
     ---------------------------- Draw the shape ------------------------------
     */
-    if (Get_Image_Data()) {
-        int frame = 0;
-
-        if (IsTiberium) {
-            frame = 7;
-        }
-
-        IsTheaterShape = IsTheater;
-        CC_Draw_Shape(Get_Image_Data(), frame, x, y, window, SHAPE_NORMAL | SHAPE_CENTER | SHAPE_WIN_REL);
-        IsTheaterShape = false;
+    if (display_icon) {
+        CC_Draw_Shape(
+            shape,
+            0,
+            x,
+            y,
+            window,
+            SHAPE_CENTER | SHAPE_WIN_REL
+        );
+        return;
     }
+
+    // display tiberium in it's most mature state
+    const auto frame = IsTiberium ? 11 : 0;
+
+    IsTheaterShape = IsTheater;
+    CC_Draw_Shape(
+        shape,
+        frame,
+        x,
+        y,
+        window,
+        SHAPE_CENTER | SHAPE_WIN_REL | SHAPE_GHOST,
+        nullptr,
+        DisplayClass::UnitShadow
+    );
+    IsTheaterShape = false;
+}
+
+bool OverlayTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto display_icon = TdSettings.Display_Object_Icons();
+    void const* shape = nullptr;
+
+    if (display_icon && IsWall) {
+        // look for associated strip icon for this wall
+        for (auto struct_type = STRUCT_FIRST; struct_type <= STRUCT_LAST; ++struct_type) {
+            const auto& building_type = BuildingTypeClass::As_Reference(struct_type);
+
+            if (building_type.OverlayToPlace == Type) {
+                shape = building_type.Get_Cameo_Data();
+                break;
+            }
+        }
+    }
+
+    if (shape == nullptr) {
+        shape = Get_Image_Data();
+    }
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************
@@ -787,10 +859,21 @@ void OverlayTypeClass::Display(int x, int y, WindowNumberType window, HousesType
  *=============================================================================================*/
 void OverlayTypeClass::Prep_For_Add(void)
 {
+    auto tiberium_added = false;
+
     for (OverlayType index = OVERLAY_FIRST; index < OVERLAY_COUNT; index++) {
-        OverlayTypeClass const& overlay = As_Reference(index);
-        if (overlay.Get_Image_Data() && !overlay.IsWall && (!overlay.IsTiberium || index == OVERLAY_TIBERIUM1)) {
-            Map.Add_To_List(&overlay);
+        if (Debug_Map && As_Reference(index).IsTiberium && tiberium_added) {
+            // we only want the first tiberium overlay for Scenario Editor
+            continue;
+        }
+
+        if (As_Reference(index).Get_Image_Data()) {
+            Map.Add_To_List(&As_Reference(index));
+
+            if (As_Reference(index).IsTiberium)
+            {
+                tiberium_added = true;
+            }
         }
     }
 }

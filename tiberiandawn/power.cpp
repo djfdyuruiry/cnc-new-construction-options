@@ -183,7 +183,7 @@ void PowerClass::Draw_It(bool complete)
 
             if (Map.IsSidebarActive) {
                 constexpr auto hi_res_power_strip_y_step = 10;
-                constexpr auto hi_res_end_piece_height = 124;
+                static const auto hi_res_end_piece_height = Get_Build_Frame_Height(PowerBarShape);
 
                 IsToRedraw = false;
 

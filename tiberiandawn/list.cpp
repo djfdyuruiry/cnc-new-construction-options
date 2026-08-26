@@ -928,9 +928,27 @@ int ListClass::Step_Selected_Index(int step)
     return (old);
 }
 
-void ListClass::Redraw_Scroll_Bar(bool forced)
+void ListClass::Redraw_Scroll_Bar(const bool forced)
 {
     UpGadget.Draw_Me(forced);
     ScrollGadget.Draw_Me(forced);
     DownGadget.Draw_Me(forced);
+}
+
+void ListClass::Disable(const bool disable_drawing)
+{
+    GadgetClass::Disable(disable_drawing);
+
+    UpGadget.Disable(disable_drawing);
+    ScrollGadget.Disable(disable_drawing);
+    DownGadget.Disable(disable_drawing);
+}
+
+void ListClass::Enable()
+{
+    GadgetClass::Enable();
+
+    UpGadget.Enable();
+    ScrollGadget.Enable();
+    DownGadget.Enable();
 }

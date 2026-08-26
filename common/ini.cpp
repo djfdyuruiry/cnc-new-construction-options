@@ -170,6 +170,9 @@ bool INIClass::Clear(char const* section, char const* entry)
 bool INIClass::Load(FileClass& file)
 {
     FileStraw fs(file);
+
+    FileName = file.File_Name();
+
     return (Load(fs));
 }
 
@@ -381,8 +384,8 @@ int INIClass::Save(Pipe& pipe) const
             /*
             **	Output the entry comment (if present).
             */
-            if (entryptr->comment.has_value()) {
-                const auto entry_comment = entryptr->comment->c_str();
+            if (entryptr->Comment.has_value()) {
+                const auto entry_comment = entryptr->Comment->c_str();
 
                 total += pipe.Put(" ; ", 3);
                 total += pipe.Put(entry_comment, static_cast<int>(strlen(entry_comment)));
@@ -987,7 +990,7 @@ bool INIClass::Put_String(char const* section, char const* entry, char const* st
             return (false);
         }
 
-        entryptr->comment = std::move(comment);
+        entryptr->Comment = std::move(comment);
 
         secptr->EntryList.Add_Tail(entryptr);
         secptr->EntryIndex.Add_Index(entryptr->Index_ID(), entryptr);
@@ -1364,4 +1367,9 @@ int32_t INIClass::CRC(const char* string)
     strcpy(buffer, string);
     strupr(buffer);
     return CRCEngine()(buffer, strlen(buffer));
+}
+
+const std::optional<std::string>& INIClass::Get_FileName()
+{
+    return FileName;
 }

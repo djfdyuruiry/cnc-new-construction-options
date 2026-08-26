@@ -402,6 +402,7 @@ bool EditClass::Handle_Key(KeyASCIIType ascii)
         if (Length) {
             Length--;
             String[Length] = '\0';
+            Changed = true;
             Flag_To_Redraw();
         }
         break;

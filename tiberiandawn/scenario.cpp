@@ -84,6 +84,27 @@ ScenarioClass::ScenarioClass(void)
     strcpy(FileName, "");
 }
 
+void ScenarioClass::Clear()
+{
+    for (auto& index : Waypoint) {
+        index = -1;
+    }
+
+    BriefingText[0] = '\0';
+    TransitTheme = THEME_NONE;
+
+    CarryOverPercent = 0;
+    CarryOverMoney = 100;
+    CarryOverCap = -1;
+
+    for (auto& view : Views) {
+        view = -1;
+    }
+
+    LuaScriptPath.reset();
+    ScenarioBasicName.reset();
+}
+
 /***********************************************************************************************
  * Start_Scenario -- Starts the scenario.                                                      *
  *                                                                                             *
@@ -410,11 +431,27 @@ void Clear_Scenario(const bool reset_rules)
         Rule.Init();
     }
 
+    // reset scenario metadata
+    Scen.Clear();
+
     // Tear down Lua runtime
     ScenarioLua::On_Clear_Scenario();
 
     // reset multiplayer max (changed by skirmish logic to ensure correct spawn points)
     MPlayerMax = 6;
+
+    // reset movies
+    strcpy(IntroMovie, "x");
+    strcpy(BriefMovie, "x");
+    strcpy(WinMovie, "x");
+    strcpy(WinMovie2, "x");
+    strcpy(WinMovie3, "x");
+    strcpy(WinMovie4, "x");
+    strcpy(LoseMovie, "x");
+    strcpy(ActionMovie, "x");
+    strcpy(MovieThemeName, "x");
+
+    BuildLevel = 15;
 }
 
 /***********************************************************************************************

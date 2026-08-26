@@ -131,6 +131,7 @@ public:
     bool Put_UUBlock(char const* section, void const* block, int len);
     bool Put_PKey(PKey const& key);
     void Put_Section(char const* section, std::optional<std::string> comment = std::nullopt);
+    const std::optional<std::string>& Get_FileName();
 
 protected:
     /*
@@ -156,7 +157,7 @@ protected:
             return CRC(Entry);
         };
 
-        std::optional<std::string> comment;
+        std::optional<std::string> Comment;
         char* Entry;
         char* Value;
     };
@@ -203,6 +204,8 @@ protected:
     VanillaList<INISection> SectionList;
 
     IndexClass<INISection*> SectionIndex;
+
+    std::optional<std::string> FileName;
 
 public:
     enum

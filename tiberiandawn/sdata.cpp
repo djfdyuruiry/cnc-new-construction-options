@@ -349,24 +349,37 @@ void SmudgeTypeClass::Init(TheaterType theater)
  * HISTORY:                                                                                    *
  *   08/12/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
-void SmudgeTypeClass::Display(int x, int y, WindowNumberType window, HousesType) const
+void SmudgeTypeClass::Display(const int x, const int y, const WindowNumberType window, const HousesType) const
 {
-    void const* ptr = Get_Image_Data();
+    void const* shape = Get_Image_Data();
 
-    x += WindowList[window][WINDOWX];
-    y += WindowList[window][WINDOWY];
+    if (shape == nullptr) {
+        return;
+    }
 
     IsTheaterShape = true; // Smudges are theater specific
-    if (ptr) {
-        for (int w = 0; w < Width; w++) {
-            for (int h = 0; h < Height; h++) {
-                CC_Draw_Shape(ptr, 0, x + w * ICON_PIXEL_W, y + h * ICON_PIXEL_H, WINDOW_TACTICAL, SHAPE_WIN_REL);
-                // LogicPage->Draw_Stamp(ptr, w + (h*Width), x + w*ICON_PIXEL_W, y + h*ICON_PIXEL_H, NULL,
-                // WINDOW_TACTICAL);
-            }
+
+    for (int w = 0; w < Width; w++) {
+        for (int h = 0; h < Height; h++) {
+            CC_Draw_Shape(shape, 0, x + w * ICON_PIXEL_W, y + h * ICON_PIXEL_H, window, SHAPE_WIN_REL);
         }
     }
+
     IsTheaterShape = false;
+}
+
+bool SmudgeTypeClass::Get_Display_Size(int& width, int& height) const
+{
+    const auto shape = Get_Image_Data();
+
+    if (shape == nullptr) {
+        return false;
+    }
+
+    width = Get_Build_Frame_Width(shape);
+    height = Get_Build_Frame_Height(shape);
+
+    return true;
 }
 
 /***********************************************************************************************

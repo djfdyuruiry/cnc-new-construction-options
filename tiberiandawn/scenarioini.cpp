@@ -350,6 +350,16 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
     */
     Scen.TransitTheme = ini.Get_ThemeType("Basic", "Theme", THEME_NONE);
 
+    static const std::string default_name = "<MISSING>";
+    auto basic_name = ini.Get_String("Basic", "Name", default_name);
+
+    Scen.ScenarioBasicName.reset();
+    if (basic_name != default_name) {
+        Scen.ScenarioBasicName = basic_name;
+    }
+
+    Scen.LuaScriptPath = ScenarioLua::Read_Lua_Script_Path(ini);
+
     /*
     **	Read in the team-type data. The team types must be created before any
     **	triggers can be created.
@@ -510,7 +520,7 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
     **	Perform a final overpass of the map. This handles smoothing of certain
     **	types of terrain (tiberium).
     */
-    Map.Overpass();
+    Map.TotalValue = Map.Overpass();
     Call_Back();
 
     /*
@@ -670,8 +680,14 @@ bool Read_Scenario_Ini(char* root, const SpecialClass& special_options, const bo
      * Lua rabbit hole (if not in scenario editor mode)
      */
     if (init_lua && !Debug_Map) {
-        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, ini, false);
+        ScenarioLua::On_Scenario_Load(GameToPlay, Scen, *PlayerPtr, false);
     }
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map) {
+        Map.Init_Sidebar_For_Scenario();
+    }
+#endif
 
     /*
     **	Return with flag saying that the scenario file was read.
@@ -843,6 +859,7 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
     */
     if (fresh) {
         if (!Map.Read_Binary_File(bin_file_name, &ScenarioCRC)) {
+            CNC_LOG_WARN("Failed to read binary file '{}' - falling back to INI template values", bin_file_name);
             TemplateClass::Read_INI(ini);
         }
     }
@@ -913,7 +930,7 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
     **	Perform a final overpass of the map. This handles smoothing of certain
     **	types of terrain (tiberium).
     */
-    Map.Overpass();
+    Map.TotalValue = Map.Overpass();
     Call_Back();
 
     /*
@@ -992,6 +1009,12 @@ bool Read_Scenario_Ini_File(char* scenario_file_name, char* bin_file_name, const
     }
 
     Call_Back();
+
+#ifdef SCENARIO_EDITOR
+    if (Debug_Map) {
+        Map.Init_Sidebar_For_Scenario();
+    }
+#endif
 
     /*
     **	Return with flag saying that the scenario file was read.
@@ -1176,6 +1199,7 @@ void Write_Scenario_Ini(char* root)
     TerrainClass::Write_INI(ini);
     OverlayClass::Write_INI(ini);
     SmudgeClass::Write_INI(ini);
+    AircraftClass::Write_INI(ini);
 
     Base.Write_INI(ini);
 
@@ -1184,10 +1208,25 @@ void Write_Scenario_Ini(char* root)
     }
 
     /*
+    **	Write rules that that belong to this scenario.
+    */
+    Rule.Get_Rule_Sections().Save_Rules_From_Source_To_Ini(fname, ini);
+
+    for (const auto& sections : Rule.Get_Type_Rules() | std::views::values) {
+        sections.Save_Rules_From_Source_To_Ini(fname, ini);
+    }
+
+    /*
     **	Write the scenario data out to a file.
     */
-    RawFileClass rawfile(fname);
-    ini.Save(rawfile, true);
+    if (CCFileClass out_file(fname); out_file.Open(WRITE)) {
+        ini.Save(out_file, true);
+        out_file.Close();
+    } else {
+        WWMessageBox().Process(
+            std::format("Error saving scenario to file: {}", fname).c_str()
+        );
+    }
 #endif
 }
 

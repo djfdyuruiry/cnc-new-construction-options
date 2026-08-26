@@ -69,7 +69,7 @@ public:
     int MaxBuildingDistance = 1;
     int MaxWallPlacementDistance = 1;
 
-    ProximityScanRules(bool debug_placement = false);
+    ProximityScanRules();
     ~ProximityScanRules();
 
     void Update_Tracker_Cell(CELL cell, ProximityResult result) const;
@@ -208,6 +208,11 @@ public:
 #ifdef USE_RA_AI
     bool Scan_For_Proximity(const ProximityScanRules& scan_rules) const;
     bool Passes_Proximity_Check(ObjectTypeClass const* object, HousesType house, short const* list, CELL trycell) const;
+
+    void Iterate_Over_Map_Cells(
+        const std::function<void(CELL, CellClass&)>& on_cell,
+        const std::function<void(int)>& on_row = [](auto _) {}
+    );
 
     static PlacementResult* Allocate_Proximity_Tracker();
     static void Dump_Proximity_Tracker_To_File(const ProximityScanRules& scan_rules, const PlacementResult* tracker, const char* file_name = "placement_debug.txt");
@@ -394,11 +399,7 @@ private:
     */
 };
 
-ProximityScanRules Resolve_Placement_Rules(
-    const BuildingTypeClass* placement_type,
-    HousesType house,
-    bool debug_placement = false
-);
-ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance, bool debug_placement = false);
+ProximityScanRules Resolve_Placement_Rules(const BuildingTypeClass* placement_type, HousesType house);
+ProximityScanRules Resolve_Placement_Rules(const BuildingClass* placement_instance);
 
 #endif

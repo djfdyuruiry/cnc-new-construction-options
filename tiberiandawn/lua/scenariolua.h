@@ -38,26 +38,13 @@ class ScenarioLua final
 public:
     static const LuaEngine& Get_Engine();
 
+    static std::optional<std::string> Read_Lua_Script_Path(const CCINIClass& ini);
+    static bool Write_Lua_Script_Path(CCINIClass& ini, const std::optional<std::string>& path);
+
     /**
      * Scenario has been fully loaded, so time to
      * initialize Lua runtime with scenario data.
      */
-    static void On_Scenario_Load(
-        const GameEnum& game_type,
-        const ScenarioClass& scenario,
-        const HouseClass& player,
-        const std::optional<std::string>& ini_script_path,
-        bool was_loaded_from_save = false
-    );
-
-    static void On_Scenario_Load(
-        const GameEnum& game_type,
-        const ScenarioClass& scenario,
-        const HouseClass& player,
-        const CCINIClass& ini,
-        bool was_loaded_from_save
-    );
-
     static void On_Scenario_Load(
         const GameEnum& game_type,
         const ScenarioClass& scenario,
@@ -128,7 +115,6 @@ private:
      *       overrides can be applied appropriately and files down the chain are executed.
      */
     static void Exec_Scenario_Lua_Scripts(
-        const std::optional<std::string>& ini_script_path,
         const ScenarioClass& scenario,
         const std::string& scenario_name,
         const std::string& faction_name,

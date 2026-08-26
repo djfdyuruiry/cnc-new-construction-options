@@ -99,6 +99,7 @@ public:
     /**********************************************************************
     ** Returns a pointer to the object for the given node
     */
+    BuildingClass* Get_Building(const BaseNodeClass& node);
     BuildingClass* Get_Building(int index);
 
     /**********************************************************************

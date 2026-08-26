@@ -18,6 +18,7 @@
     PREFIX BStateType POSTFIX \
     PREFIX CCPaletteType POSTFIX \
     PREFIX CloakType POSTFIX \
+    PREFIX ColorType POSTFIX \
     PREFIX DiffType POSTFIX \
     PREFIX DirType POSTFIX \
     PREFIX DoorClass::DoorStateType POSTFIX \

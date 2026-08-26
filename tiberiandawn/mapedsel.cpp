@@ -88,6 +88,32 @@ int MapEditClass::Select_Object(void)
     */
     if ((unsigned)cell < MAP_CELL_TOTAL) {
         object = Cell_Object(cell, x, y);
+
+        auto& cell_obj = Array[cell];
+
+        // if no object found, and overlay is present, simulate 'grabbing' it by starting placement of an equivalent
+        // object and remove the overlay from the cell
+        if (object == nullptr && cell_obj.Overlay != OVERLAY_NONE) {
+            auto owner = cell_obj.Owner != HOUSE_NONE
+                ? HouseClass::As_Pointer(cell_obj.Owner)
+                : nullptr;
+            auto overlay_type = &OverlayTypeClass::As_Reference(cell_obj.Overlay);
+
+            if (overlay_type->IsTiberium) {
+                // we only want to place first tiberium type
+                overlay_type = &OverlayTypeClass::As_Reference(OVERLAY_TIBERIUM1);
+            }
+
+            if (Manual_Start_Placement(overlay_type, owner)) {
+                cell_obj.Purge_Overlay();
+
+                GrabbedOverlay = true;
+                GrabbedObject = PendingObjectPtr;
+                GrabbedOverlayOrigin = cell;
+            } else {
+                rc = -1;
+            }
+        }
     }
 
     /*
@@ -285,6 +311,7 @@ void MapEditClass::Popup_Controls(void)
     always must add MapArea LAST in the list, so it doesn't intercept the
     other buttons' input.
     ------------------------------------------------------------------------*/
+    EditorSidebar.Remove_This();
     Remove_A_Button(*GDIButton);
     Remove_A_Button(*NODButton);
     Remove_A_Button(*NeutralButton);
@@ -296,16 +323,24 @@ void MapEditClass::Popup_Controls(void)
     Remove_A_Button(*HealthGauge);
     Remove_A_Button(*HealthText);
     Remove_A_Button(*FacingDial);
+    Remove_A_Button(*IsBaseStructureCheckbox);
+    Remove_A_Button(*IsBaseStructureText);
+    Remove_A_Button(*BaseStructureIdTextBox);
+    Remove_A_Button(*BaseStructureIdText);
     Remove_A_Button(*BaseGauge);
     Remove_A_Button(*BaseLabel);
+    Remove_A_Button(*EditorMenuButton);
     Remove_A_Button(*MapArea);
 
     /*
     ------------------ If no current object, hide the list -------------------
     */
     if (!CurrentObject.Count()) {
+        EditorSidebar.Add_This();
+
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
+        Add_A_Button(*EditorMenuButton);
         Add_A_Button(*MapArea);
         return;
     }
@@ -314,8 +349,10 @@ void MapEditClass::Popup_Controls(void)
     --------------- If not Techno, no need for editing buttons ---------------
     */
     if (!CurrentObject[0]->Is_Techno()) {
+        EditorSidebar.Add_This();
         Add_A_Button(*BaseGauge);
         Add_A_Button(*BaseLabel);
+        Add_A_Button(*EditorMenuButton);
         Add_A_Button(*MapArea);
         return;
     }
@@ -395,6 +432,31 @@ void MapEditClass::Popup_Controls(void)
         sprintf(HealthBuf, "%d", CurrentObject[0]->Strength);
         Add_A_Button(*HealthGauge);
         Add_A_Button(*HealthText);
+        Add_A_Button(*IsBaseStructureCheckbox);
+        Add_A_Button(*IsBaseStructureText);
+        Add_A_Button(*BaseStructureIdTextBox);
+        Add_A_Button(*BaseStructureIdText);
+
+        auto building = dynamic_cast<BuildingClass*>(CurrentObject[0]);
+
+        if (Base.Is_Node(building)) {
+            IsBaseStructureCheckbox->Turn_On();
+
+            auto node = Base.Get_Node(building);
+
+            BaseStructureIdTextBox->Enable();
+            BaseStructureIdText->Enable();
+
+            sprintf(BaseStructureIdBuffer, "%d", Base.Nodes.ID(node));
+        } else {
+            IsBaseStructureCheckbox->Turn_Off();
+            BaseStructureIdBuffer[0] = '\0';
+            BaseStructureIdTextBox->Disable(true);
+            BaseStructureIdText->Disable(true);
+        }
+
+        BaseStructureIdTextBox->Set_Text(BaseStructureIdBuffer, std::size(BaseStructureIdBuffer));
+        BaseStructureIdContext = building;
 
         if (objtype->IsTurretEquipped) {
             FacingDial->Set_Direction(((TechnoClass*)CurrentObject[0])->PrimaryFacing);
@@ -407,8 +469,10 @@ void MapEditClass::Popup_Controls(void)
     Add the map area last, so it's "underneath" the other buttons, and won't
     intercept input for those buttons.
     ------------------------------------------------------------------------*/
+    EditorSidebar.Add_This();
     Add_A_Button(*BaseGauge);
     Add_A_Button(*BaseLabel);
+    Add_A_Button(*EditorMenuButton);
     Add_A_Button(*MapArea);
 }
 

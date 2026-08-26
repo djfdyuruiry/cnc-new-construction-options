@@ -71,6 +71,10 @@ public:
     */
     virtual void Flag_To_Redraw(bool complete = false);
 
+#ifdef SCENARIO_EDITOR
+    virtual void Render_Editor_Controls() {}
+#endif
+
     /*
     **	Render maintenance routine (call every game tick). Probably no need
     **	to override this in derived classes.

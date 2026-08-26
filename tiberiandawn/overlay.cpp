@@ -398,12 +398,20 @@ void OverlayClass::Write_INI(CCINIClass& ini)
     **	Write the unit data out.
     */
     for (int index = 0; index < MAP_CELL_TOTAL; index++) {
+        auto save_index = index;
+
+#ifdef MEGAMAPS
+        if (Map.MapBinaryVersion == MAP_VERSION_NORMAL) {
+            save_index = Unconfine_Old_Cell(index);
+        }
+#endif
+
         CellClass* cellptr = &Map[index];
 
         if (cellptr->Overlay != OVERLAY_NONE) {
             char uname[10];
             char buf[128];
-            sprintf(uname, "%03d", index);
+            sprintf(uname, "%03d", save_index);
             sprintf(buf, "%s", OverlayTypeClass::As_Reference(cellptr->Overlay).IniName);
             ini.Put_String(INI_Name(), uname, buf);
         }
