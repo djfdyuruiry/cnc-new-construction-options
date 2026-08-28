@@ -2324,7 +2324,7 @@ void MapEditClass::Main_Menu(void)
         /*
         .......................... Load scenario ...........................
         */
-        case 1:
+        case 1: {
             if (Changed) {
                 rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
                 HiddenPage.Clear();
@@ -2339,7 +2339,13 @@ void MapEditClass::Main_Menu(void)
                 }
             }
 
-            if (Mission_Select_Dialog()) {
+            const auto multiplayer_mode = WWMessageBox().Process(
+                "Scenario type to load?",
+                Text_String(TXT_MISSION),
+                "Multiplayer"
+            );
+
+            if (Mission_Select_Dialog(multiplayer_mode)) {
                 Flag_To_Redraw(true);
                 Render();
 
@@ -2353,6 +2359,7 @@ void MapEditClass::Main_Menu(void)
             }
             process = false;
             break;
+        }
 
         /*
         .......................... Save scenario ...........................
