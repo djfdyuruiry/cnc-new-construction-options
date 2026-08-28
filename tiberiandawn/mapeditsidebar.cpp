@@ -1210,6 +1210,10 @@ void MapEditorSidebar::On_Input(KeyNumType& input, const bool forced)
             const auto list_idx = Get_Control<WAYPOINTS_LIST, ListClass>().Current_Index();
             const auto waypoint_idx = WaypointLookup[list_idx];
 
+            if (Scen.Waypoint[waypoint_idx] != -1 && GameToPlay != GAME_NORMAL) {
+                (*Parent)[Scen.Waypoint[waypoint_idx]].Flag_Remove();
+            }
+
             Scen.Waypoint[waypoint_idx] = -1;
             Refresh_Waypoint_List();
 
