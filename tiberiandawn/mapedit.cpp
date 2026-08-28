@@ -1311,6 +1311,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             ...............................................................*/
             for (i = 0; i < 26; i++) {
                 if (Scen.Waypoint[i] == CurrentCell) {
+                    if (GameToPlay != GAME_NORMAL) {
+                        Array[CurrentCell].Flag_Remove();
+                    }
+
                     Scen.Waypoint[i] = -1;
                     EditorSidebar.Refresh_Waypoint_List();
                 }
@@ -1529,6 +1533,10 @@ void MapEditClass::AI(KeyNumType& input, int x, int y)
             } else if (cell_waypoint_number != -1) {
                 // priority 2: waypoint
                 Scen.Waypoint[cell_waypoint_number] = -1;
+
+                if (GameToPlay != GAME_NORMAL || cell_waypoint_number < WAYPT_HOME) {
+                    Array[CurrentCell].Flag_Remove();
+                }
 
                 EditorSidebar.Refresh_Waypoint_List();
                 content_changed = true;
@@ -1977,7 +1985,7 @@ void MapEditClass::Decorate_Cells(const bool forced)
                 */
                 for (auto i = 0; i < WAYPT_HOME; i++) {
                     if (Scen.Waypoint[i] == cell.Cell_Number()) {
-                        if (GameToPlay != GAME_NORMAL && i < MPlayerMax && !cell.IsFlagged) {
+                        if (GameToPlay != GAME_NORMAL && !cell.IsFlagged) {
                             // mark waypoints as multiplayer start positions using flags
                             cell.Flag_Place(HOUSE_NONE);
                             cell.Draw_It(x + TacPixelX, y + TacPixelY);
@@ -2324,7 +2332,7 @@ void MapEditClass::Main_Menu(void)
         /*
         .......................... Load scenario ...........................
         */
-        case 1:
+        case 1: {
             if (Changed) {
                 rc = WWMessageBox().Process("Save Changes?", TXT_YES, TXT_NO);
                 HiddenPage.Clear();
@@ -2339,7 +2347,13 @@ void MapEditClass::Main_Menu(void)
                 }
             }
 
-            if (Mission_Select_Dialog()) {
+            const auto multiplayer_mode = WWMessageBox().Process(
+                "Scenario type to load?",
+                Text_String(TXT_MISSION),
+                "Multiplayer"
+            );
+
+            if (Mission_Select_Dialog(multiplayer_mode)) {
                 Flag_To_Redraw(true);
                 Render();
 
@@ -2353,6 +2367,7 @@ void MapEditClass::Main_Menu(void)
             }
             process = false;
             break;
+        }
 
         /*
         .......................... Save scenario ...........................

@@ -3,6 +3,7 @@
 #include "function.h"
 #include "dialog.h"
 #include "elist.h"
+#include "tiberiandawnsettings.h"
 
 #ifdef NEWMENU
 
@@ -31,12 +32,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
 
     static inline std::vector<MissionVariables> MissionCache;
     static inline std::vector<MissionVariables> ScenarioEditorMissionCache;
-
-    static std::vector<MissionVariables>& Resolve_Mission_Cache()
-    {
-        // scenario editor wants to see all scenarios, so cache needs to be different
-        return Debug_Map ? ScenarioEditorMissionCache : MissionCache;
-    }
+    static inline std::vector<MissionVariables> MultiplayerMissionCache;
 
     // TODO: lookup point of conflict (see mapsel.cpp)
     // TODO: Add rule for disabling country lookups, so custom campaigns can hide default names
@@ -140,6 +136,15 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
     {
         auto mission_description = mission_name.value_or("");
 
+        if (player == SCEN_PLAYER_MPLAYER) {
+            return std::format(
+                "{}Map {:>3} - {}",
+                std::string(sizeof(int), ' '), // leading spaces are to maintain compatibility with drawing logic
+                scenario_number,
+                mission_description
+            );
+        }
+
         // if no mission name was found in the INI files, build a default description using metadata
         if (!mission_name.has_value()) {
             const auto country = Lookup_Country(player, ini_name);
@@ -155,18 +160,19 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
         }
 
         // {campaign player}: Mission {number} - {mission description}
-        // (Note: 'Mission ' is omitted when running in DOS mode to ensure description fits EListClass control bounds)
+        // (Note: 'Mission ' is omitted in DOS mode/multiplayer to ensure description fits EListClass control bounds)
         return std::format(
             "{}{}:{} {:>2} - {}",
             std::string(sizeof(int), ' '), // leading spaces are to maintain compatibility with drawing logic
             player == SCEN_PLAYER_JP ? "Funpark" : TdTypeConverter::To_String(player),
-            Get_Resolution_Factor() == 0 ? "" : " Mission", // shorten mission description for DOS resolution
+            Get_Resolution_Factor() == 0 ? "" : " Mission",
             scenario_number,
             mission_description
         );
     }
 
     static void Add_Mission_To_Cache_If_Present(
+        std::vector<MissionVariables>& mission_cache,
         const ScenarioPlayerType& player,
         const int& mission,
         const ScenarioDirType& direction,
@@ -187,7 +193,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
         }
 
         // read custom scenario name (if present)
-        static const std::string no_name = "<none>";
+        static constexpr std::string no_name = "<none>";
         const auto ini_name = ini.Get_String("Basic", "Name", no_name);
         const auto name = ini_name == no_name ? std::nullopt : std::optional(ini_name);
 
@@ -196,10 +202,10 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
             player, mission, direction, variation, ini_filename, name
         );
 
-        Resolve_Mission_Cache().push_back({
+        mission_cache.push_back({
             mission,
             player,
-            player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD,
+            player == SCEN_PLAYER_MPLAYER ? HOUSE_MULTI1 : (player == SCEN_PLAYER_GDI ? HOUSE_GOOD : HOUSE_BAD),
             direction,
             variation,
             std::move(description)
@@ -210,9 +216,18 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
      * Find any missions between 1-20 for all three single player campaigns (GDI, NOD and Funpark). Any scenario INI files
      * present will be loaded into the mission cache, containing required metadata to enable correct loading of the mission.
      */
-    static void Fill_Mission_Cache()
+    static void Fill_Mission_Cache(std::vector<MissionVariables>& mission_cache, const bool multiplayer_mode)
     {
-        Resolve_Mission_Cache().clear();
+        mission_cache.clear();
+
+        if (multiplayer_mode) {
+            // reflect game engine limit for multiplayer maps
+            for (auto mission = 1; mission < static_cast<int>(MPlayerDescriptions.size()); mission++) {
+                Add_Mission_To_Cache_If_Present(mission_cache, SCEN_PLAYER_MPLAYER, mission, SCEN_DIR_EAST, SCEN_VAR_A);
+            }
+
+            return;
+        }
 
         for (const auto& player : { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP }) {
             /*
@@ -233,11 +248,21 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
             for (auto mission = 1; mission < mission_limit; mission++) {
                 for (const auto& direction : { SCEN_DIR_EAST, SCEN_DIR_WEST }) {
                     for (auto variation = SCEN_VAR_A; variation < SCEN_VAR_COUNT; ++variation) {
-                        Add_Mission_To_Cache_If_Present(player, mission, direction, variation);
+                        Add_Mission_To_Cache_If_Present(mission_cache, player, mission, direction, variation);
                     }
                 }
             }
         }
+    }
+
+    std::vector<MissionVariables>& Resolve_Mission_Cache() const
+    {
+        if (MultiplayerMode) {
+            return MultiplayerMissionCache;
+        }
+
+        // scenario editor wants to see all scenarios, so cache needs to be different
+        return Debug_Map ? ScenarioEditorMissionCache : MissionCache;
     }
 
     /**
@@ -278,6 +303,7 @@ class MissionSelectDialog : public Dialog<MissionSelectControls>
         Get_Control<TextButtonClass>(control).IsPressed = false;
     }
 
+    const bool MultiplayerMode;
     std::vector<ScenarioPlayerType> MissionFilter;
     std::vector<MissionVariables> MissionsToDisplay;
 
@@ -363,11 +389,18 @@ protected:
 
     void Init_Data() override
     {
-        if (Resolve_Mission_Cache().empty()) {
-            Fill_Mission_Cache();
+        auto& cache = Resolve_Mission_Cache();
+
+        if (cache.empty()) {
+            Fill_Mission_Cache(cache, MultiplayerMode);
         }
 
-        MissionFilter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
+        if (MultiplayerMode) {
+            MissionFilter = { SCEN_PLAYER_MPLAYER };
+        } else {
+            MissionFilter = { SCEN_PLAYER_GDI, SCEN_PLAYER_NOD, SCEN_PLAYER_JP };
+        }
+
         Populate_Mission_List();
     }
 
@@ -381,6 +414,13 @@ protected:
         Add_Button(BUTTON_GDI, TXT_G_D_I);
         Add_Button(BUTTON_NOD, TXT_N_O_D);
         Add_Button(BUTTON_FUNPARK, "Funpark"); // TODO: Locale string
+
+        if (MultiplayerMode) {
+            // turn off tabs whe in multiplayer mode
+            for (auto i = BUTTON_ALL; i <= BUTTON_FUNPARK; ++i) {
+               Get_Control<TextButtonClass>(i).Disable(true);
+            }
+        }
 
         Add_Control<BUTTON_MISSIONS, EListClass>(
             Dimensions[BUTTON_MISSIONS].X,
@@ -421,13 +461,13 @@ protected:
         }
 
         Dimensions[BUTTON_MISSIONS].X = X + 10 * Factor;
-        Dimensions[BUTTON_MISSIONS].Y = Y + 25 * Factor;
+        Dimensions[BUTTON_MISSIONS].Y = Y + (MultiplayerMode ? 17 : 25) * Factor; // no tabs in MultiplayerMode, move up
         Dimensions[BUTTON_MISSIONS].W = Width - 20 * Factor;
         Dimensions[BUTTON_MISSIONS].H = Height - 45 * Factor;
     }
 
 public:
-    MissionSelectDialog() : Dialog(236, 162)
+    MissionSelectDialog(const bool multiplayer_mode) : Dialog(236, 162), MultiplayerMode(multiplayer_mode)
     {
         CaptionText = Debug_Map ? "Load Scenario": "Campaign Selection";
     }
@@ -459,7 +499,7 @@ static bool Load_Selected_Mission_For_Editor()
         Base.House = HOUSE_MULTI4;
         GameToPlay = GAME_NORMAL;
     } else {
-        GameToPlay = GAME_NORMAL;
+        GameToPlay = ScenPlayer == SCEN_PLAYER_MPLAYER ? GAME_SKIRMISH : GAME_NORMAL;
     }
 
     Clear_Scenario();
@@ -476,11 +516,11 @@ static bool Load_Selected_Mission_For_Editor()
     return true;
 }
 
-bool Mission_Select_Dialog()
+bool Mission_Select_Dialog(const bool multiplayer_mode)
 {
     const auto factor = (SeenBuff.Get_Width() == 320) ? 1 : 2;
 
-    MissionSelectDialog dialog;
+    MissionSelectDialog dialog(multiplayer_mode);
 
     dialog.Init(
         Try_Get_Resolution_Mode_Width().value_or(SeenBuff.Get_Width()),
@@ -491,7 +531,7 @@ bool Mission_Select_Dialog()
     const auto result = dialog.Present();
 
     // ensure correct data loaded if player picked a mission (ignore for demo mode)
-    if (result && !Is_Demo()) {
+    if (result && !Is_Demo() && ScenPlayer != SCEN_PLAYER_MPLAYER) {
         RequiredCD = ScenPlayer;
 
         if (!Force_CD_Available(ScenPlayer)) {

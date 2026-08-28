@@ -465,7 +465,7 @@ void Nod_Ending(void);
 */
 bool Expansion_Present(void);
 bool Expansion_Dialog(void);
-bool Mission_Select_Dialog(void);
+bool Mission_Select_Dialog(bool multiplayer_mode = false);
 bool Bonus_Dialog(void);
 
 /*

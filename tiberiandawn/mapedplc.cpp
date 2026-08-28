@@ -2214,6 +2214,10 @@ bool MapEditClass::Place_Waypoint(void)
     Scen.Waypoint[CurWaypoint] = cell;
     Array[cell].IsWaypoint = 1;
 
+    if (GameToPlay != GAME_NORMAL) {
+        Array[cell].Flag_Place(HOUSE_NONE);
+    }
+
     return true;
 }
 
