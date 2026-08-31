@@ -32,7 +32,7 @@ protected:
         const auto string_value = RuleSection::Variant_To_String(rule_variant);
 
         const auto converter_variant = TdTypeConverter::Get_Rule_Variant(
-            *Section.Get_Converter_Section_Type_Name(),
+            Section,
             RuleName
         );
         auto& dropdown = Get_Control<VALUE_DROPDOWN, DropListClass>();
@@ -111,7 +111,7 @@ protected:
                 const std::string selected_value = dropdown.Current_Item();
 
                 const auto variant = TdTypeConverter::Get_Rule_Variant(
-                    *Section.Get_Converter_Section_Type_Name(),
+                    Section,
                     RuleName
                 );
 
@@ -168,7 +168,7 @@ protected:
         Dialog::Render_Background(display);
 
         const auto variant = TdTypeConverter::Get_Rule_Variant(
-            *Section.Get_Converter_Section_Type_Name(),
+            Section,
             RuleName
         );
         const auto variant_name = TdTypeConverter::Get_Type_Name_Variant(variant);
@@ -220,7 +220,7 @@ protected:
     void Init_Data() override
     {
         const auto csv_variant = TdTypeConverter::Get_Csv_Rule_Variant(
-            *Section.Get_Converter_Section_Type_Name(),
+            Section,
             RuleName
         );
 
@@ -305,7 +305,7 @@ protected:
 
                 const auto csv_value = CncStringUtils::To_Csv(selected_values);
                 const auto variant = TdTypeConverter::Get_Csv_Rule_Variant(
-                    *Section.Get_Converter_Section_Type_Name(),
+                    Section,
                     RuleName
                 );
 
@@ -329,7 +329,7 @@ protected:
         Dialog::Render_Background(display);
 
         const auto variant = TdTypeConverter::Get_Csv_Rule_Variant(
-            *Section.Get_Converter_Section_Type_Name(),
+            Section,
             RuleName
         );
         const auto& variant_name = TdTypeConverter::Get_Type_Name_Variant(variant);
@@ -617,7 +617,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
         const std::string new_value = Text[control].get();
 
         // rule is of special type that needs a non-trivial conversion from a string value
-        if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(section, name)) {
+        if (TdTypeConverter::Rule_Requires_Converter(section, name)) {
             const auto& type_name = section.Get_Converter_Section_Type_Name();
 
             if (TdTypeConverter::Rule_Requires_Csv_Converter(section, name)) {
@@ -712,7 +712,7 @@ class RulesEditorDialog : public Dialog<RulesEditorControls>
 
                 Get_Control<EditClass>(value_control).Set_Text(edit_buffer, RuleValueTextLength);
 
-                if (ActiveSectionsAreType && TdTypeConverter::Rule_Requires_Converter(section, name)) {
+                if (TdTypeConverter::Rule_Requires_Converter(section, name)) {
                     // don't allow player to manually edit converter type values, show an edit button instead
                     Get_Control<EditClass>(value_control).Disable();
                     Get_Control<TextButtonClass>(edit_button).Enable();

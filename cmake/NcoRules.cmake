@@ -47,7 +47,7 @@ CHECK_REQUIRED_VARIABLE(RULES_NCO_PATH)
 CHECK_REQUIRED_VARIABLE(RULE_KEYS_TEMPLATE_PATH)
 CHECK_REQUIRED_VARIABLE(RULE_KEYS_PATH)
 
-function(ResolveRuleValue _RULE_TYPE _RULE_DEFAULT _RULE_VALUE)
+function(ResolveRuleValue _RULE_TYPE _RULE_CONVERTER_TYPE _RULE_DEFAULT _RULE_VALUE)
   set(RULE_VALUE "${_RULE_DEFAULT}")
 
   if(${_RULE_TYPE} STREQUAL "bool")
@@ -58,11 +58,14 @@ function(ResolveRuleValue _RULE_TYPE _RULE_DEFAULT _RULE_VALUE)
       set(RULE_VALUE "false")
     endif()
   elseif(${_RULE_TYPE} STREQUAL "float")
-      # ensure value is denoted as a float
-      set(RULE_VALUE "${RULE_VALUE}f")
+    # ensure value is denoted as a float
+    set(RULE_VALUE "${RULE_VALUE}f")
   elseif(${_RULE_TYPE} STREQUAL "fixed")
-      # ensure value wrapped in a fixed class constructor call
-      set(RULE_VALUE "fixed(${RULE_VALUE}f)")
+    # ensure value wrapped in a fixed class constructor call
+    set(RULE_VALUE "fixed(${RULE_VALUE}f)")
+  elseif(${_RULE_TYPE} STREQUAL "converter")
+    # value will be deserialized into a native game engine type instance
+    set(RULE_VALUE "TdTypeConverter::Assert_Parse<${_RULE_CONVERTER_TYPE}>(\"${RULE_VALUE}\", \"Invalid default value in rules JSON\")")
   endif()
 
   set("${_RULE_VALUE}" "${RULE_VALUE}" PARENT_SCOPE)
@@ -77,11 +80,12 @@ function(TransformRuleNameToUpperSnakecase _RULE_NAME _RULE_NAME_SNAKE_CASE)
   set("${_RULE_NAME_SNAKE_CASE}" ${RULE_NAME_SNAKE_CASE} PARENT_SCOPE)
 endfunction()
 
-function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_COMMENT _RULE_DEFAULT _IS_IMPLEMENTED)
+function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_CONVERTER_TYPE _RULE_COMMENT _RULE_DEFAULT _IS_IMPLEMENTED)
   string(JSON RULE_OBJECT_JSON GET "${_RULES_JSON}" rules "${_RULE_INDEX}")
 
   string(JSON RULE_NAME GET "${RULE_OBJECT_JSON}" name)
   string(JSON RULE_TYPE GET "${RULE_OBJECT_JSON}" type)
+  string(JSON RULE_CONVERTER_TYPE ERROR_VARIABLE JSON_ERROR GET "${RULE_OBJECT_JSON}" converter_type)
   string(JSON RULE_COMMENT GET "${RULE_OBJECT_JSON}" comment)
   string(JSON RULE_DEFAULT GET "${RULE_OBJECT_JSON}" default)
 
@@ -94,6 +98,7 @@ function(LoadRuleProperties _RULES_JSON _RULE_INDEX _RULE_NAME _RULE_TYPE _RULE_
 
   set("${_RULE_NAME}" ${RULE_NAME} PARENT_SCOPE)
   set("${_RULE_TYPE}" ${RULE_TYPE} PARENT_SCOPE)
+  set("${_RULE_CONVERTER_TYPE}" ${RULE_CONVERTER_TYPE} PARENT_SCOPE)
   set("${_RULE_COMMENT}" ${RULE_COMMENT} PARENT_SCOPE)
   set("${_RULE_DEFAULT}" ${RULE_DEFAULT} PARENT_SCOPE)
   set("${_IS_IMPLEMENTED}" ${IS_IMPLEMENTED} PARENT_SCOPE)
@@ -276,15 +281,19 @@ function(Main)
         string(APPEND RULE_PROCESS_CODE "\n             ")
       endif()
 
-      LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_COMMENT RULE_DEFAULT IS_IMPLEMENTED)
+      LoadRuleProperties("${RULES_JSON}" "${RULE_INDEX}" RULE_NAME RULE_TYPE RULE_CONVERTER_TYPE RULE_COMMENT RULE_DEFAULT IS_IMPLEMENTED)
 
       TransformRuleNameToUpperSnakecase("${RULE_NAME}" RULE_NAME_SNAKE_CASE)
       set(RULE_DEFINE "${RULE_NAME_SNAKE_CASE}_RULE")
 
       # rules-nco.cpp
-      ResolveRuleValue("${RULE_TYPE}" "${RULE_DEFAULT}" RULE_VALUE)
+      ResolveRuleValue("${RULE_TYPE}" "${RULE_CONVERTER_TYPE}" "${RULE_DEFAULT}" RULE_VALUE)
 
-      string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Comment(\"${RULE_COMMENT}\").With_Default(${RULE_VALUE})")
+      if ("${RULE_TYPE}" STREQUAL "converter")
+        string(APPEND RULE_PROCESS_CODE ".template Load_With_Converter<${RULE_CONVERTER_TYPE}, TdTypeConverter>(${RULE_DEFINE}, ${RULE_VALUE}).With_Comment(\"${RULE_COMMENT}\")")
+      else()
+        string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Comment(\"${RULE_COMMENT}\").With_Default(${RULE_VALUE})")
+      endif()
 
       if(${RULE_INDEX} EQUAL ${RULE_COUNT})
         # close call chain for section

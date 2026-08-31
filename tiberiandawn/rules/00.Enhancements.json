@@ -17,12 +17,6 @@
       "comment": "Barracks, Hand of Nod, Weapons Factory etc. support setting rally points for produced units TS/RA2 style. Ported from the CFEPatch - see: https://bitbucket.org/cfehunter/cncremastered/src/cfepatch/"
     },
     {
-      "name": "CommandoGuard",
-      "type": "bool",
-      "default": true,
-      "comment": "Allow the commandos to guard an area (applies to any infantry equipped with a RIFLE weapon)"
-    },
-    {
       "name": "MaxBuildDistance",
       "type": "int",
       "default": 1,
@@ -54,9 +48,10 @@
     },
     {
       "name": "CommandoGuard",
-      "type": "bool",
-      "default": true,
-      "comment": "Allow the commandos to guard an area (applies to any infantry equipped with a RIFLE weapon)"
+      "type": "converter",
+      "converter_type": "GameType",
+      "default": "MULTIPLAYER",
+      "comment": "Allow commandos to guard an area and proactively shoot targets. Valid values: 'ANY' to enable everywhere, 'MULTIPLAYER' to enable only in Skirmish/Network games OR 'NONE' to disable this rule (applies to any infantry equipped with a RIFLE weapon)"
     },
     {
       "name": "NewSaveGameFormat",

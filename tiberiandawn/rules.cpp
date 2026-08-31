@@ -808,6 +808,15 @@ void RulesClass::Assert_Section_Not_Present(const std::string_view name) const
     }
 }
 
+bool RulesClass::Is_Enabled_For_Current_Game_Type(const std::string_view section, const std::string_view rule) const
+{
+    const auto rule_game_type = Get_Rule_Value_With_Converter<GameType>(section, rule);
+
+    return GameToPlay == GAME_NORMAL
+        ? rule_game_type == GAME_ANY // check rule isn't just enabled for multiplayer
+        : rule_game_type != GAME_NONE; // enabled/disabled check
+}
+
 const RuleSection& RulesClass::operator[](std::string_view section_name) const
 {
     return Sections[section_name];

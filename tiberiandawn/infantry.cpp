@@ -2557,9 +2557,9 @@ TARGET InfantryClass::Greatest_Threat(ThreatType threat) const
     **	unless specifically in hunt mode.
     */
     case WEAPON_RIFLE:
-        const auto commando_guard_rule = Rule.Get_Rule_Value<bool>(ENHANCEMENTS_SECTION, COMMANDO_GUARD_RULE);
+        const auto command_guard_enabled = Rule.Is_Enabled_For_Current_Game_Type(ENHANCEMENTS_SECTION, COMMANDO_GUARD_RULE);
 
-        if (House->IsHuman && (Mission == MISSION_GUARD || Mission == MISSION_GUARD_AREA) && !commando_guard_rule) {
+        if (House->IsHuman && (Mission == MISSION_GUARD || Mission == MISSION_GUARD_AREA) && !command_guard_enabled) {
             return (TARGET_NONE);
         }
         return (TechnoClass::Greatest_Threat(threat | THREAT_INFANTRY | THREAT_BUILDINGS));

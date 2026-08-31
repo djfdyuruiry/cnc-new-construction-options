@@ -308,9 +308,13 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
+    static void Register_Rule_Type(const RuleSection& section, const std::string_view& rule)
     {
-        RegisteredRuleTypes[type_name.data()][rule.data()] = Get_Default_Value<T>();
+        const auto& type_name = section.Get_Converter_Section_Type_Name();
+
+        type_name.has_value()
+            ? RegisteredRuleTypes[type_name.value().data()][rule.data()] = Get_Default_Value<T>()
+            : RegisteredRuleTypes[section.Get_Section_Name().data()][rule.data()] = Get_Default_Value<T>();
     }
 
     /**
@@ -318,18 +322,17 @@ public:
      */
     template<class T>
     requires SupportedByTdTypeConverter<T>
-    static void Register_Csv_Rule_Type(const std::string_view& type_name, const std::string_view& rule)
+    static void Register_Csv_Rule_Type(const RuleSection& section, const std::string_view& rule)
     {
-        RegisteredCsvRuleTypes[type_name.data()][rule.data()] = Get_Default_Value<T>();
+        const auto& section_name = section.Get_Converter_Section_Type_Name();
+
+        section_name.has_value()
+            ? RegisteredCsvRuleTypes[section_name.value().data()][rule.data()] = Get_Default_Value<T>()
+            : RegisteredCsvRuleTypes[section.Get_Section_Name().data()][rule.data()] = Get_Default_Value<T>();
     }
 
     /**
      * Does the given type name rule require a converter to read/write from?
-     */
-    static bool Rule_Requires_Converter(const std::string_view& type_name, const std::string_view& rule);
-
-    /**
-     * Overload for Rule_Requires_Converter to allow providing source RuleSection directly.
      */
     static bool Rule_Requires_Converter(
         const RuleSection& section,
@@ -339,27 +342,19 @@ public:
     /**
      * Does the given type name rule require a CSV converter to read/write from?
      */
-    static bool Rule_Requires_Csv_Converter(const std::string_view& type_name, const std::string_view& rule);
-
-    /**
-     * Overload for Rule_Requires_Csv_Converter to allow providing source RuleSection directly.
-     */
-    static bool Rule_Requires_Csv_Converter(
-        const RuleSection& section,
-        const std::string_view& rule
-    );
+    static bool Rule_Requires_Csv_Converter(const RuleSection& section, const std::string_view& rule);
 
     /**
      * Get the corresponding variant for a given type rule, it must have been registered by calling
      * Rule_Requires_Converter first.
      */
-    static ConverterTypeVariant Get_Rule_Variant(const std::string_view& type_name, const std::string_view& rule);
+    static ConverterTypeVariant Get_Rule_Variant(const RuleSection& section, const std::string_view& rule);
 
     /**
      * Get the corresponding variant for a given type csv rule, it must have been registered by calling
      * Rule_Requires_Csv_Converter first.
      */
-    static ConverterTypeVariant Get_Csv_Rule_Variant(const std::string_view& type_name, const std::string_view& rule);
+    static ConverterTypeVariant Get_Csv_Rule_Variant(const RuleSection& section, const std::string_view& rule);
 
     /**
      * Using a given type rule variant, call RuleSection::Set_With_Converter with appropriate type arguments.

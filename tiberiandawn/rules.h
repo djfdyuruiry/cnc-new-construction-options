@@ -373,6 +373,14 @@ public:
         return Sections[section].Get<T>(rule);
     }
 
+    template<typename T>
+    T Get_Rule_Value_With_Converter(const std::string_view section, const std::string_view rule) const
+    {
+        return Sections[section].Get_With_Converter<T, TdTypeConverter>(rule);
+    }
+
+    bool Is_Enabled_For_Current_Game_Type(std::string_view section, std::string_view rule) const;
+
     const RuleSection& operator[](std::string_view section_name) const;
 
     JSON_FUNCTIONS(RulesClass)
