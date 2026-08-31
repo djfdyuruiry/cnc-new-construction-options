@@ -34,9 +34,14 @@
               "int",
               "bool",
               "float",
-              "fixed"
+              "fixed",
+              "converter"
             ],
             "description": "Type of the rule value"
+          },
+          "converter_type": {
+            "type": "string",
+            "description": "If type is 'converter', the game engine typename for the rule value"
           },
           "default": {
             "description": "Default value for the rule"
@@ -54,7 +59,8 @@
           "name",
           "type",
           "default"
-        ]
+        ],
+        "additionalProperties": false
       }
     }
   },
@@ -63,5 +69,6 @@
     "ini_comment",
     "comment",
     "rules"
-  ]
+  ],
+  "additionalProperties": false
 }

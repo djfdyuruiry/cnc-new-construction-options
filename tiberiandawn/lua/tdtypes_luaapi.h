@@ -132,19 +132,20 @@ private:
             }
 
             const auto section_name = std::string(section_names.front());
+            const auto& section = sections[section_name];
 
-            if (TdTypeConverter::Rule_Requires_Converter(type_name, property_name)) {
+            if (TdTypeConverter::Rule_Requires_Converter(section, property_name)) {
                 // rule is of special type, look up type name using converter
                 RulesLuaAdapter::Assert_Rule_Exists(engine, sections, section_name, property_name);
 
-                if (TdTypeConverter::Rule_Requires_Csv_Converter(type_name, property_name)) {
-                    const auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(type_name, property_name);
+                if (TdTypeConverter::Rule_Requires_Csv_Converter(section, property_name)) {
+                    const auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(section, property_name);
 
                     engine.Push_Value(
                         std::format("{}[]", TdTypeConverter::Get_Type_Name_Variant(converter_variant))
                     );
                 } else {
-                    const auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
+                    const auto converter_variant = TdTypeConverter::Get_Rule_Variant(section, property_name);
 
                     engine.Push_Value(
                         TdTypeConverter::Get_Type_Name_Variant(converter_variant)
@@ -243,8 +244,9 @@ private:
 
             // fetch type rules and instance name
             auto section_name = U::As_Reference(instance).Name();
+            auto& section = sections[section_name];
 
-            if (TdTypeConverter::Rule_Requires_Converter(type_name, property_name)) {
+            if (TdTypeConverter::Rule_Requires_Converter(section, property_name)) {
                 // rule is of special type that needs conversion from a string value
                 RulesLuaAdapter::Assert_Rule_Exists(engine, sections, section_name, property_name);
 
@@ -255,8 +257,8 @@ private:
                 // get current rule value and type
                 auto current_value = section.template Get<std::string>(property_name);
 
-                if (TdTypeConverter::Rule_Requires_Csv_Converter(type_name, property_name)) {
-                    auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(type_name, property_name);
+                if (TdTypeConverter::Rule_Requires_Csv_Converter(section, property_name)) {
+                    auto converter_variant = TdTypeConverter::Get_Csv_Rule_Variant(section, property_name);
 
                     try {
                         // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)
@@ -271,7 +273,7 @@ private:
                         engine.Raise_Error(ex.what());
                     }
                 } else {
-                    auto converter_variant = TdTypeConverter::Get_Rule_Variant(type_name, property_name);
+                    auto converter_variant = TdTypeConverter::Get_Rule_Variant(section, property_name);
 
                     try {
                         // convert string and set rule value (class_instance is updated by OnRulesChanged handler in section)

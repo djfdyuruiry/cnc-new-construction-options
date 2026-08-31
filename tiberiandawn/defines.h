@@ -2629,13 +2629,16 @@ typedef enum WaypointEnum : unsigned char
 */
 typedef enum GameEnum : unsigned char
 {
-    GAME_NORMAL,            // not multiplayer
-    GAME_MODEM,             // modem game
-    GAME_NULL_MODEM,        // NULL-modem
-    GAME_IPX,               // IPX Network game
-    GAME_INTERNET,          // WInsock game
-    GAME_SKIRMISH,          // 1 plr vs. AI's
-    GAME_GLYPHX_MULTIPLAYER // Multiplayer game controlled by the GLYPHX engine. ST - 3/12/2019 10:04AM
+    GAME_NORMAL,                   // not multiplayer
+    GAME_MULTIPLAYER,              // not normal
+    GAME_MODEM = GAME_MULTIPLAYER, // modem game
+    GAME_NULL_MODEM,               // NULL-modem
+    GAME_IPX,                      // IPX Network game
+    GAME_INTERNET,                 // WInsock game
+    GAME_SKIRMISH,                 // 1 plr vs. AI's
+    GAME_GLYPHX_MULTIPLAYER,       // Multiplayer game controlled by the GLYPHX engine. ST - 3/12/2019 10:04AM
+    GAME_ANY,                      // for rule logic only
+    GAME_NONE                      // for rule logic only
 } GameType;
 
 #define MPLAYER_BUILD_LEVEL_MAX 7

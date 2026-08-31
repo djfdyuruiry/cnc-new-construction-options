@@ -55,7 +55,7 @@ const std::unordered_map<size_t, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(EventType,                    "EVENT_",       EVENT_NONE,                             EVENT_LAST,                               {},                  {},                  false),
     ENUM_TYPE_PAIR(FacingType,                   "FACING_",      FACING_NONE,                            FACING_LAST,                              {},                  {},                  false),
     ENUM_TYPE_PAIR(FactoryType,                  "FACTORY_",     FACTORY_TYPE_NONE,                      FACTORY_TYPE_BUILDING,                    {},                  {},                  false),
-    ENUM_TYPE_PAIR(GameType,                     "GAME_",        GAME_NORMAL,                            GAME_GLYPHX_MULTIPLAYER,                  {},                  {},                  false),
+    ENUM_TYPE_PAIR(GameType,                     "GAME_",        GAME_NORMAL,                            GAME_NONE,                                {},                  {},                  false),
     ENUM_TYPE_PAIR(HouseColorType,               "HOUSE_COLOR_", HOUSE_COLOR_BAD,                        HOUSE_COLOR_NEUTRAL,                      {},                  {},                  false),
     ENUM_TYPE_PAIR(HousesType,                   "HOUSE_",       HOUSE_NONE,                             HOUSE_LAST,                               HousesPatchTable,    {},                  false),
     ENUM_TYPE_PAIR(InfantryType,                 "INFANTRY_",    INFANTRY_NONE,                          INFANTRY_LAST,                            InfantryPatchTable,  {},                  false),
@@ -102,32 +102,19 @@ void TdTypeConverter::Reset_Rule_Type_Registry()
 }
 
 bool TdTypeConverter::Rule_Requires_Converter(
-    const std::string_view& type_name,
-    const std::string_view& rule
-)
-{
-    return (RegisteredRuleTypes.contains(type_name.data())
-            && RegisteredRuleTypes[type_name.data()].contains(rule.data()))
-        || Rule_Requires_Csv_Converter(type_name, rule);
-}
-
-bool TdTypeConverter::Rule_Requires_Converter(
     const RuleSection& section,
     const std::string_view& rule
 )
 {
-    const auto& type_name = section.Get_Converter_Section_Type_Name();
+    auto type_or_section_name = section.Get_Converter_Section_Type_Name();
 
-    return type_name.has_value() && Rule_Requires_Converter(type_name->data(), rule);
-}
+    if (!type_or_section_name.has_value()) {
+        type_or_section_name = section.Get_Section_Name();
+    }
 
-bool TdTypeConverter::Rule_Requires_Csv_Converter(
-    const std::string_view& type_name,
-    const std::string_view& rule
-)
-{
-    return RegisteredCsvRuleTypes.contains(type_name.data())
-        && RegisteredCsvRuleTypes[type_name.data()].contains(rule.data());
+    return (RegisteredRuleTypes.contains(type_or_section_name.value().data())
+        && RegisteredRuleTypes[type_or_section_name.value().data()].contains(rule.data()))
+        || Rule_Requires_Csv_Converter(section, rule);
 }
 
 bool TdTypeConverter::Rule_Requires_Csv_Converter(
@@ -135,25 +122,42 @@ bool TdTypeConverter::Rule_Requires_Csv_Converter(
     const std::string_view& rule
 )
 {
-    const auto& type_name = section.Get_Converter_Section_Type_Name();
+    auto type_or_section_name = section.Get_Converter_Section_Type_Name();
 
-    return type_name.has_value() && Rule_Requires_Csv_Converter(type_name->data(), rule);
+    if (!type_or_section_name.has_value()) {
+        type_or_section_name = section.Get_Section_Name();
+    }
+
+    return RegisteredCsvRuleTypes.contains(type_or_section_name.value())
+        && RegisteredCsvRuleTypes[type_or_section_name.value().data()].contains(rule.data());
 }
 
 ConverterTypeVariant TdTypeConverter::Get_Rule_Variant(
-    const std::string_view& type_name,
+    const RuleSection& section,
     const std::string_view& rule
 )
 {
-    return RegisteredRuleTypes[type_name.data()][rule.data()];
+    auto type_or_section_name = section.Get_Converter_Section_Type_Name();
+
+    if (!type_or_section_name.has_value()) {
+        type_or_section_name = section.Get_Section_Name();
+    }
+
+    return RegisteredRuleTypes[type_or_section_name.value().data()][rule.data()];
 }
 
 ConverterTypeVariant TdTypeConverter::Get_Csv_Rule_Variant(
-    const std::string_view& type_name,
+    const RuleSection& section,
     const std::string_view& rule
 )
 {
-    return RegisteredCsvRuleTypes[type_name.data()][rule.data()];
+    auto type_or_section_name = section.Get_Converter_Section_Type_Name();
+
+    if (!type_or_section_name.has_value()) {
+        type_or_section_name = section.Get_Section_Name();
+    }
+
+    return RegisteredCsvRuleTypes[type_or_section_name.value().data()][rule.data()];
 }
 
 void TdTypeConverter::Set_Rule_With_Variant(

@@ -57,13 +57,16 @@ concept RuleValueVariantCompatible = (
     std::is_same_v<T, std::string>
 );
 
+class RuleSection;
+
 template<typename C, typename T>
 concept TypeConverter = requires(
     std::string str,
     const std::string& str_ref,
     std::string_view str_view,
     const std::vector<T>& instances,
-    const char c, T instance
+    const char c, T instance,
+    const RuleSection& section
 ) {
     { C::template Get_Valid_Strings<T>() } -> std::same_as<std::vector<std::string>>;
     { C::template Get_Valid_Instances<T>() } -> std::same_as<std::vector<T>>;
@@ -73,8 +76,8 @@ concept TypeConverter = requires(
     { C::To_String(instance) } -> std::same_as<std::string>;
     { C::To_Csv_String(instances) } -> std::same_as<std::string>;
     { C::template Get_Type_Name<T>() } -> std::same_as<std::string_view>;
-    { C::template Register_Rule_Type<T>(str_view, str_view) } -> std::same_as<void>;
-    { C::template Register_Csv_Rule_Type<T>(str_view, str_view) } -> std::same_as<void>;
+    { C::template Register_Rule_Type<T>(section, str_view) } -> std::same_as<void>;
+    { C::template Register_Csv_Rule_Type<T>(section, str_view) } -> std::same_as<void>;
 };
 
 class RuleSection
@@ -666,6 +669,7 @@ public:
     {
         Section.Load_From_Ini(Context, name, std::move(default_value));
 
+        NameInStream = name.data();
         ValueInStream = Section.Get<T>(name);
 
         return *this;
@@ -674,9 +678,7 @@ public:
     template<class T, TypeConverter<T> C>
     IniRuleContext& Load_With_Converter(std::string_view name, T default_value)
     {
-        if (const auto type_name = Section.Get_Converter_Section_Type_Name(); type_name.has_value()) {
-            C::template Register_Rule_Type<T>(type_name.value(), name);
-        }
+        C::template Register_Rule_Type<T>(Section, name);
 
         Section.Load_From_Ini<std::string>(
             Context,
@@ -702,6 +704,7 @@ public:
             }
         );
 
+        NameInStream = name.data();
         ValueInStream = Section.Get<std::string>(name);
 
         return *this;
@@ -735,6 +738,7 @@ public:
             }
         );
 
+        NameInStream = name.data();
         ValueInStream = Section.Get<std::string>(name);
 
         return *this;
