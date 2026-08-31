@@ -58,13 +58,14 @@ function(ResolveRuleValue _RULE_TYPE _RULE_CONVERTER_TYPE _RULE_DEFAULT _RULE_VA
       set(RULE_VALUE "false")
     endif()
   elseif(${_RULE_TYPE} STREQUAL "float")
-      # ensure value is denoted as a float
-      set(RULE_VALUE "${RULE_VALUE}f")
+    # ensure value is denoted as a float
+    set(RULE_VALUE "${RULE_VALUE}f")
   elseif(${_RULE_TYPE} STREQUAL "fixed")
-      # ensure value wrapped in a fixed class constructor call
-      set(RULE_VALUE "fixed(${RULE_VALUE}f)")
+    # ensure value wrapped in a fixed class constructor call
+    set(RULE_VALUE "fixed(${RULE_VALUE}f)")
   elseif(${_RULE_TYPE} STREQUAL "converter")
-
+    # value will be deserialized into a native game engine type instance
+    set(RULE_VALUE "TdTypeConverter::Assert_Parse<${_RULE_CONVERTER_TYPE}>(\"${RULE_VALUE}\", \"Invalid default value in rules JSON\")")
   endif()
 
   set("${_RULE_VALUE}" "${RULE_VALUE}" PARENT_SCOPE)
@@ -289,7 +290,7 @@ function(Main)
       ResolveRuleValue("${RULE_TYPE}" "${RULE_CONVERTER_TYPE}" "${RULE_DEFAULT}" RULE_VALUE)
 
       if ("${RULE_TYPE}" STREQUAL "converter")
-        string(APPEND RULE_PROCESS_CODE ".template Load_With_Converter<${RULE_CONVERTER_TYPE}, TdTypeConverter>(${RULE_DEFINE}, TdTypeConverter::Assert_Parse<${RULE_CONVERTER_TYPE}>(\"${RULE_VALUE}\", \"Invalid default value in rules JSON\")).With_Comment(\"${RULE_COMMENT}\")")
+        string(APPEND RULE_PROCESS_CODE ".template Load_With_Converter<${RULE_CONVERTER_TYPE}, TdTypeConverter>(${RULE_DEFINE}, ${RULE_VALUE}).With_Comment(\"${RULE_COMMENT}\")")
       else()
         string(APPEND RULE_PROCESS_CODE ".Load(${RULE_DEFINE}).With_Comment(\"${RULE_COMMENT}\").With_Default(${RULE_VALUE})")
       endif()
