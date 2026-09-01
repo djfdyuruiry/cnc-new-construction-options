@@ -37,6 +37,7 @@
 
 #include "credits.h"
 #include "function.h"
+#include "tiberiandawnsettings.h"
 
 /***********************************************************************************************
  * CreditClass::CreditClass -- Default constructor for the credit class object.                *
@@ -92,7 +93,7 @@ void CreditClass::Graphic_Logic(bool forced)
         **	Play a sound effect when the money display changes, but only if a sound
         **	effect was requested.
         */
-        if (IsAudible) {
+        if (IsAudible && TdSettings.Cash_Sounds_Enabled()) {
             if (IsUp) {
                 Sound_Effect(VOC_UP, VOL_1);
             } else {

@@ -64,6 +64,12 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
 
     CommonSettings->Load(IniFileName, ini);
 
+    Get_Common_Sections()["Options"].With<IniRuleContext>(ini, [&](auto& c) {
+        c.Load("EnableCashSounds")
+         .With_Comment("Enable sounds effects for spending/receiving money")
+         .With_Default(true);
+    });
+
     Get_Editor_Section().With<IniRuleContext>(ini, [&](auto& c) {
         c.Load("EnforceObjectOwnableBy")
             .With_Comment("only allow game objects to be assigned a house found in their 'OwnableBy' rule")
@@ -81,6 +87,11 @@ void TiberianDawnSettings::Load(std::string ini_file_name, INIClass& ini)
          .With_Default(false);
     });
     Load_MultiPlayer(ini);
+}
+
+bool TiberianDawnSettings::Cash_Sounds_Enabled()
+{
+    return Get_Common_Sections()["Options"].Get<bool>("EnableCashSounds");
 }
 
 bool TiberianDawnSettings::Enforce_OwnableBy_In_Editor()
