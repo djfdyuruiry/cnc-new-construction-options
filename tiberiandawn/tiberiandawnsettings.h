@@ -26,6 +26,9 @@ public:
     void Init(SettingsClass& common_settings);
     void Load(std::string ini_file_name, INIClass& ini);
 
+    // game engine options
+    bool Cash_Sounds_Enabled();
+
     // editor
     bool Enforce_OwnableBy_In_Editor();
     ColorType Get_Editor_Trigger_Color();

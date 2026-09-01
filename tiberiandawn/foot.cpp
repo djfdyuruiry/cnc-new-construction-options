@@ -75,6 +75,7 @@
 
 #include "function.h"
 #include "common/irandom.h"
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 
 /***********************************************************************************************
@@ -2037,7 +2038,7 @@ bool FootClass::Can_Demolish(void) const
 void FootClass::Sell_Back(int control)
 {
     if (control != 0) {
-        if (House == PlayerPtr) {
+        if (House == PlayerPtr && TdSettings.Cash_Sounds_Enabled()) {
             Sound_Effect(VOC_CASHTURN);
         }
         House->Refund_Money(Refund_Amount());

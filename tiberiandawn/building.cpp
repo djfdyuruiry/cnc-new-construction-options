@@ -102,6 +102,7 @@
 ** New sidebar for GlyphX multiplayer. ST - 3/26/2019 12:24PM
 */
 #include "sidebarglyphx.h"
+#include "tiberiandawnsettings.h"
 
 extern bool DLL_Export_Get_Input_Key_State(KeyNumType key);
 
@@ -4310,7 +4311,9 @@ int BuildingClass::Mission_Deconstruction(void)
 						Sound_Effect(VOC_CASHTURN, Coord);
 					}
 #else
-            Sound_Effect(VOC_CASHTURN, Coord);
+            if (TdSettings.Cash_Sounds_Enabled()) {
+                Sound_Effect(VOC_CASHTURN, Coord);
+            }
 #endif
 
             /*

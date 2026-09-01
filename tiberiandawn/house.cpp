@@ -106,6 +106,7 @@
 #include "defines.h"
 #include "common/irandom.h"
 #include "ccini.h"
+#include "tiberiandawnsettings.h"
 #include "typeconverter.h"
 #include "common/fixed.h"
 #include "common/json.h"
@@ -4792,7 +4793,7 @@ void HouseClass::Sell_Wall(CELL cell)
 
                 if (btype != NULL && !btype->IsUnsellable) {
 
-                    if (PlayerPtr == this) {
+                    if (PlayerPtr == this && TdSettings.Cash_Sounds_Enabled()) {
                         Sound_Effect(VOC_CASHTURN);
                     }
 
