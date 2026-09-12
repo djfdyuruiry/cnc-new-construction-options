@@ -171,7 +171,11 @@ bool INIClass::Load(FileClass& file)
 {
     FileStraw fs(file);
 
-    FileName = file.File_Name();
+    if (file.File_Name() != nullptr) {
+        FileName = std::string(file.File_Name());
+    } else {
+        FileName.reset();
+    }
 
     return (Load(fs));
 }
