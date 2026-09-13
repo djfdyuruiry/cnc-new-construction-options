@@ -79,7 +79,11 @@ private:
 
     static bool Load_Env_Log_Levels();
 
+#ifndef REMASTER_BUILD
     static std::shared_ptr<spdlog::async_logger> Build_Logger(const std::string& name);
+#else
+    static std::shared_ptr<spdlog::logger> Build_Logger(const std::string& name);
+#endif
 
     static void Init_SpdLog();
 

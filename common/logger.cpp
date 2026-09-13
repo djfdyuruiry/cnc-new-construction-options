@@ -2,11 +2,17 @@
 
 #include <filesystem>
 
+#ifdef REMASTER_BUILD
+#include <atlstr.h>
+#include <windows.h>
+#endif
+
 #include <spdlog/cfg/env.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
 #include "paths.h"
+#include "stringutils.h"
 
 /**
  * Wrapper around @class{spdlog::sinks::rotating_file_sink_mt}
@@ -110,6 +116,7 @@ bool CncLogger::Load_Env_Log_Levels()
     return log_env_defined;
 }
 
+#ifndef REMASTER_BUILD
 std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string& name)
 {
     auto logger = std::make_shared<spdlog::async_logger>(
@@ -119,6 +126,16 @@ std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string&
         spdlog::thread_pool(),
         spdlog::async_overflow_policy::block
     );
+#else
+// async logging doesn't flush correctly when running as a remaster dll, so use sync logging instead
+std::shared_ptr<spdlog::logger> CncLogger::Build_Logger(const std::string& name)
+{
+    auto logger = std::make_shared<spdlog::logger>(
+        name,
+        Sinks.begin(),
+        Sinks.end()
+    );
+#endif
 
 #ifndef REMASTER_BUILD
     // ensure any error/critical messages trigger a flush, due to increased likelihood that the process might crash
@@ -130,6 +147,60 @@ std::shared_ptr<spdlog::async_logger> CncLogger::Build_Logger(const std::string&
     return logger;
 }
 
+#ifdef REMASTER_BUILD
+static bool Attach_Win32_Console()
+{
+    if (
+        (AllocConsole() || AttachConsole(GetCurrentProcessId()) || AttachConsole(ATTACH_PARENT_PROCESS)) &&
+        freopen("CON", "w", stdout) &&
+        freopen("CON", "w", stderr)
+    ) {
+        return true;
+    }
+
+    LPWSTR messageBuffer = nullptr;
+    DWORD error;
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        error,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPWSTR)&messageBuffer,
+        0,
+        NULL
+    );
+
+    auto formatted_msg = std::format(L"Failed to alloc console: {}", messageBuffer);
+
+    MessageBox(
+        NULL,
+        (LPCWSTR)formatted_msg.c_str(),
+        L"NCO Mod",
+        MB_OK | MB_ICONSTOP
+    );
+
+    return false;
+}
+
+static bool Win32_Console_Logging_Enabled()
+{
+    static std::once_flag onceFlag;
+    static auto console_enabled = false;
+
+    std::call_once(onceFlag, []() {
+        const auto console_env = std::getenv("NCO_LOG_CONSOLE");
+        auto console_str = std::string(console_env == nullptr ? "false" : console_env);
+
+        CncStringUtils::To_Lower(console_str);
+
+        console_enabled = console_str == "true" || console_str == "1";
+    });
+
+    return console_enabled;
+}
+#endif
+
 void CncLogger::Init_SpdLog()
 {
     if (!Load_Env_Log_Levels()) {
@@ -139,15 +210,21 @@ void CncLogger::Init_SpdLog()
 
     Sinks.clear();
 
-    spdlog::init_thread_pool(8192, 1);
-
-// remaster dll has no stdout handle, so disable console logging in that build
 #ifndef REMASTER_BUILD
-    // console logging
-    auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    stdout_sink->set_pattern("%^%L [%=15!n] %v%$");
+    spdlog::init_thread_pool(8192, 1);
+#endif
 
-    Sinks.emplace_back(std::move(stdout_sink));
+#ifdef REMASTER_BUILD
+    // remaster dll has no console, so spawn one
+    if (Win32_Console_Logging_Enabled() && Attach_Win32_Console()) {
+#endif
+        // console logging
+        auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        stdout_sink->set_pattern("%^%L [%=15!n] %v%$");
+
+        Sinks.emplace_back(std::move(stdout_sink));
+#ifdef REMASTER_BUILD
+    }
 #endif
 
     // create log file in user path, filename matches program binary (nco-td.log, TIBERIANDAWN.DLL.log etc.)

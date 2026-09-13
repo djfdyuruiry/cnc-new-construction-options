@@ -50,6 +50,10 @@
 #include "common/winasm.h"
 #include <time.h>
 
+#ifdef REMASTER_BUILD
+#include <windows.h>
+#endif
+
 /****************************************
 **	Function prototypes for this module **
 *****************************************/
@@ -116,8 +120,17 @@ bool Init_Game(int, char*[])
 
         Speak(VOX_FAIL);
 
+#ifndef REMASTER_BUILD
         // TODO: Play commando death sound before this or mission failure message :D
         WWMessageBox().Process(err.c_str());
+#else
+        MessageBoxA(
+            NULL,
+            err.c_str(),
+            "NCO Mod",
+            MB_OK | MB_ICONSTOP
+        );
+#endif
 
         Prog_End(err.c_str(), false);
 
