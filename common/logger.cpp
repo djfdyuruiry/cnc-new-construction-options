@@ -210,7 +210,9 @@ void CncLogger::Init_SpdLog()
 
     Sinks.clear();
 
+#ifndef REMASTER_BUILD
     spdlog::init_thread_pool(8192, 1);
+#endif
 
 #ifdef REMASTER_BUILD
     // remaster dll has no console, so spawn one
