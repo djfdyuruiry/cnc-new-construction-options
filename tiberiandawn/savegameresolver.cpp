@@ -26,7 +26,11 @@ bool SaveGameResolver::Save(CDFileClass& file, const char* description)
         header.Version = Current_Save_Version;
         header.Description = description;
         header.Read_Globals();
+#ifndef REMASTER_BUILD
         header.Read_Screenshot_If_Present();
+#else
+        header.ScreenshotBase64.clear();
+#endif
 
         // build save
         CURRENT_SAVE_CLASS save;

@@ -207,6 +207,7 @@ void Main_Game(int argc, char* argv[])
                 if (SpecialDialog != SDLG_NONE) {
                     Set_Video_Cursor_Clip(false);
 
+#ifndef REMASTER_BUILD
                     static const auto screenshot_path = PathsClass::Concatenate_Paths(
                         Paths.User_Screenshot_Path(),
                         PRE_DIALOG_SCREENSHOT_FILE_NAME
@@ -221,6 +222,7 @@ void Main_Game(int argc, char* argv[])
                         SeenBuff.Get_Height() - (Map.Get_Tab_Height()),
                         screenshot_path.c_str()
                     );
+#endif
 
                     switch (SpecialDialog) {
                     case SDLG_SPECIAL:
