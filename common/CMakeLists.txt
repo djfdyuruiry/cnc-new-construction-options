@@ -108,7 +108,6 @@ set(COMMON_SRC
     lua/rulesluaadapter.cpp
     lua/system_luaapi.cpp
     json.cpp
-    logger.cpp
     rulesections.cpp
     stringutils.cpp
     texture.cpp
@@ -123,10 +122,12 @@ if(BUILD_NCO_TD OR BUILD_NCO_RA OR BUILD_TESTS)
     endif()
 endif()
 
+# ensure any source files that require remaster defs are included here (headers are handled automatically)
 set(COMMONR_SRC
     framelimit.cpp
     gbuffer.cpp
     interpal.cpp
+    logger.cpp
     soundio_null.cpp
     video_null.cpp
     wwkeyboard.cpp
@@ -138,6 +139,7 @@ set(COMMONV_SRC
     framelimit.cpp
     gbuffer.cpp
     interpal.cpp
+    logger.cpp
     unvqbuff.cpp
     vqaconfig.cpp
     vqadrawer.cpp
@@ -207,7 +209,6 @@ endif()
 
 if(BUILD_REMASTER_TD OR BUILD_REMASTER_RA)
     if (WIN32)
-        # REMASTER_DEFS are required for remaster dll path logic to be enabled with REMASTER_BUILD define
         list(APPEND COMMONR_SRC file_win.cpp paths_win.cpp)
     endif()
 
