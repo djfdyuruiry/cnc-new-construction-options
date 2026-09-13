@@ -45,7 +45,6 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
     Program_Lua_Path();
     Data_Path();
     User_Path();
-    User_Lua_Path();
 
     DBG_INFO("Searching the following paths for path config data: < argv: '%s' | binary: '%s' | default data: "
              "'%s' | default user: '%s' >",
@@ -112,6 +111,10 @@ void PathsClass::Init(const char* suffix, const char* ini_name, const char* data
     } else if (use_prog_path) {
         UserPath = ProgramPath;
     }
+
+    User_Lua_Path();
+    User_Save_Path();
+    User_Screenshot_Path();
 
     CNC_LOGGER_INFO("Read only data directory is set to '{}'", DataPath);
     CNC_LOGGER_INFO("Read/Write user data directory is set to '{}'", UserPath);
