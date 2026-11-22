@@ -146,6 +146,7 @@ set(TIBDAWN_SRC
     lua/events/popup_luaevent.cpp
     lua/game_luaapi.cpp
     lua/messages_luaapi.cpp
+    lua/music_luaapi.cpp
     lua/scenario_luaapi.cpp
     lua/scenariolua.cpp
     lua/td_luaapi.cpp

@@ -12,6 +12,7 @@
 
 #include "game_luaapi.h"
 #include "messages_luaapi.h"
+#include "music_luaapi.h"
 #include "scenario_luaapi.h"
 #include "scenariolua.h"
 #include "tdtypes_luaapi.h"
@@ -213,6 +214,7 @@ void ScenarioLua::Init_Tiberian_Dawn_Lua_Engine(
         .With_Api<EventLuaApi>()
         .With_Api<TiberianDawnTypesLuaApi>()
         .With_Api<GameLuaApi>()
+        .With_Api<MusicLuaApi>()
         .With_Api<MessagesLuaApi>()
         .With_Api<UiLuaApi>()
         .With_Api<ScenarioLuaApi>(scenario_name, scenario_type_name, faction, house_name, was_loaded_from_save)

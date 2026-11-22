@@ -55,6 +55,7 @@
     PREFIX TemplateType POSTFIX \
     PREFIX TerrainType POSTFIX \
     PREFIX TheaterType POSTFIX \
+    PREFIX ThemeType POSTFIX \
     PREFIX TriggerClass::ActionType POSTFIX \
     PREFIX TriggerClass::PersistantType POSTFIX \
     PREFIX UnitType POSTFIX \

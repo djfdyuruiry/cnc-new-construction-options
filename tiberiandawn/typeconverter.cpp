@@ -84,6 +84,7 @@ const std::unordered_map<size_t, EnumTypeInfoVariant> TdTypeConverter::EnumTypes
     ENUM_TYPE_PAIR(TemplateType,                 "TEMPLATE_",    TEMPLATE_FIRST,                         TEMPLATE_NONE,                            {},                  TemplateExcludes,    false),
     ENUM_TYPE_PAIR(TerrainType,                  "TERRAIN_",     TERRAIN_NONE,                           TERRAIN_LAST,                             {},                  {},                  false),
     ENUM_TYPE_PAIR(TheaterType,                  "THEATER_",     THEATER_NONE,                           THEATER_LAST,                             {},                  {},                  false),
+    ENUM_TYPE_PAIR(ThemeType,                    "THEME_",       THEME_AIRSTRIKE,                        THEME_VALKYRIE,                             {},                  {},                  false),
     ENUM_TYPE_PAIR(TriggerClass::ActionType,     "ACTION_",      TriggerClass::ActionType::ACTION_NONE,  TriggerClass::ActionType::ACTION_LAST,    {},                  {},                  false),
     ENUM_TYPE_PAIR(TriggerClass::PersistantType, "",             TriggerClass::PersistantType::VOLATILE, TriggerClass::PersistantType::PERSISTANT, {},                  {},                  false),
     ENUM_TYPE_PAIR(UnitType,                     "UNIT_",        UNIT_NONE,                              UNIT_LAST,                                UnitPatchTable,      {},                  false),
